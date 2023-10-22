@@ -324,6 +324,7 @@ $action-bar-height: 38px;
     color: $primary-color;
 }
 
+$pagination-color: transparent;
 
 
 .right {
@@ -332,7 +333,7 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 20vw;
     z-index: 3;
-    background: transparent;
+    background: $pagination-color;
     border-color: transparent;
     border: none !important;
     opacity: 0;
@@ -354,7 +355,7 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 18%;
     z-index: 3;
-    background: transparent;
+    background: $pagination-color;
     border-color: transparent;
     border: none !important;
     opacity: 0;
@@ -374,7 +375,7 @@ $action-bar-height: 38px;
     left: 0px;
     top: $action-bar-height;
     width: 20vw;
-    background: transparent;
+    background: $pagination-color;
     border-color: transparent;
     border: none !important;
     z-index: 3;

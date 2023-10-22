@@ -206,8 +206,7 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType.Review);
         if (existingEvt is {IsProcessed: false})
         {
-            _logger.LogDebug("Overriding scrobble event for {Series} from Review {Tagline}/{Body} -> {UpdatedTagline}{UpdatedBody}",
-                existingEvt.Series.Name, existingEvt.ReviewTitle, existingEvt.ReviewBody, reviewTitle, reviewBody);
+            _logger.LogDebug("Overriding Review scrobble event for {Series}", existingEvt.Series.Name);
             existingEvt.ReviewBody = reviewBody;
             existingEvt.ReviewTitle = reviewTitle;
             _unitOfWork.ScrobbleRepository.Update(existingEvt);

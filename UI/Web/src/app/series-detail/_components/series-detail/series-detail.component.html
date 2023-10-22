@@ -157,6 +157,7 @@
                                      [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
                     </ng-template>
                   </ng-container>
+                  <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
                 </div>
               </ng-container>
               <ng-template #storylineListLayout>
@@ -203,6 +204,7 @@
                                    [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
                     </app-card-item>
                   </ng-container>
+                  <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
                 </div>
               </ng-container>
               <ng-template #volumeListLayout>
@@ -240,6 +242,7 @@
                       </ng-container>
                     </app-card-item>
                   </div>
+                  <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
                 </div>
               </ng-container>
               <ng-template #chapterListLayout>
@@ -354,5 +357,26 @@
 
     <app-loading [loading]="isLoading"></app-loading>
   </div>
+  <ng-template #estimatedNextCard let-tabId="tabId">
+    <ng-container *ngIf="nextExpectedChapter">
+      <ng-container [ngSwitch]="tabId">
+        <ng-container *ngSwitchCase="TabID.Volumes">
+          <app-card-item *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === 0" class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>
+        </ng-container>
+        <ng-container *ngSwitchCase="TabID.Chapters">
+          <app-card-item class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>
+        </ng-container>
+        <ng-container *ngSwitchCase="TabID.Storyline">
+          <app-card-item class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>
+        </ng-container>
+      </ng-container>
+<!--      <ng-container *ngIf="tabId === TabID.Volumes && nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === 0">-->
+<!--        <app-card-item class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>-->
+<!--      </ng-container>-->
+<!--      <ng-container *ngIf="tabId === TabID.Storyline || tabId === TabID.Chapters && nextExpectedChapter.chapterNumber !== 0">-->
+<!--        <app-card-item class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>-->
+<!--      </ng-container>-->
+    </ng-container>
+  </ng-template>
 
 </ng-container>

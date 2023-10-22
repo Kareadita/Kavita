@@ -39,8 +39,10 @@ import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
 import {SentenceCasePipe} from "../../pipe/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
 import {RouterLink} from "@angular/router";
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
+import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-card-item',
@@ -96,7 +98,7 @@ export class CardItemComponent implements OnInit {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input({required: true}) entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem;
+  @Input({required: true}) entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem | NextExpectedChapter;
   /**
    * If the entity is selected or not.
    */
@@ -117,6 +119,10 @@ export class CardItemComponent implements OnInit {
    * Additional information to show on the overlay area. Will always render.
    */
   @Input() overlayInformation: string = '';
+  /**
+   * If overlay is enabled, should the text be centered or not
+   */
+  @Input() centerOverlay = false;
   /**
    * Event emitted when item is clicked
    */
@@ -210,7 +216,28 @@ export class CardItemComponent implements OnInit {
       }
     } else if (this.utilityService.isSeries(this.entity)) {
       this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
+    } else if (this.entity.hasOwnProperty('expectedDate')) {
+      this.suppressArchiveWarning = true;
+      this.imageUrl = '';
+      const nextDate = (this.entity as NextExpectedChapter);
+
+      // if (nextDate.volumeNumber > 0 && nextDate.chapterNumber === 0) {
+      //   this.overlayInformation = 'Volume ' + nextDate.volumeNumber;
+      //
+      // } else {
+      //   this.overlayInformation = 'Chapter ' + nextDate.chapterNumber;
+      // }
+      this.overlayInformation = nextDate.title;
+      this.centerOverlay = true;
+
+      if (nextDate.expectedDate) {
+        const utcPipe = new UtcToLocalTimePipe();
+        this.title = utcPipe.transform(nextDate.expectedDate);
+      }
+
+      this.cdRef.markForCheck();
     }
+
 
     this.filterSendTo();
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {

@@ -897,7 +897,6 @@
 
     "card-item": {
         "cannot-read": "Cannot Read"
-
     },
 
     "chapter-metadata-detail": {
@@ -1190,6 +1189,10 @@
         "bust-cache-task": "Bust Cache",
         "bust-cache-task-desc": "Busts the Kavita+ Cache - should only be used when debugging bad matches.",
         "bust-cache-task-success": "Kavita+ Cache busted",
+
+        "bust-locale-task": "Bust Locale Cache",
+        "bust-locale-task-desc": "Busts the Locale Cache. This can fix issues with strings not showing correctly after an update",
+        "bust-locale-task-success": "Locale Cache busted",
 
         "clear-reading-cache-task": "Clear Reading Cache",
         "clear-reading-cache-task-desc": "Clears cached files for reading. Useful when you've just updated a file that you were previously reading within the last 24 hours.",

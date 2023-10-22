@@ -1,4 +1,4 @@
-import { DOCUMENT, NgIf, NgStyle, NgFor, DecimalPipe } from '@angular/common';
+import {DecimalPipe, DOCUMENT, NgFor, NgIf, NgStyle, NgSwitch, NgSwitchCase, NgTemplateOutlet} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -12,17 +12,31 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import { NgbModal, NgbNavChangeEvent, NgbOffcanvas, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbDropdown,
+  NgbDropdownItem,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbNav,
+  NgbNavChangeEvent,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbOffcanvas,
+  NgbProgressbar,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, of} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
-import {ConfirmService} from 'src/app/shared/confirm.service';
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
@@ -54,27 +68,30 @@ import {ReviewSeriesModalComponent} from '../../../_single-module/review-series-
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
-import { LoadingComponent } from '../../../shared/loading/loading.component';
-import { ExternalListItemComponent } from '../../../cards/external-list-item/external-list-item.component';
-import { ExternalSeriesCardComponent } from '../../../cards/external-series-card/external-series-card.component';
-import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
-import { EntityTitleComponent } from '../../../cards/entity-title/entity-title.component';
-import { ListItemComponent } from '../../../cards/list-item/list-item.component';
-import { CardItemComponent } from '../../../cards/card-item/card-item.component';
-import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { ReviewCardComponent } from '../../../_single-module/review-card/review-card.component';
-import { CarouselReelComponent } from '../../../carousel/_components/carousel-reel/carousel-reel.component';
-import { SeriesMetadataDetailComponent } from '../series-metadata-detail/series-metadata-detail.component';
-import { ImageComponent } from '../../../shared/image/image.component';
-import { TagBadgeComponent } from '../../../shared/tag-badge/tag-badge.component';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {LoadingComponent} from '../../../shared/loading/loading.component';
+import {ExternalListItemComponent} from '../../../cards/external-list-item/external-list-item.component';
+import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/external-series-card.component';
+import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
+import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
+import {ListItemComponent} from '../../../cards/list-item/list-item.component';
+import {CardItemComponent} from '../../../cards/card-item/card-item.component';
+import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {ReviewCardComponent} from '../../../_single-module/review-card/review-card.component';
+import {CarouselReelComponent} from '../../../carousel/_components/carousel-reel/carousel-reel.component';
+import {SeriesMetadataDetailComponent} from '../series-metadata-detail/series-metadata-detail.component';
+import {ImageComponent} from '../../../shared/image/image.component';
+import {TagBadgeComponent} from '../../../shared/tag-badge/tag-badge.component';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
 import {
   SeriesPreviewDrawerComponent
 } from "../../../_single-module/series-preview-drawer/series-preview-drawer.component";
+import {PublicationStatus} from "../../../_models/metadata/publication-status";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -102,7 +119,7 @@ interface StoryLineItem {
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe, TranslocoDirective]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -149,6 +166,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   seriesImage: string = '';
   downloadInProgress: boolean = false;
+
+  nextExpectedChapter: any | undefined;
 
   /**
    * Track by function for Volume to tell when to refresh card data
@@ -293,7 +312,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               public utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService, private titleService: Title,
+              private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               private messageHub: MessageHubService, private readingListService: ReadingListService,
               public navService: NavService,
@@ -501,6 +520,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata = metadata;
       this.cdRef.markForCheck();
+
+      if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
+      this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
+        if (date == null || date.expectedDate === null) return;
+
+        this.nextExpectedChapter = date;
+        this.cdRef.markForCheck();
+      })
     });
 
     this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {

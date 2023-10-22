@@ -46,8 +46,6 @@ public class FilterController : BaseApiController
             return BadRequest("You cannot use the name of a system provided stream");
         }
 
-        // I might just want to use DashboardStream instead of a separate entity. It will drastically simplify implementation
-
         var existingFilter =
             user.SmartFilters.FirstOrDefault(f => f.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase));
         if (existingFilter != null)

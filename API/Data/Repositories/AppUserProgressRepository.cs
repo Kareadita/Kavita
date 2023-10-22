@@ -205,5 +205,4 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)
             .FirstOrDefaultAsync();
     }
-    #nullable disable
 }

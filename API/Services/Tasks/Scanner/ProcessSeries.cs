@@ -288,14 +288,12 @@ public class ProcessSeries : IProcessSeries
         series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
         // The actual number of count's defined across all chapter's metadata
         series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
-        // To not have to rely completely on ComicInfo, try to parse out if the series is complete by checking parsed filenames as well.
-        if (series.Metadata.MaxCount != series.Metadata.TotalCount)
-        {
-            var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
-            var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
-            if (maxVolume == series.Metadata.TotalCount) series.Metadata.MaxCount = maxVolume;
-            else if (maxChapter == series.Metadata.TotalCount) series.Metadata.MaxCount = maxChapter;
-        }
+
+        var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
+        var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
+        var maxActual = Math.Max(maxVolume, maxChapter);
+
+        series.Metadata.MaxCount = maxActual;
 
 
         if (!series.Metadata.PublicationStatusLocked)

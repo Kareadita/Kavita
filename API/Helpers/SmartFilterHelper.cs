@@ -80,7 +80,7 @@ public static class SmartFilterHelper
         if (statements == null || statements.Count == 0)
             return string.Empty;
 
-        var encodedStatements = StatementsKey + HttpUtility.UrlEncode(string.Join(",", statements.Select(EncodeFilterStatementDto)));
+        var encodedStatements = StatementsKey + Uri.EscapeDataString(string.Join(",", statements.Select(EncodeFilterStatementDto)));
         return encodedStatements;
     }
 
@@ -88,7 +88,7 @@ public static class SmartFilterHelper
     {
         var encodedComparison = $"comparison={(int) statement.Comparison}";
         var encodedField = $"field={(int) statement.Field}";
-        var encodedValue = $"value={HttpUtility.UrlEncode(statement.Value)}";
+        var encodedValue = $"value={Uri.EscapeDataString(statement.Value)}";
 
         return $"{encodedComparison}&{encodedField}&{encodedValue}";
     }

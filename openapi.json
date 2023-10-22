@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.8.15"
+    "version": "0.7.9.0"
   },
   "servers": [
     {
@@ -9071,6 +9071,47 @@
         }
       }
     },
+    "/api/Series/next-expected": {
+      "get": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Based on the delta times between when chapters are added, for series that are not Completed/Cancelled/Hiatus, forecast the next\r\ndate when it will be available.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextExpectedChapterDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextExpectedChapterDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextExpectedChapterDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -13389,7 +13430,7 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues or volumes in the series",
+            "description": "Total number of issues or volumes in the series. This is straight from ComicInfo",
             "format": "int32"
           },
           "count": {
@@ -15637,6 +15678,31 @@
         },
         "additionalProperties": false
       },
+      "NextExpectedChapterDto": {
+        "type": "object",
+        "properties": {
+          "chapterNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "volumeNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expectedDate": {
+            "type": "string",
+            "description": "Null if not applicable",
+            "format": "date-time",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "description": "The localized title to render on the card",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Person": {
         "type": "object",
         "properties": {
@@ -17244,7 +17310,7 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues/volumes in the series",
+            "description": "Total expected number of issues/volumes in the series from ComicInfo.xml",
             "format": "int32"
           },
           "maxCount": {

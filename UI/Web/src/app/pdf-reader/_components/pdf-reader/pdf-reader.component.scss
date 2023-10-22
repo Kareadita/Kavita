@@ -3,13 +3,18 @@
 }
 
 .book-title {
-    margin: 8px 0 4px !important;   
+    margin: 8px 0 4px !important;
 }
 
 // Override since it's not coming from library
 ::ng-deep #presentationMode {
     margin: 3px 0 4px !important;
 }
+
+::ng-deep .dark > ngx-extended-pdf-viewer .treeItem>a {
+    color: lightblue !important;
+}
+
 
 .progress-container {
     width: 100%;

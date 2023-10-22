@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -347,9 +348,9 @@ public class SeriesRepository : ISeriesRepository
             .Where(l => libraryIds.Contains(l.Id))
             .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .IsRestricted(QueryContext.Search)
-            .OrderBy(l => l.Name.ToLower())
             .AsSplitQuery()
             .Take(maxRecords)
+            .OrderBy(l => l.Name.ToLower())
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -366,10 +367,10 @@ public class SeriesRepository : ISeriesRepository
                          || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
-            .OrderBy(s => s.SortName!.ToLower())
             .AsNoTracking()
             .AsSplitQuery()
             .Take(maxRecords)
+            .OrderBy(s => s.SortName!.ToLower())
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -379,6 +380,7 @@ public class SeriesRepository : ISeriesRepository
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .Take(maxRecords)
+            .OrderBy(r => r.NormalizedTitle)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -399,8 +401,9 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .Take(maxRecords)
             .Distinct()
+            .Take(maxRecords)
+            .OrderBy(p => p.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -408,9 +411,9 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .OrderBy(t => t.NormalizedTitle)
             .Distinct()
             .Take(maxRecords)
+            .OrderBy(t => t.NormalizedTitle)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -418,9 +421,9 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .OrderBy(t => t.NormalizedTitle)
             .Distinct()
             .Take(maxRecords)
+            .OrderBy(t => t.NormalizedTitle)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -435,6 +438,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
             .AsSplitQuery()
             .Take(maxRecords)
+            .OrderBy(f => f.FilePath)
             .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -447,12 +451,19 @@ public class SeriesRepository : ISeriesRepository
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
             .Take(maxRecords)
+            .OrderBy(c => c.TitleName)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         return result;
     }
 
+    /// <summary>
+    /// Includes Progress for the user
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId)
     {
         var series = await _context.Series.Where(x => x.Id == seriesId)
@@ -955,7 +966,7 @@ public class SeriesRepository : ISeriesRepository
 
 
         return ApplyLimit(query
-            .Sort(filter.SortOptions)
+            .Sort(userId, filter.SortOptions)
             .AsSplitQuery(), filter.LimitTo);
     }
 
@@ -1108,7 +1119,7 @@ public class SeriesRepository : ISeriesRepository
                                                || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))
             .Where(s => userLibraries.Contains(s.LibraryId)
                         && formats.Contains(s.Format))
-            .Sort(filter.SortOptions)
+            .Sort(userId, filter.SortOptions)
             .AsNoTracking();
 
         return query.AsSplitQuery();
@@ -1971,4 +1982,5 @@ public class SeriesRepository : ISeriesRepository
             .IsRestricted(queryContext)
             .Select(lib => lib.Id);
     }
+
 }

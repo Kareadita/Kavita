@@ -40,6 +40,7 @@ public interface IChapterRepository
     Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format);
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
     Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter);
+    IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -263,5 +264,13 @@ public class ChapterRepository : IChapterRepository
         }
 
         return chapter;
+    }
+
+    public IEnumerable<Chapter> GetChaptersForSeries(int seriesId)
+    {
+        return _context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId)
+            .Include(c => c.Volume)
+            .AsEnumerable();
     }
 }

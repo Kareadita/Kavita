@@ -11,7 +11,7 @@ public static class SeriesSort
     /// <param name="query"></param>
     /// <param name="sortOptions"></param>
     /// <returns></returns>
-    public static IQueryable<Series> Sort(this IQueryable<Series> query, SortOptions? sortOptions)
+    public static IQueryable<Series> Sort(this IQueryable<Series> query, int userId, SortOptions? sortOptions)
     {
         // If no sort options, default to using SortName
         sortOptions ??= new SortOptions()
@@ -28,7 +28,9 @@ public static class SeriesSort
             SortField.LastChapterAdded => query.DoOrderBy(s => s.LastChapterAdded, sortOptions),
             SortField.TimeToRead => query.DoOrderBy(s => s.AvgHoursToRead, sortOptions),
             SortField.ReleaseYear => query.DoOrderBy(s => s.Metadata.ReleaseYear, sortOptions),
-            SortField.ReadProgress => query.DoOrderBy(s => s.Progress.Where(p => p.SeriesId == s.Id).Select(p => p.LastModified).Max(), sortOptions),
+            SortField.ReadProgress => query.DoOrderBy(s => s.Progress.Where(p => p.SeriesId == s.Id && p.AppUserId == userId)
+                .Select(p => p.LastModified)
+                .Max(), sortOptions),
             _ => query
         };
 

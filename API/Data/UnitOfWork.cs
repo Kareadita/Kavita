@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
+using API.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 
@@ -40,6 +41,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILocalizationService _localizationService;
 
     public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
     {
@@ -97,6 +99,16 @@ public class UnitOfWork : IUnitOfWork
     public bool HasChanges()
     {
         return _context.ChangeTracker.HasChanges();
+    }
+
+    public async Task BeginTransactionAsync()
+    {
+        await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        await _context.Database.CommitTransactionAsync();
     }
 
     /// <summary>

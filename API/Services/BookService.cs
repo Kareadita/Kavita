@@ -1026,9 +1026,11 @@ public class BookService : IBookService
 
         if (chaptersList.Count != 0) return chaptersList;
         // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
-        var tocPage = book.Content.Html.Local.Select(s => s.Key).FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
+        var tocPage = book.Content.Html.Local.Select(s => s.Key)
+            .FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
             k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
         if (string.IsNullOrEmpty(tocPage)) return chaptersList;
+
 
         // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
         if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
@@ -1036,6 +1038,14 @@ public class BookService : IBookService
 
         var doc = new HtmlDocument();
         doc.LoadHtml(content);
+
+        // TODO: We may want to check if there is a toc.ncs file to better handle nested toc
+        // We could do a fallback first with ol/lis
+        //var sections = doc.DocumentNode.SelectNodes("//ol");
+        //if (sections == null)
+
+
+
         var anchors = doc.DocumentNode.SelectNodes("//a");
         if (anchors == null) return chaptersList;
 
