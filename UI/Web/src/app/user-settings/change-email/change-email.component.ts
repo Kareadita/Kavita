@@ -64,7 +64,7 @@ export class ChangeEmailComponent implements OnInit {
         if (updateEmailResponse.hadNoExistingEmail) {
           this.toastr.success(translate('toasts.email-sent-to-no-existing', {email: model.email}));
         } else {
-          this.toastr.success(translate('toasts.email-send-to'));
+          this.toastr.success(translate('toasts.email-sent-to'));
         }
       } else {
         this.toastr.success(translate('toasts.change-email-private'));
