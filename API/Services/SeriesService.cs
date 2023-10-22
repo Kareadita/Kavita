@@ -651,9 +651,10 @@ public class SeriesService : ISeriesService
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-        var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
-        if (!libraryIds.Contains(series.LibraryId)) //// TODO: Rewrite this to use a new method which checks permissions all in the DB to be streamlined and less memory
+        if (!(await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId)))
+        {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
+        }
         if (series?.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
         {
             return new NextExpectedChapterDto()
