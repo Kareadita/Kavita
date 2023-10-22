@@ -1907,7 +1907,7 @@
         "reading-list-imported": "Reading List imported",
         "incognito-off": "Incognito mode is off. Progress will now start being tracked.",
         "email-service-reset": "Email Service Reset",
-        "email-service-reachable": "Email Service was reachable",
+        "email-service-reachable": "Kavita Email Connection Successful",
         "email-service-unresponsive": "Email Service Url did not respond.",
         "refresh-covers-queued": "Refresh covers queued for {{name}}",
         "library-file-analysis-queued": "Library file analysis queued for {{name}}",

@@ -26,6 +26,7 @@ public interface IEmailService
     Task<EmailTestResultDto> TestConnectivity(string emailUrl, string adminEmail, bool sendEmail);
     Task<bool> IsDefaultEmailService();
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
+    Task<string?> GetVersion(string emailUrl);
 }
 
 public class EmailService : IEmailService
@@ -92,6 +93,34 @@ public class EmailService : IEmailService
         {
             _logger.LogError("There was a critical error sending Confirmation email");
         }
+    }
+
+    public async Task<string> GetVersion(string emailUrl)
+    {
+        try
+        {
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            var response = await $"{emailUrl}/api/about/version"
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("x-kavita-installId", settings.InstallId)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(10))
+                .GetStringAsync();
+
+            if (!string.IsNullOrEmpty(response))
+            {
+                return response.Replace("\"", string.Empty);
+            }
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+
+        return null;
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
