@@ -173,8 +173,7 @@ public class ComicInfo
 
         if (!string.IsNullOrEmpty(info.Number))
         {
-            float.TryParse(info.Number, NumberStyles.Any, Thread.CurrentThread.CurrentCulture, out var number);
-            info.Number = $"{number}";
+            info.Number = info.Number.Replace(",", "."); // Corrective measure for non English OSes
         }
     }
 

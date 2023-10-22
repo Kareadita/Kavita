@@ -9071,6 +9071,47 @@
         }
       }
     },
+    "/api/Series/next-expected": {
+      "get": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Based on the delta times between when chapters are added, for series that are not Completed/Cancelled/Hiatus, forecast the next\r\ndate when it will be available.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextExpectedChapterDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextExpectedChapterDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextExpectedChapterDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -15632,6 +15673,31 @@
           },
           "password": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NextExpectedChapterDto": {
+        "type": "object",
+        "properties": {
+          "chapterNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "volumeNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expectedDate": {
+            "type": "string",
+            "description": "Null if not applicable",
+            "format": "date-time",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "description": "The localized title to render on the card",
             "nullable": true
           }
         },

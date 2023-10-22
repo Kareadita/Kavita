@@ -44,6 +44,6 @@ public enum FilterField
     /// <summary>
     /// Last time User Read
     /// </summary>
-    ReadingDate = 27
+    ReadingDate = 27,
 
 }

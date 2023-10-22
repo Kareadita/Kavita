@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace API.DTOs.SeriesDetail;
+#nullable enable
 
 /// <summary>
 /// This is a special DTO for a UI page in Kavita. This performs sorting and grouping and returns exactly what UI requires for layout.
@@ -32,5 +33,4 @@ public class SeriesDetailDto
     /// How many chapters are there
     /// </summary>
     public int TotalCount { get; set; }
-
 }

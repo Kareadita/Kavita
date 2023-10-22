@@ -21,6 +21,7 @@ import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "../_models/rating";
 import {Recommendation} from "../_models/series-detail/recommendation";
 import {ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
+import {NextExpectedChapter} from "../_models/series-detail/next-expected-chapter";
 
 @Injectable({
   providedIn: 'root'
@@ -231,6 +232,10 @@ export class SeriesService {
 
   getExternalSeriesDetails(aniListId?: number, malId?: number, seriesId?: number) {
     return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + (aniListId || 0) + '&malId=' + (malId || 0) + '&seriesId=' + (seriesId || 0));
+  }
+
+  getNextExpectedChapterDate(seriesId: number) {
+    return this.httpClient.get<NextExpectedChapter>(this.baseUrl + 'series/next-expected?seriesId=' + seriesId);
   }
 
 }

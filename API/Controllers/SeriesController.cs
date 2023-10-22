@@ -610,4 +610,18 @@ public class SeriesController : BaseApiController
         }
     }
 
+    /// <summary>
+    /// Based on the delta times between when chapters are added, for series that are not Completed/Cancelled/Hiatus, forecast the next
+    /// date when it will be available.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("next-expected")]
+    public async Task<ActionResult<NextExpectedChapterDto>> GetNextExpectedChapter(int seriesId)
+    {
+        var userId = User.GetUserId();
+
+        return Ok(await _seriesService.GetEstimatedChapterCreationDate(seriesId, userId));
+    }
+
 }

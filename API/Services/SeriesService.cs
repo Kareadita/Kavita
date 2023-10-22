@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -36,6 +38,7 @@ public interface ISeriesService
     Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle,
         bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
+    Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
 }
 
 public class SeriesService : ISeriesService
@@ -399,6 +402,7 @@ public class SeriesService : ISeriesService
     public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
@@ -488,7 +492,7 @@ public class SeriesService : ISeriesService
             Volumes = processedVolumes,
             StorylineChapters = storylineChapters,
             TotalCount = chapters.Count,
-            UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages)
+            UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages),
         };
     }
 
@@ -641,5 +645,88 @@ public class SeriesService : ISeriesService
             });
             _unitOfWork.SeriesRepository.Update(series);
         }
+    }
+
+    public async Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+        var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+        if (!libraryIds.Contains(series.LibraryId)) //// TODO: Rewrite this to use a new method which checks permissions all in the DB to be streamlined and less memory
+            throw new UnauthorizedAccessException("user-no-access-library-from-series");
+        if (series?.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
+        {
+            return new NextExpectedChapterDto()
+            {
+                ExpectedDate = null,
+                ChapterNumber = 0,
+                VolumeNumber = 0
+            };
+        }
+
+        var chapters = _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
+            .Where(c => !c.IsSpecial)
+            .OrderBy(c => c.CreatedUtc)
+            .ToList();
+
+        // Calculate the time differences between consecutive chapters
+        var timeDifferences = chapters
+            .Select((chapter, index) => new
+            {
+                ChapterNumber = chapter.Number,
+                VolumeNumber = chapter.Volume.Number,
+                TimeDifference = index == 0 ? TimeSpan.Zero : (chapter.CreatedUtc - chapters.ElementAt(index - 1).CreatedUtc)
+            })
+            .ToList();
+
+        // Calculate the average time difference between chapters
+        var averageTimeDifference = timeDifferences
+            .Average(td => td.TimeDifference.TotalDays);
+
+        // Calculate the forecast for when the next chapter is expected
+        var nextChapterExpected = chapters.Any()
+            ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(averageTimeDifference)
+            : (DateTime?) null;
+
+        if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
+        {
+            nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
+        }
+
+        var lastChapter = timeDifferences.Last();
+        float.TryParse(lastChapter.ChapterNumber, NumberStyles.Number, CultureInfo.InvariantCulture,
+            out var lastChapterNumber);
+
+        var result = new NextExpectedChapterDto()
+        {
+            ChapterNumber = 0,
+            VolumeNumber = 0,
+            ExpectedDate = nextChapterExpected,
+            Title = ""
+        };
+
+        if (lastChapterNumber > 0)
+        {
+            result.ChapterNumber = lastChapterNumber + 1;
+            result.VolumeNumber = lastChapter.VolumeNumber;
+            result.Title = series.Library.Type switch
+            {
+                LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num",
+                    new object[] {result.ChapterNumber}),
+                LibraryType.Comic => await _localizationService.Translate(userId, "issue-num",
+                    new object[] {"#", result.ChapterNumber}),
+                LibraryType.Book => await _localizationService.Translate(userId, "book-num",
+                    new object[] {result.ChapterNumber}),
+                _ => "Chapter " + result.ChapterNumber
+            };
+        }
+        else
+        {
+            result.VolumeNumber = lastChapter.VolumeNumber + 1;
+            result.Title = "Volume " + result.ChapterNumber;
+        }
+
+
+        return result;
     }
 }

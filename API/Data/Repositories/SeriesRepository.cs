@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -457,6 +458,12 @@ public class SeriesRepository : ISeriesRepository
         return result;
     }
 
+    /// <summary>
+    /// Includes Progress for the user
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId)
     {
         var series = await _context.Series.Where(x => x.Id == seriesId)
@@ -1975,4 +1982,5 @@ public class SeriesRepository : ISeriesRepository
             .IsRestricted(queryContext)
             .Select(lib => lib.Id);
     }
+
 }
