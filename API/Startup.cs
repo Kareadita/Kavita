@@ -238,21 +238,8 @@ public class Startup
 
                     logger.LogInformation("Running Migrations");
 
-                    // v0.7.2
-                    await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
-
-                    // v0.7.3
-                    await MigrateRemoveWebPSettingRows.Migrate(unitOfWork, logger);
-
-                    // v0.7.4
-                    await MigrateDisableScrobblingOnComicLibraries.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.7.6
-                    await MigrateExistingRatings.Migrate(dataContext, logger);
-
                     // v0.7.9
                     await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
-                    await MigrateDashboardStreamNamesToLocaleKeys.Migrate(unitOfWork, dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
