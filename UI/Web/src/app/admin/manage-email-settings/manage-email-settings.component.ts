@@ -1,13 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs';
+import {forkJoin, take} from 'rxjs';
 import {EmailTestResult, SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgIf, NgTemplateOutlet} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {ServerService} from "../../_services/server.service";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -22,15 +23,24 @@ export class ManageEmailSettingsComponent implements OnInit {
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   link = '<a href="https://github.com/Kareadita/KavitaEmail" target="_blank" rel="noopener noreferrer">Kavita Email</a>';
+  emailVersion: string | null = null;
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly serverService = inject(ServerService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, private translocoService: TranslocoService) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, []));
+      this.cdRef.markForCheck();
+    });
+
+    this.serverService.getEmailVersion().subscribe(version => {
+      this.emailVersion = version;
       this.cdRef.markForCheck();
     });
   }
@@ -51,7 +61,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
+      this.toastr.success(translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -61,7 +71,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
+      this.toastr.success(translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -71,7 +81,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
       this.resetForm();
-      this.toastr.success(this.translocoService.translate('toasts.email-service-reset'));
+      this.toastr.success(translate('toasts.email-service-reset'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -79,11 +89,13 @@ export class ManageEmailSettingsComponent implements OnInit {
 
   testEmailServiceUrl() {
     if (this.settingsForm.get('emailServiceUrl')?.value === '') return;
-    this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value).pipe(take(1)).subscribe(async (result: EmailTestResult) => {
+    forkJoin([this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value), this.serverService.getEmailVersion()])
+        .pipe(take(1)).subscribe(async (results) => {
+          const result = results[0] as EmailTestResult;
       if (result.successful) {
-        this.toastr.success(this.translocoService.translate('toasts.email-service-reachable'));
+        this.toastr.success(translate('toasts.email-service-reachable', {version: results}));
       } else {
-        this.toastr.error(this.translocoService.translate('toasts.email-service-unresponsive') + result.errorMessage);
+        this.toastr.error(translate('toasts.email-service-unresponsive') + result.errorMessage);
       }
 
     }, (err: any) => {

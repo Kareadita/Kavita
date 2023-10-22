@@ -5,6 +5,7 @@ import {ServerInfoSlim} from '../admin/_models/server-info';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { Job } from '../_models/job/job';
 import { KavitaMediaError } from '../admin/_models/media-error';
+import {TextResonse} from "../_types/text-response";
 
 @Injectable({
   providedIn: 'root'
@@ -66,5 +67,9 @@ export class ServerService {
 
   clearMediaAlerts() {
     return this.httpClient.post(this.baseUrl + 'server/clear-media-alerts', {});
+  }
+
+  getEmailVersion() {
+    return this.httpClient.get<string>(this.baseUrl + 'server/email-version', TextResonse);
   }
 }

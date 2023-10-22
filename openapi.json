@@ -9455,6 +9455,36 @@
         }
       }
     },
+    "/api/Server/email-version": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns the KavitaEmail version for non-default instances",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [
