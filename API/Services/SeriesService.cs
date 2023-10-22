@@ -702,7 +702,7 @@ public class SeriesService : ISeriesService
             ChapterNumber = 0,
             VolumeNumber = 0,
             ExpectedDate = nextChapterExpected,
-            Title = ""
+            Title = string.Empty
         };
 
         if (lastChapterNumber > 0)
@@ -723,7 +723,8 @@ public class SeriesService : ISeriesService
         else
         {
             result.VolumeNumber = lastChapter.VolumeNumber + 1;
-            result.Title = "Volume " + result.ChapterNumber;
+            result.Title = await _localizationService.Translate(userId, "vol-num",
+                new object[] {result.VolumeNumber});
         }
 
 
