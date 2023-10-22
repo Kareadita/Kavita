@@ -42,12 +42,13 @@ public class ServerController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEasyCachingProviderFactory _cachingProviderFactory;
     private readonly ILocalizationService _localizationService;
+    private readonly IEmailService _emailService;
 
     public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
         ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, IEmailService emailService)
     {
         _logger = logger;
         _backupService = backupService;
@@ -61,6 +62,7 @@ public class ServerController : BaseApiController
         _unitOfWork = unitOfWork;
         _cachingProviderFactory = cachingProviderFactory;
         _localizationService = localizationService;
+        _emailService = emailService;
     }
 
     /// <summary>
@@ -268,6 +270,23 @@ public class ServerController : BaseApiController
         provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
         await provider.FlushAsync();
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns the KavitaEmail version for non-default instances
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("email-version")]
+    public async Task<ActionResult<string?>> GetEmailVersion()
+    {
+        var emailServiceUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))
+            .Value;
+
+        if (emailServiceUrl.Equals(EmailService.DefaultApiUrl)) return Ok(null);
+
+        return Ok(await _emailService.GetVersion(emailServiceUrl));
+
     }
 
 

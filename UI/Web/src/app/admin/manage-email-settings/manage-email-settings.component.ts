@@ -95,7 +95,7 @@ export class ManageEmailSettingsComponent implements OnInit {
       if (result.successful) {
         this.toastr.success(translate('toasts.email-service-reachable', {version: results}));
       } else {
-        this.toastr.error(translate('toasts.email-service-unresponsive') + result.errorMessage);
+        this.toastr.error(translate('toasts.email-service-unresponsive') + result.errorMessage.split('(')[0]);
       }
 
     }, (err: any) => {
