@@ -101,6 +101,16 @@ public class UnitOfWork : IUnitOfWork
         return _context.ChangeTracker.HasChanges();
     }
 
+    public async Task BeginTransactionAsync()
+    {
+        await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        await _context.Database.CommitTransactionAsync();
+    }
+
     /// <summary>
     /// Rollback transaction
     /// </summary>

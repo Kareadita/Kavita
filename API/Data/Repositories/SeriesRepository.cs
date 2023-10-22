@@ -966,7 +966,7 @@ public class SeriesRepository : ISeriesRepository
 
 
         return ApplyLimit(query
-            .Sort(filter.SortOptions)
+            .Sort(userId, filter.SortOptions)
             .AsSplitQuery(), filter.LimitTo);
     }
 
@@ -1119,7 +1119,7 @@ public class SeriesRepository : ISeriesRepository
                                                || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))
             .Where(s => userLibraries.Contains(s.LibraryId)
                         && formats.Contains(s.Format))
-            .Sort(filter.SortOptions)
+            .Sort(userId, filter.SortOptions)
             .AsNoTracking();
 
         return query.AsSplitQuery();
