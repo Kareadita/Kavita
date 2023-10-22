@@ -671,18 +671,32 @@ public class SeriesService : ISeriesService
             .ToList();
 
         // Calculate the time differences between consecutive chapters
-        var timeDifferences = chapters
-            .Select((chapter, index) => new
+        // var timeDifferences = chapters
+        //     .Select((chapter, index) => new
+        //     {
+        //         ChapterNumber = chapter.Number,
+        //         VolumeNumber = chapter.Volume.Number,
+        //         TimeDifference = index == 0 ? TimeSpan.Zero : (chapter.CreatedUtc - chapters.ElementAt(index - 1).CreatedUtc)
+        //     })
+        //     .ToList();
+        // Quantize time differences: Chapters created within an hour from each other will be treated as one time delta
+        var timeDifferences = new List<TimeSpan>();
+        DateTime? previousChapterTime = null;
+        foreach (var chapter in chapters)
+        {
+            if (previousChapterTime.HasValue && (chapter.CreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
             {
-                ChapterNumber = chapter.Number,
-                VolumeNumber = chapter.Volume.Number,
-                TimeDifference = index == 0 ? TimeSpan.Zero : (chapter.CreatedUtc - chapters.ElementAt(index - 1).CreatedUtc)
-            })
-            .ToList();
+                continue; // Skip this chapter if it's within an hour of the previous one
+            }
+            timeDifferences.Add(chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+            previousChapterTime = chapter.CreatedUtc;
+        }
 
         // Calculate the average time difference between chapters
+        // var averageTimeDifference = timeDifferences
+        //     .Average(td => td.TimeDifference.TotalDays);
         var averageTimeDifference = timeDifferences
-            .Average(td => td.TimeDifference.TotalDays);
+            .Average(td => td.TotalDays);
 
         // Calculate the forecast for when the next chapter is expected
         var nextChapterExpected = chapters.Any()
@@ -694,8 +708,8 @@ public class SeriesService : ISeriesService
             nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
         }
 
-        var lastChapter = timeDifferences.Last();
-        float.TryParse(lastChapter.ChapterNumber, NumberStyles.Number, CultureInfo.InvariantCulture,
+        var lastChapter = chapters.Last();
+        float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var lastChapterNumber);
 
         var result = new NextExpectedChapterDto()
@@ -709,7 +723,7 @@ public class SeriesService : ISeriesService
         if (lastChapterNumber > 0)
         {
             result.ChapterNumber = lastChapterNumber + 1;
-            result.VolumeNumber = lastChapter.VolumeNumber;
+            result.VolumeNumber = lastChapter.Volume.Number;
             result.Title = series.Library.Type switch
             {
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num",
@@ -723,7 +737,7 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            result.VolumeNumber = lastChapter.VolumeNumber + 1;
+            result.VolumeNumber = lastChapter.Volume.Number + 1;
             result.Title = await _localizationService.Translate(userId, "volume-num",
                 new object[] {result.VolumeNumber});
         }
