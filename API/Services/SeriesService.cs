@@ -723,7 +723,7 @@ public class SeriesService : ISeriesService
         else
         {
             result.VolumeNumber = lastChapter.VolumeNumber + 1;
-            result.Title = await _localizationService.Translate(userId, "vol-num",
+            result.Title = await _localizationService.Translate(userId, "volume-num",
                 new object[] {result.VolumeNumber});
         }
 
