@@ -93,7 +93,8 @@ export class ManageEmailSettingsComponent implements OnInit {
         .pipe(take(1)).subscribe(async (results) => {
           const result = results[0] as EmailTestResult;
       if (result.successful) {
-        this.toastr.success(translate('toasts.email-service-reachable', {version: results}));
+        const version = ('. Kavita Email: ' + results[1] ? 'v' + results[1] : '');
+        this.toastr.success(translate('toasts.email-service-reachable') + version);
       } else {
         this.toastr.error(translate('toasts.email-service-unresponsive') + result.errorMessage.split('(')[0]);
       }
