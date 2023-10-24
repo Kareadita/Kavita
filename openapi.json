@@ -9713,7 +9713,9 @@
         "tags": [
           "Settings"
         ],
+        "summary": "Sends a test email from the Email Service. Will not send if email service is the Default Provider",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {

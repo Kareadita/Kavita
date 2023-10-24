@@ -699,7 +699,7 @@ public class SeriesService : ISeriesService
         }
 
 
-        if (timeDifferences.Count == 0)
+        if (timeDifferences.Count < 3)
         {
             return _emptyExpectedChapter;
         }

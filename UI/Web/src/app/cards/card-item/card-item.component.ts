@@ -5,7 +5,7 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  Input,
+  Input, NgZone,
   OnInit,
   Output
 } from '@angular/core';
@@ -39,10 +39,11 @@ import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
 import {SentenceCasePipe} from "../../pipe/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
 import {RouterLink} from "@angular/router";
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
+import {TimeAgoPipe} from "../../pipe/time-ago.pipe";
 
 @Component({
   selector: 'app-card-item',
@@ -159,6 +160,8 @@ export class CardItemComponent implements OnInit {
 
   private user: User | undefined;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly ngZone = inject(NgZone);
+  private readonly translocoService = inject(TranslocoService);
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -221,17 +224,12 @@ export class CardItemComponent implements OnInit {
       this.imageUrl = '';
       const nextDate = (this.entity as NextExpectedChapter);
 
-      // if (nextDate.volumeNumber > 0 && nextDate.chapterNumber === 0) {
-      //   this.overlayInformation = 'Volume ' + nextDate.volumeNumber;
-      //
-      // } else {
-      //   this.overlayInformation = 'Chapter ' + nextDate.chapterNumber;
-      // }
       this.overlayInformation = nextDate.title;
       this.centerOverlay = true;
 
       if (nextDate.expectedDate) {
         const utcPipe = new UtcToLocalTimePipe();
+        //const timeUntilPipe = new TimeAgoPipe(this.cdRef, this.ngZone, this.translocoService);
         this.title = utcPipe.transform(nextDate.expectedDate);
       }
 
