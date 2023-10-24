@@ -717,10 +717,10 @@ public class SeriesService : ISeriesService
             ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(forecastedTimeDifference)
             : (DateTime?)null;
 
-        if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
-        {
-            nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(forecastedTimeDifference);
-        }
+        // if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
+        // {
+        //     nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(forecastedTimeDifference);
+        // }
         //
         // var averageTimeDifference = timeDifferences
         //     .Average(td => td.TotalDays);
