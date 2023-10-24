@@ -56,7 +56,8 @@ public class ThemeService : IThemeService
         var reservedNames = Seed.DefaultThemes.Select(t => t.NormalizedName).ToList();
         var themeFiles = _directoryService
             .GetFilesWithExtension(Scanner.Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
-            .Where(name => !reservedNames.Contains(name.ToNormalized())).ToList();
+            .Where(name => !reservedNames.Contains(name.ToNormalized()) && !name.Contains(" "))
+            .ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
 
