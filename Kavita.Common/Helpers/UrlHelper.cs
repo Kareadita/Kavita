@@ -38,4 +38,11 @@ public static class UrlHelper
             ? $"/{url}"
             : url;
     }
+
+    public static string? RemoveEndingSlash(string? url)
+    {
+        if (string.IsNullOrEmpty(url)) return url;
+        if (url.EndsWith('/')) return url.Substring(0, url.Length - 1);
+        return url;
+    }
 }
