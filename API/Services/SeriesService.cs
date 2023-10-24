@@ -50,6 +50,13 @@ public class SeriesService : ISeriesService
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
 
+    private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto()
+    {
+        ExpectedDate = null,
+        ChapterNumber = 0,
+        VolumeNumber = 0
+    };
+
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
         ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
     {
@@ -59,6 +66,7 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+
     }
 
     /// <summary>
@@ -657,12 +665,7 @@ public class SeriesService : ISeriesService
         }
         if (series?.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
         {
-            return new NextExpectedChapterDto()
-            {
-                ExpectedDate = null,
-                ChapterNumber = 0,
-                VolumeNumber = 0
-            };
+            return _emptyExpectedChapter;
         }
 
         var chapters = _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
@@ -671,15 +674,6 @@ public class SeriesService : ISeriesService
             .ToList();
 
         // Calculate the time differences between consecutive chapters
-        // var timeDifferences = chapters
-        //     .Select((chapter, index) => new
-        //     {
-        //         ChapterNumber = chapter.Number,
-        //         VolumeNumber = chapter.Volume.Number,
-        //         TimeDifference = index == 0 ? TimeSpan.Zero : (chapter.CreatedUtc - chapters.ElementAt(index - 1).CreatedUtc)
-        //     })
-        //     .ToList();
-        // Quantize time differences: Chapters created within an hour from each other will be treated as one time delta
         var timeDifferences = new List<TimeSpan>();
         DateTime? previousChapterTime = null;
         foreach (var chapter in chapters)
@@ -688,29 +682,72 @@ public class SeriesService : ISeriesService
             {
                 continue; // Skip this chapter if it's within an hour of the previous one
             }
-            timeDifferences.Add(chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+
+            if ((chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
+            {
+                timeDifferences.Add(chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+            }
+
             previousChapterTime = chapter.CreatedUtc;
         }
 
-        // Calculate the average time difference between chapters
-        // var averageTimeDifference = timeDifferences
-        //     .Average(td => td.TimeDifference.TotalDays);
-        var averageTimeDifference = timeDifferences
-            .Average(td => td.TotalDays);
+
+        if (timeDifferences.Count < 3)
+        {
+            return _emptyExpectedChapter;
+        }
+
+        var historicalTimeDifferences = timeDifferences.Select(td => td.TotalDays).ToList();
+
+        if (historicalTimeDifferences.Count < 3)
+        {
+            return _emptyExpectedChapter;
+        }
+
+        const double alpha = 0.2; // A smaller alpha will give more weight to recent data, while a larger alpha will smooth the data more.
+        var forecastedTimeDifference = ExponentialSmoothing(historicalTimeDifferences, alpha);
+
+        if (forecastedTimeDifference <= 0)
+        {
+            return _emptyExpectedChapter;
+        }
 
         // Calculate the forecast for when the next chapter is expected
         var nextChapterExpected = chapters.Any()
-            ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(averageTimeDifference)
-            : (DateTime?) null;
+            ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(forecastedTimeDifference)
+            : (DateTime?)null;
 
-        if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
-        {
-            nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
-        }
+        // if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
+        // {
+        //     nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(forecastedTimeDifference);
+        // }
+        //
+        // var averageTimeDifference = timeDifferences
+        //     .Average(td => td.TotalDays);
+        //
+        //
+        // if (averageTimeDifference == 0)
+        // {
+        //     return _emptyExpectedChapter;
+        // }
+        //
+        //
+        // // Calculate the forecast for when the next chapter is expected
+        // var nextChapterExpected = chapters.Any()
+        //     ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(averageTimeDifference)
+        //     : (DateTime?) null;
+        //
+        // if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
+        // {
+        //     nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
+        // }
 
-        var lastChapter = chapters.Last();
+        // For number and volume number, we need the highest chapter, not the latest created
+        var lastChapter = chapters.MaxBy(c => float.Parse(c.Number))!;
         float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var lastChapterNumber);
+
+        var lastVolumeNum = chapters.Select(c => c.Volume.Number).Max();
 
         var result = new NextExpectedChapterDto()
         {
@@ -737,12 +774,24 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            result.VolumeNumber = lastChapter.Volume.Number + 1;
+            result.VolumeNumber = lastVolumeNum + 1;
             result.Title = await _localizationService.Translate(userId, "volume-num",
                 new object[] {result.VolumeNumber});
         }
 
 
         return result;
+    }
+
+    private double ExponentialSmoothing(IEnumerable<double> data, double alpha)
+    {
+        double forecast = data.First();
+
+        foreach (var value in data)
+        {
+            forecast = alpha * value + (1 - alpha) * forecast;
+        }
+
+        return forecast;
     }
 }

@@ -74,8 +74,8 @@ public class AccountService : IAccountService
             }
         }
 
-        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
-        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}".Replace("//", "/");
+        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}".Replace("//", "/");
     }
 
     public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)

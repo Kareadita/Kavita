@@ -137,6 +137,11 @@ public class SettingsController : BaseApiController
         return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
     }
 
+    /// <summary>
+    /// Sends a test email from the Email Service. Will not send if email service is the Default Provider
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("test-email-url")]
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
@@ -278,7 +283,17 @@ public class SettingsController : BaseApiController
             if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
             {
                 setting.Value = (updateSettingsDto.HostName + string.Empty).Trim();
-                if (setting.Value.EndsWith('/')) setting.Value = setting.Value.Substring(0, setting.Value.Length - 1);
+                setting.Value = UrlHelper.RemoveEndingSlash(setting.Value);
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
+            {
+                setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;
+                setting.Value = UrlHelper.RemoveEndingSlash(setting.Value);
+                FlurlHttp.ConfigureClient(setting.Value, cli =>
+                    cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
@@ -330,15 +345,6 @@ public class SettingsController : BaseApiController
                     return BadRequest(await _localizationService.Translate(User.GetUserId(), "total-logs"));
                 }
                 setting.Value = updateSettingsDto.TotalLogs + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
-            {
-                setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;
-                FlurlHttp.ConfigureClient(setting.Value, cli =>
-                    cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
-
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

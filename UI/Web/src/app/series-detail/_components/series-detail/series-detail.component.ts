@@ -92,6 +92,7 @@ import {
   SeriesPreviewDrawerComponent
 } from "../../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
+import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -167,7 +168,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesImage: string = '';
   downloadInProgress: boolean = false;
 
-  nextExpectedChapter: any | undefined;
+  nextExpectedChapter: NextExpectedChapter | undefined;
 
   /**
    * Track by function for Volume to tell when to refresh card data

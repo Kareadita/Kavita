@@ -200,18 +200,22 @@ export class MetadataFilterComponent implements OnInit {
       limitTo: new FormControl(this.filterV2?.limitTo || 0, []),
       name: new FormControl(this.filterV2?.name || '', [])
     });
+    if (this.filterSettings?.presetsV2?.sortOptions) {
+      this.isAscendingSort = this.filterSettings?.presetsV2?.sortOptions!.isAscending;
+    }
+
 
     this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      if (this.filterV2?.sortOptions === null) {
-        this.filterV2.sortOptions = {
-          isAscending: this.isAscendingSort,
-          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
-        };
-      }
-      this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
-      this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
-      this.filterV2!.name = this.sortGroup.get('name')?.value || '';
-      this.cdRef.markForCheck();
+    if (this.filterV2?.sortOptions === null) {
+      this.filterV2.sortOptions = {
+        isAscending: this.isAscendingSort,
+        sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
+      };
+    }
+    this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
+    this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
+    this.filterV2!.name = this.sortGroup.get('name')?.value || '';
+    this.cdRef.markForCheck();
     });
 
     this.fullyLoaded = true;
@@ -230,6 +234,7 @@ export class MetadataFilterComponent implements OnInit {
     }
 
     this.filterV2!.sortOptions!.isAscending = this.isAscendingSort;
+    this.cdRef.markForCheck();
   }
 
   clear() {

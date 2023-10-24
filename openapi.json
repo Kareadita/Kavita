@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.9.0"
+    "version": "0.7.9.2"
   },
   "servers": [
     {
@@ -9713,7 +9713,9 @@
         "tags": [
           "Settings"
         ],
+        "summary": "Sends a test email from the Email Service. Will not send if email service is the Default Provider",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
