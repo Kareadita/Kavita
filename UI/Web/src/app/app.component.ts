@@ -1,11 +1,11 @@
 import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
-import { NavigationStart, Router, RouterOutlet } from '@angular/router';
+import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {map, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
-import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
@@ -24,7 +24,8 @@ export class AppComponent implements OnInit {
 
   transitionState$!: Observable<boolean>;
 
-  destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly offcanvas = inject(NgbOffcanvas);
 
   constructor(private accountService: AccountService, public navService: NavService,
     private libraryService: LibraryService,
@@ -37,12 +38,29 @@ export class AppComponent implements OnInit {
 
     // Close any open modals when a route change occurs
     router.events
-      .pipe(filter(event => event instanceof NavigationStart), takeUntilDestroyed(this.destroyRef))
-      .subscribe((event) => {
+      .pipe(
+          filter(event => event instanceof NavigationStart),
+          takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(async (event) => {
+
+        if (!this.ngbModal.hasOpenModals() && !this.offcanvas.hasOpenOffcanvas()) return;
+
         if (this.ngbModal.hasOpenModals()) {
           this.ngbModal.dismissAll();
         }
+
+        if (this.offcanvas.hasOpenOffcanvas()) {
+          this.offcanvas.dismiss();
+        }
+
+        if ((event as any).navigationTrigger === 'popstate') {
+          const currentRoute = this.router.routerState;
+          await this.router.navigateByUrl(currentRoute.snapshot.url, { skipLocationChange: true });
+        }
+
       });
+
 
     this.transitionState$ = this.accountService.currentUser$.pipe(map((user) => {
       if (!user) return false;
