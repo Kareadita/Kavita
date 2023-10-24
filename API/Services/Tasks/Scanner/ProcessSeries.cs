@@ -291,10 +291,15 @@ public class ProcessSeries : IProcessSeries
 
         var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
         var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
-        var maxActual = Math.Max(maxVolume, maxChapter);
 
-        series.Metadata.MaxCount = maxActual;
-
+        if (maxChapter > series.Metadata.TotalCount && maxVolume <= series.Metadata.TotalCount)
+        {
+            series.Metadata.MaxCount = maxVolume;
+        }
+        else
+        {
+            series.Metadata.MaxCount = maxChapter;
+        }
 
         if (!series.Metadata.PublicationStatusLocked)
         {
