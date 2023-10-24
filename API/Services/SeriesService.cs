@@ -674,13 +674,6 @@ public class SeriesService : ISeriesService
             .ToList();
 
         // Calculate the time differences between consecutive chapters
-        // var timeDifferences = new List<TimeSpan>();
-        // for (var i = 1; i < chapters.Count; i++)
-        // {
-        //     var delta = chapters[i].CreatedUtc - chapters[i - 1].CreatedUtc;
-        //     timeDifferences.Add(delta);
-        // }
-
         var timeDifferences = new List<TimeSpan>();
         DateTime? previousChapterTime = null;
         foreach (var chapter in chapters)
@@ -704,25 +697,50 @@ public class SeriesService : ISeriesService
             return _emptyExpectedChapter;
         }
 
-        var averageTimeDifference = timeDifferences
-            .Average(td => td.TotalDays);
+        var historicalTimeDifferences = timeDifferences.Select(td => td.TotalDays).ToList();
 
-
-        if (averageTimeDifference == 0)
+        if (historicalTimeDifferences.Count < 3)
         {
             return _emptyExpectedChapter;
         }
 
+        const double alpha = 0.2; // A smaller alpha will give more weight to recent data, while a larger alpha will smooth the data more.
+        var forecastedTimeDifference = ExponentialSmoothing(historicalTimeDifferences, alpha);
+
+        if (forecastedTimeDifference <= 0)
+        {
+            return _emptyExpectedChapter;
+        }
 
         // Calculate the forecast for when the next chapter is expected
         var nextChapterExpected = chapters.Any()
-            ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(averageTimeDifference)
-            : (DateTime?) null;
+            ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(forecastedTimeDifference)
+            : (DateTime?)null;
 
         if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
         {
-            nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
+            nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(forecastedTimeDifference);
         }
+        //
+        // var averageTimeDifference = timeDifferences
+        //     .Average(td => td.TotalDays);
+        //
+        //
+        // if (averageTimeDifference == 0)
+        // {
+        //     return _emptyExpectedChapter;
+        // }
+        //
+        //
+        // // Calculate the forecast for when the next chapter is expected
+        // var nextChapterExpected = chapters.Any()
+        //     ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(averageTimeDifference)
+        //     : (DateTime?) null;
+        //
+        // if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
+        // {
+        //     nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
+        // }
 
         // For number and volume number, we need the highest chapter, not the latest created
         var lastChapter = chapters.MaxBy(c => float.Parse(c.Number))!;
@@ -763,5 +781,17 @@ public class SeriesService : ISeriesService
 
 
         return result;
+    }
+
+    private double ExponentialSmoothing(IEnumerable<double> data, double alpha)
+    {
+        double forecast = data.First();
+
+        foreach (var value in data)
+        {
+            forecast = alpha * value + (1 - alpha) * forecast;
+        }
+
+        return forecast;
     }
 }
