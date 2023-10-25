@@ -123,7 +123,7 @@ public static class SmartFilterHelper
         var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith("sortField="));
         var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith("isAscending="));
 
-        var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? true;
+        var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
         if (sortFieldPart != null)
         {
             var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);

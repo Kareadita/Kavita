@@ -201,7 +201,7 @@ export class FilterUtilitiesService {
 
         if (sortFieldPart && isAscendingPart) {
             const sortField = parseInt(sortFieldPart.split('=')[1], 10) as SortField;
-            const isAscending = isAscendingPart.split('=')[1] === 'true';
+            const isAscending = isAscendingPart.split('=')[1].toLowerCase() === 'true';
             return {sortField, isAscending};
         }
 
