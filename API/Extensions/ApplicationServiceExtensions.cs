@@ -107,12 +107,19 @@ public static class ApplicationServiceExtensions
 
     private static void AddSqLite(this IServiceCollection services)
     {
-        services.AddDbContext<DataContext>(options =>
+        services.AddDbContextPool<DataContext>(options =>
         {
             options.UseSqlite("Data source=config/kavita.db");
             options.EnableDetailedErrors();
 
             options.EnableSensitiveDataLogging();
         });
+        // services.AddDbContext<DataContext>(options =>
+        // {
+        //     options.UseSqlite("Data source=config/kavita.db");
+        //     options.EnableDetailedErrors();
+        //
+        //     options.EnableSensitiveDataLogging();
+        // });
     }
 }
