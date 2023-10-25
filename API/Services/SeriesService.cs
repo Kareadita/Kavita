@@ -759,7 +759,7 @@ public class SeriesService : ISeriesService
 
         if (lastChapterNumber > 0)
         {
-            result.ChapterNumber = lastChapterNumber + 1;
+            result.ChapterNumber = (int) Math.Truncate(lastChapterNumber) + 1;
             result.VolumeNumber = lastChapter.Volume.Number;
             result.Title = series.Library.Type switch
             {
