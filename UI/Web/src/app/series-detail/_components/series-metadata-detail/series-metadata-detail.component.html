@@ -15,7 +15,7 @@
     <app-metadata-detail [tags]="links" [libraryId]="series.libraryId" [heading]="t('links-title')">
       <ng-template #itemTemplate let-item>
         <a class="col me-1" [href]="item | safeHtml" target="_blank" rel="noopener noreferrer" [title]="item">
-          <img width="24" height="24" class="lazyload img-placeholder"
+          <img width="24" height="24" class="lazyload img-placeholder favicon"
                [src]="imageService.errorWebLinkImage"
                [attr.data-src]="imageService.getWebLinkImage(item)"
                (error)="imageService.updateErroredWebLinkImage($event)"
