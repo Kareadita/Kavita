@@ -21,6 +21,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
 
+#nullable enable
+
 public interface IProcessSeries
 {
     /// <summary>
@@ -208,7 +210,7 @@ public class ProcessSeries : IProcessSeries
                                     .ToList()}));
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
-                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
+                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
                             ex.Message));
                     return;
                 }
@@ -886,7 +888,7 @@ public class ProcessSeries : IProcessSeries
                 }
             }
 
-            action(genre, newTag);
+            action(genre!, newTag);
         }
     }
 

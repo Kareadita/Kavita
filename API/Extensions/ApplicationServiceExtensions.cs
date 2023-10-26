@@ -114,12 +114,5 @@ public static class ApplicationServiceExtensions
 
             options.EnableSensitiveDataLogging();
         });
-        // services.AddDbContext<DataContext>(options =>
-        // {
-        //     options.UseSqlite("Data source=config/kavita.db");
-        //     options.EnableDetailedErrors();
-        //
-        //     options.EnableSensitiveDataLogging();
-        // });
     }
 }

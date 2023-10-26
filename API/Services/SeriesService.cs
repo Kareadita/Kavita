@@ -717,31 +717,6 @@ public class SeriesService : ISeriesService
             ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(forecastedTimeDifference)
             : (DateTime?)null;
 
-        // if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
-        // {
-        //     nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(forecastedTimeDifference);
-        // }
-        //
-        // var averageTimeDifference = timeDifferences
-        //     .Average(td => td.TotalDays);
-        //
-        //
-        // if (averageTimeDifference == 0)
-        // {
-        //     return _emptyExpectedChapter;
-        // }
-        //
-        //
-        // // Calculate the forecast for when the next chapter is expected
-        // var nextChapterExpected = chapters.Any()
-        //     ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(averageTimeDifference)
-        //     : (DateTime?) null;
-        //
-        // if (nextChapterExpected != null && nextChapterExpected < DateTime.UtcNow)
-        // {
-        //     nextChapterExpected = DateTime.UtcNow + TimeSpan.FromDays(averageTimeDifference);
-        // }
-
         // For number and volume number, we need the highest chapter, not the latest created
         var lastChapter = chapters.MaxBy(c => float.Parse(c.Number))!;
         float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
@@ -783,9 +758,9 @@ public class SeriesService : ISeriesService
         return result;
     }
 
-    private double ExponentialSmoothing(IEnumerable<double> data, double alpha)
+    private static double ExponentialSmoothing(IList<double> data, double alpha)
     {
-        double forecast = data.First();
+        var forecast = data.First();
 
         foreach (var value in data)
         {

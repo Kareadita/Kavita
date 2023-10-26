@@ -118,16 +118,6 @@ public class UnitOfWork : IUnitOfWork
     /// <returns></returns>
     public async Task<bool> RollbackAsync()
     {
-        // foreach (var entry in _context.ChangeTracker.Entries())
-        // {
-        //     switch (entry.State)
-        //     {
-        //         case EntityState.Added:
-        //             entry.State = EntityState.Detached;
-        //             break;
-        //     }
-        // }
-
         try
         {
             await _context.Database.RollbackTransactionAsync();
