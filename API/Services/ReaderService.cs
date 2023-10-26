@@ -245,6 +245,9 @@ public class ReaderService : IReaderService
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
+            // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when
+            // opening a chapter
+            if (userProgress == null && progressDto.PageNum == 0) return true;
 
             if (userProgress == null)
             {

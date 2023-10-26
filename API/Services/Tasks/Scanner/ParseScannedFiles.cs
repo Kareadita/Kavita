@@ -279,8 +279,22 @@ public class ParseScannedFiles
         IEnumerable<string> folders, string libraryName, bool isLibraryScan,
         IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos, bool forceCheck = false)
     {
-
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
+
+        foreach (var folderPath in folders)
+        {
+            try
+            {
+                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, forceCheck);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folderPath);
+            }
+        }
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
+        return;
 
         async Task ProcessFolder(IList<string> files, string folder)
         {
@@ -340,21 +354,6 @@ public class ParseScannedFiles
                 }
             }
         }
-
-
-        foreach (var folderPath in folders)
-        {
-            try
-            {
-                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, forceCheck);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folderPath);
-            }
-        }
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
     }
 
     /// <summary>
