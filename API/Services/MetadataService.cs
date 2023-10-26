@@ -107,7 +107,7 @@ public class MetadataService : IMetadataService
 
 
         volume.Chapters ??= new List<Chapter>();
-        var firstChapter = volume.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default);
+        var firstChapter = volume.Chapters.MinBy(x => x.Number.AsDouble(), ChapterSortComparerZeroFirst.Default);
         if (firstChapter == null) return Task.FromResult(false);
 
         volume.CoverImage = firstChapter.CoverImage;

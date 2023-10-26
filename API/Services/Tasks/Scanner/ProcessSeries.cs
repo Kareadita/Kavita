@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -616,7 +617,7 @@ public class ProcessSeries : IProcessSeries
             // Add files
             var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
-            chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty;
+            chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
         }
 

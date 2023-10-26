@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using API.DTOs.Filtering.v2;
 using API.Entities.Enums;
+using API.Extensions;
 
 namespace API.Helpers.Converters;
 
@@ -68,7 +70,7 @@ public static class FilterFieldValueConverter
                 .Select(int.Parse)
                 .ToList(),
             FilterField.WantToRead => bool.Parse(value),
-            FilterField.ReadProgress => float.Parse(value),
+            FilterField.ReadProgress => value.AsFloat(),
             FilterField.ReadingDate => DateTime.Parse(value),
             FilterField.Formats => value.Split(',')
                 .Select(x => (MangaFormat) Enum.Parse(typeof(MangaFormat), x))

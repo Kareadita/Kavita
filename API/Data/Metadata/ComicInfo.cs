@@ -185,12 +185,12 @@ public class ComicInfo
     {
         try
         {
-            if (float.TryParse(Number, out var chpCount) && chpCount > 0)
+            if (float.TryParse(Number, CultureInfo.InvariantCulture, out var chpCount) && chpCount > 0)
             {
                 return (int) Math.Floor(chpCount);
             }
 
-            if (float.TryParse(Volume, out var volCount) && volCount > 0)
+            if (float.TryParse(Volume, CultureInfo.InvariantCulture, out var volCount) && volCount > 0)
             {
                 return (int) Math.Floor(volCount);
             }

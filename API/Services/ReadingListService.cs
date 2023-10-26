@@ -12,6 +12,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services.Tasks.Scanner.Parser;
@@ -390,7 +391,7 @@ public class ReadingListService : IReadingListService
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
         var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ChapterIncludes.Volumes))
             .OrderBy(c => Parser.MinNumberFromRange(c.Volume.Name))
-            .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting)
+            .ThenBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting)
             .ToList();
 
         var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;

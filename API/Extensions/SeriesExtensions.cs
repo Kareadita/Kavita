@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
@@ -24,7 +25,7 @@ public static class SeriesExtensions
         if (firstVolume == null) return null;
 
         var chapters = firstVolume.Chapters
-            .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
+            .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
             .ToList();
 
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
@@ -44,9 +45,9 @@ public static class SeriesExtensions
         {
             var looseLeafChapters = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
                 .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
-                .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
+                .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
                 .ToList();
-            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].Number) > float.Parse(looseLeafChapters[0].Number))
+            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].Number) > looseLeafChapters[0].Number.AsFloat())
             {
                 return looseLeafChapters[0].CoverImage;
             }
@@ -56,7 +57,7 @@ public static class SeriesExtensions
         var firstLooseLeafChapter = volumes
             .Where(v => $"{v.Number}" == Parser.DefaultVolume)
             .SelectMany(v => v.Chapters)
-            .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
+            .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
             .FirstOrDefault(c => !c.IsSpecial);
 
         return firstLooseLeafChapter?.CoverImage ?? firstVolume.CoverImage;

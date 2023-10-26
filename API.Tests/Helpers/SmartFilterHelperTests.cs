@@ -25,7 +25,7 @@ public class SmartFilterHelperTests
 
         var list = filter.Statements.ToList();
         AssertStatementSame(list[2], FilterField.SeriesName, FilterComparison.Matches, "a");
-        AssertStatementSame(list[1], FilterField.AgeRating, FilterComparison.Equal, (int) AgeRating.Unknown + "");
+        AssertStatementSame(list[1], FilterField.AgeRating, FilterComparison.Equal, (int) AgeRating.Unknown + string.Empty);
         AssertStatementSame(list[0], FilterField.Genres, FilterComparison.Contains, "6");
 
     }

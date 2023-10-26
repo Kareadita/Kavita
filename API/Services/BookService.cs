@@ -10,6 +10,7 @@ using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -490,7 +491,7 @@ public class BookService : IBookService
                 switch (metadataItem.Name)
                 {
                     case "calibre:rating":
-                        info.UserRating = float.Parse(metadataItem.Content);
+                        info.UserRating = metadataItem.Content.AsFloat();
                         break;
                     case "calibre:title_sort":
                         info.TitleSort = metadataItem.Content;

@@ -13,6 +13,7 @@ using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services.Plus;
@@ -77,20 +78,20 @@ public class SeriesService : ISeriesService
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
         var sortedVolumes = series.Volumes
-            .Where(v => float.TryParse(v.Name, out var parsedValue) && parsedValue != 0.0f)
-            .OrderBy(v => float.TryParse(v.Name, out var parsedValue) ? parsedValue : float.MaxValue);
+            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != 0.0f)
+            .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
         var minVolumeNumber = sortedVolumes
-            .MinBy(v => float.Parse(v.Name));
+            .MinBy(v => v.Name.AsFloat());
 
 
         var allChapters = series.Volumes
-            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)).ToList();
+            .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
         var minChapter =  allChapters
             .FirstOrDefault();
 
-        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, out var chapNum) && chapNum >= minVolumeNumber.Number)
+        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) && chapNum >= minVolumeNumber.Number)
         {
-            return minVolumeNumber.Chapters.MinBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
+            return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
 
         return minChapter;
@@ -436,7 +437,9 @@ public class SeriesService : ISeriesService
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             foreach (var volume in volumes)
             {
-                volume.Chapters = volume.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
+                volume.Chapters = volume.Chapters
+                    .OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default)
+                    .ToList();
                 var firstChapter = volume.Chapters.First();
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
@@ -450,7 +453,7 @@ public class SeriesService : ISeriesService
             processedVolumes.ForEach(v =>
             {
                 v.Name = $"Volume {v.Name}";
-                v.Chapters = v.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
+                v.Chapters = v.Chapters.OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default).ToList();
             });
         }
 
@@ -460,7 +463,7 @@ public class SeriesService : ISeriesService
             if (v.Number == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
-        }).OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)).ToList();
+        }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
 
         foreach (var chapter in chapters)
         {
@@ -485,12 +488,12 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .Where(v => v.Number == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)
+            .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
             .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
         if (storylineChapters.Any()) {
-            retChapters = retChapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
+            retChapters = retChapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
 
         return new SeriesDetailDto()
@@ -718,7 +721,7 @@ public class SeriesService : ISeriesService
             : (DateTime?)null;
 
         // For number and volume number, we need the highest chapter, not the latest created
-        var lastChapter = chapters.MaxBy(c => float.Parse(c.Number))!;
+        var lastChapter = chapters.MaxBy(c => c.Number.AsFloat())!;
         float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var lastChapterNumber);
 

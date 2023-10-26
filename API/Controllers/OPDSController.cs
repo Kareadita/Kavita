@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -775,7 +776,7 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id)).OrderBy(x => double.Parse(x.Number),
+            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
         _chapterSortComparer);
 
             foreach (var chapter in chapters)
@@ -825,7 +826,7 @@ public class OpdsController : BaseApiController
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapters =
-            (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
+            (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
                 _chapterSortComparer);
         var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);

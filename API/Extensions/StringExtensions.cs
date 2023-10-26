@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace API.Extensions;
 
@@ -21,5 +22,15 @@ public static class StringExtensions
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
         return Services.Tasks.Scanner.Parser.Parser.Normalize(value);
+    }
+
+    public static float AsFloat(this string value)
+    {
+        return float.Parse(value, CultureInfo.InvariantCulture);
+    }
+
+    public static double AsDouble(this string value)
+    {
+        return double.Parse(value, CultureInfo.InvariantCulture);
     }
 }

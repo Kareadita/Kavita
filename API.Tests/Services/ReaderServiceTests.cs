@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
+using System.Globalization;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1219,7 +1220,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2,5, 1);
         var chapterInfoDto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(prevChapter);
-        Assert.Equal(1, float.Parse(chapterInfoDto.ChapterNumber));
+        Assert.Equal(1, chapterInfoDto.ChapterNumber.AsFloat());
 
         // This is first chapter of first volume
         prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2,4, 1);

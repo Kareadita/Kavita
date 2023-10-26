@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
@@ -31,7 +32,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Special 1", series.GetCoverImage());
@@ -66,7 +67,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
@@ -108,7 +109,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
@@ -134,7 +135,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Special 2", series.GetCoverImage());
@@ -164,7 +165,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Chapter 2", series.GetCoverImage());
@@ -201,7 +202,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
@@ -238,7 +239,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
@@ -282,7 +283,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
@@ -315,7 +316,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Chapter 2", series.GetCoverImage());
