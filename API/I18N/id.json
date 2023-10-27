@@ -1,0 +1,8 @@
+{
+    "invalid-password": "Sandi Tidak Sah",
+    "validate-email": "Terdapat masalah saat memvalidasi email kamu: {0}",
+    "confirm-email": "Kamu harus mengonfirmasi email kamu terlebih dahulu",
+    "disabled-account": "Akunmu dinonaktifkan. Hubungi admin server.",
+    "denied": "Tidak diizinkan",
+    "register-user": "Terjadi kesalahan ketika mendaftarkan pengguna"
+}
