@@ -53,7 +53,6 @@ export class UserLoginComponent implements OnInit {
       if (user) {
         this.navService.showSideNav();
         this.cdRef.markForCheck();
-        this.router.navigateByUrl('/libraries');
       }
     });
 
@@ -92,11 +91,8 @@ export class UserLoginComponent implements OnInit {
 
       // Check if user came here from another url, else send to library route
       const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-      console.log('Redirect Url found: ', pageResume)
       if (pageResume && pageResume !== '/login') {
         localStorage.setItem('kavita--auth-intersection-url', '');
-        const tokens = pageResume.split('/');
-
         this.router.navigateByUrl(pageResume);
       } else {
         localStorage.setItem('kavita--auth-intersection-url', '');

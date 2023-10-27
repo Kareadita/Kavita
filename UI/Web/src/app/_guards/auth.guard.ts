@@ -23,7 +23,6 @@ export class AuthGuard implements CanActivate {
           return true;
         }
 
-        console.log('Redirect url: ', window.location.pathname);
         localStorage.setItem(this.urlKey, window.location.pathname);
         this.router.navigateByUrl('/login');
         return false;
