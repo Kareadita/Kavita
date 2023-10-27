@@ -650,7 +650,7 @@ public class BookService : IBookService
                 return;
             case "ill":
             case "illustrator":
-                info.Letterer += AppendAuthor(person);
+                info.Inker += AppendAuthor(person);
                 return;
             case "clr":
             case "colorist":
