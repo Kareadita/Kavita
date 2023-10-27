@@ -43,12 +43,13 @@ public enum AppUserIncludes
 
 public interface IUserRepository
 {
+    void Add(AppUserBookmark bookmark);
+    void Add(AppUser bookmark);
     void Update(AppUser user);
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     void Update(AppUserDashboardStream stream);
     void Update(AppUserSideNavStream stream);
-    void Add(AppUserBookmark bookmark);
     void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
     void Delete(IEnumerable<AppUserDashboardStream> streams);
@@ -108,6 +109,16 @@ public class UserRepository : IUserRepository
         _mapper = mapper;
     }
 
+    public void Add(AppUserBookmark bookmark)
+    {
+        _context.AppUserBookmark.Add(bookmark);
+    }
+
+    public void Add(AppUser user)
+    {
+        _context.AppUser.Add(user);
+    }
+
     public void Update(AppUser user)
     {
         _context.Entry(user).State = EntityState.Modified;
@@ -131,11 +142,6 @@ public class UserRepository : IUserRepository
     public void Update(AppUserSideNavStream stream)
     {
         _context.Entry(stream).State = EntityState.Modified;
-    }
-
-    public void Add(AppUserBookmark bookmark)
-    {
-        _context.AppUserBookmark.Add(bookmark);
     }
 
     public void Delete(AppUser? user)

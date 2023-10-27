@@ -604,7 +604,7 @@ public class AccountController : BaseApiController
 
         // Create a new user
         var user = new AppUserBuilder(dto.Email, dto.Email, await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
-
+        _unitOfWork.UserRepository.Add(user);
         try
         {
             var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
