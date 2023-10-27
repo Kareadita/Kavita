@@ -103,11 +103,10 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     }
 
     ctx.drawImage(img, 0, 0);
-    const dataURL = canvas.toDataURL("image/png");
-    return dataURL;
+    return canvas.toDataURL("image/png");
   }
 
-  selectImage(index: number) {
+  selectImage(index: number, callback?: Function) {
     if (this.selectedIndex === index) { return; }
 
     // If we load custom images of series/chapters/covers, then those urls are not properly encoded, so on select we have to clean them up
@@ -116,7 +115,11 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.src = imgUrl;
-      img.onload = (e) => this.handleUrlImageAdd(img, index);
+      img.onload = (e) => {
+        this.handleUrlImageAdd(img, index);
+        this.selectedBase64Url.emit(this.imageUrls[this.selectedIndex]);
+        if (callback) callback(index);
+      };
       img.onerror = (e) => {
         this.toastr.error(translate('errors.rejected-cover-upload'));
         this.form.get('coverImageUrl')?.setValue('');
@@ -124,7 +127,6 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       };
       this.form.get('coverImageUrl')?.setValue('');
       this.cdRef.markForCheck();
-      this.selectedBase64Url.emit(this.imageUrls[this.selectedIndex]);
       return;
     }
 
@@ -135,11 +137,13 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   }
 
   applyImage(index: number) {
-    if (this.showApplyButton) {
+    if (!this.showApplyButton) return;
+
+    this.selectImage(index, () => {
       this.applyCover.emit(this.imageUrls[index]);
       this.appliedIndex = index;
       this.cdRef.markForCheck();
-    }
+    });
   }
 
   resetImage() {

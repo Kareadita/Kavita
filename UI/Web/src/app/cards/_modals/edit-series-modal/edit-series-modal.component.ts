@@ -368,7 +368,7 @@ export class EditSeriesModalComponent implements OnInit {
       return {id: 0, title: title };
     });
     this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
-      return a.id == b.id;
+      return a.title.toLowerCase() == b.title.toLowerCase();
     }
     this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
@@ -398,7 +398,7 @@ export class EditSeriesModalComponent implements OnInit {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
     this.genreSettings.selectionCompareFn = (a: Genre, b: Genre) => {
-      return a.title == b.title;
+      return a.title.toLowerCase() == b.title.toLowerCase();
     }
 
     this.genreSettings.addTransformFn = ((title: string) => {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -20,6 +21,8 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
+
+#nullable enable
 
 public interface IProcessSeries
 {
@@ -208,7 +211,7 @@ public class ProcessSeries : IProcessSeries
                                     .ToList()}));
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
-                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
+                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
                             ex.Message));
                     return;
                 }
@@ -614,7 +617,7 @@ public class ProcessSeries : IProcessSeries
             // Add files
             var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
-            chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty;
+            chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
         }
 
@@ -886,7 +889,7 @@ public class ProcessSeries : IProcessSeries
                 }
             }
 
-            action(genre, newTag);
+            action(genre!, newTag);
         }
     }
 

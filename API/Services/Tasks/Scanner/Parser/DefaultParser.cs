@@ -38,7 +38,7 @@ public class DefaultParser : IDefaultParser
 
         ParserInfo ret;
 
-        if (Parser.IsEpub(filePath))
+        if (Parser.IsEpub(filePath)) // NOTE: Will this ever be called? Because we use ReadingService to handle parse
         {
             ret = new ParserInfo
             {

@@ -240,27 +240,6 @@ public class ScannerService : IScannerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
 
         await _processSeries.Prime();
-        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        {
-            var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return;
-
-            var foundParsedSeries = new ParsedSeries()
-            {
-                Name = parsedFiles[0].Series,
-                NormalizedName = parsedFiles[0].Series.ToNormalized(),
-                Format = parsedFiles[0].Format
-            };
-
-            // For Scan Series, we need to filter out anything that isn't our Series
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
-            {
-                return;
-            }
-
-            await _processSeries.ProcessSeriesAsync(parsedFiles, library, bypassFolderOptimizationChecks);
-            parsedSeries.Add(foundParsedSeries, parsedFiles);
-        }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanElapsedTime = await ScanFiles(library, new []{ folderPath }, false, TrackFiles, true);
@@ -317,6 +296,29 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
+        return;
+
+        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        {
+            var parsedFiles = parsedInfo.Item2;
+            if (parsedFiles.Count == 0) return;
+
+            var foundParsedSeries = new ParsedSeries()
+            {
+                Name = parsedFiles[0].Series,
+                NormalizedName = parsedFiles[0].Series.ToNormalized(),
+                Format = parsedFiles[0].Format
+            };
+
+            // For Scan Series, we need to filter out anything that isn't our Series
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
+            {
+                return;
+            }
+
+            await _processSeries.ProcessSeriesAsync(parsedFiles, library, bypassFolderOptimizationChecks);
+            parsedSeries.Add(foundParsedSeries, parsedFiles);
+        }
     }
 
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
@@ -488,38 +490,6 @@ public class ScannerService : IScannerService
         await _processSeries.Prime();
         var processTasks = new List<Func<Task>>();
 
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        {
-            var skippedScan = parsedInfo.Item1;
-            var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
-
-            var foundParsedSeries = new ParsedSeries()
-            {
-                Name = parsedFiles[0].Series,
-                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles[0].Series),
-                Format = parsedFiles[0].Format
-            };
-
-            if (skippedScan)
-            {
-                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
-                {
-                    Name = pf.Series,
-                    NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
-                    Format = pf.Format
-                }));
-                return Task.CompletedTask;
-            }
-
-            totalFiles += parsedFiles.Count;
-
-
-            seenSeries.Add(foundParsedSeries);
-            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate));
-            return Task.CompletedTask;
-        }
-
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
         // NOTE: This runs sync after every file is scanned
@@ -592,6 +562,39 @@ public class ScannerService : IScannerService
         await _metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
+        return;
+
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        {
+            var skippedScan = parsedInfo.Item1;
+            var parsedFiles = parsedInfo.Item2;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
+
+            var foundParsedSeries = new ParsedSeries()
+            {
+                Name = parsedFiles[0].Series,
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles[0].Series),
+                Format = parsedFiles[0].Format
+            };
+
+            if (skippedScan)
+            {
+                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
+                {
+                    Name = pf.Series,
+                    NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
+                    Format = pf.Format
+                }));
+                return Task.CompletedTask;
+            }
+
+            totalFiles += parsedFiles.Count;
+
+
+            seenSeries.Add(foundParsedSeries);
+            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate));
+            return Task.CompletedTask;
+        }
     }
 
     private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,

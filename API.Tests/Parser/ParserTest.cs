@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
@@ -6,6 +7,14 @@ namespace API.Tests.Parser;
 
 public class ParserTests
 {
+    [Fact]
+    public void ShouldWork()
+    {
+        var s = 6.5f + "";
+        var a = float.Parse(s, CultureInfo.InvariantCulture);
+        Assert.Equal(6.5f, a);
+    }
+
     [Theory]
     [InlineData("Joe Shmo, Green Blue", "Joe Shmo, Green Blue")]
     [InlineData("Shmo, Joe",  "Shmo, Joe")]

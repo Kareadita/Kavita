@@ -31,6 +31,7 @@
     "password-updated": "Password Updated",
     "forgot-password-generic": "An email will be sent to the email if it exists in our database",
     "not-accessible-password": "Your server is not accessible. The link to reset your password is in the logs",
+    "invalid-email": "The email on file for user is not a valid email. See logs for any links.",
     "not-accessible": "Your server is not accessible externally",
     "email-sent": "Email sent",
     "user-migration-needed": "This user needs to migrate. Have them log out and login to trigger a migration flow",

@@ -72,7 +72,7 @@ public static class SmartFilterHelper
 
     private static string EncodeSortOptions(SortOptions sortOptions)
     {
-        return $"sortField={(int) sortOptions.SortField}&isAscending={sortOptions.IsAscending}";
+        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField}&isAscending={sortOptions.IsAscending}");
     }
 
     private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto> statements)
@@ -90,7 +90,7 @@ public static class SmartFilterHelper
         var encodedField = $"field={(int) statement.Field}";
         var encodedValue = $"value={Uri.EscapeDataString(statement.Value)}";
 
-        return $"{encodedComparison}&{encodedField}&{encodedValue}";
+        return Uri.EscapeDataString($"{encodedComparison},{encodedField},{encodedValue}");
     }
 
     private static List<FilterStatementDto> DecodeFilterStatementDtos(string encodedStatements)
@@ -119,11 +119,11 @@ public static class SmartFilterHelper
 
     private static SortOptions DecodeSortOptions(string encodedSortOptions)
     {
-        string[] parts = encodedSortOptions.Split('&');
+        string[] parts = encodedSortOptions.Split(',');
         var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith("sortField="));
         var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith("isAscending="));
 
-        var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? true;
+        var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
         if (sortFieldPart != null)
         {
             var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);

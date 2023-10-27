@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 
@@ -70,7 +71,10 @@ public class TachiyomiService : ITachiyomiService
             var looseLeafChapterVolume = volumes.Find(v => v.Number == 0);
             if (looseLeafChapterVolume == null)
             {
-                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparerZeroFirst.Default).Last());
+                var volumeChapter = _mapper.Map<ChapterDto>(volumes
+                    .Last().Chapters
+                    .OrderBy(c => c.Number.AsFloat(), ChapterSortComparerZeroFirst.Default)
+                    .Last());
                 if (volumeChapter.Number == "0")
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
@@ -88,7 +92,9 @@ public class TachiyomiService : ITachiyomiService
                 };
             }
 
-            var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default).Last();
+            var lastChapter = looseLeafChapterVolume.Chapters
+                .OrderBy(c => double.Parse(c.Number, CultureInfo.InvariantCulture), ChapterSortComparer.Default)
+                .Last();
             return _mapper.Map<ChapterDto>(lastChapter);
         }
 

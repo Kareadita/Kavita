@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities.Enums;
+using API.Extensions;
 
 namespace API.Services.Tasks.Scanner.Parser;
 
@@ -927,7 +928,7 @@ public static class Parser
             }
 
             var tokens = range.Replace("_", string.Empty).Split("-");
-            return tokens.Min(float.Parse);
+            return tokens.Min(t => t.AsFloat());
         }
         catch
         {
@@ -945,7 +946,7 @@ public static class Parser
             }
 
             var tokens = range.Replace("_", string.Empty).Split("-");
-            return tokens.Max(float.Parse);
+            return tokens.Max(t => t.AsFloat());
         }
         catch
         {

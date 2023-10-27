@@ -526,6 +526,7 @@ public class ScrobblingService : IScrobblingService
             foreach (var series in seriesWithProgress)
             {
                 if (!libAllowsScrobbling[series.LibraryId]) continue;
+                if (series.PagesRead <= 0) continue; // Since we only scrobble when things are higher, we can
                 await ScrobbleReadingUpdate(uId, series.Id);
             }
 

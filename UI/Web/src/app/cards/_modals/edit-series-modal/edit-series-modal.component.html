@@ -124,9 +124,9 @@
                 <div class="col-md-12">
                   <div class="mb-3">
                     <label for="tags" class="form-label">{{t('tags-label')}}</label>
-                    <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsSettings"
+                    <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsSettings"
                                    [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
-                                   (newItemAdded)="metadata.tagsLocked = true" (selectedData)="metadata.tagsLocked = true">
+                                   (newItemAdded)="metadata.tagsLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
                       </ng-template>

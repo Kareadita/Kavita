@@ -288,7 +288,7 @@ public class ImageService : IImageService
 
             // Create the destination file path
             using var image = Image.PngloadStream(faviconStream);
-            var filename = $"{domain}{encodeFormat.GetExtension()}";
+            var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
             switch (encodeFormat)
             {
                 case EncodeFormat.PNG:

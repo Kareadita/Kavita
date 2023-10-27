@@ -458,6 +458,8 @@ public class LibraryController : BaseApiController
         }
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
+        await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
+            MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 

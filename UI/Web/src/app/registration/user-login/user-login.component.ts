@@ -53,7 +53,6 @@ export class UserLoginComponent implements OnInit {
       if (user) {
         this.navService.showSideNav();
         this.cdRef.markForCheck();
-        this.router.navigateByUrl('/libraries');
       }
     });
 
@@ -96,6 +95,7 @@ export class UserLoginComponent implements OnInit {
         localStorage.setItem('kavita--auth-intersection-url', '');
         this.router.navigateByUrl(pageResume);
       } else {
+        localStorage.setItem('kavita--auth-intersection-url', '');
         this.router.navigateByUrl('/libraries');
       }
       this.isSubmitting = false;

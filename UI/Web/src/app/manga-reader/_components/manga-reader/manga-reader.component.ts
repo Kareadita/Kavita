@@ -1645,6 +1645,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.emulateBook = modelSettings.emulateBook;
       data.swipeToPaginate = modelSettings.swipeToPaginate;
       data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
+      data.locale = data.locale || 'en';
 
       this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
         this.toastr.success(translate('manga-reader.user-preferences-updated'));

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
@@ -17,7 +18,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         {
             Range = string.IsNullOrEmpty(range) ? number : range,
             Title = string.IsNullOrEmpty(range) ? number : range,
-            Number = Parser.MinNumberFromRange(number) + string.Empty,
+            Number = Parser.MinNumberFromRange(number).ToString(CultureInfo.InvariantCulture),
             Files = new List<MangaFile>(),
             Pages = 1
         };
