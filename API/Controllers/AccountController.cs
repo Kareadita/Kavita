@@ -380,6 +380,16 @@ public class AccountController : BaseApiController
             var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
             _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
+            if (!_emailService.IsValidEmail(user.Email))
+            {
+                _logger.LogCritical("[Update Email]: User is trying to update their email, but their existing email ({Email}) isn't valid. No email will be send", user.Email);
+                return Ok(new InviteUserResponse
+                {
+                    EmailLink = string.Empty,
+                    EmailSent = false
+                });
+            }
+
 
             var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
@@ -664,6 +674,17 @@ public class AccountController : BaseApiController
             var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
             _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
+
+            if (!_emailService.IsValidEmail(dto.Email))
+            {
+                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email, so will not send an email to address", dto.Email);
+                return Ok(new InviteUserResponse
+                {
+                    EmailLink = emailLink,
+                    EmailSent = false
+                });
+            }
+
             var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
@@ -855,6 +876,11 @@ public class AccountController : BaseApiController
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
         _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+        if (!_emailService.IsValidEmail(user.Email))
+        {
+            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send", user.Email);
+            return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
+        }
         if (await _accountService.CheckIfAccessible(Request))
         {
             await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
@@ -930,6 +956,13 @@ public class AccountController : BaseApiController
         var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
         _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
+
+        if (!_emailService.IsValidEmail(user.Email))
+        {
+            _logger.LogCritical("[Email Migration]: User is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.Email);
+            return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
+        }
+
         if (await _accountService.CheckIfAccessible(Request))
         {
             try

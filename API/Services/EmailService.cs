@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ public interface IEmailService
     Task<bool> IsDefaultEmailService();
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
     Task<string?> GetVersion(string emailUrl);
+    bool IsValidEmail(string email);
 }
 
 public class EmailService : IEmailService
@@ -121,6 +123,11 @@ public class EmailService : IEmailService
         }
 
         return null;
+    }
+
+    public bool IsValidEmail(string email)
+    {
+        return new EmailAddressAttribute().IsValid(email);
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
