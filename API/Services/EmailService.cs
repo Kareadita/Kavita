@@ -138,8 +138,15 @@ public class EmailService : IEmailService
         // This is the only exception for using the default because we need an external service to check if the server is accessible for emails
         try
         {
-            if (IsLocalIpAddress(host)) return false;
-            return await SendEmailWithGet(DefaultApiUrl + "/api/reachable?host=" + host);
+            if (IsLocalIpAddress(host))
+            {
+                _logger.LogDebug("[EmailService] Server is not accessible, using local ip");
+                return false;
+            }
+
+            var url = DefaultApiUrl + "/api/reachable?host=" + host;
+            _logger.LogDebug("[EmailService] Checking if this server is accessible for sending an email to: {Url}", url);
+            return await SendEmailWithGet(url);
         }
         catch (Exception)
         {

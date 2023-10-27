@@ -56,7 +56,8 @@ public class AccountService : IAccountService
     /// <returns></returns>
     public async Task<bool> CheckIfAccessible(HttpRequest request)
     {
-        var host = _environment.IsDevelopment() ? LocalHost : request.Host.ToString();
+        //var host = _environment.IsDevelopment() ? LocalHost : request.Host.ToString();
+        var host =  request.Host.ToString();
         return !string.IsNullOrEmpty((await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).HostName) || await _emailService.CheckIfAccessible(host);
     }
 

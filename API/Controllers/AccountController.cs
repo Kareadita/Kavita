@@ -572,23 +572,24 @@ public class AccountController : BaseApiController
     [HttpPost("invite")]
     public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
     {
-        var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (adminUser == null) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        var userId = User.GetUserId();
+        var adminUser = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (adminUser == null) return Unauthorized(await _localizationService.Translate(userId, "permission-denied"));
+
+        dto.Email = dto.Email.Trim();
+        if (string.IsNullOrEmpty(dto.Email))
+            return BadRequest(await _localizationService.Translate(userId, "invalid-payload"));
 
         _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
         // Check if there is an existing invite
-        if (!string.IsNullOrEmpty(dto.Email))
+        var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
+        if (emailValidationErrors.Any())
         {
-            dto.Email = dto.Email.Trim();
-            var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
-            if (emailValidationErrors.Any())
-            {
-                var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-                if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
-                    return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-registered", invitedUser!.UserName));
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-invited"));
-            }
+            var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+            if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-registered", invitedUser!.UserName));
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-invited"));
         }
 
         // Create a new user
