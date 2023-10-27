@@ -85,11 +85,13 @@ public class SeriesService : ISeriesService
 
 
         var allChapters = series.Volumes
-            .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
-        var minChapter =  allChapters
+            .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default))
+            .ToList();
+        var minChapter = allChapters
             .FirstOrDefault();
 
-        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) && chapNum >= minVolumeNumber.Number)
+        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
+            (chapNum >= minVolumeNumber.Number || chapNum == 0))
         {
             return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
