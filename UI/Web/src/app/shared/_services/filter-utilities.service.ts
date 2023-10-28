@@ -209,9 +209,9 @@ export class FilterUtilitiesService {
     }
 
     decodeFilterStatements(encodedStatements: string): FilterStatement[] {
-        const statementStrings = decodeURIComponent(encodedStatements).split(',');
+        const statementStrings = decodeURIComponent(encodedStatements).split(',').map(s => decodeURIComponent(s));
         return statementStrings.map(statementString => {
-            const parts = statementString.split('&');
+            const parts = statementString.split(',');
             if (parts === null || parts.length < 3) return null;
 
             const comparisonStartToken = parts.find(part => part.startsWith('comparison='));
