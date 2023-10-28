@@ -5,7 +5,7 @@
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal">
-      <p [innerHTML]="t('description') | safeHtml"></p>
+      <p *ngIf="!invited" [innerHTML]="t('description') | safeHtml"></p>
 
       <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
         <div class="row g-0">

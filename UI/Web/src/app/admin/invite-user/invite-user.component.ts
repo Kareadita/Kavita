@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -33,6 +33,9 @@ export class InviteUserComponent implements OnInit {
   selectedLibraries: Array<number> = [];
   selectedRestriction: AgeRestriction = {ageRating: AgeRating.NotApplicable, includeUnknowns: false};
   emailLink: string = '';
+  invited: boolean = false;
+
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   makeLink: (val: string) => string = (val: string) => {return this.emailLink};
 
@@ -51,7 +54,6 @@ export class InviteUserComponent implements OnInit {
   }
 
   invite() {
-
     this.isSending = true;
     const email = this.inviteForm.get('email')?.value.trim();
     this.accountService.inviteUser({
@@ -62,10 +64,12 @@ export class InviteUserComponent implements OnInit {
     }).subscribe((data: InviteUserResponse) => {
       this.emailLink = data.emailLink;
       this.isSending = false;
+      this.invited = true;
       if (data.emailSent) {
         this.toastr.info(translate('toasts.email-sent', {email: email}));
         this.modal.close(true);
       }
+      this.cdRef.markForCheck();
     }, err => {
       this.isSending = false;
       this.toastr.error(err)
