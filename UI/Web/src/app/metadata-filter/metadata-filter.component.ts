@@ -38,6 +38,9 @@ import {
   Select2UpdateValue
 } from "ng-select2-component";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+
+const ANIMATION_SPEED = 200;
 
 @Component({
     selector: 'app-metadata-filter',
@@ -46,7 +49,29 @@ import {SmartFilter} from "../_models/metadata/v2/smart-filter";
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
-    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module, NgClass]
+    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module, NgClass],
+  animations: [
+    trigger('slideFromTop', [
+      state('in', style({ transform: 'translateY(0)' })),
+      transition('void => *', [
+        style({ transform: 'translateY(-100%)' }),
+        animate(ANIMATION_SPEED)
+      ]),
+      transition('* => void', [
+        animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
+      ])
+    ]),
+    trigger('slideFromBottom', [
+      state('in', style({ transform: 'translateY(0)' })),
+      transition('void => *', [
+        style({ transform: 'translateY(100%)' }),
+        animate(ANIMATION_SPEED)
+      ]),
+      transition('* => void', [
+        animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
+      ])
+    ])
+  ],
 })
 export class MetadataFilterComponent implements OnInit {
 
@@ -89,6 +114,8 @@ export class MetadataFilterComponent implements OnInit {
 
   smartFilters!: Array<Select2Option>;
 
+  isOpen = false;
+
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
 
@@ -114,9 +141,12 @@ export class MetadataFilterComponent implements OnInit {
       this.filterOpen.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(openState => {
         this.filteringCollapsed = !openState;
         this.toggleService.set(!this.filteringCollapsed);
+        this.isOpen = openState;
         this.cdRef.markForCheck();
       });
     }
+
+
 
     this.loadFromPresetsAndSetup();
   }

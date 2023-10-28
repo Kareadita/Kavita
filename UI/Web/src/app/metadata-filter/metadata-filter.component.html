@@ -24,7 +24,7 @@
   </ng-container>
 
   <ng-template #filterSection>
-    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded && filterV2">
+    <div class="filter-section mx-auto pb-3 slide-down" *ngIf="fullyLoaded && filterV2" [@slideFromTop]="isOpen">
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2"
                               [availableFilterFields]="allFilterFields"

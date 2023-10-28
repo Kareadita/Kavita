@@ -15,6 +15,17 @@
     </div>
     <div class="dropdown" *ngIf="hasFocus">
       <ul class="list-group" role="listbox" id="dropdown">
+
+        <ng-container *ngIf="groupedData.series.length === 0 && !hasData">
+          <li class="list-group-item section-header"><h6>Stumped on what to Type?</h6></li>
+          <ul class="list-group results" role="group">
+            <li class="list-group-item" style="font-size: 14px">
+              <i>Try batman, 2014, Ecchi</i> <!-- Or maybe it should be Search by x, y, z -->
+            </li>
+          </ul>
+        </ng-container>
+
+
         <ng-container *ngIf="seriesTemplate !== undefined && groupedData.series.length > 0">
           <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
           <ul class="list-group results" role="group" aria-describedby="series-group">

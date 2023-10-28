@@ -12,7 +12,7 @@
         <i class="fa-solid fa-sliders" aria-hidden="true"></i>
         <span class="visually-hidden">{{t('page-settings-title')}}</span>
       </button>
-      <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleService.toggle()"
+      <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'info'}} btn-small" (click)="toggleService.toggle()"
               [attr.aria-expanded]="filterOpen" placement="left"
               id="filter-btn--komf"
               ngbTooltip="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}"
