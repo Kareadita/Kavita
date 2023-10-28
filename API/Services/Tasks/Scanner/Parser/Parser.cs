@@ -321,6 +321,10 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)( ?- ?)Ch\.\d+-?\d*",
             MatchOptions, RegexTimeout),
+        // Korean catch all for symbols 죠시라쿠! 2년 후 1권
+        new Regex(
+            @"^(?!Vol)(?!Chapter)(?<Series>.+?)(-|_|\s|#)\d+(-\d+)?(권|화|話)",
+            MatchOptions, RegexTimeout),
         // [BAA]_Darker_than_Black_Omake-1, Bleach 001-002, Kodoja #001 (March 2016)
         new Regex(
             @"^(?!Vol)(?!Chapter)(?<Series>.+?)(-|_|\s|#)\d+(-\d+)?",
