@@ -1102,14 +1102,20 @@ public class OpdsController : BaseApiController
             Response.AddCacheHeader(content);
 
             // Save progress for the user
-            await _readerService.SaveReadingProgress(new ProgressDto()
+
+            var userAgent = Request.Headers["User-Agent"].ToString();
+            if (!userAgent.Equals("panels", StringComparison.InvariantCultureIgnoreCase))
             {
-                ChapterId = chapterId,
-                PageNum = pageNumber,
-                SeriesId = seriesId,
-                VolumeId = volumeId,
-                LibraryId =libraryId
-            }, await GetUser(apiKey));
+                await _readerService.SaveReadingProgress(new ProgressDto()
+                {
+                    ChapterId = chapterId,
+                    PageNum = pageNumber,
+                    SeriesId = seriesId,
+                    VolumeId = volumeId,
+                    LibraryId =libraryId
+                }, await GetUser(apiKey));
+            }
+
 
             return File(content, MimeTypeMap.GetMimeType(format));
         }
