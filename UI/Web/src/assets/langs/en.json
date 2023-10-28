@@ -546,11 +546,11 @@
     "invite-user": {
         "title": "Invite User",
         "close": "{{common.close}}",
-        "description": "Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">host your own</a> email service or use a fake email (Forgot User will not work). A link will be presented regardless and can be used to setup the account manually.",
+        "description": "IInvite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name field set in the <a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab or be accessing your instance through it's remote URL. <br/>Alternatively, you can use a username, but note that password resets won't be available for username-based accounts. If you do not want to use our email service, you can host your own email service.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "User invited",
-        "setup-user-description": "You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user. If your server is externally accessible, an email will have been sent to the user and the links can be used by them to finish setting up their account.",
+        "setup-user-description": "You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user. If Kavita can determine your server as accessibile externally (or Host Name is set), an email will have been sent to the user and the links can be used by them to finish setting up their account. Otherwise, use the link below or in logs to manually send to them or setup their account.",
         "setup-user-account": "Setup user's account",
         "setup-user-account-tooltip": "Copy this and paste in a new tab. You may need to log out.",
         "invite-url-label": "Invite Url",
