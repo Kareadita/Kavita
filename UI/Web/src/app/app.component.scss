@@ -38,3 +38,17 @@
         width: auto;
     }
 }
+
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.fadein {
+    animation: 2s fadeInUp;
+}

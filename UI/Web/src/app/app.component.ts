@@ -12,17 +12,30 @@ import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {animate, state, style, transition, trigger} from "@angular/animations";
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: true,
+  animations: [
+      trigger('fadeIn', [
+        // the "out" style determines the "resting" state of the element when it is visible.
+        state('out', style({opacity: 0})),
+        // in state
+        state('in', style({opacity: 1})),
+
+        transition('out => in', animate('700ms ease-in')),
+        transition('in => out', animate('700ms ease-in')),
+      ])
+  ],
   imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent]
 })
 export class AppComponent implements OnInit {
 
   transitionState$!: Observable<boolean>;
+  fade = 'out';
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly offcanvas = inject(NgbOffcanvas);
