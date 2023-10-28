@@ -93,7 +93,7 @@ export class FilterUtilitiesService {
 
 
     encodeSortOptions(sortOptions: SortOptions) {
-        return `sortField=${sortOptions.sortField}&isAscending=${sortOptions.isAscending}`;
+        return `sortField=${sortOptions.sortField},isAscending=${sortOptions.isAscending}`;
     }
 
     encodeFilterStatements(statements: Array<FilterStatement>) {
@@ -195,7 +195,7 @@ export class FilterUtilitiesService {
     }
 
     decodeSortOptions(encodedSortOptions: string): SortOptions | null {
-        const parts = decodeURIComponent(encodedSortOptions).split('&');
+        const parts = decodeURIComponent(encodedSortOptions).split(',');
         const sortFieldPart = parts.find(part => part.startsWith('sortField='));
         const isAscendingPart = parts.find(part => part.startsWith('isAscending='));
 
