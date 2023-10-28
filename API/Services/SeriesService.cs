@@ -678,6 +678,8 @@ public class SeriesService : ISeriesService
             .OrderBy(c => c.CreatedUtc)
             .ToList();
 
+        if (chapters.Count < 3) return _emptyExpectedChapter;
+
         // Calculate the time differences between consecutive chapters
         var timeDifferences = new List<TimeSpan>();
         DateTime? previousChapterTime = null;

@@ -200,6 +200,10 @@ public class MangaParserTests
     [InlineData("Accel World Chapter 001 Volume 002", "Accel World")]
     [InlineData("Bleach 001-003", "Bleach")]
     [InlineData("Accel World Volume 2", "Accel World")]
+    [InlineData("죠시라쿠! 2년 후 v01", "죠시라쿠! 2년 후")]
+    [InlineData("죠시라쿠! 2년 후 1권", "죠시라쿠! 2년 후")]
+    [InlineData("test 2 years 1권", "test 2 years")]
+    [InlineData("test 2 years 1화", "test 2 years")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));

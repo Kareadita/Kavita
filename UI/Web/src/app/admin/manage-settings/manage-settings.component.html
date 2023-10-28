@@ -24,7 +24,7 @@
       </div>
 
       <div class="row g-0 mb-2">
-        <div class="col-md-8 col-sm-12 pe-2">
+        <div class="col-md-8 col-sm-12  pe-md-2">
           <label for="settings-ipaddresses" class="form-label">{{t('ip-address-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="ipAddressesTooltip" role="button" tabindex="0"></i>
           <ng-template #ipAddressesTooltip>{{t('ip-address-tooltip')}}</ng-template>
           <span class="visually-hidden" id="settings-ipaddresses-help">
@@ -42,7 +42,7 @@
           </div>
         </div>
 
-        <div class="col-md-4 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12">
           <label for="settings-port" class="form-label">{{t('port-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
           <ng-template #portTooltip>{{t('port-tooltip')}}</ng-template>
           <span class="visually-hidden" id="settings-port-help">
@@ -53,7 +53,7 @@
       </div>
 
       <div class="row g-0 mb-2">
-        <div class="col-md-4 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12  pe-md-2">
           <label for="backup-tasks" class="form-label">{{t('backup-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
           <ng-template #backupTasksTooltip>{{t('backup-tooltip')}}.</ng-template>
           <span class="visually-hidden" id="backup-tasks-help">
@@ -75,7 +75,7 @@
           </ng-container>
         </div>
 
-        <div class="col-md-4 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12  pe-md-2">
           <label for="log-tasks" class="form-label">{{t('log-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="logTasksTooltip" role="button" tabindex="0"></i>
           <ng-template #logTasksTooltip>{{t('log-tooltip')}}</ng-template>
           <span class="visually-hidden" id="log-tasks-help">
@@ -103,7 +103,7 @@
           <span class="visually-hidden" id="logging-level-port-help">
             <ng-container [ngTemplateOutlet]="loggingLevelTooltip"></ng-container>
           </span>
-          <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-select" formControlName="loggingLevel"
+          <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-select"  formControlName="loggingLevel"
                   [class.is-invalid]="settingsForm.get('loggingLevel')?.invalid && settingsForm.get('loggingLevel')?.touched">
             <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
           </select>
@@ -111,7 +111,7 @@
       </div>
 
       <div class="row g-0 mb-2 mt-3">
-        <div class="col-md-4 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12 pe-md-2">
           <label for="cache-size" class="form-label">{{t('cache-size-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="cacheSizeTooltip" role="button" tabindex="0"></i>
           <ng-template #cacheSizeTooltip>{{t('cache-size-tooltip')}}</ng-template>
           <span class="visually-hidden" id="cache-size-help">
@@ -129,7 +129,7 @@
             </p>
           </ng-container>
         </div>
-        <div class="col-md-4 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12 pe-md-2">
           <label for="on-deck-progress-days" class="form-label">{{t('on-deck-last-progress-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="onDeckProgressDaysTooltip" role="button" tabindex="0"></i>
           <ng-template #onDeckProgressDaysTooltip>{{t('on-deck-last-progress-tooltip')}}</ng-template>
           <span class="visually-hidden" id="on-deck-progress-days-help">
@@ -147,7 +147,7 @@
             </p>
           </ng-container>
         </div>
-        <div class="col-md-4 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12">
           <label for="on-deck-update-days" class="form-label">{{t('on-deck-last-chapter-add-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="onDeckUpdateDaysTooltip" role="button" tabindex="0"></i>
           <ng-template #onDeckUpdateDaysTooltip>{{t('on-deck-last-chapter-add-tooltip')}}</ng-template>
           <span class="visually-hidden" id="on-deck-update-days-help">
