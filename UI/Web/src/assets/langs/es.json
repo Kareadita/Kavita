@@ -11,7 +11,7 @@
         "no-libraries": "No existen librerías configuradas. Configura algunas en",
         "server-settings-link": "Configuración del servidor",
         "not-granted": "No has sido autorizado para ver ninguna librería.",
-        "on-deck-title": "En la portada",
+        "on-deck-title": "En portada",
         "recently-updated-title": "Series Actualizadas Recientemente",
         "recently-added-title": "Series Añadidas Recientemente",
         "more-in-genre-title": "Más en {{genre}}"
@@ -64,7 +64,7 @@
     },
     "metadata-filter": {
         "penciller-label": "Dibujante",
-        "filter-title": "Filtro",
+        "filter-title": "{{common.filter}}",
         "format-label": "Formato",
         "libraries-label": "Librerías",
         "genres-label": "Géneros",
@@ -97,7 +97,9 @@
         "ascending-alt": "Ascendente",
         "descending-alt": "Descendente",
         "cover-artist-label": "Artista de la Portada",
-        "limit-label": "Limitar a"
+        "limit-label": "Limitar",
+        "save": "{{common.save}}",
+        "filter-name-label": "Nombre del filtro"
     },
     "manga-reader": {
         "incognito-title": "Modo incógnito:",
@@ -131,7 +133,10 @@
         "collapse": "Ocultar",
         "swipe-enabled-label": "Deslizamiento activado",
         "prev-chapter-tooltip": "Capítulo/Volumen anterior",
-        "prev-page-tooltip": "Página anterior"
+        "prev-page-tooltip": "Página anterior",
+        "unbookmark-page-tooltip": "Desmarcar página",
+        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
+        "bookmark-page-tooltip": "Marcar página"
     },
     "import-cbl-modal": {
         "import": "Importar",
@@ -260,7 +265,8 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "line-height-book-label": "Espaciado entre líneas",
-        "scrobbling-tab": "Seguimiento"
+        "scrobbling-tab": "Seguimiento",
+        "smart-filters-tab": "Filtros"
     },
     "user-holds": {
         "description": "Se trata de una lista gestionada por el usuario de series que no serán scrobbleadas a proveedores de upstream. Puedes eliminar una serie en cualquier momento y el siguiente evento scrobble-able (progreso de lectura, calificación, desea leer el estado) activará los eventos.",
@@ -378,7 +384,8 @@
         "no-key": "ERROR - KEY NOT SET",
         "confirm-reset": "Esto invalidará cualquier configuración de OPDS. Estás seguro que quieres continuar?",
         "regen-warning": "Regenerar tu Clave de API invalidará los clientes conectados.",
-        "show": "Mostrar"
+        "show": "Mostrar",
+        "hide": "Ocultar"
     },
     "scrobbling-providers": {
         "generate": "Generar",
@@ -444,8 +451,8 @@
     "generic-list-modal": {
         "close": "{{common.close}}",
         "open-filtered-search": "Abierta una búsqueda filtrada para {{item}}",
-        "filter": "Filtrar",
-        "clear": "Limpiar"
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}"
     },
     "user-stats": {
         "read-percentage": "% Leído",
@@ -542,9 +549,9 @@
         "user-reviews-alt": "Opiniones de usuarios",
         "continue": "Continuar",
         "read-options-alt": "Opciones de lectura",
-        "remove-from-want-to-read": "Quitar de Quiero leer",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "incognito": "Incógnito",
-        "add-to-want-to-read": "Añadir a Quiero leer",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Editar informacion de la serie",
         "download-series--tooltip": "Descargar serie",
         "volumes-tab": "Volumenes",
@@ -555,7 +562,9 @@
         "no-chapters": "No existen capitulos en este volumen. No se puede leer.",
         "cover-change": "Puede tomar hasta un minuto para que tu navegador actualice la imagen. Espera hasta entonces. La imagen antigua se puede mostrar en algunas páginas.",
         "no-pages": "{{toasts.no-pages}}",
-        "storyline-tab": "Argumento"
+        "storyline-tab": "Argumento",
+        "continue-incognito": "Continuar en incognito",
+        "read-incognito": "Leer en incognito"
     },
     "book-reader": {
         "go-to-page-prompt": "Hay {{totalPages}} páginas. A qué pagina quieres ir?",
@@ -700,7 +709,9 @@
         "reading-lists": "Listas de lectura",
         "bookmarks": "Marcadores",
         "home": "Inicio",
-        "want-to-read": "Quiero Leer"
+        "want-to-read": "Quiero Leer",
+        "back": "Atras",
+        "more": "Ver más"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -736,7 +747,7 @@
         "manage-reading-list-label": "Gestionar Listas de Lectura",
         "folder-watching-label": "Monitorizar Carpetas",
         "include-in-dashboard-tooltip": "¿Deben incluirse las series de la biblioteca en el panel de control? Esto afecta a todas las fuentes, como \"En el puente\", \"Actualizado recientemente\", \"Añadido recientemente\" o cualquier adición personalizada.",
-        "folder-watching-tooltip": "Anula la monitorización de carpetas del servidor para esta biblioteca. Si está desactivada, la monitorización de carpetas no se ejecutará en las carpetas que contenga esta biblioteca. Si las bibliotecas comparten carpetas, éstas pueden seguir siendo monitorizadas.",
+        "folder-watching-tooltip": "Anula la monitorización de carpetas del servidor para esta biblioteca. Si está desactivada, la monitorización de carpetas no se ejecutará en las carpetas que contenga esta biblioteca. Si las bibliotecas comparten carpetas, éstas pueden seguir siendo monitorizadas. Los cambios empezaran a aplicarse a partir de los 10 minutos de haberlos realizado.",
         "force-scan": "Escaneo forzado",
         "include-in-search-tooltip": "¿Deben incluirse las series y cualquier información derivada (géneros, personas, archivos) de la biblioteca en los resultados de búsqueda?",
         "manage-reading-list-tooltip": "¿Debe Kavita crear listas de lectura a partir de las etiquetas StoryArc/StoryArcNumber y AlternativeSeries/AlternativeCount que se encuentran en los archivos ComicInfo.xml/opf?",
@@ -959,7 +970,8 @@
         "last-modified": "Modificado por última vez",
         "last-chapter-added": "Item añadido",
         "time-to-read": "Tiempo de lectura",
-        "created": "Creado"
+        "created": "Creado",
+        "read-progress": "Última vez leído"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalles",
@@ -1035,7 +1047,7 @@
     },
     "add-to-list-modal": {
         "title": "Añadir a Lista de Lectura",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "close": "{{common.close}}",
         "no-data": "Todavía no se han creado listas",
         "loading": "{{common.loading}}",
@@ -1256,11 +1268,11 @@
     },
     "manage-alerts": {
         "description-part-1": "Esta tabla contiene los problemas encontrados durante el escaneo o la lectura de tus medios. Esta lista no está gestionada. Puedes borrarla en cualquier momento y utilizar Escaneado (forzado) de la biblioteca para realizar el análisis. Puedes encontrar una lista de algunos errores comunes y su significado en ",
-        "file-header": "Archivo",
+        "file-header": "Fichero",
         "comment-header": "Comentario",
         "description-part-2": "wiki.",
         "details-header": "Detalles",
-        "filter-label": "Filtrar",
+        "filter-label": "{{common.filter}}",
         "clear-alerts": "Limpiar alertas",
         "extension-header": "Extensión"
     },
@@ -1295,7 +1307,7 @@
         "edit-header": "Editar",
         "edit-item-alt": "Editar {{seriesName}}",
         "clear-errors": "Borrar los fallos",
-        "filter-label": "Filtro"
+        "filter-label": "{{common.filter}}"
     },
     "card-detail-layout": {
         "total-items": "Elementos totales {{count}}"
@@ -1328,7 +1340,7 @@
         "logging-level-label": "Nivel de registro",
         "logging-level-tooltip": "Use la depuración para ayudar a identificar problemas. La depuración puede consumir mucho espacio en disco.",
         "folder-watching-label": "Monitorizar carpetas",
-        "folder-watching-tooltip": "Permite a Kavita monitorizar las carpetas de biblioteca para detectar cambios e iniciar escaneos de dichos cambios. Esto permite que el contenido se actualice sin tener que iniciar escaneos manualmente o esperar a los escaneos nocturnos.",
+        "folder-watching-tooltip": "Permite a Kavita monitorizar las carpetas de biblioteca para detectar cambios e iniciar escaneos de dichos cambios. Esto permite que el contenido se actualice sin tener que iniciar escaneos manualmente o esperar a los escaneos nocturnos. El escaneo empezara 10 minutos después de que el contenido sea agregado.",
         "enable-folder-watching": "Habilitar monitoreo de carpetas",
         "max-logs-validation": "No puedes tener más de {{num}} registros",
         "min-logs-validation": "Tienes que tener al menos un registro",
@@ -1345,7 +1357,11 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "field-required": "{{validation.field-required}}"
+        "field-required": "{{validation.field-required}}",
+        "on-deck-last-progress-tooltip": "Número de dias desde el ultimo progreso antes de quitar contenido de En portada.",
+        "on-deck-last-chapter-add-tooltip": "El numero de dias desde que el ultimo capitulo fue agregado para incluirlo en En portada.",
+        "on-deck-last-progress-label": "Ultimo progreso en portada (dias)",
+        "on-deck-last-chapter-add-label": "Último capitulo agregado a En portada (dias)"
     },
     "manage-media-settings": {
         "encode-as-description-part-1": "WebP/AVIF puede reducir drásticamente el espacio requerido para archivos. WebP/AVIF no está soportado por todos los navegadores o versiones. Para comprobar si estos ajustes son apropiados para tu configuración, visita ",
@@ -1574,7 +1590,8 @@
     "draggable-ordered-list": {
         "reorder-label": "Ordenar de nuevo",
         "remove-item-alt": "Eliminar elemento",
-        "instructions-alt": "Cuando introduzca un número en el cuadro de Reordenar, el ítem será insertado en la posición y el resto tendrá su orden actualizado."
+        "instructions-alt": "Cuando introduzca un número en el cuadro de Reordenar, el ítem será insertado en la posición y el resto tendrá su orden actualizado.",
+        "bulk-select-label": "Selectionar multiples elementos"
     },
     "collection-detail": {
         "no-data": "No hay elementos. Prueba a añadir una serie.",
@@ -1593,5 +1610,16 @@
     },
     "day-breakdown": {
         "x-axis-label": "Día de la semana"
+    },
+    "stream-list-item": {
+        "external-source": "Fuente externa",
+        "smart-filter": "Filtros",
+        "library": "Libreria",
+        "remove": "{{common.remove}}",
+        "load-filter": "Cargar filtro"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "Portentaje",
+        "unit-reading-date": "Fecha"
     }
 }

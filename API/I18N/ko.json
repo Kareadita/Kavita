@@ -167,7 +167,7 @@
     "external-source-already-in-use": "이 외부 소스가 포함된 기존 스트림이 있습니다",
     "dashboard-stream-doesnt-exist": "대시보드 스트림이 존재하지 않습니다",
     "external-source-already-exists": "외부 소스가 이미 존재합니다",
-    "sidenav-stream-doesnt-exist": "SideNav 스트림이 존재하지 않습니다",
+    "sidenav-stream-doesnt-exist": "사이드 내비게이션 스트림이 존재하지 않습니다",
     "external-source-doesnt-exist": "외부 소스가 존재하지 않습니다",
     "external-sources": "외부 소스",
     "external-source-required": "ApiKey 및 호스트가 필요합니다",

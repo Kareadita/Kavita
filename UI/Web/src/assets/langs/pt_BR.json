@@ -1056,13 +1056,9 @@
         "save": "{{common.save}}",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Última Execução",
-        "cron-header": "",
         "convert-media-task": "Converter Mídia para Codificação de Destino",
         "convert-media-task-desc": "Executa uma tarefa de longa duração que converterá todas as mídias gerenciadas pelo kavita na codificação de destino. Isso é lento (especialmente em dispositivos ARM).",
         "convert-media-success": "A Conversão de Mídia para Codificação de Destino foi enfileirada",
-        "bust-cache-task": "",
-        "bust-cache-task-desc": "",
-        "bust-cache-task-success": "",
         "clear-reading-cache-task": "Limpar Cache de Leitura",
         "clear-reading-cache-task-desc": "Limpa os arquivos em cache para leitura. Útil quando você acabou de atualizar um arquivo que estava lendo nas últimas 24 horas.",
         "clear-reading-cache-task-success": "O cache foi limpo",
@@ -1288,7 +1284,6 @@
         "next": "Seguinte",
         "import-step": "Importar CBLs",
         "validate-cbl-step": "Validar CBL",
-        "dry-run-step": "",
         "final-import-step": "Passo Final"
     },
     "pdf-reader": {
@@ -1446,7 +1441,6 @@
         "max-issue-tooltip": "Campo Máx. de Número ou Volume de todos ComicInfo nas Séries"
     },
     "day-breakdown": {
-        "title": "",
         "x-axis-label": "Dia da Semana",
         "y-axis-label": "Eventos de Leitura"
     },

@@ -1,11 +1,11 @@
 {
     "login": {
         "title": "登录",
-        "username": "{{common.username}}",
-        "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
+        "username": "用户",
+        "password": "密码",
+        "password-validation": "验证密码",
         "forgot-password": "忘记密码？",
-        "submit": "{{common.submit}}"
+        "submit": "提交"
     },
     "dashboard": {
         "no-libraries": "还没有设置资料库，请先配置一些",
@@ -14,16 +14,16 @@
         "on-deck-title": "最近阅读",
         "recently-updated-title": "最近更新的系列",
         "recently-added-title": "新增系列",
-        "more-in-genre-title": "{{genre}} 的更多内容"
+        "more-in-genre-title": "{{genre}}分类的更多内容"
     },
     "edit-user": {
-        "edit": "{{common.edit}}",
-        "close": "{{common.close}}",
-        "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
-        "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
-        "cancel": "{{common.cancel}}",
+        "edit": "编辑",
+        "close": "关闭",
+        "username": "用户名",
+        "required": "输入必要字段",
+        "email": "电子邮箱",
+        "not-valid-email": "验证邮箱",
+        "cancel": "取消",
         "saving": "保存…",
         "update": "更新"
     },
@@ -58,11 +58,11 @@
         "title": "编辑评论",
         "tagline-label": "标语",
         "review-label": "评论",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "close": "关闭",
+        "save": "保存"
     },
     "review-card-modal": {
-        "close": "{{common.close}}",
+        "close": "关闭",
         "user-review": "{{username}}的评论",
         "external-mod": "（外部的）",
         "go-to-review": "跳转评论"
@@ -102,7 +102,7 @@
         "disable-animations-label": "关闭动画",
         "disable-animations-tooltip": "关闭站点中的动画。对电子墨水阅读器很有用。",
         "collapse-series-relationships-label": "折叠系列关系",
-        "collapse-series-relationships-tooltip": "Kavitra 是否显示没有关系的系列或者是父/前传",
+        "collapse-series-relationships-tooltip": "Kavitra 是否显示没有关系的系列或者是前传",
         "share-series-reviews-label": "分享系列评论",
         "share-series-reviews-tooltip": "是否对其他用户显示你的评论",
         "image-reader-settings-title": "图像阅读器",
@@ -118,7 +118,7 @@
         "background-color-label": "背景色",
         "auto-close-menu-label": "自动关闭菜单",
         "show-screen-hints-label": "显示屏幕提示",
-        "emulate-comic-book-label": "模仿漫画书",
+        "emulate-comic-book-label": "模仿美漫",
         "swipe-to-paginate-label": "滑动翻页",
         "book-reader-settings-title": "图书阅读器",
         "tap-to-paginate-label": "点击翻页",
@@ -144,8 +144,8 @@
         "clients-opds-description": "所有第三方客户端均使用下方的API密钥或链接。它们就像密码一样，请保密。",
         "clients-api-key-tooltip": "API密钥等同于密码，请保持它的机密性和安全性。",
         "clients-opds-url-tooltip": "OPDS URL",
-        "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
+        "reset": "重置",
+        "save": "保存",
         "smart-filters-tab": "智能筛选器"
     },
     "user-holds": {
@@ -154,12 +154,12 @@
     },
     "theme-manager": {
         "title": "主题管理器",
-        "looking-for-theme": "您是在寻找一个明亮的或者墨水屏主题吗？我们有一些自定义主题供您使用。 ",
+        "looking-for-theme": "您正在寻找一个明亮的或者墨水屏的主题吗？您可以使用我们制作的自定义主题。 ",
         "looking-for-theme-continued": "Github主题",
         "scan": "扫描",
         "site-themes": "网站主题",
         "set-default": "设为默认值",
-        "apply": "{{common.apply}}",
+        "apply": "应用",
         "applied": "已应用",
         "updated-toastr": "网站默认值已更新为{{name}}",
         "scan-queued": "网站主题扫描已进入队列"
@@ -190,34 +190,34 @@
         "no-devices": "尚未设置任何设备",
         "platform-label": "平台: ",
         "email-label": "电子邮件: ",
-        "add": "{{common.add}}",
-        "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "add": "添加",
+        "delete": "删除",
+        "edit": "编辑"
     },
     "edit-device": {
         "device-name-label": "设备名称",
-        "email-label": "{{common.email}}",
+        "email-label": "电子邮箱",
         "email-tooltip": "此电子邮件地址用于接收通过“发送到”菜单发送的文件",
         "device-platform-label": "设备平台",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "save": "保存",
+        "required-field": "必填项",
+        "valid-email": "填写有效邮箱"
     },
     "change-password": {
-        "password-label": "{{common.password}}",
+        "password-label": "密码",
         "current-password-label": "当前密码",
         "new-password-label": "新密码",
         "confirm-password-label": "确认密码",
-        "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
+        "reset": "重置",
+        "edit": "编辑",
+        "cancel": "取消",
+        "save": "保存",
+        "required-field": "必填项",
         "passwords-must-match": "密码必须一致",
         "permission-error": "您无权更改密码，请与服务器管理员联系。"
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "电子邮箱",
         "current-password-label": "当前密码",
         "email-not-confirmed": "此电子邮件未确认",
         "email-updated-title": "电子邮件已更新",
@@ -226,19 +226,19 @@
         "invite-url-label": "邀请链接",
         "invite-url-tooltip": "将其复制并粘贴到一个新的标签页中",
         "permission-error": "您无权更改电子邮件，请与服务器管理员联系。",
-        "required-field": "{{validation.required-field}}",
-        "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "required-field": "必填项",
+        "reset": "重置",
+        "edit": "编辑",
+        "cancel": "取消",
+        "save": "保存"
     },
     "change-age-restriction": {
         "age-restriction-label": "年龄限制",
         "unknowns": "未知",
-        "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "reset": "重置",
+        "edit": "编辑",
+        "cancel": "取消",
+        "save": "保存"
     },
     "api-key": {
         "copy": "复制",
@@ -483,7 +483,7 @@
         "published-label": "出版： ",
         "available": "可用",
         "description": "如果您没有看到{{installed}}",
-        "description-continued": "标签，您正在使用测试版。只有稳定版才会显示为可用。"
+        "description-continued": "标签，那么您正在使用测试版。只有主版本才会显示为可用。"
     },
     "invite-user": {
         "title": "邀请用户",
@@ -612,8 +612,8 @@
         "continue": "继续",
         "read-options-alt": "阅读选项",
         "incognito": "隐身模式",
-        "remove-from-want-to-read": "从想读中移除",
-        "add-to-want-to-read": "添加到想读",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "编辑系列信息",
         "download-series--tooltip": "下载系列",
         "downloading-status": "下载中…",
@@ -633,7 +633,7 @@
     },
     "series-metadata-detail": {
         "links-title": "链接",
-        "genres-title": "类别",
+        "genres-title": "分类",
         "tags-title": "标签",
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -719,7 +719,7 @@
         "include-in-recommendation-label": "在推荐中显示",
         "include-in-recommendation-tooltip": "是否在推荐页面中显示此资料库的系列。",
         "include-in-search-label": "在搜索中显示",
-        "include-in-search-tooltip": "是否在搜索结果中显示此资料库的系列和任何派生信息（类别、人物、文件）。",
+        "include-in-search-tooltip": "是否在搜索结果中显示此资料库的系列和任何派生信息（分类、人物、文件）。",
         "force-scan": "强制扫描",
         "force-scan-tooltip": "对资料库强制扫描，即全新扫描",
         "reset": "{{common.reset}}",
@@ -926,7 +926,7 @@
     },
     "manage-email-settings": {
         "title": "电子邮件服务（SMTP）",
-        "description": "Kavita预设提供了一个电子邮件服务，用于邀请用户、重置密码等任务。通过我们的服务发送的电子邮件会立即被删除。您可以通过设置 {{link}}  服务来使用自己的电子邮件服务。设置电子邮件服务的URL，并使用测试按钮确保其正常工作。您随时可以将这些设置重置为默认值。无法禁用身份验证的电子邮件，尽管您不需要为用户使用有效的电子邮件地址。确认链接始终会保存到日志中，并在界面上呈现。如果您未通过公共可访问的URL访问Kavita，或者未配置主机名功能，则不会发送注册/确认电子邮件。",
+        "description": "Kavita提供一个开箱即用的电子邮件服务，用于邀请用户、重置密码等任务，通过我们服务发送的电子邮件会立即删除。您也可以通过设置 {{link}}  使用自己的电子邮件服务，请使用测试按钮确保设置的电子邮件服务的URL可以正常工作，您随时可以将这些设置重置为默认值。虽然您不需要为用户使用有效的电子邮件地址，但没有办法禁用电子邮件验证，确认链接始终保存在日志中并显示在UI中。如果您不是通过公共URL访问Kavita，或者除非配置了主机名功能，否则不会发送注册/确认电子邮件。",
         "send-to-warning": "如果您希望\"发送到设备\"正常工作，您必须自行搭建电子邮件服务。",
         "email-url-label": "邮件服务器URL",
         "email-url-tooltip": "请使用完整的URL地址来配置电子邮件服务，不要包含结尾的斜杠。",
@@ -955,7 +955,7 @@
     "manage-media-settings": {
         "encode-as-description-part-1": "WebP/AVIF 可以极大减少文件的空间需求。但WebP/AVIF 并不支持所有浏览器。要了解这些设置是否符合您的要求，请访问 ",
         "encode-as-description-part-2": "我可以使用WebP吗？",
-        "encode-as-description-part-3": "我可以使用 AVIF 吗？",
+        "encode-as-description-part-3": "我可以使用AVIF吗？",
         "encode-as-warning": "一旦转换为WebP/AVIF，您就无法再转换回PNG格式。您需要刷新资料库封面重新生成所有封面。书签封面和网站图标无法进行转换。",
         "media-warning": "您必须在“任务”选项卡中触发媒体转换任务。",
         "encode-as-label": "媒体另存为",
@@ -967,7 +967,7 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "媒体问题",
-        "scrobble-issue-title": "跟踪记录问题",
+        "scrobble-issue-title": "Scrobble问题",
         "cover-image-size-tooltip": "生成封面图片的尺寸。注意：任何大于默认尺寸的图片都会延长页面加载时间。",
         "cover-image-size-label": "封面图片尺寸"
     },
@@ -1130,7 +1130,7 @@
     },
     "library-recommended": {
         "no-data": "没有要显示的内容。请给资料库添加一些元数据，阅读一些内容或对某些内容进行评价。也可能是资料库的推荐功能被关闭了。",
-        "more-in-genre": "{{genre}}类别的更多内容",
+        "more-in-genre": "{{genre}}分类的更多内容",
         "rediscover": "重温",
         "highly-rated": "最高评价",
         "quick-catchups": "快速回顾",
@@ -1172,7 +1172,8 @@
     "draggable-ordered-list": {
         "instructions-alt": "当您在重新排序输入框中输入一个数字时，该项将被插入到该位置，并且所有其他项的顺序将得到更新。",
         "reorder-label": "重新排序",
-        "remove-item-alt": "移除条目"
+        "remove-item-alt": "移除条目",
+        "bulk-select-label": "批量选择项目"
     },
     "reading-lists": {
         "title": "阅读清单",
@@ -1224,7 +1225,7 @@
         "chapters": "章节",
         "people": "创作人员",
         "tags": "标签",
-        "genres": "类别",
+        "genres": "分类",
         "libraries": "资料库",
         "reading-lists": "阅读清单",
         "collections": "收藏",
@@ -1339,7 +1340,7 @@
         "format-label": "格式",
         "libraries-label": "资料库",
         "collections-label": "收藏",
-        "genres-label": "类别",
+        "genres-label": "分类",
         "tags-label": "标签",
         "cover-artist-label": "封面设计",
         "writer-label": "作者",
@@ -1392,7 +1393,7 @@
         "related-tab": "相关",
         "info-tab": "信息",
         "collections-label": "收藏",
-        "genres-label": "类别",
+        "genres-label": "分类",
         "tags-label": "标签",
         "cover-artist-label": "封面设计",
         "writer-label": "作者",
@@ -1497,8 +1498,8 @@
         "total-files-label": "文件总数",
         "total-files-tooltip": "文件总数: {{count}}",
         "total-size-label": "总大小",
-        "total-genres-label": "类别总数",
-        "total-genres-tooltip": "类别总数: {{count}}",
+        "total-genres-label": "分类总数",
+        "total-genres-tooltip": "分类总数: {{count}}",
         "total-tags-label": "标签总数",
         "total-tags-tooltip": "标签总数: {{count}}",
         "total-people-label": "创作人员总数",
@@ -1512,12 +1513,12 @@
         "popular-libraries-title": "热门资料库",
         "popular-series-title": "热门系列",
         "recently-read-title": "最近阅读",
-        "genre-count": "{{num}} 类别",
+        "genre-count": "{{num}} 分类",
         "tag-count": "{{num}} 标签",
         "people-count": "{{num}} 人",
         "tags": "标签",
         "people": "创作人员",
-        "genres": "类别"
+        "genres": "分类"
     },
     "errors": {
         "series-doesnt-exist": "该系列已不存在",
@@ -1564,7 +1565,7 @@
         "reading-list-imported": "阅读列表已导入",
         "incognito-off": "隐身模式已关闭。进度将开始被跟踪。",
         "email-service-reset": "电子邮件服务已重置",
-        "email-service-reachable": "电子邮件服务可访问",
+        "email-service-reachable": "Kavita电子邮件服务连接成功",
         "email-service-unresponsive": "电子邮件服务的URL没有响应。",
         "refresh-covers-queued": "已为{{name}}排队刷新封面",
         "library-file-analysis-queued": "已为{{name}}排队进行资料库文件分析",
@@ -1643,7 +1644,9 @@
         "add-rule-group-or": "添加规则组（或）",
         "add-rule-group-and": "添加规则组（与）",
         "remove-rule-group": "移除规则组",
-        "customize": "自定义"
+        "customize": "自定义",
+        "mark-invisible": "标记为隐藏",
+        "mark-visible": "标记为可见"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -1729,7 +1732,7 @@
         "cover-artist": "封面设计",
         "editor": "编辑",
         "formats": "格式",
-        "genres": "类别",
+        "genres": "分类",
         "inker": "上墨师",
         "languages": "语言",
         "read-progress": "阅读进度",
@@ -1779,7 +1782,7 @@
     "stream-list-item": {
         "smart-filter": "智能筛选器",
         "remove": "{{common.remove}}",
-        "provided": "提供",
+        "provided": "已提供的",
         "load-filter": "加载筛选",
         "external-source": "外部源",
         "library": "资料库"
@@ -1793,7 +1796,8 @@
         "title-sidenav": "定制侧边栏",
         "external-sources": "外部源",
         "title-dashboard": "定制仪表盘",
-        "title-smart-filters": "智筛选"
+        "title-smart-filters": "智筛选",
+        "help": "{{common.help}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "百分比",
@@ -1824,11 +1828,12 @@
         "delete": "{{common.delete}}"
     },
     "manage-external-sources": {
-        "description": "将外部服务器添加到您的帐户中，然后将它们添加到您的侧边栏中，以便在您和您朋友的服务器之间快速切换。",
+        "description": "通过添加外部服务器来增强您的体验，并方便地将它们包含在您的侧边导航中，以便快速访问您的服务器和您朋友的服务器。",
         "add-source": "添加",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "help-link": "更多信息"
+        "help-link": "更多信息",
+        "no-data": "不存在外部来源"
     },
     "customize-sidenav-streams": {
         "save": "{{common.save}}",
@@ -1840,14 +1845,17 @@
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
         "add": "{{common.add}}",
-        "reorder-when-filter-present": "当筛选存在时您不能通过拖放操作重新排序条目。使用{{customize-sidenav-streams.order-numbers-label}}"
+        "reorder-when-filter-present": "当筛选存在时您不能通过拖放操作重新排序条目。使用{{customize-sidenav-streams.order-numbers-label}}",
+        "bulk-mode-label": "批量模式"
     },
     "series-preview-drawer": {
         "genres-label": "{{filter-field-pipe.genres}}",
         "view-series": "查看系列",
         "staff-label": "工作人员",
         "vols-and-chapters": "{{volCount}}卷/{{chpCount}}章",
-        "tags-label": "{{filter-field-pipe.tags}}"
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
     },
     "customize-dashboard-streams": {
         "no-data": "所有智能筛选已加入仪表板或尚未创建。",

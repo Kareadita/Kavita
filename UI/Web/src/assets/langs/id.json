@@ -1,0 +1,29 @@
+{
+    "login": {
+        "title": "Masuk",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Lupa Sandi?",
+        "submit": "{{common.submit}}"
+    },
+    "dashboard": {
+        "server-settings-link": "Pengaturan server",
+        "not-granted": "Kamu belum diberikan akses ke pustaka apa pun.",
+        "more-in-genre-title": "Lainnya di {{genre}}"
+    },
+    "edit-user": {
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "not-valid-email": "{{validation.valid-email}}",
+        "cancel": "{{common.cancel}}",
+        "saving": "Menyimpan…",
+        "update": "Perbarui"
+    },
+    "user-scrobble-history": {
+        "filter-label": "{{common.filter}}"
+    }
+}
