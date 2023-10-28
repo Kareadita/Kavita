@@ -106,15 +106,17 @@ export class ErrorInterceptor implements HttpInterceptor {
         console.error('500 error: ', error);
       }
       this.toast(err.message);
-    } else if (error.hasOwnProperty('message') && error.message.trim() !== '') {
+      return;
+    }
+    if (error.hasOwnProperty('message') && error.message.trim() !== '') {
       if (error.message !== 'User is not authenticated' && error.message !== 'errors.user-not-auth') {
         console.error('500 error: ', error);
       }
+      return;
     }
-     else {
-      this.toast('errors.unknown-crit');
-      console.error('500 error:', error);
-    }
+
+    this.toast('errors.unknown-crit');
+    console.error('500 error:', error);
   }
 
   private handleAuthError(error: any) {
