@@ -1105,7 +1105,7 @@ public class OpdsController : BaseApiController
 
             var userAgent = Request.Headers["User-Agent"].ToString();
             Console.WriteLine("User Agent: " + userAgent);
-            if (!userAgent.Equals("panels", StringComparison.InvariantCultureIgnoreCase))
+            if (!userAgent.Contains("panels", StringComparison.InvariantCultureIgnoreCase))
             {
                 await _readerService.SaveReadingProgress(new ProgressDto()
                 {
