@@ -1,13 +1,15 @@
-name: Release Workflow
+name: Stable Workflow
 
 on:
+  push:
+    branches: ['release/**']
   pull_request:
-    branches: [ release/** ]
+    branches: [ 'develop' ]
     types: [ closed ]
 
 jobs:
   if_merged:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -15,6 +17,7 @@ jobs:
   build:
     name: Upload Kavita.Common for Version Bump
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -29,6 +32,7 @@ jobs:
   stable:
     name: Build Stable and Nightly Docker if Release
     needs: [ build ]
+    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     runs-on: ubuntu-latest
     permissions:
       packages: write
