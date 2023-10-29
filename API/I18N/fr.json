@@ -162,5 +162,7 @@
     "collection-deleted": "Collection supprimée",
     "smart-filters": "Filtres iintelligents",
     "browse-smart-filters": "Parcourir Filtres intelligents",
-    "smart-filter-doesnt-exist": "Aucun Filtres iintelligents n'existe"
+    "smart-filter-doesnt-exist": "Aucun Filtres iintelligents n'existe",
+    "browse-external-sources": "Parcourir les Sources externes",
+    "external-sources": "Sources externes"
 }

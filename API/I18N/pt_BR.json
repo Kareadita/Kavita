@@ -171,5 +171,6 @@
     "external-source-required": "ApiKey e Host necessários",
     "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente",
     "browse-external-sources": "Navegar em Fontes Externas",
-    "external-sources": "Fontes Externas"
+    "external-sources": "Fontes Externas",
+    "invalid-email": "O e-mail registrado para o usuário não é um e-mail válido. Veja os registros para quaisquer links."
 }

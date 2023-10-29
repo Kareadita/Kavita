@@ -9,7 +9,7 @@
     "confirm-email": "您必须先确认电子邮件",
     "disabled-account": "您的账号已被禁用，请联系管理员。",
     "register-user": "注册用户时出现一些错误",
-    "locked-out": "您因多次错误登陆已被阻止，请稍等 10 分钟",
+    "locked-out": "您因多次错误登陆已被阻止，请稍等 10 分钟。",
     "permission-denied": "您无权执行此操作",
     "invalid-password": "无效密码",
     "generate-token": "生成确认电子邮件令牌时出现问题，参见日志",
@@ -155,7 +155,7 @@
     "generic-create-temp-archive": "创建临时档案时出现问题",
     "query-required": "您必须传递一个查询参数",
     "scrobble-bad-payload": "Scrobble服务提供商的数据无效",
-    "bad-copy-files-for-download": "无法复制文件至临时下载目录",
+    "bad-copy-files-for-download": "无法复制文件至临时下载目录。",
     "progress-must-exist": "用户进程必须存在",
     "generic-scrobble-hold": "启用锁定时发生错误",
     "reset-chapter-lock": "无法重置章节的封面锁",
@@ -171,5 +171,6 @@
     "browse-external-sources": "浏览外部资源",
     "external-source-already-in-use": "存在具有此外部源的现有流",
     "external-sources": "外部来源",
-    "smart-filter-already-in-use": "存在带有此智能筛选器的现有流"
+    "smart-filter-already-in-use": "存在带有此智能筛选器的现有流",
+    "invalid-email": "用户文件中的电子邮件不是有效的电子邮件。请参阅日志中的链接。"
 }

@@ -171,5 +171,6 @@
     "external-source-doesnt-exist": "외부 소스가 존재하지 않습니다",
     "external-sources": "외부 소스",
     "external-source-required": "ApiKey 및 호스트가 필요합니다",
-    "smart-filter-already-in-use": "이 스마트 필터가 포함된 기존 스트림이 있습니다"
+    "smart-filter-already-in-use": "이 스마트 필터가 포함된 기존 스트림이 있습니다",
+    "invalid-email": "등록된 사용자의 이메일은 유효한 이메일이 아닙니다. 링크를 확인하려면 로그를 참조하세요."
 }
