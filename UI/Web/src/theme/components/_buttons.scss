@@ -37,6 +37,10 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
 }
 
+.btn:focus, .btn:active, .btn:active:focus {
+  box-shadow: 0 0 0 0 var(---btn-focus-boxshadow-color) !important;
+}
+
 
 .btn-icon {
   cursor: pointer;
@@ -45,6 +49,12 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 
   &:hover, &:focus {
     color: var(--body-text-color);
+    border: none;
+  }
+  &.active {
+    > i {
+      color: var(--primary-color) !important;
+    }
     border: none;
   }
 }

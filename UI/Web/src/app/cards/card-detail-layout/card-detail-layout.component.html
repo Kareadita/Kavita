@@ -8,7 +8,9 @@
         </span>
         <span *ngIf="header !== undefined && header.length > 0">
           {{header}}&nbsp;
-          <span class="badge bg-primary rounded-pill" [attr.aria-label]="t('total-items', {count: pagination.totalItems})" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
+          <span class="badge bg-primary rounded-pill"
+                [attr.aria-label]="t('total-items', {count: pagination.totalItems})"
+                *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
         </span>
       </h2>
     </div>
