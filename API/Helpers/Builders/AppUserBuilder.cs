@@ -32,8 +32,6 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             DashboardStreams = new List<AppUserDashboardStream>(),
             SideNavStreams = new List<AppUserSideNavStream>()
         };
-        _appUser.DashboardStreams = Seed.DefaultStreams.ToList();
-        _appUser.SideNavStreams = Seed.DefaultSideNavStreams.ToList();
     }
 
     public AppUserBuilder WithLibrary(Library library, bool createSideNavStream = false)
