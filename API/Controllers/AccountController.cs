@@ -682,7 +682,6 @@ public class AccountController : BaseApiController
         {
             var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-            _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
 
             if (!_emailService.IsValidEmail(dto.Email))
             {
@@ -704,7 +703,6 @@ public class AccountController : BaseApiController
                     InvitingUser = adminUser.UserName!,
                     ServerConfirmationLink = emailLink
                 }));
-
             }
 
             return Ok(new InviteUserResponse
@@ -832,13 +830,13 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> ConfirmForgotPassword(ConfirmPasswordResetDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+        if (user == null)
+        {
+            return BadRequest(await _localizationService.Get("en", "bad-credentials"));
+        }
+
         try
         {
-            if (user == null)
-            {
-                return BadRequest(await _localizationService.Get("en", "bad-credentials"));
-            }
-
             var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
                 "ResetPassword", dto.Token);
             if (!result)
