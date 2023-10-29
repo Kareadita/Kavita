@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'series-info-cards'">
-  <div class="row g-0 mt-3">
+  <div class="row justify-content-between g-0 mt-3">
     <ng-container *ngIf="seriesMetadata.releaseYear > 0">
       <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
         <app-icon-and-title [label]="t('release-date-title')" [clickable]="false" fontClasses="fa-regular fa-calendar" [title]="t('release-year-tooltip')">
