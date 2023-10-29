@@ -120,6 +120,7 @@ public static class Seed
         }
     });
 
+
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
         var roles = typeof(PolicyConstants)

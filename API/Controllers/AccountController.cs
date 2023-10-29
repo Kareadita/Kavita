@@ -601,7 +601,7 @@ public class AccountController : BaseApiController
         {
             var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
             if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-registered", invitedUser!.UserName));
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-registered", invitedUser.UserName));
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-invited"));
         }
 

@@ -15771,7 +15771,15 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastActiveUtc": {
             "type": "string",
             "format": "date-time"
           },
