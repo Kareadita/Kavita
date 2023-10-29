@@ -27,6 +27,7 @@ import {AccountService} from "./app/_services/account.service";
 import {switchMap} from "rxjs";
 import {provideTranslocoLocale} from "@ngneat/transloco-locale";
 import {provideTranslocoPersistTranslations} from "@ngneat/transloco-persist-translations";
+import {LazyLoadImageModule} from "ng-lazyload-image";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -118,6 +119,7 @@ bootstrapApplication(AppComponent, {
         importProvidersFrom(BrowserModule,
           AppRoutingModule,
           BrowserAnimationsModule.withConfig({ disableAnimations }),
+          LazyLoadImageModule,
           ToastrModule.forRoot({
             positionClass: 'toast-bottom-right',
             preventDuplicates: true,

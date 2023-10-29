@@ -95,10 +95,6 @@ export class ImageService {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
   }
 
-  updateErroredImage(event: any) {
-    event.target.src = this.placeholderImage;
-  }
-
   updateErroredWebLinkImage(event: any) {
     event.target.src = this.errorWebLinkImage;
   }
