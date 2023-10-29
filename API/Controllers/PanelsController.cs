@@ -22,6 +22,12 @@ public class PanelsController : BaseApiController
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Saves the progress of a given chapter.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="apiKey"></param>
+    /// <returns></returns>
     [HttpPost("save-progress")]
     public async Task<ActionResult> SaveProgress(ProgressDto dto, [FromQuery] string apiKey)
     {
@@ -29,5 +35,21 @@ public class PanelsController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         await _readerService.SaveReadingProgress(dto, userId);
         return Ok();
+    }
+
+    /// <summary>
+    /// Gets the Progress of a given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="apiKey"></param>
+    /// <returns>The number of pages read, 0 if none read</returns>
+    [HttpGet("get-progress")]
+    public async Task<ActionResult<int>> GetProgress(int chapterId, [FromQuery] string apiKey)
+    {
+        if (string.IsNullOrEmpty(apiKey)) return Unauthorized("ApiKey is required");
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+
+        var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
+        return Ok(progress?.PageNum ?? 0);
     }
 }
