@@ -72,7 +72,7 @@ public static class SmartFilterHelper
 
     private static string EncodeSortOptions(SortOptions sortOptions)
     {
-        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField}&isAscending={sortOptions.IsAscending}");
+        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField},isAscending={sortOptions.IsAscending}");
     }
 
     private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto> statements)

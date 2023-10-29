@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {distinctUntilChanged, filter, map, shareReplay, take, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
 import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -17,7 +17,6 @@ import { Library, LibraryType } from '../../../_models/library';
 import { AccountService } from '../../../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../../../_services/action-factory.service';
 import { ActionService } from '../../../_services/action.service';
-import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
@@ -56,7 +55,18 @@ export class SideNavComponent implements OnInit {
   }
   showAll: boolean = false;
   totalSize = 0;
+
   protected readonly SideNavStreamType = SideNavStreamType;
+  private readonly router = inject(Router);
+  private readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly actionService = inject(ActionService);
+  public readonly navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly ngbModal = inject(NgbModal);
+  private readonly imageService = inject(ImageService);
+  public readonly accountService = inject(AccountService);
+
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -111,25 +121,22 @@ export class SideNavComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
   );
 
+  collapseSideNavOnMobileNav$ = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef),
+      map(evt => evt as NavigationEnd),
+      filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet),
+      switchMap(() => this.navService.sideNavCollapsed$),
+      take(1),
+      filter(collapsed => !collapsed)
+  );
 
-  constructor(
-    public utilityService: UtilityService, private messageHub: MessageHubService,
-    private actionService: ActionService,
-    public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
-    private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
 
-      this.router.events.pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef),
-        map(evt => evt as NavigationEnd),
-        filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet),
-        switchMap(() => this.navService.sideNavCollapsed$),
-        take(1),
-        filter(collapsed => !collapsed)
-      ).subscribe(() => {
+  constructor() {
+    this.collapseSideNavOnMobileNav$.subscribe(() => {
         this.navService.toggleSideNav();
         this.cdRef.markForCheck();
-      });
+    });
   }
 
   ngOnInit(): void {

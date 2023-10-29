@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.9.4"
+    "version": "0.7.10.0"
   },
   "servers": [
     {
@@ -4137,6 +4137,15 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "saveProgress",
+            "in": "query",
+            "description": "Optional parameter. Can pass false and progress saving will be suppressed",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {
@@ -4164,6 +4173,101 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Panels/save-progress": {
+      "post": {
+        "tags": [
+          "Panels"
+        ],
+        "summary": "Saves the progress of a given chapter.",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Panels/get-progress": {
+      "get": {
+        "tags": [
+          "Panels"
+        ],
+        "summary": "Gets the Progress of a given chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
           }
         }
       }
@@ -19686,6 +19790,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Panels",
+      "description": "For the Panels app explicitly"
     },
     {
       "name": "Rating",

@@ -1,4 +1,4 @@
-import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {map, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
@@ -26,8 +26,10 @@ export class AppComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly offcanvas = inject(NgbOffcanvas);
+  public readonly navService = inject(NavService);
+  public readonly cdRef = inject(ChangeDetectorRef);
 
-  constructor(private accountService: AccountService, public navService: NavService,
+  constructor(private accountService: AccountService,
     private libraryService: LibraryService,
     private router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
@@ -88,7 +90,7 @@ export class AppComponent implements OnInit {
     if (user) {
       // Bootstrap anything that's needed
       this.themeService.getThemes().subscribe();
-      this.libraryService.getLibraryNames().pipe(take(1), shareReplay()).subscribe();
+      this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
     }
   }
 }
