@@ -229,7 +229,6 @@ export class CardItemComponent implements OnInit {
 
       if (nextDate.expectedDate) {
         const utcPipe = new UtcToLocalTimePipe();
-        //const timeUntilPipe = new TimeAgoPipe(this.cdRef, this.ngZone, this.translocoService);
         this.title = utcPipe.transform(nextDate.expectedDate);
       }
 
