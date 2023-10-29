@@ -56,7 +56,7 @@ public class SmartFilterHelperTests
         };
 
         var encodedFilter = SmartFilterHelper.Encode(filter);
-        Assert.Equal("name=Test&stmts=comparison%253D0%252Cfield%253D4%252Cvalue%253D0&sortOptions=sortField%3D2%26isAscending%3DFalse&limitTo=10&combination=1", encodedFilter);
+        Assert.Equal("name=Test&stmts=comparison%253D0%252Cfield%253D4%252Cvalue%253D0&sortOptions=sortField%3D2%2CisAscending%3DFalse&limitTo=10&combination=1", encodedFilter);
     }
 
     private void AssertStatementSame(FilterStatementDto statement, FilterField field, FilterComparison combination, string value)
