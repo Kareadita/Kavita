@@ -49,7 +49,7 @@ jobs:
             dotnet-version: 7.0.x
 
       - name: Bump versions
-        uses: majora2007/dotnet-bump-version@v0.0.8
+        uses: majora2007/dotnet-bump-version@v0.0.9
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.REPO_GHA_PAT }}
