@@ -412,14 +412,15 @@ public class LibraryController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
+        var userId = User.GetUserId();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
-        if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
+        if (library == null) return BadRequest(await _localizationService.Translate(userId, "library-doesnt-exist"));
 
         var newName = dto.Name.Trim();
         if (await _unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-name-exists"));
+            return BadRequest(await _localizationService.Translate(userId, "library-name-exists"));
 
-        var originalFolders = library.Folders.Select(x => x.Path).ToList();
+        var originalFoldersCount = library.Folders.Count;
 
         library.Name = newName;
         library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).Distinct().ToList();
@@ -445,8 +446,8 @@ public class LibraryController : BaseApiController
 
         _unitOfWork.LibraryRepository.Update(library);
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library-update"));
-        if (originalFolders.Count != dto.Folders.Count() || typeUpdate)
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(userId, "generic-library-update"));
+        if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
             await _libraryWatcher.RestartWatching();
             _taskScheduler.ScanLibrary(library.Id);
@@ -458,8 +459,9 @@ public class LibraryController : BaseApiController
         }
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
+
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
-            MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
+            MessageFactory.SideNavUpdateEvent(userId), false);
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
