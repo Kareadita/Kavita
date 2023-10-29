@@ -2,9 +2,9 @@ name: Stable Workflow
 
 on:
   push:
-    branches: ['release/**']
+    branches: ['!release/**']
   pull_request:
-    branches: [ 'develop' ]
+    branches: [ 'develop', '!release/**' ]
     types: [ closed ]
   workflow_dispatch:
 
