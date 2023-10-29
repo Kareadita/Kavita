@@ -1079,10 +1079,11 @@ public class OpdsController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="chapterId"></param>
     /// <param name="pageNumber"></param>
+    /// <param name="saveProgress">Optional parameter. Can pass false and progress saving will be suppressed</param>
     /// <returns></returns>
     [HttpGet("{apiKey}/image")]
     public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId,
-        [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
+        [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber, [FromQuery] bool saveProgress = true)
     {
         var userId = await GetUser(apiKey);
         if (pageNumber < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "Page"));
@@ -1101,11 +1102,9 @@ public class OpdsController : BaseApiController
             // Calculates SHA1 Hash for byte[]
             Response.AddCacheHeader(content);
 
-            // Save progress for the user
-
+            // Save progress for the user (except Panels, they will use a direct connection)
             var userAgent = Request.Headers["User-Agent"].ToString();
-            Console.WriteLine("User Agent: " + userAgent);
-            if (!userAgent.Contains("panels", StringComparison.InvariantCultureIgnoreCase))
+            if (!userAgent.StartsWith("Panels", StringComparison.InvariantCultureIgnoreCase) || !saveProgress)
             {
                 await _readerService.SaveReadingProgress(new ProgressDto()
                 {
