@@ -44,12 +44,19 @@ public class PanelsController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns>The number of pages read, 0 if none read</returns>
     [HttpGet("get-progress")]
-    public async Task<ActionResult<int>> GetProgress(int chapterId, [FromQuery] string apiKey)
+    public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId, [FromQuery] string apiKey)
     {
         if (string.IsNullOrEmpty(apiKey)) return Unauthorized("ApiKey is required");
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
 
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
-        return Ok(progress?.PageNum ?? 0);
+        if (progress == null) return Ok(new ProgressDto()
+        {
+            PageNum = 0,
+            ChapterId = chapterId,
+            VolumeId = 0,
+            SeriesId = 0
+        });
+        return Ok(progress);
     }
 }
