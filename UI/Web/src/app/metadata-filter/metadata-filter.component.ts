@@ -38,13 +38,44 @@ import {
   Select2UpdateValue
 } from "ng-select2-component";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+
+const ANIMATION_SPEED = 750;
 
 @Component({
-    selector: 'app-metadata-filter',
-    templateUrl: './metadata-filter.component.html',
-    styleUrls: ['./metadata-filter.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-metadata-filter',
+  templateUrl: './metadata-filter.component.html',
+  styleUrls: ['./metadata-filter.component.scss'],
+  animations: [
+    trigger('smoothCollapse', [
+      // state('initial', style({
+      //   height:'0',
+      //   overflow:'hidden',
+      //   opacity:'0'
+      // })),
+      // state('final', style({
+      //   overflow:'hidden',
+      //   opacity:'1'
+      // })),
+      // transition('initial=>final', animate('1s')),
+      // transition('final=>initial', animate('1s')),
+      transition('void => *', [
+        animate('1s', style({
+          height:'0',
+          overflow:'hidden',
+          opacity:'0'
+        }))
+      ]),
+      transition('* => void', [
+        animate('1s', style({
+          overflow:'hidden',
+          opacity:'1'
+        }))
+      ]),
+    ]),
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
     ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module, NgClass]
 })
@@ -117,6 +148,8 @@ export class MetadataFilterComponent implements OnInit {
         this.cdRef.markForCheck();
       });
     }
+
+
 
     this.loadFromPresetsAndSetup();
   }

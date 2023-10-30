@@ -2,9 +2,7 @@
   <ng-container *ngIf="toggleService.toggleState$ | async as isOpen">
     <ng-container *ngIf="utilityService.getActiveBreakpoint() as activeBreakpoint">
       <div *ngIf="activeBreakpoint >= Breakpoint.Tablet; else mobileView">
-        <div #collapse="ngbCollapse" [ngbCollapse]="!isOpen" (ngbCollapseChange)="setToggle($event)">
-          <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
-        </div>
+        <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}"></ng-container>
       </div>
 
       <ng-template #mobileView>
@@ -23,8 +21,8 @@
     </ng-container>
   </ng-container>
 
-  <ng-template #filterSection>
-    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded && filterV2">
+  <ng-template #filterSection let-isOpen="isOpen">
+    <div class="filter-section mx-auto pb-3" [@smoothCollapse]="!isOpen" *ngIf="fullyLoaded && filterV2">
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2"
                               [availableFilterFields]="allFilterFields"
@@ -74,6 +72,7 @@
       </form>
     </div>
   </ng-template>
+
   <ng-template #buttons>
     <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
     <div class="col-md-6 col-sm-6 mt-4 pt-2 d-flex justify-content-between">
