@@ -131,9 +131,12 @@ public class AccountController : BaseApiController
             var user = new AppUserBuilder(registerDto.Username, registerDto.Email,
                 await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 
-
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
+
+            // Assign default streams
+            user.DashboardStreams = Seed.DefaultStreams.ToList();
+            user.SideNavStreams = Seed.DefaultSideNavStreams.ToList();
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -610,6 +613,11 @@ public class AccountController : BaseApiController
             var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
+            // Assign default streams
+            user.DashboardStreams = Seed.DefaultStreams.ToList();
+            user.SideNavStreams = Seed.DefaultSideNavStreams.ToList();
+
+
             // Assign Roles
             var roles = dto.Roles;
             var hasAdminRole = dto.Roles.Contains(PolicyConstants.AdminRole);
@@ -666,6 +674,7 @@ public class AccountController : BaseApiController
             _logger.LogError(ex, "There was an error during invite user flow, unable to create user. Deleting user for retry");
             _unitOfWork.UserRepository.Delete(user);
             await _unitOfWork.CommitAsync();
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
         }
 
 

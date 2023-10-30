@@ -27,6 +27,7 @@ public interface IAccountService
     Task<bool> HasChangeRestrictionRole(AppUser? user);
     Task<bool> CheckIfAccessible(HttpRequest request);
     Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true);
+
 }
 
 public class AccountService : IAccountService
