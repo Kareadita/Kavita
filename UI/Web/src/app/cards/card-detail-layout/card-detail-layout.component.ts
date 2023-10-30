@@ -95,6 +95,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   updateApplied: number = 0;
   hasResumedJumpKey: boolean = false;
+  bufferAmount: number = 1;
 
 
   get Breakpoint() {

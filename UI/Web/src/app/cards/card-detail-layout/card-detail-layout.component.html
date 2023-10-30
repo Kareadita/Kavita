@@ -22,7 +22,7 @@
         <p *ngIf="items.length === 0 && !isLoading">
           <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
         </p>
-        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="1" [parentScroll]="parentScroll">
+        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll" >
           <div class="grid row g-0" #container>
             <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
               <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
@@ -35,7 +35,7 @@
     <ng-container *ngIf="jumpBarKeysToRender.length >= 4 && items.length > 0 && scroll.viewPortInfo.maxScrollPosition > 0" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
   </div>
   <ng-template #cardTemplate>
-    <virtual-scroller #scroll [items]="items" [bufferAmount]="1">
+    <virtual-scroller #scroll [items]="items" [bufferAmount]="bufferAmount">
       <div class="grid row g-0" #container>
         <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
           <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
