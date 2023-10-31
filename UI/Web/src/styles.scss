@@ -12,6 +12,8 @@
 // Bootstrap must be after _colors since we define the colors there
 @import '../node_modules/bootstrap/scss/bootstrap';
 
+@import '../node_modules/charts.css/dist/charts.min';
+
 
 
 // Import all the customized theme overrides

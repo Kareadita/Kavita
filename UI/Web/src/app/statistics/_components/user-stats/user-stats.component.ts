@@ -69,5 +69,4 @@ export class UserStatsComponent implements OnInit {
 
     });
   }
-
 }
