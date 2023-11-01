@@ -12,9 +12,15 @@ namespace API.Helpers;
 public static class SmartFilterHelper
 {
     private const string SortOptionsKey = "sortOptions=";
+    private const string NameKey = "name=";
+    private const string SortFieldKey = "sortField=";
+    private const string IsAscendingKey = "isAscending=";
     private const string StatementsKey = "stmts=";
     private const string LimitToKey = "limitTo=";
     private const string CombinationKey = "combination=";
+    private const string StatementComparisonKey = "comparison=";
+    private const string StatementFieldKey = "field=";
+    private const string StatementValueKey = "value=";
     private const string StatementSeparator = "\ufffd";
     private const string InnerStatementSeparator = "¦";
 
@@ -25,7 +31,7 @@ public static class SmartFilterHelper
             return new FilterV2Dto(); // Create a default filter if the input is empty
         }
 
-        string[] parts = encodedFilter.Split('&');
+        var parts = encodedFilter.Split('&');
         var filter = new FilterV2Dto();
 
         foreach (var part in parts)
@@ -46,7 +52,7 @@ public static class SmartFilterHelper
             {
                 filter.Statements = DecodeFilterStatementDtos(part.Substring(StatementsKey.Length));
             }
-            else if (part.StartsWith("name="))
+            else if (part.StartsWith(NameKey))
             {
                 filter.Name = HttpUtility.UrlDecode(part.Substring(5));
             }
@@ -71,12 +77,12 @@ public static class SmartFilterHelper
 
     private static string EncodeName(string? name)
     {
-        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"name={Uri.EscapeDataString(name)}&";
+        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"{NameKey}{Uri.EscapeDataString(name)}&";
     }
 
     private static string EncodeSortOptions(SortOptions sortOptions)
     {
-        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField}{InnerStatementSeparator}isAscending={sortOptions.IsAscending}");
+        return Uri.EscapeDataString($"{SortFieldKey}{(int) sortOptions.SortField}{InnerStatementSeparator}{IsAscendingKey}{sortOptions.IsAscending}");
     }
 
     private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto>? statements)
@@ -90,9 +96,10 @@ public static class SmartFilterHelper
 
     private static string EncodeFilterStatementDto(FilterStatementDto statement)
     {
-        var encodedComparison = $"comparison={(int) statement.Comparison}";
-        var encodedField = $"field={(int) statement.Field}";
-        var encodedValue = $"value={Uri.EscapeDataString(statement.Value)}";
+
+        var encodedComparison = $"{StatementComparisonKey}{(int) statement.Comparison}";
+        var encodedField = $"{StatementFieldKey}{(int) statement.Field}";
+        var encodedValue = $"{StatementValueKey}{Uri.EscapeDataString(statement.Value)}";
 
         return Uri.EscapeDataString($"{encodedComparison}{InnerStatementSeparator}{encodedField}{InnerStatementSeparator}{encodedValue}");
     }
@@ -123,8 +130,8 @@ public static class SmartFilterHelper
     private static SortOptions DecodeSortOptions(string encodedSortOptions)
     {
         var parts = encodedSortOptions.Split(InnerStatementSeparator);
-        var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith("sortField="));
-        var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith("isAscending="));
+        var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith(SortFieldKey));
+        var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith(IsAscendingKey));
 
         var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
         if (sortFieldPart == null)
