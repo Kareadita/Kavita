@@ -147,7 +147,10 @@ export class DashboardComponent implements OnInit {
             s.api = this.seriesService.getRecentlyUpdatedSeries();
             break;
           case StreamType.SmartFilter:
-            s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
+            s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
+              switchMap(filter => {
+                return this.seriesService.getAllSeriesV2(0, 20, filter);
+              }))
                 .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.MoreInGenre:
