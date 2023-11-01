@@ -170,7 +170,7 @@ export class BulkSelectionService {
 
   private applyFilter(action: ActionItem<any>, allowedActions: Array<Action>) {
 
-    var ret = false;
+    let ret = false;
     if (action.action === Action.Submenu || allowedActions.includes(action.action)) {
       // Do something
       ret = true;

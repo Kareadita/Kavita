@@ -12,7 +12,7 @@ import {HttpClient} from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";
-import {of} from "rxjs";
+import {of, switchMap} from "rxjs";
 
 const sortOptionsKey = 'sortOptions=';
 const statementsKey = 'stmts=';
@@ -37,8 +37,23 @@ export class FilterUtilitiesService {
 
   constructor(private metadataService: MetadataService, private router: Router, private httpClient: HttpClient) {}
 
+  encodeFilter(filter: SeriesFilterV2 | undefined) {
+    return this.httpClient.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse);
+  }
+
+  decodeFilter(encodedFilter: string) {
+    return this.httpClient.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
+      if (filter == null) {
+        filter = this.metadataService.createDefaultFilterDto();
+        filter.statements.push(this.createSeriesV2DefaultStatement());
+      }
+
+      return filter;
+    }))
+  }
+
   updateUrlFromFilter(filter: SeriesFilterV2 | undefined) {
-    return this.httpClient.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse).pipe(tap(encodedFilter => {
+    return this.encodeFilter(filter).pipe(tap(encodedFilter => {
       window.history.replaceState(window.location.href, '', window.location.href.split('?')[0]+ '?' + encodedFilter);
     }));
   }
@@ -51,16 +66,7 @@ export class FilterUtilitiesService {
     return this.decodeFilter(window.location.href.split('?')[1]);
   }
 
-  decodeFilter(encodedFilter: string) {
-      return this.httpClient.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
-        if (filter == null) {
-          filter = this.metadataService.createDefaultFilterDto();
-          filter.statements.push(this.createSeriesV2DefaultStatement());
-        }
 
-        return filter;
-      }))
-  }
 
   createSeriesV2Filter(): SeriesFilterV2 {
       return {
@@ -130,23 +136,29 @@ export class FilterUtilitiesService {
     return url.replace(/page=\d+/i, 'page=' + pagination.currentPage);
   }
 
-  // TODO: This needs to call the backend encode
+  /**
+   * Applies and redirects to the passed page with the filter encoded
+   * @param page
+   * @param filter
+   * @param comparison
+   * @param value
+   */
   applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
-    const dto: SeriesFilterV2 = {
-      statements:  [this.metadataService.createDefaultFilterStatement(filter, comparison, value + '')],
-      combination: FilterCombination.Or,
-      limitTo: 0
-    };
+    const dto = this.createSeriesV2Filter();
+    dto.statements.push(this.metadataService.createDefaultFilterStatement(filter, comparison, value + ''));
 
-    const url = this.urlFromFilterV2(page.join('/') + '?', dto);
-    return this.router.navigateByUrl(url);
+    return this.encodeFilter(dto).pipe(switchMap(encodedFilter => {
+      return this.router.navigateByUrl(page.join('/') + '?' + encodedFilter);
+    }));
   }
 
-  // TODO: This needs to call the backend encode
   applyFilterWithParams(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
-    let url = this.urlFromFilterV2(page.join('/') + '?', filter);
-    url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
-    return this.router.navigateByUrl(url, extraParams);
+    return this.encodeFilter(filter).pipe(switchMap(encodedFilter => {
+      let url = page.join('/') + '?' + encodedFilter;
+      url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
+
+      return this.router.navigateByUrl(url, extraParams);
+    }));
   }
 
   /**

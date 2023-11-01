@@ -234,6 +234,6 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   goToCharacter(character: Person) {
-    this.filterUtilityService.applyFilter(['all-series'], FilterField.Characters, FilterComparison.Contains, character.id + '');
+    this.filterUtilityService.applyFilter(['all-series'], FilterField.Characters, FilterComparison.Contains, character.id + '').subscribe();
   }
 }
