@@ -1,14 +1,22 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { ReaderService } from 'src/app/_services/reader.service';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
+import {Router} from '@angular/router';
+import {ReaderService} from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
 import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
-import { UtilityService } from '../../../shared/_services/utility.service';
-import { MangaFormat } from '../../../_models/manga-format';
-import { ReadingList } from '../../../_models/reading-list';
-import { Series } from '../../../_models/series';
-import { SeriesMetadata } from '../../../_models/metadata/series-metadata';
-import { ImageService } from 'src/app/_services/image.service';
+import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';
+import {MangaFormat} from '../../../_models/manga-format';
+import {ReadingList} from '../../../_models/reading-list';
+import {Series} from '../../../_models/series';
+import {SeriesMetadata} from '../../../_models/metadata/series-metadata';
+import {ImageService} from 'src/app/_services/image.service';
 import {CommonModule} from "@angular/common";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
@@ -72,6 +80,10 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   constructor(public utilityService: UtilityService,
     private router: Router, public readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {
+
+    // If on desktop, we can just have all the data expanded by default:
+    this.isCollapsed = this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop;
+    this.cdRef.markForCheck();
 
   }
 

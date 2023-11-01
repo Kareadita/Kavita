@@ -31,7 +31,6 @@
 
                     <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
                     <label class="btn btn-outline-primary" for="layout-mode-col1">{{t('layout-mode-option-list')}}</label>
-
                   </div>
                 </div>
               </div>
@@ -122,7 +121,9 @@
       </div>
 
       <div class="row pt-4">
-        <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')" iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}" [clickableTitle]="true" (sectionClick)="openReviewModal()">
+        <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
+                           iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
+                           [clickableTitle]="true" (sectionClick)="openReviewModal()">
           <ng-template #carouselItem let-item let-position="idx">
             <app-review-card [review]="item"></app-review-card>
           </ng-template>
