@@ -47,7 +47,7 @@ export class AllSeriesComponent implements OnInit {
   title: string = translate('all-series.title');
   series: Series[] = [];
   loadingSeries = false;
-  pagination!: Pagination;
+  pagination: Pagination = new Pagination();
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -113,8 +113,6 @@ export class AllSeriesComponent implements OnInit {
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
       this.filter = filter;
 
@@ -155,13 +153,14 @@ export class AllSeriesComponent implements OnInit {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
-        this.loadPage();
-      });
-    } else {
+    if (data.isFirst) {
       this.loadPage();
+      return;
     }
+
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
   }
 
   loadPage() {

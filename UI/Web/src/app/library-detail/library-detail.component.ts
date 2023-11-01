@@ -260,13 +260,14 @@ export class LibraryDetailComponent implements OnInit {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
-        this.loadPage();
-      });
-    } else {
+    if (data.isFirst) {
       this.loadPage();
+      return;
     }
+
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
   }
 
   loadPage() {

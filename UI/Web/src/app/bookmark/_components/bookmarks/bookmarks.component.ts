@@ -54,7 +54,7 @@ export class BookmarksComponent implements OnInit {
   actions: ActionItem<Series>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
 
-  pagination!: Pagination;
+  pagination: Pagination = new Pagination();
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -84,20 +84,12 @@ export class BookmarksComponent implements OnInit {
 
         this.cdRef.markForCheck();
       });
-      // this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      // if (this.filter.statements.length === 0) {
-      //   this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      // }
-      // this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      // this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      // this.filterSettings.presetsV2 =  this.filter;
-      // this.filterSettings.statementLimit = 1;
+
       this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }
 
   ngOnInit(): void {
     this.actions = this.actionFactoryService.getBookmarkActions(this.handleAction.bind(this));
-    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
   }
 
 
@@ -153,7 +145,7 @@ export class BookmarksComponent implements OnInit {
         this.readerService.clearMultipleBookmarks(seriesIds).subscribe(() => {
           this.toastr.success(this.translocoService.translate('bookmarks.delete-success'));
           this.bulkSelectionService.deselectAll();
-          this.loadBookmarks();
+          this.loadPage();
         });
         break;
       default:
@@ -161,7 +153,7 @@ export class BookmarksComponent implements OnInit {
     }
   }
 
-  loadBookmarks() {
+  loadPage() {
     this.loadingBookmarks = true;
     this.cdRef.markForCheck();
 
@@ -221,12 +213,13 @@ export class BookmarksComponent implements OnInit {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
-        this.loadBookmarks();
-      });
-    } else {
-      this.loadBookmarks();
+    if (data.isFirst) {
+      this.loadPage();
+      return;
     }
+
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
   }
 }

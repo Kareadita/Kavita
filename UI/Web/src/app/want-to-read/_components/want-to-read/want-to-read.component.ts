@@ -56,7 +56,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   isLoading: boolean = true;
   series: Array<Series> = [];
-  pagination!: Pagination;
+  pagination: Pagination = new Pagination();
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
@@ -105,8 +105,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     private jumpbarService: JumpbarService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
-
-      this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 
       this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
       if (this.filter.statements.length === 0) {
@@ -187,14 +185,16 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    if (data.isFirst) {
+      this.loadPage();
+      return;
     }
 
-    this.loadPage();
-  }
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
 
-  protected readonly undefined = undefined;
+  }
 }
 
 

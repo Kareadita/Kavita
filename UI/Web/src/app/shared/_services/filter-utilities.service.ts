@@ -150,30 +150,6 @@ export class FilterUtilitiesService {
   }
 
   /**
-   * Updates the window location with a custom url based on filter and pagination objects
-   * @param pagination
-   * @param filter
-   */
-  updateUrlFromFilterV2(pagination: Pagination, filter: SeriesFilterV2 | undefined) {
-    const params = '?page=' + pagination.currentPage + '&';
-    // TODO: Remove this code
-    const url = this.urlFromFilterV2(window.location.href.split('?')[0] + params, filter);
-    window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
-  }
-
-  /**
-   * Will fetch current page from route if present
-   * @param snapshot to fetch page from. Must be from component else may get stale data
-   * @param itemsPerPage If you want pagination, pass non-zero number
-   * @returns A default pagination object
-   */
-  pagination(snapshot: ActivatedRouteSnapshot, itemsPerPage: number = 0): Pagination {
-    // TODO: We can remove, we don't use pagination anymore
-    return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage, totalItems: 0, totalPages: 1};
-  }
-
-
-  /**
    * Returns the current url with query params for the filter
    * @param currentUrl Full url, with ?page=1 as a minimum
    * @param filter Filter to build url off
