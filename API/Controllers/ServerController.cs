@@ -286,8 +286,6 @@ public class ServerController : BaseApiController
         if (emailServiceUrl.Equals(EmailService.DefaultApiUrl)) return Ok(null);
 
         return Ok(await _emailService.GetVersion(emailServiceUrl));
-
     }
-
 
 }

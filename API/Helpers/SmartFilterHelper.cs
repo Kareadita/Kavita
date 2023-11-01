@@ -13,6 +13,8 @@ public static class SmartFilterHelper
     private const string StatementsKey = "stmts=";
     private const string LimitToKey = "limitTo=";
     private const string CombinationKey = "combination=";
+    private const string StatementSeparator = "\ufffd";
+    private const string InnerStatementSeparator = "¦";
 
     public static FilterV2Dto Decode(string? encodedFilter)
     {
@@ -59,7 +61,7 @@ public static class SmartFilterHelper
         var encodedStatements = EncodeFilterStatementDtos(filter.Statements);
         var encodedSortOptions = filter.SortOptions != null
             ? $"{SortOptionsKey}{EncodeSortOptions(filter.SortOptions)}"
-            : "";
+            : string.Empty;
         var encodedLimitTo = $"{LimitToKey}{filter.LimitTo}";
 
         return $"{EncodeName(filter.Name)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
@@ -67,12 +69,12 @@ public static class SmartFilterHelper
 
     private static string EncodeName(string name)
     {
-        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"name={HttpUtility.UrlEncode(name)}&";
+        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"name={Uri.EscapeDataString(name)}&";
     }
 
     private static string EncodeSortOptions(SortOptions sortOptions)
     {
-        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField},isAscending={sortOptions.IsAscending}");
+        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField}{InnerStatementSeparator}isAscending={sortOptions.IsAscending}");
     }
 
     private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto> statements)
@@ -80,7 +82,7 @@ public static class SmartFilterHelper
         if (statements == null || statements.Count == 0)
             return string.Empty;
 
-        var encodedStatements = StatementsKey + Uri.EscapeDataString(string.Join(",", statements.Select(EncodeFilterStatementDto)));
+        var encodedStatements = StatementsKey + Uri.EscapeDataString(string.Join(StatementSeparator, statements.Select(EncodeFilterStatementDto)));
         return encodedStatements;
     }
 
@@ -90,19 +92,18 @@ public static class SmartFilterHelper
         var encodedField = $"field={(int) statement.Field}";
         var encodedValue = $"value={Uri.EscapeDataString(statement.Value)}";
 
-        return Uri.EscapeDataString($"{encodedComparison},{encodedField},{encodedValue}");
+        return Uri.EscapeDataString($"{encodedComparison}{InnerStatementSeparator}{encodedField}{InnerStatementSeparator}{encodedValue}");
     }
 
     private static List<FilterStatementDto> DecodeFilterStatementDtos(string encodedStatements)
     {
-        encodedStatements = HttpUtility.UrlDecode(encodedStatements);
-        string[] statementStrings = encodedStatements.Split(',');
+        string[] statementStrings = Uri.UnescapeDataString(encodedStatements).Split(StatementSeparator);
 
         var statements = new List<FilterStatementDto>();
 
         foreach (var statementString in statementStrings)
         {
-            var parts = statementString.Split('&');
+            var parts = Uri.UnescapeDataString(statementString).Split(InnerStatementSeparator);
             if (parts.Length < 3)
                 continue;
 
@@ -110,7 +111,7 @@ public static class SmartFilterHelper
             {
                 Comparison = Enum.Parse<FilterComparison>(parts[0].Split("=")[1]),
                 Field = Enum.Parse<FilterField>(parts[1].Split("=")[1]),
-                Value = HttpUtility.UrlDecode(parts[2].Split("=")[1])
+                Value = Uri.UnescapeDataString(parts[2].Split("=")[1])
             });
         }
 
@@ -119,7 +120,7 @@ public static class SmartFilterHelper
 
     private static SortOptions DecodeSortOptions(string encodedSortOptions)
     {
-        string[] parts = encodedSortOptions.Split(',');
+        string[] parts = encodedSortOptions.Split(InnerStatementSeparator);
         var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith("sortField="));
         var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith("isAscending="));
 

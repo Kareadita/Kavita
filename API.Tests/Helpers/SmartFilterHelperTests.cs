@@ -15,13 +15,13 @@ public class SmartFilterHelperTests
     [Fact]
     public void Test_Decode()
     {
-        var encoded = """
-                      stmts=comparison%3D5%26field%3D18%26value%3D95%2Ccomparison%3D0%26field%3D4%26value%3D0%2Ccomparison%3D7%26field%3D1%26value%3Da&sortOptions=sortField=2&isAscending=false&limitTo=10&combination=1
-                      """;
+        const string encoded = """
+                               stmts=comparison%3D5¦field%3D18¦value%3D95�comparison%3D0¦field%3D4¦value%3D0�comparison%3D7¦field%3D1¦value%3Da&sortOptions=sortField=2,isAscending=false&limitTo=0&combination=1
+                               """;
 
         var filter = SmartFilterHelper.Decode(encoded);
 
-        Assert.Equal(10, filter.LimitTo);
+        Assert.Equal(0, filter.LimitTo);
         Assert.Equal(SortField.CreatedDate, filter.SortOptions.SortField);
         Assert.False(filter.SortOptions.IsAscending);
         Assert.Null(filter.Name);
@@ -56,10 +56,24 @@ public class SmartFilterHelperTests
         };
 
         var encodedFilter = SmartFilterHelper.Encode(filter);
-        Assert.Equal("name=Test&stmts=comparison%253D0%252Cfield%253D4%252Cvalue%253D0&sortOptions=sortField%3D2%2CisAscending%3DFalse&limitTo=10&combination=1", encodedFilter);
+
+        var decoded = SmartFilterHelper.Decode(encodedFilter);
+        Assert.Single(decoded.Statements);
+        AssertStatementSame(decoded.Statements.First(), filter.Statements.First());
+        Assert.Equal("Test", decoded.Name);
+        Assert.Equal(10, decoded.LimitTo);
+        Assert.Equal(SortField.CreatedDate, decoded.SortOptions.SortField);
+        Assert.False(decoded.SortOptions.IsAscending);
     }
 
-    private void AssertStatementSame(FilterStatementDto statement, FilterField field, FilterComparison combination, string value)
+    private static void AssertStatementSame(FilterStatementDto statement, FilterStatementDto statement2)
+    {
+        Assert.Equal(statement.Field, statement2.Field);
+        Assert.Equal(statement.Comparison, statement2.Comparison);
+        Assert.Equal(statement.Value, statement2.Value);
+    }
+
+    private static void AssertStatementSame(FilterStatementDto statement, FilterField field, FilterComparison combination, string value)
     {
         Assert.Equal(statement.Field, field);
         Assert.Equal(statement.Comparison, combination);

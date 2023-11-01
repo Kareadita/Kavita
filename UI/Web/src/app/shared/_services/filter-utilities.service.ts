@@ -14,6 +14,15 @@ const statementsKey = 'stmts=';
 const limitToKey = 'limitTo=';
 const combinationKey = 'combination=';
 
+/**
+ * Used to separate actual full statements
+ */
+const statementSeparator = '�';
+/**
+ * What is used within a stmt=value=X{innerStatementSeparator}field=3{innerStatementSeparator}combination=2
+ */
+const innerStatementSeparator = '¦';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -103,8 +112,8 @@ export class FilterUtilitiesService {
             const encodedField = `field=${statement.field}`;
             const encodedValue = `value=${encodeURIComponent(statement.value)}`;
 
-            return `${encodedComparison}&${encodedField}&${encodedValue}`;
-        }).join(','));
+            return `${encodedComparison}${innerStatementSeparator}${encodedField}${innerStatementSeparator}${encodedValue}`;
+        }).join(statementSeparator));
     }
 
   decodeSeriesFilter(encodedFilter: string) {
@@ -209,7 +218,7 @@ export class FilterUtilitiesService {
     }
 
     decodeFilterStatements(encodedStatements: string): FilterStatement[] {
-        const statementStrings = decodeURIComponent(encodedStatements).split(',').map(s => decodeURIComponent(s));
+        const statementStrings = decodeURIComponent(encodedStatements).split(statementSeparator).map(s => decodeURIComponent(s));
         return statementStrings.map(statementString => {
             const parts = statementString.split(',');
             if (parts === null || parts.length < 3) return null;
