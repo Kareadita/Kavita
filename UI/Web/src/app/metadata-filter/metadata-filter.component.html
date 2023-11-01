@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'metadata-filter'">
   <ng-container *ngIf="toggleService.toggleState$ | async as isOpen">
     <ng-container *ngIf="utilityService.getActiveBreakpoint() as activeBreakpoint">
-      <div *ngIf="activeBreakpoint >= Breakpoint.Tablet; else mobileView">
+      <div *ngIf="activeBreakpoint >= Breakpoint.Tablet; else mobileView"  [@inOutAnimation]>
         <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}"></ng-container>
       </div>
 
@@ -12,7 +12,7 @@
               {{t('filter-title')}}
             </h5>
             <div body class="drawer-body">
-              <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd -->
+              <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd (also this isn't animating like my custom version)-->
               <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
             </div>
           </app-drawer>
@@ -22,7 +22,7 @@
   </ng-container>
 
   <ng-template #filterSection let-isOpen="isOpen">
-    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded && filterV2" [@inOutAnimation]>
+    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded && filterV2">
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2"
                               [availableFilterFields]="allFilterFields"
