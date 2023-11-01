@@ -193,6 +193,8 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
     this.loadPage();
   }
+
+  protected readonly undefined = undefined;
 }
 
 

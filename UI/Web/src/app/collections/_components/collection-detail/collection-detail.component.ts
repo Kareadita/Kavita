@@ -284,4 +284,5 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  protected readonly undefined = undefined;
 }

@@ -13,7 +13,7 @@
   <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
       <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
-      <app-card-detail-layout
+      <app-card-detail-layout *ngIf="filter"
           [isLoading]="isLoading"
           [items]="series"
           [pagination]="pagination"

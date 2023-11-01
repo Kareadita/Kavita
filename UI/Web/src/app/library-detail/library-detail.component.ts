@@ -282,4 +282,5 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;
+  protected readonly undefined = undefined;
 }

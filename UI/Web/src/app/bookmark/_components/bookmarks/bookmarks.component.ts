@@ -26,7 +26,7 @@ import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
-import { DecimalPipe } from '@angular/common';
+import {DecimalPipe, NgIf} from '@angular/common';
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
@@ -36,12 +36,12 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {Title} from "@angular/platform-browser";
 
 @Component({
-    selector: 'app-bookmarks',
-    templateUrl: './bookmarks.component.html',
-    styleUrls: ['./bookmarks.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective]
+  selector: 'app-bookmarks',
+  templateUrl: './bookmarks.component.html',
+  styleUrls: ['./bookmarks.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, NgIf]
 })
 export class BookmarksComponent implements OnInit {
 
@@ -73,14 +73,25 @@ export class BookmarksComponent implements OnInit {
     private router: Router, private readonly cdRef: ChangeDetectorRef,
     private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
     private jumpbarService: JumpbarService, private titleService: Title) {
-      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      if (this.filter.statements.length === 0) {
-        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      }
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      this.filterSettings.presetsV2 =  this.filter;
-      this.filterSettings.statementLimit = 1;
+
+      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+        this.filter = filter;
+
+        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+        this.filterSettings.presetsV2 =  this.filter;
+        this.filterSettings.statementLimit = 1;
+
+        this.cdRef.markForCheck();
+      });
+      // this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+      // if (this.filter.statements.length === 0) {
+      //   this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      // }
+      // this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      // this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      // this.filterSettings.presetsV2 =  this.filter;
+      // this.filterSettings.statementLimit = 1;
       this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }
 
@@ -211,10 +222,13 @@ export class BookmarksComponent implements OnInit {
     this.filter = data.filterV2;
 
     if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+      this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+        this.loadBookmarks();
+      });
+    } else {
+      this.loadBookmarks();
     }
-
-    this.loadBookmarks();
   }
 
+  protected readonly undefined = undefined;
 }

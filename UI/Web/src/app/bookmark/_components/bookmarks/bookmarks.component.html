@@ -6,7 +6,7 @@
     <h6 subtitle>{{t('series-count', {num: series.length | number})}}</h6>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-  <app-card-detail-layout
+  <app-card-detail-layout *ngIf="filter"
     [isLoading]="loadingBookmarks"
     [items]="series"
     [filterSettings]="filterSettings"

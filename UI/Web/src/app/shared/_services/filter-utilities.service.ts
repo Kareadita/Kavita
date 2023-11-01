@@ -45,6 +45,7 @@ export class FilterUtilitiesService {
 
   filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot) {
     const filter = this.metadataService.createDefaultFilterDto();
+    filter.statements.push(this.createSeriesV2DefaultStatement());
     if (!window.location.href.includes('?')) return of(filter);
 
     return this.decodeFilter(window.location.href.split('?')[1]);
@@ -53,8 +54,10 @@ export class FilterUtilitiesService {
   decodeFilter(encodedFilter: string) {
       return this.httpClient.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
         if (filter == null) {
-          return this.metadataService.createDefaultFilterDto();
+          filter = this.metadataService.createDefaultFilterDto();
+          filter.statements.push(this.createSeriesV2DefaultStatement());
         }
+
         return filter;
       }))
   }

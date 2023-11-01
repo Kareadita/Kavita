@@ -1299,7 +1299,8 @@
     "collection-detail": {
         "no-data": "There are no items. Try adding a series.",
         "no-data-filtered": "No items match your current filter.",
-        "title-alt": "Kavita - {{collectionName}} Collection"
+        "title-alt": "Kavita - {{collectionName}} Collection",
+        "series-header": "Series"
     },
 
     "all-collections": {

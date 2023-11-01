@@ -113,33 +113,20 @@ export class AllSeriesComponent implements OnInit {
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.title = this.route.snapshot.queryParamMap.get('title') || this.title;
-    this.titleService.setTitle('Kavita - ' + this.title);
-
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 
-    //this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
       this.filter = filter;
-      console.log('all-series filter: ', this.filter);
 
-      if (this.filter.statements.length === 0) {
-        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      }
+      this.title = this.route.snapshot.queryParamMap.get('title') || this.filter.name || this.title;
+      this.titleService.setTitle('Kavita - ' + this.title);
+
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
       this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
       this.filterSettings.presetsV2 =  this.filter;
 
       this.cdRef.markForCheck();
     });
-    // if (this.filter.statements.length === 0) {
-    //   this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    // }
-    // this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-    // this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    // this.filterSettings.presetsV2 =  this.filter;
-    //
-    // this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {

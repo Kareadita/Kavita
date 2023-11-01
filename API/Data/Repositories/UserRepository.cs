@@ -627,7 +627,6 @@ public class UserRepository : IUserRepository
         return await ApplyLimit(filterSeriesQuery
                 .Sort(filter.SortOptions)
                 .AsSplitQuery(), filter.LimitTo)
-            .Select(o => o.Bookmark)
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
