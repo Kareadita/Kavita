@@ -57,34 +57,32 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;
 
-  imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly router = inject(Router);
+  private readonly readerService = inject(ReaderService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   /**
    * Html representation of Series Summary
    */
   seriesSummary: string = '';
 
-  get LibraryType() { return LibraryType; }
-  get MangaFormat() { return MangaFormat; }
-  get TagBadgeCursor() { return TagBadgeCursor; }
-
-  get FilterField() {
-    return FilterField;
-  }
+  protected FilterField = FilterField;
+  protected LibraryType = LibraryType;
+  protected MangaFormat = MangaFormat;
+  protected TagBadgeCursor = TagBadgeCursor;
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
     return this.seriesMetadata?.webLinks.split(',') || [];
   }
 
-  constructor(public utilityService: UtilityService,
-    private router: Router, public readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {
-
+  constructor() {
     // If on desktop, we can just have all the data expanded by default:
     this.isCollapsed = this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop;
     this.cdRef.markForCheck();
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
