@@ -168,17 +168,19 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
-        this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
-      }
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
-      this.filterSettings.presetsV2 =  this.filter;
+      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+        this.filter = filter;
 
-      this.cdRef.markForCheck();
+        if (this.filter.statements.filter(stmt => stmt.field === FilterField.CollectionTags).length === 0) {
+          this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        }
+        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        this.filterSettings.presetsV2 =  this.filter;
+        this.cdRef.markForCheck();
 
-      this.updateTag(tagId);
+        this.updateTag(tagId);
+      });
   }
 
   ngOnInit(): void {

@@ -106,15 +106,15 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 
-      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      if (this.filter.statements.length === 0) {
-        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      }
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      this.filterSettings.presetsV2 =  this.filter;
+      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+        this.filter = filter;
 
-      this.cdRef.markForCheck();
+        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+        this.filterSettings.presetsV2 =  this.filter;
+
+        this.cdRef.markForCheck();
+      });
 
       this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
         if (event.event === EVENTS.SeriesRemoved) {
@@ -193,7 +193,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
       this.loadPage();
     });
-
   }
 }
 

@@ -190,50 +190,6 @@ export class FilterUtilitiesService {
     }).join(statementSeparator));
   }
 
-  filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
-    // TODO: Replace with decodeFilter
-    const filter = this.metadataService.createDefaultFilterDto();
-    if (!window.location.href.includes('?')) return filter;
-
-    const queryParams = snapshot.queryParams;
-
-    if (queryParams.name) {
-      filter.name = queryParams.name;
-    }
-
-    const fullUrl = window.location.href.split('?')[1];
-    const stmtsStartIndex = fullUrl.indexOf(statementsKey);
-    let endIndex = fullUrl.indexOf('&' + sortOptionsKey);
-    if (endIndex < 0) {
-      endIndex = fullUrl.indexOf('&' + limitToKey);
-    }
-
-    if (stmtsStartIndex !== -1 || endIndex !== -1) {
-      // +1 is for the =
-      const stmtsEncoded = fullUrl.substring(stmtsStartIndex + statementsKey.length, endIndex);
-      filter.statements = this.decodeFilterStatements(stmtsEncoded);
-    }
-
-    if (queryParams.sortOptions) {
-      const optionsStartIndex = fullUrl.indexOf('&' + sortOptionsKey);
-      const endIndex = fullUrl.indexOf('&' + limitToKey);
-      const sortOptionsEncoded = fullUrl.substring(optionsStartIndex + sortOptionsKey.length + 1, endIndex);
-      const sortOptions = this.decodeSortOptions(sortOptionsEncoded);
-      if (sortOptions) {
-        filter.sortOptions = sortOptions;
-      }
-    }
-
-    if (queryParams.limitTo) {
-      filter.limitTo = parseInt(queryParams.limitTo, 10);
-    }
-
-    if (queryParams.combination) {
-      filter.combination = parseInt(queryParams.combination, 10) as FilterCombination;
-    }
-
-    return filter;
-  }
 
   decodeSortOptions(encodedSortOptions: string): SortOptions | null {
     const parts = decodeURIComponent(encodedSortOptions).split(',');
