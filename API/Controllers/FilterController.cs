@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Dashboard;
@@ -10,7 +9,6 @@ using API.DTOs.Filtering.v2;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
-using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -21,12 +19,10 @@ namespace API.Controllers;
 public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
 
-    public FilterController(IUnitOfWork unitOfWork, IEasyCachingProviderFactory cacheFactory)
+    public FilterController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _cacheFactory = cacheFactory;
     }
 
     /// <summary>

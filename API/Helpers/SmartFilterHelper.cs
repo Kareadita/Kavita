@@ -5,6 +5,8 @@ using System.Web;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 
+#nullable enable
+
 namespace API.Helpers;
 
 public static class SmartFilterHelper
@@ -31,7 +33,6 @@ public static class SmartFilterHelper
             if (part.StartsWith(SortOptionsKey))
             {
                 filter.SortOptions = DecodeSortOptions(part.Substring(SortOptionsKey.Length));
-                if (filter.SortOptions == null) filter.SortOptions = new SortOptions();
             }
             else if (part.StartsWith(LimitToKey))
             {
@@ -54,7 +55,7 @@ public static class SmartFilterHelper
         return filter;
     }
 
-    public static string Encode(FilterV2Dto filter)
+    public static string Encode(FilterV2Dto? filter)
     {
         if (filter == null)
             return string.Empty;
@@ -68,7 +69,7 @@ public static class SmartFilterHelper
         return $"{EncodeName(filter.Name)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
     }
 
-    private static string EncodeName(string name)
+    private static string EncodeName(string? name)
     {
         return string.IsNullOrWhiteSpace(name) ? string.Empty : $"name={Uri.EscapeDataString(name)}&";
     }
@@ -78,7 +79,7 @@ public static class SmartFilterHelper
         return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField}{InnerStatementSeparator}isAscending={sortOptions.IsAscending}");
     }
 
-    private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto> statements)
+    private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto>? statements)
     {
         if (statements == null || statements.Count == 0)
             return string.Empty;
@@ -98,7 +99,7 @@ public static class SmartFilterHelper
 
     private static List<FilterStatementDto> DecodeFilterStatementDtos(string encodedStatements)
     {
-        string[] statementStrings = Uri.UnescapeDataString(encodedStatements).Split(StatementSeparator);
+        var statementStrings = Uri.UnescapeDataString(encodedStatements).Split(StatementSeparator);
 
         var statements = new List<FilterStatementDto>();
 
@@ -121,22 +122,22 @@ public static class SmartFilterHelper
 
     private static SortOptions DecodeSortOptions(string encodedSortOptions)
     {
-        string[] parts = encodedSortOptions.Split(InnerStatementSeparator);
+        var parts = encodedSortOptions.Split(InnerStatementSeparator);
         var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith("sortField="));
         var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith("isAscending="));
 
         var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
-        if (sortFieldPart != null)
+        if (sortFieldPart == null)
         {
-            var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);
-
-            return new SortOptions
-            {
-                SortField = sortField,
-                IsAscending = isAscending
-            };
+            return new SortOptions();
         }
 
-        return null;
+        var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);
+
+        return new SortOptions
+        {
+            SortField = sortField,
+            IsAscending = isAscending
+        };
     }
 }

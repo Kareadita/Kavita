@@ -5,7 +5,6 @@ using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.Entities.Enums;
 using API.Helpers;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using Xunit;
 
 namespace API.Tests.Helpers;
