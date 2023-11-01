@@ -60,9 +60,9 @@ export class LibraryDetailComponent implements OnInit {
   libraryName = '';
   series: Series[] = [];
   loadingSeries = false;
-  pagination!: Pagination;
+  pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
   actions: ActionItem<Library>[] = [];
-  filterV2: SeriesFilterV2 | undefined = undefined;
+  filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
@@ -158,19 +158,20 @@ export class LibraryDetailComponent implements OnInit {
 
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
 
-    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-    this.filterV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+      this.filter = filter;
 
-    if (this.filterV2.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
-       this.filterV2!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
-    }
+      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
+        this.filter!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+      }
 
-    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-    this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
 
-    this.filterSettings.presetsV2 =  this.filterV2;
+      this.filterSettings.presetsV2 =  this.filter;
 
-    this.cdRef.markForCheck();
+      this.cdRef.markForCheck();
+    });
   }
 
 
@@ -179,7 +180,7 @@ export class LibraryDetailComponent implements OnInit {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
-        if (!this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck)) {
+        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
           this.loadPage();
           return;
         }
@@ -199,7 +200,7 @@ export class LibraryDetailComponent implements OnInit {
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
-        if (!this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck)) {
+        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
           this.loadPage();
           return;
         }
@@ -257,21 +258,23 @@ export class LibraryDetailComponent implements OnInit {
 
   updateFilter(data: FilterEvent) {
     if (data.filterV2 === undefined) return;
-    this.filterV2 = data.filterV2;
+    this.filter = data.filterV2;
 
     if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filterV2);
+      this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+        this.loadPage();
+      });
+    } else {
+      this.loadPage();
     }
-
-    this.loadPage();
   }
 
   loadPage() {
     this.loadingSeries = true;
-    this.filterActive = !this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck);
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.cdRef.markForCheck();
 
-    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2)
+    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter)
       .subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;

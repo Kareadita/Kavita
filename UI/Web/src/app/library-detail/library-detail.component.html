@@ -7,7 +7,7 @@
     <h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{t('common.series-count', {num: pagination.totalItems | number})}} </h6>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-  <app-card-detail-layout *ngIf="filterV2"
+  <app-card-detail-layout *ngIf="filter"
     [isLoading]="loadingSeries"
     [items]="series"
     [pagination]="pagination"

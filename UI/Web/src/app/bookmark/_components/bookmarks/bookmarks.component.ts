@@ -229,6 +229,4 @@ export class BookmarksComponent implements OnInit {
       this.loadBookmarks();
     }
   }
-
-  protected readonly undefined = undefined;
 }
