@@ -45,7 +45,7 @@ import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
   imports: [CommonModule, LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent, TranslocoDirective],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardDetailLayoutComponent implements OnInit, OnChanges {
 

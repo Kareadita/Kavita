@@ -22,7 +22,7 @@
   </ng-container>
 
   <ng-template #filterSection let-isOpen="isOpen">
-    <div class="filter-section mx-auto pb-3" [@smoothCollapse]="!isOpen" *ngIf="fullyLoaded && filterV2">
+    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded && filterV2" [@inOutAnimation]>
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2"
                               [availableFilterFields]="allFilterFields"

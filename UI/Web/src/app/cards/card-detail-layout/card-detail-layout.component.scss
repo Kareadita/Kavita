@@ -21,7 +21,6 @@
 .card-container {
     display: inline-block;
     width: 100%;
-    //overflow-y: auto;
 }
 
 .grid {
@@ -93,11 +92,7 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  //height: calc(100vh - 160px); // 64 is a random number, 523 for me.
   height: calc(var(--vh) * 100 - 173px);
-  //height: calc(100vh - 160px);
-  //background-color: red;
-  //max-height: calc(var(--vh)*100 - 170px);
 }
 
 virtual-scroller.empty {
