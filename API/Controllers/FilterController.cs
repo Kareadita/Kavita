@@ -93,4 +93,27 @@ public class FilterController : BaseApiController
         await _unitOfWork.CommitAsync();
         return Ok();
     }
+
+    /// <summary>
+    /// Encode the Filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("encode")]
+    public ActionResult<string> EncodeFilter(FilterV2Dto dto)
+    {
+        return Ok(SmartFilterHelper.Encode(dto));
+    }
+
+    /// <summary>
+    /// Decodes the filter.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("decode")]
+    public ActionResult<FilterV2Dto> DecodeFilter(DecodeFilterDto dto)
+    {
+        //if (string.IsNullOrWhiteSpace(dto.EncodedFilter)) return Ok(new FilterV2Dto());
+        return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
+    }
 }

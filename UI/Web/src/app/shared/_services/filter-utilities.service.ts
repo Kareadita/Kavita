@@ -8,6 +8,11 @@ import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {HttpClient} from "@angular/common/http";
+import {TextResonse} from "../../_types/text-response";
+import {environment} from "../../../environments/environment";
+import {map, tap} from "rxjs/operators";
+import {of} from "rxjs";
 
 const sortOptionsKey = 'sortOptions=';
 const statementsKey = 'stmts=';
@@ -28,95 +33,55 @@ const innerStatementSeparator = '¦';
 })
 export class FilterUtilitiesService {
 
-    constructor(private metadataService: MetadataService, private router: Router) {}
+  private apiUrl = environment.apiUrl;
 
-    applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
-        const dto: SeriesFilterV2 = {
-            statements:  [this.metadataService.createDefaultFilterStatement(filter, comparison, value + '')],
-            combination: FilterCombination.Or,
-            limitTo: 0
-        };
+  constructor(private metadataService: MetadataService, private router: Router, private httpClient: HttpClient) {}
 
-        const url = this.urlFromFilterV2(page.join('/') + '?', dto);
-        return this.router.navigateByUrl(url);
-    }
+  updateUrlFromFilter(filter: SeriesFilterV2 | undefined) {
+    return this.httpClient.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse).pipe(tap(encodedFilter => {
+      window.history.replaceState(window.location.href, '', window.location.href.split('?')[0]+ '?' + encodedFilter);
+    }));
+  }
 
-    applyFilterWithParams(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
-        let url = this.urlFromFilterV2(page.join('/') + '?', filter);
-        url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
-        return this.router.navigateByUrl(url, extraParams);
-    }
+  filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot) {
+    const filter = this.metadataService.createDefaultFilterDto();
+    if (!window.location.href.includes('?')) return of(filter);
 
-    /**
-     * Updates the window location with a custom url based on filter and pagination objects
-     * @param pagination
-     * @param filter
-     */
-    updateUrlFromFilterV2(pagination: Pagination, filter: SeriesFilterV2 | undefined) {
-        const params = '?page=' + pagination.currentPage + '&';
+    return this.decodeFilter(window.location.href.split('?')[1]);
+  }
 
-        const url = this.urlFromFilterV2(window.location.href.split('?')[0] + params, filter);
-        window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
-    }
+  decodeFilter(encodedFilter: string) {
+      return this.httpClient.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
+        if (filter == null) {
+          return this.metadataService.createDefaultFilterDto();
+        }
+        return filter;
+      }))
+  }
 
+  createSeriesV2Filter(): SeriesFilterV2 {
+      return {
+          combination: FilterCombination.And,
+          statements: [],
+          limitTo: 0,
+          sortOptions: {
+              isAscending: true,
+              sortField: SortField.SortName
+          },
+      };
+  }
 
-    private replacePaginationOnUrl(url: string, pagination: Pagination) {
-        return url.replace(/page=\d+/i, 'page=' + pagination.currentPage);
-    }
+  createSeriesV2DefaultStatement(): FilterStatement {
+      return {
+          comparison: FilterComparison.Equal,
+          value: '',
+          field: FilterField.SeriesName
+      }
+  }
 
-    /**
-     * Will fetch current page from route if present
-     * @param snapshot to fetch page from. Must be from component else may get stale data
-     * @param itemsPerPage If you want pagination, pass non-zero number
-     * @returns A default pagination object
-     */
-    pagination(snapshot: ActivatedRouteSnapshot, itemsPerPage: number = 0): Pagination {
-        return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage, totalItems: 0, totalPages: 1};
-    }
-
-
-    /**
-     * Returns the current url with query params for the filter
-     * @param currentUrl Full url, with ?page=1 as a minimum
-     * @param filter Filter to build url off
-     * @returns current url with query params added
-     */
-    urlFromFilterV2(currentUrl: string, filter: SeriesFilterV2 | undefined) {
-        if (filter === undefined) return currentUrl;
-
-        return currentUrl + this.encodeSeriesFilter(filter);
-    }
-
-    encodeSeriesFilter(filter: SeriesFilterV2) {
-        const encodedStatements = this.encodeFilterStatements(filter.statements);
-        const encodedSortOptions = filter.sortOptions ? `${sortOptionsKey}${this.encodeSortOptions(filter.sortOptions)}` : '';
-        const encodedLimitTo = `${limitToKey}${filter.limitTo}`;
-
-        return `${this.encodeName(filter.name)}${encodedStatements}&${encodedSortOptions}&${encodedLimitTo}&${combinationKey}${filter.combination}`;
-    }
-
-    encodeName(name: string | undefined) {
-        if (name === undefined || name === '') return '';
-        return `name=${encodeURIComponent(name)}&`
-    }
-
-
-    encodeSortOptions(sortOptions: SortOptions) {
-        return `sortField=${sortOptions.sortField},isAscending=${sortOptions.isAscending}`;
-    }
-
-    encodeFilterStatements(statements: Array<FilterStatement>) {
-        if (statements.length === 0) return '';
-        return statementsKey + encodeURIComponent(statements.map(statement => {
-            const encodedComparison = `comparison=${statement.comparison}`;
-            const encodedField = `field=${statement.field}`;
-            const encodedValue = `value=${encodeURIComponent(statement.value)}`;
-
-            return `${encodedComparison}${innerStatementSeparator}${encodedField}${innerStatementSeparator}${encodedValue}`;
-        }).join(statementSeparator));
-    }
-
+  // Code that needs to be replaced:
   decodeSeriesFilter(encodedFilter: string) {
+    // TODO: Replace with decodeFilter
     const filter = this.metadataService.createDefaultFilterDto();
 
     if (encodedFilter.includes('name=')) {
@@ -158,104 +123,173 @@ export class FilterUtilitiesService {
     return filter;
   }
 
+  private replacePaginationOnUrl(url: string, pagination: Pagination) {
+    return url.replace(/page=\d+/i, 'page=' + pagination.currentPage);
+  }
 
-    filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
-        const filter = this.metadataService.createDefaultFilterDto();
-        if (!window.location.href.includes('?')) return filter;
+  // TODO: This needs to call the backend encode
+  applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
+    const dto: SeriesFilterV2 = {
+      statements:  [this.metadataService.createDefaultFilterStatement(filter, comparison, value + '')],
+      combination: FilterCombination.Or,
+      limitTo: 0
+    };
 
-        const queryParams = snapshot.queryParams;
+    const url = this.urlFromFilterV2(page.join('/') + '?', dto);
+    return this.router.navigateByUrl(url);
+  }
 
-        if (queryParams.name) {
-            filter.name = queryParams.name;
-        }
+  // TODO: This needs to call the backend encode
+  applyFilterWithParams(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
+    let url = this.urlFromFilterV2(page.join('/') + '?', filter);
+    url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
+    return this.router.navigateByUrl(url, extraParams);
+  }
 
-        const fullUrl = window.location.href.split('?')[1];
-        const stmtsStartIndex = fullUrl.indexOf(statementsKey);
-        let endIndex = fullUrl.indexOf('&' + sortOptionsKey);
-        if (endIndex < 0) {
-            endIndex = fullUrl.indexOf('&' + limitToKey);
-        }
+  /**
+   * Updates the window location with a custom url based on filter and pagination objects
+   * @param pagination
+   * @param filter
+   */
+  updateUrlFromFilterV2(pagination: Pagination, filter: SeriesFilterV2 | undefined) {
+    const params = '?page=' + pagination.currentPage + '&';
+    // TODO: Remove this code
+    const url = this.urlFromFilterV2(window.location.href.split('?')[0] + params, filter);
+    window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
+  }
 
-        if (stmtsStartIndex !== -1 || endIndex !== -1) {
-            // +1 is for the =
-            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + statementsKey.length, endIndex);
-            filter.statements = this.decodeFilterStatements(stmtsEncoded);
-        }
+  /**
+   * Will fetch current page from route if present
+   * @param snapshot to fetch page from. Must be from component else may get stale data
+   * @param itemsPerPage If you want pagination, pass non-zero number
+   * @returns A default pagination object
+   */
+  pagination(snapshot: ActivatedRouteSnapshot, itemsPerPage: number = 0): Pagination {
+    // TODO: We can remove, we don't use pagination anymore
+    return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage, totalItems: 0, totalPages: 1};
+  }
 
-        if (queryParams.sortOptions) {
-            const optionsStartIndex = fullUrl.indexOf('&' + sortOptionsKey);
-            const endIndex = fullUrl.indexOf('&' + limitToKey);
-            const sortOptionsEncoded = fullUrl.substring(optionsStartIndex + sortOptionsKey.length + 1, endIndex);
-            const sortOptions = this.decodeSortOptions(sortOptionsEncoded);
-            if (sortOptions) {
-                filter.sortOptions = sortOptions;
-            }
-        }
 
-        if (queryParams.limitTo) {
-            filter.limitTo = parseInt(queryParams.limitTo, 10);
-        }
+  /**
+   * Returns the current url with query params for the filter
+   * @param currentUrl Full url, with ?page=1 as a minimum
+   * @param filter Filter to build url off
+   * @returns current url with query params added
+   */
+  private urlFromFilterV2(currentUrl: string, filter: SeriesFilterV2 | undefined) {
+    if (filter === undefined) return currentUrl;
 
-        if (queryParams.combination) {
-            filter.combination = parseInt(queryParams.combination, 10) as FilterCombination;
-        }
+    return currentUrl + this.encodeSeriesFilter(filter);
+  }
 
-        return filter;
+  encodeSeriesFilter(filter: SeriesFilterV2) {
+    const encodedStatements = this.encodeFilterStatements(filter.statements);
+    const encodedSortOptions = filter.sortOptions ? `${sortOptionsKey}${this.encodeSortOptions(filter.sortOptions)}` : '';
+    const encodedLimitTo = `${limitToKey}${filter.limitTo}`;
+
+    return `${this.encodeName(filter.name)}${encodedStatements}&${encodedSortOptions}&${encodedLimitTo}&${combinationKey}${filter.combination}`;
+  }
+
+  encodeName(name: string | undefined) {
+    if (name === undefined || name === '') return '';
+    return `name=${encodeURIComponent(name)}&`
+  }
+
+
+  encodeSortOptions(sortOptions: SortOptions) {
+    return `sortField=${sortOptions.sortField},isAscending=${sortOptions.isAscending}`;
+  }
+
+  encodeFilterStatements(statements: Array<FilterStatement>) {
+    if (statements.length === 0) return '';
+    return statementsKey + encodeURIComponent(statements.map(statement => {
+      const encodedComparison = `comparison=${statement.comparison}`;
+      const encodedField = `field=${statement.field}`;
+      const encodedValue = `value=${encodeURIComponent(statement.value)}`;
+
+      return `${encodedComparison}${innerStatementSeparator}${encodedField}${innerStatementSeparator}${encodedValue}`;
+    }).join(statementSeparator));
+  }
+
+  filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
+    // TODO: Replace with decodeFilter
+    const filter = this.metadataService.createDefaultFilterDto();
+    if (!window.location.href.includes('?')) return filter;
+
+    const queryParams = snapshot.queryParams;
+
+    if (queryParams.name) {
+      filter.name = queryParams.name;
     }
 
-    decodeSortOptions(encodedSortOptions: string): SortOptions | null {
-        const parts = decodeURIComponent(encodedSortOptions).split(',');
-        const sortFieldPart = parts.find(part => part.startsWith('sortField='));
-        const isAscendingPart = parts.find(part => part.startsWith('isAscending='));
-
-        if (sortFieldPart && isAscendingPart) {
-            const sortField = parseInt(sortFieldPart.split('=')[1], 10) as SortField;
-            const isAscending = isAscendingPart.split('=')[1].toLowerCase() === 'true';
-            return {sortField, isAscending};
-        }
-
-        return null;
+    const fullUrl = window.location.href.split('?')[1];
+    const stmtsStartIndex = fullUrl.indexOf(statementsKey);
+    let endIndex = fullUrl.indexOf('&' + sortOptionsKey);
+    if (endIndex < 0) {
+      endIndex = fullUrl.indexOf('&' + limitToKey);
     }
 
-    decodeFilterStatements(encodedStatements: string): FilterStatement[] {
-        const statementStrings = decodeURIComponent(encodedStatements).split(statementSeparator).map(s => decodeURIComponent(s));
-        return statementStrings.map(statementString => {
-            const parts = statementString.split(',');
-            if (parts === null || parts.length < 3) return null;
-
-            const comparisonStartToken = parts.find(part => part.startsWith('comparison='));
-            if (!comparisonStartToken) return null;
-            const comparison = parseInt(comparisonStartToken.split('=')[1], 10) as FilterComparison;
-
-            const fieldStartToken = parts.find(part => part.startsWith('field='));
-            if (!fieldStartToken) return null;
-            const field = parseInt(fieldStartToken.split('=')[1], 10) as FilterField;
-
-            const valueStartToken = parts.find(part => part.startsWith('value='));
-            if (!valueStartToken) return null;
-            const value = decodeURIComponent(valueStartToken.split('=')[1]);
-            return {comparison, field, value};
-        }).filter(o => o != null) as FilterStatement[];
+    if (stmtsStartIndex !== -1 || endIndex !== -1) {
+      // +1 is for the =
+      const stmtsEncoded = fullUrl.substring(stmtsStartIndex + statementsKey.length, endIndex);
+      filter.statements = this.decodeFilterStatements(stmtsEncoded);
     }
 
-    createSeriesV2Filter(): SeriesFilterV2 {
-        return {
-            combination: FilterCombination.And,
-            statements: [],
-            limitTo: 0,
-            sortOptions: {
-                isAscending: true,
-                sortField: SortField.SortName
-            },
-        };
+    if (queryParams.sortOptions) {
+      const optionsStartIndex = fullUrl.indexOf('&' + sortOptionsKey);
+      const endIndex = fullUrl.indexOf('&' + limitToKey);
+      const sortOptionsEncoded = fullUrl.substring(optionsStartIndex + sortOptionsKey.length + 1, endIndex);
+      const sortOptions = this.decodeSortOptions(sortOptionsEncoded);
+      if (sortOptions) {
+        filter.sortOptions = sortOptions;
+      }
     }
 
-    createSeriesV2DefaultStatement(): FilterStatement {
-        return {
-            comparison: FilterComparison.Equal,
-            value: '',
-            field: FilterField.SeriesName
-        }
+    if (queryParams.limitTo) {
+      filter.limitTo = parseInt(queryParams.limitTo, 10);
     }
+
+    if (queryParams.combination) {
+      filter.combination = parseInt(queryParams.combination, 10) as FilterCombination;
+    }
+
+    return filter;
+  }
+
+  decodeSortOptions(encodedSortOptions: string): SortOptions | null {
+    const parts = decodeURIComponent(encodedSortOptions).split(',');
+    const sortFieldPart = parts.find(part => part.startsWith('sortField='));
+    const isAscendingPart = parts.find(part => part.startsWith('isAscending='));
+
+    if (sortFieldPart && isAscendingPart) {
+      const sortField = parseInt(sortFieldPart.split('=')[1], 10) as SortField;
+      const isAscending = isAscendingPart.split('=')[1].toLowerCase() === 'true';
+      return {sortField, isAscending};
+    }
+
+    return null;
+  }
+
+  decodeFilterStatements(encodedStatements: string): FilterStatement[] {
+    const statementStrings = decodeURIComponent(encodedStatements).split(statementSeparator).map(s => decodeURIComponent(s));
+    return statementStrings.map(statementString => {
+      const parts = statementString.split(',');
+      if (parts === null || parts.length < 3) return null;
+
+      const comparisonStartToken = parts.find(part => part.startsWith('comparison='));
+      if (!comparisonStartToken) return null;
+      const comparison = parseInt(comparisonStartToken.split('=')[1], 10) as FilterComparison;
+
+      const fieldStartToken = parts.find(part => part.startsWith('field='));
+      if (!fieldStartToken) return null;
+      const field = parseInt(fieldStartToken.split('=')[1], 10) as FilterField;
+
+      const valueStartToken = parts.find(part => part.startsWith('value='));
+      if (!valueStartToken) return null;
+      const value = decodeURIComponent(valueStartToken.split('=')[1]);
+      return {comparison, field, value};
+    }).filter(o => o != null) as FilterStatement[];
+  }
+
 
 }

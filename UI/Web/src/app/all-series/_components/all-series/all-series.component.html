@@ -6,7 +6,7 @@
     <h6 subtitle *ngIf="pagination">{{t('series-count', {num: pagination.totalItems | number})}}</h6>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-  <app-card-detail-layout
+  <app-card-detail-layout *ngIf="filter"
     [isLoading]="loadingSeries"
     [items]="series"
     [trackByIdentity]="trackByIdentity"

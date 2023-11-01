@@ -118,15 +118,28 @@ export class AllSeriesComponent implements OnInit {
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 
-    this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-    if (this.filter.statements.length === 0) {
-      this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    }
-    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-    this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    this.filterSettings.presetsV2 =  this.filter;
+    //this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+      this.filter = filter;
+      console.log('all-series filter: ', this.filter);
 
-    this.cdRef.markForCheck();
+      if (this.filter.statements.length === 0) {
+        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      }
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.filterSettings.presetsV2 =  this.filter;
+
+      this.cdRef.markForCheck();
+    });
+    // if (this.filter.statements.length === 0) {
+    //   this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+    // }
+    // this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+    // this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+    // this.filterSettings.presetsV2 =  this.filter;
+    //
+    // this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {
@@ -156,10 +169,12 @@ export class AllSeriesComponent implements OnInit {
     this.filter = data.filterV2;
 
     if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+      this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+        this.loadPage();
+      });
+    } else {
+      this.loadPage();
     }
-
-    this.loadPage();
   }
 
   loadPage() {

@@ -31,6 +31,7 @@ public static class SmartFilterHelper
             if (part.StartsWith(SortOptionsKey))
             {
                 filter.SortOptions = DecodeSortOptions(part.Substring(SortOptionsKey.Length));
+                if (filter.SortOptions == null) filter.SortOptions = new SortOptions();
             }
             else if (part.StartsWith(LimitToKey))
             {
