@@ -21,14 +21,14 @@ export class FilterUtilitiesService {
 
   private apiUrl = environment.apiUrl;
 
-  constructor(private metadataService: MetadataService, private router: Router, private httpClient: HttpClient) {}
+  constructor(private metadataService: MetadataService, private router: Router, private http: HttpClient) {}
 
   encodeFilter(filter: SeriesFilterV2 | undefined) {
-    return this.httpClient.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse);
+    return this.http.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse);
   }
 
   decodeFilter(encodedFilter: string) {
-    return this.httpClient.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
+    return this.http.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
       if (filter == null) {
         filter = this.metadataService.createDefaultFilterDto();
         filter.statements.push(this.createSeriesV2DefaultStatement());

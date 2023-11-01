@@ -106,14 +106,13 @@ public class FilterController : BaseApiController
     }
 
     /// <summary>
-    /// Decodes the filter.
+    /// Decodes the Filter
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("decode")]
     public ActionResult<FilterV2Dto> DecodeFilter(DecodeFilterDto dto)
     {
-        //if (string.IsNullOrWhiteSpace(dto.EncodedFilter)) return Ok(new FilterV2Dto());
         return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
     }
 }
