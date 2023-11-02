@@ -13,42 +13,24 @@ namespace API.Data.ManualMigrations;
 /// </summary>
 public static class MigrateSmartFilterEncoding
 {
+    private static readonly Regex StatementsRegex = new Regex("stmts=(?<Statements>.*?)&");
+    private const string ValueRegex = @"value=(?<value>\d+)";
+    private const string FieldRegex = @"field=(?<value>\d+)";
+    private const string ComparisonRegex = @"comparison=(?<value>\d+)";
+    private const string SortOptionsRegex = @"sortField=(.*?),isAscending=(.*?)";
+
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
         logger.LogCritical("Running MigrateSmartFilterEncoding migration - Please be patient, this may take some time. This is not an error");
 
-        var statementsRegex = new Regex("stmts=(?<Statements>.*?)&");
-        const string valueRegex = @"value=(?<value>\d+)";
-        const string fieldRegex = @"field=(?<value>\d+)";
-        const string comparisonRegex = @"comparison=(?<value>\d+)";
+
         var smartFilters = dataContext.AppUserSmartFilter.ToList();
         foreach (var filter in smartFilters)
         {
             if (filter.Filter.Contains(SmartFilterHelper.StatementSeparator)) continue;
-            var statements = statementsRegex.Matches(filter.Filter)
-                .Select(match => match.Groups["Statements"])
-                .FirstOrDefault(group => group.Success && group != Match.Empty)?.Value;
-            if (string.IsNullOrEmpty(statements)) continue;
-
-
-            // We have statements. Let's remove the statements and generate a filter dto
-            var noStmt = statementsRegex.Replace(filter.Filter, string.Empty).Replace("stmts=", string.Empty);
-            var filterDto = SmartFilterHelper.Decode(noStmt);
-
-            // Now we just parse each individual stmt into the core components and add to statements
-
-            var individualParts = Uri.UnescapeDataString(statements).Split(',').Select(Uri.UnescapeDataString);
-            foreach (var part in individualParts)
-            {
-                filterDto.Statements.Add(new FilterStatementDto()
-                {
-                    Value = Regex.Match(part, valueRegex).Groups["value"].Value,
-                    Field = Enum.Parse<FilterField>(Regex.Match(part, fieldRegex).Groups["value"].Value),
-                    Comparison = Enum.Parse<FilterComparison>(Regex.Match(part, comparisonRegex).Groups["value"].Value),
-                });
-            }
-
-            filter.Filter = SmartFilterHelper.Encode(filterDto);
+            var decode = EncodeFix(filter.Filter);
+            if (string.IsNullOrEmpty(decode)) continue;
+            filter.Filter = decode;
         }
 
         if (unitOfWork.HasChanges())
@@ -57,5 +39,48 @@ public static class MigrateSmartFilterEncoding
         }
 
         logger.LogCritical("Running MigrateSmartFilterEncoding migration - Completed. This is not an error");
+    }
+
+    public static string EncodeFix(string encodedFilter)
+    {
+        var statements = StatementsRegex.Matches(encodedFilter)
+            .Select(match => match.Groups["Statements"])
+            .FirstOrDefault(group => group.Success && group != Match.Empty)?.Value;
+        if (string.IsNullOrEmpty(statements)) return encodedFilter;
+
+
+        // We have statements. Let's remove the statements and generate a filter dto
+        var noStmt = StatementsRegex.Replace(encodedFilter, string.Empty).Replace("stmts=", string.Empty);
+
+        // Pre-v0.7.10 filters could be extra escaped
+        if (!noStmt.Contains("sortField="))
+        {
+            noStmt = Uri.UnescapeDataString(noStmt);
+        }
+
+        // We need to replace sort options portion with a properly encoded
+        noStmt = Regex.Replace(noStmt, SortOptionsRegex, match =>
+        {
+            var sortFieldValue = match.Groups[1].Value;
+            var isAscendingValue = match.Groups[2].Value;
+
+            return $"sortField={sortFieldValue}{SmartFilterHelper.InnerStatementSeparator}isAscending={isAscendingValue}";
+        });
+
+        var filterDto = SmartFilterHelper.Decode(noStmt);
+
+        // Now we just parse each individual stmt into the core components and add to statements
+
+        var individualParts = Uri.UnescapeDataString(statements).Split(',').Select(Uri.UnescapeDataString);
+        foreach (var part in individualParts)
+        {
+            filterDto.Statements.Add(new FilterStatementDto()
+            {
+                Value = Regex.Match(part, ValueRegex).Groups["value"].Value,
+                Field = Enum.Parse<FilterField>(Regex.Match(part, FieldRegex).Groups["value"].Value),
+                Comparison = Enum.Parse<FilterComparison>(Regex.Match(part, ComparisonRegex).Groups["value"].Value),
+            });
+        }
+        return SmartFilterHelper.Encode(filterDto);
     }
 }

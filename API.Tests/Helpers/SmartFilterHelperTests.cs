@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using API.Data.ManualMigrations;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.Entities.Enums;
@@ -100,6 +101,24 @@ public class SmartFilterHelperTests
         Assert.Equal(10, decoded.LimitTo);
         Assert.Equal(SortField.CreatedDate, decoded.SortOptions.SortField);
         Assert.False(decoded.SortOptions.IsAscending);
+    }
+
+    [Theory]
+    [InlineData("name=DC%20-%20On%20Deck&stmts=comparison%3D1%26field%3D20%26value%3D0,comparison%3D9%26field%3D20%26value%3D100,comparison%3D0%26field%3D19%26value%3D274&sortOptions=sortField%3D1&isAscending=True&limitTo=0&combination=1")]
+    [InlineData("name=Manga%20-%20On%20Deck&stmts=comparison%253D1%252Cfield%253D20%252Cvalue%253D0,comparison%253D3%252Cfield%253D20%252Cvalue%253D100,comparison%253D0%252Cfield%253D19%252Cvalue%253D2&sortOptions=sortField%3D1,isAscending%3DTrue&limitTo=0&combination=1")]
+    [InlineData("name=English%20In%20Progress&stmts=comparison%253D8%252Cfield%253D7%252Cvalue%253D4%25252C3,comparison%253D3%252Cfield%253D20%252Cvalue%253D100,comparison%253D8%252Cfield%253D3%252Cvalue%253Dja,comparison%253D1%252Cfield%253D20%252Cvalue%253D0&sortOptions=sortField%3D7,isAscending%3DFalse&limitTo=0&combination=1")]
+    public void MigrationWorks(string filter)
+    {
+        try
+        {
+            var updatedFilter = MigrateSmartFilterEncoding.EncodeFix(filter);
+            Assert.NotNull(updatedFilter);
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail("Exception thrown: " + ex.Message);
+        }
+
     }
 
     private static void AssertStatementSame(FilterStatementDto statement, FilterStatementDto statement2)
