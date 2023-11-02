@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class HttpExtensions
 {

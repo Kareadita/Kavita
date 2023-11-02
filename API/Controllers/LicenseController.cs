@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class LicenseController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

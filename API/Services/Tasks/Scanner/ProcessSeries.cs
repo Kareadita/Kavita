@@ -21,7 +21,6 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
-
 #nullable enable
 
 public interface IProcessSeries

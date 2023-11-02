@@ -3,6 +3,7 @@ using Kavita.Common;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class ClaimsPrincipalExtensions
 {

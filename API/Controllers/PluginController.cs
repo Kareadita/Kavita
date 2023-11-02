@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class PluginController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -43,7 +45,7 @@ public class PluginController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0)
         {
-            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {Information}", pluginName, new
+            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName, new
             {
                 IpAddress = ipAddress,
                 UserAgent = userAgent,

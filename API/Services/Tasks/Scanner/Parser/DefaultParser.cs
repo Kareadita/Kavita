@@ -3,6 +3,7 @@ using System.Linq;
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
+#nullable enable
 
 public interface IDefaultParser
 {

@@ -2,6 +2,7 @@
 using System.IO;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class FileInfoExtensions
 {

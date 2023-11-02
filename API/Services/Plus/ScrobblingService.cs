@@ -22,6 +22,7 @@ using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
+#nullable enable
 
 /// <summary>
 /// Misleading name but is the source of data (like a review coming from AniList)

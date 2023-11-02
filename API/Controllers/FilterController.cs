@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// This is responsible for Filter caching
 /// </summary>

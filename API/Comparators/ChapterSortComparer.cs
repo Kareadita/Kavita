@@ -2,6 +2,8 @@
 
 namespace API.Comparators;
 
+#nullable enable
+
 /// <summary>
 /// Sorts chapters based on their Number. Uses natural ordering of doubles.
 /// </summary>

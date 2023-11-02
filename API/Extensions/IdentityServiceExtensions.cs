@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class IdentityServiceExtensions
 {

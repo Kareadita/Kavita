@@ -12,6 +12,7 @@ using API.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;
+#nullable enable
 
 public static class QueryableExtensions
 {

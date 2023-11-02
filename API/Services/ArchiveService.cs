@@ -18,6 +18,8 @@ using SharpCompress.Common;
 
 namespace API.Services;
 
+#nullable enable
+
 public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);

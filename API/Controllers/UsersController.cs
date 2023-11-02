@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 [Authorize]
 public class UsersController : BaseApiController
 {

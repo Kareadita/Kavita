@@ -24,6 +24,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class SettingsController : BaseApiController
 {
     private readonly ILogger<SettingsController> _logger;

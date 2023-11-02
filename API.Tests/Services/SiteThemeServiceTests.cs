@@ -23,7 +23,7 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
 
-    protected SiteThemeServiceTest(ITestOutputHelper testOutputHelper) : base()
+    protected SiteThemeServiceTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }
@@ -56,7 +56,7 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         });
         await _context.SaveChangesAsync();
 
-        var ex = await Assert.ThrowsAsync<KavitaException>(async () => await siteThemeService.UpdateDefault(10));
+        var ex = await Assert.ThrowsAsync<KavitaException>(() => siteThemeService.UpdateDefault(10));
         Assert.Equal("Theme file missing or invalid", ex.Message);
 
     }

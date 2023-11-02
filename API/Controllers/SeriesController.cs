@@ -28,6 +28,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class SeriesController : BaseApiController
 {
     private readonly ILogger<SeriesController> _logger;

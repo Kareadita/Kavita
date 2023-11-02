@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// Responsible interacting and creating Devices
 /// </summary>

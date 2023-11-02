@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
+#nullable enable
+
 public interface IAccountService
 {
     Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);

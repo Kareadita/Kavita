@@ -4,6 +4,7 @@ using API.Entities;
 using API.Entities.Enums;
 
 namespace API.Extensions.QueryExtensions;
+#nullable enable
 
 /// <summary>
 /// Responsible for restricting Entities based on an AgeRestriction

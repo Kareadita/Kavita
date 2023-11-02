@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Extensions;
 
 namespace API.Services.Tasks.Scanner.Parser;
+#nullable enable
 
 public static class Parser
 {

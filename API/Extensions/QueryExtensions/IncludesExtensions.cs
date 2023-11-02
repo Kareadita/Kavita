@@ -4,6 +4,7 @@ using API.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;
+#nullable enable
 
 /// <summary>
 /// All extensions against IQueryable that enables the dynamic including based on bitwise flag pattern

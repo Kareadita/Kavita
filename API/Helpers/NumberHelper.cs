@@ -1,4 +1,5 @@
 ﻿namespace API.Helpers;
+#nullable enable
 
 public static class NumberHelper
 {

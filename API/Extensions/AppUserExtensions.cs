@@ -4,6 +4,7 @@ using API.Entities;
 using API.Helpers;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class AppUserExtensions
 {

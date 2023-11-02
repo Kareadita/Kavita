@@ -4,6 +4,7 @@ using API.Entities.Interfaces;
 using API.Services;
 
 namespace API.Helpers;
+#nullable enable
 
 public interface ICacheHelper
 {

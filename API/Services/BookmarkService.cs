@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
+#nullable enable
+
 public interface IBookmarkService
 {
     Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark> bookmarks);

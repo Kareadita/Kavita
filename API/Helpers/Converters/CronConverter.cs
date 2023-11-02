@@ -2,6 +2,7 @@
 using Hangfire;
 
 namespace API.Helpers.Converters;
+#nullable enable
 
 public static class CronConverter
 {

@@ -4,6 +4,7 @@ using API.DTOs.Filtering;
 using API.Entities.Enums;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class FilterDtoExtensions
 {

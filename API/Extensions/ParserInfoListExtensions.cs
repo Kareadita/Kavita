@@ -4,6 +4,7 @@ using API.Entities;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class ParserInfoListExtensions
 {

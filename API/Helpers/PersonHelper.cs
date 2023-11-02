@@ -8,6 +8,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 
 namespace API.Helpers;
+#nullable enable
 
 public static class PersonHelper
 {
@@ -29,6 +30,7 @@ public static class PersonHelper
         foreach (var name in names)
         {
             var normalizedName = name.ToNormalized();
+            // BUG: Doesn't this create a duplicate entry because allPeopleTypeRoles is a different instance?
             var person = allPeopleTypeRole.Find(p =>
                 p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)

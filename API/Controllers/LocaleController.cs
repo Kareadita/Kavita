@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class LocaleController : BaseApiController
 {
     private readonly ILocalizationService _localizationService;

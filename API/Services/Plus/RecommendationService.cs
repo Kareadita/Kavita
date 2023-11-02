@@ -18,6 +18,7 @@ using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
+#nullable enable
 
 public record PlusSeriesDto
 {

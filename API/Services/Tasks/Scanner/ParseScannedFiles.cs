@@ -12,6 +12,7 @@ using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
+#nullable enable
 
 public class ParsedSeries
 {

@@ -4,11 +4,12 @@ using API.Entities;
 using API.Extensions.QueryExtensions;
 
 namespace API.Extensions.QueryExtensions.Filtering;
+#nullable enable
 
 public class BookmarkSeriesPair
 {
-    public AppUserBookmark Bookmark { get; set; }
-    public Series Series { get; set; }
+    public AppUserBookmark Bookmark { get; set; } = null!;
+    public Series Series { get; set; } = null!;
 }
 
 public static class BookmarkSort

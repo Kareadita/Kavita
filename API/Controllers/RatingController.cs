@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// Responsible for providing external ratings for Series
 /// </summary>
