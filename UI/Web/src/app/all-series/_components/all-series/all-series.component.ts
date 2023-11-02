@@ -166,6 +166,7 @@ export class AllSeriesComponent implements OnInit {
   loadPage() {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.loadingSeries = true;
+    this.title = this.route.snapshot.queryParamMap.get('title') || this.filter?.name || translate('all-series.title');
     this.cdRef.markForCheck();
     this.seriesService.getAllSeriesV2(undefined, undefined, this.filter!).pipe(take(1)).subscribe(series => {
       this.series = series.result;

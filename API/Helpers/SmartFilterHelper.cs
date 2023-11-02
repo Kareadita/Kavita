@@ -129,7 +129,7 @@ public static class SmartFilterHelper
 
     private static SortOptions DecodeSortOptions(string encodedSortOptions)
     {
-        var parts = encodedSortOptions.Split(InnerStatementSeparator);
+        var parts = Uri.UnescapeDataString(encodedSortOptions).Split(InnerStatementSeparator);
         var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith(SortFieldKey));
         var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith(IsAscendingKey));
 
