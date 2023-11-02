@@ -2078,7 +2078,7 @@
         "tags": [
           "Filter"
         ],
-        "summary": "Decodes the filter.",
+        "summary": "Decodes the Filter",
         "requestBody": {
           "description": "",
           "content": {
@@ -14557,7 +14557,8 @@
             "nullable": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "For requesting an encoded filter to be decoded"
       },
       "DeleteSeriesDto": {
         "type": "object",

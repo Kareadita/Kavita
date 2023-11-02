@@ -21,8 +21,8 @@ public static class SmartFilterHelper
     private const string StatementComparisonKey = "comparison=";
     private const string StatementFieldKey = "field=";
     private const string StatementValueKey = "value=";
-    private const string StatementSeparator = "\ufffd";
-    private const string InnerStatementSeparator = "¦";
+    public const string StatementSeparator = "\ufffd";
+    public const string InnerStatementSeparator = "¦";
 
     public static FilterV2Dto Decode(string? encodedFilter)
     {

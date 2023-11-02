@@ -241,6 +241,9 @@ public class Startup
                     // v0.7.9
                     await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
 
+                    // v0.7.11
+                    await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();

@@ -1,15 +1,14 @@
 ﻿using System.Linq;
 using API.DTOs.Filtering;
 using API.Entities;
-using API.Extensions.QueryExtensions;
 
 namespace API.Extensions.QueryExtensions.Filtering;
 #nullable enable
 
 public class BookmarkSeriesPair
 {
-    public AppUserBookmark Bookmark { get; set; } = null!;
-    public Series Series { get; set; } = null!;
+    public AppUserBookmark Bookmark { get; init; } = null!;
+    public Series Series { get; init; } = null!;
 }
 
 public static class BookmarkSort
