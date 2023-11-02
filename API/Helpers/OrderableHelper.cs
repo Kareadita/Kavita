@@ -2,6 +2,7 @@
 using API.Entities;
 
 namespace API.Helpers;
+#nullable enable
 
 public static class OrderableHelper
 {

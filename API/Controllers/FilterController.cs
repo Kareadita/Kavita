@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Dashboard;
@@ -10,10 +9,11 @@ using API.DTOs.Filtering.v2;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
-using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
+
+#nullable enable
 
 /// <summary>
 /// This is responsible for Filter caching
@@ -21,12 +21,10 @@ namespace API.Controllers;
 public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
 
-    public FilterController(IUnitOfWork unitOfWork, IEasyCachingProviderFactory cacheFactory)
+    public FilterController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _cacheFactory = cacheFactory;
     }
 
     /// <summary>
@@ -92,5 +90,27 @@ public class FilterController : BaseApiController
         _unitOfWork.AppUserSmartFilterRepository.Delete(filter);
         await _unitOfWork.CommitAsync();
         return Ok();
+    }
+
+    /// <summary>
+    /// Encode the Filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("encode")]
+    public ActionResult<string> EncodeFilter(FilterV2Dto dto)
+    {
+        return Ok(SmartFilterHelper.Encode(dto));
+    }
+
+    /// <summary>
+    /// Decodes the Filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("decode")]
+    public ActionResult<FilterV2Dto> DecodeFilter(DecodeFilterDto dto)
+    {
+        return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
     }
 }

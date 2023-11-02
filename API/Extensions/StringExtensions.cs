@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class StringExtensions
 {

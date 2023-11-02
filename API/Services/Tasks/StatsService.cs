@@ -19,6 +19,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
 
+#nullable enable
+
 public interface IStatsService
 {
     Task Send();

@@ -1,16 +1,14 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {map, tap} from 'rxjs/operators';
-import {of, ReplaySubject, switchMap} from 'rxjs';
+import {tap} from 'rxjs/operators';
+import {of} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {Genre} from '../_models/metadata/genre';
-import {AgeRating} from '../_models/metadata/age-rating';
 import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
 import {Language} from '../_models/metadata/language';
 import {PublicationStatusDto} from '../_models/metadata/publication-status-dto';
 import {Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
-import {TextResonse} from '../_types/text-response';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
 import {Router} from "@angular/router";
@@ -92,10 +90,6 @@ export class MetadataService {
   getAllPeopleByRole(role: PersonRole) {
     return this.httpClient.get<Array<Person>>(this.baseUrl + 'metadata/people-by-role?role=' + role);
   }
-
-  // getChapterSummary(chapterId: number) {
-  //   return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, TextResonse);
-  // }
 
   createDefaultFilterDto(): SeriesFilterV2 {
     return {

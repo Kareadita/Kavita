@@ -13,6 +13,7 @@ using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
+#nullable enable
 
 internal class RegisterLicenseResponseDto
 {

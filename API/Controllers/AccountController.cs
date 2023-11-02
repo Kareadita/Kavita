@@ -29,6 +29,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// All Account matters
 /// </summary>

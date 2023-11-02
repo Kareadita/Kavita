@@ -13,6 +13,8 @@ using MimeTypes;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// Responsible for servicing up images stored in Kavita for entities
 /// </summary>

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using VersOne.Epub;
 
 namespace API.Services.Tasks.Metadata;
+#nullable enable
 
 public interface IWordCountAnalyzerService
 {

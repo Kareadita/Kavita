@@ -9,7 +9,6 @@ using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions.Filtering;
-
 #nullable enable
 
 public static class SeriesFilter

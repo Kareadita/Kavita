@@ -6,6 +6,7 @@ using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers;
+#nullable enable
 
 public static class ParserInfoHelpers
 {

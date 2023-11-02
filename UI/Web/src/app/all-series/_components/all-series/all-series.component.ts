@@ -47,7 +47,7 @@ export class AllSeriesComponent implements OnInit {
   title: string = translate('all-series.title');
   series: Series[] = [];
   loadingSeries = false;
-  pagination!: Pagination;
+  pagination: Pagination = new Pagination();
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -113,20 +113,18 @@ export class AllSeriesComponent implements OnInit {
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.title = this.route.snapshot.queryParamMap.get('title') || this.title;
-    this.titleService.setTitle('Kavita - ' + this.title);
+    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+      this.filter = filter;
 
-    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+      this.title = this.route.snapshot.queryParamMap.get('title') || this.filter.name || this.title;
+      this.titleService.setTitle('Kavita - ' + this.title);
 
-    this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-    if (this.filter.statements.length === 0) {
-      this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    }
-    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-    this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    this.filterSettings.presetsV2 =  this.filter;
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.filterSettings.presetsV2 =  this.filter;
 
-    this.cdRef.markForCheck();
+      this.cdRef.markForCheck();
+    });
   }
 
   ngOnInit(): void {
@@ -155,16 +153,20 @@ export class AllSeriesComponent implements OnInit {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    if (data.isFirst) {
+      this.loadPage();
+      return;
     }
 
-    this.loadPage();
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
   }
 
   loadPage() {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.loadingSeries = true;
+    this.title = this.route.snapshot.queryParamMap.get('title') || this.filter?.name || translate('all-series.title');
     this.cdRef.markForCheck();
     this.seriesService.getAllSeriesV2(undefined, undefined, this.filter!).pipe(take(1)).subscribe(series => {
       this.series = series.result;

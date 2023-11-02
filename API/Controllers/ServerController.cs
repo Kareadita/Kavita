@@ -20,12 +20,13 @@ using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using MimeTypes;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
+
+#nullable enable
 
 [Authorize(Policy = "RequireAdminRole")]
 public class ServerController : BaseApiController
@@ -286,8 +287,6 @@ public class ServerController : BaseApiController
         if (emailServiceUrl.Equals(EmailService.DefaultApiUrl)) return Ok(null);
 
         return Ok(await _emailService.GetVersion(emailServiceUrl));
-
     }
-
 
 }

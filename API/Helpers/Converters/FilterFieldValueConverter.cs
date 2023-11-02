@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Extensions;
 
 namespace API.Helpers.Converters;
+#nullable enable
 
 public static class FilterFieldValueConverter
 {

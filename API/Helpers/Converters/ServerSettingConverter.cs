@@ -6,6 +6,7 @@ using API.Entities.Enums;
 using AutoMapper;
 
 namespace API.Helpers.Converters;
+#nullable enable
 
 public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>, ServerSettingDto>
 {

@@ -56,7 +56,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   isLoading: boolean = true;
   series: Array<Series> = [];
-  pagination!: Pagination;
+  pagination: Pagination = new Pagination();
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
@@ -106,17 +106,15 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 
-      this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+        this.filter = filter;
 
-      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      if (this.filter.statements.length === 0) {
-        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      }
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      this.filterSettings.presetsV2 =  this.filter;
+        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+        this.filterSettings.presetsV2 =  this.filter;
 
-      this.cdRef.markForCheck();
+        this.cdRef.markForCheck();
+      });
 
       this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
         if (event.event === EVENTS.SeriesRemoved) {
@@ -187,11 +185,14 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    if (data.isFirst) {
+      this.loadPage();
+      return;
     }
 
-    this.loadPage();
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
   }
 }
 

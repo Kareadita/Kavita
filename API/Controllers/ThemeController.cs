@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class ThemeController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

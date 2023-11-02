@@ -2,6 +2,8 @@
 
 namespace API.Comparators;
 
+#nullable enable
+
 public class NumericComparer : IComparer
 {
 

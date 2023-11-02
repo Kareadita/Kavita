@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class StatsController : BaseApiController
 {
     private readonly IStatisticService _statService;

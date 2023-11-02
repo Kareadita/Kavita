@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class AdminController : BaseApiController
 {
     private readonly UserManager<AppUser> _userManager;

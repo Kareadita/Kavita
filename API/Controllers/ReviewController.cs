@@ -18,6 +18,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class ReviewController : BaseApiController
 {
     private readonly ILogger<ReviewController> _logger;

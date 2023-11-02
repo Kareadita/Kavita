@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
@@ -10,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
+
+#nullable enable
 
 public class PluginController : BaseApiController
 {
@@ -43,7 +46,7 @@ public class PluginController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0)
         {
-            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {Information}", pluginName, new
+            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", Uri.EscapeDataString(pluginName), new
             {
                 IpAddress = ipAddress,
                 UserAgent = userAgent,
@@ -52,7 +55,7 @@ public class PluginController : BaseApiController
             throw new KavitaUnauthenticatedUserException();
         }
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user!.UserName, userId);
+        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", Uri.EscapeDataString(pluginName), user!.UserName, userId);
         return new UserDto
         {
             Username = user.UserName!,

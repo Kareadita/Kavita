@@ -5,6 +5,7 @@ using API.Entities;
 using API.Entities.Enums;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class VolumeListExtensions
 {
