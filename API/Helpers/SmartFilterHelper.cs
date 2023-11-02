@@ -13,8 +13,8 @@ public static class SmartFilterHelper
     private const string StatementsKey = "stmts=";
     private const string LimitToKey = "limitTo=";
     private const string CombinationKey = "combination=";
-    private const string StatementSeparator = "\ufffd";
-    private const string InnerStatementSeparator = "¦";
+    public const string StatementSeparator = "\ufffd";
+    public const string InnerStatementSeparator = "¦";
 
     public static FilterV2Dto Decode(string? encodedFilter)
     {
