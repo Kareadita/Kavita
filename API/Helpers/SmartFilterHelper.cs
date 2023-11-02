@@ -5,24 +5,16 @@ using System.Web;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 
-#nullable enable
-
 namespace API.Helpers;
 
 public static class SmartFilterHelper
 {
     private const string SortOptionsKey = "sortOptions=";
-    private const string NameKey = "name=";
-    private const string SortFieldKey = "sortField=";
-    private const string IsAscendingKey = "isAscending=";
     private const string StatementsKey = "stmts=";
     private const string LimitToKey = "limitTo=";
     private const string CombinationKey = "combination=";
-    private const string StatementComparisonKey = "comparison=";
-    private const string StatementFieldKey = "field=";
-    private const string StatementValueKey = "value=";
-    public const string StatementSeparator = "\ufffd";
-    public const string InnerStatementSeparator = "¦";
+    private const string StatementSeparator = "\ufffd";
+    private const string InnerStatementSeparator = "¦";
 
     public static FilterV2Dto Decode(string? encodedFilter)
     {
@@ -31,7 +23,7 @@ public static class SmartFilterHelper
             return new FilterV2Dto(); // Create a default filter if the input is empty
         }
 
-        var parts = encodedFilter.Split('&');
+        string[] parts = encodedFilter.Split('&');
         var filter = new FilterV2Dto();
 
         foreach (var part in parts)
@@ -52,7 +44,7 @@ public static class SmartFilterHelper
             {
                 filter.Statements = DecodeFilterStatementDtos(part.Substring(StatementsKey.Length));
             }
-            else if (part.StartsWith(NameKey))
+            else if (part.StartsWith("name="))
             {
                 filter.Name = HttpUtility.UrlDecode(part.Substring(5));
             }
@@ -61,7 +53,7 @@ public static class SmartFilterHelper
         return filter;
     }
 
-    public static string Encode(FilterV2Dto? filter)
+    public static string Encode(FilterV2Dto filter)
     {
         if (filter == null)
             return string.Empty;
@@ -75,17 +67,17 @@ public static class SmartFilterHelper
         return $"{EncodeName(filter.Name)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
     }
 
-    private static string EncodeName(string? name)
+    private static string EncodeName(string name)
     {
-        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"{NameKey}{Uri.EscapeDataString(name)}&";
+        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"name={Uri.EscapeDataString(name)}&";
     }
 
     private static string EncodeSortOptions(SortOptions sortOptions)
     {
-        return Uri.EscapeDataString($"{SortFieldKey}{(int) sortOptions.SortField}{InnerStatementSeparator}{IsAscendingKey}{sortOptions.IsAscending}");
+        return Uri.EscapeDataString($"sortField={(int) sortOptions.SortField}{InnerStatementSeparator}isAscending={sortOptions.IsAscending}");
     }
 
-    private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto>? statements)
+    private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto> statements)
     {
         if (statements == null || statements.Count == 0)
             return string.Empty;
@@ -96,17 +88,16 @@ public static class SmartFilterHelper
 
     private static string EncodeFilterStatementDto(FilterStatementDto statement)
     {
-
-        var encodedComparison = $"{StatementComparisonKey}{(int) statement.Comparison}";
-        var encodedField = $"{StatementFieldKey}{(int) statement.Field}";
-        var encodedValue = $"{StatementValueKey}{Uri.EscapeDataString(statement.Value)}";
+        var encodedComparison = $"comparison={(int) statement.Comparison}";
+        var encodedField = $"field={(int) statement.Field}";
+        var encodedValue = $"value={Uri.EscapeDataString(statement.Value)}";
 
         return Uri.EscapeDataString($"{encodedComparison}{InnerStatementSeparator}{encodedField}{InnerStatementSeparator}{encodedValue}");
     }
 
     private static List<FilterStatementDto> DecodeFilterStatementDtos(string encodedStatements)
     {
-        var statementStrings = Uri.UnescapeDataString(encodedStatements).Split(StatementSeparator);
+        string[] statementStrings = Uri.UnescapeDataString(encodedStatements).Split(StatementSeparator);
 
         var statements = new List<FilterStatementDto>();
 
@@ -129,22 +120,22 @@ public static class SmartFilterHelper
 
     private static SortOptions DecodeSortOptions(string encodedSortOptions)
     {
-        var parts = Uri.UnescapeDataString(encodedSortOptions).Split(InnerStatementSeparator);
-        var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith(SortFieldKey));
-        var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith(IsAscendingKey));
+        string[] parts = encodedSortOptions.Split(InnerStatementSeparator);
+        var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith("sortField="));
+        var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith("isAscending="));
 
         var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
-        if (sortFieldPart == null)
+        if (sortFieldPart != null)
         {
-            return new SortOptions();
+            var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);
+
+            return new SortOptions
+            {
+                SortField = sortField,
+                IsAscending = isAscending
+            };
         }
 
-        var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);
-
-        return new SortOptions
-        {
-            SortField = sortField,
-            IsAscending = isAscending
-        };
+        return null;
     }
 }
