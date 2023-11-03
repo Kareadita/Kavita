@@ -3,12 +3,13 @@
     <h4>{{t('title')}}</h4>
 
     <ng-container *ngIf="(dayBreakdown$ | async) as days">
+      <div *ngIf="days.length === 0">No Data</div>
       <div class="day-breakdown-chart">
         <table class="charts-css column show-labels show-primary-axis show-4-secondary-axes data-spacing-5">
           <tbody>
             <tr *ngFor="let day of days">
               <th scope="row"> {{day.name}} </th>
-              <td style="{{'--size: ' + (day.value * 0.01)}}"> <span class="data"> {{day.value}}</span> </td>
+              <td style="{{'--size: ' + (day.value / max)}}"> <span class="data"> {{day.value}}</span> </td>
             </tr>
           </tbody>
         </table>
