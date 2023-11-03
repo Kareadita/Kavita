@@ -40,18 +40,16 @@ export class UserLoginComponent implements OnInit {
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
     private toastr: ToastrService, private navService: NavService,
     private readonly cdRef: ChangeDetectorRef, private route: ActivatedRoute) {
-      this.navService.showNavBar();
+      this.navService.hideNavBar();
       this.navService.hideSideNav();
     }
 
   ngOnInit(): void {
-    this.navService.showNavBar();
-    this.navService.hideSideNav();
-    this.cdRef.markForCheck();
-
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
+        this.navService.showNavBar();
         this.navService.showSideNav();
+        this.router.navigateByUrl('/libraries');
         this.cdRef.markForCheck();
       }
     });
