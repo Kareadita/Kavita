@@ -139,14 +139,14 @@
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
-                <div class="card-container row g-0" #container>
+                <div class="card-container row g-0">
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
 
                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
-                      <ng-container [ngTemplateOutlet]="nonChapterVolume" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                      <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
                     </ng-container>
                     <ng-template #chapterCardItem>
-                      <ng-container [ngTemplateOutlet]="nonSpecialChapter" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
+                      <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
                     </ng-template>
 
                   </ng-container>
@@ -186,11 +186,11 @@
         <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
           <a ngbNavLink>{{libraryType === LibraryType.Book ? t('books-tab') : t('volumes-tab')}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="volumes"  [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
-                <div class="card-container row g-0" #container>
+                <div class="card-container row g-0">
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
-                    <ng-container [ngTemplateOutlet]="nonChapterVolume" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
+                    <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
                   </ng-container>
                   <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
                 </div>
@@ -217,9 +217,9 @@
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else chapterListLayout">
-                <div class="card-container row g-0" #container>
+                <div class="card-container row g-0">
                   <div *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                    <ng-container [ngTemplateOutlet]="nonSpecialChapter" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
+                    <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
                   </div>
                   <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
                 </div>
@@ -246,9 +246,9 @@
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else specialListLayout">
-                <div class="card-container row g-0" #container>
+                <div class="card-container row g-0">
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                    <ng-container [ngTemplateOutlet]="specialChapter" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
+                    <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
                   </ng-container>
                 </div>
               </ng-container>
@@ -273,7 +273,7 @@
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock">
-              <div class="card-container row g-0" #container>
+              <div class="card-container row g-0">
                 <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentify">
                   <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
                 </ng-container>
@@ -287,7 +287,7 @@
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else recListLayout">
-                <div class="card-container row g-0" #container>
+                <div class="card-container row g-0">
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
                     <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
                       <app-series-card class="col-auto mt-2 mb-2" [data]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
@@ -348,7 +348,7 @@
 
 </ng-container>
 
-<ng-template #nonSpecialChapter let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+<ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
   <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                  [imageUrl]="imageService.getChapterCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
@@ -358,7 +358,7 @@
   </app-card-item>
 </ng-template>
 
-<ng-template #nonChapterVolume let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+<ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
   <app-card-item *ngIf="item.number !== 0" class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                  [imageUrl]="imageService.getVolumeCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
@@ -367,7 +367,7 @@
   </app-card-item>
 </ng-template>
 
-<ng-template #specialChapter let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+<ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
   <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
                  [imageUrl]="imageService.getChapterCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
