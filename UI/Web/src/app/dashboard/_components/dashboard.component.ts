@@ -32,15 +32,19 @@ import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {SeriesRemovedEvent} from "../../_models/events/series-removed-event";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {fadeInAnimation} from "angular-animations";
 
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent]
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent],
+  animations: [
+    fadeInAnimation()
+  ]
 })
 export class DashboardComponent implements OnInit {
 
@@ -58,6 +62,9 @@ export class DashboardComponent implements OnInit {
   genre: Genre | undefined;
   refreshStreams$ = new Subject<void>();
   refreshStreamsFromDashboardUpdate$ = new Subject<void>();
+
+  streamCount: number = 0;
+  streamsLoaded: number = 0;
 
 
   /**
@@ -83,8 +90,7 @@ export class DashboardComponent implements OnInit {
 
     this.refreshStreamsFromDashboardUpdate$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(1000),
       tap(() => {
-        console.log('Loading Dashboard')
-        this.loadDashboard()
+        this.loadDashboard();
       }))
       .subscribe();
 
@@ -96,6 +102,7 @@ export class DashboardComponent implements OnInit {
 
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+      // TODO: Make the event have a stream Id so I can refresh just that stream
       if (res.event === EVENTS.DashboardUpdate) {
         this.refreshStreamsFromDashboardUpdate$.next();
       } else if (res.event === EVENTS.SeriesAdded) {
@@ -121,6 +128,7 @@ export class DashboardComponent implements OnInit {
     this.isLoadingAdmin = true;
     this.cdRef.markForCheck();
 
+    // TODO: We can likely reduce this to something faster
     this.libraries$ = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef), tap((libs) => {
       this.isLoadingAdmin = false;
       this.cdRef.markForCheck();
@@ -133,22 +141,23 @@ export class DashboardComponent implements OnInit {
     this.cdRef.markForCheck();
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
+      this.streamCount = streams.length;
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
             s.api = this.seriesService.getOnDeck(0, 1, 20)
-                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.NewlyAdded:
             s.api = this.seriesService.getRecentlyAdded(1, 20)
-                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.RecentlyUpdated:
-            s.api = this.seriesService.getRecentlyUpdatedSeries();
+            s.api = this.seriesService.getRecentlyUpdatedSeries().pipe(tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.SmartFilter:
             s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
-                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.MoreInGenre:
             s.api = this.metadataService.getAllGenres().pipe(
@@ -158,6 +167,7 @@ export class DashboardComponent implements OnInit {
                 }),
                 switchMap(genre => this.recommendationService.getMoreIn(0, genre.id, 0, 30)),
                 map(p => p.result),
+                tap(() => this.increment()),
                 takeUntilDestroyed(this.destroyRef),
                 shareReplay({bufferSize: 1, refCount: true})
             );
@@ -167,6 +177,11 @@ export class DashboardComponent implements OnInit {
       this.isLoadingDashboard = false;
       this.cdRef.markForCheck();
     });
+  }
+
+  increment() {
+    this.streamsLoaded++;
+    this.cdRef.markForCheck();
   }
 
   reloadStream(streamId: number) {

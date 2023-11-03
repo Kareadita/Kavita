@@ -82,5 +82,5 @@
 
 </ng-container>
 
-  <app-loading [loading]="isLoadingDashboard"></app-loading>
+  <app-loading [loading]="isLoadingDashboard || (streamCount !== streamsLoaded)"></app-loading>
 </ng-container>
