@@ -133,7 +133,7 @@
 
     <ng-container *ngIf="series">
       <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
           <a ngbNavLink>{{t('storyline-tab')}}</a>
           <ng-template ngbNavContent>
