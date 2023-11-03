@@ -6,6 +6,7 @@ using API.Extensions;
 using API.Services.Tasks.Scanner;
 
 namespace API.Helpers;
+#nullable enable
 
 public static class SeriesHelper
 {

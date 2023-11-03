@@ -136,7 +136,7 @@ export class NavHeaderComponent implements OnInit {
     filter.statements = [statement];
     params['page'] = 1;
     this.clearSearch();
-    this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params);
+    this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
   }
 
   goToOther(field: FilterField, value: string) {

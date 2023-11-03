@@ -72,7 +72,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   collectionTag!: CollectionTag;
   isLoading: boolean = true;
   series: Array<Series> = [];
-  pagination!: Pagination;
+  pagination: Pagination = new Pagination();
   collectionTagActions: ActionItem<CollectionTag>[] = [];
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
@@ -168,19 +168,19 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+        this.filter = filter;
 
-      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
-        this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
-      }
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
-      this.filterSettings.presetsV2 =  this.filter;
+        if (this.filter.statements.filter(stmt => stmt.field === FilterField.CollectionTags).length === 0) {
+          this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        }
+        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        this.filterSettings.presetsV2 =  this.filter;
+        this.cdRef.markForCheck();
 
-      this.cdRef.markForCheck();
-
-      this.updateTag(tagId);
+        this.updateTag(tagId);
+      });
   }
 
   ngOnInit(): void {
@@ -252,11 +252,14 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
-    if (!data.isFirst) {
-      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    if (data.isFirst) {
+      this.loadPage();
+      return;
     }
 
-    this.loadPage();
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+      this.loadPage();
+    });
   }
 
   handleCollectionActionCallback(action: ActionItem<CollectionTag>, collectionTag: CollectionTag) {
@@ -284,4 +287,5 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  protected readonly undefined = undefined;
 }

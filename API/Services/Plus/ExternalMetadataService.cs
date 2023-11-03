@@ -14,6 +14,7 @@ using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
+#nullable enable
 
 /// <summary>
 /// Used for matching and fetching metadata on a series

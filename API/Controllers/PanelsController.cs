@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// For the Panels app explicitly
 /// </summary>

@@ -115,7 +115,7 @@ export class ServerStatsComponent {
       ref.componentInstance.items = genres.map(t => t.title);
       ref.componentInstance.title = translate('server-stats.genres');
       ref.componentInstance.clicked = (item: string) => {
-        this.filterUtilityService.applyFilter(['all-series'], FilterField.Genres, FilterComparison.Contains, genres.filter(g => g.title === item)[0].id + '');
+        this.filterUtilityService.applyFilter(['all-series'], FilterField.Genres, FilterComparison.Contains, genres.filter(g => g.title === item)[0].id + '').subscribe();
       };
     });
   }
@@ -126,7 +126,7 @@ export class ServerStatsComponent {
       ref.componentInstance.items = tags.map(t => t.title);
       ref.componentInstance.title = translate('server-stats.tags');
       ref.componentInstance.clicked = (item: string) => {
-        this.filterUtilityService.applyFilter(['all-series'], FilterField.Tags, FilterComparison.Contains, tags.filter(g => g.title === item)[0].id + '');
+        this.filterUtilityService.applyFilter(['all-series'], FilterField.Tags, FilterComparison.Contains, tags.filter(g => g.title === item)[0].id + '').subscribe();
       };
     });
   }

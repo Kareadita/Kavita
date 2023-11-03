@@ -6,6 +6,7 @@ using static System.Char;
 
 namespace API.Comparators;
 
+
 public static class StringLogicalComparer
 {
     public static int Compare(string s1, string s2)

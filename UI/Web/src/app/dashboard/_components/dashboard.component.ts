@@ -156,8 +156,11 @@ export class DashboardComponent implements OnInit {
             s.api = this.seriesService.getRecentlyUpdatedSeries().pipe(tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.SmartFilter:
-            s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
-                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
+              switchMap(filter => {
+                return this.seriesService.getAllSeriesV2(0, 20, filter);
+              }))
+                .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.MoreInGenre:
             s.api = this.metadataService.getAllGenres().pipe(
@@ -210,7 +213,7 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
       }
-      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
       params['page'] = 1;
@@ -223,7 +226,7 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
       }
-      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     } else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
       params['page'] = 1;
@@ -233,14 +236,14 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.sortField = SortField.Created;
         filter.sortOptions.isAscending = false;
       }
-      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     } else if (sectionTitle.toLowerCase() === 'more in genre') {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('more-in-genre-title', {genre: this.genre?.title});
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
-      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
   }
 

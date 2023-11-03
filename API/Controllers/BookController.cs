@@ -14,6 +14,8 @@ using VersOne.Epub;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class BookController : BaseApiController
 {
     private readonly IBookService _bookService;

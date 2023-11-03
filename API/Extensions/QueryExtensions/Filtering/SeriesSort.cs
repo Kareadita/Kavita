@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using API.DTOs.Filtering;
 using API.Entities;
-using API.Extensions.QueryExtensions;
+
+namespace API.Extensions.QueryExtensions.Filtering;
+#nullable enable
 
 public static class SeriesSort
 {

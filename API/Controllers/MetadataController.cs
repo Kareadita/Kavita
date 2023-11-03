@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
 
 public class MetadataController : BaseApiController
 {

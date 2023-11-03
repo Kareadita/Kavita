@@ -24,12 +24,12 @@ export class MetadataDetailComponent {
   @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 
-  private readonly filterUtilitiesService = inject(FilterUtilitiesService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly TagBadgeCursor = TagBadgeCursor;
 
 
   goTo(queryParamName: FilterField, filter: any) {
     if (queryParamName === FilterField.None) return;
-    this.filterUtilitiesService.applyFilter(['library', this.libraryId], queryParamName, FilterComparison.Equal, filter);
+    this.filterUtilityService.applyFilter(['library', this.libraryId], queryParamName, FilterComparison.Equal, filter).subscribe();
   }
 }

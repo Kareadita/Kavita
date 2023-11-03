@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// All APIs related to downloading entities from the system. Requires Download Role or Admin Role.
 /// </summary>

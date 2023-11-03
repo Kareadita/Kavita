@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
+#nullable enable
 
 public interface ILibraryWatcher
 {

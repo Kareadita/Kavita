@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace API.Services.HostedServices;
+#nullable enable
 
 public class StartupTasksHostedService : IHostedService
 {

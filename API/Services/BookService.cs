@@ -29,6 +29,7 @@ using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
 
 namespace API.Services;
+
 #nullable enable
 
 public interface IBookService

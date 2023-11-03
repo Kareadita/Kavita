@@ -17,6 +17,8 @@ using Newtonsoft.Json;
 
 namespace API.Controllers;
 
+#nullable enable
+
 public class RecommendedController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

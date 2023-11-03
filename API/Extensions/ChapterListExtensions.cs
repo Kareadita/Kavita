@@ -5,6 +5,7 @@ using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class ChapterListExtensions
 {

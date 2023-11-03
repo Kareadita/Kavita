@@ -27,6 +27,8 @@ using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
 
+#nullable enable
+
 [Authorize]
 public class LibraryController : BaseApiController
 {

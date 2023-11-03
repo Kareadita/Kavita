@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class DateTimeExtensions
 {

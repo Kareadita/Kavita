@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// Responsible for all things Want To Read
 /// </summary>
@@ -42,7 +44,7 @@ public class WantToReadController : BaseApiController
     /// <returns></returns>
     [HttpPost]
     [Obsolete("use v2 instead")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams userParams, FilterDto filterDto)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams? userParams, FilterDto filterDto)
     {
         userParams ??= new UserParams();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(User.GetUserId(), userParams, filterDto);
@@ -60,7 +62,7 @@ public class WantToReadController : BaseApiController
     /// <param name="filterDto"></param>
     /// <returns></returns>
     [HttpPost("v2")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToReadV2([FromQuery] UserParams userParams, FilterV2Dto filterDto)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToReadV2([FromQuery] UserParams? userParams, FilterV2Dto filterDto)
     {
         userParams ??= new UserParams();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(User.GetUserId(), userParams, filterDto);

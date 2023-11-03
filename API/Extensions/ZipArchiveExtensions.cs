@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Linq;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class ZipArchiveExtensions
 {

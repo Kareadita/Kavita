@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using API.Comparators;
@@ -7,6 +6,7 @@ using API.Entities;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class SeriesExtensions
 {

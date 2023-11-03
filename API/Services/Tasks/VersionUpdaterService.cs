@@ -14,6 +14,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
 
+#nullable enable
+
 internal class GithubReleaseMetadata
 {
     /// <summary>

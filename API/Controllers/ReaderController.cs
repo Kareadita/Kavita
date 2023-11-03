@@ -26,6 +26,8 @@ using MimeTypes;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// For all things regarding reading, mainly focusing on non-Book related entities
 /// </summary>

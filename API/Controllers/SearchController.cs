@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 /// <summary>
 /// Responsible for the Search interface from the UI
 /// </summary>

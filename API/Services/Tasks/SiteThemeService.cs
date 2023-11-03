@@ -10,6 +10,7 @@ using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API.Services.Tasks;
+#nullable enable
 
 public interface IThemeService
 {

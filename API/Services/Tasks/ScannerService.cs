@@ -19,6 +19,8 @@ using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
+#nullable enable
+
 public interface IScannerService
 {
     /// <summary>

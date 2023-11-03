@@ -3,6 +3,7 @@ using API.DTOs.Scrobbling;
 using API.Entities.Enums;
 
 namespace API.Helpers;
+#nullable enable
 
 public static class LibraryTypeHelper
 {

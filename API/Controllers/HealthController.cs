@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+#nullable enable
+
 [AllowAnonymous]
 public class HealthController : BaseApiController
 {

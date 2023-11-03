@@ -22,8 +22,8 @@
     </div>
     <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
-    <app-card-detail-layout
-      header="Series"
+    <app-card-detail-layout *ngIf="filter"
+      [header]="t('series-header')"
       [isLoading]="isLoading"
       [items]="series"
       [pagination]="pagination"
