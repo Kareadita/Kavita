@@ -141,19 +141,14 @@
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
-                    <ng-container *ngIf="!item.isChapter; else chapterCardItem">
 
+                    <ng-container *ngIf="!item.isChapter; else chapterCardItem">
                       <ng-container [ngTemplateOutlet]="nonChapterVolume" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
-<!--                      <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number !== 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"-->
-<!--                                     [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"-->
-<!--                                     [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions"-->
-<!--                                     [count]="item.volume.chapters[0].files.length"-->
-<!--                                     (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)"-->
-<!--                                     [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>-->
                     </ng-container>
                     <ng-template #chapterCardItem>
                       <ng-container [ngTemplateOutlet]="nonSpecialChapter" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
                     </ng-template>
+
                   </ng-container>
                   <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
                 </div>
@@ -195,13 +190,7 @@
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
-                    <ng-container [ngTemplateOutlet]="nonChapterVolume" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
-<!--                    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"-->
-<!--                                   [imageUrl]="imageService.getVolumeCoverImage(item.id)"-->
-<!--                                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"-->
-<!--                                   (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)"-->
-<!--                                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">-->
-<!--                    </app-card-item>-->
+                    <ng-container [ngTemplateOutlet]="nonChapterVolume" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
                   </ng-container>
                   <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
                 </div>
@@ -230,7 +219,7 @@
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else chapterListLayout">
                 <div class="card-container row g-0" #container>
                   <div *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                    <ng-container [ngTemplateOutlet]="nonSpecialChapter" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
+                    <ng-container [ngTemplateOutlet]="nonSpecialChapter" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
                   </div>
                   <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
                 </div>
@@ -259,13 +248,7 @@
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else specialListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
-                                   [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                                   [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                                   [count]="item.files.length"
-                                   (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, chapters.length, $event)"
-                                   [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-                    </app-card-item>
+                    <ng-container [ngTemplateOutlet]="specialChapter" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
                   </ng-container>
                 </div>
               </ng-container>
@@ -365,28 +348,31 @@
 
 </ng-container>
 
-<ng-template #nonSpecialChapter let-item let-scroll="scroll" let-idx="idx" let-chaptersLength="chaptersLength">
+<ng-template #nonSpecialChapter let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
   <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                  [imageUrl]="imageService.getChapterCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
                  [count]="item.files.length"
-                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, chaptersLength, $event)"
+                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
                  [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-    <ng-container title>
-      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [includeVolume]="true"></app-entity-title>
-    </ng-container>
   </app-card-item>
 </ng-template>
 
-<ng-template #nonChapterVolume let-item let-scroll="scroll" let-idx="idx" let-volumesLength="volumesLength">
+<ng-template #nonChapterVolume let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
   <app-card-item *ngIf="item.number !== 0" class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                  [imageUrl]="imageService.getVolumeCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
-                 (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumesLength, $event)"
+                 (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
                  [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
   </app-card-item>
 </ng-template>
 
-<ng-template #specialChapter>
-
+<ng-template #specialChapter let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
+                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
+                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                 [count]="item.files.length"
+                 (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                 [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-card-item>
 </ng-template>
