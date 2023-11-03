@@ -78,10 +78,8 @@ public class StatisticService : IStatisticService
             .CountAsync();
 
         var lastActive = await _context.AppUserProgresses
-            .OrderByDescending(p => p.LastModified)
             .Where(p => p.AppUserId == userId)
-            .Select(p => p.LastModified)
-            .FirstOrDefaultAsync();
+            .MaxAsync(p => p.LastModified);
 
 
         // First get the total pages per library
@@ -103,15 +101,28 @@ public class StatisticService : IStatisticService
             })
             .ToListAsync();
 
-        var averageReadingTimePerWeek = _context.AppUserProgresses
+
+        // New solution. Calculate total hours then divide by number of weeks from time account was created (or min reading event) till now
+        var averageReadingTimePerWeek = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
                 (p, c) => new
                 {
-                    AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) * ((float) c.AvgHoursToRead)
+                    AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) *
+                                          ((float) c.AvgHoursToRead)
                 })
             .Select(x => x.AverageReadingHours)
-            .Average() * 7.0;
+            .SumAsync();
+
+        var earliestReadDate = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .MinAsync(p => p.Created);
+
+        var timeDifference = DateTime.Now - earliestReadDate;
+        var deltaWeeks = (int)Math.Ceiling(timeDifference.TotalDays / 7);
+
+        averageReadingTimePerWeek /= deltaWeeks;
+
 
         return new UserReadStatistics()
         {
