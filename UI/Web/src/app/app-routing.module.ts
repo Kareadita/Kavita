@@ -8,12 +8,12 @@ const routes: Routes = [
   {
     path: 'admin',
     canActivate: [AdminGuard],
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
+    loadChildren: () => import('./_routes/admin-routing.module').then(m => m.routes)
   },
   {
     path: 'preferences',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
+    loadChildren: () => import('./_routes/user-settings-routing.module').then(m => m.routes)
   },
   {
     path: 'collections',
@@ -48,10 +48,6 @@ const routes: Routes = [
     loadChildren: () => import('./_routes/want-to-read-routing.module').then(m => m.routes)
   },
   {
-    path: 'libraries', // TODO: libraries/ route is deprecated, we are switching to /home as it makes much more sense
-    loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
-  },
-  {
     path: 'home',
     loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
   },
@@ -63,28 +59,29 @@ const routes: Routes = [
       {
         path: ':libraryId',
         pathMatch: 'full',
-        loadChildren: () => import('../app/library-detail/library-detail.module').then(m => m.LibraryDetailModule)
+        loadChildren: () => import('./_routes/library-detail-routing.module').then(m => m.routes)
       },
       {
         path: ':libraryId/series/:seriesId',
         pathMatch: 'full',
-        loadChildren: () => import('../app/series-detail/series-detail.module').then(m => m.SeriesDetailModule)
+        loadComponent: () => import('../app/series-detail/_components/series-detail/series-detail.component').then(c => c.SeriesDetailComponent)
       },
       {
         path: ':libraryId/series/:seriesId/manga',
-        loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
+        loadChildren: () => import('./_routes/manga-reader.router.module').then(m => m.routes)
       },
       {
         path: ':libraryId/series/:seriesId/book',
-        loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
+        loadChildren: () => import('./_routes/book-reader.router.module').then(m => m.routes)
       },
       {
         path: ':libraryId/series/:seriesId/pdf',
-        loadChildren: () => import('../app/pdf-reader/pdf-reader.module').then(m => m.PdfReaderModule)
+        loadChildren: () => import('./_routes/pdf-reader.router.module').then(m => m.routes)
       },
     ]
   },
   {path: '**', pathMatch: 'full', redirectTo: 'home'},
+  {path: 'libraries', pathMatch: 'full', redirectTo: 'home'},
   {path: '**', pathMatch: 'prefix', redirectTo: 'home'},
 ];
 
