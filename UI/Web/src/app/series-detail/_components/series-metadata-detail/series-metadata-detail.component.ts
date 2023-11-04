@@ -1,17 +1,25 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { ReaderService } from 'src/app/_services/reader.service';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
+import {Router} from '@angular/router';
+import {ReaderService} from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
 import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
-import { UtilityService } from '../../../shared/_services/utility.service';
-import { MangaFormat } from '../../../_models/manga-format';
-import { ReadingList } from '../../../_models/reading-list';
-import { Series } from '../../../_models/series';
-import { SeriesMetadata } from '../../../_models/metadata/series-metadata';
-import { ImageService } from 'src/app/_services/image.service';
+import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';
+import {MangaFormat} from '../../../_models/manga-format';
+import {ReadingList} from '../../../_models/reading-list';
+import {Series} from '../../../_models/series';
+import {SeriesMetadata} from '../../../_models/metadata/series-metadata';
+import {ImageService} from 'src/app/_services/image.service';
 import {CommonModule} from "@angular/common";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
-import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {ExternalRatingComponent} from "../external-rating/external-rating.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
@@ -49,30 +57,32 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;
 
-  imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly router = inject(Router);
+  private readonly readerService = inject(ReaderService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   /**
    * Html representation of Series Summary
    */
   seriesSummary: string = '';
 
-  get LibraryType() { return LibraryType; }
-  get MangaFormat() { return MangaFormat; }
-  get TagBadgeCursor() { return TagBadgeCursor; }
-
-  get FilterField() {
-    return FilterField;
-  }
+  protected FilterField = FilterField;
+  protected LibraryType = LibraryType;
+  protected MangaFormat = MangaFormat;
+  protected TagBadgeCursor = TagBadgeCursor;
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
     return this.seriesMetadata?.webLinks.split(',') || [];
   }
 
-  constructor(public utilityService: UtilityService,
-    private router: Router, public readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {
-
+  constructor() {
+    // If on desktop, we can just have all the data expanded by default:
+    this.isCollapsed = this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop;
+    this.cdRef.markForCheck();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

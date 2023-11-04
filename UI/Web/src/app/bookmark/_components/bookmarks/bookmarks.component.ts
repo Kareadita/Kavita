@@ -66,7 +66,7 @@ export class BookmarksComponent implements OnInit {
 
   private readonly translocoService = inject(TranslocoService);
 
-  constructor(private readerService: ReaderService, private seriesService: SeriesService,
+  constructor(private readerService: ReaderService,
     private downloadService: DownloadService, private toastr: ToastrService,
     private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService,
     public imageService: ImageService, private actionFactoryService: ActionFactoryService,

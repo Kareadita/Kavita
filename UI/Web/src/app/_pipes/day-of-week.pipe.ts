@@ -1,10 +1,10 @@
-import {inject, Pipe, PipeTransform} from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import { DayOfWeek } from 'src/app/_services/statistics.service';
-import {translate, TranslocoService} from "@ngneat/transloco";
+import {translate} from "@ngneat/transloco";
 
 @Pipe({
-    name: 'dayOfWeek',
-    standalone: true
+  name: 'dayOfWeek',
+  standalone: true
 })
 export class DayOfWeekPipe implements PipeTransform {
 

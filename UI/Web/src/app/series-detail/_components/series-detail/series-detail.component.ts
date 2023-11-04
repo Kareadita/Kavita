@@ -343,7 +343,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null || libraryId == null) {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/home');
       return;
     }
 
@@ -352,7 +352,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
         if (seriesRemovedEvent.seriesId === this.seriesId) {
           this.toastr.info(this.translocoService.translate('errors.series-doesnt-exist'));
-          this.router.navigateByUrl('/libraries');
+          this.router.navigateByUrl('/home');
         }
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
@@ -589,7 +589,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       });
 
       this.seriesService.getSeriesDetail(this.seriesId).pipe(catchError(err => {
-        this.router.navigateByUrl('/libraries');
+        this.router.navigateByUrl('/home');
         return of(null);
       })).subscribe(detail => {
         if (detail == null) return;
@@ -618,7 +618,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.cdRef.markForCheck();
       });
     }, err => {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/home');
     });
   }
 

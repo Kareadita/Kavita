@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { FilterPipe } from '../../../../pipe/filter.pipe';
+import { FilterPipe } from '../../../../_pipes/filter.pipe';
 import { NgIf, NgFor } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 

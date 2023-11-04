@@ -6,7 +6,6 @@ import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/oper
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
-import {Series} from 'src/app/_models/series';
 import {SortField} from 'src/app/_models/metadata/series-filter';
 import {AccountService} from 'src/app/_services/account.service';
 import {ImageService} from 'src/app/_services/image.service';
@@ -30,27 +29,34 @@ import {RecommendationService} from "../../_services/recommendation.service";
 import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
-import {SeriesRemovedEvent} from "../../_models/events/series-removed-event";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent]
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent],
 })
 export class DashboardComponent implements OnInit {
 
-  /**
-   * By default, 0, but if non-zero, will limit all API calls to library id
-   */
-  @Input() libraryId: number = 0;
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly metadataService = inject(MetadataService);
+  private readonly recommendationService = inject(RecommendationService);
+  public readonly accountService = inject(AccountService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly router = inject(Router);
+  private readonly titleService = inject(Title);
+  public readonly imageService = inject(ImageService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly dashboardService = inject(DashboardService);
 
-  libraries$: Observable<Library[]> = of([]);
-  isLoadingAdmin = true;
+  libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
   isAdmin$: Observable<boolean> = of(false);
 
@@ -59,32 +65,21 @@ export class DashboardComponent implements OnInit {
   refreshStreams$ = new Subject<void>();
   refreshStreamsFromDashboardUpdate$ = new Subject<void>();
 
+  streamCount: number = 0;
+  streamsLoaded: number = 0;
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly metadataService = inject(MetadataService);
-  private readonly recommendationService = inject(RecommendationService);
   protected readonly StreamType = StreamType;
 
-
-
-  constructor(public accountService: AccountService, private libraryService: LibraryService,
-    private seriesService: SeriesService, private router: Router,
-    private titleService: Title, public imageService: ImageService,
-    private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef,
-              private dashboardService: DashboardService) {
-
-
+  constructor() {
     this.loadDashboard();
 
     this.refreshStreamsFromDashboardUpdate$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(1000),
       tap(() => {
-        console.log('Loading Dashboard')
-        this.loadDashboard()
+        this.loadDashboard();
       }))
       .subscribe();
 
@@ -96,6 +91,7 @@ export class DashboardComponent implements OnInit {
 
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+      // TODO: Make the event have a stream Id so I can refresh just that stream
       if (res.event === EVENTS.DashboardUpdate) {
         this.refreshStreamsFromDashboardUpdate$.next();
       } else if (res.event === EVENTS.SeriesAdded) {
@@ -118,13 +114,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita');
-    this.isLoadingAdmin = true;
-    this.cdRef.markForCheck();
-
-    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef), tap((libs) => {
-      this.isLoadingAdmin = false;
-      this.cdRef.markForCheck();
-    }));
   }
 
 
@@ -133,25 +122,26 @@ export class DashboardComponent implements OnInit {
     this.cdRef.markForCheck();
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
+      this.streamCount = streams.length;
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
             s.api = this.seriesService.getOnDeck(0, 1, 20)
-                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.NewlyAdded:
             s.api = this.seriesService.getRecentlyAdded(1, 20)
-                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.RecentlyUpdated:
-            s.api = this.seriesService.getRecentlyUpdatedSeries();
+            s.api = this.seriesService.getRecentlyUpdatedSeries().pipe(tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.SmartFilter:
             s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
               switchMap(filter => {
                 return this.seriesService.getAllSeriesV2(0, 20, filter);
               }))
-                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.MoreInGenre:
             s.api = this.metadataService.getAllGenres().pipe(
@@ -161,6 +151,7 @@ export class DashboardComponent implements OnInit {
                 }),
                 switchMap(genre => this.recommendationService.getMoreIn(0, genre.id, 0, 30)),
                 map(p => p.result),
+                tap(() => this.increment()),
                 takeUntilDestroyed(this.destroyRef),
                 shareReplay({bufferSize: 1, refCount: true})
             );
@@ -170,6 +161,11 @@ export class DashboardComponent implements OnInit {
       this.isLoadingDashboard = false;
       this.cdRef.markForCheck();
     });
+  }
+
+  increment() {
+    this.streamsLoaded++;
+    this.cdRef.markForCheck();
   }
 
   reloadStream(streamId: number) {
@@ -229,13 +225,6 @@ export class DashboardComponent implements OnInit {
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    }
-  }
-
-  removeFromArray(arr: Array<any>, element: any) {
-    const index = arr.indexOf(element);
-    if (index >= 0) {
-      arr.splice(index);
     }
   }
 }

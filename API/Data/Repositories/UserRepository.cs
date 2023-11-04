@@ -665,7 +665,9 @@ public class UserRepository : IUserRepository
                 Username = u.UserName,
                 Email = u.Email,
                 Created = u.Created,
+                CreatedUtc = u.CreatedUtc,
                 LastActive = u.LastActive,
+                LastActiveUtc = u.LastActiveUtc,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
                 IsPending = !u.EmailConfirmed,
                 AgeRestriction = new AgeRestrictionDto()

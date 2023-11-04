@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, DestroyRef,
@@ -13,7 +14,8 @@ import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgOptimizedImage} from "@angular/common";
+import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
 
 /**
  * This is used for images with placeholder fallback.
@@ -21,7 +23,7 @@ import {CommonModule} from "@angular/common";
 @Component({
   selector: 'app-image',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgOptimizedImage, LazyLoadImageModule],
   templateUrl: './image.component.html',
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -68,8 +70,12 @@ export class ImageComponent implements OnChanges {
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly imageService = inject(ImageService);
+  private readonly renderer = inject(Renderer2);
+  private readonly hubService = inject(MessageHubService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
-  constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService, private changeDetectionRef: ChangeDetectorRef) {
+  constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (!this.processEvents) return;
       if (res.event === EVENTS.CoverUpdate) {
@@ -86,7 +92,7 @@ export class ImageComponent implements OnChanges {
           }
           if (id === (updateEvent.id + '')) {
             this.imageUrl = this.imageService.randomize(this.imageUrl);
-            this.changeDetectionRef.markForCheck();
+            this.cdRef.markForCheck();
           }
         }
       }
@@ -120,6 +126,40 @@ export class ImageComponent implements OnChanges {
 
     if (this.background != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'background', this.background);
+    }
+  }
+
+
+  myCallbackFunction(event: StateChange) {
+    const image = this.imgElem.nativeElement;
+    switch (event.reason) {
+      case 'setup':
+        // The lib has been instantiated but we have not done anything yet.
+        break;
+      case 'observer-emit':
+        // The image observer (intersection/scroll/custom observer) has emit a value so we
+        // should check if the image is in the viewport.
+        // `event.data` is the event in this case.
+        break;
+      case 'start-loading':
+        // The image is in the viewport so the image will start loading
+        break;
+      case 'mount-image':
+        // The image has been loaded successfully so lets put it into the DOM
+        break;
+      case 'loading-succeeded':
+        // The image has successfully been loaded and placed into the DOM
+        this.renderer.addClass(image, 'loaded');
+        break;
+      case 'loading-failed':
+        // The image could not be loaded for some reason.
+        // `event.data` is the error in this case
+        image.src = this.imageService.errorImage;
+        this.cdRef.markForCheck();
+        break;
+      case 'finally':
+        // The last event before cleaning up
+        break;
     }
   }
 

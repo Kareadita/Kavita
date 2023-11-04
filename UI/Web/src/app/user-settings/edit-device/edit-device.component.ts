@@ -16,7 +16,7 @@ import { Device } from 'src/app/_models/device/device';
 import { DevicePlatform, devicePlatforms } from 'src/app/_models/device/device-platform';
 import { DeviceService } from 'src/app/_services/device.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { DevicePlatformPipe } from '../_pipes/device-platform.pipe';
+import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import {NgIf, NgFor, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";

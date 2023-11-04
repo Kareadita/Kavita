@@ -10,12 +10,12 @@ import {
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {SeriesService} from "../../../_services/series.service";
 import {Rating} from "../../../_models/rating";
-import {ProviderImagePipe} from "../../../pipe/provider-image.pipe";
+import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {AccountService} from "../../../_services/account.service";
 import {LibraryType} from "../../../_models/library";
-import {ProviderNamePipe} from "../../../pipe/provider-name.pipe";
+import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";

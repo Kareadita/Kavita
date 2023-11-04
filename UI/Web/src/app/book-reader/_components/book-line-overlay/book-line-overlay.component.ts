@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   DestroyRef,
-  ElementRef, EventEmitter,
+  ElementRef, EventEmitter, HostListener,
   inject,
   Input,
   OnInit, Output,
@@ -15,6 +15,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {ReaderService} from "../../../_services/reader.service";
 import {ToastrService} from "ngx-toastr";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {KEY_CODES} from "../../../shared/_services/utility.service";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -51,6 +52,17 @@ export class BookLineOverlayComponent implements OnInit {
 
   get BookLineOverlayMode() { return BookLineOverlayMode; }
   constructor(private elementRef: ElementRef, private toastr: ToastrService) {}
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyPress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.ESC_KEY) {
+      this.reset();
+      this.cdRef.markForCheck();
+      event.stopPropagation();
+      event.preventDefault();
+      return;
+    }
+  }
 
 
   ngOnInit() {

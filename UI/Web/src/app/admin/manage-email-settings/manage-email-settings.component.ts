@@ -7,7 +7,7 @@ import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
-import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ServerService} from "../../_services/server.service";
 
 @Component({

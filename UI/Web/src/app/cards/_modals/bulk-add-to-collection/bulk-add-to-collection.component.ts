@@ -17,7 +17,7 @@ import { CollectionTag } from 'src/app/_models/collection-tag';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
-import {FilterPipe} from "../../../pipe/filter.pipe";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({

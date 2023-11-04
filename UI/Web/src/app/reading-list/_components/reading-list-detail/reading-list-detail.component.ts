@@ -80,7 +80,7 @@ export class ReadingListDetailComponent implements OnInit {
     const listId = this.route.snapshot.paramMap.get('id');
 
     if (listId === null) {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/home');
       return;
     }
     this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));

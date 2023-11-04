@@ -23,7 +23,7 @@ import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
 import { NgIf, NgClass, NgStyle, NgFor, AsyncPipe } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";

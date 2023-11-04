@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'reading-activity'">
   <ng-container>
-    <div class="dashboard-card-content">
+    <div class="dashboard-card-content stat-container">
       <div class="row g-0 mb-2 align-items-center">
         <div class="col-4">
           <h4>{{t('title')}}</h4>
@@ -27,6 +27,7 @@
           </form>
         </div>
       </div>
+
       <div class="row g-0">
         <ng-container *ngIf="data$ | async as data">
           <ngx-charts-line-chart

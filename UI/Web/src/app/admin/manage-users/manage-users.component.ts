@@ -13,9 +13,12 @@ import {EditUserComponent} from '../edit-user/edit-user.component';
 import {ServerService} from 'src/app/_services/server.service';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, DatePipe, NgFor, NgIf, TitleCasePipe} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
-import {DefaultDatePipe} from "../../pipe/default-date.pipe";
+import {AsyncPipe, DatePipe, NgClass, NgFor, NgIf, TitleCasePipe} from '@angular/common';
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
     selector: 'app-manage-users',
@@ -23,7 +26,7 @@ import {DefaultDatePipe} from "../../pipe/default-date.pipe";
     styleUrls: ['./manage-users.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgFor, NgIf, NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe]
+  imports: [NgFor, NgIf, NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe]
 })
 export class ManageUsersComponent implements OnInit {
 
@@ -31,24 +34,24 @@ export class ManageUsersComponent implements OnInit {
   loggedInUsername = '';
   loadingMembers = false;
 
-  translocoService = inject(TranslocoService);
-  cdRef = inject(ChangeDetectorRef);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly memberService = inject(MemberService);
+  private readonly accountService = inject(AccountService);
+  private readonly modalService = inject(NgbModal);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  public readonly messageHub = inject(MessageHubService);
+  private readonly serverService = inject(ServerService);
+  private readonly router = inject(Router);
 
-  constructor(private memberService: MemberService,
-              private accountService: AccountService,
-              private modalService: NgbModal,
-              private toastr: ToastrService,
-              private confirmService: ConfirmService,
-              public messageHub: MessageHubService,
-              private serverService: ServerService,
-              private router: Router) {
+  constructor() {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (user) {
         this.loggedInUsername = user.username;
         this.cdRef.markForCheck();
       }
     });
-
   }
 
   ngOnInit(): void {
@@ -136,7 +139,7 @@ export class ManageUsersComponent implements OnInit {
 
   formatLibraries(member: Member) {
     if (member.libraries.length === 0) {
-      return this.translocoService.translate('manage-users.none');
+      return translate('manage-users.none');
     }
 
     return member.libraries.map(item => item.name).join(', ');

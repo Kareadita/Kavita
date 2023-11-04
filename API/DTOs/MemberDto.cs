@@ -18,7 +18,9 @@ public class MemberDto
     public bool IsPending { get; init; }
     public AgeRestrictionDto? AgeRestriction { get; init; }
     public DateTime Created { get; init; }
+    public DateTime CreatedUtc { get; init; }
     public DateTime LastActive { get; init; }
+    public DateTime LastActiveUtc { get; init; }
     public IEnumerable<LibraryDto>? Libraries { get; init; }
     public IEnumerable<string>? Roles { get; init; }
 }

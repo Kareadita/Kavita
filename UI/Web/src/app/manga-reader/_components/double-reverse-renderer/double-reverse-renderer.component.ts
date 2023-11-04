@@ -20,7 +20,7 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
+import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
 
 /**
  * This is aimed at manga. Double page renderer but where if we have page = 10, you will see

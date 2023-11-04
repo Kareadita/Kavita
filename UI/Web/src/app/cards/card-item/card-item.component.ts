@@ -34,16 +34,16 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
 import {FormsModule} from "@angular/forms";
-import {MangaFormatPipe} from "../../pipe/manga-format.pipe";
-import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
-import {SentenceCasePipe} from "../../pipe/sentence-case.pipe";
+import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
+import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
+import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
 import {RouterLink} from "@angular/router";
 import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
-import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
-import {TimeAgoPipe} from "../../pipe/time-ago.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 
 @Component({
   selector: 'app-card-item',
@@ -229,7 +229,6 @@ export class CardItemComponent implements OnInit {
 
       if (nextDate.expectedDate) {
         const utcPipe = new UtcToLocalTimePipe();
-        //const timeUntilPipe = new TimeAgoPipe(this.cdRef, this.ngZone, this.translocoService);
         this.title = utcPipe.transform(nextDate.expectedDate);
       }
 

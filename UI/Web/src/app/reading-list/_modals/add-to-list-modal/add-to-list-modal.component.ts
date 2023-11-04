@@ -4,7 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { FilterPipe } from '../../../pipe/filter.pipe';
+import { FilterPipe } from '../../../_pipes/filter.pipe';
 import { NgIf, NgFor } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
@@ -17,10 +17,10 @@ export enum ADD_FLOW {
 }
 
 @Component({
-    selector: 'app-add-to-list-modal',
-    templateUrl: './add-to-list-modal.component.html',
-    styleUrls: ['./add-to-list-modal.component.scss'],
-    standalone: true,
+  selector: 'app-add-to-list-modal',
+  templateUrl: './add-to-list-modal.component.html',
+  styleUrls: ['./add-to-list-modal.component.scss'],
+  standalone: true,
   imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoDirective]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {

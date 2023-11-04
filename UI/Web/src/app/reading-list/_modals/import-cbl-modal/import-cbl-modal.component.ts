@@ -13,9 +13,9 @@ import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-su
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import {StepTrackerComponent, TimelineStep} from '../../_components/step-tracker/step-tracker.component';
 import {CommonModule} from "@angular/common";
-import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
-import {CblConflictReasonPipe} from "../../_pipes/cbl-conflict-reason.pipe";
-import {CblImportResultPipe} from "../../_pipes/cbl-import-result.pipe";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
+import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 interface FileStep {

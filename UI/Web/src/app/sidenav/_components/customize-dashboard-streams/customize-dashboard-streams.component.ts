@@ -12,7 +12,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {FilterPipe} from "../../../pipe/filter.pipe";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
 
 @Component({
   selector: 'app-customize-dashboard-streams',

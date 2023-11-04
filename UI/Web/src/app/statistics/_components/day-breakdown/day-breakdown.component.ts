@@ -1,14 +1,15 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import { BarChartModule } from '@swimlane/ngx-charts';
 import {map, Observable} from 'rxjs';
 import {DayOfWeek, StatisticsService} from 'src/app/_services/statistics.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {StatCount} from '../../_models/stat-count';
-import {DayOfWeekPipe} from '../../_pipes/day-of-week.pipe';
+import {DayOfWeekPipe} from '../../../_pipes/day-of-week.pipe';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { AsyncPipe } from '@angular/common';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {tap} from "rxjs/operators";
 
 @Component({
     selector: 'app-day-breakdown',
@@ -16,17 +17,19 @@ import {TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./day-breakdown.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [BarChartModule, AsyncPipe, TranslocoDirective]
+  imports: [BarChartModule, AsyncPipe, TranslocoDirective, NgForOf, NgIf]
 })
 export class DayBreakdownComponent implements OnInit {
 
   @Input() userId = 0;
   view: [number, number] = [0,0];
   showLegend: boolean = true;
+  max: number = 1;
 
   formControl: FormControl = new FormControl(true, []);
   dayBreakdown$!: Observable<Array<PieDataItem>>;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   constructor(private statService: StatisticsService) {}
 
@@ -37,6 +40,10 @@ export class DayBreakdownComponent implements OnInit {
         return data.map(d => {
           return {name: dayOfWeekPipe.transform(d.value), value: d.count};
         })
+      }),
+      tap(data => {
+        this.max = data.reduce((acc, day) => Math.max(acc, day.value), 0);
+        this.cdRef.markForCheck();
       }),
       takeUntilDestroyed(this.destroyRef)
     );

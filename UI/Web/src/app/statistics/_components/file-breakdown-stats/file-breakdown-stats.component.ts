@@ -14,8 +14,8 @@ import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table
 import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
 import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { MangaFormatPipe } from '../../../pipe/manga-format.pipe';
-import { BytesPipe } from '../../../pipe/bytes.pipe';
+import { MangaFormatPipe } from '../../../_pipes/manga-format.pipe';
+import { BytesPipe } from '../../../_pipes/bytes.pipe';
 import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';

@@ -184,7 +184,7 @@ $action-bar-height: 38px;
     position: relative;
     height: 100%;
 
-   // background-color: purple !important;
+   //background-color: purple !important;
 
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
@@ -198,10 +198,10 @@ $action-bar-height: 38px;
         // Fixes an issue where chrome will cut of margins, doesn't seem to affect other browsers
         overflow: auto;
     }
+}
 
-    &.pointer {
-        cursor: pointer;
-    }
+.pointer {
+    cursor: pointer;
 }
 
 .book-content {
@@ -325,6 +325,10 @@ $action-bar-height: 38px;
 }
 
 $pagination-color: transparent;
+$pagination-opacity: 0;
+
+//$pagination-color: red;
+//$pagination-opacity: 0.7;
 
 
 .right {
@@ -356,9 +360,9 @@ $pagination-color: transparent;
     width: 18%;
     z-index: 3;
     background: $pagination-color;
+    opacity: $pagination-opacity;
     border-color: transparent;
     border: none !important;
-    opacity: 0;
     outline: none;
 
     &.immersive {
@@ -376,11 +380,12 @@ $pagination-color: transparent;
     top: $action-bar-height;
     width: 20vw;
     background: $pagination-color;
+    opacity: $pagination-opacity;
     border-color: transparent;
     border: none !important;
     z-index: 3;
-    opacity: 0;
     outline: none;
+    height: 100vw;
 
     &.immersive {
         top: 0px;

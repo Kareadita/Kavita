@@ -6,7 +6,9 @@ export interface Member {
     username: string;
     email: string;
     lastActive: string; // datetime
+    lastActiveUtc: string; // datetime
     created: string; // datetime
+    createdUtc: string; // datetime
     roles: string[];
     libraries: Library[];
     ageRestriction: AgeRestriction;

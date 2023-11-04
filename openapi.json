@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.10.2"
+    "version": "0.7.10.4"
   },
   "servers": [
     {
@@ -15882,7 +15882,15 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastActiveUtc": {
             "type": "string",
             "format": "date-time"
           },

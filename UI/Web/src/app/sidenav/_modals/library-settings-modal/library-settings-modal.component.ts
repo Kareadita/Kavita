@@ -26,10 +26,10 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
-import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoModule} from "@ngneat/transloco";
-import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
+import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 
 enum TabID {
   General = 'general-tab',

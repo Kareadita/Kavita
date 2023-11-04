@@ -19,7 +19,7 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
+import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
 
 @Component({
     selector: 'app-single-renderer',

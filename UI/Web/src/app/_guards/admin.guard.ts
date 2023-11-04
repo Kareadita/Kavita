@@ -22,7 +22,7 @@ export class AdminGuard implements CanActivate {
         }
 
         this.toastr.error(this.translocoService.translate('toasts.unauthorized-1'));
-        this.router.navigateByUrl('/libraries');
+        this.router.navigateByUrl('/home');
         return false;
       })
     );

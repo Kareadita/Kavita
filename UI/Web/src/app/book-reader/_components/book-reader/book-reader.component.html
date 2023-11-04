@@ -1,4 +1,5 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}" tabindex="0" #reader>
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}"
+     tabindex="0" #reader (click)="handleContainerClick($event)" [ngClass]="{'pointer' : cursorIsPointer}">
   <ng-container *transloco="let t; read: 'book-reader'">
     <div class="fixed-top" #stickyTop>
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
@@ -98,7 +99,8 @@
       </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading">
+    <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}"
+         [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading" (click)="handleReaderClick($event)">
 
       <ng-container *ngIf="clickToPaginate">
         <div class="left {{clickOverlayClass('left')}} no-pointer-events no-observe"
@@ -111,9 +113,8 @@
              [ngStyle]="{height: PageHeightForPagination}"></div>
       </ng-container>
         <div #bookContainer class="book-container {{WritingStyleClass}}"
-          [ngClass]="{'immersive' : immersiveMode, 'pointer' : cursorIsPointer}"
-          (click)="handleReaderClick($event)"
-          (mousedown)="mouseDown($event)">
+          [ngClass]="{'immersive' : immersiveMode}"
+             (mousedown)="mouseDown($event)" >
 
         <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
              [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"

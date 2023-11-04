@@ -5,7 +5,7 @@ import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
-import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { RestrictionSelectorComponent } from '../../user-settings/restriction-selector/restriction-selector.component';
 import { LibrarySelectorComponent } from '../library-selector/library-selector.component';
 import { RoleSelectorComponent } from '../role-selector/role-selector.component';

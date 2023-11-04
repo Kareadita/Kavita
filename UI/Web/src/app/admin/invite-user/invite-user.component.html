@@ -47,10 +47,10 @@
 
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">
-        {{t('cancel')}}
+      <button type="button" class="btn btn-{{invited ? 'primary' : 'secondary'}}" (click)="close()">
+        {{invited ? t('cancel') : t('close')}}
       </button>
-      <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
+      <button *ngIf="!invited" type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
         <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>{{isSending ? t('inviting') : t('invite')}}</span>
       </button>

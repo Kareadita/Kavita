@@ -54,11 +54,11 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 @Component({
-    selector: 'app-collection-detail',
-    templateUrl: './collection-detail.component.html',
-    styleUrls: ['./collection-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-collection-detail',
+  templateUrl: './collection-detail.component.html',
+  styleUrls: ['./collection-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {

@@ -17,7 +17,7 @@ import { ServerService } from 'src/app/_services/server.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { FilterPipe } from '../../pipe/filter.pipe';
+import { FilterPipe } from '../../_pipes/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgIf, NgFor } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";

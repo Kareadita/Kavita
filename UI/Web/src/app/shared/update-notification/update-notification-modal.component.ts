@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
 import {CommonModule} from "@angular/common";
-import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 
 

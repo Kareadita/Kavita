@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef, importProvidersFrom,
+  DestroyRef,
   inject,
   OnDestroy,
   OnInit
@@ -31,7 +31,7 @@ import {forkJoin} from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { UserHoldsComponent } from '../user-holds/user-holds.component';
 import { UserScrobbleHistoryComponent } from '../../_single-module/user-scrobble-history/user-scrobble-history.component';
 import { UserStatsComponent } from '../../statistics/_components/user-stats/user-stats.component';
@@ -72,11 +72,11 @@ enum FragmentID {
 }
 
 @Component({
-    selector: 'app-user-preferences',
-    templateUrl: './user-preferences.component.html',
-    styleUrls: ['./user-preferences.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-user-preferences',
+  templateUrl: './user-preferences.component.html',
+  styleUrls: ['./user-preferences.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
     ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,

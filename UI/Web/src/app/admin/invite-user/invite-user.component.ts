@@ -13,7 +13,7 @@ import { LibrarySelectorComponent } from '../library-selector/library-selector.c
 import { RoleSelectorComponent } from '../role-selector/role-selector.component';
 import { NgIf } from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 @Component({
     selector: 'app-invite-user',

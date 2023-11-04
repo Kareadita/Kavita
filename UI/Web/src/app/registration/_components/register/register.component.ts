@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -9,6 +9,7 @@ import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {NavService} from "../../../_services/nav.service";
 
 /**
  * This is exclusively used to register the first user on the server and nothing else
@@ -29,8 +30,13 @@ export class RegisterComponent {
     password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
   });
 
+  private readonly navService = inject(NavService);
+
   constructor(private router: Router, private accountService: AccountService,
     private toastr: ToastrService, private memberService: MemberService) {
+
+    this.navService.hideNavBar();
+    this.navService.hideSideNav();
 
       this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       if (adminExists) {

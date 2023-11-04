@@ -1,19 +1,19 @@
 <ng-container *transloco="let t; read: 'day-breakdown'">
   <div class="dashboard-card-content">
-    <div class="row g-0 mb-2">
-      <h4>{{t('title')}}</h4>
-    </div>
+    <h4>{{t('title')}}</h4>
 
-    <ngx-charts-bar-vertical
-      class="dark"
-      [results]="dayBreakdown$ | async"
-      [xAxis]="true"
-      [yAxis]="true"
-      [legend]="showLegend"
-      [showXAxisLabel]="true"
-      [showYAxisLabel]="true"
-      [xAxisLabel]="t('x-axis-label')"
-      [yAxisLabel]="t('y-axis-label')">
-    </ngx-charts-bar-vertical>
+    <ng-container *ngIf="(dayBreakdown$ | async) as days">
+      <div *ngIf="days.length === 0">{{t('no-data')}}</div>
+      <div class="day-breakdown-chart">
+        <table class="charts-css column show-labels show-primary-axis show-4-secondary-axes data-spacing-5">
+          <tbody>
+            <tr *ngFor="let day of days">
+              <th scope="row"> {{day.name}} </th>
+              <td style="{{'--size: ' + (day.value / max)}}"> <span class="data"> {{day.value}}</span> </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
   </div>
 </ng-container>

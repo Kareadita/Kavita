@@ -523,7 +523,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   handleScrollEvent() {
     // Highlight the current chapter we are on
     if (Object.keys(this.pageAnchors).length !== 0) {
-      // get the height of the document so we can capture markers that are halfway on the document viewport
+      // get the height of the document, so we can capture markers that are halfway on the document viewport
       const verticalOffset = this.reader.nativeElement?.scrollTop || (this.scrollService.scrollPosition + (this.document.body.offsetHeight / 2));
 
       const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
@@ -576,7 +576,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
     if (libraryId === null || seriesId === null || chapterId === null) {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/home');
       return;
     }
 
@@ -616,7 +616,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
     this.cdRef.markForCheck();
-
 
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
@@ -711,6 +710,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
       this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
     } else if (event.key === KEY_CODES.ESC_KEY) {
+      const isHighlighting = window.getSelection()?.toString() != '';
+      if (isHighlighting) return;
       this.closeReader();
     } else if (event.key === KEY_CODES.SPACE) {
       this.toggleDrawer();
@@ -1590,12 +1591,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private isCursorOverLeftPaginationArea(event: MouseEvent): boolean {
     const leftPaginationAreaEnd = window.innerWidth * 0.2;
+    //console.log('user clicked on ', event.clientX, ' and left pagination ends on ', leftPaginationAreaEnd);
     return event.clientX <= leftPaginationAreaEnd;
   }
 
   private isCursorOverRightPaginationArea(event: MouseEvent): boolean {
-    const rightPaginationAreaStart = event.clientX >= window.innerWidth * 0.8;
-    return rightPaginationAreaStart;
+    const rightPaginationAreaStart = window.innerWidth * 0.8;
+    //console.log('user clicked on ', event.clientX, ' and right pagination starts at ', rightPaginationAreaStart);
+    return event.clientX >= rightPaginationAreaStart;
   }
 
   private isCursorOverPaginationArea(event: MouseEvent): boolean {
@@ -1611,24 +1614,38 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
+  // Responsibile for handling pagination only
+  handleContainerClick(event: MouseEvent) {
+
+    //if (event.target)
+    console.log('target: ', event.target);
+    if (['action-bar'].some(className => (event.target as Element).classList.contains(className))) {
+      console.log('exiting early')
+      return;
+    }
+
+    if (this.isCursorOverLeftPaginationArea(event)) {
+      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+    } else if (this.isCursorOverRightPaginationArea(event)) {
+      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
+    } else {
+      this.toggleMenu(event);
+    }
+  }
+
   handleReaderClick(event: MouseEvent) {
     if (!this.clickToPaginate) {
+      event.preventDefault();
+      event.stopPropagation();
       this.toggleMenu(event);
       return;
     }
 
     const isHighlighting = window.getSelection()?.toString() != '';
-
     if (isHighlighting) {
+      event.preventDefault();
+      event.stopPropagation();
       return;
-    }
-
-    if (this.isCursorOverLeftPaginationArea(event)) {
-        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-    } else if (this.isCursorOverRightPaginationArea(event)) {
-        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
-    } else {
-      this.toggleMenu(event);
     }
   }
 

@@ -25,7 +25,7 @@ import {ExternalSourceService} from "../../../external-source.service";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {FilterPipe} from "../../../pipe/filter.pipe";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {Action, ActionItem} from "../../../_services/action-factory.service";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
@@ -222,7 +222,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
 
 
   orderUpdated(event: IndexUpdateEvent) {
-    
+
     this.sideNavService.updateSideNavStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
       this.sideNavService.getSideNavStreams(false).subscribe((data) => {
         this.items = [...data];

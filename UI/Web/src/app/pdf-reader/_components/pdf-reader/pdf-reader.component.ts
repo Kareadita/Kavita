@@ -119,7 +119,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
     if (libraryId === null || seriesId === null || chapterId === null) {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/home');
       return;
     }
 

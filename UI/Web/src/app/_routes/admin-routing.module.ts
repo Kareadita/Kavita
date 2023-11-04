@@ -1,9 +1,8 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AdminGuard } from '../_guards/admin.guard';
-import { DashboardComponent } from './dashboard/dashboard.component';
+import { DashboardComponent } from '../admin/dashboard/dashboard.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   {path: '**', component: DashboardComponent, pathMatch: 'full', canActivate: [AdminGuard]},
   {
     path: '',
@@ -15,9 +14,3 @@ const routes: Routes = [
   }
 ];
 
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class AdminRoutingModule { }

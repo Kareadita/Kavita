@@ -23,7 +23,7 @@ import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
 import {DrawerComponent} from '../shared/drawer/drawer.component';
 import {AsyncPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
-import {SortFieldPipe} from "../pipe/sort-field.pipe";
+import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {allFields} from "../_models/metadata/v2/filter-field";
 import {MetadataService} from "../_services/metadata.service";
@@ -38,15 +38,42 @@ import {
   Select2UpdateValue
 } from "ng-select2-component";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+
+const ANIMATION_SPEED = 750;
 
 @Component({
-    selector: 'app-metadata-filter',
-    templateUrl: './metadata-filter.component.html',
-    styleUrls: ['./metadata-filter.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-metadata-filter',
+  templateUrl: './metadata-filter.component.html',
+  styleUrls: ['./metadata-filter.component.scss'],
+  animations: [
+    trigger(
+      'inOutAnimation',
+      [
+        transition(
+          ':enter',
+          [
+            style({ height: 0, opacity: 0 }),
+            animate('.5s ease-out',
+              style({ height: 300, opacity: 1 }))
+          ]
+        ),
+        transition(
+          ':leave',
+          [
+            style({ height: 300, opacity: 1 }),
+            animate('.5s ease-in',
+              style({ height: 0, opacity: 0 }))
+          ]
+        )
+      ]
+    ),
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
-    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module, NgClass]
+    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe,
+    MetadataBuilderComponent, NgForOf, Select2Module, NgClass]
 })
 export class MetadataFilterComponent implements OnInit {
 
@@ -117,6 +144,8 @@ export class MetadataFilterComponent implements OnInit {
         this.cdRef.markForCheck();
       });
     }
+
+
 
     this.loadFromPresetsAndSetup();
   }

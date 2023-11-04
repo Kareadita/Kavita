@@ -8,7 +8,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({

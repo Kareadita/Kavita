@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
-import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
+import { MangaFormatPipe } from 'src/app/_pipes/manga-format.pipe';
 import { Member } from 'src/app/_models/auth/member';
 import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -11,16 +11,18 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 
+
 @Component({
-    selector: 'app-reading-activity',
-    templateUrl: './reading-activity.component.html',
-    styleUrls: ['./reading-activity.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective]
+  selector: 'app-reading-activity',
+  templateUrl: './reading-activity.component.html',
+  styleUrls: ['./reading-activity.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective, MangaFormatPipe]
 })
 export class ReadingActivityComponent implements OnInit {
   /**
@@ -30,6 +32,11 @@ export class ReadingActivityComponent implements OnInit {
   @Input() isAdmin: boolean = true;
   @Input() individualUserMode: boolean = false;
 
+  private readonly utcDatePipe = new UtcToLocalTimePipe();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   view: [number, number] = [0, 400];
   formGroup: FormGroup = new FormGroup({
     'users': new FormControl(-1, []),
@@ -38,8 +45,6 @@ export class ReadingActivityComponent implements OnInit {
   users$: Observable<Member[]> | undefined;
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly translocoService = inject(TranslocoService);
   mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
   constructor(private statService: StatisticsService, private memberService: MemberService) {

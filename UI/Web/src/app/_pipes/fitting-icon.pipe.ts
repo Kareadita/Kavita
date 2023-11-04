@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { FITTING_OPTION } from '../_models/reader-enums';
+import { FITTING_OPTION } from '../manga-reader/_models/reader-enums';
 
 @Pipe({
   name: 'fittingIcon',

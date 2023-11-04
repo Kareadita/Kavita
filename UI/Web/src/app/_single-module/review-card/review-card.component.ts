@@ -6,9 +6,9 @@ import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.c
 import {AccountService} from "../../_services/account.service";
 import {ReviewSeriesModalComponent} from "../review-series-modal/review-series-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
-import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
-import {ProviderImagePipe} from "../../pipe/provider-image.pipe";
+import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
