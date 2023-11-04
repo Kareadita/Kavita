@@ -33,11 +33,11 @@ import {ToastrService} from "ngx-toastr";
 
 
 @Component({
-    selector: 'app-all-collections',
-    templateUrl: './all-collections.component.html',
-    styleUrls: ['./all-collections.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-all-collections',
+  templateUrl: './all-collections.component.html',
+  styleUrls: ['./all-collections.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, NgIf, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class AllCollectionsComponent implements OnInit {

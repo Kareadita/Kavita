@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
       <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
-      <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active">
+      <a class="navbar-brand dark-exempt" routerLink="/home" routerLinkActive="active">
         <img width="28" height="28" class="logo" ngSrc="assets/images/logo-32.png" alt="kavita icon" aria-hidden="true"/>
         <span class="d-none d-md-inline logo"> Kavita</span>
       </a>

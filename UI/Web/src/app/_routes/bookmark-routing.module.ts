@@ -1,6 +1,6 @@
 import { Routes } from "@angular/router";
 import { AuthGuard } from "../_guards/auth.guard";
-import { BookmarksComponent } from "./_components/bookmarks/bookmarks.component";
+import { BookmarksComponent } from "../bookmark/_components/bookmarks/bookmarks.component";
 
 export const routes: Routes = [
   {path: '**', component: BookmarksComponent, pathMatch: 'full', canActivate: [AuthGuard]},

@@ -49,7 +49,7 @@ export class UserLoginComponent implements OnInit {
       if (user) {
         this.navService.showNavBar();
         this.navService.showSideNav();
-        this.router.navigateByUrl('/libraries');
+        this.router.navigateByUrl('/home');
         this.cdRef.markForCheck();
       }
     });
@@ -94,7 +94,7 @@ export class UserLoginComponent implements OnInit {
         this.router.navigateByUrl(pageResume);
       } else {
         localStorage.setItem('kavita--auth-intersection-url', '');
-        this.router.navigateByUrl('/libraries');
+        this.router.navigateByUrl('/home');
       }
       this.isSubmitting = false;
       this.cdRef.markForCheck();

@@ -138,7 +138,7 @@ export class LibraryDetailComponent implements OnInit {
     private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/home');
       return;
     }
 

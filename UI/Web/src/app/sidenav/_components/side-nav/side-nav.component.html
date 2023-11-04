@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'side-nav'">
     <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'hidden': (navService.sideNavVisibility$ | async) === false, 'no-donate': (accountService.hasValidLicense$ | async) === true}"  *ngIf="accountService.currentUser$ | async as user">
-      <app-side-nav-item icon="fa-home" [title]="t('home')" link="/libraries/">
+      <app-side-nav-item icon="fa-home" [title]="t('home')" link="/home/">
         <ng-container actions>
           <app-card-actionables [actions]="homeActions" [labelBy]="t('home')" iconClass="fa-ellipsis-v" (actionHandler)="handleHomeActions()"></app-card-actionables>
         </ng-container>

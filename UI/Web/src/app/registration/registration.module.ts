@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmEmailComponent } from './_components/confirm-email/confirm-email.component';
-import { RegistrationRoutingModule } from './registration.router.module';
+import { RegistrationRoutingModule } from '../_routes/registration.router.module';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserLoginComponent } from './user-login/user-login.component';

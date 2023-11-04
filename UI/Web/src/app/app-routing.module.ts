@@ -11,51 +11,49 @@ const routes: Routes = [
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
   {
-    path: 'collections',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./collections/collections.module').then(m => m.CollectionsModule)
-  },
-  {
     path: 'preferences',
     canActivate: [AuthGuard],
     loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
   },
   {
+    path: 'collections',
+    loadChildren: () => import('./_routes/collections-routing.module').then(m => m.routes)
+  },
+  {
     path: 'lists',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
+    loadChildren: () => import('./_routes/reading-list-routing.module').then(m => m.routes)
   },
   {
     path: 'registration',
-    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
+    loadChildren: () => import('./_routes/registration.router.module').then(m => m.routes)
+  },
+  {
+    path: 'login',
+    loadChildren: () => import('./_routes/registration.router.module').then(m => m.routes) // TODO: Refactor so we just use /registration/login going forward
   },
   {
     path: 'announcements',
-    loadChildren: () => import('../app/announcements/announcements.module').then(m => m.AnnouncementsModule)
+    loadChildren: () => import('./_routes/announcements-routing.module').then(m => m.routes)
   },
-  // {
-  //   path: 'bookmarks',
-  //   loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
-  // },
   {
     path: 'bookmarks',
-    loadChildren: () => import('../app/bookmark/bookmark-routing.module').then(m => m.routes)
+    loadChildren: () => import('./_routes/bookmark-routing.module').then(m => m.routes)
   },
   {
     path: 'all-series',
-    loadChildren: () => import('../app/all-series/all-series.module').then(m => m.AllSeriesModule)
-  },
-  {
-    path: 'libraries',
-    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
-  },
-  {
-    path: 'libraries',
-    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+    loadChildren: () => import('./_routes/all-series-routing.module').then(m => m.routes)
   },
   {
     path: 'want-to-read',
-    loadChildren: () => import('../app/want-to-read/want-to-read.module').then(m => m.WantToReadModule)
+    loadChildren: () => import('./_routes/want-to-read-routing.module').then(m => m.routes)
+  },
+  {
+    path: 'libraries', // TODO: libraries/ route is deprecated, we are switching to /home as it makes much more sense
+    loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
+  },
+  {
+    path: 'home',
+    loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
   },
   {
     path: 'library',
@@ -86,9 +84,8 @@ const routes: Routes = [
       },
     ]
   },
-  {path: 'login', loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)},
-  {path: '**', pathMatch: 'full', redirectTo: 'libraries'},
-  {path: '**', pathMatch: 'prefix', redirectTo: 'libraries'},
+  {path: '**', pathMatch: 'full', redirectTo: 'home'},
+  {path: '**', pathMatch: 'prefix', redirectTo: 'home'},
 ];
 
 @NgModule({
