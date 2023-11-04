@@ -10,11 +10,11 @@ import {Job} from 'src/app/_models/job/job';
 import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
 import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
-import {DefaultValuePipe} from '../../pipe/default-value.pipe';
+import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, DatePipe, NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
-import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 interface AdhocTask {
   name: string;

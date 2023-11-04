@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} f
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {NavService} from '../../_services/nav.service';
-import {SentenceCasePipe} from '../../pipe/sentence-case.pipe';
+import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {LicenseComponent} from '../license/license.component';
 import {ManageTasksSettingsComponent} from '../manage-tasks-settings/manage-tasks-settings.component';
 import {ServerStatsComponent} from '../../statistics/_components/server-stats/server-stats.component';

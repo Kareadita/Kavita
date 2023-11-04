@@ -18,17 +18,17 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ImageService } from 'src/app/_services/image.service';
 import {CommonModule} from "@angular/common";
 import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
-import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
-import {DefaultDatePipe} from "../../pipe/default-date.pipe";
-import {BytesPipe} from "../../pipe/bytes.pipe";
-import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
-import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {BytesPipe} from "../../_pipes/bytes.pipe";
+import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
+import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
-import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-entity-info-cards',

@@ -17,13 +17,13 @@ import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
-import { TimeAgoPipe } from '../../pipe/time-ago.pipe';
-import { LibraryTypePipe } from '../../pipe/library-type.pipe';
+import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
+import { TimeAgoPipe } from '../../_pipes/time-ago.pipe';
+import { LibraryTypePipe } from '../../_pipes/library-type.pipe';
 import { RouterLink } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
-import {DefaultDatePipe} from "../../pipe/default-date.pipe";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 
 @Component({
     selector: 'app-manage-library',

@@ -6,13 +6,13 @@ import {ExternalSeriesDetail, SeriesStaff} from "../../_models/series-detail/ext
 import {SeriesService} from "../../_services/series.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {A11yClickDirective} from "../../shared/a11y-click.directive";
 import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {ImageService} from "../../_services/image.service";
-import {PublicationStatusPipe} from "../../pipe/publication-status.pipe";
+import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {ActionService} from "../../_services/action.service";

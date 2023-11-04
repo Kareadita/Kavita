@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
-import {StreamNamePipe} from "../../../pipe/stream-name.pipe";
+import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 

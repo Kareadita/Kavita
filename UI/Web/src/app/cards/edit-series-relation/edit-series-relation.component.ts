@@ -23,7 +23,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {CommonModule} from "@angular/common";
 import {TranslocoModule} from "@ngneat/transloco";
-import {RelationshipPipe} from "../../pipe/relationship.pipe";
+import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well

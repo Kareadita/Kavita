@@ -7,7 +7,7 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {FilterPipe} from "../../../pipe/filter.pipe";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
 
 @Component({
   selector: 'app-manage-smart-filters',

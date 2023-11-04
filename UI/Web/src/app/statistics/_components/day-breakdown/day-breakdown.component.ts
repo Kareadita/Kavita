@@ -5,7 +5,7 @@ import {map, Observable} from 'rxjs';
 import {DayOfWeek, StatisticsService} from 'src/app/_services/statistics.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {StatCount} from '../../_models/stat-count';
-import {DayOfWeekPipe} from '../../_pipes/day-of-week.pipe';
+import {DayOfWeekPipe} from '../../../_pipes/day-of-week.pipe';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";

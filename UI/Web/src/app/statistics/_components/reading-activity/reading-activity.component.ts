@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
-import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
+import { MangaFormatPipe } from 'src/app/_pipes/manga-format.pipe';
 import { Member } from 'src/app/_models/auth/member';
 import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -11,7 +11,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {UtcToLocalTimePipe} from "../../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 

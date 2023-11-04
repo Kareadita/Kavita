@@ -12,8 +12,8 @@ import { SiteTheme } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SiteThemeProviderPipe } from '../_pipes/site-theme-provider.pipe';
-import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
+import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 

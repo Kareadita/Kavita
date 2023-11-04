@@ -12,9 +12,9 @@ import {PaginatedResult, Pagination} from "../../_models/pagination";
 import {SortableHeader, SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {TranslocoModule} from "@ngneat/transloco";
-import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
-import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-user-scrobble-history',

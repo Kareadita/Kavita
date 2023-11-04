@@ -29,7 +29,7 @@ import {FilterSettings} from '../metadata-filter/filter-settings';
 import {JumpKey} from '../_models/jumpbar/jump-key';
 import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {SentenceCasePipe} from '../pipe/sentence-case.pipe';
+import {SentenceCasePipe} from '../_pipes/sentence-case.pipe';
 import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
 import {SeriesCardComponent} from '../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';

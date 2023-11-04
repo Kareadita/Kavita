@@ -23,13 +23,13 @@ import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
 import {SeriesService} from "../../_services/series.service";
 import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/edit-series-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FilterPipe} from "../../pipe/filter.pipe";
+import {FilterPipe} from "../../_pipes/filter.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TranslocoModule} from "@ngneat/transloco";
-import {DefaultDatePipe} from "../../pipe/default-date.pipe";
-import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
-import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-manage-scrobble-errors',

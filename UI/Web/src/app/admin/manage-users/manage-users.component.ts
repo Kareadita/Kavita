@@ -15,10 +15,10 @@ import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
 import {AsyncPipe, DatePipe, NgClass, NgFor, NgIf, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
-import {DefaultDatePipe} from "../../pipe/default-date.pipe";
-import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
-import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
     selector: 'app-manage-users',

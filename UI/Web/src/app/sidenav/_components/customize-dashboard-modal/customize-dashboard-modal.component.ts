@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {

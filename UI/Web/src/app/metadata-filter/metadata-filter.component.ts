@@ -23,7 +23,7 @@ import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
 import {DrawerComponent} from '../shared/drawer/drawer.component';
 import {AsyncPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
-import {SortFieldPipe} from "../pipe/sort-field.pipe";
+import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {allFields} from "../_models/metadata/v2/filter-field";
 import {MetadataService} from "../_services/metadata.service";

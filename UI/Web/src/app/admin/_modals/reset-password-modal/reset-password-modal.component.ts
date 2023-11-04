@@ -3,7 +3,7 @@ import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angula
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
-import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { NgIf } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 

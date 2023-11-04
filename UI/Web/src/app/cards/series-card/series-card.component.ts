@@ -20,7 +20,7 @@ import {EditSeriesModalComponent} from '../_modals/edit-series-modal/edit-series
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
-import {RelationshipPipe} from "../../pipe/relationship.pipe";
+import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
 import {translate, TranslocoService} from "@ngneat/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";

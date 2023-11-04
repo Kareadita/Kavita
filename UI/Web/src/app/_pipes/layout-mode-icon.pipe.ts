@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { LayoutMode } from '../_models/layout-mode';
+import { LayoutMode } from '../manga-reader/_models/layout-mode';
 
 @Pipe({
   name: 'layoutModeIcon',

@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
-import { TimeAgoPipe } from '../../../pipe/time-ago.pipe';
-import { TimeDurationPipe } from '../../../pipe/time-duration.pipe';
+import { TimeAgoPipe } from '../../../_pipes/time-ago.pipe';
+import { TimeDurationPipe } from '../../../_pipes/time-duration.pipe';
 import { DecimalPipe } from '@angular/common';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import {AccountService} from "../../../_services/account.service";
-import {CompactNumberPipe} from "../../../pipe/compact-number.pipe";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({

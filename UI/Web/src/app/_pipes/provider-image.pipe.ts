@@ -18,8 +18,6 @@ export class ProviderImagePipe implements PipeTransform {
       case ScrobbleProvider.Kavita:
         return 'assets/images/logo-32.png';
     }
-
-    return '';
   }
 
 }

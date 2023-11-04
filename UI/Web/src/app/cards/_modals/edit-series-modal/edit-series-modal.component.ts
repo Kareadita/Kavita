@@ -42,18 +42,18 @@ import {CommonModule} from "@angular/common";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-series-relation.component";
-import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
-import {MangaFormatPipe} from "../../../pipe/manga-format.pipe";
-import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
-import {TimeAgoPipe} from "../../../pipe/time-ago.pipe";
+import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
+import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {PublicationStatusPipe} from "../../../pipe/publication-status.pipe";
-import {BytesPipe} from "../../../pipe/bytes.pipe";
+import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
+import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
-import {DefaultValuePipe} from "../../../pipe/default-value.pipe";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoDatePipe} from "@ngneat/transloco-locale";
-import {UtcToLocalTimePipe} from "../../../pipe/utc-to-local-time.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 enum TabID {
   General = 0,

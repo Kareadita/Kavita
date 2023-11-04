@@ -19,7 +19,7 @@ import {SeriesMetadata} from '../../../_models/metadata/series-metadata';
 import {ImageService} from 'src/app/_services/image.service';
 import {CommonModule} from "@angular/common";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
-import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {ExternalRatingComponent} from "../external-rating/external-rating.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
