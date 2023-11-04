@@ -6,7 +6,6 @@ import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/oper
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
-import {Series} from 'src/app/_models/series';
 import {SortField} from 'src/app/_models/metadata/series-filter';
 import {AccountService} from 'src/app/_services/account.service';
 import {ImageService} from 'src/app/_services/image.service';
@@ -30,9 +29,7 @@ import {RecommendationService} from "../../_services/recommendation.service";
 import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
-import {SeriesRemovedEvent} from "../../_models/events/series-removed-event";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {fadeInAnimation} from "angular-animations";
 
 @Component({
   selector: 'app-dashboard',
@@ -42,19 +39,24 @@ import {fadeInAnimation} from "angular-animations";
   standalone: true,
   imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
     CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent],
-  animations: [
-    fadeInAnimation()
-  ]
 })
 export class DashboardComponent implements OnInit {
 
-  /**
-   * By default, 0, but if non-zero, will limit all API calls to library id
-   */
-  @Input() libraryId: number = 0;
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly metadataService = inject(MetadataService);
+  private readonly recommendationService = inject(RecommendationService);
+  public readonly accountService = inject(AccountService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly router = inject(Router);
+  private readonly titleService = inject(Title);
+  public readonly imageService = inject(ImageService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly dashboardService = inject(DashboardService);
 
-  libraries$: Observable<Library[]> = of([]);
-  isLoadingAdmin = true;
+  libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
   isAdmin$: Observable<boolean> = of(false);
 
@@ -66,26 +68,13 @@ export class DashboardComponent implements OnInit {
   streamCount: number = 0;
   streamsLoaded: number = 0;
 
-
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly metadataService = inject(MetadataService);
-  private readonly recommendationService = inject(RecommendationService);
   protected readonly StreamType = StreamType;
 
-
-
-  constructor(public accountService: AccountService, private libraryService: LibraryService,
-    private seriesService: SeriesService, private router: Router,
-    private titleService: Title, public imageService: ImageService,
-    private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef,
-              private dashboardService: DashboardService) {
-
-
+  constructor() {
     this.loadDashboard();
 
     this.refreshStreamsFromDashboardUpdate$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(1000),
@@ -125,14 +114,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita');
-    this.isLoadingAdmin = true;
-    this.cdRef.markForCheck();
-
-    // TODO: We can likely reduce this to something faster
-    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef), tap((libs) => {
-      this.isLoadingAdmin = false;
-      this.cdRef.markForCheck();
-    }));
   }
 
 
@@ -244,13 +225,6 @@ export class DashboardComponent implements OnInit {
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    }
-  }
-
-  removeFromArray(arr: Array<any>, element: any) {
-    const index = arr.indexOf(element);
-    if (index >= 0) {
-      arr.splice(index);
     }
   }
 }
