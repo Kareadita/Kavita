@@ -1637,6 +1637,7 @@
 
     "day-breakdown": {
         "title": "Day Breakdown",
+        "no-data": "No progress, get to reading",
         "x-axis-label": "Day of Week",
         "y-axis-label": "Reading Events"
     },
