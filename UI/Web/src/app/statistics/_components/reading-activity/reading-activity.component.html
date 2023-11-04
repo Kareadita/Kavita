@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'reading-activity'">
   <ng-container>
-    <div class="dashboard-card-content">
+    <div class="dashboard-card-content stat-container">
       <div class="row g-0 mb-2 align-items-center">
         <div class="col-4">
           <h4>{{t('title')}}</h4>
@@ -27,8 +27,34 @@
           </form>
         </div>
       </div>
+
+      <div class="row g-0">
+        <ng-container *ngIf="data2$ | async as data">
+        <div class="stat-chart">
+          <table class="charts-css line multiple show-labels show-primary-axis show-4-secondary-axes data-spacing-5">
+            <tbody>
+            <tr *ngFor="let readingActivity of data; let idx = index">
+              <th scope="row">{{readingActivity.date}}</th>
+              <ng-container *ngFor="let point of readingActivity.values">
+                <td style="--start: 0; --end: 0" *ngIf="(idx === 0 && point.count === 0); else readPoint"></td>
+                <ng-template #readPoint>
+                  <td style="{{'--start: ' +  (point.count === 0 ? 0 : point.count / max)}}">
+                  </td>
+                </ng-template>
+
+              </ng-container>
+
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        </ng-container>
+      </div>
+
       <div class="row g-0">
         <ng-container *ngIf="data$ | async as data">
+
+
           <ngx-charts-line-chart
             *ngIf="data.length > 0; else noData"
             class="dark"
