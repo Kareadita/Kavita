@@ -1,9 +1,8 @@
-import { NgModule } from "@angular/core";
-import { Routes, RouterModule } from "@angular/router";
+import { Routes } from "@angular/router";
 import { AuthGuard } from "../_guards/auth.guard";
 import { BookmarksComponent } from "./_components/bookmarks/bookmarks.component";
 
-const routes: Routes = [
+export const routes: Routes = [
   {path: '**', component: BookmarksComponent, pathMatch: 'full', canActivate: [AuthGuard]},
   {
     path: '',
@@ -14,10 +13,3 @@ const routes: Routes = [
     ]
   }
 ];
-
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class BookmarkRoutingModule { }

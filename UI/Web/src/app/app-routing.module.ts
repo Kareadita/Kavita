@@ -33,9 +33,13 @@ const routes: Routes = [
     path: 'announcements',
     loadChildren: () => import('../app/announcements/announcements.module').then(m => m.AnnouncementsModule)
   },
+  // {
+  //   path: 'bookmarks',
+  //   loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
+  // },
   {
     path: 'bookmarks',
-    loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
+    loadChildren: () => import('../app/bookmark/bookmark-routing.module').then(m => m.routes)
   },
   {
     path: 'all-series',
