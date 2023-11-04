@@ -523,7 +523,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   handleScrollEvent() {
     // Highlight the current chapter we are on
     if (Object.keys(this.pageAnchors).length !== 0) {
-      // get the height of the document so we can capture markers that are halfway on the document viewport
+      // get the height of the document, so we can capture markers that are halfway on the document viewport
       const verticalOffset = this.reader.nativeElement?.scrollTop || (this.scrollService.scrollPosition + (this.document.body.offsetHeight / 2));
 
       const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
@@ -616,7 +616,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
     this.cdRef.markForCheck();
-
 
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
