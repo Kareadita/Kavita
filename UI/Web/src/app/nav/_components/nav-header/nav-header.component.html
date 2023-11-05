@@ -4,7 +4,7 @@
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
       <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
       <a class="navbar-brand dark-exempt" routerLink="/home" routerLinkActive="active">
-        <img width="28" height="28" class="logo" ngSrc="assets/images/logo-32.png" alt="kavita icon" aria-hidden="true"/>
+        <app-image width="28px" height="28px" imageUrl="assets/images/logo-32.png" classes="logo" />
         <span class="d-none d-md-inline logo"> Kavita</span>
       </a>
       <ul class="navbar-nav col me-auto">

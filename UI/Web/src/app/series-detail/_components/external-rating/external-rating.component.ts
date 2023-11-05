@@ -19,11 +19,12 @@ import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {ImageComponent} from "../../../shared/image/image.component";
 
 @Component({
   selector: 'app-external-rating',
   standalone: true,
-  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule],
+  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

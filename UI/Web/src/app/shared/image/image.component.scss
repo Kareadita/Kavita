@@ -3,11 +3,6 @@ img {
     transition: opacity 1s;
 }
 
-.img-placeholder {
-    background: rgb(44,47,51);
-    background: radial-gradient(circle, rgba(44,47,51,1) 0%, rgba(34,42,24,1) 37%, rgba(2,0,36,1) 100%);
-}
-
 .fade-in {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;

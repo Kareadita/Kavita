@@ -5,7 +5,8 @@ import {
   inject,
   Input,
   OnChanges,
-  SimpleChanges
+  SimpleChanges,
+  ViewEncapsulation
 } from '@angular/core';
 import {Router} from '@angular/router';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -31,6 +32,7 @@ import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.compon
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {ImageComponent} from "../../../shared/image/image.component";
 
 
 @Component({
@@ -38,10 +40,11 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
   standalone: true,
   imports: [CommonModule, TagBadgeComponent, BadgeExpanderComponent, SafeHtmlPipe, ExternalRatingComponent,
     ReadMoreComponent, A11yClickDirective, PersonBadgeComponent, NgbCollapse, SeriesInfoCardsComponent,
-    MetadataDetailComponent, TranslocoDirective],
+    MetadataDetailComponent, TranslocoDirective, ImageComponent],
   templateUrl: './series-metadata-detail.component.html',
   styleUrls: ['./series-metadata-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class SeriesMetadataDetailComponent implements OnChanges {
 

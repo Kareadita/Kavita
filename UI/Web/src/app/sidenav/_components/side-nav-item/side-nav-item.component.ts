@@ -12,12 +12,13 @@ import { filter, map } from 'rxjs';
 import { NavService } from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule, NgOptimizedImage} from "@angular/common";
+import {ImageComponent} from "../../../shared/image/image.component";
 
 
 @Component({
   selector: 'app-side-nav-item',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgOptimizedImage],
+  imports: [CommonModule, RouterLink, NgOptimizedImage, ImageComponent],
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
