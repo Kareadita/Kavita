@@ -24,6 +24,7 @@ import { WebtoonImage } from '../../_models/webtoon-image';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {MangaReaderComponent} from "../manga-reader/manga-reader.component";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -61,6 +62,12 @@ const enum DEBUG_MODES {
   imports: [NgIf, NgFor, AsyncPipe, TranslocoDirective]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
+
+  private readonly mangaReaderService = inject(ManagaReaderService);
+  private readonly readerService = inject(ReaderService);
+  private readonly renderer = inject(Renderer2);
+  private readonly scrollService = inject(ScrollService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   /**
    * Current page number aka what's recorded on screen
@@ -150,7 +157,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -169,9 +176,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return this.webtoonImageWidth > (innerWidth || document.body.clientWidth);
   }
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2,
-    @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService,
-    private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) {
+  constructor(@Inject(DOCUMENT) private readonly document: Document) {
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reading-area');
     if (reader !== null) {
@@ -200,6 +205,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
     .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
     .subscribe((event) => this.handleScrollEvent(event));
+
+    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scrollend')
+    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
+    .subscribe((event) => this.handleScrollEndEvent(event));
   }
 
   ngOnInit(): void {
@@ -305,6 +314,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
+  }
+
+  handleScrollEndEvent(event?: any) {
+    if (!this.isScrolling) {
+
+      const closestImages = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
+      const img = this.findClosestVisibleImage(closestImages);
+
+      if (img != null) {
+        this.setPageNum(parseInt(img.getAttribute('page') || this.pageNum + '', 10));
+      }
+    }
   }
 
   getTotalHeight() {
@@ -423,9 +444,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (elem === null || elem === undefined) { return false; }
 
     const rect = elem.getBoundingClientRect();
-
     const [innerHeight, innerWidth] = this.getInnerDimensions();
-
 
     if (rect.bottom >= 0 &&
             rect.right >= 0 &&
@@ -438,6 +457,32 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return false;
   }
 
+  /**
+   * Find the closest visible image within the viewport.
+   * @param images An array of HTML Image Elements
+   * @returns Closest visible image or null if none are visible
+   */
+  findClosestVisibleImage(images: HTMLImageElement[]): HTMLImageElement | null {
+    let closestImage: HTMLImageElement | null = null;
+    let closestDistanceToTop = Number.MAX_VALUE; // Initialize to a high value.
+
+    for (const image of images) {
+      // Get the bounding rectangle of the image.
+      const rect = image.getBoundingClientRect();
+
+      // Calculate the distance of the current image to the top of the viewport.
+      const distanceToTop = Math.abs(rect.top);
+
+      // Check if the image is visible within the viewport.
+      if (distanceToTop < closestDistanceToTop) {
+        closestDistanceToTop = distanceToTop;
+        closestImage = image;
+      }
+    }
+
+    return closestImage;
+  }
+
 
   initWebtoonReader() {
     this.initFinished = false;
@@ -448,6 +493,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.checkIfShouldTriggerContinuousReader();
     this.cdRef.markForCheck();
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+
 
     this.debugLog('[INIT] Prefetching pages ' + startingIndex + ' to ' + endingIndex + '. Current page: ', this.pageNum);
     for(let i = startingIndex; i <= endingIndex; i++) {
