@@ -46,6 +46,14 @@ import {TranslocoDirective} from "@ngneat/transloco";
 })
 export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
+  private readonly destroyRef = inject(DestroyRef);
+  public readonly utilityService = inject(UtilityService);
+  private readonly readerService = inject(ReaderService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly messageHub = inject(MessageHubService);
+  public readonly accountService = inject(AccountService);
+  private readonly scrobbleService = inject(ScrobblingService);
+
   @Input({required: true}) series!: Series;
   @Input({required: true}) seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
@@ -59,19 +67,13 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
   isScrobbling: boolean = true;
   libraryAllowsScrobbling: boolean = true;
-  private readonly destroyRef = inject(DestroyRef);
 
-  get MangaFormat() {
-    return MangaFormat;
-  }
 
-  get FilterField() {
-    return FilterField;
-  }
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly FilterField = FilterField;
 
-  constructor(public utilityService: UtilityService, private readerService: ReaderService,
-              private readonly cdRef: ChangeDetectorRef, private messageHub: MessageHubService,
-              public accountService: AccountService, private scrobbleService: ScrobblingService) {
+
+  constructor() {
       // Listen for progress events and re-calculate getTimeLeft
       this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
                                     map(evt => evt.payload as UserProgressUpdateEvent),
