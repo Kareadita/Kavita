@@ -2904,10 +2904,12 @@
         "tags": [
           "Library"
         ],
+        "summary": "Returns the type of the underlying library",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"

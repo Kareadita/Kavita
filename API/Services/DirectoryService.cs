@@ -369,6 +369,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public void ClearDirectory(string directoryPath)
     {
+        directoryPath = directoryPath.Replace(Environment.NewLine, string.Empty);
         var di = FileSystem.DirectoryInfo.New(directoryPath);
         if (!di.Exists) return;
         try

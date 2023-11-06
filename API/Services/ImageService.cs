@@ -219,7 +219,7 @@ public class ImageService : IImageService
     {
         // Parse the URL to get the domain (including subdomain)
         var uri = new Uri(url);
-        var domain = uri.Host;
+        var domain = uri.Host.Replace(Environment.NewLine, string.Empty);
         var baseUrl = uri.Scheme + "://" + uri.Host;
 
 
