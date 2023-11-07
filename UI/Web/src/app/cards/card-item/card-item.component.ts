@@ -229,7 +229,7 @@ export class CardItemComponent implements OnInit {
 
       if (nextDate.expectedDate) {
         const utcPipe = new UtcToLocalTimePipe();
-        this.title = utcPipe.transform(nextDate.expectedDate);
+        this.title = utcPipe.transform(nextDate.expectedDate, 'shortDate');
       }
 
       this.cdRef.markForCheck();
