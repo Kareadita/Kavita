@@ -652,7 +652,7 @@
         "setup-user-account-tooltip": "이것을 복사하여 새 탭에 붙여넣으십시오. 로그아웃해야 할 수도 있습니다.",
         "title": "사용자 초대",
         "inviting": "초대중…",
-        "description": "사용자를 이메일을 입력하여 서버로 초대하십시오. 그들은 계정을 생성하기 위한 이메일을 받게 됩니다. 이 기능을 사용하려면 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에서 호스트 이름 필드를 설정하거나 원격 URL을 통해 인스턴스에 액세스해야 합니다. <br/><br/>대체로 사용자 이름을 사용할 수도 있지만 사용자 이름 기반 계정의 경우 비밀번호 재설정 기능을 사용할 수 없다는 점을 유의하세요. 우리의 이메일 서비스를 사용하지 않으려면 고유의 이메일 서비스를 호스팅할 수도 있습니다.\""
+        "description": "이메일을 통해 사용자를 서버로 초대하려면, 그들의 이메일 주소를 입력해주세요. 그들은 계정을 생성할 수 있는 이메일을 받게 될 것입니다. 이 작업을 수행하려면 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에서 호스트 이름 필드를 설정해야하거나 인스턴스에 원격 URL을 통해 접근해야합니다. <br/><br/>또 다른 방법으로는 사용자 이름을 사용할 수 있지만, 사용자 이름 기반 계정의 경우 비밀번호 재설정이 불가능하다는 점을 참고하세요. 만약 우리 이메일 서비스를 사용하지 않고 싶다면, 자체 이메일 서비스를 호스팅할 수도 있습니다."
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
@@ -1126,7 +1126,8 @@
     "day-breakdown": {
         "x-axis-label": "요일",
         "title": "일 분석",
-        "y-axis-label": "읽기 이벤트"
+        "y-axis-label": "읽기 이벤트",
+        "no-data": "진행이 없습니디, 읽어보세요"
     },
     "reading-activity": {
         "last-7-days": "{{time-periods.last-7-days}}",
@@ -1697,7 +1698,8 @@
     "collection-detail": {
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
         "no-data-filtered": "현재 필터와 일치하는 항목이 없습니다.",
-        "title-alt": "Kavita - {{collectionName}} 컬렉션"
+        "title-alt": "Kavita - {{collectionName}} 컬렉션",
+        "series-header": "시리즈"
     },
     "all-collections": {
         "title": "컬렉션",

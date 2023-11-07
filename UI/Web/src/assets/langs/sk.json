@@ -4,7 +4,7 @@
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "Zabudli ste heslo?",
+        "forgot-password": "Zabudnuté heslo?",
         "submit": "{{common.submit}}"
     },
     "dashboard": {
@@ -12,6 +12,70 @@
         "server-settings-link": "Nastavenia servera",
         "not-granted": "Nemáte prístup do žiadnej z knižníc.",
         "on-deck-title": "Vitajte na palube",
-        "recently-updated-title": "Naposledy aktualizované série"
+        "recently-updated-title": "Naposledy aktualizované série",
+        "more-in-genre-title": "Viac v {{genre}}",
+        "recently-added-title": "Novo pridané série"
+    },
+    "user-scrobble-history": {
+        "not-applicable": "Neplatné",
+        "rating": "Hodnotenie {{r}}",
+        "processed": "Spracované",
+        "no-data": "Žiadne dáta",
+        "type-header": "Typ",
+        "not-processed": "Nespracované",
+        "volume-and-chapter-num": "Zväzok {{v}} Kapitola {{n}}",
+        "data-header": "Dáta",
+        "created-header": "Vytvorené",
+        "series-header": "Série",
+        "last-modified-header": "Posledne upravené",
+        "is-processed-header": "Je spracované"
+    },
+    "user-preferences": {
+        "global-settings-title": "Globálne nastavenia",
+        "account-tab": "Účet",
+        "title": "Používateľský panel",
+        "smart-filters-tab": "Inteligentné filtre",
+        "theme-tab": "Téma",
+        "page-layout-mode-label": "Režim rozloženia strany",
+        "locale-tooltip": "Jazyk, ktorý má Kavita použiť",
+        "blur-unread-summaries-label": "Zakryť neprečítané zhrnutie",
+        "pref-description": "Toto sú globálne nastavenia, ktoré sú viazané na Váš účet.",
+        "blur-unread-summaries-tooltip": "Zakryje text zhrnutia na zväzkoch alebo kapitolách, ktoré nemajú žiadny progres čítania (pre vyhnutie sa spojlerom)",
+        "success-toast": "Používateľské preferencie aktualizované",
+        "page-layout-mode-tooltip": "Zobraziť položky ako karty alebo zoznam na stránke Detaily série.",
+        "preferences-tab": "Preferencie",
+        "3rd-party-clients-tab": "Klienti od tretej strany",
+        "stats-tab": "Štatistiky",
+        "devices-tab": "Zariadenia"
+    },
+    "review-card-modal": {
+        "go-to-review": "Prejsť na recenziu",
+        "external-mod": "(externé)"
+    },
+    "review-card": {
+        "external-review": "Externá recenzia",
+        "rating-percentage": "Hodnotenie {{r}}%",
+        "your-review": "Toto je Vaša recenzia",
+        "local-review": "Recenzia"
+    },
+    "edit-user": {
+        "update": "Aktualizovať",
+        "username": "{{common.username}}",
+        "saving": "Ukladanie…",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}"
+    },
+    "spoiler": {
+        "click-to-show": "Spojler, kliknite na zobrazenie"
+    },
+    "want-to-read": {
+        "no-items-filtered": "Žiadne položky sa nezhodujú Vášmu momentálnemu filtru."
+    },
+    "review-series-modal": {
+        "review-label": "Recenzia",
+        "title": "Upraviť recenziu"
+    },
+    "scrobble-event-type-pipe": {
+        "review": "Zhodnotiť aktualizáciu"
     }
 }

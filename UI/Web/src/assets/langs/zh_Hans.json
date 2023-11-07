@@ -406,10 +406,10 @@
     },
     "publication-status-pipe": {
         "ongoing": "连载中",
-        "hiatus": "停更",
+        "hiatus": "有生之年",
         "completed": "完结",
-        "cancelled": "中止",
-        "ended": "终止"
+        "cancelled": "停更",
+        "ended": "断更"
     },
     "person-role-pipe": {
         "artist": "设计师",
@@ -1159,7 +1159,8 @@
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
         "no-data-filtered": "没有项目与当前筛选器匹配。",
-        "title-alt": "Kavita - {{collectionName}}收藏集"
+        "title-alt": "Kavita - {{collectionName}}收藏集",
+        "series-header": "系列"
     },
     "all-collections": {
         "title": "收藏",
@@ -1210,7 +1211,7 @@
         "close": "{{common.close}}",
         "users-online-count": "{{num}}用户在线",
         "active-events-title": "活动事件：",
-        "no-data": "什么都没有发生"
+        "no-data": "无运行"
     },
     "shortcuts-modal": {
         "title": "热键",

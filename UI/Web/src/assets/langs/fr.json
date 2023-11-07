@@ -8,12 +8,12 @@
         "submit": "{{common.submit}}"
     },
     "dashboard": {
-        "no-libraries": "Aucune bibliothèques n'est configurée. Veuillez en ajouter une",
-        "server-settings-link": "Paramètres du Serveur",
-        "not-granted": "Vous n'êtes pas autorisé à accèder à une bibliothèque.",
+        "no-libraries": "Aucunes bibliothèques configurées. Veuillez en ajouter une",
+        "server-settings-link": "Paramètres serveur",
+        "not-granted": "Vous n'avez accès à aucune bibliothèque.",
         "on-deck-title": "En Cours",
         "recently-updated-title": "Séries mises à jour récemment",
-        "recently-added-title": "Séries nouvellement ajoutées",
+        "recently-added-title": "Séries ajoutées récemment",
         "more-in-genre-title": "Plus dans {{genre}}"
     },
     "edit-user": {
@@ -24,8 +24,8 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "Sauvegarde en cour …",
-        "update": "Mise-à-jour"
+        "saving": "Sauvegarde en cours…",
+        "update": "Mise à jour"
     },
     "user-scrobble-history": {
         "title": "Historique de scrobble",
@@ -145,7 +145,8 @@
         "clients-opds-url-tooltip": "URL OPDS",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "smart-filters-tab": "Filtres intelligents"
+        "smart-filters-tab": "Filtres intelligents",
+        "immersive-mode-tooltip": "Cela permet de masquer le menu en cliquant sur le document de lecture et d'activer la fonction de pagination"
     },
     "theme-manager": {
         "title": "Gestionnaire de Theme",
@@ -225,7 +226,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "email-updated-description": "Utilisez le lien ci-dessous pour confirmer l'adresse courriel de votre compte. Si votre serveur  est ouvert sur l'extérieur, un courriel  a été adressé  à l'adresse indiquée et le lien peut être utilisé pour confirmer l'adresse."
+        "email-updated-description": "Vous pouvez utiliser le lien suivant pour confirmer l'email de votre compte. Si votre serveur est accessible depuis l'extérieur, un email y sera envoyé avec un lien permettant de confirmer l'adresse."
     },
     "change-age-restriction": {
         "age-restriction-label": "Restriction d'âge",
@@ -241,7 +242,8 @@
         "no-key": "Erreur - La clé n'a pas été défini",
         "key-reset": "Réinitialiser la clé API",
         "show": "Afficher",
-        "confirm-reset": "Ceci annulera toutes les configurations OPDS que vous avez configurées. Êtes-vous sûr de vouloir continuer ?"
+        "confirm-reset": "Ceci annulera toutes les configurations OPDS que vous avez configurées. Êtes-vous sûr de vouloir continuer ?",
+        "hide": "Cacher"
     },
     "scrobbling-providers": {
         "requires": "Ce fonctionnalité requiert un licence active du {{product}}",
@@ -251,7 +253,8 @@
         "generate": "Générer",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-input-label": "{{service}} Le token vient ici"
     },
     "typeahead": {
         "locked-field": "Ce champ est vérouillé",
@@ -277,7 +280,7 @@
         "chapters-read-label": "Chapitres Lu",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "Lecture moyenne / semaine",
-        "last-active-label": "Dernière fois en ligne",
+        "last-active-label": "Dernière activité",
         "chapters": "{{value}} chapitres"
     },
     "user-stats": {
@@ -309,7 +312,8 @@
         "name-header": "Nom",
         "cancel": "{{common.cancel}}",
         "share": "Partager",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "instructions": "Sélectionnez un répertoire pour voir le fil d'Ariane. Répertoire non visible ? Vérifiez d'abord qu'il existe."
     },
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
@@ -353,30 +357,46 @@
         "chapter-missing": "{{series}} : Le chapitre {{chapter}} est manquant dans Kavita et sera ignoré.",
         "name-conflict": "Une liste de lecture ({{readingListName}}) correspondant au fichier cbl existe déjà dans votre compte.",
         "series-missing": "La série, {{series}}, est absente de Kavita ou votre compte n'a pas les permissions requises. Tous les éléments de cette série seront ignorés lors de l'import.",
-        "all-series-missing": "Votre compte n'a accès à aucune des séries de la liste ou Kavita n'a aucune série disponible dans la liste."
+        "all-series-missing": "Votre compte n'a accès à aucune des séries de la liste ou Kavita n'a aucune série disponible dans la liste.",
+        "invalid-file": "Le fichier est corrompu ou ne correspond pas aux étiquettes/spécifications attendues.",
+        "all-chapter-missing": "Tous les chapitres ne peuvent pas être mis en correspondance avec les chapitres de Kavita.",
+        "success": "{{series} volume {{volume} chapitre {{chapter}} recensé avec succès."
     },
     "person-role-pipe": {
         "colorist": "Coloriste",
         "editor": "Éditeur",
         "writer": "Scénariste",
-        "other": "Autre"
+        "other": "Autre",
+        "penciller": "Crayonneur",
+        "letterer": "Lettreur",
+        "cover-artist": "Artiste de la couverture",
+        "character": "Personnage",
+        "artist": "Artiste",
+        "inker": "Encreur"
     },
     "manga-format-pipe": {
         "epub": "EPUB",
-        "pdf": "PDF"
+        "pdf": "PDF",
+        "image": "Image",
+        "unknown": "Inconnu",
+        "archive": "Archive"
     },
     "library-type-pipe": {
         "book": "Livre",
-        "manga": "Manga"
+        "manga": "Manga",
+        "comic": "Bande dessinée"
     },
     "reset-password": {
-        "description": "Entrez l'email de votre compte. Kavita vous enverra un e-mail s'il est valide dans le dossier, sinon demandez à l'administrateur le lien des journaux."
+        "description": "Entrez l'email de votre compte. Kavita vous enverra un e-mail s'il est valide dans le dossier, sinon demandez à l'administrateur le lien des journaux.",
+        "title": "Réinitialisation de mot de passe"
     },
     "all-series": {
         "title": "Toutes les Séries"
     },
     "series-metadata-detail": {
-        "collections-title": "{{side-nav.collections}}"
+        "collections-title": "{{side-nav.collections}}",
+        "tags-title": "Étiquettes",
+        "characters-title": "Personnages"
     },
     "side-nav": {
         "home": "Accueil",
@@ -390,13 +410,18 @@
         "title": "Collections"
     },
     "grouped-typeahead": {
-        "collections": "Collections"
+        "collections": "Collections",
+        "tags": "Étiquettes"
     },
     "metadata-filter": {
-        "collections-label": "Collections"
+        "collections-label": "Collections",
+        "tags-label": "Étiquettes",
+        "character-label": "Personnage"
     },
     "edit-series-modal": {
-        "collections-label": "Collections"
+        "collections-label": "Collections",
+        "tags-label": "Étiquettes",
+        "character-label": "Personnage"
     },
     "common": {
         "reset-to-default": "Réinitialiser aux valeurs par défaut",
@@ -431,11 +456,25 @@
     },
     "filter-field-pipe": {
         "file-path": "Chemin du fichier",
-        "path": "Chemin"
+        "path": "Chemin",
+        "tags": "Étiquettes",
+        "collection-tags": "Étiquettes de la collection",
+        "characters": "Personnages"
     },
     "relationship-pipe": {
         "adaptation": "Adaptation",
-        "alternative-setting": "Paramètres alternatifs"
+        "alternative-setting": "Paramètres alternatifs",
+        "side-story": "Histoire secondaire",
+        "parent": "Parent",
+        "doujinshi": "Doujinshi",
+        "prequel": "Préquelle",
+        "alternative-version": "Version alternative",
+        "spin-off": "Spin Off",
+        "sequel": "Séquelle",
+        "edition": "Édition",
+        "other": "Autre",
+        "character": "Personnage",
+        "contains": "Contient"
     },
     "time-ago-pipe": {
         "min-ago": "il y a une minute",
@@ -457,5 +496,100 @@
         "hours": "{{value}} heures",
         "years": "{{value}} années",
         "minutes": "{{value}} minutes"
+    },
+    "validation": {
+        "password-validation": "Le mot de passe doit comporter entre 6 et 32 caractères"
+    },
+    "age-rating-pipe": {
+        "pg": "Déconseillé aux moins de 10 ans",
+        "unknown": "Inconnu",
+        "g": "Tous publics",
+        "teen": "Ado",
+        "x18-plus": "Interdit aux moins de 18 ans",
+        "everyone-10-plus": "Déconseillé aux moins de 10 ans",
+        "early-childhood": "Petite enfance",
+        "adults-only": "Interdit aux moins de 18 ans",
+        "mature": "Mature",
+        "not-applicable": "Non applicable",
+        "r18-plus": "Interdit aux moins de 18 ans",
+        "kids-to-adults": "Enfants aux adultes",
+        "rating-pending": "Classification en attente",
+        "everyone": "Tous publics"
+    },
+    "server-stats": {
+        "tags": "Étiquettes",
+        "total-tags-tooltip": "Nombre total d'étiquettes : {{count}}",
+        "total-tags-label": "Nombre total d'étiquettes",
+        "tag-count": "{{num}} étiquettes"
+    },
+    "chapter-metadata-detail": {
+        "characters-title": "{{series-metadata-detail.characters-title}}"
+    },
+    "changelog": {
+        "download": "Télécharger",
+        "published-label": "Publié : ",
+        "description": "Si vous ne voyez pas un {{installed}",
+        "available": "Disponible",
+        "installed": "Installé",
+        "description-continued": "étiquette, vous êtes sur une version de développement quotidienne (nightly release). Seules les versions majeures seront disponibles."
+    },
+    "publication-status-pipe": {
+        "completed": "Achevé",
+        "ended": "Terminé",
+        "cancelled": "Annulé",
+        "hiatus": "Pause",
+        "ongoing": "En cours"
+    },
+    "reset-password-modal": {
+        "title": "Réinitialiser le mot de passe de {nom}",
+        "error-label": "Erreur : ",
+        "new-password-label": "Nouveau mot de passe"
+    },
+    "invite-user": {
+        "title": "Inviter un utilisateur"
+    },
+    "announcements": {
+        "title": "Annonces"
+    },
+    "license": {
+        "activate-license-label": "Clé de licence",
+        "license-valid": "Licence valide",
+        "activate-delete": "Supprimer",
+        "no-license-key": "Aucune clé de licence",
+        "license-not-valid": "Licence non valide",
+        "activate-description": "Entrez la clé de licence et l'email utilisé pour s'inscrire avec Stripe"
+    },
+    "book-reader": {
+        "bookmarks-header": "Signets",
+        "incognito-mode-label": "Navigation privée",
+        "page-label": "Page",
+        "prev-page": "Page précédente",
+        "title": "Paramètres du livre",
+        "table-of-contents-header": "Table des matières",
+        "settings-header": "Paramètres",
+        "go-to-last-page": "Aller à la dernière page",
+        "go-to-page-prompt": "Il y a {{totalPages}} pages. À quelle page voulez-vous aller ?",
+        "next-chapter": "Chapitre/Volume suivant",
+        "go-back": "Revenir en arrière",
+        "skip-header": "Passer au contenu principal",
+        "incognito-mode-alt": "La navigation privée est activée. Basculer pour désactiver.",
+        "previous": "Précédent",
+        "go-to-page": "Aller à la page",
+        "next": "Suivant",
+        "next-page": "Page suivante",
+        "loading-book": "Chargement du livre…",
+        "virtual-pages": "pages virtuelles",
+        "toc-header": "TdM",
+        "pagination-header": "Section",
+        "prev-chapter": "Chapitre/Volume précédent"
+    },
+    "book-line-overlay": {
+        "bookmark": "Signet",
+        "copy": "Copier",
+        "bookmark-label": "Nom du signet"
+    },
+    "register": {
+        "description": "Remplissez le formulaire pour enregistrer un compte administrateur",
+        "title": "S'inscrire"
     }
 }
