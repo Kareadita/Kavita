@@ -914,6 +914,8 @@
     },
 
     "cover-image-chooser": {
+        "enter-an-url-pre-title": "Enter an {{url}}",
+        "url": "Url",
         "drag-n-drop": "Drag and drop",
         "upload": "Upload",
         "upload-continued": "an image",
