@@ -914,6 +914,8 @@
     },
 
     "cover-image-chooser": {
+        "enter-an-url-pre-title": "Enter an {{url}}",
+        "url": "Url",
         "drag-n-drop": "Drag and drop",
         "upload": "Upload",
         "upload-continued": "an image",
@@ -1505,13 +1507,15 @@
         "brightness-label": "Brightness",
         "bookmark-page-tooltip": "Bookmark Page",
         "unbookmark-page-tooltip": "Unbookmark Page",
+        "bookmarks-title": "Bookmarks",
 
         "first-time-reading-manga": "Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.",
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
         "user-preferences-updated": "User preferences updated",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "series-progress": "Series Progress: {{percentage}}"
     },
 
     "metadata-filter": {

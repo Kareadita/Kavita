@@ -10,7 +10,7 @@
         <div>
           <div style="font-weight: bold;">{{title}} <span class="clickable" *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)</span></div>
           <div class="subtitle">
-            {{subtitle}}
+            {{subtitle}} <span *ngIf="totalSeriesPages > 0">{{t('series-progress', {percentage: (((totalSeriesPagesRead + pageNum) / totalSeriesPages) | percent)}) }}</span>
           </div>
         </div>
 

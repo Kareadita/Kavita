@@ -25,4 +25,6 @@ export interface ChapterInfo {
      * This will not always be present. Depends on if asked from backend.
      */
     doublePairs?: {[key: number]: number};
+    seriesTotalPagesRead: number;
+    seriesTotalPages: number;
 }

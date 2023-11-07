@@ -134,7 +134,7 @@ public class LibraryController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("list")]
-    public ActionResult<IEnumerable<DirectoryDto>> GetDirectories(string path)
+    public ActionResult<IEnumerable<DirectoryDto>> GetDirectories(string? path)
     {
         if (string.IsNullOrEmpty(path))
         {
@@ -385,7 +385,7 @@ public class LibraryController : BaseApiController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, await _localizationService.Translate(User.GetUserId(), "generic-library"));
+            _logger.LogError(ex, "There was a critical issue. Please try again");
             await _unitOfWork.RollbackAsync();
             return Ok(false);
         }
@@ -441,7 +441,7 @@ public class LibraryController : BaseApiController
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
         {
-            _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name);
+            _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name.Replace(Environment.NewLine, string.Empty));
             library.AllowScrobbling = false;
         }
 
@@ -471,7 +471,11 @@ public class LibraryController : BaseApiController
 
     }
 
-
+    /// <summary>
+    /// Returns the type of the underlying library
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpGet("type")]
     public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)
     {

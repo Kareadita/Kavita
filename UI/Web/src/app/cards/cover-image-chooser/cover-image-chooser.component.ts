@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Inject,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule} from 'ngx-file-drop';
 import { fromEvent, Subject } from 'rxjs';
@@ -25,7 +35,14 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
   styleUrls: ['./cover-image-chooser.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CoverImageChooserComponent implements OnInit, OnDestroy {
+export class CoverImageChooserComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  public readonly imageService = inject(ImageService);
+  public readonly fb = inject(FormBuilder);
+  public readonly toastr = inject(ToastrService);
+  public readonly uploadService = inject(UploadService);
 
   /**
    * If buttons show under images to allow immediate selection of cover images.
@@ -70,10 +87,8 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].join(',');
 
   mode: 'file' | 'url' | 'all' = 'all';
-  private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService,
-    @Inject(DOCUMENT) private document: Document, private readonly cdRef: ChangeDetectorRef) { }
+  constructor(@Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -83,10 +98,6 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   /**
    * Generates a base64 encoding for an Image. Used in manual file upload flow.

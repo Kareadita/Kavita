@@ -46,7 +46,7 @@ public class PluginController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0)
         {
-            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", Uri.EscapeDataString(pluginName), new
+            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName.Replace(Environment.NewLine, string.Empty), new
             {
                 IpAddress = ipAddress,
                 UserAgent = userAgent,
@@ -55,7 +55,7 @@ public class PluginController : BaseApiController
             throw new KavitaUnauthenticatedUserException();
         }
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", Uri.EscapeDataString(pluginName), user!.UserName, userId);
+        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
         return new UserDto
         {
             Username = user.UserName!,

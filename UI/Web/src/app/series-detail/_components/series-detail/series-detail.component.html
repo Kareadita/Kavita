@@ -288,7 +288,7 @@
     <ng-container *ngIf="nextExpectedChapter">
       <ng-container [ngSwitch]="tabId">
         <ng-container *ngSwitchCase="TabID.Volumes">
-          <app-card-item *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === 0" class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>
+          <app-card-item *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === 0" class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"></app-card-item>
         </ng-container>
         <ng-container *ngSwitchCase="TabID.Chapters">
           <app-card-item class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" ></app-card-item>

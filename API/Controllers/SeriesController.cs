@@ -143,7 +143,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult> DeleteMultipleSeries(DeleteSeriesDto dto)
     {
         var username = User.GetUsername();
-        _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", dto.SeriesIds, username);
+        _logger.LogInformation("Series {@SeriesId} is being deleted by {UserName}", dto.SeriesIds, username);
 
         if (await _seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok();
 

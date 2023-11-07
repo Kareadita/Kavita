@@ -687,7 +687,7 @@ public class AccountController : BaseApiController
 
             if (!_emailService.IsValidEmail(dto.Email))
             {
-                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email, so will not send an email to address", dto.Email);
+                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email, so will not send an email to address", dto.Email.Replace(Environment.NewLine, string.Empty));
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,

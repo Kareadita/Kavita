@@ -158,10 +158,14 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
             {
                 // This compares if it's changed since a file scan only
                 var firstFile = chapter.Files.FirstOrDefault();
-                if (firstFile == null) return;
-                if (!_cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis, forceUpdate,
+                if (firstFile == null || !_cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis,
+                        forceUpdate,
                         firstFile))
+                {
+                    volume.WordCount += chapter.WordCount;
+                    series.WordCount += chapter.WordCount;
                     continue;
+                }
 
                 if (series.Format == MangaFormat.Epub)
                 {

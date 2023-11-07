@@ -13,11 +13,13 @@
 
               <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-evenly">
-                  <a style="padding-right:0px" href="javascript:void(0)" (click)="changeMode('url')"><span class="phone-hidden">Enter a </span>Url</a>
+                  <a class="pe-0" href="javascript:void(0)" (click)="changeMode('url')">
+                    <span class="phone-hidden">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
+                  </a>
                   <span class="ps-1 pe-1">•</span>
-                  <span style="padding-right:0px" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
-                  <span class="ps-1 pe-1" style="padding-right:0px">•</span>
-                  <a style="padding-right:0px" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                  <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                  <span class="ps-1 pe-1">•</span>
+                  <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
                 </div>
               </div>
             </div>

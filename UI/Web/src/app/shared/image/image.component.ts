@@ -30,6 +30,12 @@ import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
 })
 export class ImageComponent implements OnChanges {
 
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly imageService = inject(ImageService);
+  private readonly renderer = inject(Renderer2);
+  private readonly hubService = inject(MessageHubService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   /**
    * Source url to load image
    */
@@ -66,14 +72,18 @@ export class ImageComponent implements OnChanges {
     * If the image component should respond to cover updates
     */
    @Input() processEvents: boolean = true;
-   @Input() classes: string = '';
+  /**
+   * Note: Parent component must use ViewEncapsulation.None
+   */
+  @Input() classes: string = '';
+  /**
+   * A collection of styles to apply. This is useful if the parent component doesn't want to use no view encapsulation
+   */
+  @Input() styles: string = '';
+  @Input() errorImage: string = this.imageService.errorImage;
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
-  private readonly destroyRef = inject(DestroyRef);
-  protected readonly imageService = inject(ImageService);
-  private readonly renderer = inject(Renderer2);
-  private readonly hubService = inject(MessageHubService);
-  private readonly cdRef = inject(ChangeDetectorRef);
+
 
   constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
@@ -127,6 +137,14 @@ export class ImageComponent implements OnChanges {
     if (this.background != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'background', this.background);
     }
+
+    if (this.styles != '') {
+      this.renderer.setStyle(this.imgElem.nativeElement, 'styles', this.styles);
+    }
+
+    if (this.classes != '') {
+      this.renderer.addClass(this.imgElem.nativeElement, this.classes);
+    }
   }
 
 
@@ -154,7 +172,7 @@ export class ImageComponent implements OnChanges {
       case 'loading-failed':
         // The image could not be loaded for some reason.
         // `event.data` is the error in this case
-        image.src = this.imageService.errorImage;
+        image.src = this.errorImage;
         this.cdRef.markForCheck();
         break;
       case 'finally':

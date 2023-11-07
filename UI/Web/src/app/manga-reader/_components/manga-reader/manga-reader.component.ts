@@ -13,7 +13,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase } from '@angular/common';
+import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -32,7 +32,7 @@ import {
 import { ChangeContext, LabelType, Options, NgxSliderModule } from 'ngx-slider-v2';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -124,7 +124,7 @@ enum KeyDirection {
   imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
     NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe,
-    FullscreenIconPipe, TranslocoDirective]
+    FullscreenIconPipe, TranslocoDirective, NgbProgressbar, PercentPipe]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -170,6 +170,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Total pages in the given Chapter
    */
   maxPages = 1;
+  totalSeriesPages = 0;
+  totalSeriesPagesRead = 0;
   user!: User;
   generalSettingsForm!: FormGroup;
 
@@ -840,7 +842,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.getBookmarkInfo(this.seriesId).subscribe(bookmarkInfo => {
         this.setPageNum(0);
         this.title = bookmarkInfo.seriesName;
-        this.subtitle = 'Bookmarks';
+        this.subtitle = translate('manga-reader.bookmarks-title');
         this.libraryType = bookmarkInfo.libraryType;
         this.maxPages = bookmarkInfo.pages;
         this.mangaReaderService.load(bookmarkInfo);
@@ -883,6 +885,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       page = this.adjustPagesForDoubleRenderer(page);
+
+      this.totalSeriesPages = results.chapterInfo.seriesTotalPages;
+      this.totalSeriesPagesRead = results.chapterInfo.seriesTotalPagesRead - page;
 
       this.setPageNum(page); // first call
       this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
