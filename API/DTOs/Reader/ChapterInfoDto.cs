@@ -65,6 +65,14 @@ public class ChapterInfoDto : IChapterInfoDto
     /// </summary>
     /// <remarks>Usually just series name, but can include chapter title</remarks>
     public string Title { get; set; } = default!;
+    /// <summary>
+    /// Total pages for the series
+    /// </summary>
+    public int SeriesTotalPages { get; set; }
+    /// <summary>
+    /// Total pages read for the series
+    /// </summary>
+    public int SeriesTotalPagesRead { get; set; }
 
     /// <summary>
     /// List of all files with their inner archive structure maintained in filename and dimensions
@@ -76,5 +84,4 @@ public class ChapterInfoDto : IChapterInfoDto
     /// </summary>
     /// <remarks>This is optionally returned by includeDimensions</remarks>
     public IDictionary<int, int>? DoublePairs { get; set; }
-
 }

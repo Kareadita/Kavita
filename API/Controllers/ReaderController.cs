@@ -230,6 +230,8 @@ public class ReaderController : BaseApiController
         if (dto == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "perform-scan"));
         var mangaFile = chapter.Files.First();
 
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(dto.SeriesId, User.GetUserId());
+
         var info = new ChapterInfoDto()
         {
             ChapterNumber = dto.ChapterNumber,
@@ -242,6 +244,8 @@ public class ReaderController : BaseApiController
             LibraryId = dto.LibraryId,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
+            SeriesTotalPages = series?.Pages ?? 0,
+            SeriesTotalPagesRead = series?.PagesRead ?? 0,
             ChapterTitle = dto.ChapterTitle ?? string.Empty,
             Subtitle = string.Empty,
             Title = dto.SeriesName,

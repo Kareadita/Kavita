@@ -14000,6 +14000,16 @@
             "description": "Series Title",
             "nullable": true
           },
+          "seriesTotalPages": {
+            "type": "integer",
+            "description": "Total pages for the series",
+            "format": "int32"
+          },
+          "seriesTotalPagesRead": {
+            "type": "integer",
+            "description": "Total pages read for the series",
+            "format": "int32"
+          },
           "pageDimensions": {
             "type": "array",
             "items": {
