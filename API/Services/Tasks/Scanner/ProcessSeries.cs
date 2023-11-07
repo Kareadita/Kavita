@@ -306,7 +306,7 @@ public class ProcessSeries : IProcessSeries
         if (!series.Metadata.PublicationStatusLocked)
         {
             series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
-            if (series.Metadata.MaxCount >= series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
+            if (series.Metadata.MaxCount == series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Completed;
             } else if (series.Metadata.TotalCount > 0)
