@@ -59,7 +59,7 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> SearchTags(string queryString)
+    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> SearchTags(string? queryString)
     {
         queryString ??= string.Empty;
         queryString = queryString.Replace(@"%", string.Empty);
