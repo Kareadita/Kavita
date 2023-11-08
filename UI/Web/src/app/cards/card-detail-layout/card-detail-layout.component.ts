@@ -151,17 +151,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     // TODO: I wish I had signals so I can tap into when isLoading is false and trigger the scroll code
 
     // Don't resume jump key when there is a custom sort order, as it won't work
-    if (this.items.length > 0) {
-      if (!this.hasCustomSort()) {
-        if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
-          const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
-          if (resumeKey === '') return;
-          const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
-          if (keys.length < 1) return;
+    if (!this.hasCustomSort()) {
+      if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
+        const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
+        if (resumeKey === '') return;
+        const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
+        if (keys.length < 1) return;
 
-          this.hasResumedJumpKey = true;
-          setTimeout(() => this.scrollTo(keys[0]), 100);
-        }
+        this.hasResumedJumpKey = true;
+        setTimeout(() => this.scrollTo(keys[0]), 100);
       }
     }
     //  else {
