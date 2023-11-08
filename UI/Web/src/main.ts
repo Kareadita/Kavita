@@ -9,7 +9,6 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app/app-routing.module';
-import { SAVER, getSaver } from './app/shared/_providers/saver.provider';
 import { Title, BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
@@ -147,7 +146,6 @@ bootstrapApplication(AppComponent, {
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         preLoad,
         Title,
-        { provide: SAVER, useFactory: getSaver },
         provideHttpClient(withInterceptorsFromDi())
     ]
 } as ApplicationConfig)

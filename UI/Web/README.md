@@ -29,3 +29,7 @@ Run `npx playwright test --reporter=line` or `npx playwright test` to run e2e te
 
 ng serve --host 0.0.0.0
 and update environment.ts to your local ip. 
+
+## Notes:
+- injected services should be at the top of the file
+- all components must be standalone

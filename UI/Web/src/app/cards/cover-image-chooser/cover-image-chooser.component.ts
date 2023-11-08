@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
   EventEmitter,
   inject,
   Inject,
@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule} from 'ngx-file-drop';
-import { fromEvent, Subject } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { ImageService } from 'src/app/_services/image.service';
@@ -37,7 +37,6 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
 })
 export class CoverImageChooserComponent implements OnInit {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly imageService = inject(ImageService);
   public readonly fb = inject(FormBuilder);
@@ -84,8 +83,7 @@ export class CoverImageChooserComponent implements OnInit {
   appliedIndex: number = 0;
   form!: FormGroup;
   files: NgxFileDropEntry[] = [];
-  acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].join(',');
-
+  acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif'].join(',');
   mode: 'file' | 'url' | 'all' = 'all';
 
   constructor(@Inject(DOCUMENT) private document: Document) { }
@@ -182,6 +180,25 @@ export class CoverImageChooserComponent implements OnInit {
     });
   }
 
+  loadImageFromUrl(url?: string) {
+    url = url || this.form.get('coverImageUrl')?.value.trim();
+    if (!url || url === '') return;
+
+    this.uploadService.uploadByUrl(url).subscribe(filename => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = this.imageService.getCoverUploadImage(filename);
+      img.onload = (e) => this.handleUrlImageAdd(img);
+      img.onerror = (e) => {
+        this.toastr.error(translate('errors.rejected-cover-upload'));
+        this.form.get('coverImageUrl')?.setValue('');
+        this.cdRef.markForCheck();
+      };
+      this.form.get('coverImageUrl')?.setValue('');
+      this.cdRef.markForCheck();
+    });
+  }
+
 
 
   changeMode(mode: 'url') {
@@ -239,12 +256,6 @@ export class CoverImageChooserComponent implements OnInit {
     });
   }
 
-  public fileOver(event: any){
-  }
-
-  public fileLeave(event: any){
-  }
-
   reset() {
     this.resetClicked.emit();
     this.selectedIndex = -1;
@@ -275,4 +286,6 @@ export class CoverImageChooserComponent implements OnInit {
     });
   }
 
+  protected fileOver(event: any){}
+  protected fileLeave(event: any){}
 }

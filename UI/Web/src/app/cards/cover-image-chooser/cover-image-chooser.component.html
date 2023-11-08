@@ -31,7 +31,7 @@
               <div class="input-group col-auto me-md-2" style="width: 83%">
                 <label class="input-group-text" for="load-image">{{t('url-label')}}</label>
                 <input type="text" autofocus autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
-                <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="(form.get('coverImageUrl')?.value).length === 0">
+                <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImageFromUrl(); mode='all';" [disabled]="(form.get('coverImageUrl')?.value).length === 0">
                   {{t('load')}}
                 </button>
               </div>

@@ -79,13 +79,9 @@
           <ng-template ngbNavContent>
             <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
             <p>{{t('cover-description-extra')}}</p>
-            <app-cover-image-chooser [(imageUrls)]="imageUrls"
-                                     [showReset]="false"
-                                     [showApplyButton]="true"
-                                     (applyCover)="applyCoverImage($event)"
-                                     (resetCover)="resetCoverImage()"
-            >
-            </app-cover-image-chooser>
+            <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
+                                     (selectedBase64Url)="applyCoverImage($event)" [showReset]="library.coverImage !== undefined "
+                                     (resetClicked)="resetCoverImage()"></app-cover-image-chooser>
           </ng-template>
         </li>
 

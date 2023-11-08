@@ -206,6 +206,11 @@ export class CardDetailDrawerComponent implements OnInit {
     this.uploadService.updateChapterCoverImage(this.chapter.id, coverUrl).subscribe(() => {});
   }
 
+  updateCoverImageIndex(selectedIndex: number) {
+    if (selectedIndex <= 0) return;
+    this.applyCoverImage(this.imageUrls[selectedIndex]);
+  }
+
   resetCoverImage() {
     this.uploadService.resetChapterCoverLock(this.chapter.id).subscribe(() => {
       this.toastr.info(translate('toasts.regen-cover'));

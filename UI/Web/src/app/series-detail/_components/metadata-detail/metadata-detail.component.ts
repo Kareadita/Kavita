@@ -6,6 +6,7 @@ import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-b
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-metadata-detail',
@@ -17,6 +18,11 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 })
 export class MetadataDetailComponent {
 
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  public readonly utilityService = inject(UtilityService);
+  protected readonly TagBadgeCursor = TagBadgeCursor;
+  protected readonly Breakpoint = Breakpoint;
+
   @Input({required: true}) tags: Array<any> = [];
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) heading!: string;
@@ -24,12 +30,11 @@ export class MetadataDetailComponent {
   @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
-  protected readonly TagBadgeCursor = TagBadgeCursor;
-
 
   goTo(queryParamName: FilterField, filter: any) {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['library', this.libraryId], queryParamName, FilterComparison.Equal, filter).subscribe();
   }
+
+
 }

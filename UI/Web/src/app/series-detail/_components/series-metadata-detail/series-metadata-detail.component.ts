@@ -121,4 +121,6 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   navigate(basePage: string, id: number) {
     this.router.navigate([basePage, id]);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }

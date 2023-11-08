@@ -14,7 +14,6 @@ import {
   of,
   filter,
 } from 'rxjs';
-import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import {switchMap, take, takeWhile, throttleTime} from 'rxjs/operators';
@@ -69,7 +68,7 @@ export class DownloadService {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(private httpClient: HttpClient, private confirmService: ConfirmService,
-    @Inject(SAVER) private save: Saver, private accountService: AccountService) { }
+    private accountService: AccountService) { }
 
 
   /**
@@ -270,4 +269,15 @@ export class DownloadService {
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
   }
+
+  private save(blob: Blob, filename: string) {
+    const saveLink = document.createElement( 'a' );
+    if (saveLink.href) {
+      URL.revokeObjectURL(saveLink.href);
+    }
+    saveLink.href = URL.createObjectURL(blob);
+    saveLink.download = filename;
+    saveLink.dispatchEvent( new MouseEvent( 'click' ) );
+  }
+
 }
