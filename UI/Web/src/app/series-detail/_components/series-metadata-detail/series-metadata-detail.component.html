@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'series-metadata-detail'">
   <div class="row g-0 mt-2 mb-2">
-    <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
+    <app-read-more [text]="seriesSummary" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 1000 : 250"></app-read-more>
   </div>
 
 

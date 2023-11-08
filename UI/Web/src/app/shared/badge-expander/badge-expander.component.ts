@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  inject,
+  Input,
+  OnInit,
+  TemplateRef
+} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";
 
@@ -12,6 +21,8 @@ import {TranslocoDirective} from "@ngneat/transloco";
 })
 export class BadgeExpanderComponent implements OnInit {
 
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @Input() items: Array<any> = [];
   @Input() itemsTillExpander: number = 4;
   @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
@@ -23,8 +34,6 @@ export class BadgeExpanderComponent implements OnInit {
   get itemsLeft() {
     return Math.max(this.items.length - this.itemsTillExpander, 0);
   }
-
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.visibleItems = this.items.slice(0, this.itemsTillExpander);
