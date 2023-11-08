@@ -50,10 +50,7 @@ public class SeriesServiceTests : AbstractDbTest
 
     public SeriesServiceTests() : base()
     {
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()
-        {
-
-        });
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
 
 
         var locService = new LocalizationService(ds, new MockHostingEnvironment(),
@@ -461,7 +458,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         JobStorage.Current = new InMemoryStorage();
         var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007",
-                AppUserIncludes.Ratings))
+                AppUserIncludes.Ratings)!)
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(5, ratings.First().Rating);
@@ -526,6 +523,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
 
@@ -805,7 +803,7 @@ public class SeriesServiceTests : AbstractDbTest
     [Fact]
     public void GetFirstChapterForMetadata_BookWithOnlyVolumeNumbers_Test()
     {
-        var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
+        var file = new MangaFileBuilder("Test.cbz", MangaFormat.Epub, 1).Build();
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -819,6 +817,7 @@ public class SeriesServiceTests : AbstractDbTest
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
+        Assert.NotNull(firstChapter);
         Assert.Equal(1, firstChapter.Pages);
     }
 
@@ -828,6 +827,7 @@ public class SeriesServiceTests : AbstractDbTest
         var series = CreateSeriesMock();
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
+        Assert.NotNull(firstChapter);
         Assert.Same("1", firstChapter.Range);
     }
 
