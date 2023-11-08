@@ -115,7 +115,6 @@ export class ReadingListsComponent implements OnInit {
       this.loadingLists = false;
       this.actions = {};
       this.lists.forEach(l => this.actions[l.id] = this.getActions(l));
-      window.scrollTo(0, 0);
       this.cdRef.markForCheck();
     });
   }
