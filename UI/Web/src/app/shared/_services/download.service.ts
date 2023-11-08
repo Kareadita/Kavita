@@ -173,7 +173,7 @@ export class DownloadService {
     ).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
       download((blob, filename) => {
-        this.save2(blob, decodeURIComponent(filename));
+        this.save(blob, decodeURIComponent(filename));
       }),
       tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
       finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -188,7 +188,7 @@ export class DownloadService {
             ).pipe(
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
               download((blob, filename) => {
-                this.save2(blob, decodeURIComponent(filename));
+                this.save(blob, decodeURIComponent(filename));
               }),
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -227,7 +227,7 @@ export class DownloadService {
         ).pipe(
           throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
           download((blob, filename) => {
-            this.save2(blob, decodeURIComponent(filename));
+            this.save(blob, decodeURIComponent(filename));
           }),
           tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
           finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -242,7 +242,7 @@ export class DownloadService {
             ).pipe(
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
               download((blob, filename) => {
-                this.save2(blob, decodeURIComponent(filename));
+                this.save(blob, decodeURIComponent(filename));
               }),
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -263,14 +263,14 @@ export class DownloadService {
             ).pipe(
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
               download((blob, filename) => {
-                this.save2(blob, decodeURIComponent(filename));
+                this.save(blob, decodeURIComponent(filename));
               }),
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
   }
 
-  private save2(blob: Blob, filename: string) {
+  private save(blob: Blob, filename: string) {
     const saveLink = document.createElement( 'a' );
     if (saveLink.href) {
       URL.revokeObjectURL(saveLink.href);
