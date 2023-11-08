@@ -18,7 +18,6 @@ import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {FormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgxVirtualScrollModule} from "@lithiumjs/ngx-virtual-scroll";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -39,8 +38,7 @@ export interface ItemRemoveEvent {
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
-    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule,
-    NgxVirtualScrollModule, NgxVirtualScrollModule]
+    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
 })
 export class DraggableOrderedListComponent {
 
