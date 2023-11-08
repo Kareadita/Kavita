@@ -271,13 +271,20 @@ export class DownloadService {
   }
 
   private save(blob: Blob, filename: string) {
-    const saveLink = document.createElement( 'a' );
-    if (saveLink.href) {
-      URL.revokeObjectURL(saveLink.href);
-    }
-    saveLink.href = URL.createObjectURL(blob);
+    const saveLink = document.createElement('a');
+    saveLink.style.display = 'none';
+    document.body.appendChild(saveLink);
+
+    const url = URL.createObjectURL(blob);
+    saveLink.href = url;
     saveLink.download = filename;
-    saveLink.dispatchEvent( new MouseEvent( 'click' ) );
+
+    // Trigger the click event
+    saveLink.click();
+
+    // Cleanup
+    URL.revokeObjectURL(url);
+    document.body.removeChild(saveLink);
   }
 
 }
