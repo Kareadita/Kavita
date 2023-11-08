@@ -99,13 +99,9 @@
         <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="(isAdmin$ | async) === false">
           <a ngbNavLink>{{t(tabs[TabID.Cover].title)}}</a>
           <ng-template ngbNavContent>
-            <app-cover-image-chooser [(imageUrls)]="imageUrls"
-                                     [showReset]="chapter.coverImageLocked"
-                                     [showApplyButton]="true"
-                                     (applyCover)="applyCoverImage($event)"
-                                     (resetCover)="resetCoverImage()"
-            >
-            </app-cover-image-chooser>
+            <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
+                                     (selectedBase64Url)="applyCoverImage($event)" [showReset]="chapter.coverImageLocked"
+                                     (resetClicked)="resetCoverImage()"></app-cover-image-chooser>
           </ng-template>
         </li>
 

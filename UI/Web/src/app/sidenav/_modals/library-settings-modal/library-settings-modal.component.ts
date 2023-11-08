@@ -218,6 +218,11 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.uploadService.updateLibraryCoverImage(this.library.id, coverUrl).subscribe(() => {});
   }
 
+  updateCoverImageIndex(selectedIndex: number) {
+    if (selectedIndex <= 0) return;
+    this.applyCoverImage(this.imageUrls[selectedIndex]);
+  }
+
   resetCoverImage() {
     this.uploadService.updateLibraryCoverImage(this.library.id, '').subscribe(() => {});
   }
