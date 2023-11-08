@@ -171,5 +171,6 @@
     "external-source-doesnt-exist": "La fuente externa no existe",
     "external-sources": "Fuentes externas",
     "external-source-required": "Se requiere la clave API y el host",
-    "smart-filter-already-in-use": "Existe una transmisión con este filtro inteligente"
+    "smart-filter-already-in-use": "Existe una transmisión con este filtro inteligente",
+    "invalid-email": "La dirección de correo electrónico del usuario no es válida. Consulte los registros para ver si hay algún enlace."
 }

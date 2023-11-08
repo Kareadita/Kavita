@@ -645,8 +645,8 @@
         "close": "{{common.close}}",
         "invite": "Invitar",
         "inviting": "Invitando…",
-        "description": "Invita a un usuario a tu servidor. Introduce su correo electrónico y le enviaremos un correo para que cree su cuenta. Si no quieres usar nuestro servicio de correo puedes <a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">hostear tu propio</a> servicio de correo o usar una dirección de correo falsa (\"He perdido la contraseña no funcionará\"). Un enlace se mostrará de todas maneras y puede ser usado para configurar manualmente.",
-        "setup-user-description": "Puedes usar el enlace de abajo para configurar la cuenta para tu usuario o usa el botón de copiar. Puede que tengas que cerrar sesión antes de usar el enlace para registrar un nuevo usuario. Si tu servidor es accesible desde fuera, un correo se habrá enviado al usuario con el enlace para que el usuario configure su cuenta."
+        "description": "Invite a un usuario a su servidor introduciendo su correo electrónico. Recibirán un correo electrónico para crear una cuenta. Para que esto funcione, debe tener configurado el campo Nombre del host en la pestaña <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> o acceder a su instancia a través de su dirección URL remota. <br/><br/>Alternativamente, puede utilizar un nombre de usuario, pero tenga en cuenta que los restablecimientos de la contraseña no estarán disponibles para las cuentas basadas en nombres de usuario. Si no desea utilizar nuestro servicio de correo electrónico, puede alojar su propio servicio de correo electrónico.",
+        "setup-user-description": "Puede utilizar el siguiente enlace para configurar la cuenta de usuario o utilizar el botón de copia. Es posible que tenga que cerrar la sesión antes de utilizar el enlace para registrar un nuevo usuario. Si Kavita puede determinar que tu servidor es accesible externamente (o el nombre de host está configurado), se habrá enviado un correo electrónico al usuario y éste podrá utilizar los enlaces para terminar de configurar su cuenta. De lo contrario, utilice el enlace de abajo o en los registros para mandarselo manualmenteanualmente o configurar su cuenta."
     },
     "license": {
         "manage": "Administrar",
@@ -1030,7 +1030,10 @@
         "volume-num": "{{common.volume-num}}",
         "summary-label": "Resumen",
         "web-link-label": "Enlace web",
-        "name-label": "Nombre"
+        "name-label": "Nombre",
+        "localized-name-label": "Nombre encontrado",
+        "highest-count-tooltip": "El recuento más alto encontrado en todos los ComicInfo de la serie",
+        "max-issue-tooltip": "Campo número o volumen máximo de todos los ComicInfo de la serie"
     },
     "nav-header": {
         "search-alt": "Buscar…",
@@ -1393,7 +1396,15 @@
         "x-axis-label": "Tiempo",
         "legend-label": "Formatos",
         "y-axis-label": "Horas leidas",
-        "title": "Actividad de lectura"
+        "title": "Actividad de lectura",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "this-week": "{{time-periods.this-week}}",
+        "time-frame-label": "Duración",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}",
+        "no-data": "No se avanza en la lectura",
+        "last-90-days": "{{time-periods.last-90-days}}"
     },
     "admin-dashboard": {
         "kavita+-desc-part-3": "hoy!",
@@ -1419,7 +1430,9 @@
         "not-classified": "Sin clasificación",
         "total-files-header": "Ficheros totales",
         "total-file-size-title": "Tamaño del fichero:",
-        "extension-header": "Extensión"
+        "extension-header": "Extensión",
+        "data-table-label": "Tabla de datos",
+        "format-tooltip": "No clasificado significa que Kavita no ha escaneado algunos archivos. Esto ocurre en archivos antiguos anteriores a la v0.7. Es posible que tenga que ejecutar una exploración forzada a través de la configuración de la biblioteca."
     },
     "filter-field-pipe": {
         "colorist": "Colorista",
@@ -1492,7 +1505,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "recurring-tasks-title": "{{title}}"
+        "recurring-tasks-title": "{{title}}",
+        "bust-locale-task-desc": "Borre la caché local; esto puede resolver los problemas con las cadenas que no se muestran correctamente después de las actualizaciones",
+        "bust-locale-task-success": "Borrada la caché local"
     },
     "manage-users": {
         "edit-user-tooltip": "Editar",
@@ -1523,13 +1538,16 @@
     "manga-format-stats": {
         "title": "Formato",
         "visualisation-label": "Visualización",
-        "format-header": "Formato"
+        "format-header": "Formato",
+        "data-table-label": "Tabla de datos",
+        "count-header": "Contar"
     },
     "publication-status-stats": {
         "visualisation-label": "Visualización",
         "data-table-label": "Tabla de datos",
         "year-header": "Año",
-        "title": "Estado de publicación"
+        "title": "Estado de publicación",
+        "count-header": "Contar"
     },
     "manage-library": {
         "last-scanned-title": "Último escaneo:",
@@ -1576,7 +1594,26 @@
         "genres": "Géneros",
         "total-files-label": "Ficheros totales",
         "total-volumes-tooltip": "Volumes totales: {{count}}",
-        "total-volumes-label": "Volúmenes totales"
+        "total-volumes-label": "Volúmenes totales",
+        "recently-read-title": "Recientemente leído",
+        "total-genres-label": "Total de géneros",
+        "total-files-tooltip": "Archivos totales: {{count}}",
+        "total-read-time-label": "Duración total de la lectura",
+        "total-people-label": "Total de personas",
+        "total-tags-tooltip": "Total de etiquetas: {{count}}",
+        "total-tags-label": "Total de etiquetas",
+        "genre-count": "{{num}} Géneros",
+        "popular-series-title": "Series populares",
+        "total-genres-tooltip": "Total de géneros: {{count}}",
+        "total-size-label": "Tamaño total",
+        "total-people-tooltip": "Total de personas: {{count}}",
+        "popular-libraries-title": "Bibliotecas más visitadas",
+        "total-series-tooltip": "Series totales: {{count}}",
+        "series": "series",
+        "total-read-time-tooltip": "Duración total de la lectura: {{count}}",
+        "tag-count": "{{num}} Etiquetas",
+        "total-series-label": "Series totales",
+        "people-count": "{{num}} Personas"
     },
     "library-recommended": {
         "rediscover": "Descubrir de nuevo",
@@ -1596,7 +1633,8 @@
     "collection-detail": {
         "no-data": "No hay elementos. Prueba a añadir una serie.",
         "no-data-filtered": "No hay elementos coincidentes con tu filtro actual.",
-        "title-alt": "Kavita - Colección {{collectionName}}"
+        "title-alt": "Kavita - Colección {{collectionName}}",
+        "series-header": "Series"
     },
     "infinite-scroller": {
         "continuous-reading-next-chapter-alt": "Desplázate hacia arriba para ir al capítulo siguiente",
@@ -1609,17 +1647,92 @@
         "next-items": "Elementos siguientes"
     },
     "day-breakdown": {
-        "x-axis-label": "Día de la semana"
+        "x-axis-label": "Día de la semana",
+        "title": "Desglose por días",
+        "y-axis-label": "Eventos de lectura"
     },
     "stream-list-item": {
         "external-source": "Fuente externa",
         "smart-filter": "Filtros",
         "library": "Libreria",
         "remove": "{{common.remove}}",
-        "load-filter": "Cargar filtro"
+        "load-filter": "Cargar filtro",
+        "provided": "Proporcionado"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Portentaje",
         "unit-reading-date": "Fecha"
+    },
+    "manage-external-sources": {
+        "description": "Mejora tu experiencia añadiendo servidores externos e inclúyelos cómodamente en tu barra lateral para acceder rápidamente tanto a tu servidor como al de tus amigos.",
+        "add-source": "Añadir",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "No hay fuentes externas",
+        "help-link": "Más información"
+    },
+    "metadata-builder": {
+        "and": "Coincide con todo lo siguiente",
+        "remove-rule": "Eliminar la fila",
+        "or": "Coincidir con cualquiera de los siguientes",
+        "add-rule": "Añadir una regla"
+    },
+    "customize-sidenav-streams": {
+        "save": "{{common.save}}",
+        "smart-filters-title": "Filtros inteligentes",
+        "no-data": "Todos los filtros inteligentes se agregaron a la barra lateral o aún no se han creado.",
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "filter": "{{common.filter}}",
+        "no-data-external-source": "Todas las fuentes externas se agregaron a la barra lateral o aún no se han creado.",
+        "clear": "{{common.clear}}",
+        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "bulk-mode-label": "Por lotes",
+        "add": "{{common.add}}",
+        "reorder-when-filter-present": "No se pueden reordenar los elementos mediante arrastrar y soltar mientras haya un filtro. Utilice {{customize-sidenav-streams.order-numbers-label}}"
+    },
+    "series-preview-drawer": {
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "view-series": "Ver las series",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "staff-label": "Staff",
+        "vols-and-chapters": "{{volCount}} Volúmenes / {{chpCount}} Capítulos",
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+    },
+    "customize-dashboard-modal": {
+        "smart-filters": "Filtros inteligentes",
+        "dashboard": "Dashboard",
+        "close": "{{common.close}}",
+        "title-external-sources": "Fuentes externas",
+        "sidenav": "Barra lateral",
+        "title-sidenav": "Personalizar la barra lateral",
+        "help": "{{common.help}}",
+        "external-sources": "Fuentes externas",
+        "title-dashboard": "Personalizar el panel de control",
+        "title-smart-filters": "Filtros inteligentes"
+    },
+    "customize-dashboard-streams": {
+        "no-data": "Todos los filtros inteligentes se han añadido al panel de control o aún no se ha creado ninguno.",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
+        "add": "{{common.add}}",
+        "save": "{{common.save}}"
+    },
+    "errors": {
+        "series-doesnt-exist": "La serie ya no existe",
+        "unknown-crit": "Se ha producido un error crítico desconocido",
+        "error-code": "{{num}} Error",
+        "generic": "Algo inesperado ha ido mal",
+        "collection-invalid-access": "No tiene acceso a ninguna biblioteca con esta etiqueta o esta colección no es válida",
+        "user-not-auth": "El usuario no está registrado",
+        "download": "Se ha producido un problema al descargar este archivo o no tiene permisos",
+        "invalid-password-reset-url": "La dirección URL para restaurar la contraseña es no válida",
+        "rejected-cover-upload": "No se ha podido obtener la imagen porque el servidor ha rechazado la solicitud. Por favor, descargue y cargue el archivo en su lugar.",
+        "invalid-confirmation-url": "Dirección URL de verificación no válida",
+        "invalid-confirmation-email": "Correo electrónico de verificación no válido",
+        "not-found": "Esta dirección url no existe"
+    },
+    "manage-smart-filters": {
+        "delete": "{{common.delete}}"
     }
 }
