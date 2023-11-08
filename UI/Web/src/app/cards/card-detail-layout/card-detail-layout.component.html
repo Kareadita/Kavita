@@ -24,7 +24,7 @@
           <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
         </p>
 
-        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll" >
+        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
           <div class="grid row g-0" #container>
             <div class="card col-auto mt-2 mb-2"
                  (click)="tryToSaveJumpKey(item)"
@@ -61,7 +61,7 @@
   <ng-template #jumpBar>
     <div class="jump-bar">
       <ng-container *ngFor="let jumpKey of jumpBarKeysToRender; let i = index;">
-        <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)" [ngbTooltip]="jumpKey.size + ' Series'" placement="left">
+        <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)" [ngbTooltip]="t('jumpkey-count', {count: jumpKey.size})" placement="left">
           {{jumpKey.title}}
         </button>
       </ng-container>
