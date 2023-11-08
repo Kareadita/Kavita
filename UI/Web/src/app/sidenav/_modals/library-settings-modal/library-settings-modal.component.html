@@ -80,7 +80,7 @@
             <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
             <p>{{t('cover-description-extra')}}</p>
             <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
-                                     (selectedBase64Url)="applyCoverImage($event)" [showReset]="library.coverImage !== undefined "
+                                     (selectedBase64Url)="applyCoverImage($event)" [showReset]="library.coverImage !== null"
                                      (resetClicked)="resetCoverImage()"></app-cover-image-chooser>
           </ng-template>
         </li>

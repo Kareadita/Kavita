@@ -892,7 +892,8 @@
     },
 
     "card-detail-layout": {
-        "total-items": "{{count}} total items"
+        "total-items": "{{count}} total items",
+        "jumpkey-count": "{{count}} Series"
     },
 
     "card-item": {

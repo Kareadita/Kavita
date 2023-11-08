@@ -243,7 +243,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.pagination = series.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
-      window.scrollTo(0, 0);
       this.cdRef.markForCheck();
     });
   }

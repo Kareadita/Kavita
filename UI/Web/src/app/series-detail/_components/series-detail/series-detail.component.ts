@@ -777,8 +777,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
-      window.scrollTo(0, 0);
       if (closeResult.success) {
+        window.scrollTo(0, 0);
         this.loadSeries(this.seriesId);
       }
 

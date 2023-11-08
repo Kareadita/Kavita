@@ -281,10 +281,8 @@ export class LibraryDetailComponent implements OnInit {
       this.pagination = series.pagination;
       this.loadingSeries = false;
       this.cdRef.markForCheck();
-      window.scrollTo(0, 0);
     });
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;
-  protected readonly undefined = undefined;
 }

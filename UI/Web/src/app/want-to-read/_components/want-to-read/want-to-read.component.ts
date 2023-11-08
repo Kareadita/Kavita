@@ -176,7 +176,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.pagination = paginatedList.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
-      window.scrollTo(0, 0);
       this.cdRef.markForCheck();
     });
   }

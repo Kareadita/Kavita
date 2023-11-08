@@ -39,6 +39,9 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 
+
+const ANIMATION_TIME_MS = 0;
+
 @Component({
   selector: 'app-card-detail-layout',
   standalone: true,
@@ -48,6 +51,13 @@ import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardDetailLayoutComponent implements OnInit, OnChanges {
+
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly jumpbarService = inject(JumpbarService);
+  private readonly router = inject(Router);
+  private readonly scrollService = inject(ScrollService);
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -89,7 +99,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
   filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
   libraries: Array<FilterItem<Library>> = [];
 
@@ -97,15 +106,9 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   hasResumedJumpKey: boolean = false;
   bufferAmount: number = 1;
 
+  protected readonly Breakpoint = Breakpoint;
 
-  get Breakpoint() {
-    return Breakpoint;
-  }
-
-  constructor(public utilityService: UtilityService,
-    @Inject(DOCUMENT) private document: Document, private cdRef: ChangeDetectorRef,
-    private jumpbarService: JumpbarService, private router: Router, private scrollService: ScrollService) {
-  }
+  constructor(@Inject(DOCUMENT) private document: Document) {}
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
@@ -136,12 +139,16 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
         this.virtualScroller.refresh();
       });
     }
+
+
   }
 
 
   ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
+
+    // TODO: I wish I had signals so I can tap into when isLoading is false and trigger the scroll code
 
     // Don't resume jump key when there is a custom sort order, as it won't work
     if (!this.hasCustomSort()) {
@@ -154,14 +161,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
         this.hasResumedJumpKey = true;
         setTimeout(() => this.scrollTo(keys[0]), 100);
       }
-    } else {
-      // I will come back and refactor this to work
-      // const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
-      // console.log('scroll position: ', scrollPosition);
-      // if (scrollPosition > 0) {
-      //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
-      // }
     }
+    //  else {
+    //   // I will come back and refactor this to work
+    //   // const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
+    //   // console.log('scroll position: ', scrollPosition);
+    //   // if (scrollPosition > 0) {
+    //   //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
+    //   // }
+    // }
   }
 
   hasCustomSort() {
@@ -192,10 +200,11 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
       targetIndex += this.jumpBarKeys[i].size;
     }
 
-    this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
+    this.virtualScroller.scrollToIndex(targetIndex, true, 0, ANIMATION_TIME_MS);
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     // TODO: This doesn't work, we need the offset from virtual scroller
     this.jumpbarService.saveScrollOffset(this.router.url, this.scrollService.scrollPosition);
+
     this.cdRef.markForCheck();
   }
 

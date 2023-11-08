@@ -55,8 +55,9 @@ enum StepID {
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
-  @Input({required: true}) library!: Library;
   private readonly destroyRef = inject(DestroyRef);
+
+  @Input({required: true}) library!: Library;
 
   active = TabID.General;
   imageUrls: Array<string> = [];
@@ -81,8 +82,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   isAddLibrary = false;
   setupStep = StepID.General;
 
-  get Breakpoint() { return Breakpoint; }
-  get TabID() { return TabID; }
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
