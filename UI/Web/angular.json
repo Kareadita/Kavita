@@ -94,18 +94,18 @@
             "sslKey": "./ssl/server.key",
             "sslCert": "./ssl/server.crt",
             "ssl": false,
-            "browserTarget": "kavita-webui:build"
+            "buildTarget": "kavita-webui:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "kavita-webui:build:production"
+              "buildTarget": "kavita-webui:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "kavita-webui:build"
+            "buildTarget": "kavita-webui:build"
           }
         },
         "lint": {
