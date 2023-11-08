@@ -1,6 +1,7 @@
-import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {
+  afterNextRender,
+  AfterRenderPhase, AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -95,7 +96,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
   @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
-  @ViewChild('scroller') scroller!: CdkVirtualScrollViewport;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
@@ -109,6 +109,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   protected readonly Breakpoint = Breakpoint;
 
   constructor(@Inject(DOCUMENT) private document: Document) {}
+
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
@@ -139,8 +140,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
         this.virtualScroller.refresh();
       });
     }
-
-
   }
 
 
