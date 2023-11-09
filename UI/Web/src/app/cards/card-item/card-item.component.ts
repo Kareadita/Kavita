@@ -44,6 +44,7 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-card-item',
@@ -60,7 +61,8 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
     CardActionablesComponent,
     SentenceCasePipe,
     RouterLink,
-    TranslocoModule
+    TranslocoModule,
+    SafeHtmlPipe
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],
@@ -224,7 +226,10 @@ export class CardItemComponent implements OnInit {
       this.imageUrl = '';
       const nextDate = (this.entity as NextExpectedChapter);
 
-      this.overlayInformation = nextDate.title;
+      const tokens = nextDate.title.split(':');
+      this.overlayInformation = `
+              <i class="fa-regular fa-clock" aria-hidden="true"></i>
+              <div>${tokens[0]}</div><div>${tokens[1]}</div>`;
       this.centerOverlay = true;
 
       if (nextDate.expectedDate) {
