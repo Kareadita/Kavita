@@ -318,6 +318,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue('');
+        this.formGroup.get('comparison')?.patchValue(StringComparisons[0]);
       }
       return;
     }
@@ -329,7 +330,10 @@ export class MetadataFilterRowComponent implements OnInit {
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
-      if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
+      if (this.loaded) {
+        this.formGroup.get('filterValue')?.patchValue(0);
+        this.formGroup.get('comparison')?.patchValue(NumberFields[0]);
+      }
       return;
     }
 
@@ -339,6 +343,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(false);
+        this.formGroup.get('comparison')?.patchValue(DateComparisons[0]);
       }
       return;
     }
@@ -349,6 +354,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(false);
+        this.formGroup.get('comparison')?.patchValue(BooleanComparisons[0]);
       }
       return;
     }
@@ -363,7 +369,10 @@ export class MetadataFilterRowComponent implements OnInit {
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Dropdown);
-      if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
+      if (this.loaded) {
+        this.formGroup.get('filterValue')?.patchValue(0);
+        this.formGroup.get('comparison')?.patchValue(comps[0]);
+      }
       return;
     }
   }
