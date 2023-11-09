@@ -530,6 +530,11 @@
         "series-count": "{{common.series-count}}"
     },
 
+    "all-filters": {
+        "title": "All Smart Filters",
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+
     "announcements": {
         "title": "Announcements"
     },
@@ -1411,7 +1416,8 @@
         "settings": "Settings",
         "help": "Help",
         "announcements": "Announcements",
-        "logout": "Logout"
+        "logout": "Logout",
+        "all-filters": "all-filters"
     },
 
     "add-to-list-modal": {

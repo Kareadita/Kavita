@@ -41,6 +41,10 @@ const routes: Routes = [
         loadChildren: () => import('./_routes/all-series-routing.module').then(m => m.routes)
       },
       {
+        path: 'all-filters',
+        loadChildren: () => import('./_routes/all-filters-routing.module').then(m => m.routes)
+      },
+      {
         path: 'want-to-read',
         loadChildren: () => import('./_routes/want-to-read-routing.module').then(m => m.routes)
       },

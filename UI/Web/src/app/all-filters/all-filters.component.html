@@ -1,0 +1,34 @@
+<ng-container *transloco="let t; read: 'all-filters'">
+  <app-side-nav-companion-bar [hasFilter]="false">
+    <h2 title>
+      {{t('title')}}
+    </h2>
+    <h6 subtitle >{{t('count', {count: filters.length | number})}}</h6>
+  </app-side-nav-companion-bar>
+  <app-card-detail-layout
+                          [isLoading]="isLoading"
+                          [items]="filters"
+                          [trackByIdentity]="trackByIdentity"
+                          [jumpBarKeys]="jumpbarKeys"
+  >
+    <ng-template #cardItem let-item let-position="idx">
+      <!-- TODO: figure a way to get a hover effect -->
+      <div class="card-item-container card clickable" (click)="loadSmartFilter(item)">
+        <div class="overlay">
+          <div class="card-overlay"></div>
+          <div class="overlay-information overlay-information--centered">
+            <div class="position-relative">
+            <span class="card-title library mx-auto" style="width: auto;">
+              <i class="fa-solid fa-filter" style="font-size: 26px" aria-hidden="true"></i>
+            </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-title">{{item.name}}</span>
+        </div>
+      </div>
+    </ng-template>
+  </app-card-detail-layout>
+
+</ng-container>
