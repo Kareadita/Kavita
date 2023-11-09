@@ -1,5 +1,5 @@
 <div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}"
-     tabindex="0" #reader (click)="handleContainerClick($event)" [ngClass]="{'pointer' : cursorIsPointer}">
+     tabindex="0" #reader (click)="handleContainerClick($event)" [ngClass]="{'clickable' : cursorIsPointer}">
   <ng-container *transloco="let t; read: 'book-reader'">
     <div class="fixed-top" #stickyTop>
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
@@ -44,7 +44,7 @@
               <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" [title]="t('prev-chapter')"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
               <div class="col-1" (click)="goToPage(0)">{{pageNum}}</div>
               <div class="col-8">
-                <ngb-progressbar style="cursor: pointer" [title]="t('go-to-page')" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
+                <ngb-progressbar class="clickable" [title]="t('go-to-page')" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
               </div>
               <div class="col-1 btn-icon" (click)="goToPage(maxPages - 1)" [title]="t('go-to-last-page')">{{maxPages - 1}}</div>
               <button class="btn btn-small btn-icon col-1"  [disabled]="nextChapterDisabled" (click)="loadNextChapter()" [title]="t('next-chapter')"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
