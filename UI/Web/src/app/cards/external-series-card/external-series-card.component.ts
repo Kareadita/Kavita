@@ -9,11 +9,10 @@ import {CommonModule} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {RouterLinkActive} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
-import {NgbActiveOffcanvas, NgbOffcanvas, NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbOffcanvas, NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
-import {SeriesService} from "../../_services/series.service";
 
 @Component({
   selector: 'app-external-series-card',
