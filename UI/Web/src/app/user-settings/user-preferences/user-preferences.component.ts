@@ -54,6 +54,7 @@ import {
   TranslocoPersistTranslations
 } from "@ngneat/transloco-persist-translations";
 import {HttpLoader} from "../../../httpLoader";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -81,7 +82,7 @@ enum FragmentID {
     ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
     ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
-    TranslocoDirective],
+    TranslocoDirective, LoadingComponent],
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
