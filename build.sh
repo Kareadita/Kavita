@@ -25,16 +25,6 @@ ProgressEnd()
     echo "Finish '$1'"
 }
 
-UpdateVersionNumber()
-{
-  # TODO: Read from KavitaCommon and update in Info.plist
-    if [ "$KAVITAVERSION" != "" ]; then
-        echo "Updating Version Info"
-        sed -i'' -e "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>$KAVITAVERSION<\/AssemblyVersion>/g" src/Directory.Build.props
-        sed -i'' -e "s/<AssemblyConfiguration>[\$()A-Za-z-]\+<\/AssemblyConfiguration>/<AssemblyConfiguration>${BUILD_SOURCEBRANCHNAME}<\/AssemblyConfiguration>/g" src/Directory.Build.props
-        sed -i'' -e "s/<string>10.0.0.0<\/string>/<string>$KAVITAVERSION<\/string>/g" macOS/Kavita.app/Contents/Info.plist
-    fi
-}
 
 Build()
 {
