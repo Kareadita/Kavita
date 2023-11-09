@@ -44,7 +44,7 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 })
 export class AllSeriesComponent implements OnInit {
 
-  title: string = translate('all-series.title');
+  title!: string;
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
@@ -128,6 +128,7 @@ export class AllSeriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.title = translate('all-series.title');
     this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
       if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();

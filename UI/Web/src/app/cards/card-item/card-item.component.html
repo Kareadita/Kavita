@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'card-item'">
-  <div class="card {{selected ? 'selected-highlight' : ''}}">
+  <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       <ng-container *ngIf="total > 0 || suppressArchiveWarning">
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px"  [imageUrl]="imageUrl"></app-image>
