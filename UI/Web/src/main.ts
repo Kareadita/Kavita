@@ -27,6 +27,7 @@ import {switchMap} from "rxjs";
 import {provideTranslocoLocale} from "@ngneat/transloco-locale";
 import {provideTranslocoPersistTranslations} from "@ngneat/transloco-persist-translations";
 import {LazyLoadImageModule} from "ng-lazyload-image";
+import {getSaver, SAVER} from "./app/_providers/saver.provider";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -146,6 +147,7 @@ bootstrapApplication(AppComponent, {
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         preLoad,
         Title,
+        { provide: SAVER, useFactory: getSaver },
         provideHttpClient(withInterceptorsFromDi())
     ]
 } as ApplicationConfig)
