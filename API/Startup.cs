@@ -225,13 +225,13 @@ public class Startup
         IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService, IImageService imageService)
     {
 
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
         // Apply Migrations
         try
         {
             Task.Run(async () =>
                 {
                     // Apply all migrations on startup
-                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
@@ -256,7 +256,6 @@ public class Startup
         }
         catch (Exception ex)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
             logger.LogCritical(ex, "An error occurred during migration");
         }
 
@@ -377,7 +376,6 @@ public class Startup
         {
             try
             {
-                var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
                 logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
             }
             catch (Exception)
@@ -387,8 +385,7 @@ public class Startup
             Console.WriteLine($"Kavita - v{BuildInfo.Version}");
         });
 
-        var _logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
-        _logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
+        logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
     }
 
     private static void UpdateBaseUrlInIndex(string baseUrl)
