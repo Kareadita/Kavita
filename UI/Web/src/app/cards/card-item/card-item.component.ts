@@ -5,7 +5,7 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  Input, NgZone,
+  Input,
   OnInit,
   Output
 } from '@angular/core';
@@ -39,11 +39,10 @@ import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
 import {RouterLink} from "@angular/router";
-import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoModule} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 @Component({
@@ -69,6 +68,19 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardItemComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  public readonly imageService = inject(ImageService);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly downloadService = inject(DownloadService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly accountService = inject(AccountService);
+  private readonly scrollService = inject(ScrollService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  protected readonly MangaFormat = MangaFormat;
 
   /**
    * Card item url. Will internally handle error and missing covers
@@ -111,7 +123,7 @@ export class CardItemComponent implements OnInit {
    */
   @Input() allowSelection: boolean = false;
   /**
-   * This will suppress the cannot read archive warning when total pages is 0
+   * This will suppress the "cannot read archive warning" when total pages is 0
    */
   @Input() suppressArchiveWarning: boolean = false;
   /**
@@ -161,21 +173,6 @@ export class CardItemComponent implements OnInit {
   selectionInProgress: boolean = false;
 
   private user: User | undefined;
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly ngZone = inject(NgZone);
-  private readonly translocoService = inject(TranslocoService);
-
-  get MangaFormat(): typeof MangaFormat {
-    return MangaFormat;
-  }
-
-
-  constructor(public imageService: ImageService, private libraryService: LibraryService,
-    public utilityService: UtilityService, private downloadService: DownloadService,
-    public bulkSelectionService: BulkSelectionService,
-    private messageHub: MessageHubService, private accountService: AccountService,
-    private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef,
-    private actionFactoryService: ActionFactoryService) {}
 
   ngOnInit(): void {
 
@@ -228,13 +225,13 @@ export class CardItemComponent implements OnInit {
 
       const tokens = nextDate.title.split(':');
       this.overlayInformation = `
-              <i class="fa-regular fa-clock" aria-hidden="true"></i>
+              <i class="fa-regular fa-clock mb-2" style="font-size: 26px" aria-hidden="true"></i>
               <div>${tokens[0]}</div><div>${tokens[1]}</div>`;
       this.centerOverlay = true;
 
       if (nextDate.expectedDate) {
         const utcPipe = new UtcToLocalTimePipe();
-        this.title = utcPipe.transform(nextDate.expectedDate, 'shortDate');
+        this.title = '~ ' + utcPipe.transform(nextDate.expectedDate, 'shortDate');
       }
 
       this.cdRef.markForCheck();

@@ -2,7 +2,7 @@
   <div class="card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       <ng-container *ngIf="total > 0 || suppressArchiveWarning">
-        <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageUrl"></app-image>
+        <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px"  [imageUrl]="imageUrl"></app-image>
       </ng-container>
       <ng-container *ngIf="total === 0 && !suppressArchiveWarning">
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
