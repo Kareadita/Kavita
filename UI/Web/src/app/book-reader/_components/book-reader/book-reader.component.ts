@@ -1216,7 +1216,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
     const pageSize = this.getPageSize();
-    const totalVirtualPages = Math.max(1, Math.round(totalScroll / pageSize));
+    const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
     const delta = scrollOffset - totalScroll;
     let currentVirtualPage = 1;
 
