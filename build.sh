@@ -25,16 +25,6 @@ ProgressEnd()
     echo "Finish '$1'"
 }
 
-UpdateVersionNumber()
-{
-  # TODO: Read from KavitaCommon and update in Info.plist
-    if [ "$KAVITAVERSION" != "" ]; then
-        echo "Updating Version Info"
-        sed -i'' -e "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>$KAVITAVERSION<\/AssemblyVersion>/g" src/Directory.Build.props
-        sed -i'' -e "s/<AssemblyConfiguration>[\$()A-Za-z-]\+<\/AssemblyConfiguration>/<AssemblyConfiguration>${BUILD_SOURCEBRANCHNAME}<\/AssemblyConfiguration>/g" src/Directory.Build.props
-        sed -i'' -e "s/<string>10.0.0.0<\/string>/<string>$KAVITAVERSION<\/string>/g" macOS/Kavita.app/Contents/Info.plist
-    fi
-}
 
 Build()
 {
@@ -63,12 +53,12 @@ BuildUI()
     rm -rf API/wwwroot/*
     cd UI/Web/ || exit
     echo 'Installing web dependencies'
-    npm ci --legacy-peer-deps
+    npm install --legacy-peer-deps
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
     mkdir -p ../../API/wwwroot
-    cp -R dist/* ../../API/wwwroot
+    cp -R dist/browser/* ../../API/wwwroot
     cd ../../ || exit
     ProgressEnd 'Building UI'
 }

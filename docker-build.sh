@@ -47,7 +47,7 @@ BuildUI()
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
-    cp -r dist/* ../Kavita/API/wwwroot
+    cp -r dist/browser/* ../Kavita/API/wwwroot
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }

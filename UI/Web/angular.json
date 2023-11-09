@@ -24,11 +24,11 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -53,9 +53,7 @@
               "scripts": true,
               "styles": true
             },
-            "vendorChunk": true,
             "extractLicenses": false,
-            "buildOptimizer": false,
             "optimization": false,
             "namedChunks": true
           },
@@ -71,7 +69,6 @@
               "outputHashing": "all",
               "namedChunks": false,
               "extractLicenses": true,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -81,7 +78,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "2kb",
-                  "maximumError": "6kb"
+                  "maximumError": "30kb"
                 }
               ]
             }
@@ -94,18 +91,18 @@
             "sslKey": "./ssl/server.key",
             "sslCert": "./ssl/server.crt",
             "ssl": false,
-            "browserTarget": "kavita-webui:build"
+            "buildTarget": "kavita-webui:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "kavita-webui:build:production"
+              "buildTarget": "kavita-webui:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "kavita-webui:build"
+            "buildTarget": "kavita-webui:build"
           }
         },
         "lint": {
