@@ -745,13 +745,14 @@ public class SeriesService : ISeriesService
             result.VolumeNumber = lastChapter.Volume.Number;
             result.Title = series.Library.Type switch
             {
-                LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num",
+                LibraryType.Manga => await _localizationService.Translate(userId, "next-chapter-num",
                     new object[] {result.ChapterNumber}),
-                LibraryType.Comic => await _localizationService.Translate(userId, "issue-num",
+                LibraryType.Comic => await _localizationService.Translate(userId, "next-issue-num",
                     new object[] {"#", result.ChapterNumber}),
-                LibraryType.Book => await _localizationService.Translate(userId, "book-num",
+                LibraryType.Book => await _localizationService.Translate(userId, "next-book-num",
                     new object[] {result.ChapterNumber}),
-                _ => "Chapter " + result.ChapterNumber
+                _ => await _localizationService.Translate(userId, "next-chapter-num",
+                    new object[] {result.ChapterNumber})
             };
         }
         else

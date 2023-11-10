@@ -27,7 +27,7 @@ public static class MigrateSmartFilterEncoding
         var smartFilters = dataContext.AppUserSmartFilter.ToList();
         foreach (var filter in smartFilters)
         {
-            if (filter.Filter.Contains(SmartFilterHelper.StatementSeparator)) continue;
+            if (!ShouldMigrateFilter(filter.Filter)) continue;
             var decode = EncodeFix(filter.Filter);
             if (string.IsNullOrEmpty(decode)) continue;
             filter.Filter = decode;
@@ -39,6 +39,11 @@ public static class MigrateSmartFilterEncoding
         }
 
         logger.LogCritical("Running MigrateSmartFilterEncoding migration - Completed. This is not an error");
+    }
+
+    public static bool ShouldMigrateFilter(string filter)
+    {
+        return !string.IsNullOrEmpty(filter) && !(filter.Contains(SmartFilterHelper.StatementSeparator) || Uri.UnescapeDataString(filter).Contains(SmartFilterHelper.StatementSeparator));
     }
 
     public static string EncodeFix(string encodedFilter)
@@ -67,6 +72,7 @@ public static class MigrateSmartFilterEncoding
             return $"sortField={sortFieldValue}{SmartFilterHelper.InnerStatementSeparator}isAscending={isAscendingValue}";
         });
 
+        //name=Zero&sortOptions=sortField=2&isAscending=False&limitTo=0&combination=1
         var filterDto = SmartFilterHelper.Decode(noStmt);
 
         // Now we just parse each individual stmt into the core components and add to statements

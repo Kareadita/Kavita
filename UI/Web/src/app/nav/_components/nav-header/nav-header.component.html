@@ -163,6 +163,7 @@
             <div ngbDropdownMenu>
               <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">{{t('server-settings')}}</a>
               <a ngbDropdownItem routerLink="/preferences/">{{t('settings')}}</a>
+              <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
               <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
               <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">{{t('announcements')}}</a>
               <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>

@@ -7,9 +7,6 @@ $image-width: 160px;
     max-height: $image-height;
 }
 
-.image-card {
-    cursor: pointer;
-}
 
 .selected {
     outline: 5px solid var(--primary-color);

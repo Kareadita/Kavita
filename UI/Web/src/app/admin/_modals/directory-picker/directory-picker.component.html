@@ -48,7 +48,7 @@
         <td><i class="fa-solid fa-arrow-turn-up" aria-hidden="true"></i></td>
         <td>...</td>
       </tr>
-      <tr *ngFor="let folder of folders; let idx = index;" (click)="selectNode(folder)" style="cursor: pointer;" [ngClass]="{'disabled': folder.disabled}">
+      <tr *ngFor="let folder of folders; let idx = index;" (click)="selectNode(folder)" class="clickable" [ngClass]="{'disabled': folder.disabled}">
         <td><i class="fa-regular fa-folder" aria-hidden="true"></i></td>
         <td id="folder--{{idx}}">
           {{folder.name}}

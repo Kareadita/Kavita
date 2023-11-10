@@ -44,7 +44,7 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 })
 export class AllSeriesComponent implements OnInit {
 
-  title: string = translate('all-series.title');
+  title!: string;
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
@@ -128,6 +128,7 @@ export class AllSeriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.title = translate('all-series.title');
     this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
       if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
@@ -166,7 +167,11 @@ export class AllSeriesComponent implements OnInit {
   loadPage() {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.loadingSeries = true;
-    this.title = this.route.snapshot.queryParamMap.get('title') || this.filter?.name || translate('all-series.title');
+
+    let filterName = this.route.snapshot.queryParamMap.get('name');
+    filterName = filterName ? filterName.split('�')[0] : null;
+
+    this.title = this.route.snapshot.queryParamMap.get('title') || filterName || this.filter?.name || translate('all-series.title');
     this.cdRef.markForCheck();
     this.seriesService.getAllSeriesV2(undefined, undefined, this.filter!).pipe(take(1)).subscribe(series => {
       this.series = series.result;

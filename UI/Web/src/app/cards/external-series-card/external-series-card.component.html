@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'external-series-card'">
   <ng-container *ngIf="data !== undefined">
-    <div class="card">
+    <div class="card-item-container card clickable">
       <div class="overlay" (click)="handleClick()">
         <ng-container>
           <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="data.coverUrl"></app-image>

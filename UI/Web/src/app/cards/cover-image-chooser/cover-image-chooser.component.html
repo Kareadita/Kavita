@@ -52,7 +52,7 @@
     </form>
 
     <div class="row g-0 chooser" style="padding-top: 10px">
-      <div class="image-card col-auto"
+      <div class="clickable col-auto"
            *ngIf="showReset" tabindex="0" (click)="reset()"
            [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
         <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="230px" width="158px" [imageUrl]="imageService.resetCoverImage"></app-image>
@@ -62,7 +62,7 @@
         </ng-container>
 
       </div>
-      <div class="image-card col-auto"
+      <div class="clickable col-auto"
            *ngFor="let url of imageUrls; let idx = index;" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
            [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
         <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>

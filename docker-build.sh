@@ -32,23 +32,17 @@ Build()
 BuildUI()
 {
     ProgressStart 'Building UI'
-    cd ../Kavita-webui/ || exit
-    npm install
-    npm run prod
-    cd ../Kavita/ || exit
-    ProgressEnd 'Building UI'
-
-    ProgressStart 'Building UI'
     echo 'Removing old wwwroot'
     rm -rf API/wwwroot/*
-    cd ../Kavita-webui/ || exit
+    cd UI/Web/ || exit
     echo 'Installing web dependencies'
-    npm install
+    npm install --legacy-peer-deps
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
-    cp -r dist/browser/* ../Kavita/API/wwwroot
-    cd ../Kavita/ || exit
+    mkdir -p ../../API/wwwroot
+    cp -R dist/browser/* ../../API/wwwroot
+    cd ../../ || exit
     ProgressEnd 'Building UI'
 }
 

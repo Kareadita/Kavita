@@ -1614,13 +1614,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  // Responsibile for handling pagination only
+  // Responsible for handling pagination only
   handleContainerClick(event: MouseEvent) {
 
-    //if (event.target)
     console.log('target: ', event.target);
-    if (['action-bar'].some(className => (event.target as Element).classList.contains(className))) {
-      console.log('exiting early')
+    if (this.actionBarVisible || ['action-bar'].some(className => (event.target as Element).classList.contains(className))) {
+      //console.log('exiting early')
       return;
     }
 

@@ -21,6 +21,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { BytesPipe } from 'src/app/_pipes/bytes.pipe';
 import {translate} from "@ngneat/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SAVER, Saver} from "../../_providers/saver.provider";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -66,9 +67,11 @@ export class DownloadService {
   public activeDownloads$ = this.downloadsSource.asObservable();
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly accountService = inject(AccountService);
+  private readonly httpClient = inject(HttpClient);
 
-  constructor(private httpClient: HttpClient, private confirmService: ConfirmService,
-    private accountService: AccountService) { }
+  constructor(@Inject(SAVER) private save: Saver) { }
 
 
   /**
@@ -269,22 +272,4 @@ export class DownloadService {
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
   }
-
-  private save(blob: Blob, filename: string) {
-    const saveLink = document.createElement('a');
-    saveLink.style.display = 'none';
-    document.body.appendChild(saveLink);
-
-    const url = URL.createObjectURL(blob);
-    saveLink.href = url;
-    saveLink.download = filename;
-
-    // Trigger the click event
-    saveLink.click();
-
-    // Cleanup
-    URL.revokeObjectURL(url);
-    document.body.removeChild(saveLink);
-  }
-
 }

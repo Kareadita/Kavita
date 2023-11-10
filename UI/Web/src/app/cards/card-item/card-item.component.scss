@@ -17,38 +17,10 @@ $image-width: 160px;
     right: 0px;
 }
 
-.card {
-    max-width: $image-width;
-    cursor: pointer;
-    padding-left: 0px;
-    padding-right: 0px;
-    box-sizing: border-box;
-    position: relative;
-    color: var(--card-text-color);
-    border: 1px var(--card-border-color);
-
-}
-
-.card-title {
-    font-size: 13px;
-    width: 130px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    display: block;
-    margin-top: 2px;
-    margin-bottom: 0px;
-    text-align: center;
-}
-
 .selected-highlight {
     outline: 2px solid var(--primary-color);
 }
 
-
-.img-top {
-    height: $image-height;
-}
 
 .progress-banner {
     width: $image-width;
@@ -78,7 +50,6 @@ $image-width: 160px;
     position: absolute;
     top: 0;
     width: 158px;
-
 }
 
 .not-read-badge {
@@ -113,45 +84,13 @@ $image-width: 160px;
 }
 
 
-
-.overlay-information {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    border-radius: 15px;
-    padding: 0 10px;
-    background-color: var(--card-bg-color);
-
-    &.overlay-information--centered {
-        top: 95px;
-        left: 36px;
-    }
-}
-
 .overlay {
-    height: $image-height;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-
     &:hover {
-        visibility: visible;
-
         .bulk-mode {
             visibility: visible;
             z-index: 110;
         }
-
-        .overlay-item {
-            visibility: visible;
-            z-index: 100;
-        }
     }
-
-    .overlay-item {
-        visibility: hidden;
-    }
-
-    z-index: 10;
 
     .count {
         top: 5px;
@@ -167,29 +106,8 @@ $image-width: 160px;
     width: 20px;
 }
 
-.card-body {
-    padding: 5px !important;
-    background-color: var(--card-bg-color);
-    border-width: var(--card-border-width);
-    border-style: var(--card-border-style);
-    border-color: var(--card-border-color);
-    border-radius: 0.25em;
-}
-
 .library {
     font-size: 13px;
     text-decoration: none;
     margin-top: 0px;
-}
-
-.card-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: $image-height;
-    z-index: 10;
-    transition: all 0.2s;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
 }
