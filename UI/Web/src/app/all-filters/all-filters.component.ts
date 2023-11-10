@@ -26,7 +26,6 @@ import {JumpbarService} from "../_services/jumpbar.service";
 export class AllFiltersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly jumpbarService = inject(JumpbarService);
-  private readonly hubService = inject(MessageHubService);
   private readonly router = inject(Router);
   private readonly filterService = inject(FilterService);
 
@@ -42,10 +41,6 @@ export class AllFiltersComponent implements OnInit {
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
-    // this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
-    //   if (event.event !== EVENTS.) return;
-    //   this.loadPage();
-    // });
   }
 
   async loadSmartFilter(filter: SmartFilter) {
