@@ -72,6 +72,7 @@ public static class MigrateSmartFilterEncoding
             return $"sortField={sortFieldValue}{SmartFilterHelper.InnerStatementSeparator}isAscending={isAscendingValue}";
         });
 
+        //name=Zero&sortOptions=sortField=2&isAscending=False&limitTo=0&combination=1
         var filterDto = SmartFilterHelper.Decode(noStmt);
 
         // Now we just parse each individual stmt into the core components and add to statements

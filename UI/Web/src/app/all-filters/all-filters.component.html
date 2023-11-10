@@ -19,7 +19,7 @@
           <div class="overlay-information overlay-information--centered">
             <div class="position-relative">
             <span class="card-title library mx-auto" style="width: auto;">
-              <i class="fa-solid fa-filter" style="font-size: 26px" aria-hidden="true"></i>
+              <i class="fa-solid fa-filter" style="font-size: 26px;" [ngClass]="{'error': isErrored(item)}" aria-hidden="true"></i>
             </span>
             </div>
           </div>

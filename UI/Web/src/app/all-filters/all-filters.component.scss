@@ -2,6 +2,10 @@
   width: 146px;
 }
 
+.error {
+  color: var(--error-color);
+}
+
 .card, .overlay {
   height: 160px;
 }

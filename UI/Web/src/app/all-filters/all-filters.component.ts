@@ -12,6 +12,8 @@ import {FilterService} from "../_services/filter.service";
 import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
 import {SafeHtmlPipe} from "../_pipes/safe-html.pipe";
 import {Router} from "@angular/router";
+import {Series} from "../_models/series";
+import {JumpbarService} from "../_services/jumpbar.service";
 
 @Component({
   selector: 'app-all-filters',
@@ -23,7 +25,7 @@ import {Router} from "@angular/router";
 })
 export class AllFiltersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly jumpbarService = inject(JumpbarService);
   private readonly hubService = inject(MessageHubService);
   private readonly router = inject(Router);
   private readonly filterService = inject(FilterService);
@@ -36,6 +38,7 @@ export class AllFiltersComponent implements OnInit {
   ngOnInit() {
     this.filterService.getAllFilters().subscribe(filters => {
       this.filters = filters;
+      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.filters, (s: Series) => s.name);
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -47,6 +50,10 @@ export class AllFiltersComponent implements OnInit {
 
   async loadSmartFilter(filter: SmartFilter) {
     await this.router.navigateByUrl('all-series?' + filter.filter);
+  }
+
+  isErrored(filter: SmartFilter) {
+    return !decodeURIComponent(filter.filter).includes('¦');
   }
 
 }
