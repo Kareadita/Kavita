@@ -44,7 +44,7 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 })
 export class AllSeriesComponent implements OnInit {
 
-  title!: string;
+  title: string = translate('side-nav.all-series');
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
@@ -115,10 +115,8 @@ export class AllSeriesComponent implements OnInit {
 
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
       this.filter = filter;
-
       this.title = this.route.snapshot.queryParamMap.get('title') || this.filter.name || this.title;
       this.titleService.setTitle('Kavita - ' + this.title);
-
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
       this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
       this.filterSettings.presetsV2 =  this.filter;
@@ -128,7 +126,6 @@ export class AllSeriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.title = translate('all-series.title');
     this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
       if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
