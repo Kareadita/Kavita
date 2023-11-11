@@ -64,7 +64,7 @@ export class ImportCblModalComponent {
     {title: this.translocoService.translate('import-cbl-modal.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
     {title: this.translocoService.translate('import-cbl-modal.validate-cbl-step'), index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
     {title: this.translocoService.translate('import-cbl-modal.dry-run-step'), index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
-    {title: this.translocoService.translate('import-cbl-final-import.import-step'), index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
+    {title: this.translocoService.translate('import-cbl-modal.final-import-step'), index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
 
