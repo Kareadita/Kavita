@@ -49,11 +49,6 @@ import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {
-  provideTranslocoPersistTranslations,
-  TranslocoPersistTranslations
-} from "@ngneat/transloco-persist-translations";
-import {HttpLoader} from "../../../httpLoader";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
 enum AccordionPanelID {
@@ -333,4 +328,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     d.text = translate('preferences.' + o.text);
     return d;
   }
+
+  protected readonly undefined = undefined;
 }
