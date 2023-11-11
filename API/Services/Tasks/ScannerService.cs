@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -84,6 +85,8 @@ public class ScannerService : IScannerService
     private readonly IReadingItemService _readingItemService;
     private readonly IProcessSeries _processSeries;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
+
+    private readonly SemaphoreSlim _seriesProcessingSemaphore = new SemaphoreSlim(1, 1);
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
@@ -495,10 +498,10 @@ public class ScannerService : IScannerService
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
         // NOTE: This runs sync after every file is scanned
-        foreach (var task in processTasks)
-        {
-            await task();
-        }
+        // foreach (var task in processTasks)
+        // {
+        //     await task();
+        // }
         // TODO: We might be able to do Task.WhenAll
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -566,12 +569,12 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
         return;
 
-        // Reponsible for transforming parsedInfo into an actual ParsedSeries then calling the actual processing of the series
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        // Responsible for transforming parsedInfo into an actual ParsedSeries then calling the actual processing of the series
+        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
+            if (parsedFiles.Count == 0) return;// Task.CompletedTask;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -588,15 +591,25 @@ public class ScannerService : IScannerService
                     NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
-                return Task.CompletedTask;
+                return;// Task.CompletedTask;
             }
 
             totalFiles += parsedFiles.Count;
 
 
             seenSeries.Add(foundParsedSeries);
-            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate));
-            return Task.CompletedTask;
+            await _seriesProcessingSemaphore.WaitAsync();
+            try
+            {
+                await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate);
+                //processTasks.Add(async () => );
+            }
+            finally
+            {
+                _seriesProcessingSemaphore.Release();
+            }
+
+            //return Task.CompletedTask;
         }
     }
 
