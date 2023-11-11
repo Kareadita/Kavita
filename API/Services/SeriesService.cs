@@ -107,6 +107,7 @@ public class SeriesService : ISeriesService
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             if (series == null) return false;
             var allCollectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
+            // TODO: This is Diesel's performance problem with Komf. For some systems, this is too heavy of a call if komf is spamming updates.
             var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToList();
             var allPeople = (await _unitOfWork.PersonRepository.GetAllPeople()).ToList();
             var allTags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToList();
