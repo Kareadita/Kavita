@@ -239,36 +239,11 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         });
 
-        // Note: Fallback to folder will parse Monster #8 and get Monster
-        filepath = @"E:\Manga\Monster #8\Ch. 001-016 [MangaPlus] [Digital] [amit34521]\Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]\13.jpg";
-        expected.Add(filepath, new ParserInfo
-        {
-            Series = "Monster", Volumes = "0", Edition = "",
-            Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Image,
-            FullFilePath = filepath, IsSpecial = false
-        });
-
         filepath = @"E:\Manga\Air Gear\Air Gear Omnibus v01 (2016) (Digital) (Shadowcat-Empire).cbz";
         expected.Add(filepath, new ParserInfo
         {
             Series = "Air Gear", Volumes = "1", Edition = "Omnibus",
             Chapters = "0", Filename = "Air Gear Omnibus v01 (2016) (Digital) (Shadowcat-Empire).cbz", Format = MangaFormat.Archive,
-            FullFilePath = filepath, IsSpecial = false
-        });
-
-        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch186\Vol. 19 p106.gif";
-        expected.Add(filepath, new ParserInfo
-        {
-            Series = "Just Images the second", Volumes = "19", Edition = "",
-            Chapters = "186", Filename = "Vol. 19 p106.gif", Format = MangaFormat.Image,
-            FullFilePath = filepath, IsSpecial = false
-        });
-
-        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch186\Vol. 19 p106.gif";
-        expected.Add(filepath, new ParserInfo
-        {
-            Series = "Just Images the second", Volumes = "19", Edition = "",
-            Chapters = "186", Filename = "Vol. 19 p106.gif", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         });
 
@@ -306,6 +281,90 @@ public class DefaultParserTests
             Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
             _testOutputHelper.WriteLine("FullFilePath ✓");
         }
+    }
+
+    [Fact]
+    public void Parse_ParseInfo_Manga_ImageOnly()
+    {
+        // Images don't have root path as E:\Manga, but rather as the path of the folder
+
+        // Note: Fallback to folder will parse Monster #8 and get Monster
+        var filepath = @"E:\Manga\Monster #8\Ch. 001-016 [MangaPlus] [Digital] [amit34521]\Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]\13.jpg";
+        var expectedInfo2 = new ParserInfo
+        {
+            Series = "Monster #8", Volumes = "0", Edition = "",
+            Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Image,
+            FullFilePath = filepath, IsSpecial = false
+        };
+        var actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Monster #8");
+        Assert.NotNull(actual2);
+        _testOutputHelper.WriteLine($"Validating {filepath}");
+        Assert.Equal(expectedInfo2.Format, actual2.Format);
+        _testOutputHelper.WriteLine("Format ✓");
+        Assert.Equal(expectedInfo2.Series, actual2.Series);
+        _testOutputHelper.WriteLine("Series ✓");
+        Assert.Equal(expectedInfo2.Chapters, actual2.Chapters);
+        _testOutputHelper.WriteLine("Chapters ✓");
+        Assert.Equal(expectedInfo2.Volumes, actual2.Volumes);
+        _testOutputHelper.WriteLine("Volumes ✓");
+        Assert.Equal(expectedInfo2.Edition, actual2.Edition);
+        _testOutputHelper.WriteLine("Edition ✓");
+        Assert.Equal(expectedInfo2.Filename, actual2.Filename);
+        _testOutputHelper.WriteLine("Filename ✓");
+        Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
+        _testOutputHelper.WriteLine("FullFilePath ✓");
+
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch186\Vol. 19 p106.gif";
+        expectedInfo2 = new ParserInfo
+        {
+            Series = "Just Images the second", Volumes = "19", Edition = "",
+            Chapters = "186", Filename = "Vol. 19 p106.gif", Format = MangaFormat.Image,
+            FullFilePath = filepath, IsSpecial = false
+        };
+
+        actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Extra layer for no reason\");
+        Assert.NotNull(actual2);
+        _testOutputHelper.WriteLine($"Validating {filepath}");
+        Assert.Equal(expectedInfo2.Format, actual2.Format);
+        _testOutputHelper.WriteLine("Format ✓");
+        Assert.Equal(expectedInfo2.Series, actual2.Series);
+        _testOutputHelper.WriteLine("Series ✓");
+        Assert.Equal(expectedInfo2.Chapters, actual2.Chapters);
+        _testOutputHelper.WriteLine("Chapters ✓");
+        Assert.Equal(expectedInfo2.Volumes, actual2.Volumes);
+        _testOutputHelper.WriteLine("Volumes ✓");
+        Assert.Equal(expectedInfo2.Edition, actual2.Edition);
+        _testOutputHelper.WriteLine("Edition ✓");
+        Assert.Equal(expectedInfo2.Filename, actual2.Filename);
+        _testOutputHelper.WriteLine("Filename ✓");
+        Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
+        _testOutputHelper.WriteLine("FullFilePath ✓");
+
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch186\Vol. 19 p106.gif";
+        expectedInfo2 = new ParserInfo
+        {
+            Series = "Just Images the second", Volumes = "19", Edition = "",
+            Chapters = "186", Filename = "Vol. 19 p106.gif", Format = MangaFormat.Image,
+            FullFilePath = filepath, IsSpecial = false
+        };
+
+        actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Extra layer for no reason\");
+        Assert.NotNull(actual2);
+        _testOutputHelper.WriteLine($"Validating {filepath}");
+        Assert.Equal(expectedInfo2.Format, actual2.Format);
+        _testOutputHelper.WriteLine("Format ✓");
+        Assert.Equal(expectedInfo2.Series, actual2.Series);
+        _testOutputHelper.WriteLine("Series ✓");
+        Assert.Equal(expectedInfo2.Chapters, actual2.Chapters);
+        _testOutputHelper.WriteLine("Chapters ✓");
+        Assert.Equal(expectedInfo2.Volumes, actual2.Volumes);
+        _testOutputHelper.WriteLine("Volumes ✓");
+        Assert.Equal(expectedInfo2.Edition, actual2.Edition);
+        _testOutputHelper.WriteLine("Edition ✓");
+        Assert.Equal(expectedInfo2.Filename, actual2.Filename);
+        _testOutputHelper.WriteLine("Filename ✓");
+        Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
+        _testOutputHelper.WriteLine("FullFilePath ✓");
     }
 
     [Fact]

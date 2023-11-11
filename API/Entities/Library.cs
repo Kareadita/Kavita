@@ -41,6 +41,9 @@ public class Library : IEntityDate
     /// </summary>
     /// <remarks>Scrobbling requires a valid LicenseKey</remarks>
     public bool AllowScrobbling { get; set; } = true;
+
+
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
