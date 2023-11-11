@@ -62,9 +62,6 @@ public class ProcessSeries : IProcessSeries
     private IList<Person> _people;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
-    private readonly object _peopleLock = new object();
-    private readonly object _genreLock = new object();
-    private readonly object _tagLock = new object();
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -845,23 +842,20 @@ public class ProcessSeries : IProcessSeries
     /// <param name="action"></param>
     private void UpdatePeople(IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
-        lock (_peopleLock)
+        var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
+
+        foreach (var name in names)
         {
-            var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
+            var normalizedName = name.ToNormalized();
+            var person = allPeopleTypeRole.Find(p =>
+                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
 
-            foreach (var name in names)
+            if (person == null)
             {
-                var normalizedName = name.ToNormalized();
-                var person = allPeopleTypeRole.Find(p =>
-                    p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
-
-                if (person == null)
-                {
-                    person = new PersonBuilder(name, role).Build();
-                    _people.Add(person);
-                }
-                action(person);
+                person = new PersonBuilder(name, role).Build();
+                _people.Add(person);
             }
+            action(person);
         }
     }
 
@@ -882,11 +876,8 @@ public class ProcessSeries : IProcessSeries
             if (newTag)
             {
                 genre = new GenreBuilder(name).Build();
-                lock (_genreLock)
-                {
-                    _genres.Add(normalizedName, genre);
-                    _unitOfWork.GenreRepository.Attach(genre);
-                }
+                _genres.Add(normalizedName, genre);
+                _unitOfWork.GenreRepository.Attach(genre);
             }
 
             action(genre!, newTag);
@@ -911,10 +902,7 @@ public class ProcessSeries : IProcessSeries
             if (tag == null)
             {
                 tag = new TagBuilder(name).Build();
-                lock (_tagLock)
-                {
-                    _tags.Add(normalizedName, tag);
-                }
+                _tags.Add(normalizedName, tag);
             }
 
             action(tag, added);
