@@ -56,9 +56,9 @@ public class DefaultParser : IDefaultParser
         // This will be called if the epub is already parsed once then we call and merge the information, if the
         if (Parser.IsEpub(filePath))
         {
-            ret.Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName);
-            ret.Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName);
-            ret.Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName);
+            ret.Chapters = Parser.ParseChapter(fileName);
+            ret.Series = Parser.ParseSeries(fileName);
+            ret.Volumes = Parser.ParseVolume(fileName);
         }
         else
         {
@@ -67,15 +67,6 @@ public class DefaultParser : IDefaultParser
                 : Parser.ParseChapter(fileName);
             ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
             ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
-        }
-
-
-        if (Parser.IsImage(filePath))
-        {
-          // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
-          ret.Volumes = Parser.DefaultVolume;
-          ret.Chapters = Parser.DefaultChapter;
-          ret.Series = string.Empty;
         }
 
         if (ret.Series == string.Empty || Parser.IsImage(filePath))
