@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.10.9"
+    "version": "0.7.10.11"
   },
   "servers": [
     {
@@ -2925,7 +2925,8 @@
                   "enum": [
                     0,
                     1,
-                    2
+                    2,
+                    3
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2936,7 +2937,8 @@
                   "enum": [
                     0,
                     1,
-                    2
+                    2,
+                    3
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2947,7 +2949,8 @@
                   "enum": [
                     0,
                     1,
-                    2
+                    2,
+                    3
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -13404,7 +13407,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "format": "int32"
@@ -13965,7 +13969,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "description": "Library type",
@@ -15457,7 +15462,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "format": "int32"
@@ -15555,7 +15561,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "format": "int32"
@@ -16488,7 +16495,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "format": "int32"
@@ -16539,7 +16547,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "format": "int32"
@@ -18795,7 +18804,8 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
             "format": "int32"

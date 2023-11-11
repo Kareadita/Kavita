@@ -566,6 +566,7 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
         return;
 
+        // Reponsible for transforming parsedInfo into an actual ParsedSeries then calling the actual processing of the series
         Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
@@ -576,7 +577,7 @@ public class ScannerService : IScannerService
             {
                 Name = parsedFiles[0].Series,
                 NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles[0].Series),
-                Format = parsedFiles[0].Format
+                Format = parsedFiles[0].Format,
             };
 
             if (skippedScan)

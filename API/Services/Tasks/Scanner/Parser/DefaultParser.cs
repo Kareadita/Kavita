@@ -35,34 +35,56 @@ public class DefaultParser : IDefaultParser
     {
         var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this. (we can probably remove this and have users use kavitaignore)
-        if (Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
+        if (type != LibraryType.Image && Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
 
-        ParserInfo ret;
+        var ret = new ParserInfo()
+        {
+            Filename = Path.GetFileName(filePath),
+            Format = Parser.ParseFormat(filePath),
+            Title = Path.GetFileNameWithoutExtension(fileName),
+            FullFilePath = filePath,
+            Series = string.Empty
+        };
+
+        if (type == LibraryType.Image)
+        {
+            return ParseImage(filePath, rootPath, ret);
+        }
+
+
 
         if (Parser.IsEpub(filePath)) // NOTE: Will this ever be called? Because we use ReadingService to handle parse
         {
-            ret = new ParserInfo
-            {
-                Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName),
-                Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName),
-                Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName),
-                Filename = Path.GetFileName(filePath),
-                Format = Parser.ParseFormat(filePath),
-                FullFilePath = filePath
-            };
+            // ret = new ParserInfo
+            // {
+            //     Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName),
+            //     Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName),
+            //     Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName),
+            //     Filename = Path.GetFileName(filePath),
+            //     Format = Parser.ParseFormat(filePath),
+            //     FullFilePath = filePath
+            // };
+            ret.Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName);
+            ret.Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName);
+            ret.Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName);
         }
         else
         {
-            ret = new ParserInfo
-            {
-                Chapters = type == LibraryType.Comic ? Parser.ParseComicChapter(fileName) : Parser.ParseChapter(fileName),
-                Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName),
-                Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName),
-                Filename = Path.GetFileName(filePath),
-                Format = Parser.ParseFormat(filePath),
-                Title = Path.GetFileNameWithoutExtension(fileName),
-                FullFilePath = filePath
-            };
+            // ret = new ParserInfo
+            // {
+            //     Chapters = type == LibraryType.Comic ? Parser.ParseComicChapter(fileName) : Parser.ParseChapter(fileName),
+            //     Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName),
+            //     Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName),
+            //     Filename = Path.GetFileName(filePath),
+            //     Format = Parser.ParseFormat(filePath),
+            //     Title = Path.GetFileNameWithoutExtension(fileName),
+            //     FullFilePath = filePath
+            // };
+            ret.Chapters = type == LibraryType.Comic
+                ? Parser.ParseComicChapter(fileName)
+                : Parser.ParseChapter(fileName);
+            ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
+            ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
         }
 
 
@@ -120,6 +142,23 @@ public class DefaultParser : IDefaultParser
         return ret.Series == string.Empty ? null : ret;
     }
 
+    private ParserInfo ParseImage(string filePath, string rootPath, ParserInfo ret)
+    {
+        ret.Volumes = Parser.DefaultVolume;
+        ret.Chapters = Parser.DefaultChapter;
+        // Next we need to see if the image has a folder between rootPath and filePath.
+        // if so, take that folder as a volume 0 chapter 0 special and group everything under there (if we can't parse a volume/chapter)
+        ParseFromFallbackFolders(filePath, rootPath, LibraryType.Image, ref ret);
+        if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters == Parser.DefaultChapter) &&
+            (string.IsNullOrEmpty(ret.Volumes) || ret.Volumes == Parser.DefaultVolume))
+        {
+            ret.IsSpecial = true;
+        }
+
+        ret.Series = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
+        return ret;
+    }
+
     /// <summary>
     /// Fills out <see cref="ParserInfo"/> by trying to parse volume, chapters, and series from folders
     /// </summary>
@@ -160,11 +199,11 @@ public class DefaultParser : IDefaultParser
 
             if (!parsedVolume.Equals(Parser.DefaultVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
             {
-                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.DefaultVolume)) && !parsedVolume.Equals(Parser.DefaultVolume))
+                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.DefaultVolume)) && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.DefaultVolume))
                 {
                     ret.Volumes = parsedVolume;
                 }
-                if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter)) && !parsedChapter.Equals(Parser.DefaultChapter))
+                if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter)) && !string.IsNullOrEmpty(parsedChapter) && !parsedChapter.Equals(Parser.DefaultChapter))
                 {
                     ret.Chapters = parsedChapter;
                 }

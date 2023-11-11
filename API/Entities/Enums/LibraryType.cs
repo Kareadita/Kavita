@@ -19,4 +19,9 @@ public enum LibraryType
     /// </summary>
     [Description("Book")]
     Book = 2,
+    /// <summary>
+    /// Uses a different type of grouping and parsing mechanism
+    /// </summary>
+    [Description("Image")]
+    Image = 3,
 }
