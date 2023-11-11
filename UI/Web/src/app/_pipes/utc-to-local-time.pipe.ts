@@ -23,7 +23,7 @@ export class UtcToLocalTimePipe implements PipeTransform {
       case 'short':
         return dateTime.toLocaleString(DateTime.DATETIME_SHORT);
       case 'shortDate':
-        return dateTime.toLocaleString(DateTime.DATE_MED);
+        return dateTime.toLocaleString(DateTime.DATE_SHORT);
       case 'shortTime':
         return dateTime.toLocaleString(DateTime.TIME_SIMPLE);
       case 'full':
