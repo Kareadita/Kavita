@@ -46,40 +46,22 @@ public class DefaultParser : IDefaultParser
             Series = string.Empty
         };
 
-        if (type == LibraryType.Image)
+        // If library type is Image or this is not a cover image in a non-image library, then use dedicated parsing mechanism
+        if (type == LibraryType.Image || Parser.IsImage(filePath))
         {
             return ParseImage(filePath, rootPath, ret);
         }
 
 
-
-        if (Parser.IsEpub(filePath)) // NOTE: Will this ever be called? Because we use ReadingService to handle parse
+        // This will be called if the epub is already parsed once then we call and merge the information, if the
+        if (Parser.IsEpub(filePath))
         {
-            // ret = new ParserInfo
-            // {
-            //     Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName),
-            //     Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName),
-            //     Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName),
-            //     Filename = Path.GetFileName(filePath),
-            //     Format = Parser.ParseFormat(filePath),
-            //     FullFilePath = filePath
-            // };
             ret.Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName);
             ret.Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName);
             ret.Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName);
         }
         else
         {
-            // ret = new ParserInfo
-            // {
-            //     Chapters = type == LibraryType.Comic ? Parser.ParseComicChapter(fileName) : Parser.ParseChapter(fileName),
-            //     Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName),
-            //     Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName),
-            //     Filename = Path.GetFileName(filePath),
-            //     Format = Parser.ParseFormat(filePath),
-            //     Title = Path.GetFileNameWithoutExtension(fileName),
-            //     FullFilePath = filePath
-            // };
             ret.Chapters = type == LibraryType.Comic
                 ? Parser.ParseComicChapter(fileName)
                 : Parser.ParseChapter(fileName);

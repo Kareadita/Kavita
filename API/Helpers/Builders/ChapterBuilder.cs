@@ -28,8 +28,8 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     {
         var specialTreatment = info.IsSpecialInfo();
         var specialTitle = specialTreatment ? info.Filename : info.Chapters;
-        var builder = new ChapterBuilder(Services.Tasks.Scanner.Parser.Parser.DefaultChapter);
-        return builder.WithNumber(specialTreatment ? Services.Tasks.Scanner.Parser.Parser.DefaultChapter : Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty)
+        var builder = new ChapterBuilder(Parser.DefaultChapter);
+        return builder.WithNumber(specialTreatment ? Parser.DefaultChapter : Parser.MinNumberFromRange(info.Chapters) + string.Empty)
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
             .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
             ? info.Title

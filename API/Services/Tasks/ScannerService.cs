@@ -574,7 +574,7 @@ public class ScannerService : IScannerService
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return;// Task.CompletedTask;
+            if (parsedFiles.Count == 0) return;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -591,7 +591,7 @@ public class ScannerService : IScannerService
                     NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
-                return;// Task.CompletedTask;
+                return;
             }
 
             totalFiles += parsedFiles.Count;
@@ -602,14 +602,11 @@ public class ScannerService : IScannerService
             try
             {
                 await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate);
-                //processTasks.Add(async () => );
             }
             finally
             {
                 _seriesProcessingSemaphore.Release();
             }
-
-            //return Task.CompletedTask;
         }
     }
 
