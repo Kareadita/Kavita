@@ -293,7 +293,7 @@ public class DefaultParserTests
         var expectedInfo2 = new ParserInfo
         {
             Series = "Monster #8", Volumes = "0", Edition = "",
-            Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Image,
+            Chapters = "8", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         };
         var actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Monster #8");
@@ -314,7 +314,7 @@ public class DefaultParserTests
         Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
         _testOutputHelper.WriteLine("FullFilePath ✓");
 
-        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch186\Vol. 19 p106.gif";
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch. 186\Vol. 19 p106.gif";
         expectedInfo2 = new ParserInfo
         {
             Series = "Just Images the second", Volumes = "19", Edition = "",
@@ -340,7 +340,7 @@ public class DefaultParserTests
         Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
         _testOutputHelper.WriteLine("FullFilePath ✓");
 
-        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch186\Vol. 19 p106.gif";
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch. 186\Vol. 19 p106.gif";
         expectedInfo2 = new ParserInfo
         {
             Series = "Just Images the second", Volumes = "19", Edition = "",
