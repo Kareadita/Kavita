@@ -437,8 +437,7 @@ public class SeriesController : BaseApiController
     [HttpGet("metadata")]
     public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
     {
-        var metadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
-        return Ok(metadata);
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId));
     }
 
     /// <summary>

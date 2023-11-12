@@ -133,11 +133,11 @@ public class DefaultParser : IDefaultParser
         {
             var parsedVolume = Parser.ParseVolume(ret.Filename);
             var parsedChapter = Parser.ParseChapter(ret.Filename);
-            if (IsEmptyOrDefault(ret.Volumes, "") && !parsedVolume.Equals(Parser.DefaultVolume))
+            if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.DefaultVolume))
             {
                 ret.Volumes = parsedVolume;
             }
-            if (IsEmptyOrDefault("", ret.Chapters) && !parsedChapter.Equals(Parser.DefaultChapter))
+            if (IsEmptyOrDefault(string.Empty, ret.Chapters) && !parsedChapter.Equals(Parser.DefaultChapter))
             {
                 ret.Chapters = parsedChapter;
             }
