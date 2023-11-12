@@ -17860,34 +17860,34 @@
           "tagsLocked": {
             "type": "boolean"
           },
-          "writersLocked": {
+          "writerLocked": {
             "type": "boolean"
           },
-          "charactersLocked": {
+          "characterLocked": {
             "type": "boolean"
           },
-          "coloristsLocked": {
+          "coloristLocked": {
             "type": "boolean"
           },
-          "editorsLocked": {
+          "editorLocked": {
             "type": "boolean"
           },
-          "inkersLocked": {
+          "inkerLocked": {
             "type": "boolean"
           },
-          "letterersLocked": {
+          "lettererLocked": {
             "type": "boolean"
           },
-          "pencillersLocked": {
+          "pencillerLocked": {
             "type": "boolean"
           },
-          "publishersLocked": {
+          "publisherLocked": {
             "type": "boolean"
           },
-          "translatorsLocked": {
+          "translatorLocked": {
             "type": "boolean"
           },
-          "coverArtistsLocked": {
+          "coverArtistLocked": {
             "type": "boolean"
           },
           "releaseYearLocked": {
