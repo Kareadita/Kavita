@@ -295,6 +295,9 @@ public class ProcessSeries : IProcessSeries
         if ((maxChapter == 0 || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
         {
             series.Metadata.MaxCount = maxVolume;
+        } else if (maxVolume == series.Metadata.TotalCount)
+        {
+            series.Metadata.MaxCount = maxVolume;
         }
         else
         {

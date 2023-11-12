@@ -83,7 +83,7 @@ export class ReadingListDetailComponent implements OnInit {
       this.router.navigateByUrl('/home');
       return;
     }
-    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
+
     this.listId = parseInt(listId, 10);
     this.characters$ = this.readingListService.getCharacters(this.listId);
 
@@ -93,6 +93,8 @@ export class ReadingListDetailComponent implements OnInit {
     ]).subscribe(results => {
       const libraries = results[0];
       const readingList = results[1];
+
+      this.titleService.setTitle('Kavita - ' + readingList.title);
 
       libraries.forEach(lib => {
         this.libraryTypes[lib.id] = lib.type;

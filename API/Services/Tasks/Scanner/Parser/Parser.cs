@@ -843,22 +843,26 @@ public static class Parser
     /// <param name="isComic"></param>
     /// <returns></returns>
 
-    public static string CleanTitle(string title, bool isComic = false)
+    public static string CleanTitle(string title, bool isComic = false, bool replaceSpecials = true)
     {
 
         title = ReplaceUnderscores(title);
 
         title = RemoveEditionTagHolders(title);
 
-        if (isComic)
+        if (replaceSpecials)
         {
-            title = RemoveComicSpecialTags(title);
-            title = RemoveEuropeanTags(title);
+            if (isComic)
+            {
+                title = RemoveComicSpecialTags(title);
+                title = RemoveEuropeanTags(title);
+            }
+            else
+            {
+                title = RemoveMangaSpecialTags(title);
+            }
         }
-        else
-        {
-            title = RemoveMangaSpecialTags(title);
-        }
+
 
         title = title.Trim(SpacesAndSeparators);
 

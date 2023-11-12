@@ -73,12 +73,14 @@ public class AccountService : IAccountService
             basePart = serverSettings.HostName;
             if (!serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
             {
-                basePart += serverSettings.BaseUrl.Substring(0, serverSettings.BaseUrl.Length - 1);
+                var removeCount = serverSettings.BaseUrl.EndsWith("/") ? 2 : 1;
+                basePart += serverSettings.BaseUrl.Substring(0, serverSettings.BaseUrl.Length - removeCount);
             }
         }
 
-        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}".Replace("//", "/");
-        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}".Replace("//", "/");
+        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}"
+            .Replace("//", "/");
     }
 
     public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)

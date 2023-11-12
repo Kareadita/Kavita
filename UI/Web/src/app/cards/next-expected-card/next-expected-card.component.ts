@@ -4,6 +4,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {translate} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-next-expected-card',
@@ -39,7 +40,7 @@ export class NextExpectedCardComponent {
 
     if (this.entity.expectedDate) {
       const utcPipe = new UtcToLocalTimePipe();
-      this.title = '~ ' + utcPipe.transform(this.entity.expectedDate, 'shortDate');
+      this.title = translate('next-expected-card.title', {date: utcPipe.transform(this.entity.expectedDate, 'shortDate')});
     }
     this.cdRef.markForCheck();
   }

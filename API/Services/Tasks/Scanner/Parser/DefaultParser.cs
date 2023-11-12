@@ -119,17 +119,44 @@ public class DefaultParser : IDefaultParser
     {
         ret.Volumes = Parser.DefaultVolume;
         ret.Chapters = Parser.DefaultChapter;
-        // Next we need to see if the image has a folder between rootPath and filePath.
-        // if so, take that folder as a volume 0 chapter 0 special and group everything under there (if we can't parse a volume/chapter)
+        var directoryName = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
+        ret.Series = directoryName;
+
         ParseFromFallbackFolders(filePath, rootPath, LibraryType.Image, ref ret);
-        if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters == Parser.DefaultChapter) &&
-            (string.IsNullOrEmpty(ret.Volumes) || ret.Volumes == Parser.DefaultVolume))
+
+
+        if (IsEmptyOrDefault(ret.Volumes, ret.Chapters))
         {
             ret.IsSpecial = true;
         }
+        else
+        {
+            var parsedVolume = Parser.ParseVolume(ret.Filename);
+            var parsedChapter = Parser.ParseChapter(ret.Filename);
+            if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.DefaultVolume))
+            {
+                ret.Volumes = parsedVolume;
+            }
+            if (IsEmptyOrDefault(string.Empty, ret.Chapters) && !parsedChapter.Equals(Parser.DefaultChapter))
+            {
+                ret.Chapters = parsedChapter;
+            }
+        }
 
-        ret.Series = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
+
+        // Override the series name, as fallback folders needs it to try and parse folder name
+        if (string.IsNullOrEmpty(ret.Series) || ret.Series.Equals(directoryName))
+        {
+            ret.Series = Parser.CleanTitle(directoryName, replaceSpecials: false);
+        }
+
         return ret;
+    }
+
+    private static bool IsEmptyOrDefault(string volumes, string chapters)
+    {
+        return (string.IsNullOrEmpty(chapters) || chapters == Parser.DefaultChapter) &&
+               (string.IsNullOrEmpty(volumes) || volumes == Parser.DefaultVolume);
     }
 
     /// <summary>
@@ -193,7 +220,7 @@ public class DefaultParser : IDefaultParser
                     break;
                 }
 
-                if (!string.IsNullOrEmpty(series) && (string.IsNullOrEmpty(ret.Series) || !folder.Contains(ret.Series)))
+                if (!string.IsNullOrEmpty(series) && (string.IsNullOrEmpty(ret.Series) && !folder.Contains(ret.Series)))
                 {
                     ret.Series = series;
                     break;

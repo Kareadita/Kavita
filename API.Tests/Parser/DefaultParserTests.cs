@@ -62,7 +62,7 @@ public class DefaultParserTests
     [Theory]
     [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!")]
     [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!")]
-    [InlineData("/manga/Monster #8 (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster")]
+    [InlineData("/manga/Monster #8 (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "manga")]
     [InlineData("/manga/Monster (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster")]
     [InlineData("/manga/Foo 50/Specials/Foo 50 SP01.cbz", "Foo 50")]
     [InlineData("/manga/Foo 50 (kiraa)/Specials/Foo 50 SP01.cbz", "Foo 50")]
@@ -293,7 +293,7 @@ public class DefaultParserTests
         var expectedInfo2 = new ParserInfo
         {
             Series = "Monster #8", Volumes = "0", Edition = "",
-            Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Image,
+            Chapters = "8", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         };
         var actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Monster #8");
@@ -314,7 +314,7 @@ public class DefaultParserTests
         Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
         _testOutputHelper.WriteLine("FullFilePath ✓");
 
-        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch186\Vol. 19 p106.gif";
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch. 186\Vol. 19 p106.gif";
         expectedInfo2 = new ParserInfo
         {
             Series = "Just Images the second", Volumes = "19", Edition = "",
@@ -340,7 +340,7 @@ public class DefaultParserTests
         Assert.Equal(expectedInfo2.FullFilePath, actual2.FullFilePath);
         _testOutputHelper.WriteLine("FullFilePath ✓");
 
-        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch186\Vol. 19 p106.gif";
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch. 186\Vol. 19 p106.gif";
         expectedInfo2 = new ParserInfo
         {
             Series = "Just Images the second", Volumes = "19", Edition = "",

@@ -38,7 +38,10 @@ enum TabID {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent, ManageUsersComponent, ManageLibraryComponent, ManageLogsComponent, ManageSystemComponent, ServerStatsComponent, ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe, TranslocoDirective],
+  imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink,
+    NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent,
+    ManageUsersComponent, ManageLibraryComponent, ManageSystemComponent, ServerStatsComponent,
+    ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe, TranslocoDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
@@ -47,7 +50,6 @@ export class DashboardComponent implements OnInit {
     {title: 'general-tab', fragment: TabID.General},
     {title: 'users-tab', fragment: TabID.Users},
     {title: 'libraries-tab', fragment: TabID.Libraries},
-    //{title: 'logs-tab', fragment: TabID.Logs},
     {title: 'media-tab', fragment: TabID.Media},
     {title: 'email-tab', fragment: TabID.Email},
     {title: 'tasks-tab', fragment: TabID.Tasks},

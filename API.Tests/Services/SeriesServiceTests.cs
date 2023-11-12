@@ -657,7 +657,7 @@ public class SeriesServiceTests : AbstractDbTest
             {
                 SeriesId = 1,
                 Publishers = new List<PersonDto>() {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
-                PublishersLocked = true
+                PublisherLocked = true
             },
             CollectionTags = new List<CollectionTagDto>()
         });

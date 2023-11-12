@@ -75,16 +75,16 @@ public class SeriesMetadataDto
     public bool PublicationStatusLocked { get; set; }
     public bool GenresLocked { get; set; }
     public bool TagsLocked { get; set; }
-    public bool WritersLocked { get; set; }
-    public bool CharactersLocked { get; set; }
-    public bool ColoristsLocked { get; set; }
-    public bool EditorsLocked { get; set; }
-    public bool InkersLocked { get; set; }
-    public bool LetterersLocked { get; set; }
-    public bool PencillersLocked { get; set; }
-    public bool PublishersLocked { get; set; }
-    public bool TranslatorsLocked { get; set; }
-    public bool CoverArtistsLocked { get; set; }
+    public bool WriterLocked { get; set; }
+    public bool CharacterLocked { get; set; }
+    public bool ColoristLocked { get; set; }
+    public bool EditorLocked { get; set; }
+    public bool InkerLocked { get; set; }
+    public bool LettererLocked { get; set; }
+    public bool PencillerLocked { get; set; }
+    public bool PublisherLocked { get; set; }
+    public bool TranslatorLocked { get; set; }
+    public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
 
 

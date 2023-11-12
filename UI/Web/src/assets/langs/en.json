@@ -1707,6 +1707,10 @@
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
     },
 
+    "next-expected-card": {
+        "title": "~{{date}}"
+    },
+
     "server-stats": {
         "total-series-label": "Total Series",
         "total-series-tooltip": "Total Series: {{count}}",

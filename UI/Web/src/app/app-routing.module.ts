@@ -81,6 +81,7 @@ const routes: Routes = [
           },
         ]
       },
+      {path: '', pathMatch: 'full', redirectTo: 'home'},
     ]
   },
   {
@@ -91,9 +92,10 @@ const routes: Routes = [
     path: 'login',
     loadChildren: () => import('./_routes/registration.router.module').then(m => m.routes) // TODO: Refactor so we just use /registration/login going forward
   },
-  {path: '**', pathMatch: 'full', redirectTo: 'home'},
   {path: 'libraries', pathMatch: 'full', redirectTo: 'home'},
   {path: '**', pathMatch: 'prefix', redirectTo: 'home'},
+  {path: '**', pathMatch: 'full', redirectTo: 'home'},
+  {path: '', pathMatch: 'full', redirectTo: 'home'},
 ];
 
 @NgModule({

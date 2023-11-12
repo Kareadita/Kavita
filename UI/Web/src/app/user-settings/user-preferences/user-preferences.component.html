@@ -9,15 +9,17 @@
           <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
               <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ t(tab.title) }}</a>
               <ng-template ngbNavContent>
-                <ng-container *ngIf="tab.fragment === FragmentID.Account">
-                    <app-change-email></app-change-email>
+                @defer (when tab.fragment === FragmentID.Account; prefetch on idle) {
+                  <app-change-email></app-change-email>
                     <app-change-password></app-change-password>
                     <app-change-age-restriction></app-change-age-restriction>
                     <app-anilist-key></app-anilist-key>
-                </ng-container>
+                }
+
+                @defer (when tab.fragment === FragmentID.Preferences; prefetch on idle) {
                 <ng-container *ngIf="tab.fragment === FragmentID.Preferences">
                   <p>
-                      {{t('pref-description')}}
+                  {{t('pref-description')}}
                   </p>
 
                   <form [formGroup]="settingsForm" *ngIf="user !== undefined">
@@ -25,420 +27,418 @@
                         <div ngbAccordionItem [id]="AccordionPanelID.GlobalSettings" [collapsed]="false">
                           <h2 class="accordion-header" ngbAccordionHeader>
                               <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.GlobalSettings)" aria-controls="collapseOne">
-                                  {{t('global-settings-title')}}
-                              </button>
-                          </h2>
-                          <div ngbAccordionCollapse>
-                            <div ngbAccordionBody>
-                              <ng-template>
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-global-layoutmode" class="form-label">{{t('page-layout-mode-label')}}</label>
-                                    <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #layoutModeTooltip>{{t('page-layout-mode-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-global-layoutmode-help">
-                                      <ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="globalPageLayoutMode" id="settings-global-layoutmode">
-                                      <option *ngFor="let opt of pageLayoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-global-locale" class="form-label">{{t('locale-label')}}</label>
-                                    <i class="fa fa-info-circle ms-1"
-                                           aria-hidden="true" placement="right" [ngbTooltip]="localeTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #localeTooltip>{{t('locale-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-global-locale-help">
-                                      <ng-container [ngTemplateOutlet]="localeTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="locale" id="settings-global-locale">
-                                      <option *ngFor="let opt of locales" [value]="opt.isoCode">{{opt.title | titlecase}}</option>
-                                    </select>
-                                  </div>
-
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" id="blur-unread-summaries" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
-                                      <label class="form-check-label" for="blur-unread-summaries">{{t('blur-unread-summaries-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="blurUnreadSummariesTooltip" role="button" tabindex="0"></i>
+                  {{t('global-settings-title')}}
+                  </button>
+              </h2>
+              <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                  <ng-template>
+                    <div class="row g-0">
+                      <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                        <label for="settings-global-layoutmode" class="form-label">{{t('page-layout-mode-label')}}</label>
+                                      <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #layoutModeTooltip>{{t('page-layout-mode-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-global-layoutmode-help">
+                                        <ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="globalPageLayoutMode" id="settings-global-layoutmode">
+                                        <option *ngFor="let opt of pageLayoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
                                     </div>
 
-                                    <ng-template #blurUnreadSummariesTooltip>{{t('blur-unread-summaries-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-global-blurUnreadSummaries-help">
-                                      <ng-container [ngTemplateOutlet]="blurUnreadSummariesTooltip"></ng-container>
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" id="prompt-download" role="switch" formControlName="promptForDownloadSize" class="form-check-input" aria-describedby="settings-global-promptForDownloadSize-help" [value]="true" aria-labelledby="auto-close-label">
-                                      <label class="form-check-label" for="prompt-download">{{t('prompt-on-download-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="promptForDownloadSizeTooltip" role="button" tabindex="0"></i>
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <label for="settings-global-locale" class="form-label">{{t('locale-label')}}</label>
+                                      <i class="fa fa-info-circle ms-1"
+                                             aria-hidden="true" placement="right" [ngbTooltip]="localeTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #localeTooltip>{{t('locale-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-global-locale-help">
+                                        <ng-container [ngTemplateOutlet]="localeTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="locale" id="settings-global-locale">
+                                        <option *ngFor="let opt of locales" [value]="opt.isoCode">{{opt.title | titlecase}}</option>
+                                      </select>
                                     </div>
 
-                                    <ng-template #promptForDownloadSizeTooltip>{{t('prompt-on-download-tooltip', {size: '100'})}}</ng-template>
-                                    <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">
-                                      <ng-container [ngTemplateOutlet]="promptForDownloadSizeTooltip"></ng-container>
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" id="no-transitions" role="switch" formControlName="noTransitions" class="form-check-input"
-                                             aria-describedby="settings-global-noTransitions-help" [value]="true" aria-labelledby="auto-close-label">
-                                      <label class="form-check-label" for="no-transitions">{{t('disable-animations-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="noTransitionsTooltip" role="button" tabindex="0"></i>
-                                    </div>
-
-                                    <ng-template #noTransitionsTooltip>{{t('disable-animations-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-global-noTransitions-help">
-                                      <ng-container [ngTemplateOutlet]="noTransitionsTooltip"></ng-container>
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" id="collapse-relationships" role="switch" formControlName="collapseSeriesRelationships"
-                                             aria-describedby="settings-collapse-relationships-help" class="form-check-input" aria-labelledby="auto-close-label">
-                                      <label class="form-check-label" for="collapse-relationships">{{t('collapse-series-relationships-label')}}</label>
-                                      <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="collapseSeriesRelationshipsTooltip" role="button" tabindex="0"></i>
-                                    </div>
-                                    <ng-template #collapseSeriesRelationshipsTooltip>{{t('collapse-series-relationships-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-collapse-relationships-help">
-                                      <ng-container [ngTemplateOutlet]="collapseSeriesRelationshipsTooltip"></ng-container>
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" id="share-reviews" role="switch" formControlName="shareReviews"
-                                             aria-describedby="settings-share-reviews-help" class="form-check-input" aria-labelledby="auto-close-label">
-                                      <label class="form-check-label" for="share-reviews">{{t('share-series-reviews-label')}}</label>
-                                      <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="shareReviewsTooltip" role="button" tabindex="0"></i>
-                                    </div>
-                                    <ng-template #shareReviewsTooltip>{{t('share-series-reviews-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-share-reviews-help">
-                                      <ng-container [ngTemplateOutlet]="shareReviewsTooltip"></ng-container>
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                                  <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">{{t('reset')}}</button>
-                                  <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
-                                </div>
-                              </ng-template>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div ngbAccordionItem [id]="AccordionPanelID.ImageReader">
-                          <h2 class="accordion-header" ngbAccordionHeader>
-                            <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.ImageReader)" aria-controls="collapseOne">
-                              {{t('image-reader-settings-title')}}
-                            </button>
-                          </h2>
-                          <div ngbAccordionCollapse>
-                            <div ngbAccordionBody>
-                              <ng-template>
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-reading-direction" class="form-label">{{t('reading-direction-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #readingDirectionTooltip>{{t('reading-direction-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-reading-direction-help">
-                                      <ng-container [ngTemplateOutlet]="readingDirectionTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
-                                      <option *ngFor="let opt of readingDirectionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
                                   </div>
 
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-scaling-option" class="form-label">{{t('scaling-option-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="scalingOptionTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #scalingOptionTooltip>{{t('scaling-option-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-scaling-option-help">
-                                      <ng-container [ngTemplateOutlet]="scalingOptionTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
-                                      <option *ngFor="let opt of scalingOptionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-pagesplit-option" class="form-label">{{t('page-splitting-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #pageSplitOptionTooltip>{{t('page-splitting-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-pagesplit-option-help">
-                                      <ng-container [ngTemplateOutlet]="pageSplitOptionTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
-                                      <option *ngFor="let opt of pageSplitOptionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-readingmode-option" class="form-label">{{t('reading-mode-label')}}</label>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
-                                      <option *ngFor="let opt of readingModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2" *ngIf="true">
-                                    <label for="settings-layoutmode-option" class="form-label">{{t('layout-mode-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #layoutModeTooltip>{{t('layout-mode-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-layoutmode-option-help">
-                                      <ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="manga-header" formControlName="layoutMode" id="settings-layoutmode-option">
-                                      <option *ngFor="let opt of layoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <label for="settings-background-color-option" class="form-label">{{t('background-color-label')}}</label>
-                                    <input [value]="user!.preferences!.backgroundColor"
-                                           class="form-control"
-                                           id="settings-background-color-option"
-                                           (colorPickerChange)="handleBackgroundColorChange()"
-                                           [style.background]="user!.preferences!.backgroundColor"
-                                           [cpAlphaChannel]="'disabled'"
-                                           [(colorPicker)]="user!.preferences!.backgroundColor"/>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="mb-3 mt-1">
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                       <div class="form-check form-switch">
-                                        <input type="checkbox" id="auto-close" role="switch" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
-                                        <label class="form-check-label" for="auto-close">{{t('auto-close-menu-label')}}</label>
+                                        <input type="checkbox" id="blur-unread-summaries" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
+                                        <label class="form-check-label" for="blur-unread-summaries">{{t('blur-unread-summaries-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="blurUnreadSummariesTooltip" role="button" tabindex="0"></i>
                                       </div>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="mb-3 mt-1">
-                                      <div class="form-check form-switch">
-                                        <input type="checkbox" id="show-screen-hints" role="switch" formControlName="showScreenHints" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
-                                        <label class="form-check-label" for="show-screen-hints">{{t('show-screen-hints-label')}}</label>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
 
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="mb-3 mt-1">
-                                      <div class="form-check form-switch">
-                                        <input type="checkbox" id="emulate-book" role="switch" formControlName="emulateBook" class="form-check-input" [value]="true">
-                                        <label class="form-check-label me-1" for="emulate-book">{{t('emulate-comic-book-label')}}</label><i class="fa fa-info-circle" aria-hidden="true" placement="top" ngbTooltip="Applies a shadow effect to emulate reading from a book" role="button" tabindex="0"></i>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                    <div class="mb-3 mt-1">
-                                      <div class="form-check form-switch">
-                                        <input type="checkbox" id="swipe-to-paginate" role="switch" formControlName="swipeToPaginate" class="form-check-input" [value]="true">
-                                        <label class="form-check-label me-1" for="swipe-to-paginate">{{t('swipe-to-paginate-label')}}</label><i class="fa fa-info-circle" aria-hidden="true" placement="top" ngbTooltip="Should swiping on the screen cause the next or previous page to be triggered" role="button" tabindex="0"></i>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                                  <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">{{t('reset')}}</button>
-                                  <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
-                                </div>
-                              </ng-template>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div ngbAccordionItem [id]="AccordionPanelID.BookReader">
-                          <h2 class="accordion-header" ngbAccordionHeader>
-                            <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.BookReader)" aria-controls="collapseOne">
-                              {{t('book-reader-settings-title')}}
-                            </button>
-                          </h2>
-                          <div ngbAccordionCollapse>
-                            <div ngbAccordionBody>
-                              <ng-template>
-                                <div class="row g-0">
-                                  <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                                    <label id="taptopaginate-label" class="form-label"></label>
-                                    <div class="mb-3">
-                                      <div class="form-check form-switch">
-                                        <input type="checkbox" role="switch" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="taptopaginate-label">
-                                        <label for="taptopaginate" class="form-check-label">{{t('tap-to-paginate-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
-                                        <ng-template #tapToPaginateOptionTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
-                                        <span class="visually-hidden" id="settings-taptopaginate-option-help">
-                                          <ng-container [ngTemplateOutlet]="tapToPaginateOptionTooltip"></ng-container>
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                                    <label id="immersivemode-label" class="form-label"></label>
-                                    <div class="mb-3">
-                                      <div class="form-check form-switch">
-                                        <input type="checkbox" role="switch" id="immersivemode" formControlName="bookReaderImmersiveMode" class="form-check-input" [value]="true" aria-labelledby="immersivemode-label">
-                                        <label for="immersivemode" class="form-check-label">{{t('immersive-mode-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
-                                        <ng-template #immersivemodeOptionTooltip>{{t('immersive-mode-label')}}</ng-template>
-                                        <span class="visually-hidden" id="settings-immersivemode-option-help">
-                                          <ng-container [ngTemplateOutlet]="immersivemodeOptionTooltip"></ng-container>
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                    <label for="settings-book-reading-direction" class="form-label">{{t('reading-direction-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #bookReadingDirectionTooltip>{{t('reading-direction-book-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-book-reading-direction-book-help">
-                                      <ng-container [ngTemplateOutlet]="bookReadingDirectionTooltip"></ng-container>
-                                    </span>
-                                    <select id="settings-book-reading-direction" class="form-select" aria-describedby="settings-book-reading-direction-help" formControlName="bookReaderReadingDirection">
-                                      <option *ngFor="let opt of readingDirectionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-
-
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                    <label for="settings-fontfamily-option" class="form-label">{{t('font-family-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #fontFamilyOptionTooltip>{{t('font-family-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-fontfamily-option-help">
-                                      <ng-container [ngTemplateOutlet]="fontFamilyOptionTooltip"></ng-container>
-                                    </span>
-                                    <select id="settings-fontfamily-option" class="form-select" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
-                                      <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                    <label for="settings-book-writing-style" class="form-label me-1">{{t('writing-style-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" aria-describedby="settings-book-writing-style-help" placement="right" [ngbTooltip]="bookWritingStyleToolTip" role="button" tabindex="0"></i>
-                                    <ng-template #bookWritingStyleToolTip>{{t('writing-style-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-book-writing-style-help">
-                                      <ng-container [ngTemplateOutlet]="bookWritingStyleToolTip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="settings-book-writing-style-help" formControlName="bookReaderWritingStyle" id="settings-book-writing-style" >
-                                      <option *ngFor="let opt of bookWritingStylesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                    <label for="settings-book-layout-mode" class="form-label">{{t('layout-mode-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookLayoutModeTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #bookLayoutModeTooltip>{{t('layout-mode-book-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-book-layout-mode-help">
-                                      <ng-container [ngTemplateOutlet]="bookLayoutModeTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="settings-book-layout-mode-help" formControlName="bookReaderLayoutMode" id="settings-book-layout-mode">
-                                      <option *ngFor="let opt of bookLayoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-
-                                  <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                    <label for="settings-color-theme-option" class="form-label">{{t('color-theme-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookColorThemeTooltip" role="button" tabindex="0"></i>
-                                    <ng-template #bookColorThemeTooltip>{{t('color-theme-book-tooltip')}}</ng-template>
-                                    <span class="visually-hidden" id="settings-color-theme-option-help">
-                                      <ng-container [ngTemplateOutlet]="bookColorThemeTooltip"></ng-container>
-                                    </span>
-                                    <select class="form-select" aria-describedby="settings-color-theme-option-help" formControlName="bookReaderThemeName" id="settings-color-theme-option">
-                                      <option *ngFor="let opt of bookColorThemesTranslated" [value]="opt.name">{{opt.name | titlecase}}</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div class="row g-0">
-                                  <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                                    <label for="fontsize" class="form-label range-label">{{t('font-size-book-label')}}</label>
-                                    <input type="range" class="form-range" id="fontsize"
-                                           min="50" max="300" step="10" formControlName="bookReaderFontSize">
-                                    <span class="range-text">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
-                                  </div>
-
-
-                                  <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                                    <div class="range-label">
-                                      <label class="form-label" for="linespacing">{{t('line-height-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
-                                      <ng-template #bookLineHeightOptionTooltip>{{t('line-height-book-tooltip')}}</ng-template>
-                                      <span class="visually-hidden" id="settings-booklineheight-option-help">
-                                        <ng-container [ngTemplateOutlet]="bookLineHeightOptionTooltip"></ng-container>
+                                      <ng-template #blurUnreadSummariesTooltip>{{t('blur-unread-summaries-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-global-blurUnreadSummaries-help">
+                                        <ng-container [ngTemplateOutlet]="blurUnreadSummariesTooltip"></ng-container>
                                       </span>
                                     </div>
-                                    <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
-                                           formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help">
-                                    <span class="range-text">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
                                   </div>
 
-                                  <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                                    <div class="range-label">
-                                      <label class="form-label">{{t('margin-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
-                                      <ng-template #bookReaderMarginOptionTooltip>{{t('margin-book-tooltip')}}</ng-template>
-                                      <span class="visually-hidden" id="settings-bookmargin-option-help">
-                                        <ng-container [ngTemplateOutlet]="bookReaderMarginOptionTooltip"></ng-container>
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <div class="form-check form-switch">
+                                        <input type="checkbox" id="prompt-download" role="switch" formControlName="promptForDownloadSize" class="form-check-input" aria-describedby="settings-global-promptForDownloadSize-help" [value]="true" aria-labelledby="auto-close-label">
+                                        <label class="form-check-label" for="prompt-download">{{t('prompt-on-download-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="promptForDownloadSizeTooltip" role="button" tabindex="0"></i>
+                                      </div>
+
+                                      <ng-template #promptForDownloadSizeTooltip>{{t('prompt-on-download-tooltip', {size: '100'})}}</ng-template>
+                                      <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">
+                                        <ng-container [ngTemplateOutlet]="promptForDownloadSizeTooltip"></ng-container>
                                       </span>
                                     </div>
-
-                                    <input type="range" class="form-range" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" aria-describedby="bookmargin">
-                                    <span class="range-text">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
                                   </div>
-                                </div>
 
-                                <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                                  <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">{{t('reset')}}</button>
-                                  <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
-                                </div>
-                              </ng-template>
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <div class="form-check form-switch">
+                                        <input type="checkbox" id="no-transitions" role="switch" formControlName="noTransitions" class="form-check-input"
+                                               aria-describedby="settings-global-noTransitions-help" [value]="true" aria-labelledby="auto-close-label">
+                                        <label class="form-check-label" for="no-transitions">{{t('disable-animations-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="noTransitionsTooltip" role="button" tabindex="0"></i>
+                                      </div>
+
+                                      <ng-template #noTransitionsTooltip>{{t('disable-animations-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-global-noTransitions-help">
+                                        <ng-container [ngTemplateOutlet]="noTransitionsTooltip"></ng-container>
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                                      <div class="form-check form-switch">
+                                        <input type="checkbox" id="collapse-relationships" role="switch" formControlName="collapseSeriesRelationships"
+                                               aria-describedby="settings-collapse-relationships-help" class="form-check-input" aria-labelledby="auto-close-label">
+                                        <label class="form-check-label" for="collapse-relationships">{{t('collapse-series-relationships-label')}}</label>
+                                        <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="collapseSeriesRelationshipsTooltip" role="button" tabindex="0"></i>
+                                      </div>
+                                      <ng-template #collapseSeriesRelationshipsTooltip>{{t('collapse-series-relationships-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-collapse-relationships-help">
+                                        <ng-container [ngTemplateOutlet]="collapseSeriesRelationshipsTooltip"></ng-container>
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                                      <div class="form-check form-switch">
+                                        <input type="checkbox" id="share-reviews" role="switch" formControlName="shareReviews"
+                                               aria-describedby="settings-share-reviews-help" class="form-check-input" aria-labelledby="auto-close-label">
+                                        <label class="form-check-label" for="share-reviews">{{t('share-series-reviews-label')}}</label>
+                                        <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="shareReviewsTooltip" role="button" tabindex="0"></i>
+                                      </div>
+                                      <ng-template #shareReviewsTooltip>{{t('share-series-reviews-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-share-reviews-help">
+                                        <ng-container [ngTemplateOutlet]="shareReviewsTooltip"></ng-container>
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                                    <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">{{t('reset')}}</button>
+                                    <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+                                  </div>
+                                </ng-template>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div ngbAccordionItem [id]="AccordionPanelID.ImageReader">
+                            <h2 class="accordion-header" ngbAccordionHeader>
+                              <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.ImageReader)" aria-controls="collapseOne">
+                  {{t('image-reader-settings-title')}}
+                  </button>
+                </h2>
+                <div ngbAccordionCollapse>
+                  <div ngbAccordionBody>
+                    <ng-template>
+                      <div class="row g-0">
+                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                          <label for="settings-reading-direction" class="form-label">{{t('reading-direction-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #readingDirectionTooltip>{{t('reading-direction-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-reading-direction-help">
+                                        <ng-container [ngTemplateOutlet]="readingDirectionTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
+                                        <option *ngFor="let opt of readingDirectionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <label for="settings-scaling-option" class="form-label">{{t('scaling-option-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="scalingOptionTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #scalingOptionTooltip>{{t('scaling-option-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-scaling-option-help">
+                                        <ng-container [ngTemplateOutlet]="scalingOptionTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
+                                        <option *ngFor="let opt of scalingOptionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <label for="settings-pagesplit-option" class="form-label">{{t('page-splitting-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #pageSplitOptionTooltip>{{t('page-splitting-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-pagesplit-option-help">
+                                        <ng-container [ngTemplateOutlet]="pageSplitOptionTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
+                                        <option *ngFor="let opt of pageSplitOptionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <label for="settings-readingmode-option" class="form-label">{{t('reading-mode-label')}}</label>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
+                                        <option *ngFor="let opt of readingModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2" *ngIf="true">
+                                      <label for="settings-layoutmode-option" class="form-label">{{t('layout-mode-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #layoutModeTooltip>{{t('layout-mode-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-layoutmode-option-help">
+                                        <ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="manga-header" formControlName="layoutMode" id="settings-layoutmode-option">
+                                        <option *ngFor="let opt of layoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <label for="settings-background-color-option" class="form-label">{{t('background-color-label')}}</label>
+                                      <input [value]="user!.preferences!.backgroundColor"
+                                             class="form-control"
+                                             id="settings-background-color-option"
+                                             (colorPickerChange)="handleBackgroundColorChange()"
+                                             [style.background]="user!.preferences!.backgroundColor"
+                                             [cpAlphaChannel]="'disabled'"
+                                             [(colorPicker)]="user!.preferences!.backgroundColor"/>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <div class="mb-3 mt-1">
+                                        <div class="form-check form-switch">
+                                          <input type="checkbox" id="auto-close" role="switch" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                          <label class="form-check-label" for="auto-close">{{t('auto-close-menu-label')}}</label>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <div class="mb-3 mt-1">
+                                        <div class="form-check form-switch">
+                                          <input type="checkbox" id="show-screen-hints" role="switch" formControlName="showScreenHints" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                          <label class="form-check-label" for="show-screen-hints">{{t('show-screen-hints-label')}}</label>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <div class="mb-3 mt-1">
+                                        <div class="form-check form-switch">
+                                          <input type="checkbox" id="emulate-book" role="switch" formControlName="emulateBook" class="form-check-input" [value]="true">
+                                          <label class="form-check-label me-1" for="emulate-book">{{t('emulate-comic-book-label')}}</label><i class="fa fa-info-circle" aria-hidden="true" placement="top" ngbTooltip="Applies a shadow effect to emulate reading from a book" role="button" tabindex="0"></i>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                      <div class="mb-3 mt-1">
+                                        <div class="form-check form-switch">
+                                          <input type="checkbox" id="swipe-to-paginate" role="switch" formControlName="swipeToPaginate" class="form-check-input" [value]="true">
+                                          <label class="form-check-label me-1" for="swipe-to-paginate">{{t('swipe-to-paginate-label')}}</label><i class="fa fa-info-circle" aria-hidden="true" placement="top" ngbTooltip="Should swiping on the screen cause the next or previous page to be triggered" role="button" tabindex="0"></i>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                                    <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">{{t('reset')}}</button>
+                                    <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+                                  </div>
+                                </ng-template>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div ngbAccordionItem [id]="AccordionPanelID.BookReader">
+                            <h2 class="accordion-header" ngbAccordionHeader>
+                              <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.BookReader)" aria-controls="collapseOne">
+                  {{t('book-reader-settings-title')}}
+                  </button>
+                </h2>
+                <div ngbAccordionCollapse>
+                  <div ngbAccordionBody>
+                    <ng-template>
+                      <div class="row g-0">
+                        <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                          <label id="taptopaginate-label" class="form-label"></label>
+                          <div class="mb-3">
+                            <div class="form-check form-switch">
+                              <input type="checkbox" role="switch" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="taptopaginate-label">
+                              <label for="taptopaginate" class="form-check-label">{{t('tap-to-paginate-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
+                                          <ng-template #tapToPaginateOptionTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
+                                          <span class="visually-hidden" id="settings-taptopaginate-option-help">
+                                            <ng-container [ngTemplateOutlet]="tapToPaginateOptionTooltip"></ng-container>
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                                      <label id="immersivemode-label" class="form-label"></label>
+                                      <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                          <input type="checkbox" role="switch" id="immersivemode" formControlName="bookReaderImmersiveMode" class="form-check-input" [value]="true" aria-labelledby="immersivemode-label">
+                                          <label for="immersivemode" class="form-check-label">{{t('immersive-mode-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
+                                          <ng-template #immersivemodeOptionTooltip>{{t('immersive-mode-label')}}</ng-template>
+                                          <span class="visually-hidden" id="settings-immersivemode-option-help">
+                                            <ng-container [ngTemplateOutlet]="immersivemodeOptionTooltip"></ng-container>
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                      <label for="settings-book-reading-direction" class="form-label">{{t('reading-direction-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #bookReadingDirectionTooltip>{{t('reading-direction-book-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-book-reading-direction-book-help">
+                                        <ng-container [ngTemplateOutlet]="bookReadingDirectionTooltip"></ng-container>
+                                      </span>
+                                      <select id="settings-book-reading-direction" class="form-select" aria-describedby="settings-book-reading-direction-help" formControlName="bookReaderReadingDirection">
+                                        <option *ngFor="let opt of readingDirectionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+
+
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                      <label for="settings-fontfamily-option" class="form-label">{{t('font-family-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #fontFamilyOptionTooltip>{{t('font-family-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-fontfamily-option-help">
+                                        <ng-container [ngTemplateOutlet]="fontFamilyOptionTooltip"></ng-container>
+                                      </span>
+                                      <select id="settings-fontfamily-option" class="form-select" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
+                                        <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                      <label for="settings-book-writing-style" class="form-label me-1">{{t('writing-style-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" aria-describedby="settings-book-writing-style-help" placement="right" [ngbTooltip]="bookWritingStyleToolTip" role="button" tabindex="0"></i>
+                                      <ng-template #bookWritingStyleToolTip>{{t('writing-style-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-book-writing-style-help">
+                                        <ng-container [ngTemplateOutlet]="bookWritingStyleToolTip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="settings-book-writing-style-help" formControlName="bookReaderWritingStyle" id="settings-book-writing-style" >
+                                        <option *ngFor="let opt of bookWritingStylesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                      <label for="settings-book-layout-mode" class="form-label">{{t('layout-mode-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookLayoutModeTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #bookLayoutModeTooltip>{{t('layout-mode-book-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-book-layout-mode-help">
+                                        <ng-container [ngTemplateOutlet]="bookLayoutModeTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="settings-book-layout-mode-help" formControlName="bookReaderLayoutMode" id="settings-book-layout-mode">
+                                        <option *ngFor="let opt of bookLayoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                      <label for="settings-color-theme-option" class="form-label">{{t('color-theme-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookColorThemeTooltip" role="button" tabindex="0"></i>
+                                      <ng-template #bookColorThemeTooltip>{{t('color-theme-book-tooltip')}}</ng-template>
+                                      <span class="visually-hidden" id="settings-color-theme-option-help">
+                                        <ng-container [ngTemplateOutlet]="bookColorThemeTooltip"></ng-container>
+                                      </span>
+                                      <select class="form-select" aria-describedby="settings-color-theme-option-help" formControlName="bookReaderThemeName" id="settings-color-theme-option">
+                                        <option *ngFor="let opt of bookColorThemesTranslated" [value]="opt.name">{{opt.name | titlecase}}</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-0">
+                                    <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                                      <label for="fontsize" class="form-label range-label">{{t('font-size-book-label')}}</label>
+                                      <input type="range" class="form-range" id="fontsize"
+                                             min="50" max="300" step="10" formControlName="bookReaderFontSize">
+                                      <span class="range-text">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
+                                    </div>
+
+
+                                    <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                                      <div class="range-label">
+                                        <label class="form-label" for="linespacing">{{t('line-height-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
+                                        <ng-template #bookLineHeightOptionTooltip>{{t('line-height-book-tooltip')}}</ng-template>
+                                        <span class="visually-hidden" id="settings-booklineheight-option-help">
+                                          <ng-container [ngTemplateOutlet]="bookLineHeightOptionTooltip"></ng-container>
+                                        </span>
+                                      </div>
+                                      <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
+                                             formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help">
+                                      <span class="range-text">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
+                                    </div>
+
+                                    <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                                      <div class="range-label">
+                                        <label class="form-label">{{t('margin-book-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
+                                        <ng-template #bookReaderMarginOptionTooltip>{{t('margin-book-tooltip')}}</ng-template>
+                                        <span class="visually-hidden" id="settings-bookmargin-option-help">
+                                          <ng-container [ngTemplateOutlet]="bookReaderMarginOptionTooltip"></ng-container>
+                                        </span>
+                                      </div>
+
+                                      <input type="range" class="form-range" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" aria-describedby="bookmargin">
+                                      <span class="range-text">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
+                                    </div>
+                                  </div>
+
+                                  <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                                    <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">{{t('reset')}}</button>
+                                    <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+                                  </div>
+                                </ng-template>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                  </form>
-                </ng-container>
+                    </form>
+                  </ng-container>
+                }
 
 
-                <ng-container *ngIf="tab.fragment === FragmentID.Clients">
+
+                @defer (when tab.fragment === FragmentID.Clients; prefetch on idle) {
                   <div class="alert alert-warning" role="alert" *ngIf="!opdsEnabled">{{t('clients-opds-alert')}}</div>
                   <p>{{t('clients-opds-description')}}</p>
                   <app-api-key [tooltipText]="t('clients-api-key-tooltip')" [hideData]="true"></app-api-key>
                   <app-api-key [title]="t('clients-opds-url-tooltip')" [hideData]="true" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
-                </ng-container>
-<!--                @defer (when tab.fragment === FragmentID.Theme; prefetch on idle) {-->
-<!--                  <app-theme-manager></app-theme-manager>-->
-<!--                }-->
-<!--                @placeholder {-->
-<!--                  <app-loading [loading]="true"></app-loading>-->
-<!--                }-->
-                <ng-container *ngIf="tab.fragment === FragmentID.Theme">
+                }
+                @defer (when tab.fragment === FragmentID.Theme; prefetch on idle) {
                   <app-theme-manager></app-theme-manager>
-                </ng-container>
+                }
 
-                <ng-container *ngIf="tab.fragment === FragmentID.Devices">
+                @defer (when tab.fragment === FragmentID.Devices; prefetch on idle) {
                   <app-manage-devices></app-manage-devices>
-                </ng-container>
-                <ng-container *ngIf="tab.fragment === FragmentID.Stats">
+                }
+
+                @defer (when tab.fragment === FragmentID.Stats; prefetch on idle) {
                   <app-user-stats></app-user-stats>
-                </ng-container>
-                <ng-container *ngIf="tab.fragment === FragmentID.Scrobbling">
+                }
+
+                @defer (when tab.fragment === FragmentID.Scrobbling; prefetch on idle) {
                   <app-user-scrobble-history></app-user-scrobble-history>
                   <app-user-holds></app-user-holds>
-                </ng-container>
+                }
               </ng-template>
           </li>
       </ul>

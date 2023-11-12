@@ -17,10 +17,10 @@ export interface DirectoryPickerResult {
 
 
 @Component({
-    selector: 'app-directory-picker',
-    templateUrl: './directory-picker.component.html',
-    styleUrls: ['./directory-picker.component.scss'],
-    standalone: true,
+  selector: 'app-directory-picker',
+  templateUrl: './directory-picker.component.html',
+  styleUrls: ['./directory-picker.component.scss'],
+  standalone: true,
   imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {
@@ -37,7 +37,7 @@ export class DirectoryPickerComponent implements OnInit {
 
 
   path: string = '';
-  @ViewChild('instance', {static: true}) instance!: NgbTypeahead;
+  @ViewChild('instance', {static: false}) instance!: NgbTypeahead;
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
   searching: boolean = false;

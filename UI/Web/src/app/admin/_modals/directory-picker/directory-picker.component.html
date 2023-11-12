@@ -8,7 +8,7 @@
     <div class="mb-3">
       <label for="typeahead-focus" class="form-label">{{t('path-label')}}</label>
       <div class="input-group">
-        <input id="typeahead-focus" type="text" class="form-control" [(ngModel)]="path" [ngbTypeahead]="search"
+        <input id="typeahead-focus" type="text" class="form-control" style="width: 100%" [(ngModel)]="path" [ngbTypeahead]="search"
                (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)"
                (ngModelChange)="updateTable()" #instance="ngbTypeahead" [placeholder]="t('path-placeholder')"
                [resultTemplate]="rt" />
