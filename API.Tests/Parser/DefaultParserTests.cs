@@ -63,7 +63,7 @@ public class DefaultParserTests
     [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!")]
     [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!")]
     [InlineData("/manga/Monster #8 (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "manga")]
-    [InlineData("/manga/Monster (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "manga")]
+    [InlineData("/manga/Monster (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster")]
     [InlineData("/manga/Foo 50/Specials/Foo 50 SP01.cbz", "Foo 50")]
     [InlineData("/manga/Foo 50 (kiraa)/Specials/Foo 50 SP01.cbz", "Foo 50")]
     [InlineData("/manga/Btooom!/Specials/Just a special SP01.cbz", "Btooom!")]

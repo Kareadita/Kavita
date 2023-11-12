@@ -64,16 +64,13 @@
     <PackageReference Include="Flurl" Version="3.0.7" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="Hangfire" Version="1.8.6" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.6" />
     <PackageReference Include="Hangfire.InMemory" Version="0.6.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.4" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.13" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.6" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
