@@ -28,4 +28,6 @@ public class UpdateLibraryDto
     public bool ManageReadingLists { get; init; }
     [Required]
     public bool AllowScrobbling { get; init; }
+    [Required]
+    public ICollection<FileTypeGroup> FileGroupTypes { get; init; }
 }
