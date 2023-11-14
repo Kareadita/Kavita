@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AnalysisMode>Default</AnalysisMode>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <TieredPGO>true</TieredPGO>
@@ -53,7 +53,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
@@ -72,20 +72,20 @@
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.6" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.7" />
-    <PackageReference Include="NetVips" Version="2.3.1" />
-    <PackageReference Include="NetVips.Native" Version="8.14.5" />
+    <PackageReference Include="NetVips" Version="2.4.0" />
+    <PackageReference Include="NetVips.Native" Version="8.15.0" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.7" />
-    <PackageReference Include="Serilog" Version="3.1.0" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.2.0-dev-00752" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="7.0.0" />
@@ -104,7 +104,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.12" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
     <PackageReference Include="System.IO.Abstractions" Version="19.2.69" />
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
     <PackageReference Include="VersOne.Epub" Version="3.3.1" />
   </ItemGroup>
 
