@@ -23,7 +23,7 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { Device } from 'src/app/_models/device/device';
-import { LibraryType } from 'src/app/_models/library';
+import { LibraryType } from 'src/app/_models/library/library';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Volume } from 'src/app/_models/volume';

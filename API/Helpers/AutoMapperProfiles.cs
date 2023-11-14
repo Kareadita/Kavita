@@ -208,7 +208,10 @@ public class AutoMapperProfiles : Profile
         CreateMap<Library, LibraryDto>()
             .ForMember(dest => dest.Folders,
                 opt =>
-                    opt.MapFrom(src => src.Folders.Select(x => x.Path).ToList()));
+                    opt.MapFrom(src => src.Folders.Select(x => x.Path).ToList()))
+            .ForMember(dest => dest.LibraryFileTypes,
+                opt =>
+                    opt.MapFrom(src => src.LibraryFileTypes.Select(l => l.FileTypeGroup)));
 
         CreateMap<AppUser, MemberDto>()
             .ForMember(dest => dest.AgeRestriction,

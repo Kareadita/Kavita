@@ -678,6 +678,7 @@ public class DirectoryService : IDirectoryService
         }
         else
         {
+            // TODO: Here is where we would generate the list of supported extensions
             var foundFiles = GetFilesWithCertainExtensions(folderPath,
                     Tasks.Scanner.Parser.Parser.SupportedExtensions)
                 .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));

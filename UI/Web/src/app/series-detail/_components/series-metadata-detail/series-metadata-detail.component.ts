@@ -27,7 +27,7 @@ import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-info-cards.component";
-import {LibraryType} from "../../../_models/library";
+import {LibraryType} from "../../../_models/library/library";
 import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.component";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";

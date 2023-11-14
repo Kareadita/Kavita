@@ -10,7 +10,7 @@ import { ConfirmService } from '../shared/confirm.service';
 import { LibrarySettingsModalComponent } from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Device } from '../_models/device/device';
-import { Library } from '../_models/library';
+import { Library } from '../_models/library/library';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';

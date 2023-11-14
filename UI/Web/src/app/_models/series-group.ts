@@ -1,4 +1,4 @@
-import { LibraryType } from "./library";
+import { LibraryType } from "./library/library";
 
 export interface SeriesGroup {
     seriesId: number;
@@ -8,7 +8,7 @@ export interface SeriesGroup {
     libraryId: number;
     libraryType: LibraryType;
     volumeId: number;
-    chapterId: number; 
+    chapterId: number;
     id: number;  // This is UI only, sent from backend but has no relation to any entity
-    count: number; 
+    count: number;
 }

@@ -1,4 +1,4 @@
-import { LibraryType } from "src/app/_models/library";
+import { LibraryType } from "src/app/_models/library/library";
 import { MangaFormat } from "src/app/_models/manga-format";
 import { FileDimension } from "./file-dimension";
 

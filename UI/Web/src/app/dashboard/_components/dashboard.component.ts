@@ -4,7 +4,7 @@ import {Router, RouterLink} from '@angular/router';
 import {Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {Library} from 'src/app/_models/library';
+import {Library} from 'src/app/_models/library/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
 import {SortField} from 'src/app/_models/metadata/series-filter';
 import {AccountService} from 'src/app/_services/account.service';

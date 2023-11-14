@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {Library} from 'src/app/_models/library';
+import {Library} from 'src/app/_models/library/library';
 import {Member} from 'src/app/_models/auth/member';
 import {LibraryService} from 'src/app/_services/library.service';
 import {SelectionModel} from 'src/app/typeahead/_components/typeahead.component';

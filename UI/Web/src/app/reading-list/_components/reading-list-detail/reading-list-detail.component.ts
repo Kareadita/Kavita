@@ -4,7 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {LibraryType} from 'src/app/_models/library';
+import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {ReadingList, ReadingListItem} from 'src/app/_models/reading-list';
 import {AccountService} from 'src/app/_services/account.service';

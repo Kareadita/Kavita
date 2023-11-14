@@ -44,6 +44,8 @@ public class Library : IEntityDate
 
 
 
+
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
@@ -57,6 +59,8 @@ public class Library : IEntityDate
     public ICollection<FolderPath> Folders { get; set; } = null!;
     public ICollection<AppUser> AppUsers { get; set; } = null!;
     public ICollection<Series> Series { get; set; } = null!;
+    public ICollection<LibraryFileTypeGroup> LibraryFileTypes { get; set; } = new List<LibraryFileTypeGroup>();
+    //public ICollection<ExcludedFolderPath> ExcludedFolderPaths { get; set; } = new List<ExcludedFolderPath>();
 
     public void UpdateLastModified()
     {

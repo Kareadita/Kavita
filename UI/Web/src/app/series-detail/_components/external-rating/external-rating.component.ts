@@ -14,7 +14,7 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {AccountService} from "../../../_services/account.service";
-import {LibraryType} from "../../../_models/library";
+import {LibraryType} from "../../../_models/library/library";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";

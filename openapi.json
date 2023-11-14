@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.10.11"
+    "version": "0.7.10.13"
   },
   "servers": [
     {
@@ -15537,6 +15537,13 @@
               "$ref": "#/components/schemas/Series"
             },
             "nullable": true
+          },
+          "libraryFileTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryFileTypeGroup"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15610,6 +15617,22 @@
           "collapseSeriesRelationships": {
             "type": "boolean",
             "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
+          "libraryFileTypes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "description": "Represents a set of file types that can be scanned",
+              "format": "int32"
+            },
+            "description": "The types of file type groups the library will scan for",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15623,6 +15646,34 @@
           "count": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LibraryFileTypeGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "library": {
+            "$ref": "#/components/schemas/Library"
+          },
+          "fileTypeGroup": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents a set of file types that can be scanned",
+            "format": "int32"
           }
         },
         "additionalProperties": false

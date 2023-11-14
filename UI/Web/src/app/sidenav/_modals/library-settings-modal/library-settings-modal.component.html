@@ -91,6 +91,21 @@
             <div class="row">
               <div class="col-md-12 col-sm-12 pe-2 mb-2">
                 <div class="mb-3 mt-1">
+                  <h6>{{t('file-type-group-label')}}</h6>
+                  <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
+                    <input class="form-check-input" type="checkbox" [id]="group" [value]="group">
+                    <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('file-type-group-tooltip')}}
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
                   <div class="form-check form-switch">
                     <input type="checkbox" id="manage-collections" role="switch" formControlName="manageCollections" class="form-check-input">
                     <label class="form-check-label" for="manage-collections">{{t('manage-collection-label')}}</label>

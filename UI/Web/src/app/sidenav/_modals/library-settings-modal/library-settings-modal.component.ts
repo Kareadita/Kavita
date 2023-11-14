@@ -20,7 +20,7 @@ import {
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Library, LibraryType} from 'src/app/_models/library';
+import {Library, LibraryType} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -30,6 +30,8 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
+import {allFileTypeGroup} from "../../../_models/library/file-type-group.enum";
+import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
 
 enum TabID {
   General = 'general-tab',
@@ -48,7 +50,7 @@ enum StepID {
 @Component({
   selector: 'app-library-settings-modal',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe],
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe, FileTypeGroupPipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -81,6 +83,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   isAddLibrary = false;
   setupStep = StepID.General;
+  fileTypeGroups = allFileTypeGroup;
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;

@@ -13,7 +13,7 @@ import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
-import { Library, LibraryType } from '../../../_models/library';
+import { Library, LibraryType } from '../../../_models/library/library';
 import { AccountService } from '../../../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../../../_services/action-factory.service';
 import { ActionService } from '../../../_services/action.service';

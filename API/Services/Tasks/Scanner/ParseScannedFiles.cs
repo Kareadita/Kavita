@@ -86,6 +86,7 @@ public class ParseScannedFiles
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
+            // TODO: Globbing exclude from the Library would happen here
 
             foreach (var directory in directories)
             {

@@ -1,5 +1,5 @@
 import {SideNavStreamType} from "./sidenav-stream-type.enum";
-import {Library, LibraryType} from "../library";
+import {Library, LibraryType} from "../library/library";
 import {CommonStream} from "../common-stream";
 import {ExternalSource} from "./external-source";
 

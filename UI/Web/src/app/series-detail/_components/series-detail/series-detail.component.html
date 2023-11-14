@@ -305,6 +305,7 @@
 </ng-container>
 
 <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+  Card
   <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                  [imageUrl]="imageService.getChapterCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
@@ -315,6 +316,7 @@
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+  Vol
   <app-card-item *ngIf="item.number !== 0" class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                  [imageUrl]="imageService.getVolumeCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
@@ -324,6 +326,7 @@
 </ng-template>
 
 <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+  Special
   <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
                  [imageUrl]="imageService.getChapterCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
@@ -334,6 +337,7 @@
 </ng-template>
 
 <ng-template #nonSpecialChapterListItem let-item>
+  nonSpecialChapterList
   <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
                  [seriesName]="series.name" [entity]="item" *ngIf="!item.isSpecial"
                  [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
@@ -346,6 +350,7 @@
 </ng-template>
 
 <ng-template #nonSpecialVolumeListItem let-item>
+  nonSpecialVolumeList
   <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
                  [seriesName]="series.name" [entity]="item" *ngIf="item.number !== 0"
                  [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
@@ -357,6 +362,7 @@
   </app-list-item>
 
 </ng-template><ng-template #specialChapterListItem let-item>
+  specialList
   <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
                  [seriesName]="series.name" [entity]="item"
                  [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""

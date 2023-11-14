@@ -813,7 +813,16 @@
         "cancel": "{{common.cancel}}",
         "next": "Next",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "file-type-group-label": "File Types",
+        "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files."
+    },
+
+    "file-type-group-pipe": {
+        "archive": "Archive",
+        "epub": "Epub",
+        "pdf": "Pdf",
+        "image": "Image"
     },
 
     "reader-settings": {
