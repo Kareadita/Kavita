@@ -271,6 +271,7 @@ export class ReaderService {
     if (readingListMode) {
       this.router.navigateByUrl('lists/' + readingListId);
     } else {
+      // TODO: back doesn't always work, it might be nice to check the pattern of the url and see if we can be smart before just going back
       this.location.back();
     }
   }

@@ -203,7 +203,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   saveProgress() {
     if (this.incognitoMode) return;
-    this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.currentPage).subscribe(() => {});
+    this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.currentPage).subscribe();
   }
 
   closeReader() {
