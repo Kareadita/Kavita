@@ -555,7 +555,7 @@ public class BookService : IBookService
             // If this is a single book and not a collection, set publication status to Completed
             if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.DefaultVolume))
             {
-                info.Number = "1";
+                //info.Number = "1";
                 info.Count = 1;
             }
 
