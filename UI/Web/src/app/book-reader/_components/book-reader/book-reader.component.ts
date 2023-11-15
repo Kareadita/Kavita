@@ -1617,7 +1617,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // Responsible for handling pagination only
   handleContainerClick(event: MouseEvent) {
 
-    if (this.drawerOpen  || ['action-bar'].some(className => (event.target as Element).classList.contains(className))) {
+    if (this.drawerOpen  || ['action-bar', 'offcanvas-backdrop'].some(className => (event.target as Element).classList.contains(className))) {
       return;
     }
 
