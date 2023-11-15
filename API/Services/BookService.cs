@@ -635,6 +635,8 @@ public class BookService : IBookService
                 return;
             case "aut":
             case "author":
+            case "creator":
+            case "cre":
                 info.Writer += AppendAuthor(person);
                 return;
             case "pbl":
