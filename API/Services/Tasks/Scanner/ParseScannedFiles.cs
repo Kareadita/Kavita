@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
@@ -77,9 +78,10 @@ public class ParseScannedFiles
     /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
     /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
     public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
-        IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string,Task> folderAction, bool forceCheck = false)
+        IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string,Task> folderAction, Library library, bool forceCheck = false)
     {
         string normalizedPath;
+        var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
         if (scanDirectoryByDirectory)
         {
             // This is used in library scan, so we should check first for a ignore file and use that here as well
@@ -87,6 +89,7 @@ public class ParseScannedFiles
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
             // TODO: Globbing exclude from the Library would happen here
+
 
             foreach (var directory in directories)
             {
@@ -98,7 +101,7 @@ public class ParseScannedFiles
                 else
                 {
                     // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
-                    await folderAction(_directoryService.ScanFiles(directory, matcher), directory);
+                    await folderAction(_directoryService.ScanFiles(directory, fileExtensions, matcher), directory);
                 }
             }
 
@@ -114,7 +117,7 @@ public class ParseScannedFiles
         // We need to calculate all folders till library root and see if any kavitaignores
         var seriesMatcher = BuildIgnoreFromLibraryRoot(folderPath, seriesPaths);
 
-        await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
+        await folderAction(_directoryService.ScanFiles(folderPath, fileExtensions, seriesMatcher), folderPath);
     }
 
     /// <summary>
@@ -269,25 +272,24 @@ public class ParseScannedFiles
     /// <summary>
     /// This will process series by folder groups. This is used solely by ScanSeries
     /// </summary>
-    /// <param name="libraryType"></param>
+    /// <param name="library">This should have the FileTypes included</param>
     /// <param name="folders"></param>
-    /// <param name="libraryName"></param>
     /// <param name="isLibraryScan">If true, does a directory scan first (resulting in folders being tackled in parallel), else does an immediate scan files</param>
     /// <param name="seriesPaths">A map of Series names -> existing folder paths to handle skipping folders</param>
     /// <param name="processSeriesInfos">Action which returns if the folder was skipped and the infos from said folder</param>
     /// <param name="forceCheck">Defaults to false</param>
     /// <returns></returns>
-    public async Task ScanLibrariesForSeries(LibraryType libraryType,
-        IEnumerable<string> folders, string libraryName, bool isLibraryScan,
+    public async Task ScanLibrariesForSeries(Library library,
+        IEnumerable<string> folders, bool isLibraryScan,
         IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos, bool forceCheck = false)
     {
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
         foreach (var folderPath in folders)
         {
             try
             {
-                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, forceCheck);
+                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, library, forceCheck);
             }
             catch (ArgumentException ex)
             {
@@ -295,7 +297,7 @@ public class ParseScannedFiles
             }
         }
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
         return;
 
         async Task ProcessFolder(IList<string> files, string folder)
@@ -312,13 +314,13 @@ public class ParseScannedFiles
                     await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
                 _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, libraryName, ProgressEventType.Updated));
+                    MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, library.Name, ProgressEventType.Updated));
                 return;
             }
 
             _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", libraryName, ProgressEventType.Updated));
+                MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
             if (files.Count == 0)
             {
                 _logger.LogInformation("[ScannerService] {Folder} is empty or is no longer in this location", folder);
@@ -327,7 +329,7 @@ public class ParseScannedFiles
 
             var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
             var infos = files
-                .Select(file => _readingItemService.ParseFile(file, folder, libraryType))
+                .Select(file => _readingItemService.ParseFile(file, folder, library.Type))
                 .Where(info => info != null)
                 .ToList();
 
