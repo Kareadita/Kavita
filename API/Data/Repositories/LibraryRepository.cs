@@ -26,7 +26,7 @@ public enum LibraryIncludes
     Series = 2,
     AppUser = 4,
     Folders = 8,
-    // Ratings = 16
+    FileTypes = 16
 }
 
 public interface ILibraryRepository
@@ -86,6 +86,7 @@ public class LibraryRepository : ILibraryRepository
     {
         return _context.Library
             .Include(l => l.AppUsers)
+            .Include(l => l.LibraryFileTypes)
             .Where(library => library.AppUsers.Any(x => x.UserName.Equals(userName)))
             .OrderBy(l => l.Name)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
@@ -100,12 +101,10 @@ public class LibraryRepository : ILibraryRepository
     /// <returns></returns>
     public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None)
     {
-        var query = _context.Library
+        return await _context.Library
             .Include(l => l.AppUsers)
-            .Select(l => l);
-
-        query = AddIncludesToQuery(query, includes);
-        return await query.ToListAsync();
+            .Includes(includes)
+            .ToListAsync();
     }
 
     /// <summary>
@@ -142,11 +141,10 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None)
     {
-        var query = _context.Library
-            .Where(x => libraryIds.Contains(x.Id));
-
-        AddIncludesToQuery(query, includes);
-            return await query.ToListAsync();
+        return await _context.Library
+            .Where(x => libraryIds.Contains(x.Id))
+            .Includes(includes)
+            .ToListAsync();
     }
 
     public async Task<int> GetTotalFiles()
@@ -202,31 +200,12 @@ public class LibraryRepository : ILibraryRepository
     {
 
         var query = _context.Library
-            .Where(x => x.Id == libraryId);
+            .Where(x => x.Id == libraryId)
+            .Includes(includes);
 
-        query = AddIncludesToQuery(query, includes);
         return await query.SingleOrDefaultAsync();
     }
 
-    private static IQueryable<Library> AddIncludesToQuery(IQueryable<Library> query, LibraryIncludes includeFlags)
-    {
-        if (includeFlags.HasFlag(LibraryIncludes.Folders))
-        {
-            query = query.Include(l => l.Folders);
-        }
-
-        if (includeFlags.HasFlag(LibraryIncludes.Series))
-        {
-            query = query.Include(l => l.Series);
-        }
-
-        if (includeFlags.HasFlag(LibraryIncludes.AppUser))
-        {
-            query = query.Include(l => l.AppUsers);
-        }
-
-        return query.AsSplitQuery();
-    }
 
     public async Task<bool> LibraryExists(string libraryName)
     {

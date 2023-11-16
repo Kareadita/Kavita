@@ -127,17 +127,6 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.disable();
     }
 
-    if (this.library) {
-      for(let fileTypeGroup of allFileTypeGroup) {
-        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
-      }
-    } else {
-      for(let fileTypeGroup of allFileTypeGroup) {
-        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
-      }
-    }
-
-
     this.libraryForm.get('name')?.valueChanges.pipe(
       debounceTime(100),
       distinctUntilChanged(),
@@ -206,8 +195,15 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
-      this.cdRef.markForCheck();
+      for(let fileTypeGroup of allFileTypeGroup) {
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
+      }
+    } else {
+      for(let fileTypeGroup of allFileTypeGroup) {
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
+      }
     }
+    this.cdRef.markForCheck();
   }
 
   isDisabled() {
@@ -230,6 +226,12 @@ export class LibrarySettingsModalComponent implements OnInit {
   async save() {
     const model = this.libraryForm.value;
     model.folders = this.selectedFolders;
+    model.fileGroupTypes = []
+    for(let fileTypeGroup of allFileTypeGroup) {
+      if (model[fileTypeGroup]) {
+        model.fileGroupTypes.push(fileTypeGroup);
+      }
+    }
 
     if (this.libraryForm.errors) {
       return;

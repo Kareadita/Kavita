@@ -15657,13 +15657,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "libraryId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "library": {
-            "$ref": "#/components/schemas/Library"
-          },
           "fileTypeGroup": {
             "enum": [
               1,
@@ -15674,6 +15667,13 @@
             "type": "integer",
             "description": "Represents a set of file types that can be scanned",
             "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "library": {
+            "$ref": "#/components/schemas/Library"
           }
         },
         "additionalProperties": false
