@@ -18830,6 +18830,7 @@
       "UpdateLibraryDto": {
         "required": [
           "allowScrobbling",
+          "fileGroupTypes",
           "folders",
           "folderWatching",
           "id",
@@ -18887,6 +18888,20 @@
           },
           "allowScrobbling": {
             "type": "boolean"
+          },
+          "fileGroupTypes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "description": "Represents a set of file types that can be scanned",
+              "format": "int32"
+            }
           }
         },
         "additionalProperties": false

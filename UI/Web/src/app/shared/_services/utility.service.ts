@@ -70,6 +70,7 @@ export class UtilityService {
           return this.translocoService.translate('common.issue-hash-num');
         }
         return this.translocoService.translate('common.issue-num') + (includeSpace ? ' ' : '');
+      case LibraryType.Images:
       case LibraryType.Manga:
         return this.translocoService.translate('common.chapter-num') + (includeSpace ? ' ' : '');
     }

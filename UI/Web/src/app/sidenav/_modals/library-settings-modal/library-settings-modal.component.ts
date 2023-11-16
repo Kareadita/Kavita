@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -30,7 +39,7 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
-import {allFileTypeGroup} from "../../../_models/library/file-type-group.enum";
+import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
 
 enum TabID {
@@ -118,6 +127,16 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.disable();
     }
 
+    if (this.library) {
+      for(let fileTypeGroup of allFileTypeGroup) {
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
+      }
+    } else {
+      for(let fileTypeGroup of allFileTypeGroup) {
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
+      }
+    }
+
 
     this.libraryForm.get('name')?.valueChanges.pipe(
       debounceTime(100),
@@ -137,6 +156,40 @@ export class LibrarySettingsModalComponent implements OnInit {
 
 
     this.setValues();
+
+    // This needs to only apply after first render
+    this.libraryForm.get('type')?.valueChanges.pipe(
+
+      tap((type: LibraryType) => {
+        switch (type) {
+          case LibraryType.Manga:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
+          case LibraryType.Comic:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
+          case LibraryType.Book:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
+            break;
+          case LibraryType.Images:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+
+        }
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   setValues() {
