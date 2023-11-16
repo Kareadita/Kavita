@@ -15544,6 +15544,13 @@
               "$ref": "#/components/schemas/LibraryFileTypeGroup"
             },
             "nullable": true
+          },
+          "libraryExcludedGlobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryExcludedGlob"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15633,6 +15640,14 @@
             },
             "description": "The types of file type groups the library will scan for",
             "nullable": true
+          },
+          "libraryExcludedGlobs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A set of globs that will exclude matching content from being scanned",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15646,6 +15661,27 @@
           "count": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LibraryExcludedGlob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "glob": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "library": {
+            "$ref": "#/components/schemas/Library"
           }
         },
         "additionalProperties": false

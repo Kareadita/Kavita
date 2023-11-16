@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities;
 
@@ -60,7 +59,7 @@ public class Library : IEntityDate
     public ICollection<AppUser> AppUsers { get; set; } = null!;
     public ICollection<Series> Series { get; set; } = null!;
     public ICollection<LibraryFileTypeGroup> LibraryFileTypes { get; set; } = new List<LibraryFileTypeGroup>();
-    //public ICollection<ExcludedFolderPath> ExcludedFolderPaths { get; set; } = new List<ExcludedFolderPath>();
+    public ICollection<LibraryExcludedGlob> LibraryExcludedGlobs { get; set; } = new List<LibraryExcludedGlob>();
 
     public void UpdateLastModified()
     {

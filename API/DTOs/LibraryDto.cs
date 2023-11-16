@@ -56,4 +56,8 @@ public class LibraryDto
     /// The types of file type groups the library will scan for
     /// </summary>
     public ICollection<FileTypeGroup> LibraryFileTypes { get; set; }
+    /// <summary>
+    /// A set of globs that will exclude matching content from being scanned
+    /// </summary>
+    public ICollection<string> LibraryExcludedGlobs { get; set; }
 }

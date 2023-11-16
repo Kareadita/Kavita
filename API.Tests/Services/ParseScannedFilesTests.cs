@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -251,9 +252,11 @@ public class ParseScannedFilesTests
             return Task.CompletedTask;
         }
 
-
-        await psf.ScanLibrariesForSeries(LibraryType.Manga,
-            new List<string>() {"C:/Data/"}, "libraryName", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
+        var library =
+            await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+                LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        library.Type = LibraryType.Manga;
+        await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
 
 
         Assert.Equal(3, parsedSeries.Values.Count);
@@ -289,12 +292,15 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
+        var library =
+            await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+                LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         await psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
             (files, directoryPath) =>
         {
             directoriesSeen.Add(directoryPath);
             return Task.CompletedTask;
-        });
+        }, library);
 
         Assert.Equal(2, directoriesSeen.Count);
     }
@@ -308,11 +314,13 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
-        await psf.ProcessFiles("C:/Data/", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),(files, directoryPath) =>
+        await psf.ProcessFiles("C:/Data/", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
+            (files, directoryPath) =>
         {
             directoriesSeen.Add(directoryPath);
             return Task.CompletedTask;
-        });
+        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+                LibraryIncludes.Folders | LibraryIncludes.FileTypes));
 
         Assert.Single(directoriesSeen);
         directoriesSeen.TryGetValue("C:/Data/", out var actual);
@@ -342,7 +350,8 @@ public class ParseScannedFilesTests
             callCount++;
 
             return Task.CompletedTask;
-        });
+        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes));
 
         Assert.Equal(2, callCount);
     }
@@ -373,7 +382,8 @@ public class ParseScannedFilesTests
         {
             callCount++;
             return Task.CompletedTask;
-        });
+        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes));
 
         Assert.Equal(1, callCount);
     }
