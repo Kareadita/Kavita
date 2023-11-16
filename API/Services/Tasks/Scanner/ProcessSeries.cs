@@ -291,8 +291,11 @@ public class ProcessSeries : IProcessSeries
         var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
         var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
 
-
-        if ((maxChapter == 0 || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
+        // Single books usually don't have a number in their Range (filename)
+        if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
+        {
+            series.Metadata.MaxCount = 1;
+        } else if ((maxChapter == 0 || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
         {
             series.Metadata.MaxCount = maxVolume;
         } else if (maxVolume == series.Metadata.TotalCount)
