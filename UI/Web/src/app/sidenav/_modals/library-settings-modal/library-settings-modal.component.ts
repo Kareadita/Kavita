@@ -198,6 +198,9 @@ export class LibrarySettingsModalComponent implements OnInit {
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
       }
+      for(let glob of this.library.libraryExcludedGlobs) {
+        this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
+      }
     } else {
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
@@ -232,6 +235,11 @@ export class LibrarySettingsModalComponent implements OnInit {
         model.fileGroupTypes.push(fileTypeGroup);
       }
     }
+
+    model.libraryExcludedGlobs = Object.keys(this.libraryForm.controls)
+    .filter(key => key.startsWith('excludeGlob-'))
+    .map(key => this.libraryForm.get(key)?.value)
+    .filter(v => v !== null && v !== '');
 
     if (this.libraryForm.errors) {
       return;

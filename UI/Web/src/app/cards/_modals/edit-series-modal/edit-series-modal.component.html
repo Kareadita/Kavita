@@ -351,24 +351,7 @@
             <a ngbNavLink>{{t(tabs[TabID.WebLinks])}}</a>
             <ng-template ngbNavContent>
               <p>{{t('web-link-description')}}</p>
-              <div class="row g-0 mb-3" *ngFor="let link of WebLinks; let i = index;">
-                <div class="col-lg-8 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <label for="web-link--{{i}}" class="visually-hidden">{{t('web-link-label')}}</label>
-                    <input type="text" class="form-control" formControlName="link{{i}}" attr.id="web-link--{{i}}">
-                  </div>
-                </div>
-                <div class="col-lg-2">
-                  <button class="btn btn-secondary me-1" (click)="addWebLink()">
-                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                    <span class="visually-hidden">{{t('add-link-alt')}}</span>
-                  </button>
-                  <button class="btn btn-secondary" (click)="removeWebLink(i)">
-                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                    <span class="visually-hidden">{{t('remove-link-alt')}}</span>
-                  </button>
-                </div>
-              </div>
+              <app-edit-list [items]="WebLinks" [label]="t('web-link-label')" (updateItems)="updateWeblinks($event)"></app-edit-list>
             </ng-template>
           </li>
 

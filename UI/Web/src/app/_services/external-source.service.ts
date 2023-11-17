@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import {environment} from "../environments/environment";
+import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
-import {ExternalSource} from "./_models/sidenav/external-source";
-import {TextResonse} from "./_types/text-response";
+import {ExternalSource} from "../_models/sidenav/external-source";
+import {TextResonse} from "../_types/text-response";
 import {map} from "rxjs/operators";
 
 @Injectable({

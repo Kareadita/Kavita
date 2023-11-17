@@ -1,0 +1,24 @@
+<form [formGroup]="form" *transloco="let t">
+
+  @for(item of Items; let i = $index; track item) {
+    <div class="row g-0 mb-3">
+      <div class="col-lg-8 col-md-12 pe-2">
+        <div class="mb-3">
+          <label for="item--{{i}}" class="visually-hidden">{{label}}</label>
+          <input type="text" class="form-control" formControlName="link{{i}}" attr.id="item--{{i}}">
+        </div>
+      </div>
+      <div class="col-lg-2">
+        <button class="btn btn-secondary me-1" (click)="add()">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('common.add')}}</span>
+        </button>
+        <button class="btn btn-secondary" (click)="remove(i)">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('common.remove')}}</span>
+        </button>
+      </div>
+    </div>
+  }
+
+</form>
