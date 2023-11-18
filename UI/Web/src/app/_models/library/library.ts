@@ -23,4 +23,5 @@ export interface Library {
     allowScrobbling: boolean;
     collapseSeriesRelationships: boolean;
     libraryFileTypes: Array<FileTypeGroup>;
+    excludePatterns: Array<string>;
 }

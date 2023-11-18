@@ -10,6 +10,9 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
+  NgbAccordionBody,
+  NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
   NgbActiveModal,
   NgbModal,
   NgbModalModule,
@@ -41,6 +44,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
+import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 
 enum TabID {
   General = 'general-tab',
@@ -61,7 +65,7 @@ enum StepID {
   standalone: true,
   imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe],
+    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -95,9 +99,11 @@ export class LibrarySettingsModalComponent implements OnInit {
   isAddLibrary = false;
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
+  excludePatterns: Array<string> = [''];
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
+
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
@@ -105,12 +111,10 @@ export class LibrarySettingsModalComponent implements OnInit {
     private imageService: ImageService) { }
 
   ngOnInit(): void {
-
     this.settingService.getLibraryTypes().subscribe((types) => {
       this.libraryTypes = types;
       this.cdRef.markForCheck();
     });
-
 
     if (this.library === undefined) {
       this.isAddLibrary = true;
@@ -148,7 +152,6 @@ export class LibrarySettingsModalComponent implements OnInit {
 
     // This needs to only apply after first render
     this.libraryForm.get('type')?.valueChanges.pipe(
-
       tap((type: LibraryType) => {
         switch (type) {
           case LibraryType.Manga:
@@ -174,7 +177,6 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
-
         }
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -198,7 +200,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
       }
-      for(let glob of this.library.libraryExcludedGlobs) {
+      for(let glob of this.library.excludePatterns) {
         this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
       }
     } else {
@@ -206,6 +208,15 @@ export class LibrarySettingsModalComponent implements OnInit {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
       }
     }
+    this.excludePatterns = this.library.excludePatterns;
+    if (this.excludePatterns.length === 0) {
+      this.excludePatterns = [''];
+    }
+    this.cdRef.markForCheck();
+  }
+
+  updateGlobs(items: Array<string>) {
+    this.excludePatterns = items;
     this.cdRef.markForCheck();
   }
 
@@ -229,17 +240,13 @@ export class LibrarySettingsModalComponent implements OnInit {
   async save() {
     const model = this.libraryForm.value;
     model.folders = this.selectedFolders;
-    model.fileGroupTypes = []
+    model.fileGroupTypes = [];
     for(let fileTypeGroup of allFileTypeGroup) {
       if (model[fileTypeGroup]) {
         model.fileGroupTypes.push(fileTypeGroup);
       }
     }
-
-    model.libraryExcludedGlobs = Object.keys(this.libraryForm.controls)
-    .filter(key => key.startsWith('excludeGlob-'))
-    .map(key => this.libraryForm.get(key)?.value)
-    .filter(v => v !== null && v !== '');
+    model.excludePatterns = this.excludePatterns;
 
     if (this.libraryForm.errors) {
       return;

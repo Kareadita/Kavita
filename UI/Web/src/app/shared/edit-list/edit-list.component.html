@@ -2,7 +2,7 @@
 
   @for(item of Items; let i = $index; track item) {
     <div class="row g-0 mb-3">
-      <div class="col-lg-8 col-md-12 pe-2">
+      <div class="col-lg-10 col-md-12 pe-2">
         <div class="mb-3">
           <label for="item--{{i}}" class="visually-hidden">{{label}}</label>
           <input type="text" class="form-control" formControlName="link{{i}}" attr.id="item--{{i}}">

@@ -59,7 +59,7 @@ public class Library : IEntityDate
     public ICollection<AppUser> AppUsers { get; set; } = null!;
     public ICollection<Series> Series { get; set; } = null!;
     public ICollection<LibraryFileTypeGroup> LibraryFileTypes { get; set; } = new List<LibraryFileTypeGroup>();
-    public ICollection<LibraryExcludedGlob> LibraryExcludedGlobs { get; set; } = new List<LibraryExcludedGlob>();
+    public ICollection<LibraryExcludePattern> LibraryExcludePatterns { get; set; } = new List<LibraryExcludePattern>();
 
     public void UpdateLastModified()
     {

@@ -159,6 +159,10 @@ export class EditSeriesModalComponent implements OnInit {
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
+  get WebLinks() {
+    return this.metadata?.webLinks.split(',') || [''];
+  }
+
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }

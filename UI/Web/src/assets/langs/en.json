@@ -815,7 +815,9 @@
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "file-type-group-label": "File Types",
-        "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files."
+        "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files.",
+        "exclude-patterns-label": "Exclude Patterns",
+        "exclude-patterns-tooltip": "Configure a set of patterns (Glob syntax) that Kavita will match when scanning directories and exclude from Scanner results"
     },
 
     "file-type-group-pipe": {
@@ -953,7 +955,7 @@
         "description-part-2": "wiki for hints.",
         "target-series": "Target Series",
         "relationship": "Relationship",
-        "remove": "Remove",
+        "remove": "{{common.remove}}",
         "add-relationship": "Add Relationship",
         "parent": "{{relationship-pipe.parent}}"
     },
@@ -2066,6 +2068,7 @@
         "add": "Add",
         "apply": "Apply",
         "delete": "Delete",
+        "remove": "Remove",
         "edit": "Edit",
         "help": "Help",
         "submit": "Submit",

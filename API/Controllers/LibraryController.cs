@@ -88,6 +88,10 @@ public class LibraryController : BaseApiController
             .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
             .Distinct()
             .ToList();
+        library.LibraryExcludePatterns = dto.ExcludePatterns
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
@@ -444,6 +448,11 @@ public class LibraryController : BaseApiController
         library.AllowScrobbling = dto.AllowScrobbling;
         library.LibraryFileTypes = dto.FileGroupTypes
             .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
+
+        library.LibraryExcludePatterns = dto.ExcludePatterns
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
             .Distinct()
             .ToList();
 

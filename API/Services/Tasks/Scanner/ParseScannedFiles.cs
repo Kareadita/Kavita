@@ -89,7 +89,7 @@ public class ParseScannedFiles
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
             // TODO: Globbing exclude from the Library would happen here
-
+            //library.LibraryExcludePatterns
 
             foreach (var directory in directories)
             {

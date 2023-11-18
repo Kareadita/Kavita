@@ -196,6 +196,11 @@ public static class IncludesExtensions
             query = query.Include(l => l.AppUsers);
         }
 
+        if (includeFlags.HasFlag(LibraryIncludes.ExcludePatterns))
+        {
+            query = query.Include(l => l.LibraryExcludePatterns);
+        }
+
         return query.AsSplitQuery();
     }
 }

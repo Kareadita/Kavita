@@ -212,9 +212,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.LibraryFileTypes,
                 opt =>
                     opt.MapFrom(src => src.LibraryFileTypes.Select(l => l.FileTypeGroup)))
-            .ForMember(dest => dest.LibraryExcludedGlobs,
+            .ForMember(dest => dest.ExcludePatterns,
                 opt =>
-                    opt.MapFrom(src => src.LibraryExcludedGlobs.Select(l => l.Glob)));
+                    opt.MapFrom(src => src.LibraryExcludePatterns.Select(l => l.Pattern)));
 
         CreateMap<AppUser, MemberDto>()
             .ForMember(dest => dest.AgeRestriction,

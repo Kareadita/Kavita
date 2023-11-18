@@ -44,6 +44,7 @@ export class EditListComponent implements OnInit {
     this.items.forEach((link, index) => {
       this.form.addControl('link' + index, new FormControl(link, []));
     });
+
     this.combinedItems = this.items.join(',');
 
     this.form.valueChanges.pipe(

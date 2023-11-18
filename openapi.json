@@ -15545,10 +15545,10 @@
             },
             "nullable": true
           },
-          "libraryExcludedGlobs": {
+          "libraryExcludePatterns": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/LibraryExcludedGlob"
+              "$ref": "#/components/schemas/LibraryExcludePattern"
             },
             "nullable": true
           }
@@ -15641,7 +15641,7 @@
             "description": "The types of file type groups the library will scan for",
             "nullable": true
           },
-          "libraryExcludedGlobs": {
+          "excludePatterns": {
             "type": "array",
             "items": {
               "type": "string"
@@ -15665,14 +15665,14 @@
         },
         "additionalProperties": false
       },
-      "LibraryExcludedGlob": {
+      "LibraryExcludePattern": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
             "format": "int32"
           },
-          "glob": {
+          "pattern": {
             "type": "string",
             "nullable": true
           },

@@ -28,6 +28,13 @@ public class UpdateLibraryDto
     public bool ManageReadingLists { get; init; }
     [Required]
     public bool AllowScrobbling { get; init; }
+    /// <summary>
+    /// What types of files to allow the scanner to pickup
+    /// </summary>
     [Required]
     public ICollection<FileTypeGroup> FileGroupTypes { get; init; }
+    /// <summary>
+    /// A set of Glob patterns that the scanner will exclude processing
+    /// </summary>
+    public ICollection<string> ExcludePatterns { get; init; }
 }

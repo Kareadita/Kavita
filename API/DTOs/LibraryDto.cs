@@ -59,5 +59,5 @@ public class LibraryDto
     /// <summary>
     /// A set of globs that will exclude matching content from being scanned
     /// </summary>
-    public ICollection<string> LibraryExcludedGlobs { get; set; }
+    public ICollection<string> ExcludePatterns { get; set; }
 }

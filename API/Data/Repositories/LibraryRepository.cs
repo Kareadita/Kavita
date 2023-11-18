@@ -26,7 +26,8 @@ public enum LibraryIncludes
     Series = 2,
     AppUser = 4,
     Folders = 8,
-    FileTypes = 16
+    FileTypes = 16,
+    ExcludePatterns = 32
 }
 
 public interface ILibraryRepository
@@ -87,7 +88,8 @@ public class LibraryRepository : ILibraryRepository
         return _context.Library
             .Include(l => l.AppUsers)
             .Include(l => l.LibraryFileTypes)
-            .Where(library => library.AppUsers.Any(x => x.UserName.Equals(userName)))
+            .Include(l => l.LibraryExcludePatterns)
+            .Where(library => library.AppUsers.Any(x => x.UserName!.Equals(userName)))
             .OrderBy(l => l.Name)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()

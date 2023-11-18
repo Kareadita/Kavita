@@ -105,6 +105,37 @@
 
             <div class="row">
               <div class="col-md-12 col-sm-12 pe-2 mb-2">
+<!--                <div class="mb-3 mt-1">-->
+<!--                  <h6>{{t('exclude-patterns-label')}}</h6>-->
+<!--                  <p class="accent">-->
+<!--                    {{t('exclude-patterns-tooltip')}}-->
+<!--                  </p>-->
+<!--                  -->
+<!--                </div>-->
+                <div ngbAccordion>
+                  <div ngbAccordionItem>
+                    <h2 ngbAccordionHeader>
+                      <button ngbAccordionButton>{{t('exclude-patterns-label')}}</button>
+                    </h2>
+                    <div ngbAccordionCollapse>
+                      <div ngbAccordionBody>
+                        <ng-template>
+                          {{t('exclude-patterns-tooltip')}}
+                          <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                        </ng-template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
                 <div class="mb-3 mt-1">
                   <div class="form-check form-switch">
                     <input type="checkbox" id="manage-collections" role="switch" formControlName="manageCollections" class="form-check-input">
