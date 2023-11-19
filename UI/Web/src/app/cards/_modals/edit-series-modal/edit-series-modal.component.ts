@@ -54,6 +54,7 @@ import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoDatePipe} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 
 enum TabID {
   General = 0,
@@ -93,6 +94,7 @@ enum TabID {
     TranslocoModule,
     TranslocoDatePipe,
     UtcToLocalTimePipe,
+    EditListComponent,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -100,7 +102,24 @@ enum TabID {
 })
 export class EditSeriesModalComponent implements OnInit {
 
+  public readonly modal = inject(NgbActiveModal);
+  private readonly seriesService = inject(SeriesService);
+  public readonly utilityService = inject(UtilityService);
+  private readonly fb = inject(FormBuilder);
+  public readonly imageService = inject(ImageService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly collectionService = inject(CollectionTagService);
+  private readonly uploadService = inject(UploadService);
+  private readonly metadataService = inject(MetadataService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  protected readonly TabID = TabID;
+  protected readonly PersonRole = PersonRole;
+  protected readonly Breakpoint = Breakpoint;
+
   @Input({required: true}) series!: Series;
+
+
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   /**
@@ -140,18 +159,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
-  get Breakpoint(): typeof Breakpoint {
-    return Breakpoint;
-  }
-
-  get PersonRole() {
-    return PersonRole;
-  }
-
-  get TabID(): typeof TabID {
-    return TabID;
-  }
-
   get WebLinks() {
     return this.metadata?.webLinks.split(',') || [''];
   }
@@ -159,17 +166,6 @@ export class EditSeriesModalComponent implements OnInit {
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
-
-  constructor(public modal: NgbActiveModal,
-              private seriesService: SeriesService,
-              public utilityService: UtilityService,
-              private fb: FormBuilder,
-              public imageService: ImageService,
-              private libraryService: LibraryService,
-              private collectionService: CollectionTagService,
-              private uploadService: UploadService,
-              private metadataService: MetadataService,
-              private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
@@ -224,10 +220,6 @@ export class EditSeriesModalComponent implements OnInit {
         this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
         this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
-
-        this.WebLinks.forEach((link, index) => {
-          this.editSeriesForm.addControl('link' + index, new FormControl(link, []));
-        });
 
         this.cdRef.markForCheck();
 
@@ -416,8 +408,8 @@ export class EditSeriesModalComponent implements OnInit {
     if (presetField && presetField.length > 0) {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
       return fetch('').pipe(map(people => {
-        const persetIds = presetField.map(p => p.id);
-        personSettings.savedData = people.filter(person => persetIds.includes(person.id));
+        const presetIds = presetField.map(p => p.id);
+        personSettings.savedData = people.filter(person => presetIds.includes(person.id));
         this.peopleSettings[role] = personSettings;
         this.updatePerson(personSettings.savedData as Person[], role);
         return true;
@@ -521,23 +513,14 @@ export class EditSeriesModalComponent implements OnInit {
     return this.collectionService.search(filter);
   }
 
-  formatChapterNumber(chapter: Chapter) {
-    if (chapter.number === '0') {
-      return '1';
-    }
-    return chapter.number;
+  updateWeblinks(items: Array<string>) {
+    this.metadata.webLinks = items.map(s => s.replaceAll(',', '%2C')).join(',');
   }
+
 
   save() {
     const model = this.editSeriesForm.value;
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
-    this.metadata.webLinks = Object.keys(this.editSeriesForm.controls)
-      .filter(key => key.startsWith('link'))
-      .map(key => this.editSeriesForm.get(key)?.value.replace(',', '%2C'))
-      .filter(v => v !== null && v !== '')
-      .join(',');
-
-
 
     const apis = [
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
@@ -564,21 +547,6 @@ export class EditSeriesModalComponent implements OnInit {
     forkJoin(apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset});
     });
-  }
-
-  addWebLink() {
-    this.metadata.webLinks += ',';
-    this.editSeriesForm.addControl('link' + (this.WebLinks.length - 1), new FormControl('', []));
-    this.cdRef.markForCheck();
-  }
-
-  removeWebLink(index: number) {
-    const tokens = this.metadata.webLinks.split(',');
-    const tokenToRemove = tokens[index];
-
-    this.metadata.webLinks = tokens.filter(t => t != tokenToRemove).join(',');
-    this.editSeriesForm.removeControl('link' + index, {emitEvent: true});
-    this.cdRef.markForCheck();
   }
 
   updateCollections(tags: CollectionTag[]) {

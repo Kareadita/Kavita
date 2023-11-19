@@ -1,7 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Chapter } from 'src/app/_models/chapter';
-import { LibraryType } from 'src/app/_models/library';
+import { LibraryType } from 'src/app/_models/library/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PaginatedResult } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
@@ -70,6 +70,7 @@ export class UtilityService {
           return this.translocoService.translate('common.issue-hash-num');
         }
         return this.translocoService.translate('common.issue-num') + (includeSpace ? ' ' : '');
+      case LibraryType.Images:
       case LibraryType.Manga:
         return this.translocoService.translate('common.chapter-num') + (includeSpace ? ' ' : '');
     }

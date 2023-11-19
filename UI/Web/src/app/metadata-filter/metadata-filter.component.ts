@@ -13,7 +13,7 @@ import {
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse, NgbModal, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
-import {Library} from '../_models/library';
+import {Library} from '../_models/library/library';
 import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
 import {ToggleService} from '../_services/toggle.service';
 import {FilterSettings} from './filter-settings';

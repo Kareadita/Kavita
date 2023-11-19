@@ -813,7 +813,19 @@
         "cancel": "{{common.cancel}}",
         "next": "Next",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "file-type-group-label": "File Types",
+        "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files.",
+        "exclude-patterns-label": "Exclude Patterns",
+        "exclude-patterns-tooltip": "Configure a set of patterns (Glob syntax) that Kavita will match when scanning directories and exclude from Scanner results.",
+        "help": "{{common.help}}"
+    },
+
+    "file-type-group-pipe": {
+        "archive": "Archive",
+        "epub": "Epub",
+        "pdf": "Pdf",
+        "image": "Image"
     },
 
     "reader-settings": {
@@ -944,7 +956,7 @@
         "description-part-2": "wiki for hints.",
         "target-series": "Target Series",
         "relationship": "Relationship",
-        "remove": "Remove",
+        "remove": "{{common.remove}}",
         "add-relationship": "Add Relationship",
         "parent": "{{relationship-pipe.parent}}"
     },
@@ -1414,7 +1426,7 @@
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
         "settings": "Settings",
-        "help": "Help",
+        "help": "{{common.help}}",
         "announcements": "Announcements",
         "logout": "Logout",
         "all-filters": "Smart Filters"
@@ -1615,8 +1627,6 @@
         "release-year-label": "Release Year",
         "web-link-description": "Here you can add many different links to external services.",
         "web-link-label": "Web Link",
-        "add-link-alt": "Add Link",
-        "remove-link-alt": "Remove Link",
         "cover-image-description": "Upload and choose a new cover image. Press Save to upload and override the cover.",
         "save": "{{common.save}}",
         "field-locked-alt": "Field is locked",
@@ -2059,6 +2069,7 @@
         "add": "Add",
         "apply": "Apply",
         "delete": "Delete",
+        "remove": "Remove",
         "edit": "Edit",
         "help": "Help",
         "submit": "Submit",

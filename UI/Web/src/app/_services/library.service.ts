@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { JumpKey } from '../_models/jumpbar/jump-key';
-import { Library, LibraryType } from '../_models/library';
+import { Library, LibraryType } from '../_models/library/library';
 import { DirectoryDto } from '../_models/system/directory-dto';
 
 

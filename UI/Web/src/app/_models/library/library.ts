@@ -1,7 +1,10 @@
+import {FileTypeGroup} from "./file-type-group.enum";
+
 export enum LibraryType {
     Manga = 0,
     Comic = 1,
     Book = 2,
+    Images = 3
 }
 
 export interface Library {
@@ -19,4 +22,6 @@ export interface Library {
     manageReadingLists: boolean;
     allowScrobbling: boolean;
     collapseSeriesRelationships: boolean;
+    libraryFileTypes: Array<FileTypeGroup>;
+    excludePatterns: Array<string>;
 }

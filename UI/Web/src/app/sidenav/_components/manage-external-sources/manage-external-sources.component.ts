@@ -7,7 +7,7 @@ import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {EditExternalSourceItemComponent} from "../edit-external-source-item/edit-external-source-item.component";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
-import {ExternalSourceService} from "../../../external-source.service";
+import {ExternalSourceService} from "../../../_services/external-source.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 

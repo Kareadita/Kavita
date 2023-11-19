@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { Library } from 'src/app/_models/library';
+import { Library } from 'src/app/_models/library/library';
 import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';

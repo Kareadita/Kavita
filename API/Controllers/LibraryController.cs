@@ -84,6 +84,15 @@ public class LibraryController : BaseApiController
             .WIthAllowScrobbling(dto.AllowScrobbling)
             .Build();
 
+        library.LibraryFileTypes = dto.FileGroupTypes
+            .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
+        library.LibraryExcludePatterns = dto.ExcludePatterns
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
+
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
         {
@@ -415,7 +424,7 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
         var userId = User.GetUserId();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         if (library == null) return BadRequest(await _localizationService.Translate(userId, "library-doesnt-exist"));
 
         var newName = dto.Name.Trim();
@@ -437,6 +446,15 @@ public class LibraryController : BaseApiController
         library.ManageCollections = dto.ManageCollections;
         library.ManageReadingLists = dto.ManageReadingLists;
         library.AllowScrobbling = dto.AllowScrobbling;
+        library.LibraryFileTypes = dto.FileGroupTypes
+            .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
+
+        library.LibraryExcludePatterns = dto.ExcludePatterns
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)

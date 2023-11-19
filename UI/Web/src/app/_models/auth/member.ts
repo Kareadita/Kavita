@@ -1,5 +1,5 @@
 import { AgeRestriction } from '../metadata/age-restriction';
-import { Library } from '../library';
+import { Library } from '../library/library';
 
 export interface Member {
     id: number;

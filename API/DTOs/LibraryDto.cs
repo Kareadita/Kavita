@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using API.Entities.Enums;
 
@@ -51,4 +52,12 @@ public class LibraryDto
     /// When showing series, only parent series or series with no relationships will be returned
     /// </summary>
     public bool CollapseSeriesRelationships { get; set; } = false;
+    /// <summary>
+    /// The types of file type groups the library will scan for
+    /// </summary>
+    public ICollection<FileTypeGroup> LibraryFileTypes { get; set; }
+    /// <summary>
+    /// A set of globs that will exclude matching content from being scanned
+    /// </summary>
+    public ICollection<string> ExcludePatterns { get; set; }
 }

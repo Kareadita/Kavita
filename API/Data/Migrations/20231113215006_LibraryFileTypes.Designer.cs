@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231113215006_LibraryFileTypes")]
+    partial class LibraryFileTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.13");
@@ -891,25 +894,6 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Library");
-                });
-
-            modelBuilder.Entity("API.Entities.LibraryExcludePattern", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("LibraryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Pattern")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LibraryId");
-
-                    b.ToTable("LibraryExcludePattern");
                 });
 
             modelBuilder.Entity("API.Entities.LibraryFileTypeGroup", b =>
@@ -2095,17 +2079,6 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
-            modelBuilder.Entity("API.Entities.LibraryExcludePattern", b =>
-                {
-                    b.HasOne("API.Entities.Library", "Library")
-                        .WithMany("LibraryExcludePatterns")
-                        .HasForeignKey("LibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Library");
-                });
-
             modelBuilder.Entity("API.Entities.LibraryFileTypeGroup", b =>
                 {
                     b.HasOne("API.Entities.Library", "Library")
@@ -2495,8 +2468,6 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Library", b =>
                 {
                     b.Navigation("Folders");
-
-                    b.Navigation("LibraryExcludePatterns");
 
                     b.Navigation("LibraryFileTypes");
 

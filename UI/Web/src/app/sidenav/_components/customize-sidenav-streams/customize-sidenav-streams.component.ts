@@ -21,7 +21,7 @@ import {NavService} from "../../../_services/nav.service";
 import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SidenavStreamListItemComponent} from "../sidenav-stream-list-item/sidenav-stream-list-item.component";
-import {ExternalSourceService} from "../../../external-source.service";
+import {ExternalSourceService} from "../../../_services/external-source.service";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";

@@ -141,6 +141,7 @@
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
+                    {{item.id}}
                     <ng-container [ngSwitch]="item.isChapter">
                       <ng-container *ngSwitchCase="false" [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
                       <ng-container *ngSwitchCase="true" [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>

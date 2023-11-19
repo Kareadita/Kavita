@@ -3,7 +3,7 @@ import { map, Observable, shareReplay } from 'rxjs';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Device } from '../_models/device/device';
-import { Library } from '../_models/library';
+import { Library } from '../_models/library/library';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';

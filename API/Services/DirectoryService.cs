@@ -64,7 +64,7 @@ public interface IDirectoryService
     IEnumerable<string> GetDirectories(string folderPath);
     IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
     string GetParentDirectoryName(string fileOrFolder);
-    IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
+    IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null);
     DateTime GetLastWriteTime(string folderPath);
     GlobMatcher? CreateMatcherFromFile(string filePath);
 }
@@ -646,7 +646,7 @@ public class DirectoryService : IDirectoryService
     /// <param name="folderPath"></param>
     /// <param name="matcher"></param>
     /// <returns></returns>
-    public IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
+    public IList<string> ScanFiles(string folderPath, string supportedExtensions, GlobMatcher? matcher = null)
     {
         _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
@@ -667,19 +667,19 @@ public class DirectoryService : IDirectoryService
 
         foreach (var directory in directories)
         {
-            files.AddRange(ScanFiles(directory, matcher));
+            files.AddRange(ScanFiles(directory, supportedExtensions, matcher));
         }
 
 
         // Get the matcher from either ignore or global (default setup)
         if (matcher == null)
         {
-            files.AddRange(GetFilesWithCertainExtensions(folderPath, Tasks.Scanner.Parser.Parser.SupportedExtensions));
+            files.AddRange(GetFilesWithCertainExtensions(folderPath, supportedExtensions));
         }
         else
         {
             var foundFiles = GetFilesWithCertainExtensions(folderPath,
-                    Tasks.Scanner.Parser.Parser.SupportedExtensions)
+                    supportedExtensions)
                 .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));
             files.AddRange(foundFiles);
         }

@@ -14,7 +14,7 @@ import {take} from 'rxjs/operators';
 import {BulkSelectionService} from '../cards/bulk-selection.service';
 import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
 import {SeriesAddedEvent} from '../_models/events/series-added-event';
-import {Library} from '../_models/library';
+import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
 import {FilterEvent} from '../_models/metadata/series-filter';

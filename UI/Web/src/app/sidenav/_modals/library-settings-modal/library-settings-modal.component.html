@@ -91,6 +91,48 @@
             <div class="row">
               <div class="col-md-12 col-sm-12 pe-2 mb-2">
                 <div class="mb-3 mt-1">
+                  <h6>{{t('file-type-group-label')}}</h6>
+                  <p class="accent">
+                    {{t('file-type-group-tooltip')}}
+                  </p>
+                  <div class="hstack gap-2">
+                    <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
+                      <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
+                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div ngbAccordion>
+                  <div ngbAccordionItem>
+                    <h2 ngbAccordionHeader>
+                      <button ngbAccordionButton>{{t('exclude-patterns-label')}}</button>
+                    </h2>
+                    <div ngbAccordionCollapse>
+                      <div ngbAccordionBody>
+                        <ng-template>
+                          <span class="mb-2">{{t('exclude-patterns-tooltip')}}</span>
+                          <a class="ms-1" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner/excluding-files-folders" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
+                          <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                        </ng-template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
                   <div class="form-check form-switch">
                     <input type="checkbox" id="manage-collections" role="switch" formControlName="manageCollections" class="form-check-input">
                     <label class="form-check-label" for="manage-collections">{{t('manage-collection-label')}}</label>

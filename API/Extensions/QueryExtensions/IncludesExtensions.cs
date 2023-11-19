@@ -173,4 +173,34 @@ public static class IncludesExtensions
 
         return queryable.AsSplitQuery();
     }
+
+    public static IQueryable<Library> Includes(this IQueryable<Library> query, LibraryIncludes includeFlags)
+    {
+        if (includeFlags.HasFlag(LibraryIncludes.Folders))
+        {
+            query = query.Include(l => l.Folders);
+        }
+
+        if (includeFlags.HasFlag(LibraryIncludes.FileTypes))
+        {
+            query = query.Include(l => l.LibraryFileTypes);
+        }
+
+        if (includeFlags.HasFlag(LibraryIncludes.Series))
+        {
+            query = query.Include(l => l.Series);
+        }
+
+        if (includeFlags.HasFlag(LibraryIncludes.AppUser))
+        {
+            query = query.Include(l => l.AppUsers);
+        }
+
+        if (includeFlags.HasFlag(LibraryIncludes.ExcludePatterns))
+        {
+            query = query.Include(l => l.LibraryExcludePatterns);
+        }
+
+        return query.AsSplitQuery();
+    }
 }

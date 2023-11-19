@@ -1,5 +1,5 @@
 import { Chapter } from "../chapter";
-import { Library } from "../library";
+import { Library } from "../library/library";
 import { MangaFile } from "../manga-file";
 import { SearchResult } from "./search-result";
 import { Tag } from "../tag";
@@ -24,6 +24,6 @@ export class SearchResultGroup {
         this.genres = [];
         this.tags = [];
         this.files = [];
-        this.chapters = []; 
+        this.chapters = [];
     }
 }

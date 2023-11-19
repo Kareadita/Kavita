@@ -34,7 +34,7 @@ import { ReadingDirection } from 'src/app/_models/preferences/reading-direction'
 import {WritingStyle} from "../../../_models/preferences/writing-style";
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
-import { LibraryType } from 'src/app/_models/library';
+import { LibraryType } from 'src/app/_models/library/library';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { PageStyle, ReaderSettingsComponent } from '../reader-settings/reader-settings.component';

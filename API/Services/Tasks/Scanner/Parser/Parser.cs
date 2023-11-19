@@ -17,7 +17,9 @@ public static class Parser
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
-    private const string BookFileExtensions = @"\.epub|\.pdf";
+    public const string EpubFileExtension = @"\.epub";
+    public const string PdfFileExtension = @"\.pdf";
+    private const string BookFileExtensions = EpubFileExtension + "|" + PdfFileExtension;
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
 
