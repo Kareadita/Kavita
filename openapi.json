@@ -18937,7 +18937,16 @@
               "type": "integer",
               "description": "Represents a set of file types that can be scanned",
               "format": "int32"
-            }
+            },
+            "description": "What types of files to allow the scanner to pickup"
+          },
+          "excludePatterns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A set of Glob patterns that the scanner will exclude processing",
+            "nullable": true
           }
         },
         "additionalProperties": false

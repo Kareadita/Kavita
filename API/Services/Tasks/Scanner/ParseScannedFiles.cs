@@ -87,9 +87,22 @@ public class ParseScannedFiles
             // This is used in library scan, so we should check first for a ignore file and use that here as well
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
+            if (matcher != null)
+            {
+                _logger.LogWarning(".kavitaignore found! Ignore files is deprecated in favor of Library Settings. Please update and remove file at {Path}", potentialIgnoreFile);
+            }
+
+            if (library.LibraryExcludePatterns.Count != 0)
+            {
+                matcher ??= new GlobMatcher();
+                foreach (var pattern in library.LibraryExcludePatterns)
+                {
+                    matcher.AddExclude(pattern.Pattern);
+                }
+            }
+
+
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
-            // TODO: Globbing exclude from the Library would happen here
-            //library.LibraryExcludePatterns
 
             foreach (var directory in directories)
             {
