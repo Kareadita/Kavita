@@ -95,9 +95,11 @@
                   <p class="accent">
                     {{t('file-type-group-tooltip')}}
                   </p>
-                  <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
-                    <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
-                    <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                  <div class="hstack gap-2">
+                    <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
+                      <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
+                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -105,13 +107,6 @@
 
             <div class="row">
               <div class="col-md-12 col-sm-12 pe-2 mb-2">
-<!--                <div class="mb-3 mt-1">-->
-<!--                  <h6>{{t('exclude-patterns-label')}}</h6>-->
-<!--                  <p class="accent">-->
-<!--                    {{t('exclude-patterns-tooltip')}}-->
-<!--                  </p>-->
-<!--                  -->
-<!--                </div>-->
                 <div ngbAccordion>
                   <div ngbAccordionItem>
                     <h2 ngbAccordionHeader>
@@ -120,7 +115,8 @@
                     <div ngbAccordionCollapse>
                       <div ngbAccordionBody>
                         <ng-template>
-                          {{t('exclude-patterns-tooltip')}}
+                          <span class="mb-2">{{t('exclude-patterns-tooltip')}}</span>
+                          <a class="ms-1" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner/excluding-files-folders" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
                           <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
                         </ng-template>
                       </div>

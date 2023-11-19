@@ -817,7 +817,8 @@
         "file-type-group-label": "File Types",
         "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files.",
         "exclude-patterns-label": "Exclude Patterns",
-        "exclude-patterns-tooltip": "Configure a set of patterns (Glob syntax) that Kavita will match when scanning directories and exclude from Scanner results"
+        "exclude-patterns-tooltip": "Configure a set of patterns (Glob syntax) that Kavita will match when scanning directories and exclude from Scanner results.",
+        "help": "{{common.help}}"
     },
 
     "file-type-group-pipe": {
@@ -1425,7 +1426,7 @@
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
         "settings": "Settings",
-        "help": "Help",
+        "help": "{{common.help}}",
         "announcements": "Announcements",
         "logout": "Logout",
         "all-filters": "Smart Filters"
