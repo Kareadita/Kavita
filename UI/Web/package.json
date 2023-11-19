@@ -49,6 +49,7 @@
     "ngx-slider-v2": "^16.0.2",
     "ngx-stars": "^1.6.5",
     "ngx-toastr": "^17.0.2",
+    "nosleep.js": "^0.12.0",
     "rxjs": "^7.8.0",
     "screenfull": "^6.0.2",
     "swiper": "^8.4.6",
