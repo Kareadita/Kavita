@@ -514,7 +514,7 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   updateWeblinks(items: Array<string>) {
-    this.metadata.webLinks = items.map(s => s.replace(',', '%2C')).join(',');
+    this.metadata.webLinks = items.map(s => s.replaceAll(',', '%2C')).join(',');
   }
 
 
