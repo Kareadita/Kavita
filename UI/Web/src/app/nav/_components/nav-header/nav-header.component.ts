@@ -39,6 +39,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
 
 @Component({
     selector: 'app-nav-header',
@@ -195,6 +196,15 @@ export class NavHeaderComponent implements OnInit {
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.router.navigate(['library', libraryId, 'series', seriesId]);
+  }
+
+  clickBookmarkSearchResult(item: BookmarkSearchResult) {
+    this.clearSearch();
+    const libraryId = item.libraryId;
+    const seriesId = item.seriesId;
+    this.router.navigate(['library', libraryId, 'series', seriesId, 'manga', item.chapterId], {queryParams: {
+      incognitoMode: false, bookmarkMode: true
+      }});
   }
 
   clickFileSearchResult(item: MangaFile) {

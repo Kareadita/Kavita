@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.10.15"
+    "version": "0.7.10.16"
   },
   "servers": [
     {
@@ -12694,6 +12694,15 @@
           "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/Volume"
+          },
+          "chapter": {
+            "$ref": "#/components/schemas/Chapter"
           }
         },
         "additionalProperties": false,
@@ -13432,6 +13441,36 @@
               "format": "int32"
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BookmarkSearchResultDto": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "volumeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "localizedSeriesName": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -17186,6 +17225,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ChapterDto"
+            },
+            "nullable": true
+          },
+          "bookmarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookmarkSearchResultDto"
             },
             "nullable": true
           }

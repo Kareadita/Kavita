@@ -479,7 +479,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.getPageFn = this.getPage.bind(this);
-    this.readerService.enableWakeLock(this.reader.nativeElement);
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
@@ -864,6 +863,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.render();
       });
 
+      this.readerService.enableWakeLock(this.reader.nativeElement);
       return;
     }
 

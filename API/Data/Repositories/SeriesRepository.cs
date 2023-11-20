@@ -13,6 +13,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -373,6 +374,29 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(s => s.SortName!.ToLower())
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
+
+        result.Bookmarks = (await _context.AppUserBookmark
+                .Where(b => b.AppUserId == userId)
+                .Include(b => b.Series)
+                .Where(c => EF.Functions.Like(c.Series.Name, $"%{searchQuery}%")
+                            || (c.Series.OriginalName != null &&
+                                EF.Functions.Like(c.Series.OriginalName, $"%{searchQuery}%"))
+                            || (c.Series.LocalizedName != null &&
+                                EF.Functions.Like(c.Series.LocalizedName, $"%{searchQuery}%"))
+                )
+                .Take(maxRecords)
+                .OrderBy(c => c.Series.Name)
+                .Select(b => new BookmarkSearchResultDto()
+                {
+                    SeriesName = b.Series.Name,
+                    LocalizedSeriesName = b.Series.LocalizedName,
+                    LibraryId = b.Series.LibraryId,
+                    SeriesId = b.SeriesId,
+                    ChapterId = b.ChapterId,
+                    VolumeId = b.VolumeId
+                })
+                .ToListAsync())
+            .DistinctBy(s => s.SeriesId);
 
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)

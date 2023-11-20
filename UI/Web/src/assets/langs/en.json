@@ -618,7 +618,7 @@
 
         "settings-header": "Settings",
         "table-of-contents-header": "Table of Contents",
-        "bookmarks-header": "Bookmarks",
+        "bookmarks-header": "{{side-nav.bookmarks}}",
         "toc-header": "ToC",
 
         "loading-book": "Loading book…",
@@ -1409,6 +1409,7 @@
         "people": "People",
         "tags": "Tags",
         "genres": "Genres",
+        "bookmarks": "{{side-nav.bookmarks}}",
         "libraries": "Libraries",
         "reading-lists": "Reading Lists",
         "collections": "Collections",

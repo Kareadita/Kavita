@@ -29,4 +29,8 @@ public class AppUserBookmark : IEntityDate
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+    public virtual Series Series { get; set; }
+    public virtual Volume Volume { get; set; }
+    public virtual Chapter Chapter { get; set; }
 }
