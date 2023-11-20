@@ -145,6 +145,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly accountService = inject(AccountService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly navService = inject(NavService);
+  private readonly memberService = inject(MemberService);
   private readonly modalService = inject(NgbModal);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
