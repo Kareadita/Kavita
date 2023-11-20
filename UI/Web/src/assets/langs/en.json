@@ -623,6 +623,7 @@
 
         "loading-book": "Loading book…",
         "go-back": "Go Back",
+        "close-reader": "Close Reader",
         "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
