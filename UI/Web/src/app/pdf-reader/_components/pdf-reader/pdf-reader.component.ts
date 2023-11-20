@@ -1,10 +1,10 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, ElementRef,
   HostListener,
   inject, OnDestroy,
-  OnInit
+  OnInit, ViewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
@@ -32,6 +32,8 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
   imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
+
+  @ViewChild('container') container!: ElementRef;
 
   libraryId!: number;
   seriesId!: number;
@@ -111,6 +113,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
+    this.readerService.disableWakeLock();
   }
 
   ngOnInit(): void {
@@ -166,7 +169,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-
+    this.readerService.enableWakeLock(this.container.nativeElement);
   }
 
   /**

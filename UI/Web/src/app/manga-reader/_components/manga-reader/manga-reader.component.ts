@@ -138,7 +138,26 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(DoubleRendererComponent, { static: false }) doubleRenderer!: DoubleRendererComponent;
   @ViewChild(DoubleReverseRendererComponent, { static: false }) doubleReverseRenderer!: DoubleReverseRendererComponent;
   @ViewChild(DoubleNoCoverRendererComponent, { static: false }) doubleNoCoverRenderer!: DoubleNoCoverRendererComponent;
+
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly navService = inject(NavService);
+  private readonly memberService = inject(MemberService);
+  private readonly modalService = inject(NgbModal);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
+  public readonly readerService = inject(ReaderService);
+  public readonly utilityService = inject(UtilityService);
+  public readonly mangaReaderService = inject(ManagaReaderService);
+
+  protected readonly KeyDirection = KeyDirection;
+  protected readonly ReaderMode = ReaderMode;
+  protected readonly LayoutMode = LayoutMode;
+  protected readonly ReadingDirection = ReadingDirection;
+  protected readonly Breakpoint = Breakpoint;
 
   libraryId!: number;
   seriesId!: number;
@@ -206,12 +225,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @remarks Used for rendering to screen.
    */
   canvasImage = new Image();
-
-  /**
-   * Dictates if we use render with canvas or with image.
-   * @remarks This is only for Splitting.
-   */
-  //renderWithCanvas: boolean = false;
 
   /**
    * A circular array of size PREFETCH_PAGES. Maintains prefetched Images around the current page to load from to avoid loading animation.
@@ -440,12 +453,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'right-side';
   }
 
-
-  get KeyDirection() { return KeyDirection; }
-  get ReaderMode() { return ReaderMode; }
-  get LayoutMode() { return LayoutMode; }
-  get ReadingDirection() { return ReadingDirection; }
-  get Breakpoint() { return Breakpoint; }
   get FittingOption() { return this.generalSettingsForm?.get('fittingOption')?.value || FITTING_OPTION.HEIGHT; }
   get ReadingAreaWidth() {
     return this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth;
@@ -455,12 +462,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight;
   }
 
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-              public readerService: ReaderService, private formBuilder: FormBuilder, private navService: NavService,
-              private toastr: ToastrService, private memberService: MemberService,
-              public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-              private modalService: NgbModal, private readonly cdRef: ChangeDetectorRef,
-              public mangaReaderService: ManagaReaderService) {
+
+  constructor(@Inject(DOCUMENT) private document: Document) {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
     this.cdRef.markForCheck();
@@ -476,6 +479,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.getPageFn = this.getPage.bind(this);
+    this.readerService.enableWakeLock(this.reader.nativeElement);
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
@@ -633,6 +637,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navService.showSideNav();
     this.showBookmarkEffectEvent.complete();
     if (this.goToPageEvent !== undefined) this.goToPageEvent.complete();
+    this.readerService.disableWakeLock();
   }
 
 

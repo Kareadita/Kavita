@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'pdf-reader'">
-  <div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user">
+  <div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user" #container>
 
     <ng-container *ngIf="isLoading">
       <div class="loading mx-auto" style="min-width: 200px; width: 600px;">

@@ -560,6 +560,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
 
+    this.readerService.disableWakeLock();
+
     this.themeService.clearBookTheme();
 
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
@@ -679,6 +681,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Check if user progress has part, if so load it so we scroll to it
         this.loadPage(results.progress.bookScrollId || undefined);
+        this.readerService.enableWakeLock(this.reader.nativeElement);
       }, () => {
         setTimeout(() => {
           this.closeReader();

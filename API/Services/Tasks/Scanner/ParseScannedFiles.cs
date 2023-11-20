@@ -95,8 +95,9 @@ public class ParseScannedFiles
             if (library.LibraryExcludePatterns.Count != 0)
             {
                 matcher ??= new GlobMatcher();
-                foreach (var pattern in library.LibraryExcludePatterns)
+                foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
                 {
+
                     matcher.AddExclude(pattern.Pattern);
                 }
             }

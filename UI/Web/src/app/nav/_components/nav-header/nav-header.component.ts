@@ -140,11 +140,12 @@ export class NavHeaderComponent implements OnInit {
   }
 
   goToOther(field: FilterField, value: string) {
-    this.goTo({field, comparison: FilterComparison.Equal, value});
+    this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
   goToPerson(role: PersonRole, filter: any) {
     this.clearSearch();
+    filter = filter + '';
     switch(role) {
       case PersonRole.Writer:
         this.goTo({field: FilterField.Writers, comparison: FilterComparison.Equal, value: filter});
