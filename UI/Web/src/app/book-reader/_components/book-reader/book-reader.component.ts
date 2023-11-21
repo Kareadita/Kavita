@@ -106,6 +106,23 @@ const elementLevelStyles = ['line-height', 'font-family'];
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly readerService = inject(ReaderService);
+  private readonly renderer = inject(Renderer2);
+  private readonly navService = inject(NavService);
+  private readonly toastr = inject(ToastrService);
+  private readonly domSanitizer = inject(DomSanitizer);
+  private readonly bookService = inject(BookService);
+  private readonly memberService = inject(MemberService);
+  private readonly scrollService = inject(ScrollService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly themeService = inject(ThemeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   libraryId!: number;
   seriesId!: number;
   volumeId!: number;
@@ -194,11 +211,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   page: SafeHtml | undefined = undefined;
   /**
-   * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
    nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
    /**
-    * Previous Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+    * Previous Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
     */
    prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
    /**
@@ -480,13 +497,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
 
-
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-    private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
-    private renderer: Renderer2, private navService: NavService, private toastr: ToastrService,
-    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService, private readonly cdRef: ChangeDetectorRef) {
+  constructor(@Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
