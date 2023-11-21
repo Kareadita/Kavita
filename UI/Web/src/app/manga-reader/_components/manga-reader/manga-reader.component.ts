@@ -13,7 +13,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
+import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe, NgClass} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -124,7 +124,7 @@ enum KeyDirection {
   imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
     NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe,
-    FullscreenIconPipe, TranslocoDirective, NgbProgressbar, PercentPipe]
+    FullscreenIconPipe, TranslocoDirective, NgbProgressbar, PercentPipe, NgClass]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -392,6 +392,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   hasHitBottomTopScroll: boolean = false;
 
+  /**
+   * Show and log debug information
+   */
+  debugMode: boolean = false;
+
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
   private currentImage: Subject<HTMLImageElement | null> = new ReplaySubject(1);
@@ -404,7 +409,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
   }
-
 
   get CurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
@@ -1344,6 +1348,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (cachedImagePageNum !== numOffset) {
         this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
+        this.cachedImages[index].onload = (evt) => {
+          this.cdRef.markForCheck();
+        }
       }
     }
 
