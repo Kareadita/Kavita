@@ -164,4 +164,19 @@ public static class PersonHelper
             onModified();
         }
     }
+
+    public static bool HasAnyPeople(SeriesMetadataDto? seriesMetadata)
+    {
+        if (seriesMetadata == null) return false;
+        return seriesMetadata.Writers.Any() ||
+               seriesMetadata.CoverArtists.Any() ||
+               seriesMetadata.Publishers.Any() ||
+               seriesMetadata.Characters.Any() ||
+               seriesMetadata.Pencillers.Any() ||
+               seriesMetadata.Inkers.Any() ||
+               seriesMetadata.Colorists.Any() ||
+               seriesMetadata.Letterers.Any() ||
+               seriesMetadata.Editors.Any() ||
+               seriesMetadata.Translators.Any();
+    }
 }

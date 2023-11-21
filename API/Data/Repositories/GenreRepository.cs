@@ -17,6 +17,7 @@ public interface IGenreRepository
     void Remove(Genre genre);
     Task<Genre?> FindByNameAsync(string genreName);
     Task<IList<Genre>> GetAllGenresAsync();
+    Task<IList<Genre>> GetAllGenresByNamesAsync(IEnumerable<string> normalizedNames);
     Task<IList<GenreTagDto>> GetAllGenreDtosAsync(int userId);
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
     Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(IList<int> libraryIds, int userId);
@@ -94,6 +95,13 @@ public class GenreRepository : IGenreRepository
     public async Task<IList<Genre>> GetAllGenresAsync()
     {
         return await _context.Genre.ToListAsync();
+    }
+
+    public async Task<IList<Genre>> GetAllGenresByNamesAsync(IEnumerable<string> normalizedNames)
+    {
+        return await _context.Genre
+            .Where(g => normalizedNames.Contains(g.NormalizedTitle))
+            .ToListAsync();
     }
 
     public async Task<IList<GenreTagDto>> GetAllGenreDtosAsync(int userId)

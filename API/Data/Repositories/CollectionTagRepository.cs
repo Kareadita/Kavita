@@ -33,6 +33,9 @@ public interface ICollectionTagRepository
     void Update(CollectionTag tag);
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
+
+    Task<IEnumerable<CollectionTag>> GetAllTagsByNamesAsync(IEnumerable<string> normalizedTitles,
+        CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title);
     Task<IList<CollectionTag>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
@@ -82,6 +85,15 @@ public class CollectionTagRepository : ICollectionTagRepository
     public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None)
     {
         return await _context.CollectionTag
+            .OrderBy(c => c.NormalizedTitle)
+            .Includes(includes)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<CollectionTag>> GetAllTagsByNamesAsync(IEnumerable<string> normalizedTitles, CollectionTagIncludes includes = CollectionTagIncludes.None)
+    {
+        return await _context.CollectionTag
+            .Where(c => normalizedTitles.Contains(c.NormalizedTitle))
             .OrderBy(c => c.NormalizedTitle)
             .Includes(includes)
             .ToListAsync();
