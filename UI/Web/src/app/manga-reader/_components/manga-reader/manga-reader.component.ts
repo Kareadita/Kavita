@@ -863,7 +863,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.render();
       });
 
-      this.readerService.enableWakeLock(this.reader.nativeElement);
+      setTimeout(() => {
+        this.readerService.enableWakeLock(this.reader.nativeElement);
+      }, 1000);
       return;
     }
 

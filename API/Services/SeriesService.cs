@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -25,7 +24,7 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
-
+#nullable enable
 
 public interface ISeriesService
 {
@@ -53,7 +52,7 @@ public class SeriesService : ISeriesService
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
 
-    private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto()
+    private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
         ExpectedDate = null,
         ChapterNumber = 0,
@@ -171,7 +170,7 @@ public class SeriesService : ISeriesService
                 var allCollectionTags = (await _unitOfWork.CollectionTagRepository
                     .GetAllTagsByNamesAsync(updateSeriesMetadataDto.CollectionTags.Select(t => Parser.Normalize(t.Title)))).ToList();
                 series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
+                UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, tag =>
                 {
                     series.Metadata.CollectionTags.Add(tag);
                 });
@@ -183,7 +182,7 @@ public class SeriesService : ISeriesService
             {
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
                 series.Metadata.Genres ??= new List<Genre>();
-                GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, (genre) =>
+                GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, genre =>
                 {
                     series.Metadata.Genres.Add(genre);
                 }, () => series.Metadata.GenresLocked = true);
@@ -196,7 +195,7 @@ public class SeriesService : ISeriesService
                     .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title))))
                     .ToList();
                 series.Metadata.Tags ??= new List<Tag>();
-                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, (tag) =>
+                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, tag =>
                 {
                     series.Metadata.Tags.Add(tag);
                 }, () => series.Metadata.TagsLocked = true);
@@ -318,7 +317,7 @@ public class SeriesService : ISeriesService
     }
 
 
-    public static void UpdateCollectionsList(ICollection<CollectionTagDto>? tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
+    private static void UpdateCollectionsList(ICollection<CollectionTagDto>? tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
         // TODO: Move UpdateCollectionsList to a helper so we can easily test
@@ -478,7 +477,7 @@ public class SeriesService : ISeriesService
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => Tasks.Scanner.Parser.Parser.MinNumberFromRange(v.Name))
+            .OrderBy(v => Parser.MinNumberFromRange(v.Name))
             .ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
@@ -547,7 +546,7 @@ public class SeriesService : ISeriesService
             retChapters = retChapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
 
-        return new SeriesDetailDto()
+        return new SeriesDetailDto
         {
             Specials = specials,
             Chapters = retChapters,
@@ -565,7 +564,7 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !chapter.IsSpecial && !chapter.Number.Equals(Tasks.Scanner.Parser.Parser.DefaultChapter);
+        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.DefaultChapter);
     }
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
@@ -574,7 +573,7 @@ public class SeriesService : ISeriesService
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Tasks.Scanner.Parser.Parser.DefaultVolume)) return;
+                if (firstChapter.Range.Equals(Parser.DefaultVolume)) return;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
@@ -601,7 +600,7 @@ public class SeriesService : ISeriesService
 
         if (isSpecial)
         {
-            return Tasks.Scanner.Parser.Parser.CleanSpecialTitle(chapterTitle);
+            return Parser.CleanSpecialTitle(chapterTitle);
         }
 
         var hashSpot = withHash ? "#" : string.Empty;
@@ -698,7 +697,7 @@ public class SeriesService : ISeriesService
                     r.RelationKind == kind && r.TargetSeriesId == targetSeriesId) !=
                 null) continue;
 
-            series.Relations.Add(new SeriesRelation()
+            series.Relations.Add(new SeriesRelation
             {
                 Series = series,
                 SeriesId = series.Id,
@@ -717,7 +716,7 @@ public class SeriesService : ISeriesService
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
         }
-        if (series?.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
+        if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
         {
             return _emptyExpectedChapter;
         }
@@ -780,7 +779,7 @@ public class SeriesService : ISeriesService
 
         var lastVolumeNum = chapters.Select(c => c.Volume.Number).Max();
 
-        var result = new NextExpectedChapterDto()
+        var result = new NextExpectedChapterDto
         {
             ChapterNumber = 0,
             VolumeNumber = 0,
@@ -794,21 +793,16 @@ public class SeriesService : ISeriesService
             result.VolumeNumber = lastChapter.Volume.Number;
             result.Title = series.Library.Type switch
             {
-                LibraryType.Manga => await _localizationService.Translate(userId, "next-chapter-num",
-                    new object[] {result.ChapterNumber}),
-                LibraryType.Comic => await _localizationService.Translate(userId, "next-issue-num",
-                    new object[] {"#", result.ChapterNumber}),
-                LibraryType.Book => await _localizationService.Translate(userId, "next-book-num",
-                    new object[] {result.ChapterNumber}),
-                _ => await _localizationService.Translate(userId, "next-chapter-num",
-                    new object[] {result.ChapterNumber})
+                LibraryType.Manga => await _localizationService.Translate(userId, "next-chapter-num", result.ChapterNumber),
+                LibraryType.Comic => await _localizationService.Translate(userId, "next-issue-num", "#", result.ChapterNumber),
+                LibraryType.Book => await _localizationService.Translate(userId, "next-book-num", result.ChapterNumber),
+                _ => await _localizationService.Translate(userId, "next-chapter-num", result.ChapterNumber)
             };
         }
         else
         {
             result.VolumeNumber = lastVolumeNum + 1;
-            result.Title = await _localizationService.Translate(userId, "volume-num",
-                new object[] {result.VolumeNumber});
+            result.Title = await _localizationService.Translate(userId, "volume-num", result.VolumeNumber);
         }
 
 
