@@ -99,7 +99,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   editLibrary(library: Library) {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
     modalRef.componentInstance.library = library;
     modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
@@ -109,7 +109,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   addLibrary() {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
     modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();

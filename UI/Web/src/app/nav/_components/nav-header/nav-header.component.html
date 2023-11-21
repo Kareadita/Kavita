@@ -51,6 +51,23 @@
                 </div>
               </ng-template>
 
+              <ng-template #bookmarkTemplate let-item>
+                <div style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
+                  <div style="width: 24px" class="me-1">
+                    <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                  </div>
+                  <div class="ms-1">
+                    <app-series-format [format]="item.format"></app-series-format>
+                    <ng-container *ngIf="searchTerm.toLowerCase().trim() as st">
+                      <span *ngIf="item.seriesName.toLowerCase().trim().indexOf(st) >= 0; else localizedName">{{item.seriesName}}</span>
+                      <ng-template #localizedName>
+                        <span [innerHTML]="item.localizedSeriesName"></span>
+                      </ng-template>
+                    </ng-container>
+                  </div>
+                </div>
+              </ng-template>
+
               <ng-template #collectionTemplate let-item>
                 <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
                   <div style="width: 24px" class="me-1">

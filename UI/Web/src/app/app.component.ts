@@ -5,7 +5,7 @@ import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
-import {NgbModal, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
@@ -32,7 +32,9 @@ export class AppComponent implements OnInit {
   constructor(private accountService: AccountService,
     private libraryService: LibraryService,
     private router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig,
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService, private modalConfig: NgbModalConfig) {
+
+    modalConfig.fullscreen = 'md';
 
     // Setup default rating config
     ratingConfig.max = 5;

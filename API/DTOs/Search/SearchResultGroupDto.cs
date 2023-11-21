@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 
 namespace API.DTOs.Search;
@@ -19,6 +20,7 @@ public class SearchResultGroupDto
     public IEnumerable<TagDto> Tags { get; set; } = default!;
     public IEnumerable<MangaFileDto> Files { get; set; } = default!;
     public IEnumerable<ChapterDto> Chapters { get; set; } = default!;
+    public IEnumerable<BookmarkSearchResultDto> Bookmarks { get; set; } = default!;
 
 
 }

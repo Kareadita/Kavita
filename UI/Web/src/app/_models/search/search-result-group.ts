@@ -3,6 +3,7 @@ import { Library } from "../library/library";
 import { MangaFile } from "../manga-file";
 import { SearchResult } from "./search-result";
 import { Tag } from "../tag";
+import {BookmarkSearchResult} from "./bookmark-search-result";
 
 export class SearchResultGroup {
     libraries: Array<Library> = [];
@@ -14,6 +15,7 @@ export class SearchResultGroup {
     tags: Array<Tag> = [];
     files: Array<MangaFile> = [];
     chapters: Array<Chapter> = [];
+    bookmarks: Array<BookmarkSearchResult> = [];
 
     reset() {
         this.libraries = [];
@@ -25,5 +27,6 @@ export class SearchResultGroup {
         this.tags = [];
         this.files = [];
         this.chapters = [];
+        this.bookmarks = [];
     }
 }

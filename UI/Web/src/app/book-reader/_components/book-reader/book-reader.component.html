@@ -13,10 +13,16 @@
                              (refreshToC)="refreshPersonalToC()">
       </app-book-line-overlay>
       <app-drawer #commentDrawer="drawer" [(isOpen)]="drawerOpen" [options]="{topOffset: topOffset}">
-        <h5 header>
-          {{t('title')}}
-        </h5>
+        <div header>
+          <h5 class="mb-0">{{t('title')}}</h5>
+          <span style="font-size: 14px; color: var(--primary-color)" tabindex="0" role="button" (click)="closeReader()">{{t('close-reader')}}</span>
+        </div>
         <div subheader>
+<!--          <div class="g-0 text-center" *ngIf="!isLoading">-->
+<!--            <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">-->
+<!--                (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode-label')}}</span>)</span>-->
+<!--            <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>-->
+<!--          </div>-->
           <div class="pagination-cont">
             <ng-container *ngIf="layoutMode !== BookPageLayoutMode.Default">
               <div class="virt-pagination-cont">
@@ -148,7 +154,7 @@
           <ng-template #showTitle>
               <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
                 (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode-label')}}</span>)</span>
-            <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
+              <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
           </ng-template>
         </div>
         <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>

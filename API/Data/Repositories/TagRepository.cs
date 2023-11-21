@@ -16,6 +16,7 @@ public interface ITagRepository
     void Attach(Tag tag);
     void Remove(Tag tag);
     Task<IList<Tag>> GetAllTagsAsync();
+    Task<IList<Tag>> GetAllTagsByNameAsync(IEnumerable<string> normalizedNames);
     Task<IList<TagDto>> GetAllTagDtosAsync(int userId);
     Task RemoveAllTagNoLongerAssociated();
     Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds, int userId);
@@ -74,6 +75,13 @@ public class TagRepository : ITagRepository
     public async Task<IList<Tag>> GetAllTagsAsync()
     {
         return await _context.Tag.ToListAsync();
+    }
+
+    public async Task<IList<Tag>> GetAllTagsByNameAsync(IEnumerable<string> normalizedNames)
+    {
+        return await _context.Tag
+            .Where(t => normalizedNames.Contains(t.NormalizedTitle))
+            .ToListAsync();
     }
 
     public async Task<IList<TagDto>> GetAllTagDtosAsync(int userId)

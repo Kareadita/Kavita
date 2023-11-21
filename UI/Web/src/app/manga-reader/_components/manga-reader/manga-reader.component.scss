@@ -6,7 +6,13 @@ $pointer-offset: 5px;
 
 @use '../../.././../manga-reader-common';
 
+.current {
+  background-color: var(--primary-color);
+}
 
+.loaded {
+  font-weight: bold;
+}
 
 
 .reading-area {
@@ -52,7 +58,7 @@ $pointer-offset: 5px;
   .overlay .right .i {
       right: 20px;
   }
-} 
+}
 
 // Splitting Icon
 .split {
@@ -76,7 +82,7 @@ $pointer-offset: 5px;
         background-color: rgba(255, 255, 255, 0.6);
         margin-top: -16px;
     }
-    
+
     /* Control the right side */
     .right-side {
         height: 20px;
@@ -112,7 +118,7 @@ $pointer-offset: 5px;
     .custom-slider .ngx-slider .ngx-slider-selection {
       background: var(--primary-color);
     }
-  
+
     .custom-slider .ngx-slider .ngx-slider-pointer {
       width: 8px;
       height: 16px;
@@ -122,23 +128,23 @@ $pointer-offset: 5px;
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
     }
-  
+
     .custom-slider .ngx-slider .ngx-slider-pointer:after {
       display: none;
     }
-  
+
     .custom-slider .ngx-slider .ngx-slider-bubble {
       bottom: 14px;
       font-weight: bold;
     }
-  
+
     .custom-slider .ngx-slider .ngx-slider-limit {
       font-weight: bold;
       color: white !important;
 
     }
 
-  
+
     .custom-slider .ngx-slider .ngx-slider-tick {
       width: 1px;
       height: 10px;
@@ -147,7 +153,7 @@ $pointer-offset: 5px;
       background: #ffe4d1;
       top: -1px;
     }
-  
+
     .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
       background: var(--primary-color);
     }
@@ -179,7 +185,7 @@ $pointer-offset: 5px;
       max-height: calc(var(--vh)*100);
       z-index: 100;
     }
-    
+
     .top {
         position: absolute;
         right: 0px;
@@ -188,7 +194,7 @@ $pointer-offset: 5px;
         background: $pagination-bg;
         z-index: 100;
     }
-    
+
     .left {
         position: absolute;
         left: 0px;
@@ -198,7 +204,7 @@ $pointer-offset: 5px;
         max-height: calc(var(--vh)*100);
         z-index: 100;
     }
-    
+
     .bottom {
         position: fixed; // I couldn't figure out how to do this with abs, so only the bottom bar will not be scrollable
         left: 0px;

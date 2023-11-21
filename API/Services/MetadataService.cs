@@ -130,7 +130,7 @@ public class MetadataService : IMetadataService
             return Task.CompletedTask;
 
         series.Volumes ??= new List<Volume>();
-        series.CoverImage = series.GetCoverImage();
+        series.CoverImage = series.GetCoverImage(); // BUG: At this point the volume or chapter hasn't regenerated the cover
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;

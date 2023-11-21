@@ -96,7 +96,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   }
 
   openDirectoryChooser(existingDirectory: string, formControl: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
+    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg', fullscreen: 'md' });
     modalRef.componentInstance.startingFolder = existingDirectory || '';
     modalRef.componentInstance.helpUrl = '';
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {

@@ -618,11 +618,12 @@
 
         "settings-header": "Settings",
         "table-of-contents-header": "Table of Contents",
-        "bookmarks-header": "Bookmarks",
+        "bookmarks-header": "{{side-nav.bookmarks}}",
         "toc-header": "ToC",
 
         "loading-book": "Loading book…",
         "go-back": "Go Back",
+        "close-reader": "Close Reader",
         "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
@@ -1409,6 +1410,7 @@
         "people": "People",
         "tags": "Tags",
         "genres": "Genres",
+        "bookmarks": "{{side-nav.bookmarks}}",
         "libraries": "Libraries",
         "reading-lists": "Reading Lists",
         "collections": "Collections",

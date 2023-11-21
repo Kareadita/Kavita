@@ -80,6 +80,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
   @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
+  @ContentChild('bookmarkTemplate') bookmarkTemplate!: TemplateRef<any>;
   private readonly destroyRef = inject(DestroyRef);
 
 
@@ -96,7 +97,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   get hasData() {
     return !(this.noResultsTemplate != undefined && !this.groupedData.persons.length && !this.groupedData.collections.length
       && !this.groupedData.series.length && !this.groupedData.persons.length && !this.groupedData.tags.length && !this.groupedData.genres.length && !this.groupedData.libraries.length
-      && !this.groupedData.files.length && !this.groupedData.chapters.length);
+      && !this.groupedData.files.length && !this.groupedData.chapters.length && !this.groupedData.bookmarks.length);
   }
 
 
