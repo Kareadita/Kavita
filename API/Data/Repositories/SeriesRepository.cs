@@ -376,27 +376,31 @@ public class SeriesRepository : ISeriesRepository
             .AsEnumerable();
 
         result.Bookmarks = (await _context.AppUserBookmark
-                .Where(b => b.AppUserId == userId)
-                .Include(b => b.Series)
-                .Where(c => EF.Functions.Like(c.Series.Name, $"%{searchQuery}%")
-                            || (c.Series.OriginalName != null &&
-                                EF.Functions.Like(c.Series.OriginalName, $"%{searchQuery}%"))
-                            || (c.Series.LocalizedName != null &&
-                                EF.Functions.Like(c.Series.LocalizedName, $"%{searchQuery}%"))
-                )
-                .Take(maxRecords)
-                .OrderBy(c => c.Series.Name)
-                .Select(b => new BookmarkSearchResultDto()
-                {
-                    SeriesName = b.Series.Name,
-                    LocalizedSeriesName = b.Series.LocalizedName,
-                    LibraryId = b.Series.LibraryId,
-                    SeriesId = b.SeriesId,
-                    ChapterId = b.ChapterId,
-                    VolumeId = b.VolumeId
-                })
-                .ToListAsync())
-            .DistinctBy(s => s.SeriesId);
+            .Join(
+                _context.Series,
+                bookmark => bookmark.SeriesId,
+                series => series.Id,
+                (bookmark, series) => new {Bookmark = bookmark, Series = series}
+            )
+            .Where(joined => joined.Bookmark.AppUserId == userId &&
+                             (EF.Functions.Like(joined.Series.Name, $"%{searchQuery}%") ||
+                              (joined.Series.OriginalName != null &&
+                               EF.Functions.Like(joined.Series.OriginalName, $"%{searchQuery}%")) ||
+                              (joined.Series.LocalizedName != null &&
+                               EF.Functions.Like(joined.Series.LocalizedName, $"%{searchQuery}%"))))
+            .OrderBy(joined => joined.Series.Name)
+            .Take(maxRecords)
+            .Select(joined => new BookmarkSearchResultDto()
+            {
+                SeriesName = joined.Series.Name,
+                LocalizedSeriesName = joined.Series.LocalizedName,
+                LibraryId = joined.Series.LibraryId,
+                SeriesId = joined.Bookmark.SeriesId,
+                ChapterId = joined.Bookmark.ChapterId,
+                VolumeId = joined.Bookmark.VolumeId
+            })
+            .ToListAsync()).DistinctBy(s => s.SeriesId);
+
 
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)

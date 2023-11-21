@@ -12694,15 +12694,6 @@
           "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
-          },
-          "series": {
-            "$ref": "#/components/schemas/Series"
-          },
-          "volume": {
-            "$ref": "#/components/schemas/Volume"
-          },
-          "chapter": {
-            "$ref": "#/components/schemas/Chapter"
           }
         },
         "additionalProperties": false,
