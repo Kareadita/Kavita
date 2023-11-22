@@ -1,4 +1,4 @@
-﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
+# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
 ![new_github_preview_stills](https://user-images.githubusercontent.com/735851/169657008-37812c18-5490-4e2a-9dcb-4806f8c87c69.gif)
@@ -55,7 +55,7 @@ install methods and platforms.
 **Note: Kavita is under heavy development and is being updated all the time, so the tag for bleeding edge builds is `:nightly`. The `:latest` tag will be the latest stable release.**
 
 ## Feature Requests
-Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features before you submit an idea.
+Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
 
 ## Notice
 Kavita is being actively developed and should be considered beta software until the 1.0 release.
