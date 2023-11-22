@@ -23,7 +23,7 @@
         "required": "输入必要字段",
         "email": "电子邮箱",
         "not-valid-email": "验证邮箱",
-        "cancel": "取消",
+        "cancel": "{{common.cancel}}",
         "saving": "保存…",
         "update": "更新"
     },
@@ -38,7 +38,7 @@
         "data-header": "数据",
         "is-processed-header": "已处理",
         "no-data": "没有数据",
-        "volume-and-chapter-num": "{{v}} 卷 {{n}} 章",
+        "volume-and-chapter-num": "{{v}} 卷 {{n}} 章节",
         "rating": "评分 {{r}}",
         "not-applicable": "不适用",
         "processed": "已处理",
@@ -358,7 +358,7 @@
     },
     "cbl-conflict-reason-pipe": {
         "all-series-missing": "您的账户无法访问列表中的所有系列，或者Kavita在列表中没有任何内容。",
-        "chapter-missing": "{{series}}: Kavita缺少第{{chapter}}章。此项目将被跳过。",
+        "chapter-missing": "{{series}}: Kavita缺少第{{chapter}}章节。此项目将被跳过。",
         "empty-file": "cbl文件为空，没有任何操作可以进行。",
         "name-conflict": "您的账户已经存在一个与cbl文件匹配的阅读列表（{{readingListName}}）。",
         "series-collision": "系列{{seriesLink}}与另一个资料库中同名的系列发生冲突。",
@@ -418,7 +418,7 @@
         "cover-artist": "封面设计",
         "editor": "编辑",
         "inker": "上墨师",
-        "letterer": "排版",
+        "letterer": "嵌字师",
         "penciller": "线稿师",
         "publisher": "出版社",
         "writer": "作者",
@@ -548,7 +548,7 @@
         "virtual-pages": "虚拟页面",
         "settings-header": "设置",
         "table-of-contents-header": "目录",
-        "bookmarks-header": "书签",
+        "bookmarks-header": "{{side-nav.bookmarks}}",
         "toc-header": "目录",
         "loading-book": "正在加载书籍…",
         "go-back": "返回",
@@ -556,7 +556,8 @@
         "incognito-mode-label": "隐身模式",
         "next": "下一个",
         "previous": "上一个",
-        "go-to-page-prompt": "一共{{totalPages}}页，您想跳转至哪一页？"
+        "go-to-page-prompt": "一共{{totalPages}}页，您想跳转至哪一页？",
+        "close-reader": "关闭阅读器"
     },
     "personal-table-of-contents": {
         "no-data": "尚未添加书签",
@@ -640,12 +641,12 @@
         "writers-title": "作者",
         "cover-artists-title": "封面设计",
         "characters-title": "角色",
-        "colorists-title": "调色师",
-        "editors-title": "编者",
-        "inkers-title": "着墨师",
-        "letterers-title": "排版",
+        "colorists-title": "上色师",
+        "editors-title": "编辑",
+        "inkers-title": "上墨师",
+        "letterers-title": "嵌字师",
         "translators-title": "译者",
-        "pencillers-title": "铅笔师",
+        "pencillers-title": "线稿师",
         "publishers-title": "出版社",
         "promoted": "{{common.promoted}}",
         "see-more": "查看更多",
@@ -685,7 +686,7 @@
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
-        "edit-title": "修改{{name}}",
+        "edit-title": "编辑{{name}}",
         "add-title": "添加资料库",
         "general-tab": "常规",
         "folder-tab": "文件夹",
@@ -726,7 +727,12 @@
         "cancel": "{{common.cancel}}",
         "next": "下一步",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "exclude-patterns-label": "排除模式",
+        "help": "{{common.help}}",
+        "file-type-group-label": "文件类型",
+        "file-type-group-tooltip": "Kavita 应该扫描哪些类型的文件。例如，档案将包含所有 cb*、zip、rar 等文件。",
+        "exclude-patterns-tooltip": "配置一组模式（Glob语法），Kavita 将在扫描目录时匹配这些模式，并将其从扫描程序结果中排除。"
     },
     "reader-settings": {
         "general-settings-title": "常规设置",
@@ -803,7 +809,8 @@
         "size": "文件大小:"
     },
     "card-detail-layout": {
-        "total-items": "总共{{count}}个条目"
+        "total-items": "总共{{count}}个条目",
+        "jumpkey-count": "{{count}} 系列"
     },
     "card-item": {
         "cannot-read": "无法阅读"
@@ -832,17 +839,19 @@
         "reset": "{{common.reset}}",
         "image-num": "图片{{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "enter-an-url-pre-title": "输入 {{url}}",
+        "url": "Url"
     },
     "download-indicator": {
         "progress": "{{percentage}}% 已下载"
     },
     "edit-series-relation": {
         "description-part-1": "不确定要添加什么关系？请查看我们的",
-        "description-part-2": "wiki。",
+        "description-part-2": "维基百科的提示。",
         "target-series": "目标系列",
         "relationship": "关系",
-        "remove": "移除",
+        "remove": "{{common.remove}}",
         "add-relationship": "添加关系",
         "parent": "{{relationship-pipe.parent}}"
     },
@@ -904,8 +913,8 @@
         "create": "{{common.create}}"
     },
     "entity-title": {
-        "special": "特辑",
-        "issue-num": "问题 #",
+        "special": "特刊",
+        "issue-num": "期 #",
         "chapter": "章节"
     },
     "external-series-card": {
@@ -915,7 +924,7 @@
         "read": "{{common.read}}"
     },
     "manage-alerts": {
-        "description-part-1": "此表格列出了扫描或读取媒体时发现的问题。此列表不受管理。您可以随时清除它，并使用扫描（强制）资料库来进行分析。一些常见错误及其释义的列表可以访问 ",
+        "description-part-1": "此表格列出了扫描或读取媒体时发现的问题。此列表不受管理。您可以随时清除它，并使用扫描（强制）资料库来进行分析。一些常见错误及其释义的列表可以访问。 ",
         "description-part-2": "wiki。",
         "filter-label": "{{common.filter}}",
         "clear-alerts": "清除警报",
@@ -967,12 +976,12 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "媒体问题",
-        "scrobble-issue-title": "Scrobble问题",
+        "scrobble-issue-title": "Scrobble 问题",
         "cover-image-size-tooltip": "生成封面图片的尺寸。注意：任何大于默认尺寸的图片都会延长页面加载时间。",
         "cover-image-size-label": "封面图片尺寸"
     },
     "manage-scrobble-errors": {
-        "description": "此表格记录Scrobbling期间发生的问题。此列表不受管控。您可以随时清空列表，并在下一次Scrobble记录上传后进行查看。如果存在一个未知系列，您最好更正系列名称或者本地化系列名称，或者为Scrobble服务提供商添加一个网页链接。",
+        "description": "此表格记录 Scrobbling 期间发生的问题。此列表不受管控。您可以随时清空列表，并在下一次Scrobble记录上传后进行查看。如果存在一个未知系列，您最好更正系列名称或者本地化系列名称，或者为 Scrobble 服务提供商添加一个网页链接。",
         "filter-label": "{{common.filter}}",
         "clear-errors": "清除错误",
         "series-header": "系列",
@@ -994,7 +1003,7 @@
         "port-label": "端口",
         "port-tooltip": "服务器监听的端口号。如果Kavita在Docker中运行，则此选项无法更改。需要重启服务才能生效。",
         "backup-label": "备份天数",
-        "backup-tooltip": "要保留的备份数量。默认值 30，最小值1，最大值 30。",
+        "backup-tooltip": "要维护的备份数量。默认值为 30，最小值为 1，最大值为 30。",
         "log-label": "日志天数",
         "log-tooltip": "要保留的日志数量。默认值 30，最小值 1，最大值 30。",
         "logging-level-label": "日志等级",
@@ -1234,7 +1243,8 @@
         "reading-lists": "阅读清单",
         "collections": "收藏",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "bookmarks": "{{side-nav.bookmarks}}"
     },
     "nav-header": {
         "skip-alt": "跳转至主要内容",
@@ -1245,9 +1255,10 @@
         "scroll-to-top-alt": "滚动到顶部",
         "server-settings": "服务器设置",
         "settings": "设置",
-        "help": "帮助",
+        "help": "{{common.help}}",
         "announcements": "公告",
-        "logout": "注销"
+        "logout": "注销",
+        "all-filters": "智能筛选"
     },
     "add-to-list-modal": {
         "title": "添加到阅读清单",
@@ -1280,7 +1291,7 @@
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL导入",
-        "import-description": "要开始，请导入一个.cbl文件。Kavita将在导入之前执行多个检查。某些步骤可能会因文件问题而阻止继续进行。",
+        "import-description": "要开始，请导入一个.cbl文件。Kavita 将在导入之前执行多个检查。某些步骤可能会因文件问题而阻止继续进行。",
         "validate-description": "已验证所有文件，以查看列表中是否有任何操作需要执行。任何失败的列表将不会进入下一步。请修复CBL文件并重试。",
         "validate-warning": "CBL存在问题，这会阻止导入。请纠正这些问题，然后重试。",
         "validate-no-issue": "看起来不错",
@@ -1337,7 +1348,9 @@
         "user-preferences-updated": "用户偏好已更新",
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
         "unbookmark-page-tooltip": "取消书签页面",
-        "bookmark-page-tooltip": "书签页面"
+        "bookmark-page-tooltip": "书签页面",
+        "series-progress": "系列进度：{{percent}}",
+        "bookmarks-title": "书签"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1350,7 +1363,7 @@
         "writer-label": "作者",
         "publisher-label": "出版社",
         "penciller-label": "线稿师",
-        "letterer-label": "排版",
+        "letterer-label": "嵌字师",
         "inker-label": "上墨师",
         "editor-label": "编辑",
         "colorist-label": "上色师",
@@ -1403,7 +1416,7 @@
         "writer-label": "作者",
         "publisher-label": "出版社",
         "penciller-label": "线稿师",
-        "letterer-label": "排版",
+        "letterer-label": "嵌字师",
         "inker-label": "上墨师",
         "editor-label": "编辑",
         "colorist-label": "上色师",
@@ -1421,8 +1434,6 @@
         "release-year-label": "发行年份",
         "web-link-description": "您可以在这里添加多个不同的外部网站链接。",
         "web-link-label": "网页链接",
-        "add-link-alt": "添加链接",
-        "remove-link-alt": "移除链接",
         "cover-image-description": "选择一张新封面图片并上传。点击保存上传图片并覆盖原有封面。",
         "save": "{{common.save}}",
         "field-locked-alt": "字段已锁定",
@@ -1452,7 +1463,8 @@
     "day-breakdown": {
         "title": "每日统计分析",
         "x-axis-label": "按天进行分类统计",
-        "y-axis-label": "阅读事件"
+        "y-axis-label": "阅读事件",
+        "no-data": "没有进度，继续阅读"
     },
     "file-breakdown-stats": {
         "format-title": "格式",
@@ -1540,7 +1552,7 @@
     },
     "toasts": {
         "regen-cover": "已加入队列的任务以重新生成封面图像",
-        "no-pages": "没有任何页面。Kavita无法读取此存档文件。",
+        "no-pages": "没有任何页面。Kavita 无法读取此档案文件。",
         "download-in-progress": "下载正在进行中，请稍候。",
         "scan-queued": "{{name}}进入队列扫描",
         "server-settings-updated": "服务器设置已更新",
@@ -1666,7 +1678,7 @@
         "webtoon": "网络漫画",
         "single": "单页",
         "double": "双页",
-        "double-manga": "双页 (Manga)",
+        "double-manga": "双页 (日本漫画模式)",
         "scroll": "滚屏",
         "1-column": "单列",
         "2-column": "双列",
@@ -1710,12 +1722,13 @@
         "series-count": "{{num}}系列",
         "item-count": "{{num}}条目",
         "book-num": "书籍",
-        "issue-hash-num": "问题#",
-        "issue-num": "问题",
+        "issue-hash-num": "期 #",
+        "issue-num": "期",
         "chapter-num": "章节",
         "volume-num": "卷",
         "clear": "清空",
-        "filter": "筛选"
+        "filter": "筛选",
+        "remove": "删除"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "向上滚动以返回上一章节",
@@ -1752,7 +1765,7 @@
         "publication-status": "出版状态",
         "publisher": "出版社",
         "user-rating": "用户评分",
-        "letterer": "排版",
+        "letterer": "嵌字师",
         "penciller": "线稿师",
         "path": "路径",
         "file-path": "文件路径",
@@ -1856,7 +1869,7 @@
         "genres-label": "{{filter-field-pipe.genres}}",
         "view-series": "查看系列",
         "staff-label": "工作人员",
-        "vols-and-chapters": "{{volCount}}卷/{{chpCount}}章",
+        "vols-and-chapters": "{{volCount}}卷/{{chpCount}}章节",
         "tags-label": "{{filter-field-pipe.tags}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
@@ -1873,5 +1886,18 @@
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
         "clear": "{{common.clear}}"
+    },
+    "all-filters": {
+        "title": "所有智能筛选器",
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+    "next-expected-card": {
+        "title": "~{{date}}"
+    },
+    "file-type-group-pipe": {
+        "epub": "Epub",
+        "archive": "档案",
+        "pdf": "Pdf",
+        "image": "图片"
     }
 }

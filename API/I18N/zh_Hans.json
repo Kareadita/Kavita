@@ -144,7 +144,7 @@
     "send-to-permission": "无法向设备发送Kindel不支持的非EPUB格式或者PDF格式文件",
     "reading-list-name-exists": "此名称的阅读清单已存在",
     "volume-num": "第{0}卷",
-    "issue-num": "问题编号{0}{1}",
+    "issue-num": "期号 {0}{1}",
     "book-num": "第{0}本",
     "user-migration-needed": "该用户需要进行迁移。通知他们注销并重新登录，以触发迁移流程",
     "generic-relationship": "更新关系时发生了问题",
@@ -172,5 +172,9 @@
     "external-source-already-in-use": "存在具有此外部源的现有流",
     "external-sources": "外部来源",
     "smart-filter-already-in-use": "存在带有此智能筛选器的现有流",
-    "invalid-email": "用户文件中的电子邮件不是有效的电子邮件。请参阅日志中的链接。"
+    "invalid-email": "用户文件中的电子邮件不是有效的电子邮件。请参阅日志中的链接。",
+    "next-book-num": "下一本: {0}",
+    "next-issue-num": "下一期: {0}{1}",
+    "next-volume-num": "下一卷: {0}",
+    "next-chapter-num": "下一章: {0}"
 }

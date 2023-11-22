@@ -1412,8 +1412,6 @@
         "release-year-label": "Ano de Lançamento",
         "web-link-description": "Aqui você pode adicionar muitos links diferentes para serviços externos.",
         "web-link-label": "Link da Web",
-        "add-link-alt": "Adicionar Link",
-        "remove-link-alt": "Remover Link",
         "cover-image-description": "Carregue e escolha uma nova imagem de capa. Pressione Salvar para carregar e substituir a capa.",
         "save": "{{common.save}}",
         "field-locked-alt": "Campo está bloqueado",
