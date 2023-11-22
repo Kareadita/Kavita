@@ -1411,8 +1411,6 @@
         "release-year-label": "Jaar van uitgave",
         "web-link-description": "Hier kunt u veel verschillende links naar externe diensten toevoegen.",
         "web-link-label": "Web Link",
-        "add-link-alt": "Link toevoegen",
-        "remove-link-alt": "Verwijder link",
         "cover-image-description": "Upload en kies een nieuwe omslagfoto. Druk op Opslaan om de omslag te uploaden en te negeren.",
         "save": "{{common.save}}",
         "field-locked-alt": "Veld is vergrendeld",

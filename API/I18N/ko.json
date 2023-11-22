@@ -172,5 +172,9 @@
     "external-sources": "외부 소스",
     "external-source-required": "ApiKey 및 호스트가 필요합니다",
     "smart-filter-already-in-use": "이 스마트 필터가 포함된 기존 스트림이 있습니다",
-    "invalid-email": "등록된 사용자의 이메일은 유효한 이메일이 아닙니다. 링크를 확인하려면 로그를 참조하세요."
+    "invalid-email": "등록된 사용자의 이메일은 유효한 이메일이 아닙니다. 링크를 확인하려면 로그를 참조하세요.",
+    "next-book-num": "다음 책: {0}",
+    "next-issue-num": "다음 이슈: {0}{1}",
+    "next-volume-num": "다음 볼륨: {0}",
+    "next-chapter-num": "다음 챕터: {0}"
 }

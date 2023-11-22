@@ -169,5 +169,9 @@
     "external-sources": "Fontes Externas",
     "external-source-required": "ApiKey e Host requeridos",
     "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente",
-    "collection-deleted": "Coleção eliminada"
+    "collection-deleted": "Coleção eliminada",
+    "next-book-num": "Livro Seguinte: {0}",
+    "next-issue-num": "Número Seguinte: {0}{1}",
+    "next-volume-num": "Volume Seguinte: {0}",
+    "next-chapter-num": "Capítulo Seguinte: {0}"
 }
