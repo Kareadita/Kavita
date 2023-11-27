@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef, EventEmitter,
+  DestroyRef,
   HostListener,
   inject,
   OnDestroy
@@ -29,9 +29,9 @@ import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {Action, ActionItem} from "../../../_services/action-factory.service";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
-import {filter, tap} from "rxjs/operators";
+import {tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {KEY_CODES} from "../../../shared/_services/utility.service";
+import {Breakpoint, KEY_CODES, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
@@ -43,7 +43,6 @@ import {KEY_CODES} from "../../../shared/_services/utility.service";
 })
 export class CustomizeSidenavStreamsComponent implements OnDestroy {
 
-  //@Input({required: true}) parentScrollElem!: Element | Window;
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
@@ -108,6 +107,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly utilityService = inject(UtilityService);
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
@@ -172,7 +172,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
       this.items = results[0];
 
       // After X items, drag and drop is disabled to use virtualization
-      if (this.items.length > this.virtualizeAfter) {
+      if (this.items.length > this.virtualizeAfter || this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet) {
         this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 
