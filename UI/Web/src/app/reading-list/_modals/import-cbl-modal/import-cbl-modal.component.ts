@@ -16,7 +16,7 @@ import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 interface FileStep {
   fileName: string;
@@ -48,8 +48,6 @@ export class ImportCblModalComponent {
 
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
 
-  translocoService = inject(TranslocoService);
-
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
     FileUploadValidators.accept(['.cbl']),
   ]);
@@ -61,10 +59,10 @@ export class ImportCblModalComponent {
   isLoading: boolean = false;
 
   steps: Array<TimelineStep> = [
-    {title: this.translocoService.translate('import-cbl-modal.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
-    {title: this.translocoService.translate('import-cbl-modal.validate-cbl-step'), index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
-    {title: this.translocoService.translate('import-cbl-modal.dry-run-step'), index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
-    {title: this.translocoService.translate('import-cbl-modal.final-import-step'), index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
+    {title: translate('import-cbl-modal.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
+    {title: translate('import-cbl-modal.validate-cbl-step'), index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
+    {title: translate('import-cbl-modal.dry-run-step'), index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
+    {title: translate('import-cbl-modal.final-import-step'), index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
 
@@ -103,7 +101,7 @@ export class ImportCblModalComponent {
       case Step.Import:
         const files = this.uploadForm.get('files')?.value;
         if (!files) {
-          this.toastr.error(this.translocoService.translate('toasts.select-files-warning'));
+          this.toastr.error(translate('toasts.select-files-warning'));
           return;
         }
         // Load each file into filesToProcess and group their data
@@ -236,7 +234,7 @@ export class ImportCblModalComponent {
 
       this.isLoading = false;
       this.currentStepIndex++;
-      this.toastr.success(this.translocoService.translate('toasts.reading-list-imported'));
+      this.toastr.success(translate('toasts.reading-list-imported'));
       this.cdRef.markForCheck();
     });
   }
