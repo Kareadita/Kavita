@@ -834,10 +834,10 @@ public class OpdsController : BaseApiController
         foreach (var chapter in chapters)
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
+            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapter.Id, mangaFile, series, chapterDto!, apiKey, prefix, baseUrl));
             }
         }
 

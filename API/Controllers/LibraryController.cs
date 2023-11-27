@@ -40,13 +40,15 @@ public class LibraryController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILibraryWatcher _libraryWatcher;
     private readonly ILocalizationService _localizationService;
+    private readonly IStreamService _streamService;
     private readonly IEasyCachingProvider _libraryCacheProvider;
     private const string CacheKey = "library_";
 
     public LibraryController(IDirectoryService directoryService,
         ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
         IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher,
-        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService,
+        IStreamService streamService)
     {
         _directoryService = directoryService;
         _logger = logger;
@@ -56,6 +58,7 @@ public class LibraryController : BaseApiController
         _eventHub = eventHub;
         _libraryWatcher = libraryWatcher;
         _localizationService = localizationService;
+        _streamService = streamService;
 
         _libraryCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.Library);
     }
@@ -239,8 +242,6 @@ public class LibraryController : BaseApiController
             _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
             // Bust cache
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
-
-            // TODO: Update a user's SideNav based on library access
 
             _unitOfWork.UserRepository.Update(user);
 

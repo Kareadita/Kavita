@@ -33,7 +33,6 @@ public interface IStreamService
     Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto);
     Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto);
     Task DeleteExternalSource(int userId, int externalSourceId);
-
 }
 
 public class StreamService : IStreamService
@@ -342,6 +341,4 @@ public class StreamService : IStreamService
 
         await _unitOfWork.CommitAsync();
     }
-
-
 }
