@@ -721,6 +721,7 @@ public class SeriesService : ISeriesService
             return _emptyExpectedChapter;
         }
 
+        const int minimumTimeDeltas = 3;
         var chapters = _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
             .Where(c => !c.IsSpecial)
             .OrderBy(c => c.CreatedUtc)
@@ -745,9 +746,6 @@ public class SeriesService : ISeriesService
 
             previousChapterTime = chapter.CreatedUtc;
         }
-
-        const int minimumTimeDeltas = 3;
-
 
         if (timeDifferences.Count < minimumTimeDeltas)
         {
@@ -795,10 +793,10 @@ public class SeriesService : ISeriesService
             result.VolumeNumber = lastChapter.Volume.Number;
             result.Title = series.Library.Type switch
             {
-                LibraryType.Manga => await _localizationService.Translate(userId, "next-chapter-num", result.ChapterNumber),
-                LibraryType.Comic => await _localizationService.Translate(userId, "next-issue-num", "#", result.ChapterNumber),
-                LibraryType.Book => await _localizationService.Translate(userId, "next-book-num", result.ChapterNumber),
-                _ => await _localizationService.Translate(userId, "next-chapter-num", result.ChapterNumber)
+                LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
+                LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", "#", result.ChapterNumber),
+                LibraryType.Book => await _localizationService.Translate(userId, "book-num", result.ChapterNumber),
+                _ => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber)
             };
         }
         else

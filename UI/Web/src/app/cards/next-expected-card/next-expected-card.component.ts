@@ -27,8 +27,6 @@ export class NextExpectedCardComponent implements OnInit {
   @Input({required: true}) entity!: NextExpectedChapter;
   title: string = '';
 
-
-
   ngOnInit(): void {
     if (this.entity.expectedDate) {
       const utcPipe = new UtcToLocalTimePipe();
