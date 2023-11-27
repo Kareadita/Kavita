@@ -3,8 +3,8 @@
     <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" classes="extreme-blur"  [imageUrl]="imageUrl"></app-image>
 
     <div class="card-overlay"></div>
-    <ng-container *ngIf="overlayInformation | safeHtml as info">
-      <div class="overlay-information overlay-information--centered" *ngIf="info !== '' ||  info !== undefined">
+    <ng-container *ngIf="entity.title | safeHtml as info">
+      <div class="overlay-information overlay-information--centered" *ngIf="info !== ''">
         <div class="position-relative">
           <span class="card-title library mx-auto" style="width: auto;">
             <i class="fa-regular fa-clock mb-2" style="font-size: 26px" aria-hidden="true"></i>

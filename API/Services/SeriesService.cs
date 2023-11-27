@@ -746,15 +746,17 @@ public class SeriesService : ISeriesService
             previousChapterTime = chapter.CreatedUtc;
         }
 
+        const int minimumTimeDeltas = 3;
 
-        if (timeDifferences.Count < 3)
+
+        if (timeDifferences.Count < minimumTimeDeltas)
         {
             return _emptyExpectedChapter;
         }
 
         var historicalTimeDifferences = timeDifferences.Select(td => td.TotalDays).ToList();
 
-        if (historicalTimeDifferences.Count < 3)
+        if (historicalTimeDifferences.Count < minimumTimeDeltas)
         {
             return _emptyExpectedChapter;
         }

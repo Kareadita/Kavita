@@ -231,6 +231,7 @@ public class ReaderController : BaseApiController
         var mangaFile = chapter.Files.First();
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(dto.SeriesId, User.GetUserId());
+        if (series == null) return Unauthorized();
 
         var info = new ChapterInfoDto()
         {
@@ -277,6 +278,7 @@ public class ReaderController : BaseApiController
                                  info.ChapterNumber;
             }
         }
+
 
         return Ok(info);
     }

@@ -189,10 +189,10 @@
     "user-no-access-library-from-series": "User does not have access to the library this series belongs to",
     "series-restricted-age-restriction": "User is not allowed to view this series due to age restrictions",
 
-    "next-volume-num": "Upcoming Volume: {0}",
-    "next-book-num": "Upcoming Book: {0}",
-    "next-issue-num": "Upcoming Issue: {0}{1}",
-    "next-chapter-num": "Upcoming Chapter: {0}",
+    "next-volume-num": "<div class='upcoming-header'>Upcoming</div><div>Volume {0}</div>",
+    "next-book-num": "<div class='upcoming-header'>Upcoming</div><div>Book {0}</div>",
+    "next-issue-num": "<div class='upcoming-header'>Upcoming</div><div>Issue {0}{1}</div>",
+    "next-chapter-num": "<div class='upcoming-header'>Upcoming</div><div>Chapter {0}</div>",
 
 
     "volume-num": "Volume {0}",
