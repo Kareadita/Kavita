@@ -22,39 +22,41 @@
         <p>{{t('validate-description')}}</p>
         <div class="row g-0">
 
-          <ngb-accordion #a="ngbAccordion">
-            <ngb-panel *ngFor="let fileToProcess of filesToProcess">
-              <ng-container *ngIf="fileToProcess.validateSummary as summary">
-                <ng-template ngbPanelTitle>
-                  <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
-                </ng-template>
-
-                <ng-template ngbPanelContent>
-                  <ng-container *ngIf="summary.results.length > 0; else noValidateIssues">
-                    <h5>{{t('validate-warning')}}</h5>
-                    <ol class="list-group list-group-numbered list-group-flush" >
-                      <li class="list-group-item no-hover" *ngFor="let result of summary.results"
-                          [innerHTML]="result | cblConflictReason | safeHtml">
-                      </li>
-                    </ol>
-                  </ng-container>
-                  <ng-template #noValidateIssues>
-                    <div class="justify-content-center col">
-                      <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                          <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
+          <div ngbAccordion #accordion="ngbAccordion">
+            @for(fileToProcess of filesToProcess; track fileToProcess.fileName) {
+              <div ngbAccordionItem *ngIf="fileToProcess.validateSummary as summary">
+                <h5 ngbAccordionHeader>
+                  <button ngbAccordionButton>
+                    <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                  </button>
+                </h5>
+                <div ngbAccordionCollapse>
+                  <div ngbAccordionBody>
+                    @if(summary.results.length > 0) {
+                      <h5>{{t('validate-warning')}}</h5>
+                      <ol class="list-group list-group-numbered list-group-flush" >
+                        <li class="list-group-item no-hover" *ngFor="let result of summary.results"
+                            [innerHTML]="result | cblConflictReason | safeHtml">
+                        </li>
+                      </ol>
+                    } @else {
+                      <div class="justify-content-center col">
+                        <div class="d-flex align-items-center">
+                          <div class="flex-shrink-0">
+                            <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
+                          </div>
+                          <div class="flex-grow-1 ms-3">
+                            {{t('validate-no-issue')}}
+                          </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                          {{t('validate-no-issue')}}
-                        </div>
+                        {{t('validate-no-issue-description')}}
                       </div>
-                      {{t('validate-no-issue-description')}}
-                    </div>
-                  </ng-template>
-                </ng-template>
-              </ng-container>
-            </ngb-panel>
-          </ngb-accordion>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
         </div>
       </ng-container>
 
@@ -62,57 +64,65 @@
         <div class="row g-0">
           <p>{{t('dry-run-description')}}</p>
 
-          <ngb-accordion #a="ngbAccordion">
-            <ngb-panel *ngFor="let fileToProcess of filesToProcess">
-              <ng-container *ngIf="fileToProcess.dryRunSummary as summary">
-                <ng-template ngbPanelTitle>
-                  <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
-                </ng-template>
-
-                <ng-template ngbPanelContent>
-                  <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
-                </ng-template>
-              </ng-container>
-            </ngb-panel>
-          </ngb-accordion>
+          <div ngbAccordion #a="ngbAccordion">
+            @for(fileToProcess of filesToProcess; track fileToProcess.fileName) {
+              <div ngbAccordionItem *ngIf="fileToProcess.dryRunSummary as summary">
+                <h5 ngbAccordionHeader>
+                  <button ngbAccordionButton>
+                    <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                  </button>
+                </h5>
+                <div ngbAccordionCollapse>
+                  <div ngbAccordionBody>
+                    <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
         </div>
       </ng-container>
 
       <ng-container *ngIf="currentStepIndex === Step.Finalize">
         <div class="row g-0">
-          <ngb-accordion #a="ngbAccordion">
-            <ngb-panel *ngFor="let fileToProcess of filesToProcess">
-              <ng-container *ngIf="fileToProcess.finalizeSummary as summary">
-                <ng-template ngbPanelTitle>
-                  <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
-                </ng-template>
-
-                <ng-template ngbPanelContent>
-                  <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
-                </ng-template>
-              </ng-container>
-            </ngb-panel>
-          </ngb-accordion>
+          <div ngbAccordion #a="ngbAccordion">
+            @for(fileToProcess of filesToProcess; track fileToProcess.fileName) {
+              <div ngbAccordionItem *ngIf="fileToProcess.finalizeSummary as summary">
+                <h5 ngbAccordionHeader>
+                  <button ngbAccordionButton>
+                    <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                  </button>
+                </h5>
+                <div ngbAccordionCollapse>
+                  <div ngbAccordionBody>
+                    <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
         </div>
       </ng-container>
     </div>
 
     <ng-template #resultsList let-summary="summary">
       <ul class="list-group list-group-flush">
-        <li class="list-group-item no-hover" *ngFor="let result of summary.results"
-            innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
+        @for(result of summary.results; track result.order) {
+          <li class="list-group-item no-hover"
+              innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
+        }
       </ul>
     </ng-template>
 
     <ng-template #heading let-filename="filename" let-summary="summary">
-      <ng-container *ngIf="summary.success | cblImportResult as success">
-        <ng-container [ngSwitch]="summary.success">
-          <span *ngSwitchCase="CblImportResult.Success" class="badge bg-primary me-1">{{success}}</span>
-          <span *ngSwitchCase="CblImportResult.Fail" class="badge bg-danger me-1">{{success}}</span>
-          <span *ngSwitchCase="CblImportResult.Partial" class="badge bg-warning me-1">{{success}}</span>
+        <ng-container *ngIf="summary.success | cblImportResult as success">
+          <ng-container [ngSwitch]="summary.success">
+            <span *ngSwitchCase="CblImportResult.Success" class="badge bg-primary me-1">{{success}}</span>
+            <span *ngSwitchCase="CblImportResult.Fail" class="badge bg-danger me-1">{{success}}</span>
+            <span *ngSwitchCase="CblImportResult.Partial" class="badge bg-warning me-1">{{success}}</span>
+          </ng-container>
         </ng-container>
-      </ng-container>
-      <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
+        <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
     </ng-template>
 
 

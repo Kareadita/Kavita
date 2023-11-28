@@ -27,7 +27,8 @@ enum TabID {
   selector: 'app-customize-dashboard-modal',
   standalone: true,
   imports: [CommonModule, SafeHtmlPipe, TranslocoDirective, DraggableOrderedListComponent, ReadingListItemComponent, DashboardStreamListItemComponent,
-    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, CustomizeDashboardStreamsComponent, CustomizeSidenavStreamsComponent, ManageExternalSourcesComponent, ManageSmartFiltersComponent],
+    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, CustomizeDashboardStreamsComponent, CustomizeSidenavStreamsComponent,
+    ManageExternalSourcesComponent, ManageSmartFiltersComponent],
   templateUrl: './customize-dashboard-modal.component.html',
   styleUrls: ['./customize-dashboard-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -11,7 +11,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 
@@ -32,10 +31,10 @@ export class ReadingActivityComponent implements OnInit {
   @Input() isAdmin: boolean = true;
   @Input() individualUserMode: boolean = false;
 
-  private readonly utcDatePipe = new UtcToLocalTimePipe();
   private readonly destroyRef = inject(DestroyRef);
-  private readonly translocoService = inject(TranslocoService);
-  private readonly cdRef = inject(ChangeDetectorRef);
+  //private readonly translocoService = inject(TranslocoService);
+  private readonly statService = inject(StatisticsService);
+  private readonly memberService = inject(MemberService);
 
   view: [number, number] = [0, 400];
   formGroup: FormGroup = new FormGroup({
@@ -45,14 +44,14 @@ export class ReadingActivityComponent implements OnInit {
   users$: Observable<Member[]> | undefined;
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
-  mangaFormatPipe = new MangaFormatPipe(this.translocoService);
+  //mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
-  constructor(private statService: StatisticsService, private memberService: MemberService) {
+  constructor() {
     this.data$ = this.formGroup.valueChanges.pipe(
       switchMap(_ => this.statService.getReadCountByDay(this.formGroup.get('users')!.value, this.formGroup.get('days')!.value)),
       map(data => {
         const gList = data.reduce((formats, entry) => {
-          const formatTranslated = this.mangaFormatPipe.transform(entry.format);
+          const formatTranslated = this.statService.mangaFormatPipe.transform(entry.format);
           if (!formats[formatTranslated]) {
             formats[formatTranslated] = {
               name: formatTranslated,
@@ -76,7 +75,10 @@ export class ReadingActivityComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(filter(_ => this.isAdmin), takeUntilDestroyed(this.destroyRef), shareReplay());
+    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(
+      filter(_ => this.isAdmin),
+      takeUntilDestroyed(this.destroyRef),
+      shareReplay());
     this.formGroup.get('users')?.setValue(this.userId, {emitValue: true});
 
     if (!this.isAdmin) {

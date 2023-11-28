@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ImageComponent} from "../../shared/image/image.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
@@ -14,7 +14,7 @@ import {translate} from "@ngneat/transloco";
   styleUrl: './next-expected-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NextExpectedCardComponent {
+export class NextExpectedCardComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   /**
@@ -25,19 +25,9 @@ export class NextExpectedCardComponent {
    * This is the entity we are representing. It will be returned if an action is executed.
    */
   @Input({required: true}) entity!: NextExpectedChapter;
-
-  /**
-   * Additional information to show on the overlay area. Will always render.
-   */
-  @Input() overlayInformation: string = '';
   title: string = '';
 
-
-
   ngOnInit(): void {
-    const tokens = this.entity.title.split(':');
-    this.overlayInformation = `<div>${tokens[0]}</div><div>${tokens[1]}</div>`;
-
     if (this.entity.expectedDate) {
       const utcPipe = new UtcToLocalTimePipe();
       this.title = translate('next-expected-card.title', {date: utcPipe.transform(this.entity.expectedDate, 'shortDate')});

@@ -261,24 +261,26 @@ public class SeriesService : ISeriesService
                     HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
             }
 
-
-            series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
-            series.Metadata.PublicationStatusLocked = updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked;
-            series.Metadata.LanguageLocked = updateSeriesMetadataDto.SeriesMetadata.LanguageLocked;
-            series.Metadata.GenresLocked = updateSeriesMetadataDto.SeriesMetadata.GenresLocked;
-            series.Metadata.TagsLocked = updateSeriesMetadataDto.SeriesMetadata.TagsLocked;
-            series.Metadata.CharacterLocked = updateSeriesMetadataDto.SeriesMetadata.CharacterLocked;
-            series.Metadata.ColoristLocked = updateSeriesMetadataDto.SeriesMetadata.ColoristLocked;
-            series.Metadata.EditorLocked = updateSeriesMetadataDto.SeriesMetadata.EditorLocked;
-            series.Metadata.InkerLocked = updateSeriesMetadataDto.SeriesMetadata.InkerLocked;
-            series.Metadata.LettererLocked = updateSeriesMetadataDto.SeriesMetadata.LettererLocked;
-            series.Metadata.PencillerLocked = updateSeriesMetadataDto.SeriesMetadata.PencillerLocked;
-            series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublisherLocked;
-            series.Metadata.TranslatorLocked = updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked;
-            series.Metadata.CoverArtistLocked = updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked;
-            series.Metadata.WriterLocked = updateSeriesMetadataDto.SeriesMetadata.WriterLocked;
-            series.Metadata.SummaryLocked = updateSeriesMetadataDto.SeriesMetadata.SummaryLocked;
-            series.Metadata.ReleaseYearLocked = updateSeriesMetadataDto.SeriesMetadata.ReleaseYearLocked;
+            if (updateSeriesMetadataDto.SeriesMetadata != null)
+            {
+                series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
+                series.Metadata.PublicationStatusLocked = updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked;
+                series.Metadata.LanguageLocked = updateSeriesMetadataDto.SeriesMetadata.LanguageLocked;
+                series.Metadata.GenresLocked = updateSeriesMetadataDto.SeriesMetadata.GenresLocked;
+                series.Metadata.TagsLocked = updateSeriesMetadataDto.SeriesMetadata.TagsLocked;
+                series.Metadata.CharacterLocked = updateSeriesMetadataDto.SeriesMetadata.CharacterLocked;
+                series.Metadata.ColoristLocked = updateSeriesMetadataDto.SeriesMetadata.ColoristLocked;
+                series.Metadata.EditorLocked = updateSeriesMetadataDto.SeriesMetadata.EditorLocked;
+                series.Metadata.InkerLocked = updateSeriesMetadataDto.SeriesMetadata.InkerLocked;
+                series.Metadata.LettererLocked = updateSeriesMetadataDto.SeriesMetadata.LettererLocked;
+                series.Metadata.PencillerLocked = updateSeriesMetadataDto.SeriesMetadata.PencillerLocked;
+                series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublisherLocked;
+                series.Metadata.TranslatorLocked = updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked;
+                series.Metadata.CoverArtistLocked = updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked;
+                series.Metadata.WriterLocked = updateSeriesMetadataDto.SeriesMetadata.WriterLocked;
+                series.Metadata.SummaryLocked = updateSeriesMetadataDto.SeriesMetadata.SummaryLocked;
+                series.Metadata.ReleaseYearLocked = updateSeriesMetadataDto.SeriesMetadata.ReleaseYearLocked;
+            }
 
             if (!_unitOfWork.HasChanges())
             {
@@ -721,6 +723,7 @@ public class SeriesService : ISeriesService
             return _emptyExpectedChapter;
         }
 
+        const int minimumTimeDeltas = 3;
         var chapters = _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
             .Where(c => !c.IsSpecial)
             .OrderBy(c => c.CreatedUtc)
@@ -746,15 +749,14 @@ public class SeriesService : ISeriesService
             previousChapterTime = chapter.CreatedUtc;
         }
 
-
-        if (timeDifferences.Count < 3)
+        if (timeDifferences.Count < minimumTimeDeltas)
         {
             return _emptyExpectedChapter;
         }
 
         var historicalTimeDifferences = timeDifferences.Select(td => td.TotalDays).ToList();
 
-        if (historicalTimeDifferences.Count < 3)
+        if (historicalTimeDifferences.Count < minimumTimeDeltas)
         {
             return _emptyExpectedChapter;
         }
@@ -793,10 +795,10 @@ public class SeriesService : ISeriesService
             result.VolumeNumber = lastChapter.Volume.Number;
             result.Title = series.Library.Type switch
             {
-                LibraryType.Manga => await _localizationService.Translate(userId, "next-chapter-num", result.ChapterNumber),
-                LibraryType.Comic => await _localizationService.Translate(userId, "next-issue-num", "#", result.ChapterNumber),
-                LibraryType.Book => await _localizationService.Translate(userId, "next-book-num", result.ChapterNumber),
-                _ => await _localizationService.Translate(userId, "next-chapter-num", result.ChapterNumber)
+                LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
+                LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", "#", result.ChapterNumber),
+                LibraryType.Book => await _localizationService.Translate(userId, "book-num", result.ChapterNumber),
+                _ => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber)
             };
         }
         else
