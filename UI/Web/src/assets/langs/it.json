@@ -12,8 +12,8 @@
         "server-settings-link": "Impostazioni Server",
         "not-granted": "Non ti è stato concesso l'accesso a nessuna libreria.",
         "on-deck-title": "In primo piano",
-        "recently-updated-title": "Serie recentemente aggiornata",
-        "recently-added-title": "Serie appena aggiunta",
+        "recently-updated-title": "Serie aggiornate di recente",
+        "recently-added-title": "Serie appena aggiunte",
         "more-in-genre-title": "Altro in {{genre}}"
     },
     "edit-user": {
@@ -74,7 +74,7 @@
         "rating-percentage": "Punteggio {{r}}%"
     },
     "want-to-read": {
-        "title": "Voler leggere",
+        "title": "Voglio leggere",
         "series-count": "{{common.series-count}}",
         "no-items": "Non ci sono articoli. Prova ad aggiungere una serie.",
         "no-items-filtered": "Nessun articolo corrisponde al filtro attuale."
@@ -172,7 +172,7 @@
     },
     "restriction-selector": {
         "title": "Limitazione della classificazione in base all'età",
-        "description": "Quando selezionata, tutte le serie e gli elenchi di lettura che hanno almeno un elemento che viola la restrizione selezionata verranno omessi dai risultati.",
+        "description": "Quando selezionata, tutte le serie e le liste di lettura che hanno almeno un elemento che viola la restrizione selezionata verranno omessi dai risultati.",
         "not-applicable-for-admins": "Non applicabile per gli amministratori.",
         "age-rating-label": "Classificazione per Età",
         "no-restriction": "Nessuna Restrizione",
@@ -405,7 +405,7 @@
         "edition": "Edizione"
     },
     "publication-status-pipe": {
-        "ongoing": "Incorsa",
+        "ongoing": "In Corso",
         "hiatus": "Lato",
         "completed": "Completato",
         "cancelled": "Cancellato",
@@ -492,7 +492,7 @@
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Utente Invitato",
-        "setup-user-description": "Puoi utilizzare il collegamento seguente per configurare l'account per il tuo utente o utilizzare il pulsante Copia. Potrebbe essere necessario disconnettersi prima di utilizzare il collegamento per registrare un nuovo utente. Se il tuo server è accessibile dall'esterno, verrà inviata un'e-mail all'utente e i collegamenti potranno essere utilizzati da lui per completare la configurazione del proprio account.",
+        "setup-user-description": "Puoi utilizzare il collegamento seguente per configurare il tuo account utente o utilizzare il pulsante Copia. Potrebbe essere necessario disconnettersi prima di utilizzare il collegamento per registrare un nuovo utente. Se il tuo server è accessibile dall'esterno, all'utente verrà inviata un'e-mail contenente il collegamento che potrà essere utilizzato per completare la configurazione del proprio account.",
         "setup-user-account": "Configura l'account dell'utente",
         "setup-user-account-tooltip": "Copialo e incollalo in una nuova scheda. Potrebbe essere necessario disconnettersi.",
         "invite-url-label": "URL invito",
@@ -548,7 +548,7 @@
         "virtual-pages": "pagine virtuali",
         "settings-header": "Impostazioni",
         "table-of-contents-header": "Tabella dei contenuti",
-        "bookmarks-header": "Segnalibri",
+        "bookmarks-header": "Preferiti",
         "toc-header": "ToC",
         "loading-book": "Caricamento libro…",
         "go-back": "Torna indietro",
@@ -559,7 +559,7 @@
         "go-to-page-prompt": "Ci sono {{totalPages}} pagine. A quale pagina vuoi andare?"
     },
     "personal-table-of-contents": {
-        "no-data": "Niente ancora aggiunto ai segnalibri",
+        "no-data": "Nessun preferito ancora",
         "page": "Pagina {{value}}",
         "delete": "Elimina {{bookmarkName}}"
     },
@@ -671,8 +671,8 @@
         "filter-and-sort-alt": "Ordina / Filtra"
     },
     "side-nav": {
-        "home": "Casa",
-        "want-to-read": "Voler leggere",
+        "home": "Home",
+        "want-to-read": "Voglio leggere",
         "collections": "Collezioni",
         "reading-lists": "Liste di Lettura",
         "bookmarks": "Preferiti",
@@ -708,12 +708,12 @@
         "cover-description-extra": "L'immagine della libreria non deve essere grande. Punta a un file piccolo, di dimensioni 32x32 pixel. Kavita non esegue la convalida delle dimensioni.",
         "manage-collection-label": "Gestisci raccolte",
         "manage-collection-tooltip": "Kavita dovrebbe creare raccolte dai tag SeriesGroup trovati nei file ComicInfo.xml/opf",
-        "manage-reading-list-label": "Gestisci gli elenchi di lettura",
-        "manage-reading-list-tooltip": "Kavita dovrebbe creare elenchi di lettura dai tag StoryArc/StoryArcNumber e AlternativeSeries/AlternativeCount trovati nei file ComicInfo.xml/opf",
+        "manage-reading-list-label": "Gestisci le liste di lettura",
+        "manage-reading-list-tooltip": "Kavita dovrebbe creare liste di lettura dai tag StoryArc/StoryArcNumber e AlternativeSeries/AlternativeCount trovati nei file ComicInfo.xml/opf",
         "allow-scrobbling-label": "Consenti Scrobbling",
         "allow-scrobbling-tooltip": "Se Kavita esegue lo scrobble degli eventi di lettura, desidera leggere lo stato, le valutazioni e le recensioni dei fornitori configurati. Ciò si verificherà solo se il server dispone di un abbonamento Kavita+ attivo.",
         "folder-watching-label": "Controllo delle cartelle",
-        "folder-watching-tooltip": "Ignora il controllo della cartella del server per questa libreria. Se disattivato, il controllo delle cartelle non verrà eseguito sulle cartelle contenute in questa libreria. Se le librerie condividono le cartelle, è possibile che le cartelle vengano ancora confrontate.",
+        "folder-watching-tooltip": "Ignora il controllo della cartella del server per questa libreria. Se disattivato, il controllo delle cartelle non verrà eseguito sulle cartelle contenute in questa libreria. Se le librerie condividono le cartelle, è possibile che le cartelle vengano analizzate di nuovo. Il sistema aspetterà 10 minuti tra le scansioni.",
         "include-in-dashboard-label": "Includi in Dashboard",
         "include-in-dashboard-tooltip": "Le serie della biblioteca dovrebbero essere incluse nella Dashboard. Ciò riguarda tutti gli stream, come On Deck, Aggiornati di recente, Aggiunti di recente o qualsiasi aggiunta personalizzata.",
         "include-in-recommendation-label": "Includi in Consigliato",
@@ -770,7 +770,7 @@
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}",
-        "no-data": "Non ci sono segnalibri. Prova a crearne",
+        "no-data": "Non ci sono preferiti. Prova a crearne",
         "no-data-2": "uno.",
         "confirm-delete": "Sei sicuro di voler cancellare tutti i segnalibri per più serie? Questo non può essere annullato.",
         "confirm-single-delete": "Sei sicuro di voler cancellare tutti i segnalibri per {{seriesName}}? Questo non può essere annullato.",
@@ -845,7 +845,7 @@
         "description-part-2": "wiki per suggerimenti.",
         "target-series": "Serie Target",
         "relationship": "Relazione",
-        "remove": "Rimuovere",
+        "remove": "{{common.remove}}",
         "add-relationship": "Aggiungi Relazione",
         "parent": "{{relationship-pipe.parent}}"
     },
@@ -963,7 +963,7 @@
         "media-warning": "È necessario attivare l'attività di conversione multimediale nella scheda Attività.,",
         "encode-as-label": "Salva supporto con nome",
         "encode-as-tooltip": "Tutti i media gestiti da Kavita (copertine, segnalibri, favicon) verranno codificati come questo tipo.",
-        "bookmark-dir-label": "Directory dei segnalibri",
+        "bookmark-dir-label": "Directory dei preferiti",
         "bookmark-dir-tooltip": "Posizione in cui verranno archiviati i segnalibri. I segnalibri sono file di origine e possono essere di grandi dimensioni. Scegli un luogo con spazio di archiviazione adeguato. La directory è gestita; gli altri file all'interno della directory verranno eliminati. Se Docker, monta un volume aggiuntivo e usalo.",
         "change": "Cambia",
         "reset-to-default": "{{common.reset-to-default}}",
@@ -1182,7 +1182,7 @@
     "reading-lists": {
         "title": "Liste Letture",
         "item-count": "{{common.item-count}}",
-        "no-data": "Non ci sono elenchi di lettura.",
+        "no-data": "Non ci sono liste di lettura.",
         "create-one-part-1": "Prova a creare",
         "create-one-part-2": "uno"
     },
@@ -1245,7 +1245,7 @@
         "scroll-to-top-alt": "Scorri verso l'alto",
         "server-settings": "Impostazioni del server",
         "settings": "Impostazioni",
-        "help": "Aiuto",
+        "help": "{{common.help}}",
         "announcements": "Annunci",
         "logout": "Disconnettersi",
         "all-filters": "Filtri Intelligenti"

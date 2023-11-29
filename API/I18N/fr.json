@@ -169,5 +169,6 @@
     "dashboard-stream-doesnt-exist": "Le flux du tableau de bord n'existe pas",
     "external-source-already-exists": "La source externe existe déjà",
     "external-source-doesnt-exist": "La source externe n'existe pas",
-    "external-source-required": "La clé API et l'hôte sont requis"
+    "external-source-required": "La clé API et l'hôte sont requis",
+    "invalid-email": "Le mail du fichier de l'utilisateur n'est pas un mail valide. Voir les logs pour les liens éventuels."
 }
