@@ -1717,7 +1717,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // the book overlay is just closing
     setTimeout(() => {
       this.isLineOverlayOpen = isOpen;
-      console.log('line overlay open: ', this.isLineOverlayOpen);
       this.cdRef.markForCheck();
     }, 10);
   }
