@@ -280,7 +280,7 @@ public class LibraryRepository : ILibraryRepository
         {
             Title = s,
             IsoCode = s
-        };;
+        };
     }
 
     public IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)

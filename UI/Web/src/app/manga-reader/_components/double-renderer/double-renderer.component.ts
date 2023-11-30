@@ -76,9 +76,8 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
   shouldRenderDouble$!: Observable<boolean>;
 
 
-  get ReaderMode() {return ReaderMode;}
-  get LayoutMode() {return LayoutMode;}
-
+  protected readonly ReaderMode = ReaderMode;
+  protected readonly LayoutMode = LayoutMode;
 
 
   constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService,

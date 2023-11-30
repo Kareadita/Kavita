@@ -347,6 +347,7 @@ public class Startup
             =>
         {
             opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest;
+            opts.IncludeQueryInRequestPath = true;
         });
 
         app.Use(async (context, next) =>

@@ -72,7 +72,7 @@ public class TachiyomiService : ITachiyomiService
             if (looseLeafChapterVolume == null)
             {
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes
-                    .Last().Chapters
+                    [^1].Chapters
                     .OrderBy(c => c.Number.AsFloat(), ChapterSortComparerZeroFirst.Default)
                     .Last());
                 if (volumeChapter.Number == "0")

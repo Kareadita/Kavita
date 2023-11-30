@@ -644,6 +644,7 @@ public class DirectoryService : IDirectoryService
     /// Scans a directory by utilizing a recursive folder search. If a .kavitaignore file is found, will ignore matching patterns
     /// </summary>
     /// <param name="folderPath"></param>
+    /// <param name="supportedExtensions"></param>
     /// <param name="matcher"></param>
     /// <returns></returns>
     public IList<string> ScanFiles(string folderPath, string supportedExtensions, GlobMatcher? matcher = null)

@@ -153,7 +153,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     // This needs to only apply after first render
     this.libraryForm.get('type')?.valueChanges.pipe(
       tap((type: LibraryType) => {
-        switch (type) {
+        const libType = parseInt(type + '', 10) as LibraryType;
+        switch (libType) {
           case LibraryType.Manga:
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
@@ -177,6 +178,7 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
         }
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -203,15 +205,17 @@ export class LibrarySettingsModalComponent implements OnInit {
       for(let glob of this.library.excludePatterns) {
         this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
       }
+      this.excludePatterns = this.library.excludePatterns;
     } else {
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
       }
     }
-    this.excludePatterns = this.library.excludePatterns;
+
     if (this.excludePatterns.length === 0) {
       this.excludePatterns = [''];
     }
+
     this.cdRef.markForCheck();
   }
 

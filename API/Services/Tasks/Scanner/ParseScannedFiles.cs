@@ -312,7 +312,6 @@ public class ParseScannedFiles
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
-        return;
 
         async Task ProcessFolder(IList<string> files, string folder)
         {

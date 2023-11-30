@@ -813,7 +813,7 @@ public class SeriesService : ISeriesService
 
     private static double ExponentialSmoothing(IList<double> data, double alpha)
     {
-        var forecast = data.First();
+        var forecast = data[0];
 
         foreach (var value in data)
         {

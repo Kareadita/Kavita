@@ -13,7 +13,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe, NgClass} from '@angular/common';
+import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe, NgClass, AsyncPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -68,6 +68,7 @@ import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scrolle
 import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {shareReplay} from "rxjs/operators";
 
 
 const PREFETCH_PAGES = 10;
@@ -124,7 +125,7 @@ enum KeyDirection {
   imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
     NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe,
-    FullscreenIconPipe, TranslocoDirective, NgbProgressbar, PercentPipe, NgClass]
+    FullscreenIconPipe, TranslocoDirective, NgbProgressbar, PercentPipe, NgClass, AsyncPipe]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -158,6 +159,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly LayoutMode = LayoutMode;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly Math = Math;
 
   libraryId!: number;
   seriesId!: number;
@@ -400,7 +402,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
   private currentImage: Subject<HTMLImageElement | null> = new ReplaySubject(1);
-  currentImage$: Observable<HTMLImageElement | null> = this.currentImage.asObservable();
+  currentImage$: Observable<HTMLImageElement | null> = this.currentImage.asObservable().pipe(
+    shareReplay({refCount: true, bufferSize: 2})
+  );
 
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
@@ -743,18 +747,34 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param pageNum Page Number to load
    * @param forceNew Forces to fetch a new image
    * @param chapterId ChapterId to fetch page from. Defaults to current chapterId. Not used when in bookmark mode
-   * @returns
+   * @returns HTMLImageElement | undefined
    */
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
 
-    let img;
+    let img: HTMLImageElement | undefined;
     if (this.bookmarkMode) img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
     else img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
     );
+
+    //console.log('Requesting page ', pageNum, ' found page: ', img, ' and app is requesting new image? ', forceNew);
     if (!img || forceNew) {
       img = new Image();
       img.src = this.getPageUrl(pageNum, chapterId);
+      img.onload = (evt) => {
+        this.currentImage.next(img!);
+        this.cdRef.markForCheck();
+      }
+      // img.onerror = (evt) => {
+      //   const event = evt as Event;
+      //   const page = this.readerService.imageUrlToPageNum((event.target as HTMLImageElement).src);
+      //   console.error('Image failed to load: ', page);
+      //   (event.target as HTMLImageElement).onerror = null;
+      //   const newSrc = this.getPageUrl(pageNum, chapterId) + '#' + new Date().getTime();
+      //   console.log('requesting page ', page, ' with url: ', newSrc);
+      //   (event.target as HTMLImageElement).src = newSrc;
+      //   this.cdRef.markForCheck();
+      // }
     }
 
     return img;
@@ -1224,6 +1244,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   setCanvasImage() {
     if (this.cachedImages === undefined) return;
+
     this.canvasImage = this.getPage(this.pageNum, this.chapterId, this.layoutMode !== LayoutMode.Single);
     if (!this.canvasImage.complete) {
       this.canvasImage.addEventListener('load', () => {
@@ -1346,19 +1367,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       const cachedImagePageNum = this.readerService.imageUrlToPageNum(this.cachedImages[index].src);
       if (cachedImagePageNum !== numOffset) {
-        this.cachedImages[index] = new Image();
-        this.cachedImages[index].src = this.getPageUrl(numOffset);
-        this.cachedImages[index].onload = (evt) => {
-          this.cdRef.markForCheck();
-        }
+        this.cachedImages[index] = this.getPage(numOffset, this.chapterId);
       }
     }
-
-    //const pages = this.cachedImages.map(img => [this.readerService.imageUrlToChapterId(img.src), this.readerService.imageUrlToPageNum(img.src)]);
-    // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
-    //   if (this.pageNum === p[1]) return '[' + p + ']';
-    //   return '' + p
-    // }));
   }
 
 
@@ -1681,4 +1692,5 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     d.text = translate('preferences.' + o.text);
     return d;
   }
+
 }
