@@ -144,7 +144,7 @@
     "send-to-permission": "无法向设备发送Kindel不支持的非EPUB格式或者PDF格式文件",
     "reading-list-name-exists": "此名称的阅读清单已存在",
     "volume-num": "第{0}卷",
-    "issue-num": "问题编号{0}{1}",
+    "issue-num": "期号 {0}{1}",
     "book-num": "第{0}本",
     "user-migration-needed": "该用户需要进行迁移。通知他们注销并重新登录，以触发迁移流程",
     "generic-relationship": "更新关系时发生了问题",

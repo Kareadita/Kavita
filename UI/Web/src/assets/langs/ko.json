@@ -96,7 +96,8 @@
         "password": "비밀번호",
         "promoted": "승격",
         "clear": "삭제",
-        "filter": "필터"
+        "filter": "필터",
+        "remove": "제거"
     },
     "series-metadata-detail": {
         "characters-title": "캐릭터",
@@ -161,7 +162,12 @@
         "naming-conventions-part-1": "카비타는 ",
         "naming-conventions-part-2": "폴더 요구 사항.",
         "cover-description": "사용자 지정 라이브러리 이미지 아이콘은 선택 사항입니다",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "exclude-patterns-label": "패턴 제외",
+        "help": "{{common.help}}",
+        "file-type-group-label": "파일 유형",
+        "file-type-group-tooltip": "\"Kavita\"이(가) 무엇을 스캔해야 하는지에 따라 다양한 파일 유형이 있을 수 있습니다. 아카이브 파일은 일반적으로 cb*, zip, rar 등을 포함합니다.",
+        "exclude-patterns-tooltip": "디렉터리를 스캔할 때 Kavita가 일치시킬 패턴 집합(Glob 구문)을 구성하고, 스캐너 결과에서 제외할 수 있도록 설정하세요."
     },
     "manage-library": {
         "title": "라이브러리",
@@ -271,13 +277,14 @@
         "skip-alt": "메인 콘텐츠로 건너뛰기",
         "no-data": "검색 결과가 없습니다",
         "server-settings": "서버 설정",
-        "help": "도움말",
+        "help": "{{common.help}}",
         "logout": "로그아웃",
         "settings": "설정",
         "scroll-to-top-alt": "맨위로 스크롤",
         "announcements": "공지 사항",
         "search-series-alt": "시리즈 검색",
-        "search-alt": "검색…"
+        "search-alt": "검색…",
+        "all-filters": "스마트 필터"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -296,8 +303,6 @@
         "localized-name-label": "현지화된 이름",
         "summary-label": "요약",
         "release-year-label": "출시 연도",
-        "add-link-alt": "링크 추가",
-        "remove-link-alt": "링크 제거",
         "cover-image-description": "새 표지 이미지를 업로드하고 선택합니다. 저장을 눌러 표지를 업로드하고 재정의합니다.",
         "field-locked-alt": "필드가 잠겨 있습니다",
         "info-title": "정보",
@@ -836,7 +841,9 @@
         "load": "불러오기",
         "back": "뒤로가기",
         "reset": "{{common.reset}}",
-        "apply": "{{common.apply}}"
+        "apply": "{{common.apply}}",
+        "enter-an-url-pre-title": "{{url}}을(를) 입력하세요",
+        "url": "Url"
     },
     "series-info-cards": {
         "age-rating-title": "{{entity-info-cards.age-rating-title}}",
@@ -1082,7 +1089,9 @@
         "first-time-reading-manga": "메뉴를 열려면 언제든지 이미지를 탭하세요. 다른 설정을 구성하거나 진행 표시줄을 클릭하여 페이지로 이동할 수 있습니다. 이미지의 측면을 탭하면 다음/이전 페이지로 이동합니다.",
         "no-prev-chapter": "이전 챕터 없음",
         "unbookmark-page-tooltip": "페이지 북마크 해제",
-        "bookmark-page-tooltip": "페이지 북마크"
+        "bookmark-page-tooltip": "페이지 북마크",
+        "series-progress": "시리즈 진행률: {{percentage}}",
+        "bookmarks-title": "북마크"
     },
     "metadata-filter": {
         "penciller-label": "펜슬러",
@@ -1542,14 +1551,15 @@
         "more": "더 보기"
     },
     "card-detail-layout": {
-        "total-items": "{{count}} 총 항목"
+        "total-items": "{{count}} 총 항목",
+        "jumpkey-count": "{{count}} 시리즈"
     },
     "edit-series-relation": {
         "description-part-2": "힌트는 위키.",
         "description-part-1": "어떤 관계를 추가해야 할지 잘 모르시겠습니까? 우리를 참조하십시오",
         "target-series": "대상 시리즈",
         "relationship": "관계",
-        "remove": "제거",
+        "remove": "{{common.remove}}",
         "add-relationship": "관계 추가",
         "parent": "{{relationship-pipe.parent}}"
     },
@@ -1874,5 +1884,18 @@
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
         "clear": "{{common.clear}}"
+    },
+    "next-expected-card": {
+        "title": "~{{date}}"
+    },
+    "all-filters": {
+        "title": "모든 스마트 필터",
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+    "file-type-group-pipe": {
+        "epub": "Epub",
+        "archive": "아카이브",
+        "pdf": "Pdf",
+        "image": "Image"
     }
 }
