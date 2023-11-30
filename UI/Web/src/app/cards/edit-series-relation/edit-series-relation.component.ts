@@ -47,6 +47,15 @@ interface RelationControl {
 })
 export class EditSeriesRelationComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly seriesService = inject(SeriesService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly searchService = inject(SearchService);
+  public readonly imageService = inject(ImageService);
+  protected readonly RelationKind = RelationKind;
+
   @Input({required: true}) series!: Series;
   /**
    * This will tell the component to save based on its internal state
@@ -60,16 +69,6 @@ export class EditSeriesRelationComponent implements OnInit {
   libraryNames: {[key:number]: string} = {};
 
   focusTypeahead = new EventEmitter();
-  private readonly destroyRef = inject(DestroyRef);
-
-  get RelationKind() {
-    return RelationKind;
-  }
-
-
-  constructor(private seriesService: SeriesService, private utilityService: UtilityService,
-    public imageService: ImageService, private libraryService: LibraryService,  private searchService: SearchService,
-    private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.seriesService.getRelatedForSeries(this.series.id).subscribe(async relations => {

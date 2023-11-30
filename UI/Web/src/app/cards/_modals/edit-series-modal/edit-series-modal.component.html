@@ -106,9 +106,9 @@
                 <div class="col-md-12">
                   <div class="mb-3">
                     <label for="genres" class="form-label">{{t('genres-label')}}</label>
-                    <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings"
+                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreSettings"
                                    [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
-                                   (newItemAdded)="metadata.genresLocked = true" (selectedData)="metadata.genresLocked = true">
+                                   (newItemAdded)="metadata.genresLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
                       </ng-template>
@@ -142,9 +142,9 @@
                 <div class="col-lg-4 col-md-12 pe-2">
                   <div class="mb-3">
                     <label for="language" class="form-label">{{t('language-label')}}</label>
-                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings"
+                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
                                    [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
-                                   (newItemAdded)="metadata.languageLocked = true" (selectedData)="metadata.languageLocked = true">
+                                   (newItemAdded)="metadata.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
                       </ng-template>
@@ -159,7 +159,7 @@
                     <label for="age-rating" class="form-label">{{t('age-rating-label')}}</label>
                     <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
                       <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }"></ng-container>
-                      <select class="form-select"id="age-rating" formControlName="ageRating">
+                      <select class="form-select" id="age-rating" formControlName="ageRating">
                         <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
                       </select>
                     </div>
@@ -170,7 +170,7 @@
                     <label for="publication-status" class="form-label">{{t('publication-status-label')}}</label>
                     <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
                       <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }"></ng-container>
-                      <select class="form-select"id="publication-status" formControlName="publicationStatus">
+                      <select class="form-select" id="publication-status" formControlName="publicationStatus">
                         <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
                       </select>
                     </div>
@@ -186,9 +186,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="writer" class="form-label">{{t('writer-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [settings]="getPersonsSettings(PersonRole.Writer)"
                                  [(locked)]="metadata.writerLocked" (onUnlock)="metadata.writerLocked = false"
-                                 (newItemAdded)="metadata.writerLocked = true" (selectedData)="metadata.writerLocked = true">
+                                 (newItemAdded)="metadata.writerLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -201,9 +201,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="cover-artist" class="form-label">{{t('cover-artist-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [settings]="getPersonsSettings(PersonRole.CoverArtist)"
                                  [(locked)]="metadata.coverArtistLocked" (onUnlock)="metadata.coverArtistLocked = false"
-                                 (newItemAdded)="metadata.coverArtistLocked = true" (selectedData)="metadata.coverArtistLocked = true">
+                                 (newItemAdded)="metadata.coverArtistLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -218,9 +218,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="publisher" class="form-label">{{t('publisher-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [settings]="getPersonsSettings(PersonRole.Publisher)"
                                  [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
-                                 (newItemAdded)="metadata.publisherLocked = true" (selectedData)="metadata.publisherLocked = true">
+                                 (newItemAdded)="metadata.publisherLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -233,9 +233,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="penciller" class="form-label">{{t('penciller-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [settings]="getPersonsSettings(PersonRole.Penciller)"
                                  [(locked)]="metadata.pencillerLocked" (onUnlock)="metadata.pencillerLocked = false"
-                                 (newItemAdded)="metadata.pencillerLocked = true" (selectedData)="metadata.pencillerLocked = true">
+                                 (newItemAdded)="metadata.pencillerLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -250,9 +250,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="letterer" class="form-label">{{t('letterer-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [settings]="getPersonsSettings(PersonRole.Letterer)"
                                  [(locked)]="metadata.lettererLocked" (onUnlock)="metadata.lettererLocked = false"
-                                 (newItemAdded)="metadata.lettererLocked = true" (selectedData)="metadata.lettererLocked = true">
+                                 (newItemAdded)="metadata.lettererLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -265,9 +265,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="inker" class="form-label">{{t('inker-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [settings]="getPersonsSettings(PersonRole.Inker)"
                                  [(locked)]="metadata.inkerLocked" (onUnlock)="metadata.inkerLocked = false"
-                                 (newItemAdded)="metadata.inkerLocked = true" (selectedData)="metadata.inkerLocked = true">
+                                 (newItemAdded)="metadata.inkerLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -283,9 +283,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="editor" class="form-label">{{t('editor-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [settings]="getPersonsSettings(PersonRole.Editor)"
                                  [(locked)]="metadata.editorLocked" (onUnlock)="metadata.editorLocked = false"
-                                 (newItemAdded)="metadata.editorLocked = true" (selectedData)="metadata.editorLocked = true">
+                                 (newItemAdded)="metadata.editorLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -298,9 +298,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="colorist" class="form-label">{{t('colorist-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [settings]="getPersonsSettings(PersonRole.Colorist)"
                                  [(locked)]="metadata.coloristLocked" (onUnlock)="metadata.coloristLocked = false"
-                                 (newItemAdded)="metadata.coloristLocked = true" (selectedData)="metadata.coloristLocked = true">
+                                 (newItemAdded)="metadata.coloristLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -316,9 +316,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="character" class="form-label">{{t('character-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [settings]="getPersonsSettings(PersonRole.Character)"
                                  [(locked)]="metadata.characterLocked" (onUnlock)="metadata.characterLocked = false"
-                                 (newItemAdded)="metadata.characterLocked = true" (selectedData)="metadata.characterLocked = true">
+                                 (newItemAdded)="metadata.characterLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -331,9 +331,9 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="translator" class="form-label">{{t('translator-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="getPersonsSettings(PersonRole.Translator)"
                                  [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
-                                 (newItemAdded)="metadata.translatorLocked = true" (selectedData)="metadata.translatorLocked = true">
+                                 (newItemAdded)="metadata.translatorLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
