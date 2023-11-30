@@ -179,7 +179,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// <param name="e"></param>
     private void OnError(object sender, ErrorEventArgs e)
     {
-        _logger.LogError(e.GetException(), "[LibraryWatcher] An error occured, likely too many changes occured at once or the folder being watched was deleted. Restarting Watchers");
+        _logger.LogError(e.GetException(), "[LibraryWatcher] An error occured, likely too many changes occured at once or the folder being watched was deleted. Restarting Watchers {Current}/{Total}", _bufferFullCounter, 3);
         bool condition;
         lock (Lock)
         {
