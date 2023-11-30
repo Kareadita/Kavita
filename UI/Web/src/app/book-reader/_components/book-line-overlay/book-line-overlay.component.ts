@@ -38,6 +38,7 @@ export class BookLineOverlayComponent implements OnInit {
   @Input({required: true}) pageNumber: number = 0;
   @Input({required: true}) parent: ElementRef | undefined;
   @Output() refreshToC: EventEmitter<void> = new EventEmitter();
+  @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
   xPath: string = '';
   selectedText: string = '';
@@ -84,6 +85,8 @@ export class BookLineOverlayComponent implements OnInit {
     if (!event.target) return;
 
     if ((!selection || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
+      event.preventDefault();
+      event.stopPropagation();
       this.reset();
       return;
     }
@@ -96,6 +99,7 @@ export class BookLineOverlayComponent implements OnInit {
         this.xPath = '//' + this.xPath;
       }
 
+      this.isOpen.emit(true);
       event.preventDefault();
       event.stopPropagation();
     }
@@ -137,6 +141,7 @@ export class BookLineOverlayComponent implements OnInit {
     if (selection) {
       selection.removeAllRanges();
     }
+    this.isOpen.emit(false);
     this.cdRef.markForCheck();
   }
 

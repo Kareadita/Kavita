@@ -186,6 +186,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   drawerOpen = false;
   /**
+   * If the word/line overlay is open
+   */
+  isLineOverlayOpen = false;
+  /**
    * If the action bar is visible
    */
   actionBarVisible = true;
@@ -1630,20 +1634,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  // Responsible for handling pagination only
   handleContainerClick(event: MouseEvent) {
 
-    if (this.drawerOpen  || ['action-bar', 'offcanvas-backdrop'].some(className => (event.target as Element).classList.contains(className))) {
+    if (this.drawerOpen || this.isLineOverlayOpen || ['action-bar', 'offcanvas-backdrop'].some(className => (event.target as Element).classList.contains(className))) {
       return;
     }
 
-    if (this.isCursorOverLeftPaginationArea(event)) {
-      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-    } else if (this.isCursorOverRightPaginationArea(event)) {
-      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
-    } else {
-      this.toggleMenu(event);
+    if (this.clickToPaginate) {
+      if (this.isCursorOverLeftPaginationArea(event)) {
+        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+      } else if (this.isCursorOverRightPaginationArea(event)) {
+        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
+      }
     }
+
+    this.toggleMenu(event);
   }
 
   handleReaderClick(event: MouseEvent) {
@@ -1705,5 +1710,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   refreshPersonalToC() {
     this.refreshPToC.emit();
+  }
+
+  updateLineOverlayOpen(isOpen: boolean) {
+    // HACK: This hack allows the boolean to be changed to false so that the pagination doesn't trigger and move us to the next page when
+    // the book overlay is just closing
+    setTimeout(() => {
+      this.isLineOverlayOpen = isOpen;
+      console.log('line overlay open: ', this.isLineOverlayOpen);
+      this.cdRef.markForCheck();
+    }, 10);
   }
 }
