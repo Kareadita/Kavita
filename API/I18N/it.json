@@ -163,13 +163,12 @@
     "browse-external-sources": "Sfoglia Sorgenti Esterne",
     "smart-filters": "Filtri Intelligenti",
     "browse-smart-filters": "Sfoglia per Filtri Intelligenti",
-    "next-book-num": "Prossimo Libro: {0}",
-    "next-volume-num": "Prossimo Volume: {0}",
-    "next-chapter-num": "Prossimo Capitolo: {0}",
     "smart-filter-doesnt-exist": "Il Filtro intelligente non esiste",
     "invalid-email": "La mail nel file per l'utente non è un email valida. Vedi i log per i link.",
     "external-source-already-exists": "La Sorgente Esterna esiste già",
     "external-source-doesnt-exist": "La Sorgente Esterna non esiste",
     "external-sources": "Sorgenti Esterne",
-    "external-source-required": "ApiKey e Host sono obbligatori"
+    "external-source-required": "ApiKey e Host sono obbligatori",
+    "external-source-already-in-use": "Esiste uno stream esistente con questa Sorgente Esterna",
+    "smart-filter-already-in-use": "Esiste uno stream esistente con questo Filtro Intelligente"
 }
