@@ -34,6 +34,7 @@ public interface IAppUserProgressRepository
     Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
     Task<DateTime?> GetLatestProgressForSeries(int seriesId, int userId);
     Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId);
+    Task UpdateAllProgressThatAreMoreThanChapterPages();
 }
 #nullable disable
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -196,6 +197,36 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Select(p => p.LastModifiedUtc)
             .ToListAsync();
         return list.Count == 0 ? null : list.DefaultIfEmpty().Min();
+    }
+
+    public async Task UpdateAllProgressThatAreMoreThanChapterPages()
+    {
+        var updates = _context.AppUserProgresses
+            .Join(_context.Chapter,
+                progress => progress.ChapterId,
+                chapter => chapter.Id,
+                (progress, chapter) => new
+                {
+                    Progress = progress,
+                    Chapter = chapter
+                })
+            .Where(joinResult => joinResult.Progress.PagesRead > joinResult.Chapter.Pages)
+            .Select(result => new
+            {
+                ProgressId = result.Progress.Id,
+                NewPagesRead = Math.Min(result.Progress.PagesRead, result.Chapter.Pages)
+            })
+            .AsEnumerable();
+
+        foreach (var update in updates)
+        {
+            _context.AppUserProgresses
+                .Where(p => p.Id == update.ProgressId)
+                .ToList() // Execute the query to ensure exclusive lock
+                .ForEach(p => p.PagesRead = update.NewPagesRead);
+        }
+
+        await _context.SaveChangesAsync();
     }
 
 #nullable enable
