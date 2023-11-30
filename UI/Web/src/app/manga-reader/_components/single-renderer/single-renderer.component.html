@@ -1,12 +1,12 @@
-<ng-container *ngIf="isValid() && !this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)">
-    <div class="image-container {{imageFitClass$ | async}} {{emulateBookClass$ | async}}"
-         [style.filter]="(darkness$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
-        <ng-container *ngIf="currentImage">
-            <img alt=" "
-                #image [src]="currentImage.src"
-                id="image-1"
-                class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"
-            >
-        </ng-container>
-    </div>
-</ng-container>
+@if(isValid() && !mangaReaderService.shouldSplit(currentImage, pageSplit)) {
+  <div class="image-container {{imageFitClass$ | async}} {{emulateBookClass$ | async}}"
+       [style.filter]="(darkness$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
+    @if(currentImage) {
+      <img alt=" "
+           #image
+           [src]="currentImage.src"
+           id="image-1"
+           class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}" />
+    }
+  </div>
+}
