@@ -175,13 +175,13 @@ public class ScrobblingService : IScrobblingService
     private async Task<string> GetTokenForProvider(int userId, ScrobbleProvider provider)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return null;
+        if (user == null) return string.Empty;
 
         return provider switch
         {
             ScrobbleProvider.AniList => user.AniListAccessToken,
             _ => string.Empty
-        };
+        } ?? string.Empty;
     }
 
     public async Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody)
@@ -192,11 +192,9 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling review event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
-        if (string.IsNullOrEmpty(reviewTitle) || string.IsNullOrEmpty(reviewBody) || (reviewTitle.Length < 2200 ||
-                                                  reviewTitle.Length > 120 ||
-                                                  reviewTitle.Length < 20))
+        if (IsAniListReviewValid(reviewTitle, reviewBody))
         {
             _logger.LogDebug(
                 "Rejecting Scrobble event for {Series}. Review is not long enough to meet requirements", series.Name);
@@ -232,6 +230,13 @@ public class ScrobblingService : IScrobblingService
         _logger.LogDebug("Added Scrobbling Review update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
+    private static bool IsAniListReviewValid(string reviewTitle, string reviewBody)
+    {
+        return string.IsNullOrEmpty(reviewTitle) || string.IsNullOrEmpty(reviewBody) || (reviewTitle.Length < 2200 ||
+            reviewTitle.Length > 120 ||
+            reviewTitle.Length < 20);
+    }
+
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating)
     {
         if (!await _licenseService.HasActiveLicense()) return;
@@ -240,7 +245,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling rating event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
@@ -279,7 +284,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling reading event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
@@ -334,11 +339,11 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling want-to-read event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
-        if (existing) return;
+        if (existing) return; // BUG: If I take a series and add to remove from want to read, then add to want to read, Kavita rejects the second as a duplicate, when it's not
 
         var evt = new ScrobbleEvent()
         {
@@ -355,7 +360,7 @@ public class ScrobblingService : IScrobblingService
         _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
-    private async Task<bool> CheckIfCanScrobble(int userId, int seriesId, Series series)
+    private async Task<bool> CheckIfCannotScrobble(int userId, int seriesId, Series series)
     {
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
@@ -604,6 +609,8 @@ public class ScrobblingService : IScrobblingService
             .Select(d => d.Event)
             .ToList();
 
+        // Decisions might filter out, but those scrobble events still need to be marked as processed
+
         // For all userIds, ensure that we can connect and have access
         var usersToScrobble = readEvents.Select(r => r.AppUser)
             .Concat(addToWantToRead.Select(r => r.AppUser))
@@ -693,6 +700,21 @@ public class ScrobblingService : IScrobblingService
                     LocalizedSeriesName = evt.Series.LocalizedName,
                     Year = evt.Series.Metadata.ReleaseYear
                 }));
+
+            // After decisions, we need to mark all the want to read and remove from want to read as completed
+            foreach (var scrobbleEvent in addToWantToRead)
+            {
+                scrobbleEvent.IsProcessed = true;
+                scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
+                _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+            }
+            foreach (var scrobbleEvent in removeWantToRead)
+            {
+                scrobbleEvent.IsProcessed = true;
+                scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
+                _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+            }
+            await _unitOfWork.CommitAsync();
         }
         catch (FlurlHttpException)
         {
