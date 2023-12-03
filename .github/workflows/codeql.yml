@@ -48,6 +48,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Install Swashbuckle CLI
+      shell: powershell
+      run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2

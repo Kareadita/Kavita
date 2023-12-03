@@ -17,7 +17,7 @@ import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@a
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators';
+import {catchError, debounceTime, distinctUntilChanged, map, take, tap} from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -124,6 +124,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
   private readonly cdRef = inject(ChangeDetectorRef);
+
+  protected readonly BookPageLayoutMode = BookPageLayoutMode;
+  protected readonly WritingStyle = WritingStyle;
+  protected readonly TabID = TabID;
+  protected readonly ReadingDirection = ReadingDirection;
+  protected readonly PAGING_DIRECTION = PAGING_DIRECTION;
 
   libraryId!: number;
   seriesId!: number;
@@ -315,18 +321,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
-  /**
-   * Controls whether the cursor is a pointer when tap to paginate is on and the cursor is over
-   * either of the pagination areas
-   */
-  cursorIsPointer: boolean = false;
 
   /**
-   * Used to keep track of the last time a paginator area was clicked to prevent the default
-   * browser behavior of selecting words or lines when double- or triple-clicking, respectively,
-   * triggered by repeated click pagination (when enabled).
+   * When the user is highlighting something, then we remove pagination
    */
-  lastPaginatorClickTime: number = 0;
+  hidePagination = false;
 
   /**
    * Used to refresh the Personal PoC
@@ -343,26 +342,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: false}) reader!: ElementRef;
-
-
-  get BookPageLayoutMode() {
-    return BookPageLayoutMode;
-  }
-
-  get WritingStyle() {
-    return WritingStyle;
-  }
-  get TabID(): typeof TabID {
-    return TabID;
-  }
-
-  get ReadingDirection(): typeof ReadingDirection {
-    return ReadingDirection;
-  }
-
-  get PAGING_DIRECTION() {
-    return PAGING_DIRECTION;
-  }
 
   /**
    * Disables the Left most button
@@ -530,11 +509,28 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        map(this.isCursorOverPaginationArea.bind(this)),
-        distinctUntilChanged())
-      .subscribe((isPointer) => {
-        this.changeCursor(isPointer);
-    });
+        distinctUntilChanged(),
+        tap((e) => {
+          const selection = window.getSelection();
+          this.hidePagination = selection !== null && selection.toString().trim() !== '';
+          console.log('hide pagination: ', this.hidePagination);
+          this.cdRef.markForCheck();
+        })
+      )
+      .subscribe();
+
+    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mouseup')
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        distinctUntilChanged(),
+        tap((e) => {
+          this.hidePagination = false;
+          console.log('hide pagination: ', this.hidePagination);
+          this.cdRef.markForCheck();
+        })
+      )
+      .subscribe();
+
   }
 
   handleScrollEvent() {
@@ -1482,7 +1478,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.updateSingleImagePageStyles()
 
-    // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
+    // Calculate if bottom actionbar is needed. On a timeout to get accurate heights
     if (this.bookContentElemRef == null) {
       setTimeout(() => this.updateLayoutMode(this.layoutMode), 10);
       return;
@@ -1609,50 +1605,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
-  private isCursorOverLeftPaginationArea(event: MouseEvent): boolean {
-    const leftPaginationAreaEnd = window.innerWidth * 0.2;
-    //console.log('user clicked on ', event.clientX, ' and left pagination ends on ', leftPaginationAreaEnd);
-    return event.clientX <= leftPaginationAreaEnd;
-  }
-
-  private isCursorOverRightPaginationArea(event: MouseEvent): boolean {
-    const rightPaginationAreaStart = window.innerWidth * 0.8;
-    //console.log('user clicked on ', event.clientX, ' and right pagination starts at ', rightPaginationAreaStart);
-    return event.clientX >= rightPaginationAreaStart;
-  }
-
-  private isCursorOverPaginationArea(event: MouseEvent): boolean {
-    if (this.isLoading || !this.clickToPaginate) {
-      return false;
-    }
-
-    return this.isCursorOverLeftPaginationArea(event) || this.isCursorOverRightPaginationArea(event);
-  }
-
-  private changeCursor(isPointer: boolean) {
-    this.cursorIsPointer = isPointer;
-    this.cdRef.markForCheck();
-  }
-
-  handleContainerClick(event: MouseEvent) {
-
-    if (this.drawerOpen || this.isLineOverlayOpen || ['action-bar', 'offcanvas-backdrop'].some(className => (event.target as Element).classList.contains(className))) {
-      return;
-    }
-
-    if (this.clickToPaginate) {
-      if (this.isCursorOverLeftPaginationArea(event)) {
-        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-        return;
-      } else if (this.isCursorOverRightPaginationArea(event)) {
-        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
-        return;
-      }
-    }
-
-    this.toggleMenu(event);
-  }
-
   handleReaderClick(event: MouseEvent) {
     if (!this.clickToPaginate) {
       event.preventDefault();
@@ -1691,23 +1643,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   mouseDown($event: MouseEvent) {
     this.mousePosition.x = $event.clientX;
     this.mousePosition.y = $event.clientY;
-
-    if (!this.clickToPaginate || !this.isCursorOverPaginationArea($event)) {
-      return
-    }
-
-    // This value is completely arbitrary and should cover most
-    // double-click speeds
-    const halfASecond = 500;
-    const now = Date.now();
-
-    // This is to prevent selecting text when clicking repeatedly to switch pages,
-    // while also allowing selections to begin in a pagination area
-    if (now - this.lastPaginatorClickTime < halfASecond) {
-      $event.preventDefault();
-    }
-
-    this.lastPaginatorClickTime = now;
   }
 
   refreshPersonalToC() {
@@ -1715,11 +1650,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateLineOverlayOpen(isOpen: boolean) {
-    // HACK: This hack allows the boolean to be changed to false so that the pagination doesn't trigger and move us to the next page when
-    // the book overlay is just closing
-    setTimeout(() => {
-      this.isLineOverlayOpen = isOpen;
-      this.cdRef.markForCheck();
-    }, 10);
+    this.isLineOverlayOpen = isOpen;
+    this.cdRef.markForCheck();
   }
 }

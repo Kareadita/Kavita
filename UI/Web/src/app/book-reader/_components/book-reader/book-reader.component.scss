@@ -360,13 +360,10 @@ $pagination-opacity: 0;
     border-color: transparent;
     border: none !important;
     outline: none;
+    cursor: pointer;
 
     &.immersive {
         top: 0px;
-    }
-
-    &.no-pointer-events {
-        pointer-events: none;
     }
 }
 
@@ -382,13 +379,10 @@ $pagination-opacity: 0;
     z-index: 3;
     outline: none;
     height: 100vw;
+    cursor: pointer;
 
     &.immersive {
         top: 0px;
-    }
-
-    &.no-pointer-events {
-        pointer-events: none;
     }
 }
 
