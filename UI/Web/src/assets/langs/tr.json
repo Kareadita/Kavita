@@ -148,5 +148,30 @@
     },
     "edit-device": {
         "device-name-label": "Aygıt İsmi"
+    },
+    "common": {
+        "email": "E-posta",
+        "edit": "Düzenle",
+        "save": "Kaydet",
+        "help": "Yardım",
+        "add": "Ekle",
+        "password": "Parola",
+        "delete": "Sil",
+        "username": "Kullanıcı adı",
+        "reset": "Sıfırla",
+        "apply": "Uygula",
+        "loading": "Yükleniyor…",
+        "select-all": "Tümünü Seç",
+        "remove": "Kaldır",
+        "book-num": "Kitap"
+    },
+    "preferences": {
+        "cards": "Kartlar",
+        "2-column": "2 Sütun",
+        "1-column": "1 Sütun",
+        "up-to-down": "Yukarıdan Aşağıya"
+    },
+    "validation": {
+        "required-field": "Bu alan gereklidir"
     }
 }

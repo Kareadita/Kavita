@@ -11,7 +11,10 @@
         "server-settings-link": "Настройки сервера",
         "not-granted": "Вам не был предоставлен доступ ни к каким библиотекам.",
         "recently-updated-title": "Недавно обновленная серия",
-        "recently-added-title": "Недавно добавленная серия"
+        "recently-added-title": "Недавно добавленная серия",
+        "on-deck-title": "Продолжить чтение",
+        "more-in-genre-title": "Больше в {{genre}}",
+        "no-libraries": "Библиотеки пока не настроены. Настройте некоторые из них в"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -21,10 +24,11 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "Сохранение…"
+        "saving": "Сохранение…",
+        "update": "Обновление"
     },
     "user-scrobble-history": {
-        "filter-label": "Фильтр",
+        "filter-label": "{{common.filter}}",
         "created-header": "Создано",
         "last-modified-header": "Последнее изменение",
         "type-header": "Тип",
@@ -34,12 +38,18 @@
         "volume-and-chapter-num": "Том {{v}} Глава {{n}}",
         "rating": "Рейтинг {{r}}",
         "processed": "Обработанный",
-        "not-processed": "Не обработано"
+        "not-processed": "Не обработано",
+        "not-applicable": "Непригодный",
+        "title": "История Скроббла",
+        "data-header": "Данные",
+        "description": "Здесь вы найдете все события скроббла, связанные с вашей учетной записью. Для того чтобы события существовали, у вас должен быть настроен активный поставщик скробблинга. Все события, которые были обработаны, будут удалены через месяц. Если есть необработанные события, то, скорее всего, они не смогут сформировать совпадения выше по потоку. Пожалуйста, обратитесь к своему администратору, чтобы они были исправлены."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Прогресс чтения",
         "score-updated": "Обновление рейтинга",
-        "review": "Обновление обзора"
+        "review": "Обновление обзора",
+        "want-to-read-add": "Хотите прочитать: Добавить",
+        "want-to-read-remove": "Хотите прочитать: Удалить"
     },
     "spoiler": {
         "click-to-show": "Спойлер, нажмите, чтобы показать"
@@ -48,21 +58,26 @@
         "title": "Редактировать отзыв",
         "review-label": "Обзор",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "tagline-label": "Подзаголовок"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
-        "user-review": "Обзор на {{username}}"
+        "user-review": "Обзор на {{username}}",
+        "go-to-review": "Перейти к просмотру",
+        "external-mod": "(внешний)"
     },
     "review-card": {
         "your-review": "Это ваш отзыв",
         "local-review": "Обзор",
-        "rating-percentage": "Рейтинг {{r}}%"
+        "rating-percentage": "Рейтинг {{r}}%",
+        "external-review": "Внешний обзор"
     },
     "want-to-read": {
         "series-count": "{{common.series-count}}",
         "no-items": "Нет ни одного элемента. Попробуйте добавить серию.",
-        "no-items-filtered": "Ни один элемент не соответствует текущему фильтру."
+        "no-items-filtered": "Ни один элемент не соответствует текущему фильтру.",
+        "title": "Хочу прочитать"
     },
     "user-preferences": {
         "title": "Панель управления пользователя",
@@ -109,7 +124,20 @@
         "line-height-book-label": "Межстрочный интервал",
         "line-height-book-tooltip": "Размер интервала между строками книги",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "scrobbling-tab": "Скробблинг",
+        "page-splitting-tooltip": "Как разделить изображение во всю ширину (т.е. как левое, так и правое изображения объединяются)",
+        "swipe-to-paginate-label": "Проведите пальцем по страницам",
+        "smart-filters-tab": "Умные фильтры",
+        "collapse-series-relationships-tooltip": "Должна ли Кавита показывать серии, которые не имеют отношения друг к другу, или это родителаякий серия/приквел",
+        "locale-label": "Язык",
+        "image-reader-settings-title": "Просмоторщик изображений",
+        "collapse-series-relationships-label": "Свернуть отношение к серии",
+        "prompt-on-download-tooltip": "Запрашивать, когда размер загрузки превышает {{size}} МБ",
+        "blur-unread-summaries-label": "Размытие непрочитанных сводок",
+        "page-layout-mode-tooltip": "Показывать элементы в виде карточек или списка на странице сведений о серии.",
+        "3rd-party-clients-tab": "Сторонние клиенты",
+        "prompt-on-download-label": "Запрос на загрузку"
     },
     "theme-manager": {
         "apply": "{{common.apply}}"

@@ -15,5 +15,8 @@
     "denied": "禁じられている",
     "register-user": "ユーザー登録時に問題が発生しました",
     "nothing-to-do": "何もすることがない",
-    "permission-denied": "この操作は許可されていません"
+    "permission-denied": "この操作は許可されていません",
+    "password-updated": "パスワードは更新されました",
+    "user-already-registered": "ユーザー（{0}）は既に登録されています",
+    "no-user": "ユーザーが存在しません"
 }

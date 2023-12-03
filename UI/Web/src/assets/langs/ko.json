@@ -688,8 +688,9 @@
         "table-of-contents-header": "목차",
         "go-to-page": "페이지로 이동",
         "go-to-last-page": "마지막 페이지로 이동",
-        "bookmarks-header": "북마크",
-        "previous": "이전"
+        "bookmarks-header": "{{side-nav.bookmarks}}",
+        "previous": "이전",
+        "close-reader": "리더 닫기"
     },
     "confirm-email-change": {
         "title": "이메일 변경 확인",
@@ -999,7 +1000,8 @@
         "libraries": "라이브러리",
         "people": "인물",
         "tags": "태그",
-        "genres": "장르"
+        "genres": "장르",
+        "bookmarks": "{{side-nav.bookmarks}}"
     },
     "add-to-list-modal": {
         "filter-label": "{{common.filter}}",
