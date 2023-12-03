@@ -115,9 +115,10 @@
                     <div ngbAccordionCollapse>
                       <div ngbAccordionBody>
                         <ng-template>
-                          <span class="mb-2">{{t('exclude-patterns-tooltip')}}</span>
-                          <a class="ms-1" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner/excluding-files-folders" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
-                          <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                          <span >{{t('exclude-patterns-tooltip')}}<a class="ms-1" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner/excluding-files-folders" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a></span>
+                          <div class="mt-2">
+                            <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                          </div>
                         </ng-template>
                       </div>
                     </div>

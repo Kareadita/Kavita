@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -9,6 +9,7 @@ import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {take} from "rxjs/operators";
 
 @Component({
     selector: 'app-confirm-email',
@@ -18,7 +19,7 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
     standalone: true,
   imports: [SplashContainerComponent, NgIf, NgFor, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
-export class ConfirmEmailComponent {
+export class ConfirmEmailComponent implements OnDestroy {
   /**
    * Email token used for validating
    */
@@ -53,6 +54,14 @@ export class ConfirmEmailComponent {
       this.token = token!;
       this.registerForm.get('email')?.setValue(email || '');
       this.cdRef.markForCheck();
+  }
+
+  ngOnDestroy() {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.navService.showSideNav();
+      }
+    });
   }
 
   isNullOrEmpty(v: string | null | undefined) {

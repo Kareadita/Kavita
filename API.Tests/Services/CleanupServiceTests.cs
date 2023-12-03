@@ -514,6 +514,72 @@ public class CleanupServiceTests : AbstractDbTest
     }
     #endregion
 
+
+    #region EnsureChapterProgressIsCapped
+
+    [Fact]
+    public async Task EnsureChapterProgressIsCapped_ShouldNormalizeProgress()
+    {
+        await ResetDb();
+
+        var s = new SeriesBuilder("Test CleanupWantToRead_ShouldRemoveFullyReadSeries")
+            .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
+            .Build();
+
+        s.Library = new LibraryBuilder("Test LIb").Build();
+        var c = new ChapterBuilder("1").WithPages(2).Build();
+        c.UserProgress = new List<AppUserProgress>();
+        s.Volumes = new List<Volume>()
+        {
+            new VolumeBuilder("0").WithChapter(c).Build()
+        };
+        _context.Series.Add(s);
+
+        var user = new AppUser()
+        {
+            UserName = "EnsureChapterProgressIsCapped",
+            Progresses = new List<AppUserProgress>()
+        };
+        _context.AppUser.Add(user);
+
+        await _unitOfWork.CommitAsync();
+
+        await _readerService.MarkChaptersAsRead(user, s.Id, new List<Chapter>() {c});
+        await _unitOfWork.CommitAsync();
+
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id);
+        await _unitOfWork.ChapterRepository.AddChapterModifiers(user.Id, chapter);
+
+        Assert.NotNull(chapter);
+        Assert.Equal(2, chapter.PagesRead);
+
+        // Update chapter to have 1 page
+        c.Pages = 1;
+        _unitOfWork.ChapterRepository.Update(c);
+        await _unitOfWork.CommitAsync();
+
+        chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id);
+        await _unitOfWork.ChapterRepository.AddChapterModifiers(user.Id, chapter);
+        Assert.NotNull(chapter);
+        Assert.Equal(2, chapter.PagesRead);
+        Assert.Equal(1, chapter.Pages);
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+        await cleanupService.EnsureChapterProgressIsCapped();
+        chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id);
+        await _unitOfWork.ChapterRepository.AddChapterModifiers(user.Id, chapter);
+
+        Assert.NotNull(chapter);
+        Assert.Equal(1, chapter.PagesRead);
+
+        _context.AppUser.Remove(user);
+        await _unitOfWork.CommitAsync();
+    }
+    #endregion
+
     // #region CleanupBookmarks
     //
     // [Fact]

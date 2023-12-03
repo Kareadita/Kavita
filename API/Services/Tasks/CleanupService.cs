@@ -26,6 +26,7 @@ public interface ICleanupService
     Task CleanupBackups();
     Task CleanupLogs();
     void CleanupTemp();
+    Task EnsureChapterProgressIsCapped();
     /// <summary>
     /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed or Cancelled.
     /// </summary>
@@ -89,6 +90,8 @@ public class CleanupService : ICleanupService
         await DeleteReadingListCoverImages();
         await SendProgress(0.8F, "Cleaning old logs");
         await CleanupLogs();
+        await SendProgress(0.9F, "Cleaning progress events that exceed 100%");
+        await EnsureChapterProgressIsCapped();
         await SendProgress(1F, "Cleanup finished");
         _logger.LogInformation("Cleanup finished");
     }
@@ -241,6 +244,17 @@ public class CleanupService : ICleanupService
         }
 
         _logger.LogInformation("Temp directory purged");
+    }
+
+    /// <summary>
+    /// Ensures that each chapter's progress (pages read) is capped at the total pages. This can get out of sync when a chapter is replaced after being read with one with lower page count.
+    /// </summary>
+    /// <returns></returns>
+    public async Task EnsureChapterProgressIsCapped()
+    {
+        _logger.LogInformation("Cleaning up any progress rows that exceed chapter page count");
+        await _unitOfWork.AppUserProgressRepository.UpdateAllProgressThatAreMoreThanChapterPages();
+        _logger.LogInformation("Cleaning up any progress rows that exceed chapter page count - complete");
     }
 
     /// <summary>

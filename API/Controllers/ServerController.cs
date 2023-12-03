@@ -270,6 +270,8 @@ public class ServerController : BaseApiController
         await provider.FlushAsync();
         provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
         await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
+        await provider.FlushAsync();
         return Ok();
     }
 
