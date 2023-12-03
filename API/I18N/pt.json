@@ -169,5 +169,8 @@
     "external-sources": "Fontes Externas",
     "external-source-required": "ApiKey e Host requeridos",
     "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente",
-    "collection-deleted": "Coleção eliminada"
+    "collection-deleted": "Coleção eliminada",
+    "dashboard-stream-doesnt-exist": "Stream do Painel Principal não existe",
+    "invalid-email": "O email guardado para o utilizador não é válido. Verifique se existem links nos logs.",
+    "sidenav-stream-doesnt-exist": "Stream do SideNav não existe"
 }

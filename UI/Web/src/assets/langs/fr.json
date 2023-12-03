@@ -267,12 +267,12 @@
     "generic-list-modal": {
         "close": "{{common.close}}",
         "clear": "Effacer",
-        "filter": "Filtrer",
+        "filter": "{{filtre.commun}}",
         "open-filtered-search": "Ouvrez une recherche filtrée pour {{item}}"
     },
     "user-stats-info-cards": {
         "total-pages-read-label": "Total de pages lues",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}} : {{value}}",
         "total-words-read-label": "Nombre Total de Mots Lus",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "Temps passé à lire",

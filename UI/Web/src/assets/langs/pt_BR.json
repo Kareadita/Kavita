@@ -556,7 +556,8 @@
         "incognito-mode-label": "Modo Incógnito",
         "next": "Seguinte",
         "previous": "Anterior",
-        "go-to-page-prompt": "Existem {{totalPages}} páginas. Para qual página você quer ir?"
+        "go-to-page-prompt": "Existem {{totalPages}} páginas. Para qual página você quer ir?",
+        "close-reader": "Fechar Leitor"
     },
     "personal-table-of-contents": {
         "no-data": "Nada Marcado Ainda",
@@ -726,7 +727,12 @@
         "cancel": "{{common.cancel}}",
         "next": "Seguinte",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "exclude-patterns-label": "Excluir Padrões",
+        "help": "{{common.help}}",
+        "file-type-group-label": "Tipos de Arquivo",
+        "file-type-group-tooltip": "Que tipos de arquivos o Kavita deve procurar. Por exemplo, Arquivo incluirá todos os arquivos cb*, zip, rar, etc.",
+        "exclude-patterns-tooltip": "Configure um conjunto de padrões (sintaxe Glob) que Kavita corresponderá ao verificar diretórios e excluirá dos resultados do Scanner."
     },
     "reader-settings": {
         "general-settings-title": "Configurações Gerais",
@@ -803,7 +809,8 @@
         "size": "Tamanho:"
     },
     "card-detail-layout": {
-        "total-items": "{{count}} itens no total"
+        "total-items": "{{count}} itens no total",
+        "jumpkey-count": "{{count}} Séries"
     },
     "card-item": {
         "cannot-read": "Não foi Possível Ler"
@@ -832,7 +839,9 @@
         "reset": "{{common.reset}}",
         "image-num": "Imagem {{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "enter-an-url-pre-title": "Insira uma {{url}}",
+        "url": "Url"
     },
     "download-indicator": {
         "progress": "{{percentage}}% baixado"
@@ -1074,7 +1083,14 @@
         "analyze-files-task-desc": "Executa uma tarefa de longa duração que analisará arquivos para gerar extensão e tamanho. Isso deve ser executado apenas uma vez para a versão v0.7. Não é necessário se você instalou o pós v0.7.",
         "analyze-files-task-success": "A análise do arquivo foi colocada na fila",
         "check-for-updates-task": "Verifique se há atualizações",
-        "check-for-updates-task-desc": "Veja se há algum lançamento Estável antes da sua versão."
+        "check-for-updates-task-desc": "Veja se há algum lançamento Estável antes da sua versão.",
+        "bust-cache-task-desc": "Elimina o cache Kavita + - só deve ser usado ao depurar correspondências ruins.",
+        "bust-locale-task-desc": "Elimina o cache local. Isso pode corrigir problemas com termos que não são exibidos corretamente após uma atualização",
+        "bust-locale-task-success": "Cache Local eliminado",
+        "bust-cache-task-success": "Kavita+ Cache eliminado",
+        "bust-cache-task": "Eliminar Cache",
+        "bust-locale-task": "Eliminar Cache Local",
+        "cron-header": "Cron"
     },
     "manage-users": {
         "title": "Usuários Ativos",
@@ -1152,7 +1168,8 @@
     "collection-detail": {
         "no-data": "Não há itens. Tente adicionar uma série.",
         "no-data-filtered": "Nenhum item corresponde ao seu filtro atual.",
-        "title-alt": "Kavita - {{collectionName}} Coleção"
+        "title-alt": "Kavita - {{collectionName}} Coleção",
+        "series-header": "Séries"
     },
     "all-collections": {
         "title": "Coleções",
@@ -1226,7 +1243,8 @@
         "reading-lists": "Listas de Leitura",
         "collections": "Coleções",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "bookmarks": "{{side-nav.bookmarks}}"
     },
     "nav-header": {
         "skip-alt": "Ir para o conteúdo principal",
@@ -1239,7 +1257,8 @@
         "settings": "Configurações",
         "help": "Ajuda",
         "announcements": "Anúncios",
-        "logout": "Sair"
+        "logout": "Sair",
+        "all-filters": "Filtros Inteligentes"
     },
     "add-to-list-modal": {
         "title": "Adicionar à Lista de Leitura",
@@ -1284,7 +1303,8 @@
         "next": "Seguinte",
         "import-step": "Importar CBLs",
         "validate-cbl-step": "Validar CBL",
-        "final-import-step": "Passo Final"
+        "final-import-step": "Passo Final",
+        "dry-run-step": "Funcionamento a Seco"
     },
     "pdf-reader": {
         "loading-message": "Carregando... PDFs podem demorar mais do que o esperado",
@@ -1328,7 +1348,9 @@
         "user-preferences-updated": "Preferências de usuário atualizadas",
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
         "unbookmark-page-tooltip": "Desmarcar Página",
-        "bookmark-page-tooltip": "Marcar Página"
+        "bookmark-page-tooltip": "Marcar Página",
+        "series-progress": "Progresso das Séries: {{percentage}}",
+        "bookmarks-title": "Marcadores"
     },
     "metadata-filter": {
         "filter-title": "Filtro",
@@ -1440,7 +1462,9 @@
     },
     "day-breakdown": {
         "x-axis-label": "Dia da Semana",
-        "y-axis-label": "Eventos de Leitura"
+        "y-axis-label": "Eventos de Leitura",
+        "title": "Divisão do Dia",
+        "no-data": "Sem progresso, comece a ler"
     },
     "file-breakdown-stats": {
         "format-title": "Formato",
@@ -1703,7 +1727,8 @@
         "chapter-num": "Capítulo",
         "volume-num": "Volume",
         "clear": "Limpar",
-        "filter": "Filtro"
+        "filter": "Filtro",
+        "remove": "Remover"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Role para cima para ir para o capítulo anterior",
@@ -1861,5 +1886,18 @@
         "on-deck": "{{dashboard.on-deck-title}}",
         "newly-added": "{{dashboard.recently-added-title}}",
         "all-series": "{{side-nav.all-series}}"
+    },
+    "file-type-group-pipe": {
+        "epub": "Epub",
+        "archive": "Arquivo",
+        "pdf": "Pdf",
+        "image": "Imagem"
+    },
+    "next-expected-card": {
+        "title": "~{{date}}"
+    },
+    "all-filters": {
+        "title": "Todos os Filtros Inteligentes",
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     }
 }
