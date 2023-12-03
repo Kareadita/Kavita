@@ -84,9 +84,11 @@ export class BookLineOverlayComponent implements OnInit {
     const selection = window.getSelection();
     if (!event.target) return;
 
-    if ((!selection || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
-      event.preventDefault();
-      event.stopPropagation();
+    if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
+      if (this.selectedText !== '') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       this.reset();
       return;
     }
