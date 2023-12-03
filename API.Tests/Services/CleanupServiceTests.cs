@@ -574,6 +574,9 @@ public class CleanupServiceTests : AbstractDbTest
 
         Assert.NotNull(chapter);
         Assert.Equal(1, chapter.PagesRead);
+
+        _context.AppUser.Remove(user);
+        await _unitOfWork.CommitAsync();
     }
     #endregion
 
