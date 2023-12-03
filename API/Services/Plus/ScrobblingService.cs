@@ -714,9 +714,8 @@ public class ScrobblingService : IScrobblingService
                     scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
                     _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
                 }
+                await _unitOfWork.CommitAsync();
             }
-
-            await _unitOfWork.CommitAsync();
         }
         catch (FlurlHttpException)
         {
