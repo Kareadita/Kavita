@@ -74,7 +74,6 @@ export class EditListComponent implements OnInit {
       }
     }
 
-
     this.emit();
     this.cdRef.markForCheck();
   }
