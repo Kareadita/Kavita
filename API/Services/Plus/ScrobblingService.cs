@@ -609,8 +609,6 @@ public class ScrobblingService : IScrobblingService
             .Select(d => d.Event)
             .ToList();
 
-        // Decisions might filter out, but those scrobble events still need to be marked as processed
-
         // For all userIds, ensure that we can connect and have access
         var usersToScrobble = readEvents.Select(r => r.AppUser)
             .Concat(addToWantToRead.Select(r => r.AppUser))
@@ -623,7 +621,7 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
+        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
 
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
@@ -702,18 +700,22 @@ public class ScrobblingService : IScrobblingService
                 }));
 
             // After decisions, we need to mark all the want to read and remove from want to read as completed
-            foreach (var scrobbleEvent in addToWantToRead)
+            if (decisions.All(d => d.IsProcessed))
             {
-                scrobbleEvent.IsProcessed = true;
-                scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
-                _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+                foreach (var scrobbleEvent in addToWantToRead)
+                {
+                    scrobbleEvent.IsProcessed = true;
+                    scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
+                    _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+                }
+                foreach (var scrobbleEvent in removeWantToRead)
+                {
+                    scrobbleEvent.IsProcessed = true;
+                    scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
+                    _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+                }
             }
-            foreach (var scrobbleEvent in removeWantToRead)
-            {
-                scrobbleEvent.IsProcessed = true;
-                scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
-                _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
-            }
+
             await _unitOfWork.CommitAsync();
         }
         catch (FlurlHttpException)
