@@ -425,7 +425,7 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
         var userId = User.GetUserId();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         if (library == null) return BadRequest(await _localizationService.Translate(userId, "library-doesnt-exist"));
 
         var newName = dto.Name.Trim();
@@ -453,8 +453,8 @@ public class LibraryController : BaseApiController
             .ToList();
 
         library.LibraryExcludePatterns = dto.ExcludePatterns
-            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
             .Distinct()
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
             .ToList();
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to

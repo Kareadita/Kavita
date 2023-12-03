@@ -68,7 +68,13 @@ export class EditListComponent implements OnInit {
     const tokenToRemove = tokens[index];
 
     this.combinedItems = tokens.filter(t => t != tokenToRemove).join(',');
-    this.form.removeControl('link' + index, {emitEvent: true});
+    for (const [index, [key, value]] of Object.entries(Object.entries(this.form.controls))) {
+      if (key.startsWith('link') && this.form.get(key)?.value === tokenToRemove) {
+        this.form.removeControl('link' + index, {emitEvent: true});
+      }
+    }
+
+
     this.emit();
     this.cdRef.markForCheck();
   }
