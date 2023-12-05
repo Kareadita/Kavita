@@ -92,6 +92,8 @@ public class CleanupService : ICleanupService
         await CleanupLogs();
         await SendProgress(0.9F, "Cleaning progress events that exceed 100%");
         await EnsureChapterProgressIsCapped();
+        await SendProgress(0.95F, "Cleaning abandoned database rows");
+        await CleanupDbEntries();
         await SendProgress(1F, "Cleanup finished");
         _logger.LogInformation("Cleanup finished");
     }
