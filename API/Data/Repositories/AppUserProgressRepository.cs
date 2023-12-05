@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.Data.ManualMigrations;
 using API.DTOs;
@@ -218,15 +219,16 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             })
             .AsEnumerable();
 
+        // Need to run this Raw because DataContext will update LastModified on the entity which breaks ordering for progress
+        var sqlBuilder = new StringBuilder();
         foreach (var update in updates)
         {
-            _context.AppUserProgresses
-                .Where(p => p.Id == update.ProgressId)
-                .ToList() // Execute the query to ensure exclusive lock
-                .ForEach(p => p.PagesRead = update.NewPagesRead);
+            sqlBuilder.Append($"UPDATE AppUserProgresses SET PagesRead = {update.NewPagesRead} WHERE Id = {update.ProgressId};");
         }
 
-        await _context.SaveChangesAsync();
+        // Execute the batch SQL
+        var batchSql = sqlBuilder.ToString();
+        await _context.Database.ExecuteSqlRawAsync(batchSql);
     }
 
 #nullable enable
