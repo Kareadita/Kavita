@@ -109,9 +109,9 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
             MatchOptions, RegexTimeout),
-        // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
+        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
         new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+(Vol(ume)?\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
             MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(
@@ -137,6 +137,7 @@ public static class Parser
         new Regex(
             @"(vol_)(?<Volume>\d+(\.\d)?)",
             MatchOptions, RegexTimeout),
+
         // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
         new Regex(
             @"第(?<Volume>\d+)(卷|册)",

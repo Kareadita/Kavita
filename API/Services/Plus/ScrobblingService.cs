@@ -829,12 +829,12 @@ public class ScrobblingService : IScrobblingService
             if (!webLink.StartsWith(website)) continue;
             var tokens = webLink.Split(website)[1].Split('/');
             var value = tokens[index];
-            if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int?))
             {
                 if (int.TryParse(value, out var intValue))
                     return (T)(object)intValue;
             }
-            else if (typeof(T) == typeof(long))
+            else if (typeof(T) == typeof(long?))
             {
                 if (long.TryParse(value, out var longValue))
                     return (T)(object)longValue;
