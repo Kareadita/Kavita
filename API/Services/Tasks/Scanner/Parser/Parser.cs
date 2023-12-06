@@ -197,16 +197,17 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)(\b|_|-|\s)(?:sp)\d",
             MatchOptions, RegexTimeout),
-        // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
-        new Regex(
-            @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
-            MatchOptions, RegexTimeout),
         // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
         // The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake
         new Regex(
             @"(?<Series>.+?)(\s|_|-)+(?:Vol(ume|\.)?(\s|_|-)+\d+)(\s|_|-)+(?:(Ch|Chapter|Ch)\.?)(\s|_|-)+(?<Chapter>\d+)",
             MatchOptions,
             RegexTimeout),
+        // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz,
+        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.30 Omake
+        new Regex(
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+Vol(ume)?\.?(\d+|tbd|\s\d).+?",
+            MatchOptions, RegexTimeout),
         // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
         new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
@@ -233,6 +234,7 @@ public static class Parser
             @"(?<Series>.+?):?(\s|\b|_|-)Chapter(\s|\b|_|-)\d+(\s|\b|_|-)(vol)(ume)",
             MatchOptions,
             RegexTimeout),
+
         // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
             @"(?<Series>.+?):? (\b|_|-)(vol)(ume)",
