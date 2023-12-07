@@ -10,9 +10,9 @@ public class ScrobblingServiceTests
     [InlineData("https://anilist.co/manga/35851/Byeontaega-Doeja/", 35851)]
     [InlineData("https://anilist.co/manga/30105", 30105)]
     [InlineData("https://anilist.co/manga/30105/Kekkaishi/", 30105)]
-    public void CanParseWeblink_AniList(string link, long expectedId)
+    public void CanParseWeblink_AniList(string link, int? expectedId)
     {
-        Assert.Equal(ScrobblingService.ExtractId<long>(link, ScrobblingService.AniListWeblinkWebsite), expectedId);
+        Assert.Equal(ScrobblingService.ExtractId<int?>(link, ScrobblingService.AniListWeblinkWebsite), expectedId);
     }
 
     [Theory]
