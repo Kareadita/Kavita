@@ -2,6 +2,7 @@
 using Xunit;
 
 namespace API.Tests.Services;
+#nullable enable
 
 public class ScrobblingServiceTests
 {
