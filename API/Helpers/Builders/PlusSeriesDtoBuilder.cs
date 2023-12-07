@@ -27,6 +27,8 @@ public class PlusSeriesDtoBuilder : IEntityBuilder<PlusSeriesDto>
                 ScrobblingService.MalWeblinkWebsite),
             GoogleBooksId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
                 ScrobblingService.GoogleBooksWeblinkWebsite),
+            MangaDexId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
+                ScrobblingService.MangaDexWeblinkWebsite),
             VolumeCount = series.Volumes.Count,
             ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
             Year = series.Metadata.ReleaseYear

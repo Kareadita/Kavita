@@ -25,6 +25,7 @@ public record PlusSeriesDto
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
     public string? GoogleBooksId { get; set; }
+    public string? MangaDexId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
     public MediaFormat MediaFormat { get; set; }
