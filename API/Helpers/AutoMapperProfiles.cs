@@ -240,9 +240,10 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserSmartFilter, SmartFilterDto>();
         CreateMap<AppUserDashboardStream, DashboardStreamDto>();
-        // CreateMap<AppUserDashboardStream, DashboardStreamDto>()
-        //     .ForMember(dest => dest.SmartFilterEncoded,
-        //         opt => opt.MapFrom(src => src.SmartFilter));
+
+        // This is for cloning to ensure the records don't get overwritten when setting from SeedData
+        CreateMap<AppUserDashboardStream, AppUserDashboardStream>();
+        CreateMap<AppUserSideNavStream, AppUserSideNavStream>();
 
     }
 }
