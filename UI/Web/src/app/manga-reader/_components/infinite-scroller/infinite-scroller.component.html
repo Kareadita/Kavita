@@ -31,7 +31,7 @@
     <img src="{{item.src}}" style="display: block"
          class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}} {{initFinished ? '' : 'full-opacity'}}"
          *ngIf="item.page >= pageNum - bufferPages && item.page <= pageNum + bufferPages" rel="nofollow" alt="image"
-         (load)="onImageLoad($event)" (touchstart)="onTouchStart($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+         (load)="onImageLoad($event)" (touchstart)="onTouchStart(item.page)" (click)="onTouchStart(item.page)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
   </ng-container>
 
   <div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">

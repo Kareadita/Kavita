@@ -1,8 +1,9 @@
-import { DOCUMENT, NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgFor, NgIf} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   inject,
@@ -15,16 +16,16 @@ import {
   Renderer2,
   SimpleChanges
 } from '@angular/core';
-import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { ReaderService } from '../../../_services/reader.service';
-import { PAGING_DIRECTION } from '../../_models/reader-enums';
-import { WebtoonImage } from '../../_models/webtoon-image';
-import { ManagaReaderService } from '../../_service/managa-reader.service';
+import {BehaviorSubject, fromEvent, ReplaySubject} from 'rxjs';
+import {debounceTime} from 'rxjs/operators';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {ReaderService} from '../../../_services/reader.service';
+import {PAGING_DIRECTION} from '../../_models/reader-enums';
+import {WebtoonImage} from '../../_models/webtoon-image';
+import {ManagaReaderService} from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@ngneat/transloco";
-import {MangaReaderComponent} from "../manga-reader/manga-reader.component";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -64,6 +65,7 @@ const enum DEBUG_MODES {
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly mangaReaderService = inject(ManagaReaderService);
+  private readonly utilityService = inject(UtilityService);
   private readonly readerService = inject(ReaderService);
   private readonly renderer = inject(Renderer2);
   private readonly scrollService = inject(ScrollService);
@@ -210,9 +212,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
     .subscribe((event) => this.handleScrollEvent(event));
 
-    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scrollend')
-    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
-    .subscribe((event) => this.handleScrollEndEvent(event));
+    // Only attach this on non-mobile
+    if (this.utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {
+      fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scrollend')
+        .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
+        .subscribe((event) => this.handleScrollEndEvent(event));
+    }
   }
 
   ngOnInit(): void {
@@ -327,7 +332,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   handleScrollEndEvent(event?: any) {
     if (this.isScrolling) { return; }
 
-    return;
     const closestImages = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
     const img = this.findClosestVisibleImage(closestImages);
 
@@ -533,13 +537,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * When the user touches an image, let's set it as the active page. This ensures their touch always sets the active page
-   * @param event
+   * When the user touches/clicks an image, let's set it as the active page. This ensures their touch always sets the active page
+   * @param pageNum - Page of the image
    */
-  onTouchStart(event: TouchEvent) {
-    const newPage = parseInt((event.target as HTMLImageElement).getAttribute('page') || this.pageNum + '', 10);
-    this.debugLog('touch start: ', newPage);
-    this.setPageNum(newPage);
+  onTouchStart(pageNum: number) {
+    this.debugLog('touch start: ', pageNum);
+    this.setPageNum(pageNum);
   }
 
   /**
