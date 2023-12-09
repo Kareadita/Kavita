@@ -36,7 +36,7 @@
         </div>
       </div>
     </div>
-    <app-loading [loading]="isLoading || !(currentImage$ | async)?.complete" [absolute]="true"></app-loading>
+    <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true"></app-loading>
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
