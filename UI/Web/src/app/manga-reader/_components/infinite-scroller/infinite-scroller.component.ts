@@ -157,11 +157,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Outline | DEBUG_MODES.Logs;
   /**
-   * Debug mode. Will filter out any messages in here so they don't hit the log
+   * Debug mode. Will filter out any messages in here, so they don't hit the log
    */
   debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
+  /**
+   * Total Height of all the images
+   */
+  totalHeight: number = 0;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -212,6 +216,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
+
+    this.totalHeight = this.mangaReaderService.maxHeight();
+    this.cdRef.markForCheck();
+
     this.initScrollHandler();
 
     this.recalculateImageWidth();
@@ -220,7 +228,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.goToPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
-        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
+        this.debugLog('[GoToPage] jump has occurred from ' + this.pageNum + ' to ' + page);
 
         if (this.pageNum < page) {
           this.scrollingDirection = PAGING_DIRECTION.FORWARD;
@@ -317,15 +325,26 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   handleScrollEndEvent(event?: any) {
-    if (!this.isScrolling) {
+    if (this.isScrolling) { return; }
 
-      const closestImages = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
-      const img = this.findClosestVisibleImage(closestImages);
+    return;
+    const closestImages = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
+    const img = this.findClosestVisibleImage(closestImages);
 
-      if (img != null) {
-        this.setPageNum(parseInt(img.getAttribute('page') || this.pageNum + '', 10));
-      }
+    const newPageNum = parseInt(img?.getAttribute('page') || this.pageNum + '', 10);
+
+    // When a scroll end occurs on the last pre-fetched page, the next load event can cause the page number to be set to the end
+    // of the pages, thus jumping the user a ton of pages.
+    console.log('scroll end page delta: ', Math.abs(newPageNum - this.pageNum));
+    if (Math.abs(newPageNum - this.pageNum) <= 10 && newPageNum != this.pageNum) {
+      console.log('Closest page is: ', newPageNum)
+      this.setPageNum(newPageNum);
     }
+
+    // if (img != null) {
+    //   console.log('Closest page is: ', img.getAttribute('page'))
+    //   this.setPageNum(parseInt(img.getAttribute('page') || this.pageNum + '', 10));
+    // }
   }
 
   getTotalHeight() {
@@ -354,6 +373,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
       const totalHeight = this.getTotalHeight();
       const totalScroll = this.getTotalScroll();
+      const pageDeltaToTriggerBottomLoad = 2;
+
 
       // If we were at top but have started scrolling down past page 0, remove top spacer
       if (this.atTop && this.pageNum > 0) {
@@ -361,7 +382,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.cdRef.markForCheck();
       }
 
-      if (totalScroll === totalHeight && !this.atBottom) {
+      // If we scroll faster than the images can load, we can end up in a situation where we hit the bottom before we should,
+      // We can either check that the page num is within 10 of the total pages
+      // or we could insert a div that equal the space of the image heights combined to ensure the scroll bar
+      // Same situation, but when the next load of pages, we hit this condition. hence I'm adding a check on the page number to ensure
+      if (totalScroll === totalHeight && !this.atBottom && Math.abs(this.pageNum - this.totalPages) <= pageDeltaToTriggerBottomLoad) {
+        this.debugLog('total Scroll: ', totalScroll);
+        this.debugLog('total height: ', totalHeight);
+        this.debugLog('page delta: ', Math.abs(this.pageNum - this.totalPages));
+        this.debugLog('We hit the bottom of the viewport!');
         this.atBottom = true;
         this.cdRef.markForCheck();
         this.setPageNum(this.totalPages);
@@ -471,7 +500,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       const rect = image.getBoundingClientRect();
 
       // Calculate the distance of the current image to the top of the viewport.
-      const distanceToTop = Math.abs(rect.top);
+      const distanceToTop = Math.abs(rect.top) - rect.height / 2;
+      this.debugLog(`Image ${image.getAttribute('page')} is ${distanceToTop}px from top`)
 
       // Check if the image is visible within the viewport.
       if (distanceToTop < closestDistanceToTop) {
@@ -503,8 +533,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
+   * When the user touches an image, let's set it as the active page. This ensures their touch always sets the active page
+   * @param event
+   */
+  onTouchStart(event: TouchEvent) {
+    const newPage = parseInt((event.target as HTMLImageElement).getAttribute('page') || this.pageNum + '', 10);
+    this.debugLog('touch start: ', newPage);
+    this.setPageNum(newPage);
+  }
+
+  /**
    * Callback for an image onLoad. At this point the image is already rendered in DOM (may not be visible)
-   * This will be used to scroll to current page for intial load
+   * This will be used to scroll to current page for initial load
    * @param event
    */
   onImageLoad(event: any) {
@@ -530,6 +570,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
           // There needs to be a bit of time before we scroll
           if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
+            this.debugLog('image load, scrolling to page', this.pageNum);
             this.scrollToCurrentPage();
           } else {
             this.initFinished = true;
