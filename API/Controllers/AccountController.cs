@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SharpCompress;
 
 namespace API.Controllers;
 
@@ -137,8 +138,7 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             // Assign default streams
-            user.DashboardStreams = Seed.DefaultStreams.ToList();
-            user.SideNavStreams = Seed.DefaultSideNavStreams.ToList();
+            AddDefaultStreamsToUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -595,7 +595,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(dto.Email))
             return BadRequest(await _localizationService.Translate(userId, "invalid-payload"));
 
-        _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
+        _logger.LogInformation("{User} is inviting {Email} to the server", User.GetUsername(), dto.Email);
 
         // Check if there is an existing invite
         var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
@@ -608,7 +608,8 @@ public class AccountController : BaseApiController
         }
 
         // Create a new user
-        var user = new AppUserBuilder(dto.Email, dto.Email, await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
+        var user = new AppUserBuilder(dto.Email, dto.Email,
+            await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
         _unitOfWork.UserRepository.Add(user);
         try
         {
@@ -616,9 +617,7 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             // Assign default streams
-            user.DashboardStreams = Seed.DefaultStreams.ToList();
-            user.SideNavStreams = Seed.DefaultSideNavStreams.ToList();
-
+            AddDefaultStreamsToUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
@@ -657,7 +656,6 @@ public class AccountController : BaseApiController
                 user.CreateSideNavFromLibrary(lib);
             }
 
-            _unitOfWork.UserRepository.Update(user);
             user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction.AgeRating;
             user.AgeRestrictionIncludeUnknowns = hasAdminRole || dto.AgeRestriction.IncludeUnknowns;
 
@@ -669,6 +667,7 @@ public class AccountController : BaseApiController
             }
 
             user.ConfirmationToken = token;
+            _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
         }
         catch (Exception ex)
@@ -702,7 +701,7 @@ public class AccountController : BaseApiController
                 BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                 {
                     EmailAddress = dto.Email,
-                    InvitingUser = adminUser.UserName!,
+                    InvitingUser = User.GetUsername(),
                     ServerConfirmationLink = emailLink
                 }));
             }
@@ -719,6 +718,19 @@ public class AccountController : BaseApiController
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
+    }
+
+    private void AddDefaultStreamsToUser(AppUser user)
+    {
+        foreach (var newStream in Seed.DefaultStreams.Select(stream => _mapper.Map<AppUserDashboardStream, AppUserDashboardStream>(stream)))
+        {
+            user.DashboardStreams.Add(newStream);
+        }
+
+        foreach (var stream in Seed.DefaultSideNavStreams.Select(stream => _mapper.Map<AppUserSideNavStream, AppUserSideNavStream>(stream)))
+        {
+            user.SideNavStreams.Add(stream);
+        }
     }
 
     /// <summary>

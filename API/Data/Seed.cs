@@ -76,48 +76,42 @@ public static class Seed
             },
         }.ToArray());
 
-    public static readonly ImmutableArray<AppUserSideNavStream> DefaultSideNavStreams = ImmutableArray.Create(new[]
+    public static readonly ImmutableArray<AppUserSideNavStream> DefaultSideNavStreams = ImmutableArray.Create(
+        new AppUserSideNavStream()
     {
-        new AppUserSideNavStream()
-        {
-            Name = "want-to-read",
-            StreamType = SideNavStreamType.WantToRead,
-            Order = 1,
-            IsProvided = true,
-            Visible = true
-        },
-        new AppUserSideNavStream()
-        {
-            Name = "collections",
-            StreamType = SideNavStreamType.Collections,
-            Order = 2,
-            IsProvided = true,
-            Visible = true
-        },
-        new AppUserSideNavStream()
-        {
-            Name = "reading-lists",
-            StreamType = SideNavStreamType.ReadingLists,
-            Order = 3,
-            IsProvided = true,
-            Visible = true
-        },
-        new AppUserSideNavStream()
-        {
-            Name = "bookmarks",
-            StreamType = SideNavStreamType.Bookmarks,
-            Order = 4,
-            IsProvided = true,
-            Visible = true
-        },
-        new AppUserSideNavStream()
-        {
-            Name = "all-series",
-            StreamType = SideNavStreamType.AllSeries,
-            Order = 5,
-            IsProvided = true,
-            Visible = true
-        }
+        Name = "want-to-read",
+        StreamType = SideNavStreamType.WantToRead,
+        Order = 1,
+        IsProvided = true,
+        Visible = true
+    }, new AppUserSideNavStream()
+    {
+        Name = "collections",
+        StreamType = SideNavStreamType.Collections,
+        Order = 2,
+        IsProvided = true,
+        Visible = true
+    }, new AppUserSideNavStream()
+    {
+        Name = "reading-lists",
+        StreamType = SideNavStreamType.ReadingLists,
+        Order = 3,
+        IsProvided = true,
+        Visible = true
+    }, new AppUserSideNavStream()
+    {
+        Name = "bookmarks",
+        StreamType = SideNavStreamType.Bookmarks,
+        Order = 4,
+        IsProvided = true,
+        Visible = true
+    }, new AppUserSideNavStream()
+    {
+        Name = "all-series",
+        StreamType = SideNavStreamType.AllSeries,
+        Order = 5,
+        IsProvided = true,
+        Visible = true
     });
 
 
