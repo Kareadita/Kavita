@@ -10,7 +10,8 @@
     "dashboard": {
         "server-settings-link": "サーバー設定",
         "recently-updated-title": "最近更新されたシリーズ",
-        "recently-added-title": "最近追加されたシリーズ"
+        "recently-added-title": "最近追加されたシリーズ",
+        "on-deck-title": "最近読んだ本"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -25,7 +26,8 @@
     },
     "user-scrobble-history": {
         "series-header": "シリーズ",
-        "no-data": "データなし"
+        "no-data": "データなし",
+        "filter-label": "{{common.filter}}"
     },
     "scrobble-event-type-pipe": {
         "want-to-read-add": "読みたい：追加",
@@ -160,5 +162,10 @@
     },
     "card-detail-layout": {
         "jumpkey-count": "{{count}} シリーズ"
+    },
+    "user-preferences": {
+        "account-tab": "アカウント",
+        "theme-tab": "テーマ",
+        "devices-tab": "デバイス"
     }
 }

@@ -30,7 +30,7 @@
     "user-scrobble-history": {
         "title": "Histórico de scrobble",
         "description": "Aqui você encontrará todos os eventos scrobble vinculados à sua conta. Para que os eventos existam, você deve ter um provedor scrobble ativo configurado. Todos os eventos processados serão apagados após um mês. Se houver eventos não processados, é provável que eles não possam formar correspondências upstream. Entre em contato com seu administrador para corrigi-los.",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "created-header": "Criado",
         "last-modified-header": "Última Modificação",
         "type-header": "Tipo",
@@ -150,7 +150,7 @@
     },
     "user-holds": {
         "title": "Segurar Scrobble",
-        "description": "Esta é uma lista de séries gerenciada pelo usuário que não será scrobbled para provedores upstream. Você pode remover uma série a qualquer momento e o próximo evento compatível com Scrobble (progresso de leitura, classificação, status de desejo de leitura) acionará eventos."
+        "description": "Esta é uma lista de séries gerenciada pelo usuário que não será transferida para provedores upstream. Você pode remover uma série a qualquer momento e o próximo evento passível de scrobble (leitura de progresso, classificação, desejo de ler status) acionará eventos."
     },
     "theme-manager": {
         "title": "Gerenciador de Temas",
@@ -233,7 +233,7 @@
         "save": "{{common.save}}"
     },
     "change-age-restriction": {
-        "age-restriction-label": "Classificação Etária",
+        "age-restriction-label": "Restrição de Etária",
         "unknowns": "Desconhecidos",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
@@ -340,7 +340,7 @@
         "all-time": "Todo o Tempo"
     },
     "device-platform-pipe": {
-        "custom": "Personalizar"
+        "custom": "Personalizado"
     },
     "day-of-week-pipe": {
         "monday": "Segunda-feira",
