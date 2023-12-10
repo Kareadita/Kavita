@@ -7,7 +7,7 @@
             <app-download-indicator [download$]="download$"></app-download-indicator>
         </span>
       <div class="progress-banner" *ngIf="pagesRead < totalPages && totalPages > 0 && pagesRead !== totalPages"
-           ngbTooltip="{{(pagesRead / totalPages) * 100 | number:'1.0-1'}}% Read">
+           ngbTooltip="{{(pagesRead / totalPages) | number:'1.0-1'}}% Read">
         <p><ngb-progressbar type="primary" height="5px" [value]="pagesRead" [max]="totalPages"></ngb-progressbar></p>
       </div>
     </div>
