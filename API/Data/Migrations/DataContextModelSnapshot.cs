@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.11");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.13");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -891,6 +891,44 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Library");
+                });
+
+            modelBuilder.Entity("API.Entities.LibraryExcludePattern", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Pattern")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LibraryId");
+
+                    b.ToTable("LibraryExcludePattern");
+                });
+
+            modelBuilder.Entity("API.Entities.LibraryFileTypeGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FileTypeGroup")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LibraryId");
+
+                    b.ToTable("LibraryFileTypeGroup");
                 });
 
             modelBuilder.Entity("API.Entities.MangaFile", b =>
@@ -2057,6 +2095,28 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
+            modelBuilder.Entity("API.Entities.LibraryExcludePattern", b =>
+                {
+                    b.HasOne("API.Entities.Library", "Library")
+                        .WithMany("LibraryExcludePatterns")
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Library");
+                });
+
+            modelBuilder.Entity("API.Entities.LibraryFileTypeGroup", b =>
+                {
+                    b.HasOne("API.Entities.Library", "Library")
+                        .WithMany("LibraryFileTypes")
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Library");
+                });
+
             modelBuilder.Entity("API.Entities.MangaFile", b =>
                 {
                     b.HasOne("API.Entities.Chapter", "Chapter")
@@ -2435,6 +2495,10 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Library", b =>
                 {
                     b.Navigation("Folders");
+
+                    b.Navigation("LibraryExcludePatterns");
+
+                    b.Navigation("LibraryFileTypes");
 
                     b.Navigation("Series");
                 });

@@ -43,7 +43,7 @@ export class ReviewCardComponent implements OnInit {
     } else {
       component = ReviewCardModalComponent;
     }
-    const ref = this.modalService.open(component, {size: "lg"});
+    const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
     ref.componentInstance.review = this.review;
   }
 

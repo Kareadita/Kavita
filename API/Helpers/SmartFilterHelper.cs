@@ -133,7 +133,7 @@ public static class SmartFilterHelper
         var sortFieldPart = parts.FirstOrDefault(part => part.StartsWith(SortFieldKey));
         var isAscendingPart = parts.FirstOrDefault(part => part.StartsWith(IsAscendingKey));
 
-        var isAscending = isAscendingPart?.Substring(11).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+        var isAscending = isAscendingPart?.Trim().Replace(IsAscendingKey, string.Empty).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
         if (sortFieldPart == null)
         {
             return new SortOptions();

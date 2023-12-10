@@ -23,6 +23,7 @@ public interface IPersonRepository
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId);
     Task<int> GetCountAsync();
 
+    Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
 }
 
 public class PersonRepository : IPersonRepository
@@ -78,6 +79,13 @@ public class PersonRepository : IPersonRepository
     public async Task<int> GetCountAsync()
     {
         return await _context.Person.CountAsync();
+    }
+
+    public async Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames)
+    {
+        return await _context.Person
+            .Where(p => p.Role == role && normalizeNames.Contains(p.NormalizedName))
+            .ToListAsync();
     }
 
 

@@ -17,7 +17,7 @@ import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@a
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators';
+import {catchError, debounceTime, distinctUntilChanged, map, take, tap} from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -34,7 +34,7 @@ import { ReadingDirection } from 'src/app/_models/preferences/reading-direction'
 import {WritingStyle} from "../../../_models/preferences/writing-style";
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
-import { LibraryType } from 'src/app/_models/library';
+import { LibraryType } from 'src/app/_models/library/library';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { PageStyle, ReaderSettingsComponent } from '../reader-settings/reader-settings.component';
@@ -102,9 +102,34 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
     standalone: true,
-  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip, BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
+  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink,
+    NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip,
+    BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly readerService = inject(ReaderService);
+  private readonly renderer = inject(Renderer2);
+  private readonly navService = inject(NavService);
+  private readonly toastr = inject(ToastrService);
+  private readonly domSanitizer = inject(DomSanitizer);
+  private readonly bookService = inject(BookService);
+  private readonly memberService = inject(MemberService);
+  private readonly scrollService = inject(ScrollService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly themeService = inject(ThemeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  protected readonly BookPageLayoutMode = BookPageLayoutMode;
+  protected readonly WritingStyle = WritingStyle;
+  protected readonly TabID = TabID;
+  protected readonly ReadingDirection = ReadingDirection;
+  protected readonly PAGING_DIRECTION = PAGING_DIRECTION;
 
   libraryId!: number;
   seriesId!: number;
@@ -167,6 +192,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   drawerOpen = false;
   /**
+   * If the word/line overlay is open
+   */
+  isLineOverlayOpen = false;
+  /**
    * If the action bar is visible
    */
   actionBarVisible = true;
@@ -194,11 +223,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   page: SafeHtml | undefined = undefined;
   /**
-   * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
    nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
    /**
-    * Previous Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+    * Previous Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
     */
    prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
    /**
@@ -292,18 +321,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
-  /**
-   * Controls whether the cursor is a pointer when tap to paginate is on and the cursor is over
-   * either of the pagination areas
-   */
-  cursorIsPointer: boolean = false;
 
   /**
-   * Used to keep track of the last time a paginator area was clicked to prevent the default
-   * browser behavior of selecting words or lines when double- or triple-clicking, respectively,
-   * triggered by repeated click pagination (when enabled).
+   * When the user is highlighting something, then we remove pagination
    */
-  lastPaginatorClickTime: number = 0;
+  hidePagination = false;
 
   /**
    * Used to refresh the Personal PoC
@@ -320,26 +342,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: false}) reader!: ElementRef;
-
-
-  get BookPageLayoutMode() {
-    return BookPageLayoutMode;
-  }
-
-  get WritingStyle() {
-    return WritingStyle;
-  }
-  get TabID(): typeof TabID {
-    return TabID;
-  }
-
-  get ReadingDirection(): typeof ReadingDirection {
-    return ReadingDirection;
-  }
-
-  get PAGING_DIRECTION() {
-    return PAGING_DIRECTION;
-  }
 
   /**
    * Disables the Left most button
@@ -480,13 +482,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
 
-
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-    private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
-    private renderer: Renderer2, private navService: NavService, private toastr: ToastrService,
-    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService, private readonly cdRef: ChangeDetectorRef) {
+  constructor(@Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
@@ -513,11 +509,28 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        map(this.isCursorOverPaginationArea.bind(this)),
-        distinctUntilChanged())
-      .subscribe((isPointer) => {
-        this.changeCursor(isPointer);
-    });
+        distinctUntilChanged(),
+        tap((e) => {
+          const selection = window.getSelection();
+          this.hidePagination = selection !== null && selection.toString().trim() !== '';
+          console.log('hide pagination: ', this.hidePagination);
+          this.cdRef.markForCheck();
+        })
+      )
+      .subscribe();
+
+    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mouseup')
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        distinctUntilChanged(),
+        tap((e) => {
+          this.hidePagination = false;
+          console.log('hide pagination: ', this.hidePagination);
+          this.cdRef.markForCheck();
+        })
+      )
+      .subscribe();
+
   }
 
   handleScrollEvent() {
@@ -559,6 +572,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+
+    this.readerService.disableWakeLock();
 
     this.themeService.clearBookTheme();
 
@@ -679,6 +694,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Check if user progress has part, if so load it so we scroll to it
         this.loadPage(results.progress.bookScrollId || undefined);
+        this.readerService.enableWakeLock(this.reader.nativeElement);
       }, () => {
         setTimeout(() => {
           this.closeReader();
@@ -1462,7 +1478,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.updateSingleImagePageStyles()
 
-    // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
+    // Calculate if bottom actionbar is needed. On a timeout to get accurate heights
     if (this.bookContentElemRef == null) {
       setTimeout(() => this.updateLayoutMode(this.layoutMode), 10);
       return;
@@ -1589,47 +1605,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
-  private isCursorOverLeftPaginationArea(event: MouseEvent): boolean {
-    const leftPaginationAreaEnd = window.innerWidth * 0.2;
-    //console.log('user clicked on ', event.clientX, ' and left pagination ends on ', leftPaginationAreaEnd);
-    return event.clientX <= leftPaginationAreaEnd;
-  }
-
-  private isCursorOverRightPaginationArea(event: MouseEvent): boolean {
-    const rightPaginationAreaStart = window.innerWidth * 0.8;
-    //console.log('user clicked on ', event.clientX, ' and right pagination starts at ', rightPaginationAreaStart);
-    return event.clientX >= rightPaginationAreaStart;
-  }
-
-  private isCursorOverPaginationArea(event: MouseEvent): boolean {
-    if (this.isLoading || !this.clickToPaginate) {
-      return false;
-    }
-
-    return this.isCursorOverLeftPaginationArea(event) || this.isCursorOverRightPaginationArea(event);
-  }
-
-  private changeCursor(isPointer: boolean) {
-    this.cursorIsPointer = isPointer;
-    this.cdRef.markForCheck();
-  }
-
-  // Responsible for handling pagination only
-  handleContainerClick(event: MouseEvent) {
-
-    if (this.drawerOpen  || ['action-bar'].some(className => (event.target as Element).classList.contains(className))) {
-      return;
-    }
-
-    if (this.isCursorOverLeftPaginationArea(event)) {
-      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-    } else if (this.isCursorOverRightPaginationArea(event)) {
-      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
-    } else {
-      this.toggleMenu(event);
-    }
-  }
-
   handleReaderClick(event: MouseEvent) {
     if (!this.clickToPaginate) {
       event.preventDefault();
@@ -1668,26 +1643,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   mouseDown($event: MouseEvent) {
     this.mousePosition.x = $event.clientX;
     this.mousePosition.y = $event.clientY;
-
-    if (!this.clickToPaginate || !this.isCursorOverPaginationArea($event)) {
-      return
-    }
-
-    // This value is completely arbitrary and should cover most
-    // double-click speeds
-    const halfASecond = 500;
-    const now = Date.now();
-
-    // This is to prevent selecting text when clicking repeatedly to switch pages,
-    // while also allowing selections to begin in a pagination area
-    if (now - this.lastPaginatorClickTime < halfASecond) {
-      $event.preventDefault();
-    }
-
-    this.lastPaginatorClickTime = now;
   }
 
   refreshPersonalToC() {
     this.refreshPToC.emit();
+  }
+
+  updateLineOverlayOpen(isOpen: boolean) {
+    this.isLineOverlayOpen = isOpen;
+    this.cdRef.markForCheck();
   }
 }

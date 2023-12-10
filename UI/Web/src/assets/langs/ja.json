@@ -10,7 +10,8 @@
     "dashboard": {
         "server-settings-link": "サーバー設定",
         "recently-updated-title": "最近更新されたシリーズ",
-        "recently-added-title": "最近追加されたシリーズ"
+        "recently-added-title": "最近追加されたシリーズ",
+        "on-deck-title": "最近読んだ本"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -20,19 +21,22 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "保存中。。。",
+        "saving": "保存中…",
         "update": "更新"
     },
     "user-scrobble-history": {
         "series-header": "シリーズ",
-        "no-data": "データなし"
+        "no-data": "データなし",
+        "filter-label": "{{common.filter}}"
     },
     "scrobble-event-type-pipe": {
         "want-to-read-add": "読みたい：追加",
         "want-to-read-remove": "読みたい：消除"
     },
     "review-series-modal": {
-        "review-label": "レビュー"
+        "review-label": "レビュー",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "review-card": {
         "local-review": "レビュー"
@@ -69,7 +73,8 @@
     },
     "book-reader": {
         "settings-header": "設定",
-        "next": "次へ"
+        "next": "次へ",
+        "bookmarks-header": "{{side-nav.bookmarks}}"
     },
     "confirm-email": {
         "password-label": "{{common.password}}"
@@ -82,7 +87,13 @@
         "password-label": "{{common.password}}"
     },
     "series-detail": {
-        "downloading-status": "ダウンロード中。。。"
+        "downloading-status": "ダウンロード中…",
+        "close": "{{common.close}}",
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "read": "{{common.read}}",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "no-pages": "{{toasts.no-pages}}"
     },
     "entity-info-cards": {
         "isbn-title": "ISBN"
@@ -100,8 +111,61 @@
         "cancel": "キャンセル",
         "delete": "削除",
         "email": "メールアドレス",
-        "loading": "読み込み中。。。",
+        "loading": "読み込み中…",
         "username": "ユーザーネーム",
         "password": "パスワード"
+    },
+    "series-metadata-detail": {
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "promoted": "{{common.promoted}}",
+        "collections-title": "{{side-nav.collections}}"
+    },
+    "chapter-metadata-detail": {
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
+        "letterers-title": "{{series-metadata-detail.letterers-title}}",
+        "translators-title": "{{series-metadata-detail.translators-title}}",
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "inkers-title": "{{series-metadata-detail.inkers-title}}",
+        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "editors-title": "{{series-metadata-detail.editors-title}}",
+        "colorists-title": "{{series-metadata-detail.colorists-title}}"
+    },
+    "side-nav": {
+        "bookmarks": "ブックマーク",
+        "all-series": "すべてのシリーズ"
+    },
+    "all-series": {
+        "title": "すべてのシリーズ",
+        "series-count": "{{common.series-count}}"
+    },
+    "card-detail-drawer": {
+        "tags-title": "{{series-metadata-detail.tags-title}}",
+        "genres-title": "{{series-metadata-detail.genres-title}}",
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "writers-title": "{{common.series-count}}"
+    },
+    "edit-series-relation": {
+        "parent": "{{relationship-pipe.parent}}",
+        "remove": "{{common.remove}}"
+    },
+    "want-to-read": {
+        "series-count": "{{common.series-count}}"
+    },
+    "side-nav-companion-bar": {
+        "page-settings-title": "{{series-detail.page-settings-title}}"
+    },
+    "bookmarks": {
+        "title": "{{side-nav.bookmarks}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "card-detail-layout": {
+        "jumpkey-count": "{{count}} シリーズ"
+    },
+    "user-preferences": {
+        "account-tab": "アカウント",
+        "theme-tab": "テーマ",
+        "devices-tab": "デバイス"
     }
 }

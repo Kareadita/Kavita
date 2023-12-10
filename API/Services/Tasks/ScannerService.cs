@@ -198,7 +198,7 @@ public class ScannerService : IScannerService
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         if (library == null) return;
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
@@ -229,7 +229,6 @@ public class ScannerService : IScannerService
                 await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
                 return;
             }
-
         }
 
         if (string.IsNullOrEmpty(folderPath))
@@ -297,8 +296,8 @@ public class ScannerService : IScannerService
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
 
         await _metadataService.RemoveAbandonedMetadataKeys();
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
+        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
+        //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
         return;
@@ -472,7 +471,7 @@ public class ScannerService : IScannerService
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
@@ -493,7 +492,7 @@ public class ScannerService : IScannerService
 
 
         await _processSeries.Prime();
-        var processTasks = new List<Func<Task>>();
+        //var processTasks = new List<Func<Task>>();
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
@@ -579,7 +578,7 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles[0].Series,
-                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles[0].Series),
+                NormalizedName = Parser.Normalize(parsedFiles[0].Series),
                 Format = parsedFiles[0].Format,
             };
 
@@ -588,7 +587,7 @@ public class ScannerService : IScannerService
                 seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
                 {
                     Name = pf.Series,
-                    NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
+                    NormalizedName = Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
                 return;
@@ -616,7 +615,7 @@ public class ScannerService : IScannerService
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();
 
-        await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name,
+        await scanner.ScanLibrariesForSeries(library, dirs,
             isLibraryScan, await _unitOfWork.SeriesRepository.GetFolderPathMap(library.Id), processSeriesInfos, forceChecks);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;

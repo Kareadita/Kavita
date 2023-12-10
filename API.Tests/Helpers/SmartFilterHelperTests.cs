@@ -45,6 +45,17 @@ public class SmartFilterHelperTests
     }
 
     [Fact]
+    public void Test_Decode2()
+    {
+        const string encoded = """
+                               name=Test%202&stmts=comparison%253D10%25C2%25A6field%253D1%25C2%25A6value%253DA%EF%BF%BDcomparison%253D0%25C2%25A6field%253D19%25C2%25A6value%253D11&sortOptions=sortField%3D1%C2%A6isAscending%3DTrue&limitTo=0&combination=1
+                               """;
+
+        var filter = SmartFilterHelper.Decode(encoded);
+        Assert.True(filter.SortOptions.IsAscending);
+    }
+
+    [Fact]
     public void Test_EncodeDecode()
     {
         var filter = new FilterV2Dto()

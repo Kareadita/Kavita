@@ -15,7 +15,7 @@ import {fromEvent} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
 import {CollectionTag} from 'src/app/_models/collection-tag';
-import {Library} from 'src/app/_models/library';
+import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
 import {PersonRole} from 'src/app/_models/metadata/person';
 import {ReadingList} from 'src/app/_models/reading-list';
@@ -39,6 +39,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
 
 @Component({
     selector: 'app-nav-header',
@@ -140,11 +141,12 @@ export class NavHeaderComponent implements OnInit {
   }
 
   goToOther(field: FilterField, value: string) {
-    this.goTo({field, comparison: FilterComparison.Equal, value});
+    this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
   goToPerson(role: PersonRole, filter: any) {
     this.clearSearch();
+    filter = filter + '';
     switch(role) {
       case PersonRole.Writer:
         this.goTo({field: FilterField.Writers, comparison: FilterComparison.Equal, value: filter});
@@ -194,6 +196,15 @@ export class NavHeaderComponent implements OnInit {
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.router.navigate(['library', libraryId, 'series', seriesId]);
+  }
+
+  clickBookmarkSearchResult(item: BookmarkSearchResult) {
+    this.clearSearch();
+    const libraryId = item.libraryId;
+    const seriesId = item.seriesId;
+    this.router.navigate(['library', libraryId, 'series', seriesId, 'manga', item.chapterId], {queryParams: {
+      incognitoMode: false, bookmarkMode: true
+      }});
   }
 
   clickFileSearchResult(item: MangaFile) {

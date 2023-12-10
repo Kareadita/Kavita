@@ -105,18 +105,19 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId","page", "extractPdf", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "page", "extractPdf", "apiKey"})]
     [AllowAnonymous]
     public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
-        var chapter = await _cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return NoContent();
 
         try
         {
+            var chapter = await _cacheService.Ensure(chapterId, extractPdf);
+            if (chapter == null) return NoContent();
+            _logger.LogInformation("Fetching Page {PageNum} on Chapter {ChapterId}", page, chapterId);
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
@@ -231,6 +232,7 @@ public class ReaderController : BaseApiController
         var mangaFile = chapter.Files.First();
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(dto.SeriesId, User.GetUserId());
+        if (series == null) return Unauthorized();
 
         var info = new ChapterInfoDto()
         {
@@ -244,8 +246,8 @@ public class ReaderController : BaseApiController
             LibraryId = dto.LibraryId,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
-            SeriesTotalPages = series?.Pages ?? 0,
-            SeriesTotalPagesRead = series?.PagesRead ?? 0,
+            SeriesTotalPages = series.Pages,
+            SeriesTotalPagesRead = series.PagesRead,
             ChapterTitle = dto.ChapterTitle ?? string.Empty,
             Subtitle = string.Empty,
             Title = dto.SeriesName,
@@ -277,6 +279,7 @@ public class ReaderController : BaseApiController
                                  info.ChapterNumber;
             }
         }
+
 
         return Ok(info);
     }

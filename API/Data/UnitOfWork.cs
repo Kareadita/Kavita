@@ -2,10 +2,8 @@
 using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
-using API.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
@@ -42,7 +40,6 @@ public class UnitOfWork : IUnitOfWork
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     private readonly UserManager<AppUser> _userManager;
-    private readonly ILocalizationService _localizationService;
 
     public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
     {

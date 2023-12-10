@@ -172,7 +172,7 @@ export class ImageComponent implements OnChanges {
       case 'loading-failed':
         // The image could not be loaded for some reason.
         // `event.data` is the error in this case
-        image.src = this.errorImage;
+        this.renderer.removeClass(image, 'fade-in');
         this.cdRef.markForCheck();
         break;
       case 'finally':

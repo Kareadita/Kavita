@@ -14,7 +14,7 @@ import { Download } from 'src/app/shared/_models/download';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { LibraryType } from 'src/app/_models/library';
+import { LibraryType } from 'src/app/_models/library/library';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';

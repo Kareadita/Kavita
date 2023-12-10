@@ -13,7 +13,7 @@ import { ConfirmService } from 'src/app/shared/confirm.service';
 import { LibrarySettingsModalComponent } from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
-import { Library } from 'src/app/_models/library';
+import { Library } from 'src/app/_models/library/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -99,7 +99,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   editLibrary(library: Library) {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
     modalRef.componentInstance.library = library;
     modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
@@ -109,7 +109,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   addLibrary() {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
     modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();

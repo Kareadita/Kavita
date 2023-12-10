@@ -15,7 +15,8 @@ type UtcToLocalTimeFormat = 'full' | 'short' | 'shortDate' | 'shortTime';
 })
 export class UtcToLocalTimePipe implements PipeTransform {
 
-  transform(utcDate: string, format: UtcToLocalTimeFormat = 'short'): string {
+  transform(utcDate: string | undefined | null, format: UtcToLocalTimeFormat = 'short'): string {
+    if (utcDate === undefined || utcDate === null) return '';
     const browserLanguage = navigator.language;
     const dateTime = DateTime.fromISO(utcDate, { zone: 'utc' }).toLocal().setLocale(browserLanguage);
 

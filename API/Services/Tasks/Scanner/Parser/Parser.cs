@@ -17,7 +17,9 @@ public static class Parser
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
-    private const string BookFileExtensions = @"\.epub|\.pdf";
+    public const string EpubFileExtension = @"\.epub";
+    public const string PdfFileExtension = @"\.pdf";
+    private const string BookFileExtensions = EpubFileExtension + "|" + PdfFileExtension;
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
 
@@ -107,9 +109,9 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
             MatchOptions, RegexTimeout),
-        // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
+        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
         new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+(Vol(ume)?\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
             MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(
@@ -135,6 +137,7 @@ public static class Parser
         new Regex(
             @"(vol_)(?<Volume>\d+(\.\d)?)",
             MatchOptions, RegexTimeout),
+
         // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
         new Regex(
             @"第(?<Volume>\d+)(卷|册)",
@@ -195,16 +198,17 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)(\b|_|-|\s)(?:sp)\d",
             MatchOptions, RegexTimeout),
-        // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
-        new Regex(
-            @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
-            MatchOptions, RegexTimeout),
         // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
         // The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake
         new Regex(
             @"(?<Series>.+?)(\s|_|-)+(?:Vol(ume|\.)?(\s|_|-)+\d+)(\s|_|-)+(?:(Ch|Chapter|Ch)\.?)(\s|_|-)+(?<Chapter>\d+)",
             MatchOptions,
             RegexTimeout),
+        // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz,
+        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.30 Omake
+        new Regex(
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+Vol(ume)?\.?(\d+|tbd|\s\d).+?",
+            MatchOptions, RegexTimeout),
         // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
         new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
@@ -231,6 +235,7 @@ public static class Parser
             @"(?<Series>.+?):?(\s|\b|_|-)Chapter(\s|\b|_|-)\d+(\s|\b|_|-)(vol)(ume)",
             MatchOptions,
             RegexTimeout),
+
         // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
             @"(?<Series>.+?):? (\b|_|-)(vol)(ume)",

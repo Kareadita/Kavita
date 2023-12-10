@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import {DestroyRef, inject, Injectable} from '@angular/core';
-import {Location} from '@angular/common';
+import {DestroyRef, Inject, inject, Injectable} from '@angular/core';
+import {DOCUMENT, Location} from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
@@ -10,8 +10,6 @@ import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/readers/page-bookmark';
 import { ProgressBookmark } from '../_models/readers/progress-bookmark';
-import { UtilityService } from '../shared/_services/utility.service';
-import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FileDimension } from '../manga-reader/_models/file-dimension';
 import screenfull from 'screenfull';
 import { TextResonse } from '../_types/text-response';
@@ -19,6 +17,8 @@ import { AccountService } from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import NoSleep from 'nosleep.js';
+
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -35,14 +35,40 @@ export class ReaderService {
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
+  private noSleep = new NoSleep();
+
   constructor(private httpClient: HttpClient, private router: Router,
-    private location: Location, private utilityService: UtilityService,
-    private filterUtilityService: FilterUtilitiesService, private accountService: AccountService) {
+    private location: Location, private accountService: AccountService,
+    @Inject(DOCUMENT) private document: Document) {
       this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);
         }
       });
+  }
+
+  enableWakeLock(element?: Element | Document) {
+    // Enable wake lock.
+    // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+
+    if (!element) element = this.document;
+
+    const enableNoSleepHandler = () => {
+      element!.removeEventListener('click', enableNoSleepHandler, false);
+      element!.removeEventListener('touchmove', enableNoSleepHandler, false);
+      element!.removeEventListener('mousemove', enableNoSleepHandler, false);
+      this.noSleep!.enable();
+    };
+
+    // Enable wake lock.
+    // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+    element.addEventListener('click', enableNoSleepHandler, false);
+    element.addEventListener('touchmove', enableNoSleepHandler, false);
+    element.addEventListener('mousemove', enableNoSleepHandler, false);
+  }
+
+  disableWakeLock() {
+    this.noSleep.disable();
   }
 
 
@@ -271,6 +297,7 @@ export class ReaderService {
     if (readingListMode) {
       this.router.navigateByUrl('lists/' + readingListId);
     } else {
+      // TODO: back doesn't always work, it might be nice to check the pattern of the url and see if we can be smart before just going back
       this.location.back();
     }
   }

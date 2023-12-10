@@ -1,5 +1,14 @@
 <ng-container *transloco="let t; read: 'manga-reader'">
   <div class="reader" #reader [ngStyle]="{overflow: (isFullscreen ? 'auto' : 'visible')}">
+    @if(debugMode) {
+      <div class="fixed-top overlay">
+        @for(img of cachedImages; track img.src) {
+          <ng-container *ngIf="this.readerService.imageUrlToPageNum(img.src) as imageNum">
+            <span class="me-1" [ngClass]="{'current': imageNum === this.pageNum, 'loaded': img.complete}">{{this.readerService.imageUrlToPageNum(img.src)}}</span>
+          </ng-container>
+        }
+      </div>
+    }
     <div class="fixed-top overlay" *ngIf="menuOpen" [@slideFromTop]="menuOpen">
       <div style="display: flex; margin-top: 5px;">
         <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
@@ -10,7 +19,7 @@
         <div>
           <div style="font-weight: bold;">{{title}} <span class="clickable" *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)</span></div>
           <div class="subtitle">
-            {{subtitle}} <span *ngIf="totalSeriesPages > 0">{{t('series-progress', {percentage: (((totalSeriesPagesRead + pageNum) / totalSeriesPages) | percent)}) }}</span>
+            {{subtitle}} <span *ngIf="totalSeriesPages > 0">{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
           </div>
         </div>
 
@@ -27,7 +36,7 @@
         </div>
       </div>
     </div>
-    <app-loading [loading]="isLoading" [absolute]="true"></app-loading>
+    <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true"></app-loading>
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
@@ -191,34 +200,34 @@
               <ng-container [ngSwitch]="layoutMode">
                 <ng-container *ngSwitchCase="LayoutMode.Single">
                   <div class="split-double">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fa fa-image fa-stack-1x"></i>
-                                          </span>
+                    <span class="fa-stack fa-1x">
+                        <i class="fa-regular fa-square-full fa-stack-2x"></i>
+                        <i class="fa fa-image fa-stack-1x"></i>
+                      </span>
                   </div>
                 </ng-container>
                 <ng-container *ngSwitchCase="LayoutMode.Double">
                   <div class="split-double">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-1 fa-stack-1x"></i>
-                                          </span>
+                    <span class="fa-stack fa-1x">
+                        <i class="fa-regular fa-square-full fa-stack-2x"></i>
+                        <i class="fab fa-1 fa-stack-1x"></i>
+                    </span>
                     <span class="fa-stack fa right">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-2 fa-stack-1x"></i>
-                                          </span>
+                      <i class="fa-regular fa-square-full fa-stack-2x"></i>
+                      <i class="fab fa-2 fa-stack-1x"></i>
+                    </span>
                   </div>
                 </ng-container>
                 <ng-container *ngSwitchCase="LayoutMode.DoubleReversed">
                   <div class="split-double">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-2 fa-stack-1x"></i>
-                                          </span>
+                    <span class="fa-stack fa-1x">
+                        <i class="fa-regular fa-square-full fa-stack-2x"></i>
+                        <i class="fab fa-2 fa-stack-1x"></i>
+                    </span>
                     <span class="fa-stack fa right">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-1 fa-stack-1x"></i>
-                                          </span>
+                      <i class="fa-regular fa-square-full fa-stack-2x"></i>
+                      <i class="fab fa-1 fa-stack-1x"></i>
+                    </span>
                   </div>
                 </ng-container>
               </ng-container>
@@ -258,7 +267,8 @@
           </div>
           <div class="row mb-2">
             <div class="col-md-6 col-sm-12">
-              <label for="darkness" class="form-label range-label">{{t('brightness-label')}}</label><span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
+              <label for="darkness" class="form-label range-label">{{t('brightness-label')}}</label>
+              <span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
               <input type="range" class="form-range" id="darkness"
                      min="10" max="100" step="1" formControlName="darkness">
             </div>

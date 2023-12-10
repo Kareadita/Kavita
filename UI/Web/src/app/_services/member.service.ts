@@ -32,8 +32,8 @@ export class MemberService {
     return this.httpClient.get<boolean>(this.baseUrl + 'users/has-library-access?libraryId=' + libraryId);
   }
 
-  hasReadingProgress(librayId: number) {
-    return this.httpClient.get<boolean>(this.baseUrl + 'users/has-reading-progress?libraryId=' + librayId);
+  hasReadingProgress(libraryId: number) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'users/has-reading-progress?libraryId=' + libraryId);
   }
 
   addSeriesToWantToRead(seriesIds: Array<number>) {
@@ -47,5 +47,5 @@ export class MemberService {
   getMember() {
     return this.httpClient.get<Member>(this.baseUrl + 'users/myself');
   }
-  
+
 }

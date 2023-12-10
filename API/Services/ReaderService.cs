@@ -398,7 +398,7 @@ public class ReaderService : IReaderService
             // Handle Chapters within next Volume
             // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
             var chapters = volume.Chapters.OrderBy(x => x.Number.AsDouble(), _chapterSortComparer).ToList();
-            if (currentChapter.Number.Equals(Parser.DefaultChapter) && chapters.Last().Number.Equals(Parser.DefaultChapter))
+            if (currentChapter.Number.Equals(Parser.DefaultChapter) && chapters[^1].Number.Equals(Parser.DefaultChapter))
             {
                 // We need to handle an extra check if the current chapter is the last special, as we should return -1
                 if (currentChapter.IsSpecial) return -1;

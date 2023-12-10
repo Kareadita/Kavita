@@ -25,7 +25,7 @@ import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
-import {Library} from 'src/app/_models/library';
+import {Library} from 'src/app/_models/library/library';
 import {Pagination} from 'src/app/_models/pagination';
 import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/series-filter';
 import {ActionItem} from 'src/app/_services/action-factory.service';

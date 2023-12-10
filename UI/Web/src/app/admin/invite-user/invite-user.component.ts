@@ -4,7 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { InviteUserResponse } from 'src/app/_models/auth/invite-user-response';
-import { Library } from 'src/app/_models/library';
+import { Library } from 'src/app/_models/library/library';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AccountService } from 'src/app/_services/account.service';
 import { ApiKeyComponent } from '../../user-settings/api-key/api-key.component';

@@ -13,6 +13,7 @@ import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-customize-dashboard-streams',
@@ -31,6 +32,7 @@ export class CustomizeDashboardStreamsComponent {
   private readonly dashboardService = inject(DashboardService);
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly utilityService = inject(UtilityService);
 
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
@@ -50,7 +52,7 @@ export class CustomizeDashboardStreamsComponent {
       this.items = results[0];
 
       // After 100 items, drag and drop is disabled to use virtualization
-      if (this.items.length > 100) {
+      if (this.items.length > 100 || this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet) {
         this.accessibilityMode = true;
       }
 

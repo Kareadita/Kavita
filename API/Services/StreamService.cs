@@ -33,7 +33,6 @@ public interface IStreamService
     Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto);
     Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto);
     Task DeleteExternalSource(int userId, int externalSourceId);
-
 }
 
 public class StreamService : IStreamService
@@ -72,7 +71,7 @@ public class StreamService : IStreamService
         var smartFilter = await _unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId);
         if (smartFilter == null) throw new KavitaException(await _localizationService.Translate(userId, "smart-filter-doesnt-exist"));
 
-        var stream = user?.DashboardStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
+        var stream = user.DashboardStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
         if (stream != null) throw new KavitaException(await _localizationService.Translate(userId, "smart-filter-already-in-use"));
 
         var maxOrder = user!.DashboardStreams.Max(d => d.Order);
@@ -160,7 +159,7 @@ public class StreamService : IStreamService
         var smartFilter = await _unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId);
         if (smartFilter == null) throw new KavitaException(await _localizationService.Translate(userId, "smart-filter-doesnt-exist"));
 
-        var stream = user?.SideNavStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
+        var stream = user.SideNavStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
         if (stream != null) throw new KavitaException(await _localizationService.Translate(userId, "smart-filter-already-in-use"));
 
         var maxOrder = user!.SideNavStreams.Max(d => d.Order);
@@ -342,6 +341,4 @@ public class StreamService : IStreamService
 
         await _unitOfWork.CommitAsync();
     }
-
-
 }

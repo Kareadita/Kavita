@@ -308,7 +308,7 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
+        var (_, prefix) = await GetPrefix();
 
         var filters = _unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(userId);
         var feed = CreateFeed(await _localizationService.Translate(userId, "smartFilters"), $"{prefix}{apiKey}/smart-filters", apiKey, prefix);
@@ -337,7 +337,7 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
+        var (_, prefix) = await GetPrefix();
 
         var externalSources = await _unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId);
         var feed = CreateFeed(await _localizationService.Translate(userId, "external-sources"), $"{prefix}{apiKey}/external-sources", apiKey, prefix);
@@ -370,15 +370,13 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
         var (baseUrl, prefix) = await GetPrefix();
-        var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId);
         var feed = CreateFeed(await _localizationService.Translate(userId, "libraries"), $"{prefix}{apiKey}/libraries", apiKey, prefix);
         SetFeedId(feed, "libraries");
 
         // Ensure libraries follow SideNav order
         var userSideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreams(userId, false);
-        foreach (var sideNavStream in userSideNavStreams.Where(s => s.StreamType == SideNavStreamType.Library))
+        foreach (var library in userSideNavStreams.Where(s => s.StreamType == SideNavStreamType.Library).Select(sideNavStream => sideNavStream.Library))
         {
-            var library = sideNavStream.Library;
             feed.Entries.Add(new FeedEntry()
             {
                 Id = library!.Id.ToString(),
@@ -779,13 +777,13 @@ public class OpdsController : BaseApiController
             var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
         _chapterSortComparer);
 
-            foreach (var chapter in chapters)
+            foreach (var chapterId in chapters.Select(c => c.Id))
             {
-                var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-                var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
+                var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
+                var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
                 foreach (var mangaFile in files)
                 {
-                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
                 }
             }
 
@@ -834,10 +832,10 @@ public class OpdsController : BaseApiController
         foreach (var chapter in chapters)
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
+            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapter.Id, mangaFile, series, chapterDto!, apiKey, prefix, baseUrl));
             }
         }
 

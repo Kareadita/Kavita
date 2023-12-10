@@ -51,7 +51,7 @@
         </div>
         <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
         <ng-container *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
-          <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) | number:'1.0-1'}}% Read">
+          <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">
             <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
           </div>
           <div class="under-image">
@@ -141,6 +141,7 @@
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
+                    {{item.id}}
                     <ng-container [ngSwitch]="item.isChapter">
                       <ng-container *ngSwitchCase="false" [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
                       <ng-container *ngSwitchCase="true" [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>

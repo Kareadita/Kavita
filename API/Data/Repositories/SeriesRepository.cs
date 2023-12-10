@@ -13,6 +13,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -373,6 +374,33 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(s => s.SortName!.ToLower())
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
+
+        result.Bookmarks = (await _context.AppUserBookmark
+            .Join(
+                _context.Series,
+                bookmark => bookmark.SeriesId,
+                series => series.Id,
+                (bookmark, series) => new {Bookmark = bookmark, Series = series}
+            )
+            .Where(joined => joined.Bookmark.AppUserId == userId &&
+                             (EF.Functions.Like(joined.Series.Name, $"%{searchQuery}%") ||
+                              (joined.Series.OriginalName != null &&
+                               EF.Functions.Like(joined.Series.OriginalName, $"%{searchQuery}%")) ||
+                              (joined.Series.LocalizedName != null &&
+                               EF.Functions.Like(joined.Series.LocalizedName, $"%{searchQuery}%"))))
+            .OrderBy(joined => joined.Series.Name)
+            .Take(maxRecords)
+            .Select(joined => new BookmarkSearchResultDto()
+            {
+                SeriesName = joined.Series.Name,
+                LocalizedSeriesName = joined.Series.LocalizedName,
+                LibraryId = joined.Series.LibraryId,
+                SeriesId = joined.Bookmark.SeriesId,
+                ChapterId = joined.Bookmark.ChapterId,
+                VolumeId = joined.Bookmark.VolumeId
+            })
+            .ToListAsync()).DistinctBy(s => s.SeriesId);
+
 
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)

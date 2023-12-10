@@ -10,7 +10,7 @@ import { ConfirmService } from '../shared/confirm.service';
 import { LibrarySettingsModalComponent } from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Device } from '../_models/device/device';
-import { Library } from '../_models/library';
+import { Library } from '../_models/library/library';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -102,7 +102,7 @@ export class ActionService implements OnDestroy {
   }
 
   editLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {size: 'xl', fullscreen: 'md'});
       modalRef.componentInstance.library = library;
       modalRef.closed.subscribe((closeResult: {success: boolean, library: Library, coverImageUpdate: boolean}) => {
         if (callback) callback(library)
@@ -362,7 +362,7 @@ export class ActionService implements OnDestroy {
 
   addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
       this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
@@ -404,7 +404,7 @@ export class ActionService implements OnDestroy {
 
   addMultipleSeriesToReadingList(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
       this.readingListModalRef.componentInstance.title = 'Multiple Selections';
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
@@ -432,7 +432,7 @@ export class ActionService implements OnDestroy {
    */
   addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.collectionModalRef != null) { return; }
-      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection' });
+      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
       this.collectionModalRef.componentInstance.title = 'New Collection';
 
@@ -452,7 +452,7 @@ export class ActionService implements OnDestroy {
 
   addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesId = series.id;
       this.readingListModalRef.componentInstance.title = series.name;
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
@@ -474,7 +474,7 @@ export class ActionService implements OnDestroy {
 
   addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.volumeId = volume.id;
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
@@ -496,7 +496,7 @@ export class ActionService implements OnDestroy {
 
   addChapterToReadingList(chapter: Chapter, seriesId: number, callback?: ChapterActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.chapterId = chapter.id;
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
@@ -517,7 +517,7 @@ export class ActionService implements OnDestroy {
   }
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
-    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'lg' });
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'lg', fullscreen: 'md' });
     readingListModalRef.componentInstance.readingList = readingList;
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {

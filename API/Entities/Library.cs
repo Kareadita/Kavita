@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities;
 
@@ -44,6 +43,8 @@ public class Library : IEntityDate
 
 
 
+
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
@@ -57,6 +58,8 @@ public class Library : IEntityDate
     public ICollection<FolderPath> Folders { get; set; } = null!;
     public ICollection<AppUser> AppUsers { get; set; } = null!;
     public ICollection<Series> Series { get; set; } = null!;
+    public ICollection<LibraryFileTypeGroup> LibraryFileTypes { get; set; } = new List<LibraryFileTypeGroup>();
+    public ICollection<LibraryExcludePattern> LibraryExcludePatterns { get; set; } = new List<LibraryExcludePattern>();
 
     public void UpdateLastModified()
     {

@@ -879,7 +879,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
 
-        var allFiles = ds.ScanFiles("C:/Data/");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
 
         Assert.Empty(allFiles);
 
@@ -903,7 +903,7 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-        var allFiles = ds.ScanFiles("C:/Data/");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
 
         Assert.Single(allFiles); // Ignore files are not counted in files, only valid extensions
 
@@ -932,7 +932,7 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-        var allFiles = ds.ScanFiles("C:/Data/");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
 
         Assert.Equal(2, allFiles.Count); // Ignore files are not counted in files, only valid extensions
 
@@ -956,7 +956,7 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-        var allFiles = ds.ScanFiles("C:/Data/");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
 
         Assert.Equal(5, allFiles.Count);
 

@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'pdf-reader'">
-  <div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user">
+  <div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user" #container>
 
     <ng-container *ngIf="isLoading">
       <div class="loading mx-auto" style="min-width: 200px; width: 600px;">
@@ -43,14 +43,16 @@
     </ngx-extended-pdf-viewer>
 
     <ng-template #multiToolbar>
-      <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}"> <!--action-bar row g-0 justify-content-between-->
-        <div  id="toolbarViewerLeft">
+      <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}">
+        <div id="toolbarViewerLeft">
           <pdf-toggle-sidebar></pdf-toggle-sidebar>
           <pdf-find-button></pdf-find-button>
           <pdf-paging-area></pdf-paging-area>
         </div>
 
-        <div  id="toolbarViewerRight">
+        <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+
+        <div id="toolbarViewerRight">
           <pdf-hand-tool></pdf-hand-tool>
           <pdf-select-tool></pdf-select-tool>
           <pdf-presentation-mode></pdf-presentation-mode>
@@ -62,24 +64,22 @@
               <span class="visually-hidden">{{this.bookMode !== 'book' ? 'Book Mode' : 'Normal Mode'}}</span>
           </button> -->
 
-          <button class="btn btn-icon toolbarButton" [ngbTooltip]="bookTitle">
+          <button class="btn btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" [ngbTooltip]="bookTitle">
             <i class="toolbar-icon fa-solid fa-info" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-            <span class="visually-hidden">
-                        {{bookTitle}}
-                    </span>
+            <span class="visually-hidden">{{bookTitle}}</span>
           </button>
 
-          <button *ngIf="incognitoMode" (click)="turnOffIncognito()" class="btn btn-icon toolbarButton">
+          <button *ngIf="incognitoMode" (click)="turnOffIncognito()" class="btn btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton">
             <i class="toolbar-icon fa fa-glasses" [ngStyle]="{color: fontColor}" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode')}}</span>
           </button>
 
           <!-- This is pretty experimental, so it might not work perfectly -->
-          <button (click)="toggleTheme()" class="btn btn-icon toolbarButton">
+          <button (click)="toggleTheme()" class="btn btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton">
             <i class="toolbar-icon fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
             <span class="visually-hidden">{{this.theme === 'light' ? t('light-theme-alt') : t('dark-theme-alt')}}</span>
           </button>
 
-          <button class="btn btn-icon col-2 col-xs-1 toolbarButton" (click)="closeReader()">
+          <button class="btn btn-icon col-2 col-xs-1 mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="closeReader()">
             <i class="toolbar-icon fa fa-times-circle" aria-hidden="true" [ngStyle]="{color: fontColor}"></i>
             <span class="visually-hidden">{{t('close-reader-alt')}}</span>
           </button>
@@ -87,7 +87,7 @@
           <div class="verticalToolbarSeparator hiddenSmallView"></div>
           <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
         </div>
-        <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+
       </div>
 
     </ng-template>

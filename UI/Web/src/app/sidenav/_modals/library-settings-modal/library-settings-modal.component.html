@@ -66,10 +66,10 @@
               </button>
             </div>
             <div class="row mt-2">
-              <p>{{t('help-us-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
+              <p>{{t('help-us-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
             </div>
             <div class="row mt-2">
-              <p>{{t('naming-conventions-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner#introduction" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
+              <p>{{t('naming-conventions-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner#introduction" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
             </div>
           </ng-template>
         </li>
@@ -88,6 +88,49 @@
         <li [ngbNavItem]="TabID.Advanced" [disabled]="isAddLibrary && setupStep < 3">
           <a ngbNavLink>{{t(TabID.Advanced)}}</a>
           <ng-template ngbNavContent>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <h6>{{t('file-type-group-label')}}</h6>
+                  <p class="accent">
+                    {{t('file-type-group-tooltip')}}
+                  </p>
+                  <div class="hstack gap-2">
+                    <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
+                      <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
+                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div ngbAccordion>
+                  <div ngbAccordionItem>
+                    <h2 ngbAccordionHeader>
+                      <button ngbAccordionButton>{{t('exclude-patterns-label')}}</button>
+                    </h2>
+                    <div ngbAccordionCollapse>
+                      <div ngbAccordionBody>
+                        <ng-template>
+                          <span >{{t('exclude-patterns-tooltip')}}<a class="ms-1" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner/excluding-files-folders" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a></span>
+                          <div class="mt-2">
+                            <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                          </div>
+                        </ng-template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+
+
             <div class="row">
               <div class="col-md-12 col-sm-12 pe-2 mb-2">
                 <div class="mb-3 mt-1">

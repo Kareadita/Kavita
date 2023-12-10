@@ -4,7 +4,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {ExternalSourceService} from "../../../external-source.service";
+import {ExternalSourceService} from "../../../_services/external-source.service";
 import {distinctUntilChanged, filter, tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {switchMap} from "rxjs";

@@ -1,4 +1,4 @@
-import { LibraryType } from "./library";
+import { LibraryType } from "./library/library";
 import { MangaFormat } from "./manga-format";
 
 export interface ReadingListItem {
@@ -27,7 +27,7 @@ export interface ReadingList {
     coverImageLocked: boolean;
     items: Array<ReadingListItem>;
     /**
-     * If this is empty or null, the cover image isn't set. Do not use this externally. 
+     * If this is empty or null, the cover image isn't set. Do not use this externally.
      */
      coverImage: string;
      startingYear: number;

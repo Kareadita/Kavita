@@ -27,7 +27,7 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     styleUrls: ['./single-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, AsyncPipe, SafeStylePipe]
+    imports: [AsyncPipe, SafeStylePipe]
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
 
@@ -137,7 +137,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
         return fit;
       }),
-      shareReplay(),
+      shareReplay({refCount: true, bufferSize: 1}),
       filter(_ => this.isValid()),
       takeUntilDestroyed(this.destroyRef),
     );

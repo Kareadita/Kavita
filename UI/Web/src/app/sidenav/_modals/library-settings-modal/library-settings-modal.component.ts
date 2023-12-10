@@ -1,6 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
+  NgbAccordionBody,
+  NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
   NgbActiveModal,
   NgbModal,
   NgbModalModule,
@@ -20,7 +32,7 @@ import {
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Library, LibraryType} from 'src/app/_models/library';
+import {Library, LibraryType} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -30,6 +42,9 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
+import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
+import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
+import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 
 enum TabID {
   General = 'general-tab',
@@ -48,7 +63,9 @@ enum StepID {
 @Component({
   selector: 'app-library-settings-modal',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe],
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+    SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
+    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -81,9 +98,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   isAddLibrary = false;
   setupStep = StepID.General;
+  fileTypeGroups = allFileTypeGroup;
+  excludePatterns: Array<string> = [''];
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
+
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
@@ -91,12 +111,10 @@ export class LibrarySettingsModalComponent implements OnInit {
     private imageService: ImageService) { }
 
   ngOnInit(): void {
-
     this.settingService.getLibraryTypes().subscribe((types) => {
       this.libraryTypes = types;
       this.cdRef.markForCheck();
     });
-
 
     if (this.library === undefined) {
       this.isAddLibrary = true;
@@ -112,7 +130,6 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
       this.libraryForm.get('allowScrobbling')?.disable();
     }
-
 
     this.libraryForm.get('name')?.valueChanges.pipe(
       debounceTime(100),
@@ -132,6 +149,40 @@ export class LibrarySettingsModalComponent implements OnInit {
 
 
     this.setValues();
+
+    // This needs to only apply after first render
+    this.libraryForm.get('type')?.valueChanges.pipe(
+      tap((type: LibraryType) => {
+        const libType = parseInt(type + '', 10) as LibraryType;
+        switch (libType) {
+          case LibraryType.Manga:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
+          case LibraryType.Comic:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
+          case LibraryType.Book:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
+            break;
+          case LibraryType.Images:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
+        }
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   setValues() {
@@ -148,8 +199,29 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
-      this.cdRef.markForCheck();
+      for(let fileTypeGroup of allFileTypeGroup) {
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
+      }
+      for(let glob of this.library.excludePatterns) {
+        this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
+      }
+      this.excludePatterns = this.library.excludePatterns;
+    } else {
+      for(let fileTypeGroup of allFileTypeGroup) {
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
+      }
     }
+
+    if (this.excludePatterns.length === 0) {
+      this.excludePatterns = [''];
+    }
+
+    this.cdRef.markForCheck();
+  }
+
+  updateGlobs(items: Array<string>) {
+    this.excludePatterns = items;
+    this.cdRef.markForCheck();
   }
 
   isDisabled() {
@@ -172,6 +244,13 @@ export class LibrarySettingsModalComponent implements OnInit {
   async save() {
     const model = this.libraryForm.value;
     model.folders = this.selectedFolders;
+    model.fileGroupTypes = [];
+    for(let fileTypeGroup of allFileTypeGroup) {
+      if (model[fileTypeGroup]) {
+        model.fileGroupTypes.push(fileTypeGroup);
+      }
+    }
+    model.excludePatterns = this.excludePatterns;
 
     if (this.libraryForm.errors) {
       return;

@@ -34,7 +34,6 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
-    Task ScrobbleUpdates(int userId);
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -141,7 +140,6 @@ public class TaskScheduler : ITaskScheduler
         }
 
         RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, RecurringJobOptions);
-        RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
 
@@ -270,16 +268,6 @@ public class TaskScheduler : ITaskScheduler
     public async Task CleanupDbEntries()
     {
         await _cleanupService.CleanupDbEntries();
-    }
-
-    /// <summary>
-    /// TODO: Remove this for Release
-    /// </summary>
-    /// <returns></returns>
-    public async Task ScrobbleUpdates(int userId)
-    {
-        if (!await _licenseService.HasActiveLicense()) return;
-        BackgroundJob.Enqueue(() => _scrobblingService.ProcessUpdatesSinceLastSync());
     }
 
     /// <summary>

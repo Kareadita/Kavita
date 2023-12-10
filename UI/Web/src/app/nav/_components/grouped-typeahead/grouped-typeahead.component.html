@@ -45,6 +45,16 @@
           </ul>
         </ng-container>
 
+        <ng-container *ngIf="bookmarkTemplate !== undefined && groupedData.bookmarks.length > 0">
+          <li class="list-group-item section-header"><h5>{{t('bookmarks')}}</h5></li>
+          <ul class="list-group results">
+            <li *ngFor="let option of groupedData.bookmarks; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                class="list-group-item" role="option">
+              <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+            </li>
+          </ul>
+        </ng-container>
+
         <ng-container *ngIf="libraryTemplate !== undefined && groupedData.libraries.length > 0">
           <li class="list-group-item section-header"><h5 id="libraries-group">{{t('libraries')}}</h5></li>
           <ul class="list-group results" role="group" aria-describedby="libraries-group">

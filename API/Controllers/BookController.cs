@@ -101,8 +101,8 @@ public class BookController : BaseApiController
         if (chapterId <= 0) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         if (chapter == null) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
-        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
+        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
         var key = BookService.CoalesceKeyForAnyFile(book, file);
 
         if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Get("en", "file-missing"));

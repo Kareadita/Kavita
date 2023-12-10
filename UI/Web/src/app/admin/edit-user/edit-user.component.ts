@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
-import { Library } from 'src/app/_models/library';
+import { Library } from 'src/app/_models/library/library';
 import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';

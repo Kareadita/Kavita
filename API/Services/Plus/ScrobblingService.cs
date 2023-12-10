@@ -67,13 +67,14 @@ public class ScrobblingService : IScrobblingService
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
     public const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
+    public const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
 
     private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
     {
         {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
         {GoogleBooksWeblinkWebsite, 0},
-
+        {MangaDexWeblinkWebsite, 0},
     };
 
     private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
@@ -175,13 +176,13 @@ public class ScrobblingService : IScrobblingService
     private async Task<string> GetTokenForProvider(int userId, ScrobbleProvider provider)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return null;
+        if (user == null) return string.Empty;
 
         return provider switch
         {
             ScrobbleProvider.AniList => user.AniListAccessToken,
             _ => string.Empty
-        };
+        } ?? string.Empty;
     }
 
     public async Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody)
@@ -192,11 +193,9 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling review event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
-        if (string.IsNullOrEmpty(reviewTitle) || string.IsNullOrEmpty(reviewBody) || (reviewTitle.Length < 2200 ||
-                                                  reviewTitle.Length > 120 ||
-                                                  reviewTitle.Length < 20))
+        if (IsAniListReviewValid(reviewTitle, reviewBody))
         {
             _logger.LogDebug(
                 "Rejecting Scrobble event for {Series}. Review is not long enough to meet requirements", series.Name);
@@ -232,6 +231,13 @@ public class ScrobblingService : IScrobblingService
         _logger.LogDebug("Added Scrobbling Review update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
+    private static bool IsAniListReviewValid(string reviewTitle, string reviewBody)
+    {
+        return string.IsNullOrEmpty(reviewTitle) || string.IsNullOrEmpty(reviewBody) || (reviewTitle.Length < 2200 ||
+            reviewTitle.Length > 120 ||
+            reviewTitle.Length < 20);
+    }
+
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating)
     {
         if (!await _licenseService.HasActiveLicense()) return;
@@ -240,7 +246,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling rating event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
@@ -279,7 +285,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling reading event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
@@ -334,11 +340,11 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling want-to-read event for {UserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
-        if (existing) return;
+        if (existing) return; // BUG: If I take a series and add to remove from want to read, then add to want to read, Kavita rejects the second as a duplicate, when it's not
 
         var evt = new ScrobbleEvent()
         {
@@ -355,7 +361,7 @@ public class ScrobblingService : IScrobblingService
         _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
-    private async Task<bool> CheckIfCanScrobble(int userId, int seriesId, Series series)
+    private async Task<bool> CheckIfCannotScrobble(int userId, int seriesId, Series series)
     {
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
@@ -616,7 +622,7 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
+        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
 
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
@@ -693,6 +699,24 @@ public class ScrobblingService : IScrobblingService
                     LocalizedSeriesName = evt.Series.LocalizedName,
                     Year = evt.Series.Metadata.ReleaseYear
                 }));
+
+            // After decisions, we need to mark all the want to read and remove from want to read as completed
+            if (decisions.All(d => d.IsProcessed))
+            {
+                foreach (var scrobbleEvent in addToWantToRead)
+                {
+                    scrobbleEvent.IsProcessed = true;
+                    scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
+                    _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+                }
+                foreach (var scrobbleEvent in removeWantToRead)
+                {
+                    scrobbleEvent.IsProcessed = true;
+                    scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
+                    _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
+                }
+                await _unitOfWork.CommitAsync();
+            }
         }
         catch (FlurlHttpException)
         {
@@ -806,12 +830,12 @@ public class ScrobblingService : IScrobblingService
             if (!webLink.StartsWith(website)) continue;
             var tokens = webLink.Split(website)[1].Split('/');
             var value = tokens[index];
-            if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int?))
             {
                 if (int.TryParse(value, out var intValue))
                     return (T)(object)intValue;
             }
-            else if (typeof(T) == typeof(long))
+            else if (typeof(T) == typeof(long?))
             {
                 if (long.TryParse(value, out var longValue))
                     return (T)(object)longValue;

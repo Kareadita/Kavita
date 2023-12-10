@@ -40,13 +40,15 @@ public class LibraryController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILibraryWatcher _libraryWatcher;
     private readonly ILocalizationService _localizationService;
+    private readonly IStreamService _streamService;
     private readonly IEasyCachingProvider _libraryCacheProvider;
     private const string CacheKey = "library_";
 
     public LibraryController(IDirectoryService directoryService,
         ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
         IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher,
-        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService,
+        IStreamService streamService)
     {
         _directoryService = directoryService;
         _logger = logger;
@@ -56,6 +58,7 @@ public class LibraryController : BaseApiController
         _eventHub = eventHub;
         _libraryWatcher = libraryWatcher;
         _localizationService = localizationService;
+        _streamService = streamService;
 
         _libraryCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.Library);
     }
@@ -83,6 +86,15 @@ public class LibraryController : BaseApiController
             .WithManageReadingLists(dto.ManageReadingLists)
             .WIthAllowScrobbling(dto.AllowScrobbling)
             .Build();
+
+        library.LibraryFileTypes = dto.FileGroupTypes
+            .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
+        library.LibraryExcludePatterns = dto.ExcludePatterns
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
@@ -230,8 +242,6 @@ public class LibraryController : BaseApiController
             _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
             // Bust cache
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
-
-            // TODO: Update a user's SideNav based on library access
 
             _unitOfWork.UserRepository.Update(user);
 
@@ -415,7 +425,7 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
         var userId = User.GetUserId();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         if (library == null) return BadRequest(await _localizationService.Translate(userId, "library-doesnt-exist"));
 
         var newName = dto.Name.Trim();
@@ -437,6 +447,15 @@ public class LibraryController : BaseApiController
         library.ManageCollections = dto.ManageCollections;
         library.ManageReadingLists = dto.ManageReadingLists;
         library.AllowScrobbling = dto.AllowScrobbling;
+        library.LibraryFileTypes = dto.FileGroupTypes
+            .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
+            .Distinct()
+            .ToList();
+
+        library.LibraryExcludePatterns = dto.ExcludePatterns
+            .Distinct()
+            .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
+            .ToList();
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
