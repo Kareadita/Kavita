@@ -83,6 +83,7 @@ public class MangaParserTests
     [InlineData("시즌34삽화2", "34")]
     [InlineData("Accel World Chapter 001 Volume 002", "2")]
     [InlineData("Accel World Volume 2", "2")]
+    [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake", "30")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
@@ -204,6 +205,7 @@ public class MangaParserTests
     [InlineData("죠시라쿠! 2년 후 1권", "죠시라쿠! 2년 후")]
     [InlineData("test 2 years 1권", "test 2 years")]
     [InlineData("test 2 years 1화", "test 2 years")]
+    [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.30 Omake", "Nagasarete Airantou")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));

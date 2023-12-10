@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Logging;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -91,7 +92,7 @@ public class BackupService : IBackupService
         await SendProgress(0.1F, "Copying core files");
 
         var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
-        var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
+        var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}_v{BuildInfo.Version}.zip");
 
         if (File.Exists(zipPath))
         {

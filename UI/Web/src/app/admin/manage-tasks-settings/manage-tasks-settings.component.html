@@ -58,7 +58,9 @@
           <td>
             {{task.title | titlecase}}
           </td>
-          <td>{{task.lastExecutionUtc | utcToLocalTime | defaultValue }}</td>
+          <td>
+            {{task.lastExecutionUtc | utcToLocalTime | defaultValue }}
+          </td>
           <td>{{task.cron}}</td>
         </tr>
         </tbody>

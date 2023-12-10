@@ -115,10 +115,6 @@ public class ReaderController : BaseApiController
 
         try
         {
-            if (new Random().Next(1, 10) > 5)
-            {
-                await Task.Delay(1000);
-            }
             var chapter = await _cacheService.Ensure(chapterId, extractPdf);
             if (chapter == null) return NoContent();
             _logger.LogInformation("Fetching Page {PageNum} on Chapter {ChapterId}", page, chapterId);
