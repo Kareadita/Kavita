@@ -129,7 +129,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   isScrolling: boolean = false;
   /**
-   * Whether all prefetched images have loaded on the screen (not neccesarily in viewport)
+   * Whether all prefetched images have loaded on the screen (not necessarily in viewport)
    */
   allImagesLoaded: boolean = false;
   /**
@@ -159,7 +159,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Outline | DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   /**
    * Debug mode. Will filter out any messages in here, so they don't hit the log
    */
@@ -597,7 +597,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.debugLog('[Intersection] Page ' + imagePage + ' is visible: ', entry.isIntersecting);
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
-        this.prefetchWebtoonImages(imagePage);
+        this.setPageNum(imagePage);
       }
     });
   }
