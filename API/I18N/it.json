@@ -170,5 +170,7 @@
     "external-sources": "Sorgenti Esterne",
     "external-source-required": "ApiKey e Host sono obbligatori",
     "external-source-already-in-use": "Esiste uno stream esistente con questa Sorgente Esterna",
-    "smart-filter-already-in-use": "Esiste uno stream esistente con questo Filtro Intelligente"
+    "smart-filter-already-in-use": "Esiste uno stream esistente con questo Filtro Intelligente",
+    "dashboard-stream-doesnt-exist": "Dashboard Stream non esiste",
+    "sidenav-stream-doesnt-exist": "SideNav Stream non esiste"
 }
