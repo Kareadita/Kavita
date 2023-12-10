@@ -1,6 +1,6 @@
 {
     "register-user": "Quelque chose s'est mal passé lors de l'enregistrement de l'utilisateur",
-    "denied": "Non autorisé",
+    "denied": "Interdit",
     "permission-denied": "Vous n'êtes pas autorisé à cette opération",
     "disabled-account": "Votre compte a été désactivé. Veuillez contacter un administrateur.",
     "confirm-email": "Vous devez d'abord confirmer votre email",
