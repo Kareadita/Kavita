@@ -595,7 +595,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(dto.Email))
             return BadRequest(await _localizationService.Translate(userId, "invalid-payload"));
 
-        _logger.LogInformation("{User} is inviting {Email} to the server", User.GetUsername(), dto.Email);
+        _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
         // Check if there is an existing invite
         var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
@@ -701,7 +701,7 @@ public class AccountController : BaseApiController
                 BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                 {
                     EmailAddress = dto.Email,
-                    InvitingUser = User.GetUsername(),
+                    InvitingUser = adminUser.UserName,
                     ServerConfirmationLink = emailLink
                 }));
             }
