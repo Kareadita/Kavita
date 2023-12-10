@@ -556,7 +556,8 @@
         "incognito-mode-label": "Modalità Incognito",
         "next": "Prossimo",
         "previous": "Precedente",
-        "go-to-page-prompt": "Ci sono {{totalPages}} pagine. A quale pagina vuoi andare?"
+        "go-to-page-prompt": "Ci sono {{totalPages}} pagine. A quale pagina vuoi andare?",
+        "close-reader": "Chiudi Lettore"
     },
     "personal-table-of-contents": {
         "no-data": "Nessun preferito ancora",
@@ -726,7 +727,12 @@
         "cancel": "{{common.cancel}}",
         "next": "Prossimo",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "exclude-patterns-label": "Escludi modelli",
+        "help": "{{common.help}}",
+        "file-type-group-label": "Tipi di file",
+        "file-type-group-tooltip": "Quali tipi di file dovrebbe scansionare Kavita. Ad esempio, Archivio includerà tutti i file cb*, zip, rar, ecc.",
+        "exclude-patterns-tooltip": "Configura una serie di modelli (sintassi Glob) che Kavita abbinerà durante la scansione delle directory ed escluderà dai risultati dello scanner."
     },
     "reader-settings": {
         "general-settings-title": "Impostazioni Generali",
@@ -1081,7 +1087,10 @@
         "analyze-files-task-desc": "Esegue un'attività di lunga durata che analizzerà i file per generare estensione e dimensione. Dovrebbe essere eseguito solo una volta per la versione v0.7. Non necessario se hai installato la versione successiva alla v0.7.",
         "analyze-files-task-success": "L'analisi del file è stata messa in coda",
         "check-for-updates-task": "Cerca Aggiornamenti",
-        "check-for-updates-task-desc": "Verifica se sono disponibili versioni stabili prima della tua versione."
+        "check-for-updates-task-desc": "Verifica se sono disponibili versioni stabili prima della tua versione.",
+        "bust-locale-task-desc": "Blocca la cache delle impostazioni locali. Ciò può risolvere i problemi relativi alle stringhe che non vengono visualizzate correttamente dopo un aggiornamento",
+        "bust-locale-task-success": "Cache locale cancellata",
+        "bust-locale-task": "Busta cache delle impostazioni locali"
     },
     "manage-users": {
         "title": "Utenti Attivi",
@@ -1234,7 +1243,8 @@
         "reading-lists": "Liste Lettura",
         "collections": "Collezioni",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "bookmarks": "{{side-nav.bookmarks}}"
     },
     "nav-header": {
         "skip-alt": "Passa al contenuto principale",
@@ -1337,7 +1347,10 @@
         "no-prev-chapter": "Nessun capitolo precedente",
         "user-preferences-updated": "Preferenze utente aggiornate",
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
-        "bookmarks-title": "Segnalibri"
+        "bookmarks-title": "Segnalibri",
+        "series-progress": "Avanzamento della serie: {{percentage}}",
+        "unbookmark-page-tooltip": "Annulla pagina segnalibri",
+        "bookmark-page-tooltip": "Pagina dei segnalibri"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1384,7 +1397,8 @@
         "last-modified": "Ultima modifica",
         "last-chapter-added": "Elemento aggiunto",
         "time-to-read": "Tempo di leggere",
-        "release-year": "Anno di pubblicazione"
+        "release-year": "Anno di pubblicazione",
+        "read-progress": "Ultimo Letto"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Dettagli",
@@ -1449,7 +1463,8 @@
     "day-breakdown": {
         "title": "Ripartizione del giorno",
         "x-axis-label": "Giorno della settimana",
-        "y-axis-label": "Eventi di lettura"
+        "y-axis-label": "Eventi di lettura",
+        "no-data": "Nessun progresso, inizia a leggere"
     },
     "file-breakdown-stats": {
         "format-title": "Formato",
@@ -1712,7 +1727,8 @@
         "chapter-num": "Capitolo",
         "volume-num": "Volume",
         "clear": "Pulisci",
-        "filter": "Filtro"
+        "filter": "Filtro",
+        "remove": "Rimuovere"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Scorri verso l'alto per passare al capitolo precedente",
@@ -1758,7 +1774,9 @@
         "languages": "Lingue",
         "libraries": "Librerie",
         "path": "Percorso",
-        "file-path": "Percorso File"
+        "file-path": "Percorso File",
+        "read-date": "Data di lettura",
+        "want-to-read": "Voler leggere"
     },
     "filter-comparison-pipe": {
         "not-equal": "Non uguale",
@@ -1820,7 +1838,9 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "vols-and-chapters": "{{volCount}} Volumi / {{chpCount}} Capitoli",
         "tags-label": "{{filter-field-pipe.tags}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "view-series": "Visualizza serie",
+        "staff-label": "Personale"
     },
     "customize-dashboard-modal": {
         "smart-filters": "Filtri Intelligenti",
@@ -1829,7 +1849,10 @@
         "help": "{{common.help}}",
         "external-sources": "Fonti esterne",
         "title-dashboard": "Personalizza la Dashboard",
-        "title-smart-filters": "Filtri Intelligenti"
+        "title-smart-filters": "Filtri Intelligenti",
+        "dashboard": "Dashboard",
+        "sidenav": "Nav laterale",
+        "title-sidenav": "Personalizza la navigazione laterale"
     },
     "stream-list-item": {
         "external-source": "Fonti Esterne",
@@ -1857,7 +1880,8 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "no-data": "Non esistono fonti esterne",
-        "help-link": "Maggiori informazioni"
+        "help-link": "Maggiori informazioni",
+        "description": "Migliora la tua esperienza aggiungendo server esterni e includili comodamente nel tuo Side Nav per un accesso rapido sia al tuo server che a quello del tuo amico."
     },
     "next-expected-card": {
         "title": "~{{date}}"
@@ -1869,5 +1893,11 @@
     "metadata-filter-row": {
         "unit-reading-progress": "Percentuale",
         "unit-reading-date": "Data"
+    },
+    "file-type-group-pipe": {
+        "epub": "Epub",
+        "archive": "Archivio",
+        "pdf": "Pdf",
+        "image": "Immagine"
     }
 }
