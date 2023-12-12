@@ -99,7 +99,7 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
 
-        var (baseUrl, prefix) = await GetPrefix();
+        var (_, prefix) = await GetPrefix();
 
         var feed = CreateFeed("Kavita", string.Empty, apiKey, prefix);
         SetFeedId(feed, "root");

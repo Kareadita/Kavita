@@ -40,7 +40,7 @@ public static class ParserInfoHelpers
             }
         }
 
-        if (series.Format == MangaFormat.Unknown && format != MangaFormat.Unknown)
+        if (series.Format == MangaFormat.Unknown)
         {
             return true;
         }
