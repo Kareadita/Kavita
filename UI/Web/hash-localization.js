@@ -15,13 +15,11 @@ function generateChecksum(str, algorithm, encoding) {
 const result = {};
 
 glob.sync(`${jsonFilesDir}**/*.json`).forEach(path => {
-    console.log('Calculating hash for ', path);
     let tokens = path.split('dist\\browser\\assets\\langs\\');
     if (tokens.length === 1) {
         tokens = path.split('dist/browser/assets/langs/');
     }
     const lang = tokens[1];
-    console.log('Language: ', lang);
     const content = fs.readFileSync(path, { encoding: 'utf-8' });
     result[lang.replace('.json', '')] = generateChecksum(content);
 });

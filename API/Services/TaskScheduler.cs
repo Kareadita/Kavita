@@ -35,6 +35,7 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
+    Task CheckForUpdate();
 
 }
 public class TaskScheduler : ITaskScheduler

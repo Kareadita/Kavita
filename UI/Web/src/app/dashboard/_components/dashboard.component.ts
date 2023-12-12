@@ -32,7 +32,7 @@ import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-
+import {ServerService} from "../../_services/server.service";
 
 enum StreamId {
   OnDeck,
@@ -40,6 +40,7 @@ enum StreamId {
   NewlyAddedSeries,
   MoreInGenre,
 }
+
 
 @Component({
   selector: 'app-dashboard',
@@ -67,6 +68,7 @@ export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
