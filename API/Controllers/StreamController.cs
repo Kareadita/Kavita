@@ -19,13 +19,11 @@ public class StreamController : BaseApiController
 {
     private readonly IStreamService _streamService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<StreamController> _logger;
 
-    public StreamController(IStreamService streamService, IUnitOfWork unitOfWork, ILogger<StreamController> logger)
+    public StreamController(IStreamService streamService, IUnitOfWork unitOfWork)
     {
         _streamService = streamService;
         _unitOfWork = unitOfWork;
-        _logger = logger;
     }
 
     /// <summary>

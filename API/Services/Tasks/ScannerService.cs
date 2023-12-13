@@ -501,7 +501,6 @@ public class ScannerService : IScannerService
         // {
         //     await task();
         // }
-        // TODO: We might be able to do Task.WhenAll
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));

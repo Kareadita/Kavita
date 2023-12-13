@@ -34,7 +34,7 @@ public class DefaultParser : IDefaultParser
     public ParserInfo? Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
     {
         var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
-        // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this. (we can probably remove this and have users use kavitaignore)
+        // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
         if (type != LibraryType.Image && Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
 
         var ret = new ParserInfo()

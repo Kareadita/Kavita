@@ -141,10 +141,37 @@ public class OpdsController : BaseApiController
                     });
                     break;
                 case DashboardStreamType.RecentlyUpdated:
-                    // TODO: See if we can implement this and use (count) on series name for number of updates
+                    feed.Entries.Add(new FeedEntry()
+                    {
+                        Id = "recentlyUpdated",
+                        Title = await _localizationService.Translate(userId, "recently-updated"),
+                        Content = new FeedEntryContent()
+                        {
+                            Text = await _localizationService.Translate(userId, "browse-recently-updated")
+                        },
+                        Links = new List<FeedLink>()
+                        {
+                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-updated"),
+                        }
+                    });
                     break;
                 case DashboardStreamType.MoreInGenre:
-                    // TODO: See if we can implement this
+                    var randomGenre = await _unitOfWork.GenreRepository.GetRandomGenre();
+                    if (randomGenre == null) break;
+
+                    feed.Entries.Add(new FeedEntry()
+                    {
+                        Id = "moreInGenre",
+                        Title = await _localizationService.Translate(userId, "more-in-genre", randomGenre.Title),
+                        Content = new FeedEntryContent()
+                        {
+                            Text = await _localizationService.Translate(userId, "browse-more-in-genre", randomGenre.Title)
+                        },
+                        Links = new List<FeedLink>()
+                        {
+                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/more-in-genre?genreId={randomGenre.Id}"),
+                        }
+                    });
                     break;
                 case DashboardStreamType.SmartFilter:
 
@@ -627,6 +654,61 @@ public class OpdsController : BaseApiController
         foreach (var seriesDto in recentlyAdded)
         {
             feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+        }
+
+        return CreateXmlResult(SerializeXml(feed));
+    }
+
+    [HttpGet("{apiKey}/more-in-genre")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetMoreInGenre(string apiKey, [FromQuery] int genreId, [FromQuery] int pageNumber = 1)
+    {
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+        var genre = await _unitOfWork.GenreRepository.GetGenreById(genreId);
+        var seriesDtos = await _unitOfWork.SeriesRepository.GetMoreIn(userId, 0, genreId, GetUserParams(pageNumber));
+        var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.Id));
+
+        var feed = CreateFeed(await _localizationService.Translate(userId, "more-in-genre", genre.Title), $"{prefix}{apiKey}/more-in-genre", apiKey, prefix);
+        SetFeedId(feed, "more-in-genre");
+        AddPagination(feed, seriesDtos, $"{prefix}{apiKey}/more-in-genre");
+
+        foreach (var seriesDto in seriesDtos)
+        {
+            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+        }
+
+        return CreateXmlResult(SerializeXml(feed));
+    }
+
+    [HttpGet("{apiKey}/recently-updated")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetRecentlyUpdated(string apiKey, [FromQuery] int pageNumber = 1)
+    {
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+        var seriesDtos = (await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, PageSize)).ToList();
+        var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.SeriesId));
+
+        var feed = CreateFeed(await _localizationService.Translate(userId, "recently-updated"), $"{prefix}{apiKey}/recently-updated", apiKey, prefix);
+        SetFeedId(feed, "recently-updated");
+        //AddPagination(feed, seriesDtos, $"{prefix}{apiKey}/recently-updated");
+
+        foreach (var groupedSeries in seriesDtos)
+        {
+            var seriesDto = new SeriesDto()
+            {
+                Name = $"{groupedSeries.SeriesName} ({groupedSeries.Count})",
+                Id = groupedSeries.SeriesId,
+                Format = groupedSeries.Format,
+                LibraryId = groupedSeries.LibraryId,
+            };
+            var metadata = seriesMetadatas.First(s => s.SeriesId == seriesDto.Id);
+            feed.Entries.Add(CreateSeries(seriesDto, metadata, apiKey, prefix, baseUrl));
         }
 
         return CreateXmlResult(SerializeXml(feed));

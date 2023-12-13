@@ -199,7 +199,6 @@ public class BookService : IBookService
             }
             if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile)) continue;
 
-            //var bookFile = book.Content.AllFiles.Local[key];
             var content = await bookFile.ReadContentAsBytesAsync();
             importBuilder.Append(Encoding.UTF8.GetString(content));
         }
@@ -555,7 +554,6 @@ public class BookService : IBookService
             // If this is a single book and not a collection, set publication status to Completed
             if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.DefaultVolume))
             {
-                //info.Number = "1";
                 info.Count = 1;
             }
 
