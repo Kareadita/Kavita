@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.DTOs.Statistics;
+#nullable enable
 
 public class FileExtensionDto
 {

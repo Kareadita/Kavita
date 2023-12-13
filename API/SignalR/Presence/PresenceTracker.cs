@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 
 namespace API.SignalR.Presence;
+#nullable enable
 
 public interface IPresenceTracker
 {

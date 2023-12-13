@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace API.DTOs;
+#nullable enable
 
 public class UpdateRbsDto
 {

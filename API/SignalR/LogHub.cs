@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR;
+#nullable enable
 
 public interface ILogHub : Serilog.Sinks.AspNetCore.SignalR.Interfaces.IHub
 {

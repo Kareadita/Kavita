@@ -31,7 +31,7 @@ internal class ExternalMetadataIdsDto
 
 public interface IExternalMetadataService
 {
-    Task<ExternalSeriesDetailDto> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
+    Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService

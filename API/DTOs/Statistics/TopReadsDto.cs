@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Statistics;
+#nullable enable
 
 public class TopReadDto
 {

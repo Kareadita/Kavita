@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.DTOs.Metadata;
+#nullable enable
 
 /// <summary>
 /// Exclusively metadata about a given chapter

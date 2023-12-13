@@ -936,8 +936,9 @@ public class BookService : IBookService
     /// <param name="mappings"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    private static string CoalesceKey(EpubBookRef book, IReadOnlyDictionary<string, int> mappings, string key)
+    private static string? CoalesceKey(EpubBookRef book, IReadOnlyDictionary<string, int> mappings, string? key)
     {
+        if (string.IsNullOrEmpty(key)) return key;
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
         // Fallback to searching for key (bad epub metadata)
@@ -947,7 +948,7 @@ public class BookService : IBookService
             key = correctedKey;
         }
 
-        var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile?.FilePath); // FileName -> FilePath
+        var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile?.FilePath);
         if (mappings.TryGetValue(key, out _))
         {
             return key;

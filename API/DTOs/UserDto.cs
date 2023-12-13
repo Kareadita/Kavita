@@ -2,6 +2,7 @@
 using API.DTOs.Account;
 
 namespace API.DTOs;
+#nullable enable
 
 public class UserDto
 {

@@ -1,6 +1,7 @@
 ﻿using API.Services.Plus;
 
 namespace API.DTOs;
+#nullable enable
 
 public class RatingDto
 {

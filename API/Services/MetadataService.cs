@@ -14,6 +14,7 @@ using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
+#nullable enable
 
 public interface IMetadataService
 {

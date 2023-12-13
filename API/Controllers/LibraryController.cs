@@ -154,7 +154,7 @@ public class LibraryController : BaseApiController
             }));
         }
 
-        if (!Directory.Exists(path)) return Ok(_directoryService.ListDirectory(Path.GetDirectoryName(path)));
+        if (!Directory.Exists(path)) return Ok(_directoryService.ListDirectory(Path.GetDirectoryName(path)!));
 
         return Ok(_directoryService.ListDirectory(path));
     }

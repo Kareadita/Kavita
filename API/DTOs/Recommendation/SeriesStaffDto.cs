@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Recommendation;
+#nullable enable
 
 public class SeriesStaffDto
 {

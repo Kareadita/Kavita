@@ -1243,7 +1243,7 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
 
-        // TODO: Type could be wrong
+        // NOTE: Type could be wrong, there is nothing I can do in the spec
         var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg",
             $"{prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;

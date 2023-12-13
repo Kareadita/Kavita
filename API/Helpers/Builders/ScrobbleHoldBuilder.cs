@@ -1,6 +1,7 @@
 ﻿using API.Entities.Scrobble;
 
 namespace API.Helpers.Builders;
+#nullable enable
 
 public class ScrobbleHoldBuilder : IEntityBuilder<ScrobbleHold>
 {

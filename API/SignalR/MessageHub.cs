@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR;
+#nullable enable
 
 /// <summary>
 /// Generic hub for sending messages to UI

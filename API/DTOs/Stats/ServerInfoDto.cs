@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs.Stats;
+#nullable enable
 
 /// <summary>
 /// Represents information about a Kavita Installation

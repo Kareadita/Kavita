@@ -6,6 +6,7 @@ using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;
+#nullable enable
 
 public class ChapterBuilder : IEntityBuilder<Chapter>
 {

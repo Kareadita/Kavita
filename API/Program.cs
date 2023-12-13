@@ -25,6 +25,7 @@ using Serilog.Events;
 using Serilog.Sinks.AspNetCore.SignalR.Extensions;
 
 namespace API;
+#nullable enable
 
 public class Program
 {
