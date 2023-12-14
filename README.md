@@ -55,7 +55,7 @@ install methods and platforms.
 **Note: Kavita is under heavy development and is being updated all the time, so the tag for bleeding edge builds is `:nightly`. The `:latest` tag will be the latest stable release.**
 
 ## Feature Requests
-Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
+Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/), [Feature Discord Channel](https://discord.com/channels/821879810934439936/1164375153493422122) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
 
 ## Notice
 Kavita is being actively developed and should be considered beta software until the 1.0 release.
