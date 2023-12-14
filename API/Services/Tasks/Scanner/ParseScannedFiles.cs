@@ -399,7 +399,7 @@ public class ParseScannedFiles
     /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
     /// </example>
     /// <param name="infos">A collection of ParserInfos</param>
-    private void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
+    private void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo?> infos)
     {
         var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
         if (!hasLocalizedSeries) return;

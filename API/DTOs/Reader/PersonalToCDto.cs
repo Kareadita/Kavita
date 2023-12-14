@@ -1,5 +1,7 @@
 ﻿namespace API.DTOs.Reader;
 
+#nullable enable
+
 public class PersonalToCDto
 {
     public required int ChapterId { get; set; }

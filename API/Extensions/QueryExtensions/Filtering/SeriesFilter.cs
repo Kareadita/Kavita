@@ -22,7 +22,7 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
-                return queryable.Where(s => s.Metadata.Language.Equals(languages.First()));
+                return queryable.Where(s => s.Metadata.Language.Equals(languages[0]));
             case FilterComparison.Contains:
                 return queryable.Where(s => languages.Contains(s.Metadata.Language));
             case FilterComparison.MustContains:
@@ -30,9 +30,9 @@ public static class SeriesFilter
             case FilterComparison.NotContains:
                 return queryable.Where(s => !languages.Contains(s.Metadata.Language));
             case FilterComparison.NotEqual:
-                return queryable.Where(s => !s.Metadata.Language.Equals(languages.First()));
+                return queryable.Where(s => !s.Metadata.Language.Equals(languages[0]));
             case FilterComparison.Matches:
-                return queryable.Where(s => EF.Functions.Like(s.Metadata.Language, $"{languages.First()}%"));
+                return queryable.Where(s => EF.Functions.Like(s.Metadata.Language, $"{languages[0]}%"));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:

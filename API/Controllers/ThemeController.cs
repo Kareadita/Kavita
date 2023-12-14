@@ -53,7 +53,7 @@ public class ThemeController : BaseApiController
         {
             await _themeService.UpdateDefault(dto.ThemeId);
         }
-        catch (KavitaException ex)
+        catch (KavitaException)
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "theme-doesnt-exist"));
         }

@@ -1,4 +1,6 @@
 ﻿namespace API.DTOs.Filtering;
+#nullable enable
+
 /// <summary>
 /// Represents a range between two int/float/double
 /// </summary>

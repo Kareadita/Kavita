@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Scrobbling;
+#nullable enable
 
 /// <summary>
 /// Response from Kavita+ Scrobble API

@@ -21,8 +21,8 @@ public static class HttpExtensions
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        response.Headers.Add("Pagination", JsonSerializer.Serialize(paginationHeader, options));
-        response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
+        response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationHeader, options));
+        response.Headers.Append("Access-Control-Expose-Headers", "Pagination");
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public static class HttpExtensions
     public static void AddCacheHeader(this HttpResponse response, byte[] content)
     {
         if (content is not {Length: > 0}) return;
-        response.Headers.Add(HeaderNames.ETag, string.Concat(SHA256.HashData(content).Select(x => x.ToString("X2"))));
+        response.Headers.Append(HeaderNames.ETag, string.Concat(SHA256.HashData(content).Select(x => x.ToString("X2"))));
         response.Headers.CacheControl =  $"private,max-age=100";
     }
 
@@ -47,7 +47,7 @@ public static class HttpExtensions
     {
         if (filename is not {Length: > 0}) return;
         var hashContent = filename + File.GetLastWriteTimeUtc(filename);
-        response.Headers.Add("ETag", string.Concat(SHA256.HashData(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
+        response.Headers.Append("ETag", string.Concat(SHA256.HashData(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
         if (maxAge != 10)
         {
             response.Headers.CacheControl =  $"max-age={maxAge}";

@@ -9,6 +9,7 @@ using Kavita.Common.Extensions;
 using Nager.ArticleNumber;
 
 namespace API.Data.Metadata;
+#nullable enable
 
 /// <summary>
 /// A representation of a ComicInfo.xml file

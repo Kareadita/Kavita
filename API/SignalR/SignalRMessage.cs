@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace API.SignalR;
+#nullable enable
 
 /// <summary>
 /// Payload for SignalR messages to Frontend

@@ -6,8 +6,9 @@ namespace API.Extensions;
 
 public static class StringExtensions
 {
-    private static readonly Regex SentenceCaseRegex = new Regex(@"(^[a-z])|\.\s+(.)",
-        RegexOptions.ExplicitCapture | RegexOptions.Compiled, Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
+    private static readonly Regex SentenceCaseRegex = new(@"(^[a-z])|\.\s+(.)",
+        RegexOptions.ExplicitCapture | RegexOptions.Compiled,
+        Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 
     public static string SentenceCase(this string value)
     {
@@ -21,17 +22,16 @@ public static class StringExtensions
     /// <returns></returns>
     public static string ToNormalized(this string? value)
     {
-        if (string.IsNullOrEmpty(value)) return string.Empty;
-        return Services.Tasks.Scanner.Parser.Parser.Normalize(value);
+        return string.IsNullOrEmpty(value) ? string.Empty : Services.Tasks.Scanner.Parser.Parser.Normalize(value);
     }
 
-    public static float AsFloat(this string value)
+    public static float AsFloat(this string? value, float defaultValue = 0.0f)
     {
-        return float.Parse(value, CultureInfo.InvariantCulture);
+        return string.IsNullOrEmpty(value) ? defaultValue : float.Parse(value, CultureInfo.InvariantCulture);
     }
 
-    public static double AsDouble(this string value)
+    public static double AsDouble(this string? value, double defaultValue = 0.0f)
     {
-        return double.Parse(value, CultureInfo.InvariantCulture);
+        return string.IsNullOrEmpty(value) ? defaultValue : double.Parse(value, CultureInfo.InvariantCulture);
     }
 }

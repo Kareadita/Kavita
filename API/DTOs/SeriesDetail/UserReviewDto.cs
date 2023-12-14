@@ -1,6 +1,7 @@
 ﻿using API.Services.Plus;
 
 namespace API.DTOs.SeriesDetail;
+#nullable enable
 
 /// <summary>
 /// Represents a User Review for a given Series

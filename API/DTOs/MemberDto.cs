@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.DTOs.Account;
 
 namespace API.DTOs;
+#nullable enable
 
 /// <summary>
 /// Represents a member of a Kavita server.

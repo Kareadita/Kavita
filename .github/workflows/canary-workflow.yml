@@ -33,7 +33,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-            dotnet-version: 7.0.x
+            dotnet-version: 8.0.x
 
       - name: Bump versions
         uses: SiqiLu/dotnet-bump-version@2.0.0
@@ -98,7 +98,7 @@ jobs:
           - name: Compile dotnet app
             uses: actions/setup-dotnet@v3
             with:
-                dotnet-version: 7.0.x
+                dotnet-version: 8.0.x
 
           - name: Install Swashbuckle CLI
             run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli

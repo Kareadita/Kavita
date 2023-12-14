@@ -199,7 +199,6 @@ public class BookService : IBookService
             }
             if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile)) continue;
 
-            //var bookFile = book.Content.AllFiles.Local[key];
             var content = await bookFile.ReadContentAsBytesAsync();
             importBuilder.Append(Encoding.UTF8.GetString(content));
         }
@@ -555,7 +554,6 @@ public class BookService : IBookService
             // If this is a single book and not a collection, set publication status to Completed
             if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.DefaultVolume))
             {
-                //info.Number = "1";
                 info.Count = 1;
             }
 
@@ -938,8 +936,9 @@ public class BookService : IBookService
     /// <param name="mappings"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    private static string CoalesceKey(EpubBookRef book, IReadOnlyDictionary<string, int> mappings, string key)
+    private static string? CoalesceKey(EpubBookRef book, IReadOnlyDictionary<string, int> mappings, string? key)
     {
+        if (string.IsNullOrEmpty(key)) return key;
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
         // Fallback to searching for key (bad epub metadata)
@@ -949,7 +948,7 @@ public class BookService : IBookService
             key = correctedKey;
         }
 
-        var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile?.FilePath); // FileName -> FilePath
+        var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile?.FilePath);
         if (mappings.TryGetValue(key, out _))
         {
             return key;

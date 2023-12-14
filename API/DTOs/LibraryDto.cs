@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs;
+#nullable enable
 
 public class LibraryDto
 {

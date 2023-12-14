@@ -53,9 +53,6 @@ Package()
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
-    echo "Show API structure"
-    find
-
 	echo "Copying appsettings.json"
     cp ./config/appsettings.Development.json $lOutputFolder/config/appsettings.json
 

@@ -644,10 +644,10 @@ public class DirectoryService : IDirectoryService
     /// Scans a directory by utilizing a recursive folder search. If a .kavitaignore file is found, will ignore matching patterns
     /// </summary>
     /// <param name="folderPath"></param>
-    /// <param name="supportedExtensions"></param>
+    /// <param name="fileTypes"></param>
     /// <param name="matcher"></param>
     /// <returns></returns>
-    public IList<string> ScanFiles(string folderPath, string supportedExtensions, GlobMatcher? matcher = null)
+    public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null)
     {
         _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
@@ -668,19 +668,19 @@ public class DirectoryService : IDirectoryService
 
         foreach (var directory in directories)
         {
-            files.AddRange(ScanFiles(directory, supportedExtensions, matcher));
+            files.AddRange(ScanFiles(directory, fileTypes, matcher));
         }
 
 
         // Get the matcher from either ignore or global (default setup)
         if (matcher == null)
         {
-            files.AddRange(GetFilesWithCertainExtensions(folderPath, supportedExtensions));
+            files.AddRange(GetFilesWithCertainExtensions(folderPath, fileTypes));
         }
         else
         {
             var foundFiles = GetFilesWithCertainExtensions(folderPath,
-                    supportedExtensions)
+                    fileTypes)
                 .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));
             files.AddRange(foundFiles);
         }

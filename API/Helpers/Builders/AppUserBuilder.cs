@@ -5,6 +5,7 @@ using API.Entities;
 using Kavita.Common;
 
 namespace API.Helpers.Builders;
+#nullable enable
 
 public class AppUserBuilder : IEntityBuilder<AppUser>
 {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 
 namespace API.SignalR.Presence;
+#nullable enable
 
 public interface IPresenceTracker
 {
@@ -22,7 +23,6 @@ internal class ConnectionDetail
     public bool IsAdmin { get; set; }
 }
 
-// TODO: This can respond to UserRoleUpdate events to handle online users
 /// <summary>
 /// This is a singleton service for tracking what users have a SignalR connection and their difference connectionIds
 /// </summary>

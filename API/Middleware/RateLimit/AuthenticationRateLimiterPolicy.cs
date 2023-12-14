@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Middleware.RateLimit;
+#nullable enable
 
 public class AuthenticationRateLimiterPolicy : IRateLimiterPolicy<string>
 {

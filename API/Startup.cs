@@ -232,7 +232,6 @@ public class Startup
             Task.Run(async () =>
                 {
                     // Apply all migrations on startup
-                    var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
 

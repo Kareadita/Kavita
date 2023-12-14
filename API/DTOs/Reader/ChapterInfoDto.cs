@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.DTOs.Reader;
+#nullable enable
 
 /// <summary>
 /// Information about the Chapter for the Reader to render

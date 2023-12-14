@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs.Reader;
+#nullable enable
 
 public class BookmarkDto
 {

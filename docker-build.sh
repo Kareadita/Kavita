@@ -21,7 +21,6 @@ Build()
 
     slnFile=Kavita.sln
 
-    dotnet clean $slnFile -c Debug
     dotnet clean $slnFile -c Release
 
 	  dotnet msbuild -restore $slnFile -p:Configuration=Release -p:Platform="Any CPU" -p:RuntimeIdentifiers=$RID

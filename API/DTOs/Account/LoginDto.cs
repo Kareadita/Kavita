@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Account;
+#nullable enable
 
 public class LoginDto
 {

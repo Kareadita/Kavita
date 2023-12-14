@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Metadata;
@@ -22,6 +23,8 @@ public interface IGenreRepository
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
     Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(IList<int> libraryIds, int userId);
     Task<int> GetCountAsync();
+    Task<GenreTagDto> GetRandomGenre();
+    Task<GenreTagDto> GetGenreById(int id);
 }
 
 public class GenreRepository : IGenreRepository
@@ -90,6 +93,27 @@ public class GenreRepository : IGenreRepository
     public async Task<int> GetCountAsync()
     {
         return await _context.Genre.CountAsync();
+    }
+
+    public async Task<GenreTagDto> GetRandomGenre()
+    {
+        var genreCount = await GetCountAsync();
+        if (genreCount == 0) return null;
+
+        var randomIndex = new Random().Next(0, genreCount);
+        return await _context.Genre
+            .Skip(randomIndex)
+            .Take(1)
+            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<GenreTagDto> GetGenreById(int id)
+    {
+        return await _context.Genre
+            .Where(g => g.Id == id)
+            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<Genre>> GetAllGenresAsync()

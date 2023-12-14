@@ -2,6 +2,7 @@
 using API.DTOs.Scrobbling;
 
 namespace API.DTOs.Recommendation;
+#nullable enable
 
 public class ExternalSeriesDetailDto
 {

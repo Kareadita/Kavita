@@ -21,6 +21,7 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
+#nullable enable
 
 public interface IReadingListService
 {

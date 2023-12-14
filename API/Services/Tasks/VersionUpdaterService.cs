@@ -13,7 +13,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
-
 #nullable enable
 
 internal class GithubReleaseMetadata
@@ -76,7 +75,7 @@ public class VersionUpdaterService : IVersionUpdaterService
     /// Fetches the latest release from Github
     /// </summary>
     /// <returns>Latest update</returns>
-    public async Task<UpdateNotificationDto> CheckForUpdate()
+    public async Task<UpdateNotificationDto?> CheckForUpdate()
     {
         var update = await GetGithubRelease();
         return CreateDto(update);

@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 
-
 namespace API.DTOs.Filtering.v2;
-
-
+#nullable enable
 
 /// <summary>
 /// Metadata filtering for v2 API only

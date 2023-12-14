@@ -40,15 +40,13 @@ public class LibraryController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILibraryWatcher _libraryWatcher;
     private readonly ILocalizationService _localizationService;
-    private readonly IStreamService _streamService;
     private readonly IEasyCachingProvider _libraryCacheProvider;
     private const string CacheKey = "library_";
 
     public LibraryController(IDirectoryService directoryService,
         ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
         IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher,
-        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService,
-        IStreamService streamService)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService)
     {
         _directoryService = directoryService;
         _logger = logger;
@@ -58,7 +56,6 @@ public class LibraryController : BaseApiController
         _eventHub = eventHub;
         _libraryWatcher = libraryWatcher;
         _localizationService = localizationService;
-        _streamService = streamService;
 
         _libraryCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.Library);
     }
@@ -157,7 +154,7 @@ public class LibraryController : BaseApiController
             }));
         }
 
-        if (!Directory.Exists(path)) return Ok(_directoryService.ListDirectory(Path.GetDirectoryName(path)));
+        if (!Directory.Exists(path)) return Ok(_directoryService.ListDirectory(Path.GetDirectoryName(path)!));
 
         return Ok(_directoryService.ListDirectory(path));
     }

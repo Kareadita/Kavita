@@ -17,6 +17,7 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 
 
 namespace API.Services;
+#nullable enable
 
 public interface ITokenService
 {
