@@ -172,5 +172,9 @@
     "external-sources": "Fuentes externas",
     "external-source-required": "Se requiere la clave API y el host",
     "smart-filter-already-in-use": "Existe una transmisión con este filtro inteligente",
-    "invalid-email": "La dirección de correo electrónico del usuario no es válida. Consulte los registros para ver si hay algún enlace."
+    "invalid-email": "La dirección de correo electrónico del usuario no es válida. Consulte los registros para ver si hay algún enlace.",
+    "browse-more-in-genre": "Ver más en {0}",
+    "more-in-genre": "Más en el género {0}",
+    "recently-updated": "Actualizado recientemente",
+    "browse-recently-updated": "Examinar las últimas actualizaciones"
 }
