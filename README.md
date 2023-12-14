@@ -107,7 +107,7 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro-bono. If you want to see Kavita in your language, please help us localize.
 
 <a href="https://hosted.weblate.org/engage/kavita/">
-    <img src="https://hosted.weblate.org/widgets/kavita/-/horizontal-blue.svg" alt="Translation status" />
+<img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />
 </a>
 
 ## PikaPods
