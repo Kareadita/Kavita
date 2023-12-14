@@ -119,6 +119,8 @@ export class DashboardComponent implements OnInit {
 
   loadDashboard() {
     this.isLoadingDashboard = true;
+    this.streamsLoaded = 0;
+    this.streamCount = 0;
     this.cdRef.markForCheck();
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
