@@ -141,7 +141,7 @@ export class MessageHubService {
         accessTokenFactory: () => user.token
       })
       .withAutomaticReconnect()
-      .withStatefulReconnect()
+      //.withStatefulReconnect() // Needs @microsoft/signalr@8
       .build();
 
     this.hubConnection
