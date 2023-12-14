@@ -272,8 +272,8 @@
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "Limpar",
-        "filter": "Filtrar",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "Abre uma pesquisa filtrada para {{item}}"
     },
     "user-stats-info-cards": {
@@ -488,11 +488,11 @@
     "invite-user": {
         "title": "Convidar Usuário",
         "close": "{{common.close}}",
-        "description": "Convide um usuário para o seu servidor. Digite seu e-mail e enviaremos um e-mail para criar uma conta. Se você não quiser usar nosso serviço de e-mail, você pode um <href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\"> hospedar seu próprio </a> serviço de e-mail ou usar um e-mail falso (Esqueceu o usuário não funcionará). Um link será apresentado independentemente e pode ser usado para configurar a conta manualmente.",
+        "description": "Convide um usuário para o seu servidor digitando o email dele. Eles receberão um e-mail para criar uma conta. Para que isso funcione você deve ter o campo Host Name definido no <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> ou acesse sua instância por meio de sua URL remoto. <br/><br/>Como alternativa, você pode usar um nome de usuário, mas observe que as redefinições de senha não estarão disponíveis para contas baseadas em nome de usuário. Se não quiser usar nosso serviço de e-mail, você pode hospedar seu próprio serviço de e-mail.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Usuário Convidado",
-        "setup-user-description": "Você pode usar o seguinte link abaixo para configurar a conta para seu usuário ou usar o botão copiar. Você pode precisar sair antes de usar o link para registrar um novo usuário. Se o seu servidor estiver acessível externamente, um e-mail será enviado ao usuário e os links poderão ser usados por ele para concluir a configuração de sua conta.",
+        "setup-user-description": "Você pode usar o link a seguir para configurar a conta do seu usuário ou usar o botão copiar. Pode ser necessário sair antes de usar o link para registrar um novo usuário. Se Kavita puder determinar seu servidor como acessível externamente (ou o nome do host estiver definido), um e-mail será enviado ao usuário e os links poderão ser usados por ele para concluir a configuração de sua conta. Caso contrário, use o link abaixo ou nos registros para enviar manualmente ou configurar sua conta.",
         "setup-user-account": "Configurar conta de usuário",
         "setup-user-account-tooltip": "Copie isso e cole em uma nova aba. Você pode precisar fazer logout.",
         "invite-url-label": "URL do convite",
@@ -548,7 +548,7 @@
         "virtual-pages": "páginas virtuais",
         "settings-header": "Configurações",
         "table-of-contents-header": "Índice",
-        "bookmarks-header": "Marcadores",
+        "bookmarks-header": "{{side-nav.bookmarks}}",
         "toc-header": "Índice",
         "loading-book": "Carregando livro…",
         "go-back": "Voltar",
@@ -613,8 +613,8 @@
         "continue": "Continuar",
         "read-options-alt": "Opções de leitura",
         "incognito": "Incógnito",
-        "remove-from-want-to-read": "Remover do Quero Ler",
-        "add-to-want-to-read": "Adicionar ao Quero Ler",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Editar Informações da Série",
         "download-series--tooltip": "Baixar Séries",
         "downloading-status": "Baixando…",
@@ -638,7 +638,7 @@
         "tags-title": "Tags",
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
-        "writers-title": "Escritores/Autores",
+        "writers-title": "Escritores",
         "cover-artists-title": "Artistas de Capa",
         "characters-title": "Personagens",
         "colorists-title": "Coloristas",
@@ -677,9 +677,9 @@
         "collections": "Coleções",
         "reading-lists": "Listas de Leitura",
         "bookmarks": "Marcadores",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "all-series": "Todas as Séries",
-        "clear": "Limpar",
+        "clear": "{{common.clear}}",
         "donate": "Doar",
         "back": "Voltar",
         "more": "Mais"
@@ -714,7 +714,7 @@
         "allow-scrobbling-label": "Permitir Scrobbling",
         "allow-scrobbling-tooltip": "Caso o Kavita faça scrobble de eventos de leitura, status de Quero Ler, as avaliações e as análises dos provedores configurados. Isso só ocorrerá se o servidor tiver uma assinatura Kavita+ ativa.",
         "folder-watching-label": "Monitorar Pasta",
-        "folder-watching-tooltip": "Substitua a pasta do servidor observando esta biblioteca. Se desativado, a observação de pastas não será executada nas pastas que esta biblioteca contém. Se as bibliotecas compartilharem pastas, as pastas ainda poderão ser executadas.",
+        "folder-watching-tooltip": "Substitua a pasta do servidor monitorando esta biblioteca. Se estiver desativado, a observação de pastas não será executada nas pastas que esta biblioteca contém. Se as bibliotecas compartilharem pastas, as pastas ainda poderão ser executadas. Sempre esperará 10 minutos antes de acionar a varredura.",
         "include-in-dashboard-label": "Incluir no Painel",
         "include-in-dashboard-tooltip": "Caso séries da biblioteca sejam incluídas no Painel. Isso afeta todos os fluxos, como Na Estante, Atualizado Recentemente, Adicionado Recentemente ou quaisquer adições personalizadas.",
         "include-in-recommendation-label": "Incluir em Recomendado",
@@ -851,7 +851,7 @@
         "description-part-2": "wiki para dicas.",
         "target-series": "Série de Destino",
         "relationship": "Relação",
-        "remove": "Remover",
+        "remove": "{{common.remove}}",
         "add-relationship": "Adicionar Relação",
         "parent": "{{relationship-pipe.parent}}"
     },
@@ -905,7 +905,7 @@
         "title": "Adicionar à Coleção",
         "promoted": "{{common.promoted}}",
         "close": "{{common.close}}",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "no-data": "Nenhuma coleção criada ainda",
         "loading": "{{common.loading}}",
@@ -926,7 +926,7 @@
     "manage-alerts": {
         "description-part-1": "Esta tabela contém problemas encontrados durante a verificação ou leitura de sua mídia. Esta lista não é gerenciada. Você pode limpá-lo a qualquer momento e usar o Escanear (À Força) Biblioteca para realizar a análise. Uma lista de alguns erros comuns e o que eles significam pode ser encontrada no ",
         "description-part-2": "wiki.",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "clear-alerts": "Limpar Alertas",
         "extension-header": "Extensão",
         "file-header": "Arquivo",
@@ -982,7 +982,7 @@
     },
     "manage-scrobble-errors": {
         "description": "Esta tabela contém problemas encontrados durante o scrobbling. Esta lista não é gerenciada. Você pode limpá-lo a qualquer momento e esperar o próximo upload do scrobble para ver. Se houver uma série desconhecida, é melhor corrigir o nome da série ou o nome da série localizada, ou adicionar um link para os provedores.",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "clear-errors": "Limpar Erros",
         "series-header": "Séries",
         "created-header": "Criado",
@@ -1022,7 +1022,7 @@
         "opds-tooltip": "O suporte ao OPDS permitirá que todos os usuários usem o OPDS para ler e baixar o conteúdo do servidor.",
         "enable-opds": "Habilitar OPDS",
         "folder-watching-label": "Monitoramento de Pastas",
-        "folder-watching-tooltip": "Permite que o Kavita monitore as pastas da biblioteca para detectar alterações e invocar a verificação dessas alterações. Isso permite que o conteúdo seja atualizado sem invocar varreduras manualmente ou esperar por varreduras noturnas.",
+        "folder-watching-tooltip": "Permite que Kavita monitore as pastas da biblioteca para detectar alterações e invocar a verificação dessas alterações. Isso permite que o conteúdo seja atualizado sem invocar verificações manualmente ou aguardar verificações noturnas. Sempre esperará 10 minutos antes de acionar a varredura.",
         "enable-folder-watching": "Habilitar Monitoramento de Pastas",
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
@@ -1255,7 +1255,7 @@
         "scroll-to-top-alt": "Rolar para o Topo",
         "server-settings": "Configurações do Servidor",
         "settings": "Configurações",
-        "help": "Ajuda",
+        "help": "{{common.help}}",
         "announcements": "Anúncios",
         "logout": "Sair",
         "all-filters": "Filtros Inteligentes"
@@ -1263,7 +1263,7 @@
     "add-to-list-modal": {
         "title": "Adicionar à Lista de Leitura",
         "close": "{{common.close}}",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "promoted-alt": "Promovido",
         "no-data": "Nenhuma lista criada ainda",
         "loading": "{{common.loading}}",
@@ -1353,7 +1353,7 @@
         "bookmarks-title": "Marcadores"
     },
     "metadata-filter": {
-        "filter-title": "Filtro",
+        "filter-title": "{{common.filter}}",
         "format-label": "Formato",
         "libraries-label": "Bibliotecas",
         "collections-label": "Coleções",
@@ -1387,7 +1387,7 @@
         "descending-alt": "Descendente",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "limit-label": "Limitar A",
+        "limit-label": "Limite",
         "save": "{{common.save}}",
         "filter-name-label": "Nome do Filtro"
     },
@@ -1398,7 +1398,7 @@
         "last-chapter-added": "Item Adicionado",
         "time-to-read": "Tempo para Ler",
         "release-year": "Ano de Lançamento",
-        "read-progress": "Progresso da Leitura"
+        "read-progress": "Última Leitura"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -1581,7 +1581,7 @@
         "reading-list-imported": "Lista de leitura importada",
         "incognito-off": "O modo de navegação anônima está desativado. O progresso agora começará a ser rastreado.",
         "email-service-reset": "Redefinição do Serviço de E-mail",
-        "email-service-reachable": "O serviço de e-mail estava acessível",
+        "email-service-reachable": "Conexão de e-mail Kavita bem-sucedida",
         "email-service-unresponsive": "O URL do serviço de e-mail não respondeu.",
         "refresh-covers-queued": "Atualizar capas na fila para {{name}}",
         "library-file-analysis-queued": "Análise de arquivo de biblioteca na fila para {{name}}",
@@ -1654,7 +1654,7 @@
         "read-incognito": "Ler Anônimo",
         "details": "Detalhes",
         "view-series": "Exibir Séries",
-        "clear": "Limpar",
+        "clear": "{{common.clear}}",
         "import-cbl": "Importar CBL",
         "read": "Ler",
         "add-rule-group-or": "Adicionar Grupo de Regras (OU)",
@@ -1740,7 +1740,7 @@
         "or": "Corresponda a qualquer um dos seguintes",
         "and": "Corresponde a todos os seguintes",
         "add-rule": "Adicionar Regra",
-        "remove-rule": "Remover Linha {{num}}"
+        "remove-rule": "Remover Linha"
     },
     "filter-field-pipe": {
         "age-rating": "Classificação Etária",
@@ -1821,7 +1821,7 @@
         "unit-reading-date": "Data"
     },
     "manage-external-sources": {
-        "description": "Adicionar Servidores Externos à sua conta e, em seguida, adicione-os ao seu Navegador Lateral para uma maneira rápida de alternar entre o seu servidor e o do seu amigo.",
+        "description": "Melhore a sua experiência adicionando servidores externos e inclua-os convenientemente no seu Navegador Lateral para acesso rápido ao seu servidor e ao servidor do seu amigo.",
         "add-source": "Adicionar",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",

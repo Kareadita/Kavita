@@ -172,5 +172,9 @@
     "external-source-already-in-use": "存在具有此外部源的现有流",
     "external-sources": "外部来源",
     "smart-filter-already-in-use": "存在带有此智能筛选器的现有流",
-    "invalid-email": "用户文件中的电子邮件不是有效的电子邮件。请参阅日志中的链接。"
+    "invalid-email": "用户文件中的电子邮件不是有效的电子邮件。请参阅日志中的链接。",
+    "browse-more-in-genre": "浏览 {0} 中的更多内容",
+    "more-in-genre": "更多类型 {0}",
+    "recently-updated": "最近更新",
+    "browse-recently-updated": "浏览最近更新"
 }
