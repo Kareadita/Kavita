@@ -18,7 +18,7 @@ public class FilterV2Dto
     public string? Name { get; set; }
     public ICollection<FilterStatementDto> Statements { get; set; } = new List<FilterStatementDto>();
     public FilterCombination Combination { get; set; } = FilterCombination.And;
-    public SortOptions SortOptions { get; set; }
+    public SortOptions? SortOptions { get; set; }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)
