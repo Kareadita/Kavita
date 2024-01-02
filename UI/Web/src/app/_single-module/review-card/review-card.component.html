@@ -26,6 +26,7 @@
         <div>
           <ng-container *ngIf="isMyReview; else normalReview">
             <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
+            <img class="me-1" [ngSrc]="ScrobbleProvider.Kavita | providerImage" width="20" height="20" alt="">
             {{review.username}}
           </ng-container>
           <ng-template #normalReview>

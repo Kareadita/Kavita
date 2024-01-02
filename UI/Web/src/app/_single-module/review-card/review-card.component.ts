@@ -10,6 +10,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({
   selector: 'app-review-card',
@@ -20,9 +21,11 @@ import {TranslocoDirective} from "@ngneat/transloco";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCardComponent implements OnInit {
+  private readonly accountService = inject(AccountService);
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 
   @Input({required: true}) review!: UserReview;
-  private readonly accountService = inject(AccountService);
+
   isMyReview: boolean = false;
 
   constructor(private readonly modalService: NgbModal, private readonly cdRef: ChangeDetectorRef) {}
@@ -46,5 +49,4 @@ export class ReviewCardComponent implements OnInit {
     const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
     ref.componentInstance.review = this.review;
   }
-
 }
