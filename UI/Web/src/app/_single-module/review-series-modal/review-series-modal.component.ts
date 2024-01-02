@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -9,17 +9,19 @@ import {TranslocoDirective} from "@ngneat/transloco";
 @Component({
   selector: 'app-review-series-modal',
   standalone: true,
-    imports: [CommonModule, NgbRating, ReactiveFormsModule, TranslocoDirective],
+  imports: [CommonModule, NgbRating, ReactiveFormsModule, TranslocoDirective],
   templateUrl: './review-series-modal.component.html',
   styleUrls: ['./review-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewSeriesModalComponent implements OnInit {
 
+  protected readonly modal = inject(NgbActiveModal);
+  private readonly seriesService = inject(SeriesService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;
-
-  constructor(public modal: NgbActiveModal, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
