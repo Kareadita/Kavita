@@ -120,7 +120,7 @@
         </div>
       </div>
 
-      <div class="row pt-4">
+      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata?.summary?.length === 0}">
         <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
                            iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
                            [clickableTitle]="true" (sectionClick)="openReviewModal()">

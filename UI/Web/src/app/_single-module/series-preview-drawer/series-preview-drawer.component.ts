@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {NgbActiveOffcanvas, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ExternalSeriesDetail, SeriesStaff} from "../../_models/series-detail/external-series-detail";
@@ -16,11 +16,13 @@ import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {ActionService} from "../../_services/action.service";
+import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({
   selector: 'app-series-preview-drawer',
   standalone: true,
-  imports: [CommonModule, TranslocoDirective, ImageComponent, LoadingComponent, SafeHtmlPipe, A11yClickDirective, MetadataDetailComponent, PersonBadgeComponent, TagBadgeComponent, PublicationStatusPipe, ReadMoreComponent, NgbTooltip],
+    imports: [CommonModule, TranslocoDirective, ImageComponent, LoadingComponent, SafeHtmlPipe, A11yClickDirective, MetadataDetailComponent, PersonBadgeComponent, TagBadgeComponent, PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './series-preview-drawer.component.html',
   styleUrls: ['./series-preview-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -59,7 +61,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
     if (this.isExternalSeries) {
       this.seriesService.getExternalSeriesDetails(this.aniListId, this.malId).subscribe(externalSeries => {
         this.externalSeries = externalSeries;
-
         this.isLoading = false;
         if (this.externalSeries.siteUrl) {
           this.url = this.externalSeries.siteUrl;

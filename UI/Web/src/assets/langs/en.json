@@ -1716,7 +1716,8 @@
         "view-series": "View Series",
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "Provided by"
     },
 
     "next-expected-card": {

@@ -1,30 +1,35 @@
 <ng-container *transloco="let t; read: 'card-item'">
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
-      <ng-container *ngIf="total > 0 || suppressArchiveWarning">
+      @if (total > 0 || suppressArchiveWarning) {
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px"  [imageUrl]="imageUrl"></app-image>
-      </ng-container>
-      <ng-container *ngIf="total === 0 && !suppressArchiveWarning">
+      } @else if (total === 0 && !suppressArchiveWarning) {
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
-      </ng-container>
+      }
 
       <div class="progress-banner">
-        <p *ngIf="read > 0 && read < total && total > 0 && read !== total" ngbTooltip="{{((read / total) * 100) | number:'1.0-1'}}% Read">
-          <ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar>
-        </p>
+        @if (read > 0 && read < total && total > 0 && read !== total) {
+          <p ngbTooltip="{{((read / total) * 100) | number:'1.0-1'}}% Read">
+            <ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar>
+          </p>
+        }
+
         <span class="download">
           <app-download-indicator [download$]="download$"></app-download-indicator>
         </span>
       </div>
-      <div class="error-banner" *ngIf="total === 0 && !suppressArchiveWarning">
-        {{t('cannot-read')}}
-      </div>
 
-      <ng-container *ngIf="read === 0 && total > 0">
+      @if(total === 0 && !suppressArchiveWarning) {
+        <div class="error-banner">
+          {{t('cannot-read')}}
+        </div>
+      }
+
+      @if (read === 0 && total > 0) {
         <div class="badge-container">
           <div class="not-read-badge"></div>
         </div>
-      </ng-container>
+      }
 
       <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
         <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
@@ -34,14 +39,13 @@
         <span class="badge bg-primary">{{count}}</span>
       </div>
       <div class="card-overlay"></div>
-      <ng-container *ngIf="overlayInformation | safeHtml as info">
+      @if (overlayInformation | safeHtml; as info) {
         <div class="overlay-information {{centerOverlay ? 'overlay-information--centered' : ''}}" *ngIf="info !== '' ||  info !== undefined">
           <div class="position-relative">
             <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="info" placement="top" [innerHTML]="info"></span>
           </div>
         </div>
-      </ng-container>
-
+      }
     </div>
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">

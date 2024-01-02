@@ -5,7 +5,7 @@ import {
   Input,
   ViewChild
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {RouterLinkActive} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -13,11 +13,13 @@ import {NgbOffcanvas, NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstr
 import {ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
+import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-external-series-card',
   standalone: true,
-  imports: [CommonModule, ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective],
+  imports: [CommonModule, ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, SafeHtmlPipe],
   templateUrl: './external-series-card.component.html',
   styleUrls: ['./external-series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,6 +31,7 @@ export class ExternalSeriesCardComponent {
    */
   @Input() previewOnClick: boolean = false;
   @ViewChild('link', {static: false}) link!: ElementRef<HTMLAnchorElement>;
+
 
   private readonly offcanvasService = inject(NgbOffcanvas);
 
