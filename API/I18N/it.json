@@ -172,5 +172,9 @@
     "external-source-already-in-use": "Esiste uno stream esistente con questa Sorgente Esterna",
     "smart-filter-already-in-use": "Esiste uno stream esistente con questo Filtro Intelligente",
     "dashboard-stream-doesnt-exist": "Dashboard Stream non esiste",
-    "sidenav-stream-doesnt-exist": "SideNav Stream non esiste"
+    "sidenav-stream-doesnt-exist": "SideNav Stream non esiste",
+    "browse-more-in-genre": "Sfoglia di più in {0}",
+    "more-in-genre": "Altro in Genere {0}",
+    "recently-updated": "Aggiornato di recente",
+    "browse-recently-updated": "Sfoglia gli aggiornamenti recenti"
 }

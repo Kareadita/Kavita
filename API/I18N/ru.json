@@ -172,5 +172,9 @@
     "smart-filter-already-in-use": "Существует поток с этим умным фильтром",
     "browse-libraries": "Поиск по библиотекам",
     "generic-cover-collection-save": "Невозможно сохранить изображение обложки в Коллекцию",
-    "progress-must-exist": "Прогресс должен существовать у пользователя"
+    "progress-must-exist": "Прогресс должен существовать у пользователя",
+    "browse-more-in-genre": "Посмотреть больше в {0}",
+    "more-in-genre": "Больше в жанре {0}",
+    "recently-updated": "Недавно обновленный",
+    "browse-recently-updated": "Просмотреть недавно обновленные"
 }

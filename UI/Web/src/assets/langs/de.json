@@ -138,7 +138,7 @@
         "font-size-book-label": "Schriftgröße",
         "line-height-book-label": "Zeilenabstände",
         "line-height-book-tooltip": "Wie viel Abstand zwischen den Zeilen im Buch",
-        "margin-book-label": "Rahmen",
+        "margin-book-label": "Seitenrand",
         "margin-book-tooltip": "Wie viel Abstand auf jeder Seite des Bildschirms. Auf mobilen Geräten wird dieser Wert unabhängig von dieser Einstellung auf 0 gesetzt.",
         "clients-opds-alert": "OPDS ist auf diesem Server nicht aktiviert. Tachiyomi-Benutzer sind davon nicht betroffen.",
         "clients-opds-description": "Alle Clienten von Drittanbietern verwenden entweder den API-Schlüssel oder die unten stehende Verbindungsurl. Diese sind wie Passwörter, vertraulich behandeln.",
@@ -172,7 +172,7 @@
     },
     "restriction-selector": {
         "title": "Altersbeschränkung",
-        "description": "Wenn diese Option ausgewählt ist, werden alle Serien und Leselisten die mindestens einen Eintrag enthalten, der größer als die ausgewählte Beschränkung ist, aus den Suchergebnissen entfernt.",
+        "description": "Wenn diese Option ausgewählt ist, werden alle Serien und Leselisten, die mindestens einen Eintrag enthalten, das größer ist als die ausgewählte Einschränkung, aus den Suchergebnissen entfernt.",
         "not-applicable-for-admins": "Admins sind davon nicht betroffen.",
         "age-rating-label": "Altersfreigabe",
         "no-restriction": "Keine Einschränkung",
@@ -244,7 +244,7 @@
         "copy": "Kopie",
         "regen-warning": "Wenn Sie Ihren API-Schlüssel neu generieren, werden alle bestehenden Klienten ungültig.",
         "no-key": "ERROR - SCHLÜSSEL NICHT GESETZT",
-        "confirm-reset": "Dadurch werden alle OPDS-Konfigurationen, die Sie eingerichtet haben, ungültig. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "confirm-reset": "Alle bereits eingerichteten OPDS-Konfigurationen werden ungültig. Sind Sie sicher, dass Sie fortfahren möchten?",
         "key-reset": "API Schlüssel zurückgesetzt",
         "hide": "Ausblenden",
         "show": "Show"
@@ -269,7 +269,8 @@
         "no-data": "Keine Daten"
     },
     "generic-list-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "open-filtered-search": "Öffnen Sie eine gefilterte Suche nach {{item}}"
     },
     "user-stats-info-cards": {
         "total-pages-read-label": "Insgesamt gelesene Seiten",
@@ -294,7 +295,9 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "books-label": "Bücher: {{value}} Std.",
+        "manga-label": "Manga: {{value}} Std."
     },
     "role-selector": {
         "title": "Rollen"
@@ -342,7 +345,9 @@
     },
     "cbl-conflict-reason-pipe": {
         "series-collision": "Die Serie {{seriesLink}} kollidiert mit einer anderen Serie gleichen Namens in einer anderen Bibliothek.",
-        "series-missing": "Die Serie, {{series}}, ist in Kavita nicht vorhanden oder Sie haben nicht die nötigen Rechte. Alle Elemente dieser Serie werden beim Import übersprungen."
+        "series-missing": "Die Serie, {{series}}, ist in Kavita nicht vorhanden oder Sie haben nicht die nötigen Rechte. Alle Elemente dieser Serie werden beim Import übersprungen.",
+        "invalid-file": "Die Datei ist beschädigt oder entspricht nicht den erwarteten Tags/Spezifikationen.",
+        "volume-missing": "{{series}}: Band {{volume}} ist in Kavita nicht vorhanden oder Sie haben nicht die nötigen Rechte. Alle Elemente dieses Bandes werden übersprungen."
     },
     "time-duration-pipe": {
         "hours": "{{value}} Stunden",
@@ -429,7 +434,8 @@
     },
     "personal-table-of-contents": {
         "page": "Seite {{value}}",
-        "delete": "Löschen {{bookmarkName}}"
+        "delete": "Löschen {{bookmarkName}}",
+        "no-data": "Noch nichts mit Lesezeichen versehen"
     },
     "confirm-email": {
         "title": "Registrieren",
@@ -451,7 +457,8 @@
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "description": "Geben sie das neue Passwort ein"
     },
     "register": {
         "title": "Registrieren",
@@ -479,7 +486,8 @@
         "recommendations-tab": "Empfehlungen",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Zu diesem Band gibt es keine Kapitel. Kann nicht gelesen werden.",
-        "cover-change": "Es kann bis zu einer Minute dauern, bis Ihr Browser das Bild aktualisiert hat. Bis dahin kann auf einigen Seiten noch das alte Bild angezeigt werden."
+        "cover-change": "Es kann bis zu einer Minute dauern, bis Ihr Browser das Bild aktualisiert hat. Bis dahin kann auf einigen Seiten noch das alte Bild angezeigt werden.",
+        "read-options-alt": "Leseeinstellungen"
     },
     "series-metadata-detail": {
         "links-title": "Links",
@@ -503,7 +511,8 @@
     "side-nav": {
         "bookmarks": "Lesezeichen",
         "filter-label": "Filter",
-        "donate": "Spenden"
+        "donate": "Spenden",
+        "reading-lists": "Leselisten"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -735,7 +744,9 @@
         "settings": "Einstellungen",
         "help": "Hilfe",
         "announcements": "Ankündigungen",
-        "logout": "Abmelden"
+        "logout": "Abmelden",
+        "all-filters": "Intelligente Filter",
+        "skip-alt": "Zum Hauptinhalt springen"
     },
     "common": {
         "close": "Schließen",
@@ -747,7 +758,7 @@
         "edit": "Bearbeiten",
         "help": "Hilfe",
         "submit": "Einreichen",
-        "email": "Email",
+        "email": "E-Mail",
         "read": "Lesen",
         "loading": "Wird geladen…",
         "username": "Nutzername",
@@ -757,6 +768,33 @@
         "series-count": "{{num}}er-Serie",
         "item-count": "{{num}} Artikel",
         "book-num": "Buch",
-        "volume-num": "Band"
+        "volume-num": "Band",
+        "chapter-num": "Kapitel"
+    },
+    "customize-dashboard-modal": {
+        "smart-filters": "Intelligente Filter",
+        "title-external-sources": "Externe Quellen",
+        "external-sources": "Externe Quellen",
+        "title-smart-filters": "Intelligente Filter"
+    },
+    "customize-sidenav-streams": {
+        "smart-filters-title": "Intelligente Filter"
+    },
+    "reading-lists": {
+        "title": "Leselisten"
+    },
+    "errors": {
+        "user-not-auth": "Benutzer ist nicht authentifiziert"
+    },
+    "add-to-list-modal": {
+        "filter-label": "{{common.filter}}",
+        "no-data": "Noch keine Listen erstellt"
+    },
+    "filter-field-pipe": {
+        "want-to-read": "Möchte ich lesen"
+    },
+    "grouped-typeahead": {
+        "reading-lists": "Leselisten",
+        "genres": "Genre"
     }
 }

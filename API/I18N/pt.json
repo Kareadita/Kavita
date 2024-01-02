@@ -172,5 +172,9 @@
     "collection-deleted": "Coleção eliminada",
     "dashboard-stream-doesnt-exist": "Stream do Painel Principal não existe",
     "invalid-email": "O email guardado para o utilizador não é válido. Verifique se existem links nos logs.",
-    "sidenav-stream-doesnt-exist": "Stream do SideNav não existe"
+    "sidenav-stream-doesnt-exist": "Stream do SideNav não existe",
+    "browse-more-in-genre": "Ver mais em {0}",
+    "more-in-genre": "Mais do Género {0}",
+    "recently-updated": "Recém-Atualizados",
+    "browse-recently-updated": "Ver Recém-Atualizados"
 }

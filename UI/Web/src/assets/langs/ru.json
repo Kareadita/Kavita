@@ -176,39 +176,72 @@
         "save": "{{common.save}}",
         "email-tooltip": "Это письмо будет использоваться для приема файла через Send To",
         "device-platform-label": "Платформа устройства",
-        "device-name-label": "Имя устройства"
+        "device-name-label": "Имя устройства",
+        "valid-email": "{{validation.valid-email}}",
+        "required-field": "{{validation.required-field}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "permission-error": "У вас нет разрешения на изменение пароля. Обратитесь к администратору сервера.",
+        "new-password-label": "Новый пароль",
+        "passwords-must-match": "Пароли должны совпадать",
+        "current-password-label": "Текущий пароль",
+        "confirm-password-label": "Подтвердите пароль",
+        "required-field": "{{validation.required-field}}"
     },
     "change-email": {
         "email-label": "{{common.email}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "invite-url-label": "URL приглашения",
+        "email-updated-title": "Электронная почта обновлена",
+        "email-not-confirmed": "Это письмо не подтверждено",
+        "invite-url-tooltip": "Скопируйте это и вставьте в новую вкладку",
+        "setup-user-account": "Настройка учетной записи пользователя",
+        "email-updated-description": "Вы можете воспользоваться следующей ссылкой для подтверждения электронной почты для вашей учетной записи. Если ваш сервер доступен извне, на него будет отправлено письмо, и эту ссылку можно использовать для подтверждения электронной почты.",
+        "current-password-label": "Текущий пароль",
+        "permission-error": "У вас нет разрешения на изменение электронной почты. Обратитесь к администратору сервера."
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "age-restriction-label": "Возрастное ограничение",
+        "unknowns": "Неизвестные"
     },
     "scrobbling-providers": {
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-set": "Набор жетонов",
+        "requires": "Эта функция требует активной лицензии {{product}}.",
+        "token-expired": "Срок действия токена истек",
+        "title": "Провайдеры скрапбукинга",
+        "instructions": "Для того чтобы разрешить Kavita+ общаться с {{service}}, первым пользователям необходимо нажать на кнопку \"{{scrobbling-providers.generate}}\" ниже. После авторизации скопируйте и вставьте токен в поле ввода ниже. Вы можете регенерировать свой токен в любое время.",
+        "generate": "Создать",
+        "no-token-set": "Нет набора жетонов"
     },
     "typeahead": {
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "add-custom-item": ", тип для добавления пользовательского элемента",
+        "add-item": "Добавить {{item}}…",
+        "locked-field": "Поле заблокировано",
+        "no-data": "Нет данных"
     },
     "generic-list-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "clear": "{{common.clear}}",
+        "open-filtered-search": "Откройте отфильтрованный поиск для {{item}}.",
+        "filter": "{{common.filter}}"
     },
     "directory-picker": {
         "close": "{{common.close}}",
@@ -431,7 +464,7 @@
         "submit": "Отправить",
         "loading": "Загрузка…",
         "select-all": "Выбрать все",
-        "remove": "Удалить",
+        "remove": "Убрать",
         "book-num": "Книга",
         "close": "Закрыть"
     },
@@ -455,5 +488,47 @@
     "user-holds": {
         "title": "Удерживающие устройства Scrobble",
         "description": "Это управляемый пользователем список серий, которые не будут передаваться провайдерам. Вы можете удалить серию в любое время, и следующее событие, которое можно отскаблировать (прогресс чтения, рейтинг, статус \"Хочу прочитать\"), вызовет события."
+    },
+    "user-stats-info-cards": {
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "total-pages-read-label": "Всего прочитанных страниц",
+        "chapters": "{{value}} глав",
+        "time-spent-reading-label": "Время, проведенное за чтением",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
+        "avg-reading-per-week-label": "Среднее чтение / неделя",
+        "last-active-label": "Последний активный",
+        "chapters-read-label": "Читать главы",
+        "total-words-read-label": "Всего слов прочитано"
+    },
+    "top-readers": {
+        "comics-label": "Комиксы: {{value}} часов",
+        "all-time": "{{time-periods.all-time}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "this-week": "{{time-periods.this-week}}",
+        "title": "Лучшие читатели",
+        "time-selection-label": "Timeframe",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "books-label": "Книги: {{value}} часов",
+        "manga-label": "Манга: {{value}} часов"
+    },
+    "api-key": {
+        "copy": "Копировать",
+        "hide": "Скрыть",
+        "key-reset": "Сброс ключа API",
+        "no-key": "ОШИБКА - КЛЮЧ НЕ УСТАНОВЛЕН",
+        "regen-warning": "Регенерация ключа API приведет к аннулированию всех существующих клиентов.",
+        "show": "Показать",
+        "confirm-reset": "Это приведет к аннулированию всех настроенных конфигураций OPDS. Вы уверены, что хотите продолжить?"
+    },
+    "user-stats": {
+        "read-percentage": "% Читать",
+        "library-read-progress-title": "Прогресс чтения в библиотеке"
+    },
+    "role-selector": {
+        "title": "Роли"
     }
 }
