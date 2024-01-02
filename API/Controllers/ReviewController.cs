@@ -56,7 +56,7 @@ public class ReviewController : BaseApiController
     {
         var userId = User.GetUserId();
         var userRatings = (await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId))
-            .Where(r => !string.IsNullOrEmpty(r.Body) && !string.IsNullOrEmpty(r.Tagline))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
             .ToList();
         if (!await _licenseService.HasActiveLicense())
         {

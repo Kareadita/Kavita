@@ -28,6 +28,7 @@ public class RatingBuilder : IEntityBuilder<AppUserRating>
 
     public RatingBuilder WithTagline(string? tagline)
     {
+        if (string.IsNullOrEmpty(tagline)) return this;
         _rating.Tagline = tagline;
         return this;
     }
