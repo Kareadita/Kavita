@@ -213,9 +213,9 @@ export class SeriesService {
     return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'review?seriesId=' + seriesId);
   }
 
-  updateReview(seriesId: number, tagline: string, body: string) {
+  updateReview(seriesId: number, body: string) {
     return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
-      seriesId, tagline, body
+      seriesId, body
     });
   }
 

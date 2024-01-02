@@ -19557,11 +19557,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "tagline": {
-            "maxLength": 120,
-            "type": "string",
-            "nullable": true
-          },
           "body": {
             "type": "string",
             "nullable": true

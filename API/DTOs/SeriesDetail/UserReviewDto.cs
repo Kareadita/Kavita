@@ -12,6 +12,7 @@ public class UserReviewDto
     /// <summary>
     /// A tagline for the review
     /// </summary>
+    /// <remarks>This is not possible to set as a local user</remarks>
     public string? Tagline { get; set; }
 
     /// <summary>

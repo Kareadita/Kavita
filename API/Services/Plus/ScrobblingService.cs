@@ -187,6 +187,8 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody)
     {
+        // Currently disabled until at least hardcover is implemented
+        return;
         if (!await _licenseService.HasActiveLicense()) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);

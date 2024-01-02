@@ -139,7 +139,7 @@ public class ReviewController : BaseApiController
         var rating = ratingBuilder
             .WithBody(dto.Body)
             .WithSeriesId(dto.SeriesId)
-            .WithTagline(dto.Tagline)
+            .WithTagline(string.Empty)
             .Build();
 
         if (rating.Id == 0)
@@ -152,7 +152,7 @@ public class ReviewController : BaseApiController
 
 
         BackgroundJob.Enqueue(() =>
-            _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, dto.Tagline, dto.Body));
+            _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
         return Ok(_mapper.Map<UserReviewDto>(rating));
     }
 }
