@@ -26,6 +26,7 @@
         <div>
           <ng-container *ngIf="isMyReview; else normalReview">
             <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
+            {{review.username}}
           </ng-container>
           <ng-template #normalReview>
             <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
