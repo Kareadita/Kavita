@@ -160,8 +160,8 @@
     "want-to-read": "À Lire",
     "browse-want-to-read": "Parcourir À Lire",
     "collection-deleted": "Collection supprimée",
-    "smart-filters": "Filtres iintelligents",
-    "browse-smart-filters": "Parcourir Filtres intelligents",
+    "smart-filters": "Filtres intelligents",
+    "browse-smart-filters": "Recherche par filtres intelligents",
     "smart-filter-doesnt-exist": "Aucun Filtres iintelligents n'existe",
     "browse-external-sources": "Parcourir les Sources externes",
     "external-sources": "Sources externes",
@@ -172,5 +172,9 @@
     "external-source-required": "La clé API et l'hôte sont requis",
     "invalid-email": "Le mail du fichier de l'utilisateur n'est pas un mail valide. Voir les logs pour les liens.",
     "sidenav-stream-doesnt-exist": "Le flux de la barre de navigation latérale n'existe pas",
-    "smart-filter-already-in-use": "Il existe un flux avec ce filtre intelligent"
+    "smart-filter-already-in-use": "Il existe un flux avec ce filtre intelligent",
+    "browse-more-in-genre": "Parcourir plus dans {0}",
+    "more-in-genre": "Plus dans le genre {0}",
+    "recently-updated": "Récemment mis à jour",
+    "browse-recently-updated": "Parcourir les mises à jour récentes"
 }
