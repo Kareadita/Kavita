@@ -79,7 +79,7 @@
     "review-card": {
         "your-review": "This is your review",
         "external-review": "External Review",
-        "local-review": "Review",
+        "local-review": "Local Review",
         "rating-percentage": "Rating {{r}}%"
     },
 
