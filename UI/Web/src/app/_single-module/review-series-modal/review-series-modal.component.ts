@@ -19,14 +19,14 @@ export class ReviewSeriesModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly minLength = 20;
 
   @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
-      tagline: new FormControl(this.review.tagline || '', [Validators.min(20), Validators.max(120)]),
-      reviewBody: new FormControl(this.review.body, [Validators.min(20)]),
+      reviewBody: new FormControl(this.review.body, [Validators.required, Validators.minLength(this.minLength)]),
     });
     this.cdRef.markForCheck();
   }

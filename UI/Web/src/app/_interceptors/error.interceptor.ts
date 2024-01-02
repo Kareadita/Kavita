@@ -41,7 +41,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             break;
           default:
             // Don't throw multiple Something unexpected went wrong
-            let genericError = translate('errors.generic');
+            const genericError = translate('errors.generic');
             if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.' && this.toastr.previousToastMessage !== genericError) {
               this.toast(genericError);
             }

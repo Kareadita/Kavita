@@ -62,10 +62,11 @@
 
     "review-series-modal": {
         "title": "Edit Review",
-        "tagline-label": "Tagline",
         "review-label": "Review",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "Review must be at least {{count}} characters",
+        "required": "{{validation.required-field}}"
     },
 
     "review-card-modal": {

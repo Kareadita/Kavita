@@ -8,14 +8,19 @@
       </div>
       <div class="modal-body">
           <form [formGroup]="reviewGroup">
-              <div class="row g-0">
-                  <label for="tagline" class="form-label">{{t('tagline-label')}}</label>
-                  <input id="tagline" class="form-control" formControlName="tagline" />
-              </div>
-
               <div class="row g-0 mt-2">
                   <label for="review" class="form-label">{{t('review-label')}}</label>
-                  <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" ></textarea>
+                  <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" [minlength]="minLength"
+                            [class.is-invalid]="reviewGroup.get('reviewBody')?.invalid && reviewGroup.get('reviewBody')?.touched" aria-describedby="body-validations"
+                  ></textarea>
+                <div id="body-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                  @if (reviewGroup.get('reviewBody')?.errors?.required) {
+                    <div>{{t('required')}}</div>
+                  }
+                  @if (reviewGroup.get('reviewBody')?.errors?.minlength) {
+                    <div>{{t('min-length', {count: minLength})}}</div>
+                  }
+                </div>
               </div>
           </form>
 
