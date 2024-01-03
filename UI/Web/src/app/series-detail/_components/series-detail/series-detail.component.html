@@ -43,6 +43,9 @@
     </app-side-nav-companion-bar>
   </div>
 
+  <app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>
+
+
   <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-0 mb-xl-3 info-container">
       <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block mt-2">
@@ -120,7 +123,7 @@
         </div>
       </div>
 
-      <div class="row pt-4">
+      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata?.summary?.length === 0}">
         <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
                            iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
                            [clickableTitle]="true" (sectionClick)="openReviewModal()">
@@ -132,7 +135,7 @@
     </div>
 
     <ng-container *ngIf="series">
-      <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
           <a ngbNavLink>{{t('storyline-tab')}}</a>

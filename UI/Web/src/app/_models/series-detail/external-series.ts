@@ -1,3 +1,5 @@
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
+
 export interface ExternalSeries {
   name: string;
   coverUrl: string;
@@ -5,4 +7,5 @@ export interface ExternalSeries {
   summary: string;
   aniListId?: number;
   malId?: number;
+  provider: ScrobbleProvider;
 }

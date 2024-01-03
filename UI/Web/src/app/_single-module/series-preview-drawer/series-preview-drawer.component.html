@@ -2,6 +2,7 @@
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">
       {{name}}
+
     </h5>
     <button type="button" class="btn-close text-reset" [attr.aria-label]="t('common.close')" (click)="close()"></button>
   </div>
@@ -17,6 +18,14 @@
       <div *ngIf="(externalSeries.volumeCount || 0) > 0 || (externalSeries.chapterCount || 0) > 0" class="text-muted muted mb-2">
         {{t('series-preview-drawer.vols-and-chapters', {volCount: externalSeries.volumeCount, chpCount: externalSeries.chapterCount})}}
       </div>
+
+      @if(isExternalSeries && externalSeries) {
+        <div class="text-muted muted mb-2">
+          {{t('series-preview-drawer.provided-by-label')}}
+          <img class="ms-1" [ngSrc]="externalSeries.provider | providerImage" width="20" height="20" alt="">
+        </div>
+      }
+
       <app-read-more *ngIf="externalSeries.summary" [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
 
       <div class="mt-3">
@@ -122,7 +131,7 @@
 
     <app-loading [loading]="isLoading"></app-loading>
 
-    <a class="btn btn-primary col-12 " [href]="url" target="_blank" rel="noopener noreferrer">
+    <a class="btn btn-primary col-12 mt-2" [href]="url" target="_blank" rel="noopener noreferrer">
       {{t('series-preview-drawer.view-series')}}
     </a>
   </div>

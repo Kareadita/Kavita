@@ -55,8 +55,10 @@ public class ReviewController : BaseApiController
     public async Task<ActionResult<IEnumerable<UserReviewDto>>> GetReviews(int seriesId)
     {
         var userId = User.GetUserId();
+        var username = User.GetUsername();
         var userRatings = (await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId))
-            .Where(r => !string.IsNullOrEmpty(r.Body) && !string.IsNullOrEmpty(r.Tagline))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .OrderByDescending(review => review.Username.Equals(username) ? 1 : 0)
             .ToList();
         if (!await _licenseService.HasActiveLicense())
         {
@@ -139,7 +141,7 @@ public class ReviewController : BaseApiController
         var rating = ratingBuilder
             .WithBody(dto.Body)
             .WithSeriesId(dto.SeriesId)
-            .WithTagline(dto.Tagline)
+            .WithTagline(string.Empty)
             .Build();
 
         if (rating.Id == 0)
@@ -152,7 +154,7 @@ public class ReviewController : BaseApiController
 
 
         BackgroundJob.Enqueue(() =>
-            _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, dto.Tagline, dto.Body));
+            _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
         return Ok(_mapper.Map<UserReviewDto>(rating));
     }
 }

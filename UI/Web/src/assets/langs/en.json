@@ -62,10 +62,11 @@
 
     "review-series-modal": {
         "title": "Edit Review",
-        "tagline-label": "Tagline",
         "review-label": "Review",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "Review must be at least {{count}} characters",
+        "required": "{{validation.required-field}}"
     },
 
     "review-card-modal": {
@@ -78,7 +79,7 @@
     "review-card": {
         "your-review": "This is your review",
         "external-review": "External Review",
-        "local-review": "Review",
+        "local-review": "Local Review",
         "rating-percentage": "Rating {{r}}%"
     },
 
@@ -1716,7 +1717,8 @@
         "view-series": "View Series",
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "Provided by"
     },
 
     "next-expected-card": {

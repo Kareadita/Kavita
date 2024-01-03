@@ -1,7 +1,9 @@
 <ng-container *transloco="let t; read:'review-card-modal'">
   <div>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">{{t('user-review', {username: review.username})}} {{review.isExternal ? t('external-mod') : ''}}</h4>
+      <h4 class="modal-title" id="modal-basic-title">
+        {{t('user-review', {username: review.username})}} @if(review.isExternal) {<img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">}
+      </h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal">

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using API.DTOs.Scrobbling;
+using API.Services.Plus;
 
 namespace API.DTOs.Recommendation;
 #nullable enable
@@ -19,4 +20,5 @@ public class ExternalSeriesDetailDto
     public string? Summary { get; set; }
     public int? VolumeCount { get; set; }
     public int? ChapterCount { get; set; }
+    public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 }

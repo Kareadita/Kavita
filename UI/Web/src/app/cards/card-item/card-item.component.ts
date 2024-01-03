@@ -38,7 +38,7 @@ import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
 import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
-import {RouterLink} from "@angular/router";
+import {RouterLink, RouterLinkActive} from "@angular/router";
 import {TranslocoModule} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
@@ -61,7 +61,8 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
     SentenceCasePipe,
     RouterLink,
     TranslocoModule,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    RouterLinkActive
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],

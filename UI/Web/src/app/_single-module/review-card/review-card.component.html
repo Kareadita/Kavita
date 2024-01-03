@@ -10,11 +10,8 @@
       </div>
       <div class="col-md-10">
         <div class="card-body">
-          <h6 class="card-title" [title]="review.tagline">
-            <ng-container *ngIf="review.tagline && review.tagline.length > 0; else noTagline">{{review.tagline.substring(0, 29)}}{{review.tagline.length > 29 ? '…' : ''}}</ng-container>
-            <ng-template #noTagline>
-              {{review.isExternal ? t('external-review') : t('local-review')}}
-            </ng-template>
+          <h6 class="card-title">
+            {{review.isExternal ? t('external-review') : t('local-review')}}
           </h6>
           <p class="card-text no-images">
             <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
@@ -23,9 +20,11 @@
       </div>
 
       <div class="card-footer bg-transparent text-muted">
-        <div class="review-user">
+        <div>
           <ng-container *ngIf="isMyReview; else normalReview">
             <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
+            <img class="me-1" [ngSrc]="ScrobbleProvider.Kavita | providerImage" width="20" height="20" alt="">
+            {{review.username}}
           </ng-container>
           <ng-template #normalReview>
             <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">

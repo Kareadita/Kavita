@@ -42,7 +42,7 @@ public interface IScrobblingService
     Task CheckExternalAccessTokens();
     Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider);
     Task ScrobbleRatingUpdate(int userId, int seriesId, float rating);
-    Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody);
+    Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody);
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
 
@@ -185,8 +185,10 @@ public class ScrobblingService : IScrobblingService
         } ?? string.Empty;
     }
 
-    public async Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody)
+    public async Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody)
     {
+        // Currently disabled until at least hardcover is implemented
+        return;
         if (!await _licenseService.HasActiveLicense()) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);

@@ -1,24 +1,26 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  Component,
+  Component, inject,
   Inject,
   Input, ViewChild,
   ViewContainerRef,
   ViewEncapsulation
 } from '@angular/core';
-import {CommonModule, DOCUMENT} from '@angular/common';
+import {CommonModule, DOCUMENT, NgOptimizedImage} from '@angular/common';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
 import {UserReview} from "../review-card/user-review";
 import {SpoilerComponent} from "../spoiler/spoiler.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 
 @Component({
   selector: 'app-review-card-modal',
   standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective],
+    imports: [CommonModule, ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,12 +28,13 @@ import {TranslocoDirective} from "@ngneat/transloco";
 })
 export class ReviewCardModalComponent implements AfterViewInit {
 
+  private modal = inject(NgbActiveModal);
+
   @Input({required: true}) review!: UserReview;
   @ViewChild('container', { read: ViewContainerRef }) container!: ViewContainerRef;
 
 
-  constructor(private modal: NgbActiveModal, @Inject(DOCUMENT) private document: Document) {
-  }
+  constructor(@Inject(DOCUMENT) private document: Document) {}
 
   close() {
     this.modal.close();

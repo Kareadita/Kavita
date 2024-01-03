@@ -295,9 +295,9 @@ public class ProcessSeries : IProcessSeries
         if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
         {
             series.Metadata.MaxCount = 1;
-        } else if (series.Metadata.TotalCount == 1 && chapters.Count == 1 && chapters[0].IsSpecial)
+        } else if (series.Metadata.TotalCount <= 1 && chapters.Count == 1 && chapters[0].IsSpecial)
         {
-            // If a series has a TotalCount of 1 and there is only a Special, mark it as Complete
+            // If a series has a TotalCount of 1 (or no total count) and there is only a Special, mark it as Complete
             series.Metadata.MaxCount = series.Metadata.TotalCount;
         } else if ((maxChapter == 0 || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
         {

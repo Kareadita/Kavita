@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.Recommendation;
+﻿using API.Services.Plus;
+
+namespace API.DTOs.Recommendation;
 #nullable enable
 
 public class ExternalSeriesDto
@@ -9,4 +11,5 @@ public class ExternalSeriesDto
     public string? Summary { get; set; }
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
+    public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 }

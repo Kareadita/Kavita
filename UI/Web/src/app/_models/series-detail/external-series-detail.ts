@@ -1,3 +1,5 @@
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
+
 export enum PlusMediaFormat {
   Manga = 1,
   Comic = 2,
@@ -37,5 +39,5 @@ export interface ExternalSeriesDetail {
   chapterCount?: number;
   staff: Array<SeriesStaff>;
   tags: Array<MetadataTagDto>;
-
+  provider: ScrobbleProvider;
 }
