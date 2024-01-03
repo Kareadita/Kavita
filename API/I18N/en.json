@@ -175,6 +175,7 @@
 
     "not-authenticated": "User is not authenticated",
     "unable-to-register-k+": "Unable to register license due to error. Reach out to Kavita+ Support",
+    "unable-to-reset-k+": "Unable to reset Kavita+ license due to error. Reach out to Kavita+ Support",
     "anilist-cred-expired": "AniList Credentials have expired or not set",
     "scrobble-bad-payload": "Bad payload from Scrobble Provider",
     "theme-doesnt-exist": "Theme file missing or invalid",

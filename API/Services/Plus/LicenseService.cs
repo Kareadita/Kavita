@@ -28,6 +28,7 @@ public interface ILicenseService
     Task RemoveLicense();
     Task AddLicense(string license, string email);
     Task<bool> HasActiveLicense(bool forceCheck = false);
+    Task<bool> ResetLicense(string license, string email);
 }
 
 public class LicenseService : ILicenseService
@@ -195,6 +196,45 @@ public class LicenseService : ILicenseService
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an issue connecting to Kavita+");
+        }
+
+        return false;
+    }
+
+    public async Task<bool> ResetLicense(string license, string email)
+    {
+        try
+        {
+            var encryptedLicense = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/reset")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", encryptedLicense.Value)
+                .WithHeader("x-installId", HashUtil.ServerToken())
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .PostJsonAsync(new ResetLicenseDto()
+                {
+                    License = license.Trim(),
+                    InstallId = HashUtil.ServerToken(),
+                    EmailId = email
+                })
+                .ReceiveString();
+
+            if (string.IsNullOrEmpty(response))
+            {
+                var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+                await provider.RemoveAsync(CacheKey);
+                return true;
+            }
+
+            _logger.LogError("An error happened during the request to Kavita+ API: {ErrorMessage}", response);
+            throw new KavitaException(response);
+        }
+        catch (FlurlHttpException e)
+        {
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
 
         return false;

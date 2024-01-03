@@ -88,6 +88,10 @@ export class AccountService {
     return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse);
   }
 
+  resetLicense(license: string, email: string) {
+    return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
+  }
+
   hasValidLicense(forceCheck: boolean = false) {
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(

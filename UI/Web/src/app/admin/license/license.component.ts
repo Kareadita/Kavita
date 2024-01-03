@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, inject,
   OnInit
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
@@ -16,14 +16,19 @@ import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
-    selector: 'app-license',
-    templateUrl: './license.component.html',
-    styleUrls: ['./license.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-license',
+  templateUrl: './license.component.html',
+  styleUrls: ['./license.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
 })
 export class LicenseComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  protected readonly accountService = inject(AccountService);
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
@@ -38,9 +43,6 @@ export class LicenseComponent implements OnInit {
 
 
 
-  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService,
-              private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
-              private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
@@ -101,7 +103,16 @@ export class LicenseComponent implements OnInit {
       this.toggleViewMode();
       this.validateLicense();
     });
+  }
 
+  async resetLicense() {
+    if (!await this.confirmService.confirm(translate('toasts.k+-reset-key'))) {
+      return;
+    }
+
+    this.accountService.resetLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(() => {
+      this.toastr.success(translate('toasts.k+-reset-key-success'));
+    });
   }
 
 

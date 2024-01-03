@@ -72,10 +72,17 @@
           </div>
         </form>
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header" (click)="deleteLicense()">
+          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
+                  (click)="deleteLicense()">
             {{t('activate-delete')}}
           </button>
-          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="saveForm()">
+          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
+                  [ngbTooltip]="t('activate-reset--tooltip')"
+                  [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="resetLicense()">
+            {{t('activate-reset')}}
+          </button>
+          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header"
+                  [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="saveForm()">
             <span *ngIf="!isSaving">{{t('activate-save')}}</span>
             <app-loading [loading]="isSaving" size="spinner-border-sm"></app-loading>
           </button>
