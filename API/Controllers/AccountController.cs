@@ -318,19 +318,18 @@ public class AccountController : BaseApiController
     [HttpPost("reset-api-key")]
     public async Task<ActionResult<string>> ResetApiKey()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) throw new KavitaUnauthenticatedUserException();
-
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername()) ?? throw new KavitaUnauthenticatedUserException();
         user.ApiKey = HashUtil.ApiKey();
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
+            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
+                MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
             return Ok(user.ApiKey);
         }
 
         await _unitOfWork.RollbackAsync();
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "unable-to-reset-key"));
-
     }
 
 
