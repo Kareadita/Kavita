@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'bulk-operations'">
   <ng-container *ngIf="bulkSelectionService.selections$ | async as selectionCount">
-    <div *ngIf="selectionCount > 0" class="bulk-select mb-3 {{modalMode ? '' : 'fixed-top}}" [ngStyle]="{'margin-top': topOffset + 'px'}">
+    <div *ngIf="selectionCount > 0" class="bulk-select mb-3 {{modalMode ? '' : 'fixed-top'}}" [ngStyle]="{'margin-top': topOffset + 'px'}">
       <div class="d-flex justify-content-around align-items-center">
 
         <span class="highlight">

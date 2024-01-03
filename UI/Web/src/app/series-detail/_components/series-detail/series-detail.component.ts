@@ -136,9 +136,39 @@ interface StoryLineItem {
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly seriesService = inject(SeriesService);
+  private readonly router = inject(Router);
+  private readonly modalService = inject(NgbModal);
+  private readonly toastr = inject(ToastrService);
+  private readonly accountService = inject(AccountService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly titleService = inject(Title);
+  private readonly downloadService = inject(DownloadService);
+  private readonly actionService = inject(ActionService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly readingListService = inject(ReadingListService);
+  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly scrollService = inject(ScrollService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly translocoService = inject(TranslocoService);
+
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly imageService = inject(ImageService);
+  protected readonly navService = inject(NavService);
+  protected readonly readerService = inject(ReaderService);
+  protected readonly LibraryType = LibraryType;
+  protected readonly PageLayoutMode = PageLayoutMode;
+  protected readonly TabID = TabID;
+  protected readonly TagBadgeCursor = TagBadgeCursor;
+
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
-  private readonly destroyRef = inject(DestroyRef);
+
 
   /**
    * Series Id. Set at load before UI renders
@@ -280,14 +310,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  get TagBadgeCursor() { return TagBadgeCursor; }
-
-  get TabID() { return TabID; }
-
-  get PageLayoutMode() { return PageLayoutMode; }
-
-  get LibraryType() { return LibraryType; }
-
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
@@ -296,6 +318,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const companionHeight = this.companionBar!.nativeElement.offsetHeight;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    console.log('compainionHeight: ', companionHeight)
+    console.log('navbarHeight: ', navbarHeight)
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
@@ -319,20 +343,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return this.currentlyReadingChapter.title;
   }
 
-  constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private router: Router, public bulkSelectionService: BulkSelectionService,
-              private modalService: NgbModal, public readerService: ReaderService,
-              public utilityService: UtilityService, private toastr: ToastrService,
-              private accountService: AccountService, public imageService: ImageService,
-              private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private titleService: Title,
-              private downloadService: DownloadService, private actionService: ActionService,
-              private messageHub: MessageHubService, private readingListService: ReadingListService,
-              public navService: NavService,
-              private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document,
-              private cdRef: ChangeDetectorRef, private scrollService: ScrollService,
-              private deviceService: DeviceService, private translocoService: TranslocoService
-              ) {
+  constructor(@Inject(DOCUMENT) private document: Document) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
