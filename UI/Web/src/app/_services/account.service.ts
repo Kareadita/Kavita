@@ -113,8 +113,8 @@ export class AccountService {
       );
   }
 
-  updateUserLicense(license: string, email: string) {
-  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email}, TextResonse)
+  updateUserLicense(license: string, email: string, discordId?: string) {
+  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email, discordId}, TextResonse)
     .pipe(map(res => res === "true"));
   }
 

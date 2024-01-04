@@ -47,6 +47,7 @@ export class LicenseComponent implements OnInit {
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
+    this.formGroup.addControl('discordId', new FormControl('', []));
     this.accountService.hasAnyLicense().subscribe(res => {
       this.hasLicense = res;
       this.cdRef.markForCheck();
@@ -61,13 +62,14 @@ export class LicenseComponent implements OnInit {
   resetForm() {
     this.formGroup.get('licenseKey')?.setValue('');
     this.formGroup.get('email')?.setValue('');
+    this.formGroup.get('discordId')?.setValue('');
     this.cdRef.markForCheck();
   }
 
   saveForm() {
     this.isSaving = true;
     this.cdRef.markForCheck();
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim())
+    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim(), this.formGroup.get('discordId')!.value.trim())
       .subscribe(() => {
       this.accountService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;

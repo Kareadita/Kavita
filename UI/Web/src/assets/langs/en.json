@@ -590,6 +590,8 @@
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
         "activate-email-label": "{{common.email}}",
+        "activate-discordId-label": "Discord UserId",
+        "activate-discordId-tooltip": "Link your Discord Account with Kavita+. This grants you access to hidden channels to help shape Kavita",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
         "activate-reset--tooltip": "Untie your license with this server. Requires both License and Email.",

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.11.5"
+    "version": "0.7.11.6"
   },
   "servers": [
     {
@@ -19127,6 +19127,11 @@
           "email": {
             "type": "string",
             "description": "Email registered with Stripe",
+            "nullable": true
+          },
+          "discordId": {
+            "type": "string",
+            "description": "Optional DiscordId",
             "nullable": true
           }
         },
