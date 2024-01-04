@@ -14,6 +14,7 @@ import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {catchError} from "rxjs";
 
 @Component({
   selector: 'app-license',
@@ -85,13 +86,13 @@ export class LicenseComponent implements OnInit {
         this.cdRef.markForCheck();
       });
     }, err => {
+        this.isSaving = false;
+        this.cdRef.markForCheck();
         if (err.hasOwnProperty('error')) {
-          this.toastr.error(JSON.parse(err['error'])['message']);
+          this.toastr.error(JSON.parse(err['error']));
         } else {
           this.toastr.error(translate('toasts.k+-error'));
         }
-        this.isSaving = false;
-        this.cdRef.markForCheck();
     });
   }
 

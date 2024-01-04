@@ -15,6 +15,7 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ToastrService} from "ngx-toastr";
 
 export enum Role {
   Admin = 'Admin',
@@ -30,6 +31,8 @@ export enum Role {
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
+
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
   public static lastLoginKey = 'kavita-lastlogin';
