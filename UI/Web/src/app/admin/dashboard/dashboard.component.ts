@@ -46,6 +46,13 @@ enum TabID {
 })
 export class DashboardComponent implements OnInit {
 
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly route = inject(ActivatedRoute);
+  protected readonly navService = inject(NavService);
+  private readonly titleService = inject(Title);
+  protected readonly TabID = TabID;
+
+
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'general-tab', fragment: TabID.General},
     {title: 'users-tab', fragment: TabID.Users},
@@ -59,14 +66,8 @@ export class DashboardComponent implements OnInit {
   ];
   active = this.tabs[0];
 
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly translocoService = inject(TranslocoService);
 
-  get TabID() {
-    return TabID;
-  }
-
-  constructor(public route: ActivatedRoute, private titleService: Title, public navService: NavService) {
+  constructor() {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {

@@ -15,6 +15,7 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ToastrService} from "ngx-toastr";
 
 export enum Role {
   Admin = 'Admin',
@@ -30,6 +31,8 @@ export enum Role {
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
+
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
   public static lastLoginKey = 'kavita-lastlogin';
@@ -88,6 +91,10 @@ export class AccountService {
     return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse);
   }
 
+  resetLicense(license: string, email: string) {
+    return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
+  }
+
   hasValidLicense(forceCheck: boolean = false) {
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(
@@ -109,8 +116,8 @@ export class AccountService {
       );
   }
 
-  updateUserLicense(license: string, email: string) {
-  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email}, TextResonse)
+  updateUserLicense(license: string, email: string, discordId?: string) {
+  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email, discordId}, TextResonse)
     .pipe(map(res => res === "true"));
   }
 

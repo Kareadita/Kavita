@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, inject,
   OnInit
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
@@ -14,16 +14,22 @@ import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {catchError} from "rxjs";
 
 @Component({
-    selector: 'app-license',
-    templateUrl: './license.component.html',
-    styleUrls: ['./license.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-license',
+  templateUrl: './license.component.html',
+  styleUrls: ['./license.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
 })
 export class LicenseComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  protected readonly accountService = inject(AccountService);
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
@@ -38,13 +44,11 @@ export class LicenseComponent implements OnInit {
 
 
 
-  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService,
-              private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
-              private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
+    this.formGroup.addControl('discordId', new FormControl('', []));
     this.accountService.hasAnyLicense().subscribe(res => {
       this.hasLicense = res;
       this.cdRef.markForCheck();
@@ -59,13 +63,14 @@ export class LicenseComponent implements OnInit {
   resetForm() {
     this.formGroup.get('licenseKey')?.setValue('');
     this.formGroup.get('email')?.setValue('');
+    this.formGroup.get('discordId')?.setValue('');
     this.cdRef.markForCheck();
   }
 
   saveForm() {
     this.isSaving = true;
     this.cdRef.markForCheck();
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim())
+    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim(), this.formGroup.get('discordId')!.value.trim())
       .subscribe(() => {
       this.accountService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;
@@ -81,13 +86,13 @@ export class LicenseComponent implements OnInit {
         this.cdRef.markForCheck();
       });
     }, err => {
+        this.isSaving = false;
+        this.cdRef.markForCheck();
         if (err.hasOwnProperty('error')) {
-          this.toastr.error(JSON.parse(err['error'])['message']);
+          this.toastr.error(JSON.parse(err['error']));
         } else {
           this.toastr.error(translate('toasts.k+-error'));
         }
-        this.isSaving = false;
-        this.cdRef.markForCheck();
     });
   }
 
@@ -101,7 +106,16 @@ export class LicenseComponent implements OnInit {
       this.toggleViewMode();
       this.validateLicense();
     });
+  }
 
+  async resetLicense() {
+    if (!await this.confirmService.confirm(translate('toasts.k+-reset-key'))) {
+      return;
+    }
+
+    this.accountService.resetLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(() => {
+      this.toastr.success(translate('toasts.k+-reset-key-success'));
+    });
   }
 
 

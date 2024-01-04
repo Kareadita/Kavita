@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.11.5"
+    "version": "0.7.11.6"
   },
   "servers": [
     {
@@ -3048,6 +3048,37 @@
         ],
         "summary": "Updates server license",
         "description": "Caches the result",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/License/reset": {
+      "post": {
+        "tags": [
+          "License"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -19096,6 +19127,11 @@
           "email": {
             "type": "string",
             "description": "Email registered with Stripe",
+            "nullable": true
+          },
+          "discordId": {
+            "type": "string",
+            "description": "Optional DiscordId",
             "nullable": true
           }
         },

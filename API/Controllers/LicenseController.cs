@@ -8,7 +8,6 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
-using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,22 +16,13 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class LicenseController : BaseApiController
+public class LicenseController(
+    IUnitOfWork unitOfWork,
+    ILogger<LicenseController> logger,
+    ILicenseService licenseService,
+    ILocalizationService localizationService)
+    : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<LicenseController> _logger;
-    private readonly ILicenseService _licenseService;
-    private readonly ILocalizationService _localizationService;
-
-    public LicenseController(IUnitOfWork unitOfWork, ILogger<LicenseController> logger,
-        ILicenseService licenseService, ILocalizationService localizationService)
-    {
-        _unitOfWork = unitOfWork;
-        _logger = logger;
-        _licenseService = licenseService;
-        _localizationService = localizationService;
-    }
-
     /// <summary>
     /// Checks if the user's license is valid or not
     /// </summary>
@@ -41,7 +31,7 @@ public class LicenseController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        return Ok(await _licenseService.HasActiveLicense(forceCheck));
+        return Ok(await licenseService.HasActiveLicense(forceCheck));
     }
 
     /// <summary>
@@ -54,7 +44,7 @@ public class LicenseController : BaseApiController
     public async Task<ActionResult<bool>> HasLicense()
     {
         return Ok(!string.IsNullOrEmpty(
-            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value));
+            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value));
     }
 
     [Authorize("RequireAdminRole")]
@@ -62,12 +52,22 @@ public class LicenseController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult> RemoveLicense()
     {
-        _logger.LogInformation("Removing license on file for Server");
-        var setting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        logger.LogInformation("Removing license on file for Server");
+        var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         setting.Value = null;
-        _unitOfWork.SettingsRepository.Update(setting);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.SettingsRepository.Update(setting);
+        await unitOfWork.CommitAsync();
         return Ok();
+    }
+
+    [Authorize("RequireAdminRole")]
+    [HttpPost("reset")]
+    public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
+    {
+        logger.LogInformation("Resetting license on file for Server");
+        if (await licenseService.ResetLicense(dto.License, dto.Email)) return Ok();
+
+        return BadRequest(localizationService.Translate(User.GetUserId(), "unable-to-reset-k+"));
     }
 
     /// <summary>
@@ -81,11 +81,11 @@ public class LicenseController : BaseApiController
     {
         try
         {
-            await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
+            await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
         }
         catch (Exception ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await localizationService.Translate(User.GetUserId(), ex.Message));
         }
         return Ok();
     }

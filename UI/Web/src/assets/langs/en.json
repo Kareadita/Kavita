@@ -590,7 +590,11 @@
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
         "activate-email-label": "{{common.email}}",
-        "activate-delete": "Delete",
+        "activate-discordId-label": "Discord UserId",
+        "activate-discordId-tooltip": "Link your Discord Account with Kavita+. This grants you access to hidden channels to help shape Kavita",
+        "activate-delete": "{{common.delete}}",
+        "activate-reset": "{{common.reset}}",
+        "activate-reset--tooltip": "Untie your license with this server. Requires both License and Email.",
         "activate-save": "{{common.save}}"
     },
 
@@ -1955,6 +1959,8 @@
         "k+-unlocked": "Kavita+ unlocked!",
         "k+-error": "There was an error when activating your license. Please try again.",
         "k+-delete-key": "This will only delete Kavita's license key and allow a buy link to show. This will not cancel your subscription! Use this only if directed by support!",
+        "k+-reset-key": "This will untie your key from a server and allow you to re-register a Kavita instance.",
+        "k+-reset-key-success": "Your license has been un-registered. Use Edit button to re-register your instance and re-activate Kavita+",
         "library-deleted": "Library {{name}} has been removed",
         "copied-to-clipboard": "Copied to clipboard",
         "book-settings-info": "You can modify book settings, save those settings for all books, and view table of contents from the drawer.",

@@ -7,16 +7,15 @@
             <h4 id="license-key-header">{{t('title')}}</h4>
           </div>
           <div class="col-2 text-end">
-            <ng-container *ngIf="hasLicense; else noLicense">
-              <ng-container *ngIf="hasValidLicense; else invalidLicenseBuy">
+            @if (hasLicense) {
+              @if (hasValidLicense) {
                 <a class="btn btn-primary btn-sm me-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
-              </ng-container>
-              <ng-template #invalidLicenseBuy>
+              } @else {
                 <a class="btn btn-primary btn-sm me-1"
                    [ngbTooltip]="t('invalid-license-tooltip')"
                    href="mailto:kavitareader@gmail.com?subject=Kavita+Subscription+Renewal&body=Description%3A%0D%0A%0D%0ALicense%20Key%3A%0D%0A%0D%0AYour%20Email%3A"
                 >{{t('renew')}}</a>
-              </ng-template>
+              }
               <button class="btn btn-secondary btn-sm me-1" style="width: 58px" (click)="validateLicense()">
                 <span *ngIf="!isChecking">{{t('check')}}</span>
                 <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
@@ -25,16 +24,15 @@
                 <span *ngIf="!isViewMode">{{t('cancel')}}</span>
                 <span *ngIf="isViewMode">{{t('edit')}}</span>
               </button>
-            </ng-container>
-            <ng-template #noLicense>
+            } @else {
               <a class="btn btn-secondary btn-sm me-1" [href]="buyLink" target="_blank" rel="noreferrer nofollow">{{t('buy')}}</a>
               <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? t('activate') : t('cancel')}}</button>
-            </ng-template>
+            }
           </div>
         </div>
       </div>
 
-      <ng-container *ngIf="isViewMode">
+      @if (isViewMode) {
         <div class="container-fluid row">
           <span class="col-12">
               <ng-container *ngIf="hasLicense; else noToken">
@@ -57,7 +55,8 @@
               <ng-template #noToken>{{t('no-license-key')}}</ng-template>
           </span>
         </div>
-      </ng-container>
+      }
+
 
       <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
         <form [formGroup]="formGroup">
@@ -70,12 +69,23 @@
             <label for="email">{{t('activate-email-label')}}</label>
             <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"/>
           </div>
+          <div class="form-group mb-3">
+            <label for="discordId">{{t('activate-discordId-label')}}</label><i class="fa fa-circle-info ms-1" aria-hidden="true" [ngbTooltip]="t('activate-discordId-tooltip')"></i>
+            <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off"/>
+          </div>
         </form>
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header" (click)="deleteLicense()">
+          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
+                  (click)="deleteLicense()">
             {{t('activate-delete')}}
           </button>
-          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="saveForm()">
+          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
+                  [ngbTooltip]="t('activate-reset--tooltip')"
+                  [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="resetLicense()">
+            {{t('activate-reset')}}
+          </button>
+          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header"
+                  [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="saveForm()">
             <span *ngIf="!isSaving">{{t('activate-save')}}</span>
             <app-loading [loading]="isSaving" size="spinner-border-sm"></app-loading>
           </button>

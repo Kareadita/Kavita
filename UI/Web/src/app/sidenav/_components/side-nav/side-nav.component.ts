@@ -206,6 +206,8 @@ export class SideNavComponent implements OnInit {
   }
 
   showLess() {
+    this.filterQuery = '';
+    this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
 
