@@ -26,7 +26,7 @@ public interface ILicenseService
 {
     Task ValidateLicenseStatus();
     Task RemoveLicense();
-    Task AddLicense(string license, string email);
+    Task AddLicense(string license, string email, string? discordId);
     Task<bool> HasActiveLicense(bool forceCheck = false);
     Task<bool> ResetLicense(string license, string email);
 }
@@ -88,7 +88,7 @@ public class LicenseService : ILicenseService
     /// <param name="license"></param>
     /// <param name="email"></param>
     /// <returns></returns>
-    private async Task<string> RegisterLicense(string license, string email)
+    private async Task<string> RegisterLicense(string license, string email, string? discordId)
     {
         if (string.IsNullOrWhiteSpace(license) || string.IsNullOrWhiteSpace(email)) return string.Empty;
         try
@@ -105,7 +105,8 @@ public class LicenseService : ILicenseService
                 {
                     License = license.Trim(),
                     InstallId = HashUtil.ServerToken(),
-                    EmailId = email.Trim()
+                    EmailId = email.Trim(),
+                    DiscordId = discordId?.Trim()
                 })
                 .ReceiveJson<RegisterLicenseResponseDto>();
 
@@ -165,10 +166,10 @@ public class LicenseService : ILicenseService
         await provider.RemoveAsync(CacheKey);
     }
 
-    public async Task AddLicense(string license, string email)
+    public async Task AddLicense(string license, string email, string? discordId)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
-        var lic = await RegisterLicense(license, email);
+        var lic = await RegisterLicense(license, email, discordId);
         if (string.IsNullOrWhiteSpace(lic))
             throw new KavitaException("unable-to-register-k+");
         serverSetting.Value = lic;

@@ -81,7 +81,7 @@ public class LicenseController(
     {
         try
         {
-            await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
+            await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
         }
         catch (Exception ex)
         {
