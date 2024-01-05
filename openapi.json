@@ -876,6 +876,36 @@
         }
       }
     },
+    "/api/Account/is-email-valid": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Is the user's current email valid or not",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Admin/exists": {
       "get": {
         "tags": [

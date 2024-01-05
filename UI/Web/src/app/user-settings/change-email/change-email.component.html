@@ -29,13 +29,21 @@
             <div *ngFor="let error of errors">{{error}}</div>
           </div>
           <form [formGroup]="form">
+            @if(!hasValidEmail) {
+              <div class="alert alert-warning" role="alert">
+                It looks like you do not have a valid email set.
+              </div>
+            }
             <div class="mb-3">
               <label for="email" class="form-label visually-hidden">{{t('email-label')}}</label>
               <input class="form-control custom-input" type="email" id="email" formControlName="email"
                      [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
-              <div id="email-validations" class="invalid-feedback" *ngIf="form.dirty || form.touched">
+              <div id="email-validations" class="invalid-feedback" *ngIf="form.get('email')?.errors">
                 <div *ngIf="form.get('email')?.errors?.required">
                   {{t('required-field')}}
+                </div>
+                <div *ngIf="form.get('email')?.errors?.email">
+                  {{t('valid-email')}}
                 </div>
               </div>
             </div>

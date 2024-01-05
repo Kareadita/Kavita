@@ -253,6 +253,7 @@
 
         "permission-error": "You do not have permission to change your email. Reach out to the admin of the server.",
         "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
@@ -562,7 +563,9 @@
         "invite-url-label": "Invite Url",
         "invite": "Invite",
         "inviting": "Inviting…",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
     },
 
     "library-selector": {

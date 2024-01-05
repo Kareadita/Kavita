@@ -1109,6 +1109,20 @@ public class AccountController : BaseApiController
             }
         }
         return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
+    }
 
+
+    /// <summary>
+    /// Is the user's current email valid or not
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("is-email-valid")]
+    public async Task<ActionResult<bool>> IsEmailValid()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        if (user == null) return Unauthorized();
+        if (string.IsNullOrEmpty(user.Email)) return Ok(false);
+
+        return Ok(_emailService.IsValidEmail(user.Email));
     }
 }

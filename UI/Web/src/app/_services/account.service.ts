@@ -190,6 +190,11 @@ export class AccountService {
     return this.httpClient.get<boolean>(this.baseUrl + 'account/email-confirmed');
   }
 
+  isEmailValid() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/is-email-valid', TextResonse)
+      .pipe(map(res => res == "true"));
+  }
+
   confirmMigrationEmail(model: {email: string, token: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/confirm-migration-email', model);
   }
