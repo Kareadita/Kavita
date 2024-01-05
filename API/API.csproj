@@ -190,7 +190,7 @@
 
   <ItemGroup>
     <Folder Include="config\themes" />
-    <Folder Include="I18N\**" />
+    <None Include="I18N\**" />
   </ItemGroup>
 
   <ItemGroup>
