@@ -58,6 +58,7 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
             return;
         }
 
+        logger.LogWarning("IP ({Ip}) is not whitelisted for custom header login", context.Connection.RemoteIpAddress);
         context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         await next(context);
     }
