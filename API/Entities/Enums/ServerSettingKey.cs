@@ -147,6 +147,11 @@ public enum ServerSettingKey
     /// The size of the cover image thumbnail. Defaults to <see cref="CoverImageSize"/>.Default
     /// </summary>
     [Description("CoverImageSize")]
-    CoverImageSize = 27
+    CoverImageSize = 27,
+    /// <summary>
+    /// When using custom headers to authenticate, a list of hardcoded IPs that are allowed
+    /// </summary>
+    [Description("CustomHeaderWhitelistIpRanges")]
+    CustomHeaderWhitelistIpRanges = 28
 
 }

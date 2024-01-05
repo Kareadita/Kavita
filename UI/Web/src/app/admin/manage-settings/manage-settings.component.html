@@ -24,7 +24,7 @@
       </div>
 
       <div class="row g-0 mb-2">
-        <div class="col-md-8 col-sm-12  pe-md-2">
+        <div class="col-md-8 col-sm-12 pe-md-2">
           <label for="settings-ipaddresses" class="form-label">{{t('ip-address-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="ipAddressesTooltip" role="button" tabindex="0"></i>
           <ng-template #ipAddressesTooltip>{{t('ip-address-tooltip')}}</ng-template>
           <span class="visually-hidden" id="settings-ipaddresses-help">
@@ -49,6 +49,20 @@
             <ng-container [ngTemplateOutlet]="portTooltip"></ng-container>
           </span>
           <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+        </div>
+      </div>
+
+      <div class="row g-0 mb-2">
+        <div class="col-md-12 col-sm-12 pe-md-2">
+          <label for="settings-customheader-ipaddresses" class="form-label">{{t('custom-header-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="customHeaderIpAddressesTooltip" role="button" tabindex="0"></i>
+          <ng-template #customHeaderIpAddressesTooltip>{{t('custom-header-ip-addresses-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="settings-customheader-ipaddresses-help">
+            <ng-container [ngTemplateOutlet]="customHeaderIpAddressesTooltip"></ng-container>
+          </span>
+          <div class="input-group">
+            <input id="settings-customheader-ipaddresses" aria-describedby="settings-customheader-ipaddresses-help" class="form-control" formControlName="customHeaderWhitelistIpRanges" type="text"
+                   [class.is-invalid]="settingsForm.get('customHeaderWhitelistIpRanges')?.invalid && settingsForm.get('customHeaderWhitelistIpRanges')?.touched">
+          </div>
         </div>
       </div>
 

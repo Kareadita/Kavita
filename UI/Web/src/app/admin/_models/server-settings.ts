@@ -22,4 +22,5 @@ export interface ServerSettings {
     onDeckProgressDays: number;
     onDeckUpdateDays: number;
     coverImageSize: CoverImageSize;
+    customHeaderWhitelistIpRanges: string;
 }

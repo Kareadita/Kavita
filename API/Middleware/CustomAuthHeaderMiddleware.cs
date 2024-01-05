@@ -1,19 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using API.Data;
 using API.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
 
+/// <summary>
+/// Handles custom headers (like Authentik) which act as a Front door Auth system.
+/// This middleware checks against configured IP Addresses and Remote-User header
+/// and if matches, attaches Authentication and auto-logs in.
+/// </summary>
+/// <param name="next"></param>
 public class CustomAuthHeaderMiddleware(RequestDelegate next)
 {
     // Hardcoded list of allowed IP addresses in CIDR format
-    private readonly string[] allowedIpAddresses = { "192.168.1.0/24", "2001:db8::/32", "116.202.233.5", "104.21.81.112" };
+    //private readonly string[] allowedIpAddresses = { "192.168.1.0/24", "2001:db8::/32", "116.202.233.5", "104.21.81.112" };
 
 
     public async Task Invoke(HttpContext context, IUnitOfWork unitOfWork, ILogger<CustomAuthHeaderMiddleware> logger, ITokenService tokenService)
@@ -29,10 +35,10 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
         }
 
         // Validate IP address
-        if (IsValidIpAddress(context.Connection.RemoteIpAddress))
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var ipAddresses = settings.CustomHeaderWhitelistIpRanges.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (IsValidIpAddress(context.Connection.RemoteIpAddress, ipAddresses))
         {
-            // Perform additional authentication logic if needed
-            // For now, you can log the authenticated user
             var user = await unitOfWork.UserRepository.GetUserByEmailAsync(remoteUser);
             if (user == null)
             {
@@ -40,18 +46,18 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return;
             }
-            // Check if the RemoteUser has an account on the server
-            // if (!context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase))
-            // {
-            //     // Attach the Auth header and allow it to pass through
-            //     var token = await tokenService.CreateToken(user);
-            //     context.Request.Headers.Add("Authorization", $"Bearer {token}");
-            //     //context.Response.Redirect($"/login?apiKey={user.ApiKey}");
-            //     return;
-            // }
+
             // Attach the Auth header and allow it to pass through
             var token = await tokenService.CreateToken(user);
             context.Request.Headers.Append("Authorization", $"Bearer {token}");
+
+            // First catch, redirect to login and pre-authenticate
+            if (!context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase))
+            {
+                context.Response.Redirect($"/login?apiKey={user.ApiKey}");
+                return;
+            }
+
             await next(context);
             return;
         }
@@ -60,7 +66,7 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
         await next(context);
     }
 
-    private bool IsValidIpAddress(IPAddress ipAddress)
+    private static bool IsValidIpAddress(IPAddress ipAddress, ICollection<string> allowedIpAddresses)
     {
         // Check if the IP address is in the whitelist
         return allowedIpAddresses.Any(ipRange => IpAddressRange.Parse(ipRange).Contains(ipAddress));

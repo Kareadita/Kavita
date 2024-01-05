@@ -1,4 +1,6 @@
-﻿using API.Entities.Enums;
+﻿using System.Collections;
+using System.Collections.Generic;
+using API.Entities.Enums;
 using API.Services;
 
 namespace API.DTOs.Settings;
@@ -88,4 +90,8 @@ public class ServerSettingDto
     /// How large the cover images should be
     /// </summary>
     public CoverImageSize CoverImageSize { get; set; }
+    /// <summary>
+    /// When using custom headers to authenticate, a list of hardcoded IPs that are allowed. comma separated.
+    /// </summary>
+    public string CustomHeaderWhitelistIpRanges { get; set; }
 }

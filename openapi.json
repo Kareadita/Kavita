@@ -18513,6 +18513,11 @@
             "type": "integer",
             "description": "How large the cover images should be",
             "format": "int32"
+          },
+          "customHeaderWhitelistIpRanges": {
+            "type": "string",
+            "description": "When using custom headers to authenticate, a list of hardcoded IPs that are allowed. comma separated.",
+            "nullable": true
           }
         },
         "additionalProperties": false

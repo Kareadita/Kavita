@@ -7,9 +7,10 @@ import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
+//const ValidIpAddressWithRangeAndComma = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
   selector: 'app-manage-settings',
@@ -45,7 +46,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
-      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
+      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.pattern(ValidIpAddress)]));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
@@ -60,6 +61,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
       this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
       this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
+      this.settingsForm.addControl('customHeaderWhitelistIpRanges', new FormControl(this.serverSettings.customHeaderWhitelistIpRanges, [Validators.required]));
 
       this.serverService.getServerInfo().subscribe(info => {
         if (info.isDocker) {
@@ -92,6 +94,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('cacheSize')?.setValue(this.serverSettings.cacheSize);
     this.settingsForm.get('onDeckProgressDays')?.setValue(this.serverSettings.onDeckProgressDays);
     this.settingsForm.get('onDeckUpdateDays')?.setValue(this.serverSettings.onDeckUpdateDays);
+    this.settingsForm.get('customHeaderWhitelistIpRanges')?.setValue(this.serverSettings.customHeaderWhitelistIpRanges);
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
@@ -99,10 +102,10 @@ export class ManageSettingsComponent implements OnInit {
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.updateServerSettings(modelSettings).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
+      this.toastr.success(translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -112,7 +115,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
+      this.toastr.success(translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -122,7 +125,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.ipAddresses = settings.ipAddresses;
       this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
-      this.toastr.success(this.translocoService.translate('toasts.reset-ip-address'));
+      this.toastr.success(translate('toasts.reset-ip-address'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -132,7 +135,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetBaseUrl().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.baseUrl = settings.baseUrl;
       this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
-      this.toastr.success(this.translocoService.translate('toasts.reset-base-url'));
+      this.toastr.success(translate('toasts.reset-base-url'));
       this.cdRef.markForCheck();
     }, (err: any) => {
       console.error('error: ', err);
