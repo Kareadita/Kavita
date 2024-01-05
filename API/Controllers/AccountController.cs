@@ -1102,7 +1102,7 @@ public class AccountController : BaseApiController
                 baseUrl = baseUrl.Replace("//", "/");
             }
 
-            if (baseUrl.StartsWith("/"))
+            if (baseUrl.StartsWith('/'))
             {
                 baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
             }

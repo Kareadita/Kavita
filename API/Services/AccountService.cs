@@ -73,7 +73,7 @@ public class AccountService : IAccountService
             basePart = serverSettings.HostName;
             if (!serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
             {
-                var removeCount = serverSettings.BaseUrl.EndsWith("/") ? 2 : 1;
+                var removeCount = serverSettings.BaseUrl.EndsWith('/') ? 1 : 0;
                 basePart += serverSettings.BaseUrl.Substring(0, serverSettings.BaseUrl.Length - removeCount);
             }
         }
