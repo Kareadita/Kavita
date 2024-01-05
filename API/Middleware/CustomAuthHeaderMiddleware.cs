@@ -12,7 +12,7 @@ namespace API.Middleware;
 public class CustomAuthHeaderMiddleware(RequestDelegate next)
 {
     // Hardcoded list of allowed IP addresses in CIDR format
-    private readonly string[] allowedIpAddresses = { "192.168.1.0/24", "2001:db8::/32", "116.202.233.5" };
+    private readonly string[] allowedIpAddresses = { "192.168.1.0/24", "2001:db8::/32", "116.202.233.5", "104.21.81.112" };
 
 
     public async Task Invoke(HttpContext context, IUnitOfWork unitOfWork)
