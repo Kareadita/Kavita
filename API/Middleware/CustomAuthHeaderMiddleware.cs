@@ -6,6 +6,7 @@ using API.Data;
 using API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
 
@@ -15,7 +16,7 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
     private readonly string[] allowedIpAddresses = { "192.168.1.0/24", "2001:db8::/32", "116.202.233.5", "104.21.81.112" };
 
 
-    public async Task Invoke(HttpContext context, IUnitOfWork unitOfWork)
+    public async Task Invoke(HttpContext context, IUnitOfWork unitOfWork, ILogger<CustomAuthHeaderMiddleware> logger, ITokenService tokenService)
     {
         // Extract user information from the custom header
         string remoteUser = context.Request.Headers["Remote-User"];
@@ -26,8 +27,6 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
             await next(context);
             return;
         }
-
-
 
         // Validate IP address
         if (IsValidIpAddress(context.Connection.RemoteIpAddress))
@@ -42,12 +41,22 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
                 return;
             }
             // Check if the RemoteUser has an account on the server
-            if (!context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase))
-            {
-                context.Response.Redirect($"/login?apiKey={user.ApiKey}");
-                return;
-            }
+            // if (!context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase))
+            // {
+            //     // Attach the Auth header and allow it to pass through
+            //     var token = await tokenService.CreateToken(user);
+            //     context.Request.Headers.Add("Authorization", $"Bearer {token}");
+            //     //context.Response.Redirect($"/login?apiKey={user.ApiKey}");
+            //     return;
+            // }
+            // Attach the Auth header and allow it to pass through
+            var token = await tokenService.CreateToken(user);
+            context.Request.Headers.Append("Authorization", $"Bearer {token}");
+            await next(context);
+            return;
         }
+
+        context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         await next(context);
     }
 
