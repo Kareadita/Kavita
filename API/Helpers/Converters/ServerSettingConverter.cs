@@ -83,6 +83,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.CoverImageSize:
                     destination.CoverImageSize = Enum.Parse<CoverImageSize>(row.Value);
                     break;
+                case ServerSettingKey.CustomHeaderWhitelistIpRanges:
+                    destination.CustomHeaderWhitelistIpRanges = row.Value;
+                    break;
             }
         }
 

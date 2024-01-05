@@ -241,6 +241,7 @@ public static class Seed
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
+            new() {Key = ServerSettingKey.CustomHeaderWhitelistIpRanges, Value = string.Empty},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)
