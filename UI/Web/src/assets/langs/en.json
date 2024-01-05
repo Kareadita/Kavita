@@ -250,6 +250,7 @@
         "setup-user-account": "Setup user's account",
         "invite-url-label": "Invite Url",
         "invite-url-tooltip": "Copy this and paste in a new tab",
+        "has-invalid-email": "It looks like you do not have a valid email set. Change email will require the admin to send you a link to complete this action.",
 
         "permission-error": "You do not have permission to change your email. Reach out to the admin of the server.",
         "required-field": "{{validation.required-field}}",
@@ -1979,7 +1980,7 @@
         "library-created": "Library created successfully. A scan has been started.",
         "anilist-token-updated": "AniList Token has been updated",
         "age-restriction-updated": "Age Restriction has been updated",
-        "email-sent-to-no-existing": "An email has been sent to {{email}} for confirmation.",
+        "email-sent-to-no-existing": "Existing email is not valid. A link has been dumped to logs. Ask admin for link to complete email change.",
         "email-sent-to": "An email has been sent to your old email address for confirmation.",
         "change-email-private": "The server is not publicly accessible. Ask the admin to fetch your confirmation link from the logs",
         "device-updated": "Device updated",

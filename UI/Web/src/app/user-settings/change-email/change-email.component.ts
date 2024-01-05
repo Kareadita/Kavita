@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, injec
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {shareReplay, take} from 'rxjs';
-import {UpdateEmailResponse} from 'src/app/_models/auth/update-email-response';
 import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -66,13 +65,14 @@ export class ChangeEmailComponent implements OnInit {
 
     const model = this.form.value;
     this.errors = [];
-    this.accountService.updateEmail(model.email, model.password).subscribe((updateEmailResponse: UpdateEmailResponse) => {
+    this.accountService.updateEmail(model.email, model.password).subscribe(updateEmailResponse => {
+
+      if (updateEmailResponse.invalidEmail) {
+        this.toastr.success(translate('toasts.email-sent-to-no-existing', {email: model.email}));
+      }
+
       if (updateEmailResponse.emailSent) {
-        if (updateEmailResponse.hadNoExistingEmail) {
-          this.toastr.success(translate('toasts.email-sent-to-no-existing', {email: model.email}));
-        } else {
-          this.toastr.success(translate('toasts.email-sent-to'));
-        }
+        this.toastr.success(translate('toasts.email-sent-to'));
       } else {
         this.toastr.success(translate('toasts.change-email-private'));
       }

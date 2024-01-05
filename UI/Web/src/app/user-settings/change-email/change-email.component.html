@@ -31,7 +31,7 @@
           <form [formGroup]="form">
             @if(!hasValidEmail) {
               <div class="alert alert-warning" role="alert">
-                It looks like you do not have a valid email set.
+                {{t('has-invalid-email')}}
               </div>
             }
             <div class="mb-3">
