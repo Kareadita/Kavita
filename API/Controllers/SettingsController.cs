@@ -10,6 +10,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Logging;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
@@ -247,6 +248,25 @@ public class SettingsController : BaseApiController
                 setting.Value = updateSettingsDto.IpAddresses;
                 // IpAddresses is managed in appSetting.json
                 Configuration.IpAddresses = updateSettingsDto.IpAddresses;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.CustomHeaderWhitelistIpRanges && updateSettingsDto.CustomHeaderWhitelistIpRanges != setting.Value)
+            {
+                // Validate IP addresses
+                foreach (var ipAddress in updateSettingsDto.CustomHeaderWhitelistIpRanges.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                {
+                    try
+                    {
+                        IpAddressRange.Parse(ipAddress);
+                    }
+                    catch (Exception)
+                    {
+                        return BadRequest(await _localizationService.Translate(User.GetUserId(), "ip-address-invalid", ipAddress));
+                    }
+                }
+
+                setting.Value = updateSettingsDto.CustomHeaderWhitelistIpRanges;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
