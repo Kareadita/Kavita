@@ -390,7 +390,8 @@ public class AccountController : BaseApiController
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = string.Empty,
-                    EmailSent = false
+                    EmailSent = false,
+                    InvalidEmail = true,
                 });
             }
 
@@ -689,7 +690,8 @@ public class AccountController : BaseApiController
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,
-                    EmailSent = false
+                    EmailSent = false,
+                    InvalidEmail = true
                 });
             }
 
@@ -974,13 +976,12 @@ public class AccountController : BaseApiController
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
-        _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
-        _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
+        _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
         if (!_emailService.IsValidEmail(user.Email))
         {
-            _logger.LogCritical("[Email Migration]: User is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.Email);
-            return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
+            _logger.LogCritical("[Email Migration]: User {UserName} is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.UserName, user.Email);
+            return BadRequest(await _localizationService.Translate(user.Id, "invalid-email"));
         }
 
         if (await _accountService.CheckIfAccessible(Request))
@@ -1003,7 +1004,7 @@ public class AccountController : BaseApiController
             return Ok(emailLink);
         }
 
-        return Ok(await _localizationService.Translate(user.Id, "not-accessible"));
+        return BadRequest(await _localizationService.Translate(user.Id, "not-accessible"));
     }
 
     /// <summary>

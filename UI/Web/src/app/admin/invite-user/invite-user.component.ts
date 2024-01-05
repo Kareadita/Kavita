@@ -34,6 +34,7 @@ export class InviteUserComponent implements OnInit {
   selectedRestriction: AgeRestriction = {ageRating: AgeRating.NotApplicable, includeUnknowns: false};
   emailLink: string = '';
   invited: boolean = false;
+  inviteError: boolean = false;
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -65,14 +66,24 @@ export class InviteUserComponent implements OnInit {
       this.emailLink = data.emailLink;
       this.isSending = false;
       this.invited = true;
+      this.cdRef.markForCheck();
+
+      if (data.invalidEmail) {
+        this.toastr.info(translate('toasts.email-not-sent'));
+        this.inviteError = true;
+        this.cdRef.markForCheck();
+        return;
+      }
+
       if (data.emailSent) {
         this.toastr.info(translate('toasts.email-sent', {email: email}));
         this.modal.close(true);
       }
-      this.cdRef.markForCheck();
+
     }, err => {
+      // Note to self: If you need to catch an error, do it, but don't toast because interceptor handles that
       this.isSending = false;
-      this.toastr.error(err)
+      this.cdRef.markForCheck();
     });
   }
 

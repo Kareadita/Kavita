@@ -39,8 +39,12 @@
 
       <ng-container *ngIf="emailLink !== ''">
         <h4>{{t('setup-user-title')}}</h4>
-        <p>{{t('setup-user-description')}}
-        </p>
+        <p>{{t('setup-user-description')}}</p>
+        @if (inviteError) {
+          <div class="alert alert-warning" role="alert">
+            <strong>{{t('manage-settings.notice')}}</strong> {{t('toasts.email-not-sent')}}
+          </div>
+        }
         <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
         <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
       </ng-container>

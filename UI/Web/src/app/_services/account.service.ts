@@ -15,7 +15,6 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ToastrService} from "ngx-toastr";
 
 export enum Role {
   Admin = 'Admin',
@@ -31,7 +30,6 @@ export enum Role {
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly toastr = inject(ToastrService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -190,10 +188,6 @@ export class AccountService {
 
   isEmailConfirmed() {
     return this.httpClient.get<boolean>(this.baseUrl + 'account/email-confirmed');
-  }
-
-  migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, TextResonse);
   }
 
   confirmMigrationEmail(model: {email: string, token: string}) {
