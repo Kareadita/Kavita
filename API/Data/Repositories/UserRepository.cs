@@ -72,7 +72,7 @@ public interface IUserRepository
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
-    Task<AppUser?> GetUserByEmailAsync(string email);
+    Task<AppUser?> GetUserByEmailAsync(string email, AppUserIncludes includes = AppUserIncludes.None);
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<bool> HasAccessToSeries(int userId, int seriesId);
@@ -240,10 +240,12 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<AppUser?> GetUserByEmailAsync(string email)
+    public async Task<AppUser?> GetUserByEmailAsync(string email, AppUserIncludes includes = AppUserIncludes.None)
     {
         var lowerEmail = email.ToLower();
-        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email != null && u.Email.ToLower().Equals(lowerEmail));
+        return await _context.AppUser
+            .Includes(includes)
+            .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower().Equals(lowerEmail));
     }
 
 
