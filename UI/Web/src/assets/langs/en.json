@@ -1256,6 +1256,7 @@
         "delete-user-alt": "Delete User {{user}}",
         "edit-user-tooltip": "Edit",
         "edit-user-alt": "Edit User {{user}}",
+        "username-pattern": "Username can only contain the following characters and whitespace: {{characters}}",
         "resend-invite-tooltip": "Resend Invite",
         "resend-invite-alt": "Resend Invite {{user}}",
         "setup-user-tooltip": "Setup User",

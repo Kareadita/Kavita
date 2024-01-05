@@ -12,6 +12,8 @@ import { RoleSelectorComponent } from '../role-selector/role-selector.component'
 import { NgIf } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 
+const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
+
 @Component({
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
@@ -30,6 +32,8 @@ export class EditUserComponent implements OnInit {
 
   userForm: FormGroup = new FormGroup({});
 
+  allowedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/';
+
   public get email() { return this.userForm.get('email'); }
   public get username() { return this.userForm.get('username'); }
   public get password() { return this.userForm.get('password'); }
@@ -39,7 +43,7 @@ export class EditUserComponent implements OnInit {
 
   ngOnInit(): void {
     this.userForm.addControl('email', new FormControl(this.member.email, [Validators.required, Validators.email]));
-    this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required]));
+    this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
 
     this.userForm.get('email')?.disable();
     this.selectedRestriction = this.member.ageRestriction;

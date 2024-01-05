@@ -193,7 +193,7 @@ public class AccountController : BaseApiController
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
-                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
         }
 
         _logger.LogInformation("{UserName} attempting to login from {IpAddress}", loginDto.Username, HttpContext.Connection.RemoteIpAddress?.ToString());
@@ -485,6 +485,7 @@ public class AccountController : BaseApiController
             var errors = await _accountService.ValidateUsername(dto.Username);
             if (errors.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "username-taken"));
             user.UserName = dto.Username;
+            await _userManager.UpdateNormalizedUserNameAsync(user);
             _unitOfWork.UserRepository.Update(user);
         }
 
