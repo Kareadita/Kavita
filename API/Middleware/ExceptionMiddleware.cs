@@ -9,27 +9,17 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
 
-public class ExceptionMiddleware
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionMiddleware> _logger;
-
-
-    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context); // downstream middlewares or http call
+            await next(context); // downstream middlewares or http call
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an exception");
+            logger.LogError(ex, "There was an exception");
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
 

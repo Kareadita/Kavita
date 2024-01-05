@@ -10,24 +10,16 @@ namespace API.Middleware;
 /// <summary>
 /// Responsible for maintaining an in-memory. Not in use
 /// </summary>
-public class JwtRevocationMiddleware
+public class JwtRevocationMiddleware(
+    RequestDelegate next,
+    IEasyCachingProviderFactory cacheFactory,
+    ILogger<JwtRevocationMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
-    private readonly ILogger<JwtRevocationMiddleware> _logger;
-
-    public JwtRevocationMiddleware(RequestDelegate next, IEasyCachingProviderFactory cacheFactory, ILogger<JwtRevocationMiddleware> logger)
-    {
-        _next = next;
-        _cacheFactory = cacheFactory;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         if (context.User.Identity is {IsAuthenticated: false})
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -37,18 +29,18 @@ public class JwtRevocationMiddleware
         // Check if the token is revoked
         if (await IsTokenRevoked(token))
         {
-            _logger.LogWarning("Revoked token detected: {Token}", token);
+            logger.LogWarning("Revoked token detected: {Token}", token);
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
         }
 
-        await _next(context);
+        await next(context);
     }
 
     private async Task<bool> IsTokenRevoked(string token)
     {
         // Check if the token exists in the revocation list stored in the cache
-        var isRevoked = await _cacheFactory.GetCachingProvider(EasyCacheProfiles.RevokedJwt)
+        var isRevoked = await cacheFactory.GetCachingProvider(EasyCacheProfiles.RevokedJwt)
             .GetAsync<string>(token);
 
 

@@ -7,37 +7,29 @@ using API.Errors;
 using Kavita.Common;
 using Microsoft.AspNetCore.Http;
 using Serilog;
-using ILogger = Serilog.ILogger;
+using ILogger = Serilog.Core.Logger;
 
 namespace API.Middleware;
 
-public class SecurityEventMiddleware
+public class SecurityEventMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
-
-    public SecurityEventMiddleware(RequestDelegate next)
-    {
-        _next = next;
-
-        _logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.File(Path.Join(Directory.GetCurrentDirectory(), "config/logs/", "security.log"), rollingInterval: RollingInterval.Day)
-            .CreateLogger();
-    }
+    private readonly ILogger _logger = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .WriteTo.File(Path.Join(Directory.GetCurrentDirectory(), "config/logs/", "security.log"), rollingInterval: RollingInterval.Day)
+        .CreateLogger();
 
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (KavitaUnauthenticatedUserException ex)
         {
             var ipAddress = context.Connection.RemoteIpAddress?.ToString();
             var requestMethod = context.Request.Method;
             var requestPath = context.Request.Path;
-            var userAgent = context.Request.Headers["User-Agent"];
+            var userAgent = context.Request.Headers.UserAgent;
             var securityEvent = new
             {
                 IpAddress = ipAddress,
@@ -57,8 +49,7 @@ public class SecurityEventMiddleware
 
             var options = new JsonSerializerOptions
             {
-                PropertyNamingPolicy =
-                    JsonNamingPolicy.CamelCase
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
             var json = JsonSerializer.Serialize(response, options);

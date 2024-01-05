@@ -261,6 +261,7 @@ public class Startup
 
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<SecurityEventMiddleware>();
+        app.UseMiddleware<CustomAuthHeaderMiddleware>();
 
 
         if (env.IsDevelopment())
