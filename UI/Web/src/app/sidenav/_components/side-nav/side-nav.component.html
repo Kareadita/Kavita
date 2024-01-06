@@ -73,6 +73,6 @@
     <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
     <div class="bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
         'hidden': (navService.sideNavVisibility$ | async) === false || (accountService.hasValidLicense$ | async) === true}">
-      <app-side-nav-item *ngIf="(accountService.hasValidLicense$ | async) === false" [ngClass]="'donate'" icon="fa-heart" [title]="t('donate')" link="https://opencollective.com/kavita" [external]="true"></app-side-nav-item>
+      <app-side-nav-item *ngIf="(accountService.hasValidLicense$ | async) === false" [ngClass]="'donate'" icon="fa-heart" [ngbTooltip]="t('donate-tooltip')" link="https://wiki.kavitareader.com/en/faq#q-i-want-to-donate-what-are-my-options" [external]="true"></app-side-nav-item>
     </div>
 </ng-container>
