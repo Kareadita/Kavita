@@ -56,10 +56,11 @@
     },
     "review-series-modal": {
         "title": "Editar Análise",
-        "tagline-label": "Slogan",
         "review-label": "Análise",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "A análise deve ter pelo menos {{count}} caracteres",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -70,7 +71,7 @@
     "review-card": {
         "your-review": "Esta é sua análise",
         "external-review": "Análise Externa",
-        "local-review": "Análise",
+        "local-review": "Análise Local",
         "rating-percentage": "Avaliação {{r}}%"
     },
     "want-to-read": {
@@ -523,8 +524,12 @@
         "activate-description": "Insira a chave de licença e o e-mail usados para se registrar no Stripe",
         "activate-license-label": "Chave de licença",
         "activate-email-label": "{{common.email}}",
-        "activate-delete": "Excluir",
-        "activate-save": "{{common.save}}"
+        "activate-delete": "{{common.delete}}",
+        "activate-save": "{{common.save}}",
+        "activate-reset--tooltip": "Desvincule sua licença com este servidor. Requer licença e e-mail.",
+        "activate-discordId-label": "ID de usuário do Discord",
+        "activate-reset": "{{common.reset}}",
+        "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para ajudar a moldar Kavita"
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -1563,7 +1568,6 @@
         "no-updates": "Nenhuma atualização disponível",
         "confirm-delete-user": "Tem certeza de que deseja excluir este usuário?",
         "user-deleted": "{{user}} foi excluído",
-        "email-sent-to-user": "E-mail enviado para {{user}}",
         "click-email-link": "Clique neste link para confirmar seu e-mail. Você deve confirmar para poder fazer o login.",
         "series-added-to-collection": "Série adicionada à coleção {{collectionName}}",
         "no-series-collection-warning": "Aviso! Nenhuma série foi selecionada. Salvar excluirá a Coleção. Você tem certeza que quer continuar?",
@@ -1630,7 +1634,9 @@
         "smart-filter-updated": "Filtro Inteligente Criado/Atualizado",
         "confirm-delete-smart-filter": "Tem certeza de que deseja excluir este Filtro Inteligente?",
         "smart-filter-deleted": "Filtro Inteligente Excluído",
-        "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API"
+        "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API",
+        "k+-reset-key": "Isso desvinculará sua chave de um servidor e permitirá que você registre novamente uma instância Kavita.",
+        "k+-reset-key-success": "Sua licença foi cancelada. Use o botão Editar para registrar novamente sua instância e reativar o Kavita+"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1848,7 +1854,8 @@
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Capítulos",
         "tags-label": "{{filter-field-pipe.tags}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "Fornecido por"
     },
     "customize-dashboard-streams": {
         "no-data": "Todos os filtros inteligentes foram adicionados ao Painel de Controle ou nenhum foi criado ainda.",

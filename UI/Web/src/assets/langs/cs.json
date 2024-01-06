@@ -55,7 +55,6 @@
     },
     "review-series-modal": {
         "title": "Upravit recenzi",
-        "tagline-label": "Slogan, popis",
         "review-label": "Recenze",
         "close": "{{common.close}}",
         "save": "{{common.save}}"

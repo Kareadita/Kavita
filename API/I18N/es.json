@@ -176,5 +176,6 @@
     "browse-more-in-genre": "Ver más en {0}",
     "more-in-genre": "Más en el género {0}",
     "recently-updated": "Actualizado recientemente",
-    "browse-recently-updated": "Examinar las últimas actualizaciones"
+    "browse-recently-updated": "Examinar las últimas actualizaciones",
+    "unable-to-reset-k+": "No se ha podido restablecer la licencia de Kavita+ debido a un error. Contacta con el soporte de Kavita"
 }

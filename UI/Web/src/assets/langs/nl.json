@@ -56,7 +56,6 @@
     },
     "review-series-modal": {
         "title": "Beoordeling bewerken",
-        "tagline-label": "slogan",
         "review-label": "Beoordeling",
         "close": "{{common.close}}",
         "save": "{{common.save}}"

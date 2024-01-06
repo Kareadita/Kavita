@@ -58,8 +58,7 @@
         "title": "Редактировать отзыв",
         "review-label": "Обзор",
         "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "tagline-label": "Подзаголовок"
+        "save": "{{common.save}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",

@@ -56,10 +56,10 @@
     },
     "review-series-modal": {
         "title": "Editar Crítica",
-        "tagline-label": "Resumo",
         "review-label": "Crítica",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "A resenha deve ter pelo menos {{count}} caracteres"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -1562,7 +1562,6 @@
         "no-updates": "Nenhuma atualização disponível",
         "confirm-delete-user": "Tem a certeza que quer eliminar este utilizador?",
         "user-deleted": "{{user}} foi eliminado",
-        "email-sent-to-user": "Email enviado para {{user}}",
         "click-email-link": "Por favor clique neste link para confirmar o seu email. Tem de confirmar para poder fazer login.",
         "series-added-to-collection": "Série adicionada à coleção {{collectionName}}",
         "no-series-collection-warning": "Cuidado! Nenhuma série foi selecionada, por isso ao guardar irá eliminar a Coleção. Tem a certeza que deseja continuar?",
