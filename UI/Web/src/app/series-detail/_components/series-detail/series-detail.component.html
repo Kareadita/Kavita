@@ -140,7 +140,7 @@
         <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
           <a ngbNavLink>{{t('storyline-tab')}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
@@ -168,7 +168,7 @@
         <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
           <a ngbNavLink>{{libraryType === LibraryType.Book ? t('books-tab') : t('volumes-tab')}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
@@ -189,7 +189,7 @@
         <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
           <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else chapterListLayout">
                 <div class="card-container row g-0" #container>
                   <div *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
@@ -210,7 +210,7 @@
         <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
           <a ngbNavLink>{{t('specials-tab')}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else specialListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
@@ -230,7 +230,7 @@
         <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
               <div class="card-container row g-0" #container>
                 <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentify">
                   <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
@@ -243,7 +243,7 @@
         <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations">
           <a ngbNavLink>{{t('recommendations-tab')}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock">
+            <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else recListLayout">
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
