@@ -56,7 +56,6 @@
     },
     "review-series-modal": {
         "title": "리뷰 수정",
-        "tagline-label": "제목",
         "review-label": "평가",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
@@ -479,7 +478,6 @@
         "unauthorized-1": "이 페이지를 볼 권한이 없습니다.",
         "unauthorized-2": "권한이 없음",
         "no-pages": "페이지가 없습니다. Kavita는 이 아카이브를 읽을 수 없습니다.",
-        "email-sent-to-user": "{{user}}에 이메일 전송",
         "reading-list-imported": "읽기 목록 가져옴",
         "incognito-off": "시크릿 모드가 꺼져 있습니다. 이제 진행 상황이 추적되기 시작합니다.",
         "email-service-reset": "이메일 서비스 재설정",

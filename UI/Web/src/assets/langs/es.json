@@ -295,9 +295,10 @@
     "review-series-modal": {
         "title": "Editar reseña",
         "review-label": "Reseña",
-        "tagline-label": "Titular",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "La reseña debe tener al menos {{count}} caracteres",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -308,7 +309,7 @@
     "review-card": {
         "your-review": "Esta es tu reseña",
         "external-review": "Reseña externa",
-        "local-review": "Reseña",
+        "local-review": "Reseña local",
         "rating-percentage": "Calificación {{r}}%"
     },
     "want-to-read": {
@@ -670,9 +671,13 @@
         "license-valid": "Licencia es valida",
         "activate-license-label": "Clave de licencia",
         "activate-email-label": "{{common.email}}",
-        "activate-delete": "Eliminar",
+        "activate-delete": "{{common.delete}}",
         "activate-save": "{{common.save}}",
-        "title": "Licencia Kavita+"
+        "title": "Licencia Kavita+",
+        "activate-reset--tooltip": "Desvincule su licencia con este servidor. Requiere licencia y correo electrónico.",
+        "activate-discordId-label": "ID de usuario de Discord",
+        "activate-reset": "{{common.reset}}",
+        "activate-discordId-tooltip": "Vincula tu cuenta de Discord con Kavita+. Esto te da acceso a canales ocultos para ayudar a dar forma a Kavita"
     },
     "series-metadata-detail": {
         "translators-title": "Traductores",
@@ -993,7 +998,6 @@
         "multiple-added-to-reading-list": "Capítulos y volúmenes añadidos a la lista de lectura",
         "entity-read": "{{name}} se lee ahora",
         "select-files-warning": "Es necesario seleccionar los archivos para avanzar",
-        "email-sent-to-user": "Correo electrónico enviado a {{user}}",
         "refresh-covers-queued": "Carátulas de actualización en cola para {{name}}",
         "email-service-unresponsive": "La dirección URL del servicio del correo electrónico no responde.",
         "k+-license-saved": "Clave de licencia guardada, pero no es válida. Haga clic en comprobar para revalidar la suscripción. El primer registro puede tardar un minuto en propagarse.",
@@ -1027,7 +1031,9 @@
         "library-deleted": "La biblioteca {{name}} ha sido eliminada",
         "k+-delete-key": "Esto sólo borrará la clave de licencia de Kavita y permitirá que se muestre un enlace de compra. Esto no cancelará tu suscripción. ¡Utilice esta opción sólo si se lo indica el servicio de asistencia!",
         "reading-list-updated": "Lista de lectura actualizada",
-        "reset-base-url": "La dirección URL base se ha restablecido"
+        "reset-base-url": "La dirección URL base se ha restablecido",
+        "k+-reset-key": "Esto desvinculará tu clave de un servidor y te permitirá volver a registrar una instancia de Kavita.",
+        "k+-reset-key-success": "Se ha anulado el registro de su licencia. Utilice el botón Editar para volver a registrar su instancia y reactivar Kavita+"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -1822,7 +1828,8 @@
         "staff-label": "Staff",
         "vols-and-chapters": "{{volCount}} Volúmenes / {{chpCount}} Capítulos",
         "tags-label": "{{filter-field-pipe.tags}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "Proporcionado por"
     },
     "customize-dashboard-modal": {
         "smart-filters": "Filtros inteligentes",

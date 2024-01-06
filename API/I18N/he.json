@@ -19,5 +19,8 @@
     "no-user": "משתמש לא קיים",
     "username-taken": "שם משתמש תפוס",
     "user-already-confirmed": "המשתמש כבר אושר",
-    "age-restriction-update": "אירעה תקלה בעת עדכון הגבלת גיל"
+    "age-restriction-update": "אירעה תקלה בעת עדכון הגבלת גיל",
+    "generic-user-update": "אירעה תקלה בעת עדכון משתמש",
+    "user-already-registered": "משתמש רשום כבר בתור {0}",
+    "manual-setup-fail": "לא מתאפשר להשלים הגדרה ידנית. יש לבטל וליצור מחדש את ההזמנה"
 }

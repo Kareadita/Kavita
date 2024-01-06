@@ -56,7 +56,6 @@
     },
     "review-series-modal": {
         "title": "Modifica revisione",
-        "tagline-label": "Slogan",
         "review-label": "Revisione",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
@@ -1563,7 +1562,6 @@
         "no-updates": "Nessun aggiornamento disponibile",
         "confirm-delete-user": "Sei sicuro di voler eliminare questo utente?",
         "user-deleted": "{{utente}} è stato eliminato",
-        "email-sent-to-user": "Email inviata a {{utente}}",
         "click-email-link": "Fai clic su questo collegamento per confermare la tua email. È necessario confermarlo per poter accedere.",
         "series-added-to-collection": "Serie aggiunta alla raccolta {{collectionName}}",
         "no-series-collection-warning": "Avvertimento! Nessuna serie selezionata, il salvataggio eliminerà la raccolta. Sei sicuro di voler continuare?",

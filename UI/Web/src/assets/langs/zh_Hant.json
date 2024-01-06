@@ -55,7 +55,6 @@
     },
     "review-series-modal": {
         "title": "編輯評論",
-        "tagline-label": "標語",
         "review-label": "評論",
         "close": "{{common.close}}",
         "save": "{{common.save}}"

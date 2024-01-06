@@ -56,7 +56,6 @@
     },
     "review-series-modal": {
         "title": "Éditer la critique",
-        "tagline-label": "Slogan",
         "review-label": "Critique",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
@@ -1726,7 +1725,6 @@
         "library-created": "Bibliothèque créée avec succès. Un scan a été lancé.",
         "select-files-warning": "Vous devez sélectionner des fichiers pour avancer",
         "account-migration-complete": "Migration des comptes terminée",
-        "email-sent-to-user": "E-mail envoyé à {{user}}",
         "age-restriction-updated": "La restriction d'âge a été mise à jour",
         "password-updated": "Le mot de passe a été mis à jour",
         "refresh-covers-queued": "Actualisation des couvertures en attente pour {{name}}",

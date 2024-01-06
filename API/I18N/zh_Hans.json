@@ -106,7 +106,7 @@
     "search-description": "搜索系列、收藏或阅读清单",
     "favicon-doesnt-exist": "图标不存在",
     "not-authenticated": "用户未通过身份验证",
-    "anilist-cred-expired": "AniList凭据已过期或未设置",
+    "anilist-cred-expired": "AniList 凭据已过期或未设置",
     "theme-doesnt-exist": "主题文件丢失或者无效",
     "generic-user-email-update": "无法更新用户的电子邮件。请检查日志。",
     "epub-malformed": "文件格式不正确！无法读取。",
@@ -154,7 +154,7 @@
     "user-no-access-library-from-series": "用户无法访问此系列所属的资料库",
     "generic-create-temp-archive": "创建临时档案时出现问题",
     "query-required": "您必须传递一个查询参数",
-    "scrobble-bad-payload": "Scrobble服务提供商的数据无效",
+    "scrobble-bad-payload": "Scrobble 服务提供商的数据无效",
     "bad-copy-files-for-download": "无法复制文件至临时下载目录。",
     "progress-must-exist": "用户进程必须存在",
     "generic-scrobble-hold": "启用锁定时发生错误",
@@ -176,5 +176,6 @@
     "browse-more-in-genre": "浏览 {0} 中的更多内容",
     "more-in-genre": "更多类型 {0}",
     "recently-updated": "最近更新",
-    "browse-recently-updated": "浏览最近更新"
+    "browse-recently-updated": "浏览最近更新",
+    "unable-to-reset-k+": "因为一些错误导致无法重置 Kavita+ 许可证。请联系 Kavita+ 支持人员"
 }

@@ -56,7 +56,6 @@
     },
     "review-series-modal": {
         "title": "Rezension bearbeiten",
-        "tagline-label": "Schlagzeile",
         "review-label": "Rezension",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
