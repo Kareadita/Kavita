@@ -1608,7 +1608,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.bookmarkMode) return;
 
     const pageNum = this.pageNum;
-    const isDouble = Math.max(this.canvasRenderer.getBookmarkPageCount(), this.singleRenderer.getBookmarkPageCount(),
+    // if canvasRenderer and doubleRenderer is undefined, then we are in webtoon mode
+    const isDouble = this.canvasRenderer !== undefined && this.doubleRenderer !== undefined && Math.max(this.canvasRenderer.getBookmarkPageCount(), this.singleRenderer.getBookmarkPageCount(),
       this.doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer.getBookmarkPageCount(), this.doubleNoCoverRenderer.getBookmarkPageCount()) > 1;
 
     if (this.CurrentPageBookmarked) {
