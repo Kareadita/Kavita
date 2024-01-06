@@ -22,9 +22,11 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
     {
         // Extract user information from the custom header
         string remoteUser = context.Request.Headers["Remote-User"];
+        var isAuthenticated = context.User.Identity is {IsAuthenticated: true};
 
         // If header missing or user already authenticated, move on
-        if (string.IsNullOrEmpty(remoteUser) || context.User.Identity is {IsAuthenticated: true})
+        logger.LogDebug("Remote User: {RemoteUser}, IsAuthenticated: {IsAuthenticated}", remoteUser, isAuthenticated);
+        if (string.IsNullOrEmpty(remoteUser) || isAuthenticated)
         {
             await next(context);
             return;
@@ -33,33 +35,37 @@ public class CustomAuthHeaderMiddleware(RequestDelegate next)
         // Validate IP address
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var ipAddresses = settings.CustomHeaderWhitelistIpRanges.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        if (IsValidIpAddress(context.Connection.RemoteIpAddress, ipAddresses))
+        if (!IsValidIpAddress(context.Connection.RemoteIpAddress, ipAddresses))
         {
-            var user = await unitOfWork.UserRepository.GetUserByEmailAsync(remoteUser);
-            if (user == null)
-            {
-                // Tell security log maybe?
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return;
-            }
-
-            // Attach the Auth header and allow it to pass through
-            var token = await tokenService.CreateToken(user);
-            context.Request.Headers.Append("Authorization", $"Bearer {token}");
-
-            // First catch, redirect to login and pre-authenticate
-            if (!context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase))
-            {
-                context.Response.Redirect($"/login?apiKey={user.ApiKey}");
-                return;
-            }
-
+            logger.LogWarning("IP ({Ip}) is not whitelisted for custom header login", context.Connection.RemoteIpAddress);
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await next(context);
             return;
         }
 
-        logger.LogWarning("IP ({Ip}) is not whitelisted for custom header login", context.Connection.RemoteIpAddress);
-        context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+        var user = await unitOfWork.UserRepository.GetUserByEmailAsync(remoteUser);
+        if (user == null)
+        {
+            // Tell security log maybe?
+            logger.LogDebug("Ip is whitelisted but user doesn't exist, sending unauthorized");
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            return;
+        }
+
+        // Attach the Auth header and allow it to pass through
+        var token = await tokenService.CreateToken(user);
+        context.Request.Headers.Append("Authorization", $"Bearer {token}");
+
+        // First catch, redirect to login and pre-authenticate
+        if (!context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogDebug("Redirecting to login with a valid apikey");
+            context.Response.Redirect($"/login?apiKey={user.ApiKey}");
+            return;
+        }
+
+        logger.LogDebug("Auth attached, allowing pass through");
         await next(context);
     }
 
