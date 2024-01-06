@@ -1617,6 +1617,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       forkJoin(apis).pipe(take(1)).subscribe(() => {
         delete this.bookmarks[pageNum];
         if (isDouble) delete this.bookmarks[pageNum + 1];
+        this.cdRef.detectChanges();
       });
     } else {
       let apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
@@ -1624,6 +1625,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       forkJoin(apis).pipe(take(1)).subscribe(() => {
         this.bookmarks[pageNum] = 1;
         if (isDouble) this.bookmarks[pageNum + 1] = 1;
+        this.cdRef.detectChanges();
       });
     }
 
