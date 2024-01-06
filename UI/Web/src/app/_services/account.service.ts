@@ -10,12 +10,10 @@ import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/auth/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { UpdateEmailResponse } from '../_models/auth/update-email-response';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ToastrService} from "ngx-toastr";
 
 export enum Role {
   Admin = 'Admin',
@@ -31,7 +29,6 @@ export enum Role {
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly toastr = inject(ToastrService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -192,8 +189,9 @@ export class AccountService {
     return this.httpClient.get<boolean>(this.baseUrl + 'account/email-confirmed');
   }
 
-  migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, TextResonse);
+  isEmailValid() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/is-email-valid', TextResonse)
+      .pipe(map(res => res == "true"));
   }
 
   confirmMigrationEmail(model: {email: string, token: string}) {
@@ -247,7 +245,7 @@ export class AccountService {
   }
 
   updateEmail(email: string, password: string) {
-    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email, password});
+    return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/update/email', {email, password});
   }
 
   updateAgeRestriction(ageRating: AgeRating, includeUnknowns: boolean) {

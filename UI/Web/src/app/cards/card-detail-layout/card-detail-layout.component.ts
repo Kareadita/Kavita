@@ -1,7 +1,5 @@
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {
-  afterNextRender,
-  AfterRenderPhase, AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -172,6 +170,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
+    if (this.filteringDisabled) return false;
     return this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending
       || this.filterSettings?.presetsV2?.sortOptions?.sortField != SortField.SortName || !this.filterSettings?.presetsV2?.sortOptions?.isAscending;
   }

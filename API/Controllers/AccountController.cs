@@ -193,7 +193,7 @@ public class AccountController : BaseApiController
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
-                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
         }
 
         _logger.LogInformation("{UserName} attempting to login from {IpAddress}", loginDto.Username, HttpContext.Connection.RemoteIpAddress?.ToString());
@@ -390,7 +390,8 @@ public class AccountController : BaseApiController
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = string.Empty,
-                    EmailSent = false
+                    EmailSent = false,
+                    InvalidEmail = true,
                 });
             }
 
@@ -484,6 +485,7 @@ public class AccountController : BaseApiController
             var errors = await _accountService.ValidateUsername(dto.Username);
             if (errors.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "username-taken"));
             user.UserName = dto.Username;
+            await _userManager.UpdateNormalizedUserNameAsync(user);
             _unitOfWork.UserRepository.Update(user);
         }
 
@@ -689,7 +691,8 @@ public class AccountController : BaseApiController
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,
-                    EmailSent = false
+                    EmailSent = false,
+                    InvalidEmail = true
                 });
             }
 
@@ -974,13 +977,12 @@ public class AccountController : BaseApiController
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
-        _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
-        _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
+        _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
         if (!_emailService.IsValidEmail(user.Email))
         {
-            _logger.LogCritical("[Email Migration]: User is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.Email);
-            return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
+            _logger.LogCritical("[Email Migration]: User {UserName} is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.UserName, user.Email);
+            return BadRequest(await _localizationService.Translate(user.Id, "invalid-email"));
         }
 
         if (await _accountService.CheckIfAccessible(Request))
@@ -1003,7 +1005,7 @@ public class AccountController : BaseApiController
             return Ok(emailLink);
         }
 
-        return Ok(await _localizationService.Translate(user.Id, "not-accessible"));
+        return BadRequest(await _localizationService.Translate(user.Id, "not-accessible"));
     }
 
     /// <summary>
@@ -1102,12 +1104,26 @@ public class AccountController : BaseApiController
                 baseUrl = baseUrl.Replace("//", "/");
             }
 
-            if (baseUrl.StartsWith("/"))
+            if (baseUrl.StartsWith('/'))
             {
                 baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
             }
         }
         return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
+    }
 
+
+    /// <summary>
+    /// Is the user's current email valid or not
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("is-email-valid")]
+    public async Task<ActionResult<bool>> IsEmailValid()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        if (user == null) return Unauthorized();
+        if (string.IsNullOrEmpty(user.Email)) return Ok(false);
+
+        return Ok(_emailService.IsValidEmail(user.Email));
     }
 }

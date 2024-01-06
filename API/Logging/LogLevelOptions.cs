@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Text.RegularExpressions;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
@@ -49,6 +50,7 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
+            .Enrich.With(new ApiKeyEnricher())
             .WriteTo.Console(new MessageTemplateTextFormatter(outputTemplate))
             .WriteTo.File(LogFile,
                 shared: true,
@@ -74,6 +76,7 @@ public static class LogLevelOptions
             if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/api/health") return false;
             if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/hubs/messages") return false;
         }
+
         return true;
     }
 
@@ -114,4 +117,25 @@ public static class LogLevelOptions
         }
     }
 
+}
+
+public partial class ApiKeyEnricher : ILogEventEnricher
+{
+    public void Enrich(LogEvent e, ILogEventPropertyFactory propertyFactory)
+    {
+        var isRequestLoggingMiddleware = e.Properties.ContainsKey("SourceContext") &&
+                                         e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==
+                                         "Serilog.AspNetCore.RequestLoggingMiddleware";
+        if (!isRequestLoggingMiddleware) return;
+        if (!e.Properties.ContainsKey("RequestPath") ||
+            !e.Properties["RequestPath"].ToString().Contains("apiKey=")) return;
+
+        // Check if the log message contains "apiKey=" and censor it
+        var censoredMessage = MyRegex().Replace(e.Properties["RequestPath"].ToString(), "apiKey=******REDACTED******");
+        var enrichedProperty = propertyFactory.CreateProperty("RequestPath", censoredMessage);
+        e.AddOrUpdateProperty(enrichedProperty);
+    }
+
+    [GeneratedRegex(@"\bapiKey=[^&\s]+\b")]
+    private static partial Regex MyRegex();
 }

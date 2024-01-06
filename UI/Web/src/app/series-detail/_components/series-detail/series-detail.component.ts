@@ -318,8 +318,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const companionHeight = this.companionBar!.nativeElement.offsetHeight;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
-    console.log('compainionHeight: ', companionHeight)
-    console.log('navbarHeight: ', navbarHeight)
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 

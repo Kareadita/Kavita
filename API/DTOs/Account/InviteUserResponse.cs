@@ -10,4 +10,8 @@ public class InviteUserResponse
     /// Was an email sent (ie is this server accessible)
     /// </summary>
     public bool EmailSent { get; set; } = default!;
+    /// <summary>
+    /// When a user has an invalid email and is attempting to perform a flow.
+    /// </summary>
+    public bool InvalidEmail { get; set; } = false;
 }

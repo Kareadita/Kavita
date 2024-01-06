@@ -7,7 +7,7 @@ import {
   OnInit
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
 import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
 import { ImageService } from 'src/app/_services/image.service';
@@ -34,7 +34,7 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe],
+  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

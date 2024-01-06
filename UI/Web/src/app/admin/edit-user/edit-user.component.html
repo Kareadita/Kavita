@@ -19,6 +19,9 @@
                                 <div *ngIf="userForm.get('username')?.errors?.required">
                                     {{t('required')}}
                                 </div>
+                              <div *ngIf="userForm.get('username')?.errors?.pattern">
+                                    {{t('username-pattern', {characters: allowedCharacters})}}
+                                </div>
                             </div>
                         </div>
                     </div>

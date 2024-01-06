@@ -115,7 +115,7 @@ export class ManageUsersComponent implements OnInit {
     this.serverService.isServerAccessible().subscribe(canAccess => {
       this.accountService.resendConfirmationEmail(member.id).subscribe(async (email) => {
         if (canAccess) {
-          this.toastr.info(this.translocoService.translate('toasts.email-sent-to-user', {user: member.username}));
+          this.toastr.info(this.translocoService.translate('toasts.email-sent', {user: member.username}));
           return;
         }
         await this.confirmService.alert(
