@@ -119,7 +119,7 @@ public static class LogLevelOptions
 
 }
 
-public class ApiKeyEnricher : ILogEventEnricher
+public partial class ApiKeyEnricher : ILogEventEnricher
 {
     public void Enrich(LogEvent e, ILogEventPropertyFactory propertyFactory)
     {
@@ -127,14 +127,15 @@ public class ApiKeyEnricher : ILogEventEnricher
                                          e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==
                                          "Serilog.AspNetCore.RequestLoggingMiddleware";
         if (!isRequestLoggingMiddleware) return;
+        if (!e.Properties.ContainsKey("RequestPath") ||
+            !e.Properties["RequestPath"].ToString().Contains("apiKey=")) return;
 
         // Check if the log message contains "apiKey=" and censor it
-        if (e.Properties.ContainsKey("RequestPath") && e.Properties["RequestPath"].ToString().Contains("apiKey="))
-        {
-            var censoredMessage = Regex.Replace(e.Properties["RequestPath"].ToString(), @"\bapiKey=[^&\s]+\b",
-                "apiKey=******REDACTED******");
-            var enrichedProperty = propertyFactory.CreateProperty("RequestPath", censoredMessage);
-            e.AddOrUpdateProperty(enrichedProperty);
-        }
+        var censoredMessage = MyRegex().Replace(e.Properties["RequestPath"].ToString(), "apiKey=******REDACTED******");
+        var enrichedProperty = propertyFactory.CreateProperty("RequestPath", censoredMessage);
+        e.AddOrUpdateProperty(enrichedProperty);
     }
+
+    [GeneratedRegex(@"\bapiKey=[^&\s]+\b")]
+    private static partial Regex MyRegex();
 }

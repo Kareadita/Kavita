@@ -1,7 +1,5 @@
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {
-  afterNextRender,
-  AfterRenderPhase, AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,

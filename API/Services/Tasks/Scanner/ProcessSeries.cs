@@ -510,7 +510,6 @@ public class ProcessSeries : IProcessSeries
 
     public void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
-        var startingVolumeCount = series.Volumes.Count;
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
@@ -582,10 +581,6 @@ public class ProcessSeries : IProcessSeries
 
             series.Volumes = nonDeletedVolumes;
         }
-
-        // DO I need this anymore?
-        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from count of {StartingVolumeCount} to {VolumeCount}",
-            series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
     public void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)

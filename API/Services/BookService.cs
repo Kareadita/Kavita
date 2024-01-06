@@ -546,7 +546,6 @@ public class BookService : IBookService
                             ExtractSortTitle(metadataItem, epubBook, info);
                         }
 
-
                         break;
                 }
             }
