@@ -48,7 +48,7 @@ export class LicenseComponent implements OnInit {
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('discordId', new FormControl('', []));
+    this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
     this.accountService.hasAnyLicense().subscribe(res => {
       this.hasLicense = res;
       this.cdRef.markForCheck();
