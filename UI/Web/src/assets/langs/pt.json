@@ -59,7 +59,8 @@
         "review-label": "Crítica",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "min-length": "A resenha deve ter pelo menos {{count}} caracteres"
+        "min-length": "A resenha deve ter pelo menos {{count}} caracteres",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -70,7 +71,7 @@
     "review-card": {
         "your-review": "Esta é a sua crítica",
         "external-review": "Crítica externa",
-        "local-review": "Crítica",
+        "local-review": "Crítica Local",
         "rating-percentage": "Classificação {{r}}%"
     },
     "want-to-read": {
@@ -230,7 +231,9 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "has-invalid-email": "Parece que não tem um email válido definido. A alteração de email requere que o administrador lhe envie um link para completar esta acção.",
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrição Etária",
@@ -498,7 +501,9 @@
         "invite-url-label": "Url de Convite",
         "invite": "Convite",
         "inviting": "A convidar…",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -523,8 +528,13 @@
         "activate-description": "Introduza a Licença e o Email usados para registar com o Stripe",
         "activate-license-label": "Licença",
         "activate-email-label": "{{common.email}}",
-        "activate-delete": "Eliminar",
-        "activate-save": "{{common.save}}"
+        "activate-delete": "{{common.delete}}",
+        "activate-save": "{{common.save}}",
+        "activate-discordId-label": "User Id do Discord",
+        "activate-discordId-tooltip": "Associe a sua conta Discord com o Kavita+. Isto irá dar-lhe acesso a canais privados que são usados para definir os desenvolvimentos futuros do Kavita.",
+        "discord-validation": "Este User Id do Discord não é válido. O seu user id não é o mesmo que o seu nome no Discord.",
+        "activate-reset": "{{common.reset}}",
+        "activate-reset-tooltip": "Desassocie a sua licença deste servidor. Requere a Licença e o Email."
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -682,7 +692,8 @@
         "clear": "{{common.clear}}",
         "donate": "Donativo",
         "back": "Voltar",
-        "more": "Mais"
+        "more": "Mais",
+        "donate-tooltip": "Pode remover esta opção ao subscrever o Kavita+"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1116,7 +1127,8 @@
         "online-now-tooltip": "Online Agora",
         "sharing-title": "A Partilhar:",
         "no-data": "Não existem outros utilizadores.",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "username-pattern": "O nome de utilizador só pode conter os seguintes caracteres e o espaço em branco: {{characters}}"
     },
     "edit-collection-tags": {
         "title": "Editar Coleção {{collectionName}}",
@@ -1601,7 +1613,7 @@
         "library-created": "Biblioteca criada com sucesso. Foi iniciada uma análise.",
         "anilist-token-updated": "Foi atualizado o Token AniList",
         "age-restriction-updated": "A Restrição Etária foi atualizada",
-        "email-sent-to-no-existing": "Foi enviado um email para {{email}} para confirmação.",
+        "email-sent-to-no-existing": "O email existente não é válido. Foi colocado um link nos logs. Peça o link ao administrador para completar a alteração de email.",
         "email-sent-to": "Foi enviado um email para o seu antigo endereço de email para confirmação.",
         "device-updated": "Dispositivo atualizado",
         "device-created": "Dispositivo criado",
@@ -1629,7 +1641,10 @@
         "confirm-download-size": "O {{entityType}} tem {{size}}. Tem a certeza que quer continuar?",
         "no-next-chapter": "Não foi possível encontrar o seguinte {{entity}}",
         "load-prev-chapter": "Anterior {{entity}} carregado",
-        "k+-delete-key": "Isto apenas irá apagar a licença do Kavita e permitir que seja mostrado um link para comprar a licença. A sua subscrição não será cancelada! Use esta opção apenas quando assim indicado pelo suporte!"
+        "k+-delete-key": "Isto apenas irá apagar a licença do Kavita e permitir que seja mostrado um link para comprar a licença. A sua subscrição não será cancelada! Use esta opção apenas quando assim indicado pelo suporte!",
+        "k+-reset-key-success": "A sua licença foi desassociada. Use o botão Editar para voltar a registar a sua instância e voltar a ativar o Kavita+",
+        "email-not-sent": "O email em ficheiro não é um email válido e não pode ser enviado. Foi colocado um link nos logs. O administrador pode disponibilizar este link para concluir o processo.",
+        "k+-reset-key": "Isto irá desassociar a sua chave do servidor e permitir voltar a registar uma instância Kavita."
     },
     "actionable": {
         "scan-library": "Analisar Biblioteca",
@@ -1841,7 +1856,8 @@
         "staff-label": "Pessoal",
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Capítulos",
         "tags-label": "{{filter-field-pipe.tags}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "Disponibilizado por"
     },
     "customize-dashboard-modal": {
         "smart-filters": "Filtros Inteligentes",
