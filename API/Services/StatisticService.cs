@@ -108,6 +108,7 @@ public class StatisticService : IStatisticService
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
                 (p, c) => new
                 {
+                    // TODO: See if this can be done in the DB layer
                     AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) *
                                           ((float) c.AvgHoursToRead)
                 })

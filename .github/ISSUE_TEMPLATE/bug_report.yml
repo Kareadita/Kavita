@@ -11,7 +11,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        If you have a feature request, please go to our [Feature Requests](https://feats.kavitareader.com) page.
+        If you have a feature request, please submit on [Github Discussions](https://github.com/Kareadita/Kavita/discussions/2529).
   - type: textarea
     id: what-happened
     attributes:
@@ -34,7 +34,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: What version of our software are you running?
+      description: What version are you running?
       placeholder: Can be found by going to Server Settings > System
       value: ""
     validations:
@@ -61,7 +61,7 @@ body:
   - type: dropdown
     id: desktop-browsers
     attributes:
-      label: If issue being seen on Desktop, what browsers are you seeing the problem on?
+      label: If issue being seen in the UI, what browsers are you seeing the problem on?
       multiple: true
       options:
         - Firefox
@@ -79,7 +79,7 @@ body:
   - type: dropdown
     id: mobile-browsers
     attributes:
-      label: If issue being seen on Mobile, what browsers are you seeing the problem on?
+      label: If issue being seen on UI, what browsers are you seeing the problem on?
       multiple: true
       options:
         - Firefox
@@ -97,7 +97,7 @@ body:
     attributes:
       label: Additional Notes
       description: Any other information about the issue not covered in this form?
-      placeholder: e.g. Running Kavita on a raspberry pi
+      placeholder: e.g. Running Kavita on a raspberry pi, updating from X version, using LSIO container, etc
       value: ""
     validations:
       required: true
