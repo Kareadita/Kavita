@@ -354,15 +354,6 @@ public class SettingsController : BaseApiController
             {
                 setting.Value = updateSettingsDto.EnableFolderWatching + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
-
-                if (updateSettingsDto.EnableFolderWatching)
-                {
-                    await _libraryWatcher.StartWatching();
-                }
-                else
-                {
-                    _libraryWatcher.StopWatching();
-                }
             }
         }
 
@@ -377,6 +368,15 @@ public class SettingsController : BaseApiController
                 _directoryService.ExistOrCreate(bookmarkDirectory);
                 _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
                 _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
+            }
+
+            if (updateSettingsDto.EnableFolderWatching)
+            {
+                await _libraryWatcher.StartWatching();
+            }
+            else
+            {
+                _libraryWatcher.StopWatching();
             }
         }
         catch (Exception ex)

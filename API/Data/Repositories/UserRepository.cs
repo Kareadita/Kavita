@@ -385,6 +385,7 @@ public class UserRepository : IUserRepository
         return await _context.AppUserDashboardStream
             .Include(d => d.SmartFilter)
             .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -408,6 +409,7 @@ public class UserRepository : IUserRepository
                 Order = d.Order,
                 Visible = d.Visible
             })
+            .AsSplitQuery()
             .ToListAsync();
 
         var libraryIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.Library)
