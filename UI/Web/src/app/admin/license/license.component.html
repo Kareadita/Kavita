@@ -70,8 +70,15 @@
             <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"/>
           </div>
           <div class="form-group mb-3">
-            <label for="discordId">{{t('activate-discordId-label')}}</label><i class="fa fa-circle-info ms-1" aria-hidden="true" [ngbTooltip]="t('activate-discordId-tooltip')"></i>
-            <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off"/>
+            <label for="discordId">{{t('activate-discordId-label')}}</label>
+            <i class="fa fa-circle-info ms-1" aria-hidden="true" [ngbTooltip]="t('activate-discordId-tooltip')"></i>
+            <a class="ms-1" href="https://wiki.kavitareader.com/en/kavita-plus#discord-id" target="_blank" rel="noopener noreferrer">Help</a>
+            <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off" [class.is-invalid]="formGroup.get('discordId')?.invalid && formGroup.get('discordId')?.touched"/>
+            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="formGroup.dirty || formGroup.touched">
+              <div *ngIf="formGroup.get('discordId')?.errors?.pattern">
+                {{t('discord-validation')}}
+              </div>
+            </div>
           </div>
         </form>
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
@@ -80,7 +87,7 @@
             {{t('activate-delete')}}
           </button>
           <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
-                  [ngbTooltip]="t('activate-reset--tooltip')"
+                  [ngbTooltip]="t('activate-reset-tooltip')"
                   [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="resetLicense()">
             {{t('activate-reset')}}
           </button>

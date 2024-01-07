@@ -52,7 +52,7 @@ install methods and platforms.
 [https://wiki.kavitareader.com/en/install](https://wiki.kavitareader.com/en/install)
 
 ## Feature Requests
-Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/), [Feature Discord Channel](https://discord.com/channels/821879810934439936/1164375153493422122) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
+Got a great idea? Throw it up on [Discussions](https://github.com/Kareadita/Kavita/discussions/2529) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
 
 ## Notice
 Kavita is being actively developed and should be considered beta software until the 1.0 release.
@@ -61,7 +61,8 @@ vision. You may lose data and have to restart. The Kavita team strives to avoid 
 
 ## Donate
 If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
-expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
+expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below. Kavita+ is also an 
+option which provides funding and you get a benefit.
 
 ## Kavita+
 [Kavita+](https://wiki.kavitareader.com/en/kavita-plus) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
@@ -109,10 +110,9 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http://www.jetbrains.com/) for providing us with free licenses to their great tools.
 
 * [<img src="/Logo/rider.svg" alt="" width="32"> Rider](http://www.jetbrains.com/rider/)
-* [<img src="/Logo/dottrace.svg" alt="" width="32"> dotTrace](http://www.jetbrains.com/dottrace/)
 
 ### License
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
-* Copyright 2020-2023
+* Copyright 2020-2024
 
