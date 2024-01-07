@@ -45,5 +45,13 @@
     "manual-setup-fail": "手動セットアップが完了できません。キャンセルして招待を作り直してください",
     "forgot-password-generic": "データベースに登録されているメールアドレスにメールが送信されます",
     "generic-invite-user": "ユーザーを招待する際に問題が発生しました。ログを確認してください。",
-    "collection-deleted": "コレクションを削除"
+    "collection-deleted": "コレクションを削除",
+    "device-doesnt-exist": "デバイスが存在しません",
+    "generic-device-create": "デバイスを作成するときにエラーがありました",
+    "generic-device-update": "デバイスを更新する際にエラーがありました",
+    "generic-device-delete": "デバイスを削除した際にエラーがありました",
+    "greater-0": "{0} は 0 よりも大きいです",
+    "send-to-kavita-email": "Kavitaのメールサービスでは、デバイスへの送信はできません。 自分で設定してください.",
+    "send-to-device-status": "ファイルをデバイスに転送する",
+    "generic-send-to": "ファイルをデバイスに送信する際にエラーが発生しました。"
 }

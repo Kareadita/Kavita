@@ -513,8 +513,7 @@
         "activate-save": "{{common.save}}",
         "activate-discordId-tooltip": "DiscordアカウントをKavita+にリンクしてください。これにより、Kavitaを形成するための非公開のチャンネルへのアクセスが得られます。",
         "activate-email-label": "{{common.email}}",
-        "edit": "{{common.edit}}",
-        "activate-reset--tooltip": "このサーバーにライセンスを結びつけます｡ライセンスとEメールがどちらも必要です｡"
+        "edit": "{{common.edit}}"
     },
     "read-more": {
         "read-less": "あまり読まない",
@@ -641,7 +640,9 @@
         "description": "ユーザーをサーバーに招待するには、彼らのメールアドレスを入力してください。彼らはアカウントを作成するためのメールを受け取ります。これが機能するためには、<a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> タブでホスト名フィールドが設定されているか、リモートURLを介してインスタンスにアクセスしている必要があります。<br/><br/> 代わりにユーザー名を使用することもできますが、ユーザー名ベースのアカウントではパスワードのリセットが利用できないことに注意してください。弊社のメールサービスを使用したくない場合は、独自のメールサービスをホストすることもできます。",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "email": "{{common.email}}"
+        "email": "{{common.email}}",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
     },
     "book-line-overlay": {
         "bookmark": "ブックマーク",
@@ -665,7 +666,8 @@
         "save": "{{common.save}}",
         "email-label": "{{common.email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "valid-email": "{{validation.valid-email}}"
     },
     "top-readers": {
         "title": "最も読んだ",
@@ -905,7 +907,9 @@
     "edit-external-source-item": {
         "required": "{{validation.required-field}}",
         "cancel": "{{common.cancel}}",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}"
     },
     "toasts": {
         "forced-scan-queued": "{{name}}の強制スキャンが開始されました｡",
@@ -919,7 +923,7 @@
         "file-send-to": "ファイルが {{name}}にメールで送信されました｡",
         "entity-unread": "{{name}} は未読です",
         "user-deleted": "{{user}}はすでに削除されています",
-        "email-sent-to-no-existing": "確認のためのメールが {{email}} 宛に送信されました｡",
+        "email-sent-to-no-existing": "既存のメールアドレスは有効ではありません。リンクがログに記録されました。メールの変更を完了するためには、管理者にリンクを依頼してください。",
         "series-added-to-collection": "{{collectionName}}のシリーズがコレクションに追加されました",
         "confirm-library-delete": "{{name}} のライブラリを削除したいですか? もとに戻すことはできません｡",
         "confirm-download-size": "{{entityType}} は {{size}}です｡続行しますか?",
@@ -1009,7 +1013,8 @@
         "people-count": "{{num}} 人"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "help": "{{common.help}}"
     },
     "grouped-typeahead": {
         "loading": "{{common.loading}}",
@@ -1044,7 +1049,8 @@
         "edit-library-by-name": "{{name}}を削除"
     },
     "manage-external-sources": {
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}"
     },
     "manage-scrobble-errors": {
         "filter-label": "{{common.filter}}",
@@ -1072,7 +1078,8 @@
     "customize-dashboard-streams": {
         "filter": "{{common.filter}}",
         "add": "{{common.add}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "clear": "{{common.clear}}"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}"
@@ -1101,7 +1108,8 @@
         "delete-user-alt": "次のユーザを削除: {{user}}",
         "edit-user-alt": "次のユーザーを編集する: {{user}}",
         "resend-invite-alt": "{{user}}にもう一度招待を送る",
-        "change-password-alt": "{{user}}のパスワードを変更する"
+        "change-password-alt": "{{user}}のパスワードを変更する",
+        "username-pattern": "ユーザー名は、次の文字と空白のみを含むことができます。 {{characters}}"
     },
     "reading-lists": {
         "item-count": "{{common.item-count}}"
@@ -1140,5 +1148,10 @@
     },
     "next-expected-card": {
         "title": "~{{date}}"
+    },
+    "manage-smart-filters": {
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "delete": "{{common.delete}}"
     }
 }

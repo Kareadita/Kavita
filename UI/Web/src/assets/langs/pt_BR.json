@@ -231,7 +231,9 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "has-invalid-email": "Parece que você não tem um conjunto de e-mail válido. A alteração do e-mail exigirá que o administrador lhe envie um link para concluir esta ação.",
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrição de Etária",
@@ -499,7 +501,9 @@
         "invite-url-label": "URL do convite",
         "invite": "Convite",
         "inviting": "Convidando…",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "notice": "{{manage-settings.notice}}",
+        "email-not-sent": "{{toasts.email-not-sent}}"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -526,7 +530,6 @@
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
         "activate-save": "{{common.save}}",
-        "activate-reset--tooltip": "Desvincule sua licença com este servidor. Requer licença e e-mail.",
         "activate-discordId-label": "ID de usuário do Discord",
         "activate-reset": "{{common.reset}}",
         "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para ajudar a moldar Kavita"
@@ -687,7 +690,8 @@
         "clear": "{{common.clear}}",
         "donate": "Doar",
         "back": "Voltar",
-        "more": "Mais"
+        "more": "Mais",
+        "donate-tooltip": "Você pode remover isso assinando Kavita+"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1121,7 +1125,8 @@
         "online-now-tooltip": "Online Agora",
         "sharing-title": "Compartilhando:",
         "no-data": "Não há outros usuários.",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "username-pattern": "O nome de usuário só pode conter os seguintes caracteres e espaços em branco: {{characters}}"
     },
     "edit-collection-tags": {
         "title": "Editar {{collectionName}} Coleção",
@@ -1617,7 +1622,7 @@
         "library-created": "Biblioteca criada com sucesso. Uma verificação foi iniciada.",
         "anilist-token-updated": "O Token AniList foi atualizado",
         "age-restriction-updated": "Classificação etária foi atualizada",
-        "email-sent-to-no-existing": "Um e-mail foi enviado para {{email}} para confirmação.",
+        "email-sent-to-no-existing": "O e-mail existente não é válido. Um link foi despejado nos logs. Peça ao administrador o link para concluir a alteração do e-mail.",
         "email-sent-to": "Um e-mail foi enviado para seu endereço de e-mail antigo para confirmação.",
         "change-email-private": "O servidor não é acessível publicamente. Peça ao administrador para buscar seu link de confirmação nos registros",
         "device-updated": "Dispositivo atualizado",
@@ -1636,7 +1641,8 @@
         "smart-filter-deleted": "Filtro Inteligente Excluído",
         "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API",
         "k+-reset-key": "Isso desvinculará sua chave de um servidor e permitirá que você registre novamente uma instância Kavita.",
-        "k+-reset-key-success": "Sua licença foi cancelada. Use o botão Editar para registrar novamente sua instância e reativar o Kavita+"
+        "k+-reset-key-success": "Sua licença foi cancelada. Use o botão Editar para registrar novamente sua instância e reativar o Kavita+",
+        "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo."
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
