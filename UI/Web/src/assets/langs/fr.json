@@ -802,7 +802,7 @@
         "edit": "{{common.edit}}",
         "invalid-license-tooltip": "Si votre souscription est terminée, vous devez envoyer un mail au support pour en obtenir une nouvelle",
         "activate-discordId-label": "ID du compte Discord",
-        "activate-discordId-tooltip": "Reliez votre compte Discord à Kavita+. Cela vous permet d'accéder à des canaux cachés pour aider à façonner Kavita.",
+        "activate-discordId-tooltip": "Lien vers votre compte Discord avec Kavita+. Cela vous donne accès à des canaux cachés pour aider à façonner Kavita.",
         "activate-reset": "{{common.reset}}"
     },
     "book-reader": {

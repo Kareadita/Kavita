@@ -532,7 +532,9 @@
         "activate-save": "{{common.save}}",
         "activate-discordId-label": "Discord 用户 ID",
         "activate-reset": "{{common.reset}}",
-        "activate-discordId-tooltip": "将您的 Discord 帐户与 Kavita+ 关联。这使您可以访问隐藏的渠道来帮助塑造 Kavita"
+        "activate-discordId-tooltip": "将您的 Discord 帐户与 Kavita+ 关联。这使您可以访问隐藏的渠道来帮助塑造 Kavita。",
+        "discord-validation": "这不是有效的 Discord 用户 ID。您的用户 ID 不是您的 Discord 用户名。",
+        "activate-reset-tooltip": "解除您与此服务器的许可证的绑定。需要许可证和电子邮件。"
     },
     "book-line-overlay": {
         "copy": "复制",
