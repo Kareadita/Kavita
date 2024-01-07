@@ -674,7 +674,6 @@
         "activate-delete": "{{common.delete}}",
         "activate-save": "{{common.save}}",
         "title": "Licencia Kavita+",
-        "activate-reset--tooltip": "Desvincule su licencia con este servidor. Requiere licencia y correo electrónico.",
         "activate-discordId-label": "ID de usuario de Discord",
         "activate-reset": "{{common.reset}}",
         "activate-discordId-tooltip": "Vincula tu cuenta de Discord con Kavita+. Esto te da acceso a canales ocultos para ayudar a dar forma a Kavita"

@@ -58,7 +58,9 @@
         "title": "Éditer la critique",
         "review-label": "Critique",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "La critique doit comporter au moins {{count}} caractères",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -69,7 +71,7 @@
     "review-card": {
         "your-review": "Voici votre critique",
         "external-review": "Critique externe",
-        "local-review": "Critique",
+        "local-review": "Critique locale",
         "rating-percentage": "Évaluation {{r}}%"
     },
     "want-to-read": {
@@ -225,7 +227,9 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "email-updated-description": "Vous pouvez utiliser le lien suivant pour confirmer l'email de votre compte. Si votre serveur est accessible depuis l'extérieur, un email y sera envoyé avec un lien permettant de confirmer l'adresse."
+        "email-updated-description": "Vous pouvez utiliser le lien suivant pour confirmer l'email de votre compte. Si votre serveur est accessible depuis l'extérieur, un email y sera envoyé avec un lien permettant de confirmer l'adresse.",
+        "has-invalid-email": "Il semble que vous n'ayez pas défini d'adresse électronique valide. Pour modifier l'adresse électronique, l'administrateur devra vous envoyer un lien de confirmation.",
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restriction d'âge",
@@ -431,7 +435,8 @@
         "more": "Plus",
         "clear": "{{common.clear}}",
         "filter-label": "{{common.filter}}",
-        "donate": "Donner"
+        "donate": "Donner",
+        "donate-tooltip": "Vous pouvez supprimer ce message en vous abonnant à Kavita+"
     },
     "all-collections": {
         "title": "Collections",
@@ -770,7 +775,9 @@
         "setup-user-title": "Utilisateurs invités",
         "invite": "Inviter",
         "description": "Invitez un utilisateur sur votre serveur en saisissant son email. Ils recevront un e-mail pour créer un compte. Pour que cela fonctionne, vous devez avoir le champ Nom d'hôte défini dans l'onglet <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a> ou accéder à votre instance via son URL distante. <br/><br/>Vous pouvez également utiliser un nom d'utilisateur, mais notez que la réinitialisation du mot de passe ne sera pas disponible pour les comptes basés sur un nom d'utilisateur. Si vous ne souhaitez pas utiliser notre service de messagerie, vous pouvez héberger votre propre service de messagerie.",
-        "setup-user-description": "Vous pouvez utiliser le lien suivant ci-dessous pour configurer le compte de votre utilisateur ou utiliser le bouton Copier. Vous devrez peut-être vous déconnecter avant d'utiliser le lien pour enregistrer un nouvel utilisateur. Si Kavita peut déterminer votre serveur comme accessible en externe (ou si le nom d'hôte est défini), un e-mail aura été envoyé à l'utilisateur et les liens pourront être utilisés par lui pour terminer la configuration de son compte. Sinon, utilisez le lien ci-dessous ou celui dans les journaux pour leur envoyer manuellement ou configurer leur compte."
+        "setup-user-description": "Vous pouvez utiliser le lien suivant ci-dessous pour configurer le compte de votre utilisateur ou utiliser le bouton Copier. Vous devrez peut-être vous déconnecter avant d'utiliser le lien pour enregistrer un nouvel utilisateur. Si Kavita peut déterminer votre serveur comme accessible en externe (ou si le nom d'hôte est défini), un e-mail aura été envoyé à l'utilisateur et les liens pourront être utilisés par lui pour terminer la configuration de son compte. Sinon, utilisez le lien ci-dessous ou celui dans les journaux pour leur envoyer manuellement ou configurer leur compte.",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
     },
     "announcements": {
         "title": "Annonces"
@@ -778,7 +785,7 @@
     "license": {
         "activate-license-label": "Clé de licence",
         "license-valid": "Licence valide",
-        "activate-delete": "Supprimer",
+        "activate-delete": "{{common.delete}}",
         "no-license-key": "Aucune clé de licence",
         "license-not-valid": "Licence non valide",
         "activate-description": "Entrez la clé de licence et l'email utilisé pour s'inscrire avec Stripe",
@@ -793,7 +800,10 @@
         "activate-save": "{{common.save}}",
         "activate-email-label": "{{common.email}}",
         "edit": "{{common.edit}}",
-        "invalid-license-tooltip": "Si votre souscription est terminée, vous devez envoyer un mail au support pour en obtenir une nouvelle"
+        "invalid-license-tooltip": "Si votre souscription est terminée, vous devez envoyer un mail au support pour en obtenir une nouvelle",
+        "activate-discordId-label": "ID du compte Discord",
+        "activate-discordId-tooltip": "Reliez votre compte Discord à Kavita+. Cela vous permet d'accéder à des canaux cachés pour aider à façonner Kavita.",
+        "activate-reset": "{{common.reset}}"
     },
     "book-reader": {
         "bookmarks-header": "{{side-nav.bookmarks}}",
@@ -821,9 +831,9 @@
         "close-reader": "Fermer le lecteur"
     },
     "book-line-overlay": {
-        "bookmark": "Signet",
+        "bookmark": "Marque-page",
         "copy": "Copier",
-        "bookmark-label": "Nom du signet",
+        "bookmark-label": "Nom du marque-page",
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "save": "{{common.save}}"
@@ -979,14 +989,14 @@
         "error-label": "Erreurs : "
     },
     "bookmarks": {
-        "delete-success": "Les favoris ont été supprimés",
-        "confirm-single-delete": "Êtes-vous sûr de vouloir effacer tous les favoris de {{seriesName}}. Ceci ne peut pas être annulé.",
-        "confirm-delete": "Êtes-vous sûr de vouloir effacer tous les favoris de plusieurs séries ? Ceci ne peut pas être annulé.",
+        "delete-success": "Les marque-pages ont été supprimés",
+        "confirm-single-delete": "Êtes-vous sûr de vouloir effacer tous les marque-pages de {{seriesName}}. Ceci ne peut pas être annulé.",
+        "confirm-delete": "Êtes-vous sûr de vouloir effacer tous les marque-pages de plusieurs séries ? Ceci ne peut pas être annulé.",
         "no-data-2": "un.",
-        "no-data": "Il n'y a pas de marque-pages. Essayez d'en créer",
+        "no-data": "Il n'y a aucun marque-page. Essayez d'en créer",
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}",
-        "delete-single-success": "Les signets de {{seriesName}} ont été supprimés"
+        "delete-single-success": "Les marque-pages de {{seriesName}} ont été supprimés"
     },
     "side-nav-companion-bar": {
         "open-filter-and-sort": "Ouvrir Filtres et Tris",
@@ -1377,21 +1387,21 @@
     "manage-media-settings": {
         "cover-image-size-label": "Taille de l'image de couverture",
         "encode-as-label": "Enregistrer le média sous",
-        "bookmark-dir-label": "Dossier des signets",
+        "bookmark-dir-label": "Dossier des marque-pages",
         "cover-image-size-tooltip": "Quelle doit être la taille des images de couverture générées. Remarque : Tout ce qui est plus grand que la valeur par défaut entraînera des temps de chargement de page plus longs.",
         "encode-as-description-part-2": "Puis-je utiliser WebP ?",
         "reset": "{{common.reset}}",
         "media-warning": "Vous devez déclencher la tâche de conversion des médias dans l'onglet Tâches.,",
-        "encode-as-tooltip": "Tous les médias gérés par Kavita (couvertures, signets, favicons) seront encodés avec ce type.",
+        "encode-as-tooltip": "Tous les médias gérés par Kavita (couvertures, marque-pages, favicons) seront encodés avec ce type.",
         "save": "{{common.save}}",
         "encode-as-description-part-1": "WebP/AVIF peut réduire considérablement l'espace requis pour les fichiers. WebP/AVIF n'est pas pris en charge sur tous les navigateurs ou versions. Pour savoir si ces paramètres sont appropriés à votre configuration, visitez ",
         "change": "Changer",
         "scrobble-issue-title": "Problème de Scrobble",
-        "encode-as-warning": "Vous ne pouvez pas reconvertir en PNG une fois que vous êtes passé à WebP/AVIF. Vous devrez actualiser les couvertures de vos bibliothèques pour régénérer toutes les couvertures. Les signets et les favicons ne peuvent pas être convertis.",
+        "encode-as-warning": "Vous ne pouvez pas reconvertir en PNG une fois que vous êtes passé à WebP/AVIF. Vous devrez actualiser les couvertures de vos bibliothèques pour régénérer toutes les couvertures. Les marque-pages et les favicons ne peuvent pas être convertis.",
         "media-issue-title": "Problèmes sur les médias",
         "encode-as-description-part-3": "Puis-je utiliser AVIF ?",
         "reset-to-default": "{{common.reset-to-default}}",
-        "bookmark-dir-tooltip": "Emplacement où les signets seront stockés. Les signets sont des fichiers sources et peuvent être volumineux. Choisissez un emplacement avec un stockage adéquat. Le répertoire est géré ; les autres fichiers du répertoire seront supprimés. Si vous utilisez Docker, montez un volume supplémentaire et utilisez-le."
+        "bookmark-dir-tooltip": "Emplacement où les marque-pages seront stockés. Les marque-pages sont des fichiers sources et peuvent être volumineux. Choisissez un emplacement avec un stockage adéquat. Le répertoire est géré ; les autres fichiers du répertoire seront supprimés. Si vous utilisez Docker, montez un volume supplémentaire et utilisez-le."
     },
     "cover-image-size": {
         "default": "Défaut (320x455)",
@@ -1442,7 +1452,8 @@
         "resend": "Renvoyer",
         "pending-title": "En attente",
         "online-now-tooltip": "En ligne",
-        "setup-user-alt": "Configurer l'utilisateur {{user}}"
+        "setup-user-alt": "Configurer l'utilisateur {{user}}",
+        "username-pattern": "Le nom d'utilisateur ne peut contenir que les caractères et espaces suivants : {{caractères}}"
     },
     "admin-dashboard": {
         "users-tab": "Utilisateurs",
@@ -1738,7 +1749,7 @@
         "external-source-already-exists": "Une source externe existe déjà avec le même nom/hôte/clé API",
         "confirm-delete-smart-filter": "Êtes-vous sûr de vouloir supprimer ce filtre intelligent ?",
         "no-series-collection-warning": "Attention ! Si aucune série n'est sélectionnée, la sauvegarde supprimera la collection. Êtes-vous sûr de vouloir continuer ?",
-        "confirm-library-type-change": "Le changement de type de bibliothèque déclenchera une nouvelle analyse avec des règles d'analyse différentes, ce qui peut entraîner la recréation de séries et, par conséquent, la perte des progrès et des marque-pages. Il est conseillé de faire une sauvegarde avant de procéder à ce changement. Êtes-vous sûr de vouloir continuer ?",
+        "confirm-library-type-change": "Le changement de type de bibliothèque déclenchera une nouvelle analyse avec des règles d'analyse différentes, ce qui peut entraîner la recréation de séries et, par conséquent, la perte de la progression et des marque-pages. Il est conseillé de faire une sauvegarde avant de procéder à ce changement. Êtes-vous sûr de vouloir continuer ?",
         "series-added-to-reading-list": "Série ajoutée à la liste de lecture",
         "password-reset": "Réinitialisation du mot de passe",
         "incognito-off": "Le mode Incognito est désactivé. Le suivi de la progression va maintenant commencer.",
@@ -1747,7 +1758,7 @@
         "entity-unread": "{{name}} est maintenant non lu",
         "user-deleted": "{{user}} a été supprimé",
         "click-email-link": "Veuillez cliquer sur ce lien pour confirmer votre e-mail. Vous devez confirmer pour pouvoir vous connecter.",
-        "email-sent-to-no-existing": "Un e-mail a été envoyé à {{email}} pour confirmation.",
+        "email-sent-to-no-existing": "L'email existant n'est pas valide. Un lien a été déversé dans les journaux. Demandez à l'administrateur le lien pour terminer le changement d'email.",
         "email-service-reachable": "Le service de messagerie Kavita s'est connecté avec succès",
         "item-removed": "Élément retiré",
         "series-added-to-collection": "Série ajoutée à la collection {{collectionName}}",
@@ -1771,7 +1782,10 @@
         "account-registration-complete": "Enregistrement du compte terminé",
         "confirm-delete-multiple-series": "Êtes-vous sûr de vouloir supprimer la série {{count}} ? Cela ne modifiera pas les fichiers sur le disque.",
         "device-created": "Appareil créé",
-        "reset-base-url": "Réinitialisation de l'URL de base"
+        "reset-base-url": "Réinitialisation de l'URL de base",
+        "k+-reset-key-success": "Votre licence a été désenregistrée. Utilisez le bouton Modifier pour réenregistrer votre instance et réactiver Kavita+",
+        "email-not-sent": "L'adresse électronique figurant dans le fichier n'est pas valide et ne peut être envoyée. Un lien a été déversé dans les journaux. L'administrateur peut fournir ce lien pour compléter le flux.",
+        "k+-reset-key": "Cela vous permettra de détacher votre clé d'un serveur et de réenregistrer une instance Kavita."
     },
     "manga-format-stats": {
         "title": "Format",
@@ -1827,7 +1841,8 @@
         "staff-label": "Staff",
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters",
         "tags-label": "{{filter-field-pipe.tags}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "Fourni par"
     },
     "customize-dashboard-modal": {
         "smart-filters": "Filtres intelligents",

@@ -176,5 +176,6 @@
     "browse-more-in-genre": "Parcourir plus dans {0}",
     "more-in-genre": "Plus dans le genre {0}",
     "recently-updated": "Récemment mis à jour",
-    "browse-recently-updated": "Parcourir les mises à jour récentes"
+    "browse-recently-updated": "Parcourir les mises à jour récentes",
+    "unable-to-reset-k+": "Impossible de réinitialiser la licence Kavita+ en raison d'une erreur. Contactez le support Kavita+"
 }
