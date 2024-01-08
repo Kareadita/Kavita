@@ -24,4 +24,9 @@ public enum LibraryType
     /// </summary>
     [Description("Image")]
     Image = 3,
+    /// <summary>
+    /// Uses Magazine regex and is restricted to PDF and Archive by default
+    /// </summary>
+    [Description("Magazine")]
+    Magazine = 4
 }

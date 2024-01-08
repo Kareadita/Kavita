@@ -188,6 +188,8 @@ export class SideNavComponent implements OnInit {
         return 'fa-book-open';
       case LibraryType.Images:
         return 'fa-images';
+      case LibraryType.Magazine:
+        return 'fa-book-open'; // TODO: Find an icon for this
     }
   }
 

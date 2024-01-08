@@ -1,11 +1,11 @@
-import { HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Chapter } from 'src/app/_models/chapter';
-import { LibraryType } from 'src/app/_models/library/library';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { PaginatedResult } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { Volume } from 'src/app/_models/volume';
+import {HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Chapter} from 'src/app/_models/chapter';
+import {LibraryType} from 'src/app/_models/library/library';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {PaginatedResult} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {Volume} from 'src/app/_models/volume';
 import {TranslocoService} from "@ngneat/transloco";
 
 export enum KEY_CODES {
@@ -63,6 +63,7 @@ export class UtilityService {
    */
    formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false) {
     switch(libraryType) {
+      case LibraryType.Magazine: // TODO: Figure out if we need something special
       case LibraryType.Book:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:

@@ -488,7 +488,8 @@
     "library-type-pipe": {
         "book": "Book",
         "comic": "Comic",
-        "manga": "Manga"
+        "manga": "Manga",
+        "magazine": "Magazine"
     },
 
     "age-rating-pipe": {

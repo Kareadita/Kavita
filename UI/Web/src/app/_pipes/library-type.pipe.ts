@@ -20,6 +20,8 @@ export class LibraryTypePipe implements PipeTransform {
         return this.translocoService.translate('library-type-pipe.comic');
       case LibraryType.Manga:
         return this.translocoService.translate('library-type-pipe.manga');
+      case LibraryType.Magazine:
+        return this.translocoService.translate('library-type-pipe.magazine');
       default:
         return '';
     }

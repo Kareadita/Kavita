@@ -122,6 +122,7 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
+            // TODO: Output more information to the user
             _logger.LogError(ex, "There was an exception finding existing series for {SeriesName} with Localized name of {LocalizedName} for library {LibraryId}. This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan", firstInfo.Series, firstInfo.LocalizedSeries, library.Id);
             await _eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.ErrorEvent($"There was an exception finding existing series for {firstInfo.Series} with Localized name of {firstInfo.LocalizedSeries} for library {library.Id}",

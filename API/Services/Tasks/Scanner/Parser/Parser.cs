@@ -102,79 +102,7 @@ public static class Parser
     private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
         MatchOptions, RegexTimeout);
 
-
-    private static readonly Regex[] MangaVolumeRegex = new[]
-    {
-        // Dance in the Vampire Bund v16-17
-        new Regex(
-            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
-            MatchOptions, RegexTimeout),
-        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
-        new Regex(
-            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+(Vol(ume)?\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
-            MatchOptions, RegexTimeout),
-        // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
-        new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",
-            MatchOptions, RegexTimeout),
-        // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
-        new Regex(
-            @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
-            MatchOptions, RegexTimeout),
-        // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
-        new Regex(
-            @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
-            MatchOptions, RegexTimeout),
-        // Tonikaku Cawaii [Volume 11].cbz
-        new Regex(
-            @"(volume )(?<Volume>\d+(\.\d)?)",
-            MatchOptions, RegexTimeout),
-        // Tower Of God S01 014 (CBT) (digital).cbz
-        new Regex(
-            @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
-            MatchOptions, RegexTimeout),
-        // vol_001-1.cbz for MangaPy default naming convention
-        new Regex(
-            @"(vol_)(?<Volume>\d+(\.\d)?)",
-            MatchOptions, RegexTimeout),
-
-        // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
-        new Regex(
-            @"第(?<Volume>\d+)(卷|册)",
-            MatchOptions, RegexTimeout),
-        // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
-        new Regex(
-            @"(卷|册)(?<Volume>\d+)",
-            MatchOptions, RegexTimeout),
-        // Korean Volume: 제n화|권|회|장 -> Volume n, n화|권|회|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
-        new Regex(
-            @"제?(?<Volume>\d+(\.\d)?)(권|회|화|장)",
-            MatchOptions, RegexTimeout),
-        // Korean Season: 시즌n -> Season n,
-        new Regex(
-            @"시즌(?<Volume>\d+\-?\d+)",
-            MatchOptions, RegexTimeout),
-        // Korean Season: 시즌n -> Season n, n시즌 -> season n
-        new Regex(
-            @"(?<Volume>\d+(\-|~)?\d+?)시즌",
-            MatchOptions, RegexTimeout),
-        // Korean Season: 시즌n -> Season n, n시즌 -> season n
-        new Regex(
-            @"시즌(?<Volume>\d+(\-|~)?\d+?)",
-            MatchOptions, RegexTimeout),
-        // Japanese Volume: n巻 -> Volume n
-        new Regex(
-            @"(?<Volume>\d+(?:(\-)\d+)?)巻",
-            MatchOptions, RegexTimeout),
-        // Russian Volume: Том n -> Volume n, Тома n -> Volume
-        new Regex(
-            @"Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
-            MatchOptions, RegexTimeout),
-        // Russian Volume: n Том -> Volume n
-        new Regex(
-            @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
-            MatchOptions, RegexTimeout),
-    };
+    #region Manga
 
     private static readonly Regex[] MangaSeriesRegex = new[]
     {
@@ -349,7 +277,158 @@ public static class Parser
             MatchOptions, RegexTimeout),
 
     };
+    private static readonly Regex[] MangaVolumeRegex = new[]
+    {
+        // Dance in the Vampire Bund v16-17
+        new Regex(
+            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
+            MatchOptions, RegexTimeout),
+        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
+        new Regex(
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+(Vol(ume)?\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
+            MatchOptions, RegexTimeout),
+        // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
+        new Regex(
+            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",
+            MatchOptions, RegexTimeout),
+        // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
+        new Regex(
+            @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
+            MatchOptions, RegexTimeout),
+        // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
+        new Regex(
+            @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
+            MatchOptions, RegexTimeout),
+        // Tonikaku Cawaii [Volume 11].cbz
+        new Regex(
+            @"(volume )(?<Volume>\d+(\.\d)?)",
+            MatchOptions, RegexTimeout),
+        // Tower Of God S01 014 (CBT) (digital).cbz
+        new Regex(
+            @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
+            MatchOptions, RegexTimeout),
+        // vol_001-1.cbz for MangaPy default naming convention
+        new Regex(
+            @"(vol_)(?<Volume>\d+(\.\d)?)",
+            MatchOptions, RegexTimeout),
 
+        // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
+        new Regex(
+            @"第(?<Volume>\d+)(卷|册)",
+            MatchOptions, RegexTimeout),
+        // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
+        new Regex(
+            @"(卷|册)(?<Volume>\d+)",
+            MatchOptions, RegexTimeout),
+        // Korean Volume: 제n화|권|회|장 -> Volume n, n화|권|회|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
+        new Regex(
+            @"제?(?<Volume>\d+(\.\d)?)(권|회|화|장)",
+            MatchOptions, RegexTimeout),
+        // Korean Season: 시즌n -> Season n,
+        new Regex(
+            @"시즌(?<Volume>\d+\-?\d+)",
+            MatchOptions, RegexTimeout),
+        // Korean Season: 시즌n -> Season n, n시즌 -> season n
+        new Regex(
+            @"(?<Volume>\d+(\-|~)?\d+?)시즌",
+            MatchOptions, RegexTimeout),
+        // Korean Season: 시즌n -> Season n, n시즌 -> season n
+        new Regex(
+            @"시즌(?<Volume>\d+(\-|~)?\d+?)",
+            MatchOptions, RegexTimeout),
+        // Japanese Volume: n巻 -> Volume n
+        new Regex(
+            @"(?<Volume>\d+(?:(\-)\d+)?)巻",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: Том n -> Volume n, Тома n -> Volume
+        new Regex(
+            @"Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: n Том -> Volume n
+        new Regex(
+            @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
+            MatchOptions, RegexTimeout),
+    };
+    private static readonly Regex[] MangaChapterRegex = new[]
+    {
+        // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
+        new Regex(
+            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+            MatchOptions, RegexTimeout),
+        // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+        new Regex(
+            @"v\d+\.(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
+        new Regex(
+            @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
+            MatchOptions, RegexTimeout),
+        // Green Worldz - Chapter 027, Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 11-10
+        new Regex(
+            @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-]+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: Главы n -> Chapter n
+        new Regex(
+            @"(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            MatchOptions, RegexTimeout),
+
+        // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
+        new Regex(
+            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+            MatchOptions, RegexTimeout),
+        // Tower Of God S01 014 (CBT) (digital).cbz
+        new Regex(
+            @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
+        new Regex(
+            @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|_|\[|\()",
+            MatchOptions, RegexTimeout),
+        // Yumekui-Merry_DKThias_Chapter21.zip
+        new Regex(
+            @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
+            MatchOptions, RegexTimeout),
+        // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
+        new Regex(
+            @"(?<Series>.*)(\s|_)(vol\d+)?(\s|_)Chp\.? ?(?<Chapter>\d+)",
+            MatchOptions, RegexTimeout),
+        // Vol 1 Chapter 2
+        new Regex(
+            @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
+            MatchOptions, RegexTimeout),
+        // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
+        new Regex(
+            @"第(?<Chapter>\d+)话",
+            MatchOptions, RegexTimeout),
+        // Korean Chapter: 제n화 -> Chapter n, 가디언즈 오브 갤럭시 죽음의 보석.E0008.7화#44
+        new Regex(
+            @"제?(?<Chapter>\d+\.?\d+)(회|화|장)",
+            MatchOptions, RegexTimeout),
+        // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
+        new Regex(
+            @"第?(?<Chapter>\d+(?:\.\d+|-\d+)?)話",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: n Главa -> Chapter n
+        new Regex(
+            @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
+            MatchOptions, RegexTimeout),
+    };
+    private static readonly Regex MangaEditionRegex = new Regex(
+        // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
+        // To Love Ru v01 Uncensored (Ch.001-007)
+        @"\b(?:Omnibus(?:\s?Edition)?|Uncensored)\b",
+        MatchOptions, RegexTimeout
+    );
+
+    private static readonly Regex MangaSpecialRegex = new Regex(
+        // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+        $@"\b(?:{CommonSpecial}|Omake)\b",
+        MatchOptions, RegexTimeout
+    );
+
+    #endregion
+
+    #region Comic
     private static readonly Regex[] ComicSeriesRegex = new[]
     {
         // Russian Volume: Том n -> Volume n, Тома n -> Volume
@@ -539,102 +618,50 @@ public static class Parser
             MatchOptions, RegexTimeout),
     };
 
-    private static readonly Regex[] MangaChapterRegex = new[]
-    {
-        // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
-        new Regex(
-            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
-            MatchOptions, RegexTimeout),
-        // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
-        new Regex(
-            @"v\d+\.(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
-            MatchOptions, RegexTimeout),
-        // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
-        new Regex(
-            @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
-            MatchOptions, RegexTimeout),
-        // Green Worldz - Chapter 027, Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 11-10
-        new Regex(
-            @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-]+)?)",
-            MatchOptions, RegexTimeout),
-        // Russian Chapter: Главы n -> Chapter n
-        new Regex(
-            @"(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
-            MatchOptions, RegexTimeout),
+    private static readonly Regex ComicSpecialRegex = new Regex(
+        // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+        MatchOptions, RegexTimeout
+    );
 
-        // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
+    private static readonly Regex EuropeanComicRegex = new Regex(
+        // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+        @"\b(?:Bd[-\s]Fr)\b",
+        MatchOptions, RegexTimeout
+    );
+
+    #endregion
+
+    #region Magazine
+
+    private static readonly Regex[] MagazineSeriesRegex = new[]
+    {
+        // 3D World - 2018  UK
         new Regex(
-            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+            @"(?<Series>.+?)(\b|_|\s)?-(\b|_|\s)(?<Year>\d{4}).+",
             MatchOptions, RegexTimeout),
-        // Tower Of God S01 014 (CBT) (digital).cbz
+        // AIR International - April 2018  UK
+        // The New Yorker - April 2, 2018  USA
+        // AIR International Magazine 2006
+        // AIR International Vol. 14 No. 3 (ISSN 1011-3250)
+    };
+
+    private static readonly Regex[] MagazineVolumeRegex = new[]
+    {
+        // Batman & Wildcat (1 of 3)
         new Regex(
-            @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
-            MatchOptions, RegexTimeout),
-        // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
-        new Regex(
-            @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|_|\[|\()",
-            MatchOptions, RegexTimeout),
-        // Yumekui-Merry_DKThias_Chapter21.zip
-        new Regex(
-            @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
-            MatchOptions, RegexTimeout),
-        // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
-        new Regex(
-            @"(?<Series>.*)(\s|_)(vol\d+)?(\s|_)Chp\.? ?(?<Chapter>\d+)",
-            MatchOptions, RegexTimeout),
-        // Vol 1 Chapter 2
-        new Regex(
-            @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
-            MatchOptions, RegexTimeout),
-        // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
-        new Regex(
-            @"第(?<Chapter>\d+)话",
-            MatchOptions, RegexTimeout),
-        // Korean Chapter: 제n화 -> Chapter n, 가디언즈 오브 갤럭시 죽음의 보석.E0008.7화#44
-        new Regex(
-            @"제?(?<Chapter>\d+\.?\d+)(회|화|장)",
-            MatchOptions, RegexTimeout),
-        // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
-        new Regex(
-            @"第?(?<Chapter>\d+(?:\.\d+|-\d+)?)話",
-            MatchOptions, RegexTimeout),
-        // Russian Chapter: n Главa -> Chapter n
-        new Regex(
-            @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
+            @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
             MatchOptions, RegexTimeout),
     };
 
-    private static readonly Regex MangaEditionRegex = new Regex(
-        // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
-        // To Love Ru v01 Uncensored (Ch.001-007)
-        @"\b(?:Omnibus(?:\s?Edition)?|Uncensored)\b",
-        MatchOptions, RegexTimeout
-    );
+    #endregion
+
 
     // Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
     private static readonly Regex CleanupRegex = new Regex(
         $@"(?:\({BalancedParen}\)|{TagsInBrackets}|\{{\}}|\{{Complete\}})",
         MatchOptions, RegexTimeout
     );
-
-    private static readonly Regex MangaSpecialRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|Omake)\b",
-        MatchOptions, RegexTimeout
-    );
-
-    private static readonly Regex ComicSpecialRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
-        MatchOptions, RegexTimeout
-    );
-
-    private static readonly Regex EuropeanComicRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        @"\b(?:Bd[-\s]Fr)\b",
-        MatchOptions, RegexTimeout
-    );
-
 
     // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
     private static readonly Regex SpecialMarkerRegex = new Regex(
@@ -714,6 +741,20 @@ public static class Parser
         return string.Empty;
     }
 
+    public static string ParseMagazineSeries(string filename)
+    {
+        foreach (var regex in MagazineSeriesRegex)
+        {
+            var matches = regex.Matches(filename);
+            var group = matches
+                .Select(match => match.Groups["Series"])
+                .FirstOrDefault(group => group.Success && group != Match.Empty);
+            if (group != null) return CleanTitle(group.Value, true);
+        }
+
+        return string.Empty;
+    }
+
     public static string ParseVolume(string filename)
     {
         foreach (var regex in MangaVolumeRegex)
@@ -735,6 +776,24 @@ public static class Parser
     public static string ParseComicVolume(string filename)
     {
         foreach (var regex in ComicVolumeRegex)
+        {
+            var matches = regex.Matches(filename);
+            foreach (var group in matches.Select(match => match.Groups))
+            {
+                if (!group["Volume"].Success || group["Volume"] == Match.Empty) continue;
+
+                var value = group["Volume"].Value;
+                var hasPart = group["Part"].Success;
+                return FormatValue(value, hasPart);
+            }
+        }
+
+        return DefaultVolume;
+    }
+
+    public static string ParseMagazineVolume(string filename)
+    {
+        foreach (var regex in MagazineVolumeRegex)
         {
             var matches = regex.Matches(filename);
             foreach (var group in matches.Select(match => match.Groups))

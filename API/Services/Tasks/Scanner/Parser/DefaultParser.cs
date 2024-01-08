@@ -52,6 +52,11 @@ public class DefaultParser : IDefaultParser
             return ParseImage(filePath, rootPath, ret);
         }
 
+        if (type == LibraryType.Magazine)
+        {
+            return ParseMagazine(filePath, rootPath, ret);
+        }
+
 
         // This will be called if the epub is already parsed once then we call and merge the information, if the
         if (Parser.IsEpub(filePath))
@@ -113,6 +118,23 @@ public class DefaultParser : IDefaultParser
         }
 
         return ret.Series == string.Empty ? null : ret;
+    }
+
+    private ParserInfo ParseMagazine(string filePath, string rootPath, ParserInfo ret)
+    {
+        // Try to parse Series from the filename
+        var libraryPath = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Parent?.FullName ?? rootPath;
+        ret.Series = Parser.ParseMagazineSeries(filePath);
+        if (string.IsNullOrEmpty(ret.Series))
+        {
+            // Fallback to the parent folder. We can also likely grab Volume (year) from here
+            var folders = _directoryService.GetFoldersTillRoot(libraryPath, filePath);
+            foreach (var folder in folders)
+            {
+
+            }
+        }
+        return ret;
     }
 
     private ParserInfo ParseImage(string filePath, string rootPath, ParserInfo ret)
