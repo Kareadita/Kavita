@@ -331,7 +331,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   getTotalHeight() {
     let totalHeight = 0;
     document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
-    return Math.round(totalHeight);
+    return Math.floor(totalHeight);
   }
 
   getTotalScroll() {
@@ -364,7 +364,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.cdRef.markForCheck();
-        this.setPageNum(this.totalPages);
 
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = this.getScrollTop();
