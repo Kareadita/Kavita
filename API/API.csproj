@@ -100,7 +100,7 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.12" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
     <PackageReference Include="System.IO.Abstractions" Version="20.0.4" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
     <PackageReference Include="VersOne.Epub" Version="3.3.1" />
