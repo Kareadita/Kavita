@@ -15,4 +15,8 @@ public class ScrobbleEventFilter
     /// A query to search against
     /// </summary>
     public string Query { get; set; }
+    /// <summary>
+    /// Include reviews in the result - Note: Review Scrobbling is disabled
+    /// </summary>
+    public bool IncludeReviews { get; set; } = false;
 }

@@ -7335,6 +7335,7 @@
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Get the current user's AniList token",
         "responses": {
           "200": {
             "description": "Success"
@@ -7347,7 +7348,9 @@
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Update the current user's AniList token",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7378,10 +7381,12 @@
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Checks if the current Scrobbling token for the given Provider has expired for the current user",
         "parameters": [
           {
             "name": "provider",
             "in": "query",
+            "description": "",
             "schema": {
               "enum": [
                 0,
@@ -17178,6 +17183,10 @@
             "type": "string",
             "description": "A query to search against",
             "nullable": true
+          },
+          "includeReviews": {
+            "type": "boolean",
+            "description": "Include reviews in the result - Note: Review Scrobbling is disabled"
           }
         },
         "additionalProperties": false

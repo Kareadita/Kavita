@@ -53,6 +53,7 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync();
     Task CreateEventsFromExistingHistory(int userId = 0);
+    Task ClearEventsForSeries(int userId, int seriesId);
 }
 
 public class ScrobblingService : IScrobblingService
@@ -542,6 +543,26 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+    /// <summary>
+    /// Removes all events (active) that are tied to a now-on hold series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    public async Task ClearEventsForSeries(int userId, int seriesId)
+    {
+        _logger.LogInformation("Clearing Pre-existing Scrobble events for Series {SeriesId} by User {UserId} as Series is now on hold list", seriesId, userId);
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId);
+        foreach (var scrobble in events)
+        {
+            _unitOfWork.ScrobbleRepository.Remove(scrobble);
+        }
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Removes all events that have been processed that are 7 days old
+    /// </summary>
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ClearProcessedEvents()
@@ -594,10 +615,10 @@ public class ScrobblingService : IScrobblingService
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
-        var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
-            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-            .Where(e => !errors.Contains(e.SeriesId))
-            .ToList();
+        // var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
+        //     .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+        //     .Where(e => !errors.Contains(e.SeriesId))
+        //     .ToList();
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
             .Select(group => new
@@ -624,7 +645,7 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
+        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count;// + reviewEvents.Count;
 
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
@@ -671,21 +692,21 @@ public class ScrobblingService : IScrobblingService
                 Year = evt.Series.Metadata.ReleaseYear
             }));
 
-            progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
-                totalProgress, evt => Task.FromResult(new ScrobbleDto()
-            {
-                Format = evt.Format,
-                AniListId = evt.AniListId,
-                MALId = (int?) evt.MalId,
-                ScrobbleEventType = evt.ScrobbleEventType,
-                AniListToken = evt.AppUser.AniListAccessToken,
-                SeriesName = evt.Series.Name,
-                LocalizedSeriesName = evt.Series.LocalizedName,
-                Rating = evt.Rating,
-                Year = evt.Series.Metadata.ReleaseYear,
-                ReviewBody = evt.ReviewBody,
-                ReviewTitle = evt.ReviewTitle
-            }));
+            // progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
+            //     totalProgress, evt => Task.FromResult(new ScrobbleDto()
+            // {
+            //     Format = evt.Format,
+            //     AniListId = evt.AniListId,
+            //     MALId = (int?) evt.MalId,
+            //     ScrobbleEventType = evt.ScrobbleEventType,
+            //     AniListToken = evt.AppUser.AniListAccessToken,
+            //     SeriesName = evt.Series.Name,
+            //     LocalizedSeriesName = evt.Series.LocalizedName,
+            //     Rating = evt.Rating,
+            //     Year = evt.Series.Metadata.ReleaseYear,
+            //     ReviewBody = evt.ReviewBody,
+            //     ReviewTitle = evt.ReviewTitle
+            // }));
 
             progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter,
                 totalProgress, evt => Task.FromResult(new ScrobbleDto()
