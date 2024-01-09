@@ -560,6 +560,9 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Removes all events that have been processed that are 7 days old
+    /// </summary>
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ClearProcessedEvents()
