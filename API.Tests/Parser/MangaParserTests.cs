@@ -292,6 +292,7 @@ public class MangaParserTests
     [InlineData("Accel World Chapter 001 Volume 002", "1")]
     [InlineData("Bleach 001-003", "1-3")]
     [InlineData("Accel World Volume 2", "0")]
+    [InlineData("Historys Strongest Disciple Kenichi_v11_c90-98", "90-98")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

@@ -49,6 +49,7 @@ public class DefaultParser : IDefaultParser
         // If library type is Image or this is not a cover image in a non-image library, then use dedicated parsing mechanism
         if (type == LibraryType.Image || Parser.IsImage(filePath))
         {
+            // TODO: We can move this up one level
             return ParseImage(filePath, rootPath, ret);
         }
 
@@ -78,7 +79,7 @@ public class DefaultParser : IDefaultParser
         var edition = Parser.ParseEdition(fileName);
         if (!string.IsNullOrEmpty(edition))
         {
-            ret.Series = Parser.CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
+            ret.Series = Parser.CleanTitle(ret.Series.Replace(edition, string.Empty), type is LibraryType.Comic);
             ret.Edition = edition;
         }
 
