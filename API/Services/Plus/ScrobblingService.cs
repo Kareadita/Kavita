@@ -53,6 +53,7 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync();
     Task CreateEventsFromExistingHistory(int userId = 0);
+    Task ClearEventsForSeries(int userId, int seriesId);
 }
 
 public class ScrobblingService : IScrobblingService
@@ -540,6 +541,23 @@ public class ScrobblingService : IScrobblingService
             }
 
         }
+    }
+
+    /// <summary>
+    /// Removes all events (active) that are tied to a now-on hold series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    public async Task ClearEventsForSeries(int userId, int seriesId)
+    {
+        _logger.LogInformation("Clearing Pre-existing Scrobble events for Series {SeriesId} by User {UserId} as Series is now on hold list", seriesId, userId);
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId);
+        foreach (var scrobble in events)
+        {
+            _unitOfWork.ScrobbleRepository.Remove(scrobble);
+        }
+
+        await _unitOfWork.CommitAsync();
     }
 
     [DisableConcurrentExecution(60 * 60 * 60)]

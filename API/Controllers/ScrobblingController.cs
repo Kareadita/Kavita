@@ -169,15 +169,20 @@ public class ScrobblingController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
         if (user == null) return Unauthorized();
         if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId))
-            return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+            return Ok(await _localizationService.Translate(user.Id, "nothing-to-do"));
 
-        var seriesHold = new ScrobbleHoldBuilder().WithSeriesId(seriesId).Build();
+        var seriesHold = new ScrobbleHoldBuilder()
+            .WithSeriesId(seriesId)
+            .Build();
         user.ScrobbleHolds.Add(seriesHold);
         _unitOfWork.UserRepository.Update(user);
         try
         {
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
+
+            // When a hold is placed on a series, clear any pre-existing Scrobble Events
+            await _scrobblingService.ClearEventsForSeries(user.Id, seriesId);
             return Ok();
         }
         catch (DbUpdateConcurrencyException ex)
