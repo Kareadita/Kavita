@@ -39,22 +39,27 @@ public class ScrobblingController : BaseApiController
         _localizationService = localizationService;
     }
 
+    /// <summary>
+    /// Get the current user's AniList token
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("anilist-token")]
     public async Task<ActionResult> GetAniListToken()
     {
-        // Validate the license
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
         return Ok(user.AniListAccessToken);
     }
 
+    /// <summary>
+    /// Update the current user's AniList token
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update-anilist-token")]
     public async Task<ActionResult> UpdateAniListToken(AniListUpdateDto dto)
     {
-        // Validate the license
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
@@ -71,6 +76,11 @@ public class ScrobblingController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Checks if the current Scrobbling token for the given Provider has expired for the current user
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <returns></returns>
     [HttpGet("token-expired")]
     public async Task<ActionResult<bool>> HasTokenExpired(ScrobbleProvider provider)
     {

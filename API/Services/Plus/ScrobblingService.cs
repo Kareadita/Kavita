@@ -594,10 +594,10 @@ public class ScrobblingService : IScrobblingService
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
-        var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
-            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-            .Where(e => !errors.Contains(e.SeriesId))
-            .ToList();
+        // var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
+        //     .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+        //     .Where(e => !errors.Contains(e.SeriesId))
+        //     .ToList();
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
             .Select(group => new
@@ -624,7 +624,7 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
+        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count;// + reviewEvents.Count;
 
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
@@ -671,21 +671,21 @@ public class ScrobblingService : IScrobblingService
                 Year = evt.Series.Metadata.ReleaseYear
             }));
 
-            progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
-                totalProgress, evt => Task.FromResult(new ScrobbleDto()
-            {
-                Format = evt.Format,
-                AniListId = evt.AniListId,
-                MALId = (int?) evt.MalId,
-                ScrobbleEventType = evt.ScrobbleEventType,
-                AniListToken = evt.AppUser.AniListAccessToken,
-                SeriesName = evt.Series.Name,
-                LocalizedSeriesName = evt.Series.LocalizedName,
-                Rating = evt.Rating,
-                Year = evt.Series.Metadata.ReleaseYear,
-                ReviewBody = evt.ReviewBody,
-                ReviewTitle = evt.ReviewTitle
-            }));
+            // progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
+            //     totalProgress, evt => Task.FromResult(new ScrobbleDto()
+            // {
+            //     Format = evt.Format,
+            //     AniListId = evt.AniListId,
+            //     MALId = (int?) evt.MalId,
+            //     ScrobbleEventType = evt.ScrobbleEventType,
+            //     AniListToken = evt.AppUser.AniListAccessToken,
+            //     SeriesName = evt.Series.Name,
+            //     LocalizedSeriesName = evt.Series.LocalizedName,
+            //     Rating = evt.Rating,
+            //     Year = evt.Series.Metadata.ReleaseYear,
+            //     ReviewBody = evt.ReviewBody,
+            //     ReviewTitle = evt.ReviewTitle
+            // }));
 
             progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter,
                 totalProgress, evt => Task.FromResult(new ScrobbleDto()
