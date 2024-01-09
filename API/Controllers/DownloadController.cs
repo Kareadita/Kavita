@@ -118,7 +118,7 @@ public class DownloadController : BaseApiController
         return await _accountService.HasDownloadPermission(user);
     }
 
-    private ActionResult GetFirstFileDownload(IEnumerable<MangaFile> files)
+    private PhysicalFileResult GetFirstFileDownload(IEnumerable<MangaFile> files)
     {
         var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
         return PhysicalFile(zipFile, contentType, Uri.EscapeDataString(fileDownloadName), true);
@@ -163,7 +163,7 @@ public class DownloadController : BaseApiController
                 return GetFirstFileDownload(files);
             }
 
-            var filePath = _archiveService.CreateZipForDownload(files.Select(c => c.FilePath), tempFolder);
+            var filePath = _archiveService.CreateZipFromFoldersForDownload(files.Select(c => c.FilePath), tempFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(),
                     Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));

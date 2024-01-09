@@ -1,12 +1,12 @@
 {
   "name": "kavita-webui",
-  "version": "0.4.2",
+  "version": "0.7.12.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "minify-langs": "node minify-json.js",
-    "prod": "ng build --configuration production --aot --output-hashing=all && npm run minify-langs",
+    "prod": "ng build --configuration production && npm run minify-langs",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
     "e2e": "ng e2e"
