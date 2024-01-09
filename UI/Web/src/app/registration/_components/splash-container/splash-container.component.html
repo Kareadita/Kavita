@@ -1,5 +1,5 @@
-<div class="mx-auto login">
-    
+<div class="mx-auto login" [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - 57px)' : 'calc(var(--vh, 1vh) * 100)'}">
+
     <div class="row row-cols-4 row-cols-md-4 row-cols-sm-2 row-cols-xs-2">
         <div class="col align-self-center card p-3">
             <span>
