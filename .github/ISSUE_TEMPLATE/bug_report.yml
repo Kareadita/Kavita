@@ -23,7 +23,6 @@ body:
       label: What did you expect?
       description: What did you expect to happen?
       placeholder: Tell us what you expected to see!
-      value: ""
     validations:
       required: true
   - type: textarea
@@ -32,7 +31,6 @@ body:
       label: Version
       description: What version are you running?
       placeholder: Can be found by going to Server Settings > System
-      value: ""
     validations:
       required: true
   - type: dropdown
