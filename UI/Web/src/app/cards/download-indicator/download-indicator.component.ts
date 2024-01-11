@@ -20,6 +20,4 @@ export class DownloadIndicatorComponent {
    * Observable that represents when the download completes
    */
   @Input({required: true}) download$!: Observable<Download | DownloadEvent | null> | null;
-
-  constructor() { }
 }
