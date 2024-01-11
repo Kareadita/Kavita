@@ -351,7 +351,7 @@ public class ArchiveService : IArchiveService
             _directoryService.ExistOrCreate(tempLocation);
             foreach (var path in files)
             {
-                var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.FileInfo.New(path).Name);
+                var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.Path.GetFileNameWithoutExtension(_directoryService.FileSystem.FileInfo.New(path).Name));
                 _directoryService.ExistOrCreate(tempPath);
                 progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
                 ExtractArchive(path, tempPath);
@@ -534,7 +534,7 @@ public class ArchiveService : IArchiveService
     {
         if (!IsValidArchive(archivePath)) return;
 
-        if (!_directoryService.FileSystem.Directory.Exists(extractPath)) return;
+        if (_directoryService.FileSystem.Directory.Exists(extractPath)) return;
 
         if (!_directoryService.FileSystem.File.Exists(archivePath))
         {
