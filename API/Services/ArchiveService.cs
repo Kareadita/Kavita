@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using API.Archive;
@@ -44,7 +45,7 @@ public interface IArchiveService
     /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
     /// <returns>Path to the temp zip</returns>
     /// <exception cref="KavitaException"></exception>
-    string CreateZipFromFoldersForDownload(IEnumerable<string> files, string tempFolder);
+    string CreateZipFromFoldersForDownload(IList<string> files, string tempFolder, Func<Tuple<string, float>, Task> progressCallback);
 }
 
 /// <summary>
@@ -330,7 +331,7 @@ public class ArchiveService : IArchiveService
         return zipPath;
     }
 
-    public string CreateZipFromFoldersForDownload(IEnumerable<string> files, string tempFolder)
+    public string CreateZipFromFoldersForDownload(IList<string> files, string tempFolder, Func<Tuple<string, float>, Task> progressCallback)
     {
         var dateString = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
 
@@ -343,6 +344,8 @@ public class ArchiveService : IArchiveService
 
         // Extract all the files to a temp directory and create zip on that
         var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
+        var totalFiles = files.Count + 1;
+        var count = 1f;
         try
         {
             _directoryService.ExistOrCreate(tempLocation);
@@ -350,7 +353,9 @@ public class ArchiveService : IArchiveService
             {
                 var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.FileInfo.New(path).Name);
                 _directoryService.ExistOrCreate(tempPath);
+                progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
                 ExtractArchive(path, tempPath);
+                count++;
             }
         }
         catch

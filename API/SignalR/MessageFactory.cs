@@ -376,13 +376,13 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, float progress, string eventType = "updated")
+    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated")
     {
         return new SignalRMessage()
         {
             Name = DownloadProgress,
-            Title = $"Downloading {downloadName}",
-            SubTitle = $"Preparing {username.SentenceCase()} the download of {downloadName}",
+            Title = $"Preparing {username.SentenceCase()} the download of {downloadName}",
+            SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
             Body = new

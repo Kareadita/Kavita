@@ -254,7 +254,7 @@ export class DownloadService {
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
     return (size < this.SIZE_WARNING ||
-      await this.confirmService.confirm(translate('toasts.confirm-download-size', {entityType: 'entity-type.' + entityType, size: bytesPipe.transform(size)})));
+      await this.confirmService.confirm(translate('toasts.confirm-download-size', {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {
