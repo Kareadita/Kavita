@@ -68,6 +68,7 @@
               "optimization": true,
               "outputHashing": "all",
               "namedChunks": false,
+              "aot": true,
               "extractLicenses": true,
               "budgets": [
                 {

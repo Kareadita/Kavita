@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using API.Archive;
@@ -30,13 +31,21 @@ public interface IArchiveService
     ArchiveLibrary CanOpen(string archivePath);
     bool ArchiveNeedsFlattening(ZipArchive archive);
     /// <summary>
-    /// Creates a zip file form the listed files and outputs to the temp folder.
+    /// Creates a zip file form the listed files and outputs to the temp folder. This will combine into one zip of multiple zips.
     /// </summary>
     /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
     /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
     /// <returns>Path to the temp zip</returns>
     /// <exception cref="KavitaException"></exception>
     string CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+    /// <summary>
+    /// Creates a zip file form the listed files and outputs to the temp folder. This will extract each archive and combine them into one zip.
+    /// </summary>
+    /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
+    /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+    /// <returns>Path to the temp zip</returns>
+    /// <exception cref="KavitaException"></exception>
+    string CreateZipFromFoldersForDownload(IList<string> files, string tempFolder, Func<Tuple<string, float>, Task> progressCallback);
 }
 
 /// <summary>
@@ -322,6 +331,54 @@ public class ArchiveService : IArchiveService
         return zipPath;
     }
 
+    public string CreateZipFromFoldersForDownload(IList<string> files, string tempFolder, Func<Tuple<string, float>, Task> progressCallback)
+    {
+        var dateString = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
+
+        var potentialExistingFile = _directoryService.FileSystem.FileInfo.New(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));
+        if (potentialExistingFile.Exists)
+        {
+            // A previous download exists, just return it immediately
+            return potentialExistingFile.FullName;
+        }
+
+        // Extract all the files to a temp directory and create zip on that
+        var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
+        var totalFiles = files.Count + 1;
+        var count = 1f;
+        try
+        {
+            _directoryService.ExistOrCreate(tempLocation);
+            foreach (var path in files)
+            {
+                var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.Path.GetFileNameWithoutExtension(_directoryService.FileSystem.FileInfo.New(path).Name));
+                _directoryService.ExistOrCreate(tempPath);
+                progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
+                ExtractArchive(path, tempPath);
+                count++;
+            }
+        }
+        catch
+        {
+            throw new KavitaException("bad-copy-files-for-download");
+        }
+
+        var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+        try
+        {
+            ZipFile.CreateFromDirectory(tempLocation, zipPath);
+            // Remove the folder as we have the zip
+            _directoryService.ClearAndDeleteDirectory(tempLocation);
+        }
+        catch (AggregateException ex)
+        {
+            _logger.LogError(ex, "There was an issue creating temp archive");
+            throw new KavitaException("generic-create-temp-archive");
+        }
+
+        return zipPath;
+    }
+
 
     /// <summary>
     /// Test if the archive path exists and an archive
@@ -477,7 +534,7 @@ public class ArchiveService : IArchiveService
     {
         if (!IsValidArchive(archivePath)) return;
 
-        if (Directory.Exists(extractPath)) return;
+        if (_directoryService.FileSystem.Directory.Exists(extractPath)) return;
 
         if (!_directoryService.FileSystem.File.Exists(archivePath))
         {

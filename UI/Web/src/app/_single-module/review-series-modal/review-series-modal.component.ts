@@ -19,7 +19,7 @@ export class ReviewSeriesModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  protected readonly minLength = 20;
+  protected readonly minLength = 5;
 
   @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;

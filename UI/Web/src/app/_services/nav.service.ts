@@ -40,7 +40,7 @@ export class NavService {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     // To avoid flashing, let's check if we are authenticated before we show
-    this.accountService.currentUser$.subscribe(u => {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(u => {
       if (u) {
         this.showNavBar();
       }
