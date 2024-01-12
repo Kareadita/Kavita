@@ -335,7 +335,7 @@ public class ArchiveService : IArchiveService
     {
         var dateString = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
 
-        var potentialExistingFile = _directoryService.FileSystem.FileInfo.New(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));
+        var potentialExistingFile = _directoryService.FileSystem.FileInfo.New(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.cbz"));
         if (potentialExistingFile.Exists)
         {
             // A previous download exists, just return it immediately
@@ -352,7 +352,6 @@ public class ArchiveService : IArchiveService
             foreach (var path in files)
             {
                 var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.Path.GetFileNameWithoutExtension(_directoryService.FileSystem.FileInfo.New(path).Name));
-                _directoryService.ExistOrCreate(tempPath);
                 progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
                 ExtractArchive(path, tempPath);
                 count++;
@@ -363,7 +362,7 @@ public class ArchiveService : IArchiveService
             throw new KavitaException("bad-copy-files-for-download");
         }
 
-        var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+        var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.cbz");
         try
         {
             ZipFile.CreateFromDirectory(tempLocation, zipPath);

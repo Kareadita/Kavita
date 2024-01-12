@@ -14,12 +14,7 @@
             <div class="mb-2">
               <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
               <input class="form-control custom-input" formControlName="password" name="password"
-                     id="password" type="password" pattern="^.{6,32}$" [placeholder]="t('password')">
-              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.pattern"  >
-                <div class="" *ngIf="loginForm.get('password')?.errors?.pattern">
-                  {{t('password-validation')}}
-                </div>
-              </div>
+                     id="password" type="password" [placeholder]="t('password')">
             </div>
 
             <div class="mb-3">
