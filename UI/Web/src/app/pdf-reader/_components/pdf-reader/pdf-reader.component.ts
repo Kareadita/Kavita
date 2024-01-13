@@ -7,7 +7,7 @@ import {
   OnInit, ViewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerService, PageViewModeType, ScrollModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/_services/book.service';
@@ -88,6 +88,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    * https://github.com/stephanrauh/ngx-extended-pdf-viewer/issues/1415
    */
   bookMode: PageViewModeType = 'multiple';
+
+  scrollMode: ScrollModeType = ScrollModeType.vertical;
 
   constructor(private route: ActivatedRoute, private router: Router, public accountService: AccountService,
     private seriesService: SeriesService, public readerService: ReaderService,
