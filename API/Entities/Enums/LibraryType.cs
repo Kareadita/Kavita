@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace API.Entities.Enums;
 
@@ -24,4 +24,9 @@ public enum LibraryType
     /// </summary>
     [Description("Image")]
     Image = 3,
+    /// <summary>
+    /// Use file name or folder name as series name
+    /// </summary>
+    [Description("Flat")]
+    Flat = 4,
 }

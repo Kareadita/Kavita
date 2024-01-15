@@ -183,6 +183,7 @@ export class SideNavComponent implements OnInit {
     switch (format) {
       case LibraryType.Book:
         return 'fa-book';
+      case LibraryType.Flat:
       case LibraryType.Comic:
       case LibraryType.Manga:
         return 'fa-book-open';

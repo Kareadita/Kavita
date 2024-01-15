@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.12.2"
+    "version": "0.7.12.3"
   },
   "servers": [
     {
@@ -2956,7 +2956,8 @@
                     0,
                     1,
                     2,
-                    3
+                    3,
+                    4
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2968,7 +2969,8 @@
                     0,
                     1,
                     2,
-                    3
+                    3,
+                    4
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2980,7 +2982,8 @@
                     0,
                     1,
                     2,
-                    3
+                    3,
+                    4
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -13544,7 +13547,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"
@@ -14136,7 +14140,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "description": "Library type",
@@ -15639,7 +15644,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"
@@ -15752,7 +15758,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"
@@ -16759,7 +16766,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"
@@ -16811,7 +16819,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"
@@ -19080,7 +19089,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"

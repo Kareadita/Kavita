@@ -46,6 +46,22 @@ public class DefaultParser : IDefaultParser
             Series = string.Empty
         };
 
+        if (type == LibraryType.Flat)
+        {
+            if (Parser.IsImage(filePath))
+            {
+                ret.Series = new FileInfo(filePath).Directory?.Name ?? string.Empty;
+                if(string.IsNullOrEmpty(ret.Series)) throw new InvalidDataException($"Could not parse series from {filePath}");
+            }
+            else
+            {
+                ret.Series = Path.GetFileNameWithoutExtension(filePath);
+            }
+            ret.Volumes = "1";
+            ret.Chapters = Parser.DefaultChapter;
+            return ret;
+        }
+
         // If library type is Image or this is not a cover image in a non-image library, then use dedicated parsing mechanism
         if (type == LibraryType.Image || Parser.IsImage(filePath))
         {
