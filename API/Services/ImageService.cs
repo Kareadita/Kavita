@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -132,7 +132,7 @@ public class ImageService : IImageService
         try
         {
             var dims = size.GetDimensions();
-            using var thumbnail = Image.Thumbnail(path, dims.Width, height: dims.Height, size: Enums.Size.Force);
+            using var thumbnail = Image.Thumbnail(path, dims.Width, height: dims.Height, size: Enums.Size.Both, crop: Enums.Interesting.Attention);
             var filename = fileName + encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
@@ -157,7 +157,7 @@ public class ImageService : IImageService
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         var dims = size.GetDimensions();
-        using var thumbnail = Image.ThumbnailStream(stream, dims.Width, height: dims.Height, size: Enums.Size.Force);
+        using var thumbnail = Image.ThumbnailStream(stream, dims.Width, height: dims.Height, size: Enums.Size.Both, crop: Enums.Interesting.Attention);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -171,7 +171,7 @@ public class ImageService : IImageService
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         var dims = size.GetDimensions();
-        using var thumbnail = Image.Thumbnail(sourceFile, dims.Width, height: dims.Height, size: Enums.Size.Force);
+        using var thumbnail = Image.Thumbnail(sourceFile, dims.Width, height: dims.Height, size: Enums.Size.Both, crop: Enums.Interesting.Attention);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -459,7 +459,7 @@ public class ImageService : IImageService
         for (var i = 0; i < coverImages.Count; i++)
         {
             var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+            tile = tile.ThumbnailImage(width: thumbnailWidth, height: thumbnailHeight, size: Enums.Size.Both, crop: Enums.Interesting.Attention);
 
             var row = i / cols;
             var col = i % cols;
