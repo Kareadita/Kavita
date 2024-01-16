@@ -32,7 +32,6 @@ export class ReadingActivityComponent implements OnInit {
   @Input() individualUserMode: boolean = false;
 
   private readonly destroyRef = inject(DestroyRef);
-  //private readonly translocoService = inject(TranslocoService);
   private readonly statService = inject(StatisticsService);
   private readonly memberService = inject(MemberService);
 
@@ -44,7 +43,6 @@ export class ReadingActivityComponent implements OnInit {
   users$: Observable<Member[]> | undefined;
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
-  //mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
   constructor() {
     this.data$ = this.formGroup.valueChanges.pipe(

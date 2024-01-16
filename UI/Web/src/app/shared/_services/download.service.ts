@@ -40,6 +40,10 @@ export interface DownloadEvent {
    * Progress of the download itself
    */
   progress: number;
+  /**
+   * Entity id. For entities without id like logs or bookmarks, uses 0 instead
+   */
+  id: number;
 }
 
 /**
@@ -178,7 +182,7 @@ export class DownloadService {
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));
       }),
-      tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
+      tap((d) => this.updateDownloadState(d, downloadType, subtitle, 0)),
       finalize(() => this.finalizeDownloadState(downloadType, subtitle))
     );
   }
@@ -193,7 +197,7 @@ export class DownloadService {
               download((blob, filename) => {
                 this.save(blob, decodeURIComponent(filename));
               }),
-              tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
+              tap((d) => this.updateDownloadState(d, downloadType, subtitle, series.id)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
   }
@@ -204,12 +208,12 @@ export class DownloadService {
     this.downloadsSource.next(values);
   }
 
-  private updateDownloadState(d: Download, entityType: DownloadEntityType, entitySubtitle: string) {
+  private updateDownloadState(d: Download, entityType: DownloadEntityType, entitySubtitle: string, id: number) {
     let values = this.downloadsSource.getValue();
     if (d.state === 'PENDING') {
       const index = values.findIndex(v => v.entityType === entityType && v.subTitle === entitySubtitle);
       if (index >= 0) return; // Don't let us duplicate add
-      values.push({entityType: entityType, subTitle: entitySubtitle, progress: 0});
+      values.push({entityType: entityType, subTitle: entitySubtitle, progress: 0, id});
     } else if (d.state === 'IN_PROGRESS') {
       const index = values.findIndex(v => v.entityType === entityType && v.subTitle === entitySubtitle);
       if (index >= 0) {
@@ -232,7 +236,7 @@ export class DownloadService {
           download((blob, filename) => {
             this.save(blob, decodeURIComponent(filename));
           }),
-          tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
+          tap((d) => this.updateDownloadState(d, downloadType, subtitle, chapter.id)),
           finalize(() => this.finalizeDownloadState(downloadType, subtitle))
         );
   }
@@ -247,14 +251,14 @@ export class DownloadService {
               download((blob, filename) => {
                 this.save(blob, decodeURIComponent(filename));
               }),
-              tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
+              tap((d) => this.updateDownloadState(d, downloadType, subtitle, volume.id)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
     return (size < this.SIZE_WARNING ||
-      await this.confirmService.confirm(translate('toasts.confirm-download-size', {entityType: 'entity-type.' + entityType, size: bytesPipe.transform(size)})));
+      await this.confirmService.confirm(translate('toasts.confirm-download-size', {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {
@@ -268,7 +272,7 @@ export class DownloadService {
               download((blob, filename) => {
                 this.save(blob, decodeURIComponent(filename));
               }),
-              tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
+              tap((d) => this.updateDownloadState(d, downloadType, subtitle, 0)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
   }
