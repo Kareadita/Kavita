@@ -11,11 +11,36 @@ a {
 }
 
 .custom-input {
-    background-color: #fff !important;
-    color: black !important;
+    background-color: #343A40 !important;
+    color: #fff !important;
+    border-color: var(--login-input-border-color);
+
+    &:focus {
+        border-color: var(--login-input-border-color-focus);
+        box-shadow: var(--login-input-box-shadow-focus);
+    }
+
+    &::placeholder {
+        opacity: 0.5;
+        color: #cecece;
+      }
 }
 
 .invalid-feedback {
     display: inline-block;
-    color: #343c59;
+    color: var(--bs-form-invalid-color);
+    font-family: "League Spartan", sans-serif;
+}
+
+.forgot-password {
+    a {
+        color: var(--login-forgot-password-color);
+        font-family: "League Spartan", sans-serif;
+    }
+}
+
+.sign-in {
+    .btn {
+        font-family: 'League Spartan', sans-serif;
+    }
 }

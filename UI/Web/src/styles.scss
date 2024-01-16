@@ -63,6 +63,18 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins/Poppins.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "League Spartan";
+  src: url("assets/fonts/League_Spartan/LeagueSpartan-VariableFont_wght.ttf");
+  font-display: swap;
+}
+
 label, select, .clickable {
   cursor: pointer;
 }

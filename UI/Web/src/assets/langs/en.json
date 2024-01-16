@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "Login",
+        "title": "Sign in to your account",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
-        "submit": "{{common.submit}}"
+        "submit": "Sign in"
     },
 
     "dashboard": {

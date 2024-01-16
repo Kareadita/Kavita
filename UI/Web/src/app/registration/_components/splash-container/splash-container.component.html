@@ -1,12 +1,26 @@
-<div class="mx-auto login" [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - 57px)' : 'calc(var(--vh, 1vh) * 100)'}">
+<div class="mx-auto container login text-center"
+    [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - 57px)' : 'calc(var(--vh, 1vh) * 100)'}">
 
-    <div class="row row-cols-4 row-cols-md-4 row-cols-sm-2 row-cols-xs-2">
-        <div class="col align-self-center card p-3">
+    <div class="row align-items-center row-cols-1 logo-container mb-3 justify-content-center">
+        <div class="col col-md-4 col-sm-12 col-xs-12 align-self-center p-0">
+            <div class="row align-items-center row-cols-1 justify-content-center">
+                <div class="col col-lg-8 col-md-10 col-sm-10 col-xs-10 p-0 position-relative">
+                    <div class="justify-content-center">
+                        <div class="logo"></div>
+                        <h2>Kavita</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row align-items-center row-cols-1 login-container justify-content-center">
+        <div class="col col-xl-2 col-lg-3 col-md-3 col-sm-10 col-xs-10 align-self-center card p-3">
             <span>
                 <div class="logo-container">
-                    <h3 class="card-title text-center">
+                    <div class="card-title text-center">
                         <ng-content select="[title]"></ng-content>
-                    </h3>
+                    </div>
                 </div>
             </span>
 

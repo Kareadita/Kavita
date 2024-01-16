@@ -22,12 +22,12 @@
               </div>
             </div>
 
-            <div class="mb-3">
-              <a routerLink="/registration/reset-password" style="color: white">{{t('forgot-password')}}</a>
+            <div class="mb-3 forgot-password">
+              <a routerLink="/registration/reset-password">{{t('forgot-password')}}</a>
             </div>
 
-            <div>
-              <button class="btn btn-secondary alt" type="submit" [disabled]="isSubmitting">{{t('submit')}}</button>
+            <div class="sign-in">
+              <button class="btn btn-primary" type="submit" [disabled]="isSubmitting">{{t('submit')}}</button>
             </div>
           </div>
         </form>
