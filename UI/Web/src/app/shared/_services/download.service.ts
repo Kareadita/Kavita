@@ -166,7 +166,7 @@ export class DownloadService {
     ).pipe(filter(wantsToDownload => {
       return wantsToDownload;
     }), switchMap(() => {
-      return downloadCall.pipe(
+      return (downloadCall || of(undefined)).pipe(
         tap((d) => {
           if (callback) callback(d);
         }),
@@ -208,8 +208,9 @@ export class DownloadService {
   }
 
   private getIdKey(entity: Chapter | Volume) {
-    if (this.utilityService.isVolume(entity)) return 'id';
-    if (this.utilityService.isChapter(entity)) return 'id';
+    if (this.utilityService.isVolume(entity)) return 'volumeId';
+    if (this.utilityService.isChapter(entity)) return 'chapterId';
+    if (this.utilityService.isSeries(entity)) return 'seriesId';
     return 'id';
   }
 
@@ -237,6 +238,9 @@ export class DownloadService {
   }
 
   private downloadSeries(series: Series) {
+
+    // TODO: Call backend for all the volumes and loose leaf chapters then enqueque them all
+
     const downloadType = 'series';
     const subtitle = this.downloadSubtitle(downloadType, series);
     return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id,
@@ -312,7 +316,8 @@ export class DownloadService {
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
     return (size < this.SIZE_WARNING ||
-      await this.confirmService.confirm(translate('toasts.confirm-download-size', {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})));
+      await this.confirmService.confirm(translate('toasts.confirm-download-size',
+        {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {
@@ -336,6 +341,7 @@ export class DownloadService {
   private processDownload(entity: QueueableDownloadType): void {
     const downloadObservable = this.downloadEntity(entity);
     const entityId = (entity as any).id;
+    console.log('Process Download called for entity: ', entity);
 
     downloadObservable.subscribe((downloadEvent) => {
       // const currentProgress = this.downloadProgressSubject.value || [];

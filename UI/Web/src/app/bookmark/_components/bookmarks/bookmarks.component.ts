@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   EventEmitter,
   HostListener,
   inject,
@@ -9,11 +9,11 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs';
+import {Observable, take} from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { DownloadService } from 'src/app/shared/_services/download.service';
+import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -34,6 +34,8 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {Title} from "@angular/platform-browser";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {map, tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-bookmarks',
@@ -45,6 +47,22 @@ import {Title} from "@angular/platform-browser";
 })
 export class BookmarksComponent implements OnInit {
 
+  private readonly translocoService = inject(TranslocoService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly readerService = inject(ReaderService);
+  private readonly downloadService = inject(DownloadService);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly jumpbarService = inject(JumpbarService);
+  private readonly titleService = inject(Title);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly imageService = inject(ImageService);
+
   bookmarks: Array<PageBookmark> = [];
   series: Array<Series> = [];
   loadingBookmarks: boolean = false;
@@ -53,6 +71,7 @@ export class BookmarksComponent implements OnInit {
   clearingSeries: {[id: number]: boolean} = {};
   actions: ActionItem<Series>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
+  download$: Observable<DownloadEvent[] | null> | null = null;
 
   pagination: Pagination = new Pagination();
   filter: SeriesFilterV2 | undefined = undefined;
@@ -64,16 +83,7 @@ export class BookmarksComponent implements OnInit {
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
 
-  private readonly translocoService = inject(TranslocoService);
-
-  constructor(private readerService: ReaderService,
-    private downloadService: DownloadService, private toastr: ToastrService,
-    private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService,
-    public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef,
-    private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
-    private jumpbarService: JumpbarService, private titleService: Title) {
-
+  constructor() {
       this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
         this.filter = filter;
 
@@ -90,6 +100,18 @@ export class BookmarksComponent implements OnInit {
 
   ngOnInit(): void {
     this.actions = this.actionFactoryService.getBookmarkActions(this.handleAction.bind(this));
+
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
+      return events.filter(e => e.entityType === 'bookmark') || null;
+    }), tap(events => {
+      if (events === null) {
+        return;
+      }
+      console.log('events: ', events);
+
+      const ids = events.map(e => e.id);
+      // this.downloadingSeries[]
+    }));
   }
 
 
@@ -202,12 +224,14 @@ export class BookmarksComponent implements OnInit {
     // TODO: I can move this to the activeDownload$
     this.downloadingSeries[series.id] = true;
     this.cdRef.markForCheck();
-    this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id), (d) => {
-      if (!d) {
-        this.downloadingSeries[series.id] = false;
-        this.cdRef.markForCheck();
-      }
-    });
+    this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id)
+    //   , (d) => {
+    //   if (!d) {
+    //     this.downloadingSeries[series.id] = false;
+    //     this.cdRef.markForCheck();
+    //   }
+    // }
+    );
   }
 
   updateFilter(data: FilterEvent) {
