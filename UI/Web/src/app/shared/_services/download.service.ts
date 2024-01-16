@@ -73,12 +73,16 @@ export class DownloadService {
   public SIZE_WARNING = 104_857_600;
 
   private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
+  /**
+   * Active Downloads
+   */
   public activeDownloads$ = this.downloadsSource.asObservable();
 
   private downloadQueue: BehaviorSubject<QueueableDownloadType[]> = new BehaviorSubject<QueueableDownloadType[]>([]);
-  // private downloadProgressSubject: Subject<DownloadProgress[]> = new Subject<DownloadProgress[]>();
-  // downloadProgress$: Observable<DownloadProgress[]> = this.downloadProgressSubject.asObservable();
-
+  /**
+   * Queued Downloads
+   */
+  public queuedDownloads$ = this.downloadQueue.asObservable();
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmService = inject(ConfirmService);
@@ -345,14 +349,11 @@ export class DownloadService {
 
   private processDownload(entity: QueueableDownloadType): void {
     const downloadObservable = this.downloadEntity(entity);
-    const entityId = (entity as any).id;
     console.log('Process Download called for entity: ', entity);
 
-    downloadObservable.subscribe((downloadEvent) => {
-      // const currentProgress = this.downloadProgressSubject.value || [];
-      // const updatedProgress = [...currentProgress, { entityId, downloadEvent }];
-      // this.downloadProgressSubject.next(updatedProgress);
+    // When we consume one, we need to take it off the queue
 
+    downloadObservable.subscribe((downloadEvent) => {
       // Download completed, process the next item in the queue
       if (downloadEvent.state === 'DONE') {
         this.processNextDownload();

@@ -61,16 +61,15 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   activeEvents: number = 0;
 
-  debugMode: boolean = false;
+  debugMode: boolean = true;
 
+  protected readonly EVENTS = EVENTS;
 
-  get EVENTS() {
-    return EVENTS;
-  }
+  public readonly downloadService = inject(DownloadService);
 
   constructor(public messageHub: MessageHubService, private modalService: NgbModal,
     private accountService: AccountService, private confirmService: ConfirmService,
-    private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) {
+    private readonly cdRef: ChangeDetectorRef) {
     }
 
   ngOnDestroy(): void {
