@@ -232,7 +232,7 @@ export class DashboardComponent implements OnInit {
     } else if (streamId === StreamId.MoreInGenre) {
       const params: any = {};
       params['page'] = 1;
-      params['title'] = translate('more-in-genre-title', {genre: this.genre?.title});
+      params['title'] = translate('dashboard.more-in-genre-title', {genre: this.genre?.title});
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
