@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CardItemComponent} from '../../cards/card-item/card-item.component';
 import {SeriesCardComponent} from '../../cards/series-card/series-card.component';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
-import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgForOf, NgTemplateOutlet} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
@@ -31,14 +31,22 @@ import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
+
+enum StreamId {
+  OnDeck,
+  RecentlyUpdatedSeries,
+  NewlyAddedSeries,
+  MoreInGenre,
+}
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent],
+  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgForOf, NgTemplateOutlet, LoadingComponent],
 })
 export class DashboardComponent implements OnInit {
 
@@ -73,6 +81,7 @@ export class DashboardComponent implements OnInit {
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
   protected readonly StreamType = StreamType;
+  protected readonly StreamId = StreamId;
 
   constructor() {
     this.loadDashboard();
@@ -186,18 +195,18 @@ export class DashboardComponent implements OnInit {
     await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
   }
 
-  handleSectionClick(sectionTitle: string) {
-    if (sectionTitle.toLowerCase() === 'recently updated series') {
+  handleSectionClick(streamId: StreamId) {
+    if (streamId === StreamId.RecentlyUpdatedSeries) {
       const params: any = {};
       params['page'] = 1;
-      params['title'] = 'Recently Updated';
+      params['title'] = translate('dashboard.recently-updated-title');
       const filter = this.filterUtilityService.createSeriesV2Filter();
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    } else if (sectionTitle.toLowerCase() === 'on deck') {
+    } else if (streamId === StreamId.OnDeck) {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.on-deck-title');
@@ -210,7 +219,7 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    } else if (sectionTitle.toLowerCase() === 'newly added series') {
+    } else if (streamId === StreamId.NewlyAddedSeries) {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.recently-added-title');
@@ -220,7 +229,7 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    } else if (sectionTitle.toLowerCase() === 'more in genre') {
+    } else if (streamId === StreamId.MoreInGenre) {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('more-in-genre-title', {genre: this.genre?.title});
