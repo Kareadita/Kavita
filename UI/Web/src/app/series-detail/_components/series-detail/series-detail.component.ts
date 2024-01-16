@@ -545,7 +545,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
       this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
-        if (date == null || date.expectedDate === null) return;
+        if (date == null || date.expectedDate === null) {
+          if (this.nextExpectedChapter !== undefined) {
+            // Clear out the data so the card removes
+            this.nextExpectedChapter = undefined;
+            this.cdRef.markForCheck();
+          }
+          return;
+        }
 
         this.nextExpectedChapter = date;
         this.cdRef.markForCheck();
