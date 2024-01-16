@@ -90,6 +90,7 @@ export class DownloadService {
     this.downloadQueue.subscribe((queue) => {
       if (queue.length > 0) {
         const entity = queue.shift();
+        console.log('Download Queue shifting entity: ', entity);
         if (entity === undefined) return;
         this.processDownload(entity);
       }
@@ -137,10 +138,12 @@ export class DownloadService {
       case 'volume':
         sizeCheckCall = this.downloadVolumeSize((entity as Volume).id);
         //downloadCall = this.downloadVolume(entity as Volume);
+        this.downloadVolume(entity as Volume);
         break;
       case 'chapter':
         sizeCheckCall = this.downloadChapterSize((entity as Chapter).id);
         //downloadCall = this.downloadChapter(entity as Chapter);
+        this.downloadChapter(entity as Chapter);
         break;
       case 'bookmark':
         sizeCheckCall = of(0);
@@ -165,7 +168,9 @@ export class DownloadService {
     })
     ).pipe(filter(wantsToDownload => {
       return wantsToDownload;
-    }), switchMap(() => {
+    }),
+      filter(_ => downloadCall !== undefined),
+      switchMap(() => {
       return (downloadCall || of(undefined)).pipe(
         tap((d) => {
           if (callback) callback(d);

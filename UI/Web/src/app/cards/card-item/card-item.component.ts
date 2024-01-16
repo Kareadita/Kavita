@@ -277,6 +277,7 @@ export class CardItemComponent implements OnInit {
     });
 
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
+      console.log('Card Item download obv called for entity: ', this.entity);
       return this.downloadService.mapToEntityType(events, this.entity);
     }));
   }
