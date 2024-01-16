@@ -199,6 +199,7 @@ export class BookmarksComponent implements OnInit {
   }
 
   downloadBookmarks(series: Series) {
+    // TODO: I can move this to the activeDownload$
     this.downloadingSeries[series.id] = true;
     this.cdRef.markForCheck();
     this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id), (d) => {

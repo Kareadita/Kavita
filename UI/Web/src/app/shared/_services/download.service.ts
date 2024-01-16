@@ -12,7 +12,7 @@ import {
   tap,
   finalize,
   of,
-  filter,
+  filter, Subject,
 } from 'rxjs';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
@@ -22,6 +22,10 @@ import { BytesPipe } from 'src/app/_pipes/bytes.pipe';
 import {translate} from "@ngneat/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SAVER, Saver} from "../../_providers/saver.provider";
+import {UtilityService} from "./utility.service";
+import {CollectionTag} from "../../_models/collection-tag";
+import {RecentlyAddedItem} from "../../_models/recently-added-item";
+import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -55,6 +59,7 @@ export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 
  */
 export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefined;
 
+export type QueueableDownloadType = Chapter | Volume;
 
 @Injectable({
   providedIn: 'root'
@@ -70,12 +75,26 @@ export class DownloadService {
   private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
   public activeDownloads$ = this.downloadsSource.asObservable();
 
+  private downloadQueue: BehaviorSubject<QueueableDownloadType[]> = new BehaviorSubject<QueueableDownloadType[]>([]);
+  // private downloadProgressSubject: Subject<DownloadProgress[]> = new Subject<DownloadProgress[]>();
+  // downloadProgress$: Observable<DownloadProgress[]> = this.downloadProgressSubject.asObservable();
+
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly accountService = inject(AccountService);
   private readonly httpClient = inject(HttpClient);
+  private readonly utilityService = inject(UtilityService);
 
-  constructor(@Inject(SAVER) private save: Saver) { }
+  constructor(@Inject(SAVER) private save: Saver) {
+    this.downloadQueue.subscribe((queue) => {
+      if (queue.length > 0) {
+        const entity = queue.shift();
+        if (entity === undefined) return;
+        this.processDownload(entity);
+      }
+    });
+  }
 
 
   /**
@@ -84,7 +103,7 @@ export class DownloadService {
    * @param downloadEntity
    * @returns
    */
-   downloadSubtitle(downloadEntityType: DownloadEntityType, downloadEntity: DownloadEntity | undefined) {
+   downloadSubtitle(downloadEntityType: DownloadEntityType | undefined, downloadEntity: DownloadEntity | undefined) {
     switch (downloadEntityType) {
       case 'series':
         return (downloadEntity as Series).name;
@@ -97,6 +116,7 @@ export class DownloadService {
       case 'logs':
         return '';
     }
+    return '';
   }
 
   /**
@@ -116,11 +136,11 @@ export class DownloadService {
         break;
       case 'volume':
         sizeCheckCall = this.downloadVolumeSize((entity as Volume).id);
-        downloadCall = this.downloadVolume(entity as Volume);
+        //downloadCall = this.downloadVolume(entity as Volume);
         break;
       case 'chapter':
         sizeCheckCall = this.downloadChapterSize((entity as Chapter).id);
-        downloadCall = this.downloadChapter(entity as Chapter);
+        //downloadCall = this.downloadChapter(entity as Chapter);
         break;
       case 'bookmark':
         sizeCheckCall = of(0);
@@ -187,6 +207,35 @@ export class DownloadService {
     );
   }
 
+  private getIdKey(entity: Chapter | Volume) {
+    if (this.utilityService.isVolume(entity)) return 'id';
+    if (this.utilityService.isChapter(entity)) return 'id';
+    return 'id';
+  }
+
+  private getDownloadEntityType(entity: Chapter | Volume): DownloadEntityType {
+    if (this.utilityService.isVolume(entity)) return 'volume';
+    if (this.utilityService.isChapter(entity)) return 'chapter';
+    if (this.utilityService.isSeries(entity)) return 'series';
+    return 'logs'; // This is a hack but it will never occur
+  }
+
+  private downloadEntity<T>(entity: Chapter | Volume): Observable<any> {
+    const downloadEntityType = this.getDownloadEntityType(entity);
+    const subtitle = this.downloadSubtitle(downloadEntityType, entity);
+    const idKey = this.getIdKey(entity);
+    const url = `${this.baseUrl}download/${downloadEntityType}?${idKey}=${entity.id}`;
+
+    return this.httpClient.get(url, { observe: 'events', responseType: 'blob', reportProgress: true }).pipe(
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+      download((blob, filename) => {
+        this.save(blob, decodeURIComponent(filename));
+      }),
+      tap((d) => this.updateDownloadState(d, downloadEntityType, subtitle, entity.id)),
+      finalize(() => this.finalizeDownloadState(downloadEntityType, subtitle))
+    );
+  }
+
   private downloadSeries(series: Series) {
     const downloadType = 'series';
     const subtitle = this.downloadSubtitle(downloadType, series);
@@ -227,33 +276,38 @@ export class DownloadService {
   }
 
   private downloadChapter(chapter: Chapter) {
-    const downloadType = 'chapter';
-    const subtitle = this.downloadSubtitle(downloadType, chapter);
-    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id,
-                {observe: 'events', responseType: 'blob', reportProgress: true}
-        ).pipe(
-          throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-          download((blob, filename) => {
-            this.save(blob, decodeURIComponent(filename));
-          }),
-          tap((d) => this.updateDownloadState(d, downloadType, subtitle, chapter.id)),
-          finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-        );
+    //return this.downloadEntity(chapter, 'chapter', 'chapterId');
+    this.enqueueDownload(chapter);
+
+    // const downloadType = 'chapter';
+    // const subtitle = this.downloadSubtitle(downloadType, chapter);
+    // return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id,
+    //             {observe: 'events', responseType: 'blob', reportProgress: true}
+    //     ).pipe(
+    //       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+    //       download((blob, filename) => {
+    //         this.save(blob, decodeURIComponent(filename));
+    //       }),
+    //       tap((d) => this.updateDownloadState(d, downloadType, subtitle, chapter.id)),
+    //       finalize(() => this.finalizeDownloadState(downloadType, subtitle))
+    //     );
   }
 
-  private downloadVolume(volume: Volume): Observable<Download> {
-    const downloadType = 'volume';
-    const subtitle = this.downloadSubtitle(downloadType, volume);
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id,
-                      {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-              download((blob, filename) => {
-                this.save(blob, decodeURIComponent(filename));
-              }),
-              tap((d) => this.updateDownloadState(d, downloadType, subtitle, volume.id)),
-              finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-            );
+  private downloadVolume(volume: Volume) {
+    //return this.downloadEntity(volume, 'volume', 'volumeId');
+    this.enqueueDownload(volume);
+    // const downloadType = 'volume';
+    // const subtitle = this.downloadSubtitle(downloadType, volume);
+    // return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id,
+    //                   {observe: 'events', responseType: 'blob', reportProgress: true}
+    //         ).pipe(
+    //           throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+    //           download((blob, filename) => {
+    //             this.save(blob, decodeURIComponent(filename));
+    //           }),
+    //           tap((d) => this.updateDownloadState(d, downloadType, subtitle, volume.id)),
+    //           finalize(() => this.finalizeDownloadState(downloadType, subtitle))
+    //         );
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
@@ -275,5 +329,63 @@ export class DownloadService {
               tap((d) => this.updateDownloadState(d, downloadType, subtitle, 0)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
+  }
+
+
+
+  private processDownload(entity: QueueableDownloadType): void {
+    const downloadObservable = this.downloadEntity(entity);
+    const entityId = (entity as any).id;
+
+    downloadObservable.subscribe((downloadEvent) => {
+      // const currentProgress = this.downloadProgressSubject.value || [];
+      // const updatedProgress = [...currentProgress, { entityId, downloadEvent }];
+      // this.downloadProgressSubject.next(updatedProgress);
+
+      // Download completed, process the next item in the queue
+      if (downloadEvent.state === 'DONE') {
+        this.processNextDownload();
+      }
+    });
+  }
+
+  private processNextDownload(): void {
+    const currentQueue = this.downloadQueue.value;
+    if (currentQueue.length > 0) {
+      const nextEntity = currentQueue[0];
+      this.processDownload(nextEntity);
+    }
+  }
+
+  private enqueueDownload(entity: QueueableDownloadType): void {
+    const currentQueue = this.downloadQueue.value;
+    const newQueue = [...currentQueue, entity];
+    this.downloadQueue.next(newQueue);
+
+    // If the queue was empty, start processing the download
+    if (currentQueue.length === 0) {
+      this.processNextDownload();
+    }
+  }
+
+  mapToEntityType(events: DownloadEvent[], entity: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem | NextExpectedChapter) {
+    if(this.utilityService.isSeries(entity)) {
+      return events.find(e => e.entityType === 'series' && e.id == entity.id
+        && e.subTitle === this.downloadSubtitle('series', (entity as Series))) || null;
+    }
+    if(this.utilityService.isVolume(entity)) {
+      return events.find(e => e.entityType === 'volume' && e.id == entity.id
+        && e.subTitle === this.downloadSubtitle('volume', (entity as Volume))) || null;
+    }
+    if(this.utilityService.isChapter(entity)) {
+      return events.find(e => e.entityType === 'chapter'  && e.id == entity.id
+        && e.subTitle === this.downloadSubtitle('chapter', (entity as Chapter))) || null;
+    }
+    // Is PageBookmark[]
+    if(entity.hasOwnProperty('length')) {
+      return events.find(e => e.entityType === 'bookmark'
+        && e.subTitle === this.downloadSubtitle('bookmark', [(entity as PageBookmark)])) || null;
+    }
+    return null;
   }
 }
