@@ -141,13 +141,13 @@ export class DownloadService {
         break;
       case 'volume':
         sizeCheckCall = this.downloadVolumeSize((entity as Volume).id);
-        //downloadCall = this.downloadVolume(entity as Volume);
-        this.downloadVolume(entity as Volume);
+        downloadCall = this.downloadVolume(entity as Volume);
+        //this.enqueueDownload(entity as Volume);
         break;
       case 'chapter':
         sizeCheckCall = this.downloadChapterSize((entity as Chapter).id);
-        //downloadCall = this.downloadChapter(entity as Chapter);
-        this.downloadChapter(entity as Chapter);
+        downloadCall = this.downloadChapter(entity as Chapter);
+        //this.enqueueDownload(entity as Chapter);
         break;
       case 'bookmark':
         sizeCheckCall = of(0);
@@ -289,8 +289,7 @@ export class DownloadService {
   }
 
   private downloadChapter(chapter: Chapter) {
-    //return this.downloadEntity(chapter, 'chapter', 'chapterId');
-    this.enqueueDownload(chapter);
+    return this.downloadEntity(chapter);
 
     // const downloadType = 'chapter';
     // const subtitle = this.downloadSubtitle(downloadType, chapter);
@@ -307,8 +306,7 @@ export class DownloadService {
   }
 
   private downloadVolume(volume: Volume) {
-    //return this.downloadEntity(volume, 'volume', 'volumeId');
-    this.enqueueDownload(volume);
+    return this.downloadEntity(volume);
     // const downloadType = 'volume';
     // const subtitle = this.downloadSubtitle(downloadType, volume);
     // return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id,

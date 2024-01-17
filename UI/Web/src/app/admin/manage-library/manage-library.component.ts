@@ -24,6 +24,7 @@ import { RouterLink } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {ActionService} from "../../_services/action.service";
 
 @Component({
     selector: 'app-manage-library',
@@ -35,6 +36,15 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 })
 export class ManageLibraryComponent implements OnInit {
 
+  private readonly actionService = inject(ActionService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly modalService = inject(NgbModal);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly hubService = inject(MessageHubService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+
   libraries: Library[] = [];
   loading = false;
   /**
@@ -42,11 +52,8 @@ export class ManageLibraryComponent implements OnInit {
    */
   deletionInProgress: boolean = false;
   libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
-  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService,
-    private toastr: ToastrService, private confirmService: ConfirmService,
-    private hubService: MessageHubService, private readonly cdRef: ChangeDetectorRef) { }
+
 
   ngOnInit(): void {
     this.getLibraries();

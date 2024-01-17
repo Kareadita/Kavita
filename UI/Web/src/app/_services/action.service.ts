@@ -135,6 +135,26 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  async deleteLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
+    if (!library.hasOwnProperty('id') || library.id === undefined) {
+      return;
+    }
+
+    if (!await this.confirmService.alert(translate('toasts.confirm-library-delete'))) {
+      if (callback) {
+        callback(library);
+      }
+      return;
+    }
+
+    this.libraryService.delete(library?.id).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info(translate('toasts.library-deleted', {name: library.name}));
+      if (callback) {
+        callback(library);
+      }
+    });
+  }
+
   /**
    * Mark a series as read; updates the series pagesRead
    * @param series Series, must have id and name populated
