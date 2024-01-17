@@ -30,6 +30,8 @@ import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ToastrService} from "ngx-toastr";
 
 
 enum StreamId {
@@ -63,6 +65,8 @@ export class DashboardComponent implements OnInit {
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly dashboardService = inject(DashboardService);
+  private readonly scrobblingService = inject(ScrobblingService);
+  private readonly toastr = inject(ToastrService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
@@ -113,6 +117,14 @@ export class DashboardComponent implements OnInit {
         this.refreshStreams$.next();
       }
     });
+
+    this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+      if (hasExpired) {
+        this.toastr.error(translate('toasts.anilist-token-expired'));
+      }
+      this.cdRef.markForCheck();
+    });
+
 
     this.isAdmin$ = this.accountService.currentUser$.pipe(
       takeUntilDestroyed(this.destroyRef),

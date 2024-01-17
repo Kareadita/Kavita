@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
+using API.DTOs.SeriesDetail;
+using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers.Builders;
 using Flurl.Http;
 using Kavita.Common;
@@ -29,9 +34,17 @@ internal class ExternalMetadataIdsDto
     public MediaFormat? PlusMediaFormat { get; set; } = MediaFormat.Unknown;
 }
 
+internal class SeriesDetailPlusAPIDto
+{
+    public IEnumerable<MediaRecommendationDto> Recommendations { get; set; }
+    public IEnumerable<UserReviewDto> Reviews { get; set; }
+    public IEnumerable<RatingDto> Ratings { get; set; }
+}
+
 public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
+    Task<SeriesDetailPlusDto?> GetSeriesDetail(int userId, int seriesId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -48,6 +61,14 @@ public class ExternalMetadataService : IExternalMetadataService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
+    /// <summary>
+    /// Retrieves Metadata about a Recommended External Series
+    /// </summary>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
     public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId)
     {
         if (!aniListId.HasValue && !malId.HasValue)
@@ -59,6 +80,92 @@ public class ExternalMetadataService : IExternalMetadataService
         return await GetSeriesDetail(license, aniListId, malId, seriesId);
 
     }
+
+    public async Task<SeriesDetailPlusDto?> GetSeriesDetail(int userId, int seriesId)
+    {
+        var series =
+            await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
+        if (series == null || series.Library.Type == LibraryType.Comic) return new SeriesDetailPlusDto();
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
+
+        try
+        {
+            var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/series-detail")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", license)
+                .WithHeader("x-installId", HashUtil.ServerToken())
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .PostJsonAsync(new PlusSeriesDtoBuilder(series).Build())
+                .ReceiveJson<SeriesDetailPlusAPIDto>();
+
+
+            var recs = await ProcessRecommendations(series, user!, result.Recommendations);
+            return new SeriesDetailPlusDto()
+            {
+                Recommendations = recs,
+                Ratings = result.Ratings,
+                Reviews = result.Reviews
+            };
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
+            return null;
+        }
+    }
+
+    private async Task<RecommendationDto> ProcessRecommendations(Series series, AppUser user, IEnumerable<MediaRecommendationDto> recs)
+    {
+        var recDto = new RecommendationDto()
+        {
+            ExternalSeries = new List<ExternalSeriesDto>(),
+            OwnedSeries = new List<SeriesDto>()
+        };
+
+        var canSeeExternalSeries = user is {AgeRestriction: AgeRating.NotApplicable} &&
+                                   await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        foreach (var rec in recs)
+        {
+            // Find the series based on name and type and that the user has access too
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsForUser(user.Id, rec.RecommendationNames,
+                series.Library.Type, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
+                ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
+
+            if (seriesForRec != null)
+            {
+                recDto.OwnedSeries.Add(seriesForRec);
+                continue;
+            }
+
+            if (!canSeeExternalSeries) continue;
+            // We can show this based on user permissions
+            if (string.IsNullOrEmpty(rec.Name) || string.IsNullOrEmpty(rec.SiteUrl) || string.IsNullOrEmpty(rec.CoverUrl)) continue;
+            recDto.ExternalSeries.Add(new ExternalSeriesDto()
+            {
+                Name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.First() : rec.Name,
+                Url = rec.SiteUrl,
+                CoverUrl = rec.CoverUrl,
+                Summary = rec.Summary,
+                AniListId = rec.AniListId,
+                MalId = rec.MalId
+            });
+        }
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, recDto.OwnedSeries);
+
+        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).OrderBy(r => r.Name).ToList();
+        recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name.ToNormalized()).OrderBy(r => r.Name).ToList();
+
+        return recDto;
+    }
+
 
     private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(string license, int? aniListId, long? malId, int? seriesId)
     {

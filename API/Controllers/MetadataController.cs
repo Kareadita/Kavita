@@ -8,9 +8,12 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Recommendation;
+using API.DTOs.SeriesDetail;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Plus;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,17 +21,10 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class MetadataController : BaseApiController
+public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ILicenseService licenseService,
+    IRatingService ratingService)
+    : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILocalizationService _localizationService;
-
-    public MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
-    {
-        _unitOfWork = unitOfWork;
-        _localizationService = localizationService;
-    }
-
     /// <summary>
     /// Fetches genres from the instance
     /// </summary>
@@ -41,10 +37,10 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, User.GetUserId()));
+            return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, User.GetUserId()));
         }
 
-        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync(User.GetUserId()));
+        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -57,8 +53,8 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(PersonRole? role)
     {
         return role.HasValue ?
-            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role!.Value)) :
-            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
+            Ok(await unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role!.Value)) :
+            Ok(await unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -73,9 +69,9 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, User.GetUserId()));
+            return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, User.GetUserId()));
         }
-        return Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
+        return Ok(await unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -90,9 +86,9 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, User.GetUserId()));
+            return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, User.GetUserId()));
         }
-        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync(User.GetUserId()));
+        return Ok(await unitOfWork.TagRepository.GetAllTagDtosAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -108,7 +104,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
+            return Ok(await unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<AgeRating>().Select(t => new AgeRatingDto()
@@ -131,7 +127,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(_unitOfWork.LibraryRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
+            return Ok(unitOfWork.LibraryRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<PublicationStatus>().Select(t => new PublicationStatusDto()
@@ -152,10 +148,13 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
+        return Ok(await unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
     }
 
-
+    /// <summary>
+    /// Returns all languages Kavita can accept
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("all-languages")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     public IEnumerable<LanguageDto> GetAllValidLanguages()
@@ -177,9 +176,34 @@ public class MetadataController : BaseApiController
     [HttpGet("chapter-summary")]
     public async Task<ActionResult<string>> GetChapterSummary(int chapterId)
     {
-        if (chapterId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+        if (chapterId <= 0) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter == null) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         return Ok(chapter.Summary);
+    }
+
+    /// <summary>
+    /// Fetches the details needed from Kavita+ for Series Detail page
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("series-detail-plus")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = ["seriesId"])]
+    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId)
+    {
+        var seriesDetail = new SeriesDetailPlusDto();
+        if (!await licenseService.HasActiveLicense())
+        {
+            seriesDetail.Recommendations = null;
+            seriesDetail.Ratings = Enumerable.Empty<RatingDto>();
+            return Ok(seriesDetail);
+        }
+
+        seriesDetail.Ratings = await ratingService.GetRatings(seriesId);
+        //TODO: Migrate Reviews and Recommendations to new system where cache is in the service
+        //seriesDetail.Reviews = await
+
+        return Ok(seriesDetail);
+
     }
 }

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
-using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
@@ -78,7 +77,7 @@ public class ScrobblingService : IScrobblingService
         {MangaDexWeblinkWebsite, 0},
     };
 
-    private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
+    private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
     private static readonly IList<ScrobbleProvider> BookProviders = new List<ScrobbleProvider>()
     {
@@ -425,8 +424,17 @@ public class ScrobblingService : IScrobblingService
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
                 {
                     _logger.LogInformation("Hit Too many requests, sleeping to regain requests");
-                    await Task.Delay(TimeSpan.FromMinutes(1));
-                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
+                    await Task.Delay(TimeSpan.FromMinutes(5));
+                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unauthorized"))
+                {
+                    _logger.LogInformation("Kavita+ responded with Unauthorized. Please check your subscription");
+                    await _licenseService.HasActiveLicense(true);
+                    throw new KavitaException("Kavita+ responded with Unauthorized. Please check your subscription");
+                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Access token is invalid"))
+                {
+                    throw new KavitaException("Access token is invalid");
+                }
+                else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
                     _logger.LogInformation("Kavita+ was unable to match the series");
@@ -615,10 +623,7 @@ public class ScrobblingService : IScrobblingService
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
-        // var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
-        //     .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-        //     .Where(e => !errors.Contains(e.SeriesId))
-        //     .ToList();
+
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
             .Select(group => new
@@ -645,7 +650,7 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count;// + reviewEvents.Count;
+        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count;
 
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
@@ -691,22 +696,6 @@ public class ScrobblingService : IScrobblingService
                 Rating = evt.Rating,
                 Year = evt.Series.Metadata.ReleaseYear
             }));
-
-            // progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
-            //     totalProgress, evt => Task.FromResult(new ScrobbleDto()
-            // {
-            //     Format = evt.Format,
-            //     AniListId = evt.AniListId,
-            //     MALId = (int?) evt.MalId,
-            //     ScrobbleEventType = evt.ScrobbleEventType,
-            //     AniListToken = evt.AppUser.AniListAccessToken,
-            //     SeriesName = evt.Series.Name,
-            //     LocalizedSeriesName = evt.Series.LocalizedName,
-            //     Rating = evt.Rating,
-            //     Year = evt.Series.Metadata.ReleaseYear,
-            //     ReviewBody = evt.ReviewBody,
-            //     ReviewTitle = evt.ReviewTitle
-            // }));
 
             progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter,
                 totalProgress, evt => Task.FromResult(new ScrobbleDto()
@@ -766,7 +755,22 @@ public class ScrobblingService : IScrobblingService
             {
                 continue;
             }
+
+            if (_tokenService.HasTokenExpired(evt.AppUser.AniListAccessToken))
+            {
+                _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                {
+                    Comment = "AniList token has expired and needs rotating. Scrobbles wont work until then",
+                    Details = $"User: {evt.AppUser.UserName}",
+                    LibraryId = evt.LibraryId,
+                    SeriesId = evt.SeriesId
+                });
+                await _unitOfWork.CommitAsync();
+                return 0;
+            }
+
             var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser, license.Value);
+            userRateLimits[evt.AppUserId] = count;
             if (count == 0)
             {
                 if (usersToScrobble == 1) break;
@@ -785,6 +789,14 @@ public class ScrobblingService : IScrobblingService
             {
                 // If a flurl exception occured, the API is likely down. Kill processing
                 throw;
+            }
+            catch (KavitaException ex)
+            {
+                if (ex.Message.Contains("Access token is invalid"))
+                {
+                    _logger.LogCritical("Access Token for UserId: {UserId} needs to be rotated to continue scrobbling", evt.AppUser.Id);
+                    return progressCounter;
+                }
             }
             catch (Exception)
             {

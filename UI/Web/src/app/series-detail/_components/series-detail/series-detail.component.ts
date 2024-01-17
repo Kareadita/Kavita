@@ -106,6 +106,7 @@ import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {MetadataService} from "../../../_services/metadata.service";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -140,6 +141,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly seriesService = inject(SeriesService);
+  private readonly metadataService = inject(MetadataService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
@@ -588,8 +590,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
-      if (this.libraryType !== LibraryType.Comic && loadExternal) {
+      const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
+
+      if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
         this.loadReviews(true);
+        //this.loadPlusMetadata(this.seriesId);
       }
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
@@ -699,6 +704,23 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  loadPlusMetadata(seriesId: number) {
+    this.metadataService.getSeriesMetadataFromPlus(this.seriesId).subscribe(data => {
+      if (data === null) return;
+
+      // Reviews
+      this.reviews = [...data.reviews];
+
+      // Recommendations
+      data.recommendations.ownedSeries.map(r => {
+        this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
+      });
+      this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
+      this.hasRecommendations = this.combinedRecs.length > 0;
+
+      this.cdRef.markForCheck();
+    });
+  }
   loadReviews(loadRecs: boolean = false) {
     this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
       this.reviews = [...reviews];

@@ -245,6 +245,7 @@
         "email-label": "{{common.email}}",
         "current-password-label": "Current Password",
         "email-not-confirmed": "This email is not confirmed",
+        "email-confirmed": "This email is confirmed",
         "email-updated-title": "Email Updated",
         "email-updated-description": "You can use the following link below to confirm the email for your account. If your server is externally accessible, an email will have been sent to the email and the link can be used to confirm the email.",
         "setup-user-account": "Setup user's account",
@@ -722,6 +723,7 @@
 
     "series-metadata-detail": {
         "links-title": "Links",
+        "rating-title": "Ratings",
         "genres-title": "Genres",
         "tags-title": "Tags",
         "collections-title": "{{side-nav.collections}}",
@@ -2000,7 +2002,8 @@
         "confirm-delete-smart-filter": "Are you sure you want to delete this Smart Filter?",
         "smart-filter-deleted": "Smart Filter Deleted",
         "smart-filter-updated": "Created/Updated smart filter",
-        "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key"
+        "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key",
+        "anilist-token-expired": "Your AniList token is expired. Scrobbling will no longer process until you re-generate it in User Settings -> Account"
     },
 
     "actionable": {

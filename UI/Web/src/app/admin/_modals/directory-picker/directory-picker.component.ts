@@ -14,8 +14,6 @@ export interface DirectoryPickerResult {
   folderPath: string;
 }
 
-
-
 @Component({
   selector: 'app-directory-picker',
   templateUrl: './directory-picker.component.html',

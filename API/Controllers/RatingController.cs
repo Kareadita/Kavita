@@ -47,7 +47,6 @@ public class RatingController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetRating(int seriesId)
     {
-
         if (!await _licenseService.HasActiveLicense())
         {
             return Ok(Enumerable.Empty<RatingDto>());

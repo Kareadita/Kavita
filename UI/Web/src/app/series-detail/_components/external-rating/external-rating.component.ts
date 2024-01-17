@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   inject,
   Input,
   OnInit,
@@ -20,6 +20,7 @@ import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {ImageComponent} from "../../../shared/image/image.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-external-rating',
@@ -31,28 +32,31 @@ import {ImageComponent} from "../../../shared/image/image.component";
   encapsulation: ViewEncapsulation.None
 })
 export class ExternalRatingComponent implements OnInit {
-  @Input({required: true}) seriesId!: number;
-  @Input({required: true}) userRating!: number;
-  @Input({required: true}) hasUserRated!: boolean;
-  @Input({required: true}) libraryType!: LibraryType;
+
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
   private readonly accountService = inject(AccountService);
   private readonly themeService = inject(ThemeService);
   public readonly utilityService = inject(UtilityService);
+  public readonly destroyRef = inject(DestroyRef);
+  protected readonly Breakpoint = Breakpoint;
+
+  @Input({required: true}) seriesId!: number;
+  @Input({required: true}) userRating!: number;
+  @Input({required: true}) hasUserRated!: boolean;
+  @Input({required: true}) libraryType!: LibraryType;
+
 
   ratings: Array<Rating> = [];
   isLoading: boolean = false;
   overallRating: number = -1;
-
   starColor = this.themeService.getCssVariable('--rating-star-color');
-
 
   ngOnInit() {
 
     this.seriesService.getOverallRating(this.seriesId).subscribe(r => this.overallRating = r.averageScore);
 
-    this.accountService.hasValidLicense$.subscribe((res) => {
+    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res) => {
       if (!res) return;
       this.isLoading = true;
       this.cdRef.markForCheck();
@@ -74,6 +78,4 @@ export class ExternalRatingComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }
