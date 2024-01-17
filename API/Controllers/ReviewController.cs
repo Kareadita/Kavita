@@ -51,78 +51,10 @@ public class ReviewController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     [HttpGet]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<IEnumerable<UserReviewDto>>> GetReviews(int seriesId)
     {
-        var userId = User.GetUserId();
-        var username = User.GetUsername();
-        var userRatings = (await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId))
-            .Where(r => !string.IsNullOrEmpty(r.Body))
-            .OrderByDescending(review => review.Username.Equals(username) ? 1 : 0)
-            .ToList();
-        if (!await _licenseService.HasActiveLicense())
-        {
-            return Ok(userRatings);
-        }
-
-        var cacheKey = CacheKey + seriesId;
-        IList<UserReviewDto> externalReviews;
-
-        var result = await _cacheProvider.GetAsync<IEnumerable<UserReviewDto>>(cacheKey);
-        if (result.HasValue)
-        {
-            externalReviews = result.Value.ToList();
-        }
-        else
-        {
-            var reviews = (await _reviewService.GetReviewsForSeries(userId, seriesId)).ToList();
-            externalReviews = SelectSpectrumOfReviews(reviews);
-
-            await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
-            _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
-        }
-
-
-        // Fetch external reviews and splice them in
-        userRatings.AddRange(externalReviews);
-
-
-        return Ok(userRatings);
-    }
-
-    private static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
-    {
-        IList<UserReviewDto> externalReviews;
-        var totalReviews = reviews.Count;
-
-        if (totalReviews > 10)
-        {
-            var stepSize = Math.Max((totalReviews - 4) / 8, 1);
-
-            var selectedReviews = new List<UserReviewDto>()
-            {
-                reviews[0],
-                reviews[1],
-            };
-            for (var i = 2; i < totalReviews - 2; i += stepSize)
-            {
-                selectedReviews.Add(reviews[i]);
-
-                if (selectedReviews.Count >= 8)
-                    break;
-            }
-
-            selectedReviews.Add(reviews[totalReviews - 2]);
-            selectedReviews.Add(reviews[totalReviews - 1]);
-
-            externalReviews = selectedReviews;
-        }
-        else
-        {
-            externalReviews = reviews;
-        }
-
-        return externalReviews;
+        return Ok(await _reviewService.GetReviewsForSeries(User.GetUserId(), seriesId));
     }
 
     /// <summary>

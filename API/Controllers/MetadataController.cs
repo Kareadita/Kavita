@@ -22,7 +22,7 @@ namespace API.Controllers;
 #nullable enable
 
 public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ILicenseService licenseService,
-    IRatingService ratingService)
+    IRatingService ratingService, IReviewService reviewService, IRecommendationService recommendationService)
     : BaseApiController
 {
     /// <summary>
@@ -199,9 +199,11 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(seriesDetail);
         }
 
+        // Temp solution, needs to be updated with new API
         seriesDetail.Ratings = await ratingService.GetRatings(seriesId);
-        //TODO: Migrate Reviews and Recommendations to new system where cache is in the service
-        //seriesDetail.Reviews = await
+        seriesDetail.Reviews = await reviewService.GetReviewsForSeries(User.GetUserId(), seriesId);
+        seriesDetail.Recommendations =
+            await recommendationService.GetRecommendationsForSeries(User.GetUserId(), seriesId);
 
         return Ok(seriesDetail);
 

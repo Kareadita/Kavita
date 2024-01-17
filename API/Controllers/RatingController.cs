@@ -44,25 +44,14 @@ public class RatingController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetRating(int seriesId)
     {
         if (!await _licenseService.HasActiveLicense())
         {
             return Ok(Enumerable.Empty<RatingDto>());
         }
-
-        var cacheKey = CacheKey + seriesId;
-        var results = await _cacheProvider.GetAsync<IEnumerable<RatingDto>>(cacheKey);
-        if (results.HasValue)
-        {
-            return Ok(results.Value);
-        }
-
-        var ratings = await _ratingService.GetRatings(seriesId);
-        await _cacheProvider.SetAsync(cacheKey, ratings, TimeSpan.FromHours(24));
-        _logger.LogDebug("Caching external rating for {Key}", cacheKey);
-        return Ok(ratings);
+        return Ok(await _ratingService.GetRatings(seriesId));
     }
 
     [HttpGet("overall")]

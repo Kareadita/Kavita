@@ -593,8 +593,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
 
       if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
-        this.loadReviews(true);
-        //this.loadPlusMetadata(this.seriesId);
+        //this.loadReviews(true);
+        this.loadPlusMetadata(this.seriesId);
       }
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
@@ -869,7 +869,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean}) => {
       if (closeResult.success) {
-        this.loadReviews();
+        this.loadReviews(); // TODO: Ensure reviews get updated here
       }
     });
   }
