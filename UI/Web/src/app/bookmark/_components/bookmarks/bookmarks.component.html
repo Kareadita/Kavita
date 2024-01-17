@@ -19,7 +19,8 @@
       <app-card-item [entity]="item" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
                      [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true"
                      [actions]="actions"
-                     [selected]="bulkSelectionService.isCardSelected('bookmark', position)" (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
+                     [selected]="bulkSelectionService.isCardSelected('bookmark', position)"
+                     (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
       ></app-card-item>
     </ng-template>
 

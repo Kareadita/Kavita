@@ -48,6 +48,18 @@ import {ImageComponent} from "../../../shared/image/image.component";
 })
 export class SeriesMetadataDetailComponent implements OnChanges {
 
+  protected readonly imageService = inject(ImageService);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+
+  protected readonly FilterField = FilterField;
+  protected readonly LibraryType = LibraryType;
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly TagBadgeCursor = TagBadgeCursor;
+  protected readonly Breakpoint = Breakpoint;
+
   @Input({required: true}) seriesMetadata!: SeriesMetadata;
   @Input({required: true}) libraryType!: LibraryType;
   @Input() hasReadingProgress: boolean = false;
@@ -60,22 +72,10 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;
 
-  protected readonly imageService = inject(ImageService);
-  protected readonly utilityService = inject(UtilityService);
-  private readonly router = inject(Router);
-  private readonly readerService = inject(ReaderService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
-
   /**
    * Html representation of Series Summary
    */
   seriesSummary: string = '';
-
-  protected FilterField = FilterField;
-  protected LibraryType = LibraryType;
-  protected MangaFormat = MangaFormat;
-  protected TagBadgeCursor = TagBadgeCursor;
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
@@ -121,6 +121,4 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   navigate(basePage: string, id: number) {
     this.router.navigate([basePage, id]);
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }

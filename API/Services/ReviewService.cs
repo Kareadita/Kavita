@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.SeriesDetail;
@@ -11,6 +14,7 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services.Plus;
+using EasyCaching.Core;
 using Flurl.Http;
 using HtmlAgilityPack;
 using Kavita.Common;
@@ -48,18 +52,98 @@ public class ReviewService : IReviewService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReviewService> _logger;
+    private readonly ILicenseService _licenseService;
+    private readonly IEasyCachingProvider _cacheProvider;
+    public const string CacheKey = "review_";
 
 
-    public ReviewService(IUnitOfWork unitOfWork, ILogger<ReviewService> logger)
+    public ReviewService(IUnitOfWork unitOfWork, ILogger<ReviewService> logger, ILicenseService licenseService,
+        IEasyCachingProviderFactory cachingProviderFactory)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _licenseService = licenseService;
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+
+        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
     }
 
     public async Task<IEnumerable<UserReviewDto>> GetReviewsForSeries(int userId, int seriesId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return ImmutableList<UserReviewDto>.Empty;
+        var userRatings = (await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
+            .ToList();
+
+        if (!await _licenseService.HasActiveLicense())
+        {
+            return userRatings;
+        }
+
+        var cacheKey = CacheKey + seriesId;
+        IList<UserReviewDto> externalReviews;
+
+        var result = await _cacheProvider.GetAsync<IEnumerable<UserReviewDto>>(cacheKey);
+        if (result.HasValue)
+        {
+            externalReviews = result.Value.ToList();
+        }
+        else
+        {
+            var reviews = (await GetExternalReviews(userId, seriesId)).ToList();
+            externalReviews = SelectSpectrumOfReviews(reviews);
+
+            await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
+            _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
+        }
+
+
+        // Fetch external reviews and splice them in
+        userRatings.AddRange(externalReviews);
+
+        return userRatings;
+    }
+
+    private static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
+    {
+        IList<UserReviewDto> externalReviews;
+        var totalReviews = reviews.Count;
+
+        if (totalReviews > 10)
+        {
+            var stepSize = Math.Max((totalReviews - 4) / 8, 1);
+
+            var selectedReviews = new List<UserReviewDto>()
+            {
+                reviews[0],
+                reviews[1],
+            };
+            for (var i = 2; i < totalReviews - 2; i += stepSize)
+            {
+                selectedReviews.Add(reviews[i]);
+
+                if (selectedReviews.Count >= 8)
+                    break;
+            }
+
+            selectedReviews.Add(reviews[totalReviews - 2]);
+            selectedReviews.Add(reviews[totalReviews - 1]);
+
+            externalReviews = selectedReviews;
+        }
+        else
+        {
+            externalReviews = reviews;
+        }
+
+        return externalReviews;
+    }
+
+    private async Task<IEnumerable<UserReviewDto>> GetExternalReviews(int userId, int seriesId)
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,

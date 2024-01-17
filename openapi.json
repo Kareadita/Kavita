@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.12.2"
+    "version": "0.7.12.3"
   },
   "servers": [
     {
@@ -3538,6 +3538,7 @@
         "tags": [
           "Metadata"
         ],
+        "summary": "Returns all languages Kavita can accept",
         "responses": {
           "200": {
             "description": "Success",
@@ -3605,6 +3606,47 @@
               "text/json": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Metadata/series-detail-plus": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Fetches the details needed from Kavita+ for Series Detail page",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesDetailPlusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesDetailPlusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesDetailPlusDto"
                 }
               }
             }
@@ -17651,6 +17693,30 @@
         },
         "additionalProperties": false,
         "description": "This is a special DTO for a UI page in Kavita. This performs sorting and grouping and returns exactly what UI requires for layout.\r\nThis is subject to change, do not rely on this Data model."
+      },
+      "SeriesDetailPlusDto": {
+        "type": "object",
+        "properties": {
+          "recommendations": {
+            "$ref": "#/components/schemas/RecommendationDto"
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserReviewDto"
+            },
+            "nullable": true
+          },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RatingDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "All the data from Kavita+ for Series Detail"
       },
       "SeriesDto": {
         "type": "object",

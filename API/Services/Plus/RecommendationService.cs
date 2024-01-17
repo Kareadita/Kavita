@@ -40,7 +40,7 @@ public record PlusSeriesDto
     public int? Year { get; set; }
 }
 
-internal record MediaRecommendationDto
+public record MediaRecommendationDto
 {
     public int Rating { get; set; }
     public IEnumerable<string> RecommendationNames { get; set; } = null!;
@@ -126,7 +126,7 @@ public class RecommendationService : IRecommendationService
     }
 
 
-    private async Task<IEnumerable<MediaRecommendationDto>> GetRecommendations(string license, Series series)
+    protected async Task<IEnumerable<MediaRecommendationDto>> GetRecommendations(string license, Series series)
     {
         try
         {

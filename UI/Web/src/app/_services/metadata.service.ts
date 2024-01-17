@@ -16,6 +16,7 @@ import {SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
+import {SeriesDetailPlus} from "../_models/series-detail/series-detail-plus";
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,11 @@ export class MetadataService {
   baseUrl = environment.apiUrl;
   private validLanguages: Array<Language> = [];
 
-  constructor(private httpClient: HttpClient, private router: Router) { }
+  constructor(private httpClient: HttpClient) { }
+
+  getSeriesMetadataFromPlus(seriesId: number) {
+    return this.httpClient.get<SeriesDetailPlus | null>(this.baseUrl + 'metadata/series-detail-plus?seriesId=' + seriesId);
+  }
 
   getAllAgeRatings(libraries?: Array<number>) {
     let method = 'metadata/age-ratings'

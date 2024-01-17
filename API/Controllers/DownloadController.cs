@@ -233,7 +233,7 @@ public class DownloadController : BaseApiController
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}", 1F));
 
 
-        return PhysicalFile(filePath, DefaultContentType, System.Web.HttpUtility.UrlEncode(filename), true);
+        return PhysicalFile(filePath, DefaultContentType, Uri.EscapeDataString(filename), true);
     }
 
 }

@@ -277,26 +277,9 @@ export class CardItemComponent implements OnInit {
     });
 
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      if(this.utilityService.isSeries(this.entity)) {
-        return events.find(e => e.entityType === 'series' && e.id == this.entity.id
-          && e.subTitle === this.downloadService.downloadSubtitle('series', (this.entity as Series))) || null;
-      }
-      if(this.utilityService.isVolume(this.entity)) {
-        return events.find(e => e.entityType === 'volume' && e.id == this.entity.id
-          && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
-      }
-      if(this.utilityService.isChapter(this.entity)) {
-        return events.find(e => e.entityType === 'chapter'  && e.id == this.entity.id
-          && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
-      }
-      // Is PageBookmark[]
-      if(this.entity.hasOwnProperty('length')) {
-        return events.find(e => e.entityType === 'bookmark'
-          && e.subTitle === this.downloadService.downloadSubtitle('bookmark', [(this.entity as PageBookmark)])) || null;
-      }
-      return null;
+      console.log('Card Item download obv called for entity: ', this.entity);
+      return this.downloadService.mapToEntityType(events, this.entity);
     }));
-
   }
 
 

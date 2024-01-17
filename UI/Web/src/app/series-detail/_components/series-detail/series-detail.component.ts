@@ -1,4 +1,5 @@
 import {
+  AsyncPipe,
   DecimalPipe,
   DOCUMENT,
   NgClass,
@@ -42,13 +43,13 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, forkJoin, of} from 'rxjs';
-import {take} from 'rxjs/operators';
+import {catchError, forkJoin, Observable, of} from 'rxjs';
+import {filter, map, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
-import {DownloadService} from 'src/app/shared/_services/download.service';
+import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
@@ -105,6 +106,7 @@ import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {MetadataService} from "../../../_services/metadata.service";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -126,19 +128,22 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
+const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
+
 @Component({
     selector: 'app-series-detail',
     templateUrl: './series-detail.component.html',
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent, NgClass, NgOptimizedImage, ProviderImagePipe]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent, NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly seriesService = inject(SeriesService);
+  private readonly metadataService = inject(MetadataService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
@@ -261,6 +266,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   user: User | undefined;
 
+  /**
+   * This is the download we get from download service.
+   */
+  download$: Observable<DownloadEvent | null> | null = null;
+
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     if (this.series === undefined) {
       return;
@@ -367,6 +377,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.router.navigateByUrl('/home');
       return;
     }
+
+    // Setup the download in progress
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
+      return this.downloadService.mapToEntityType(events, this.series);
+    }));
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
@@ -545,7 +560,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
       this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
-        if (date == null || date.expectedDate === null) return;
+        if (date == null || date.expectedDate === null) {
+          if (this.nextExpectedChapter !== undefined) {
+            // Clear out the data so the card removes
+            this.nextExpectedChapter = undefined;
+            this.cdRef.markForCheck();
+          }
+          return;
+        }
 
         this.nextExpectedChapter = date;
         this.cdRef.markForCheck();
@@ -563,16 +585,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
+    if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
+      this.loadPlusMetadata(this.seriesId);
+    }
+
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
-
-      if (this.libraryType !== LibraryType.Comic && loadExternal) {
-        this.loadReviews(true);
-      }
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -670,23 +692,37 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  loadRecommendations() {
-    this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
-      rec.ownedSeries.map(r => {
+  // loadRecommendations() {
+  //   this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
+  //     rec.ownedSeries.map(r => {
+  //       this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
+  //     });
+  //     this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
+  //     this.hasRecommendations = this.combinedRecs.length > 0;
+  //     this.cdRef.markForCheck();
+  //   });
+  // }
+
+  loadPlusMetadata(seriesId: number) {
+    this.metadataService.getSeriesMetadataFromPlus(seriesId).subscribe(data => {
+      if (data === null) return;
+
+      // Reviews
+      this.reviews = [...data.reviews];
+
+      // Recommendations
+      data.recommendations.ownedSeries.map(r => {
         this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
       });
-      this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
+      this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
       this.hasRecommendations = this.combinedRecs.length > 0;
+
       this.cdRef.markForCheck();
     });
   }
-
-  loadReviews(loadRecs: boolean = false) {
+  loadReviews() {
     this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
       this.reviews = [...reviews];
-      if (loadRecs) {
-        this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
-      }
       this.cdRef.markForCheck();
     });
   }
@@ -829,7 +865,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean}) => {
       if (closeResult.success) {
-        this.loadReviews();
+        this.loadReviews(); // TODO: Ensure reviews get updated here
       }
     });
   }

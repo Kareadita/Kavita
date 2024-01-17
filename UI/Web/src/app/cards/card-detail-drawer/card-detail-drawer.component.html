@@ -108,45 +108,52 @@
         <li [ngbNavItem]="tabs[TabID.Files]" [disabled]="(isAdmin$ | async) === false">
           <a ngbNavLink>{{t(tabs[TabID.Files].title)}}</a>
           <ng-template ngbNavContent>
-            <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
+            @if (!utilityService.isChapter(data)) {
+              <h4>{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
+            }
             <ul class="list-unstyled">
               <li class="d-flex my-4" *ngFor="let chapter of chapters">
+                <!-- TODO: Localize title -->
                 <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{utilityService.formatChapterName(libraryType, true, false)}} {{formatChapterNumber(chapter)}}">
                   <app-image class="me-2" width="74px" [imageUrl]="imageService.getChapterCoverImage(chapter.id)"></app-image>
                 </a>
                 <div class="flex-grow-1">
                   <h5 class="mt-0 mb-1">
-                  <span>
-                      <span>
-                          <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions"
-                                                [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
-                          <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
-                              {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
-                          </ng-container>
-                      </span>
-                      <span class="badge bg-primary rounded-pill ms-1">
-                          <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
-                          <span *ngIf="chapter.pagesRead === 0">{{t('unread') | uppercase}}</span>
-                          <span *ngIf="chapter.pagesRead === chapter.pages">{{t('read') | uppercase}}</span>
-                      </span>
-                  </span>
+                    <span>
+                        <span>
+                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions"
+                                                  [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
+                            <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
+                                {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
+                            </ng-container>
+                        </span>
+                        <span class="badge bg-primary rounded-pill ms-1">
+                            <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
+                            <span *ngIf="chapter.pagesRead === 0">{{t('unread') | uppercase}}</span>
+                            <span *ngIf="chapter.pagesRead === chapter.pages">{{t('read') | uppercase}}</span>
+                        </span>
+                    </span>
                     <ng-template #specialHeader>{{t('files')}}</ng-template>
                   </h5>
                   <ul class="list-group">
-                    <li *ngFor="let file of chapter.files" class="list-group-item no-hover">
-                      <span>{{file.filePath}}</span>
-                      <div class="row g-0">
-                        <div class="col">
-                          {{t('pages')}} {{file.pages | number:''}}
+                    @for (file of chapter.files; track file.id) {
+                      <li class="list-group-item no-hover">
+                        <span>{{file.filePath}}</span>
+                        <div class="row g-0">
+                          <div class="col">
+                            {{t('pages')}} {{file.pages | number:''}}
+                          </div>
+                          @if (data.hasOwnProperty('created')) {
+                            <div class="col">
+                              {{t('added')}} {{file.created | date: 'short' | defaultDate}}
+                            </div>
+                          }
+                          <div class="col">
+                            {{t('size')}} {{file.bytes | bytes}}
+                          </div>
                         </div>
-                        <div class="col" *ngIf="data.hasOwnProperty('created')">
-                          {{t('added')}} {{file.created | date: 'short' | defaultDate}}
-                        </div>
-                        <div class="col">
-                          {{t('size')}} {{file.bytes | bytes}}
-                        </div>
-                      </div>
-                    </li>
+                      </li>
+                    }
                   </ul>
                 </div>
               </li>

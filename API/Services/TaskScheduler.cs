@@ -19,6 +19,7 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
+    Task ScheduleKavitaPlusTasks();
     void ScanFolder(string folderPath, TimeSpan delay);
     void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
@@ -72,7 +73,7 @@ public class TaskScheduler : ITaskScheduler
     public const string LicenseCheck = "license-check";
 
     private static readonly ImmutableArray<string> ScanTasks =
-        ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
+        ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
 
     private static readonly Random Rnd = new Random();
 
@@ -143,11 +144,22 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
 
+        await ScheduleKavitaPlusTasks();
+    }
+
+    public async Task ScheduleKavitaPlusTasks()
+    {
         // KavitaPlus based (needs license check)
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+        if (!await _licenseService.HasActiveSubscription(license))
+        {
+
+            return;
+        }
         RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
-        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateLicenseStatus(), LicenseService.Cron, RecurringJobOptions);
-        BackgroundJob.Enqueue(() => _licenseService.ValidateLicenseStatus());
+        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.HasActiveLicense(true), LicenseService.Cron, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _licenseService.HasActiveLicense(true));
 
         // KavitaPlus Scrobbling (every 4 hours)
         RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
