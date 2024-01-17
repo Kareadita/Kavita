@@ -128,6 +128,8 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
+const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
+
 @Component({
     selector: 'app-series-detail',
     templateUrl: './series-detail.component.html',
@@ -583,19 +585,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
+    if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
+      this.loadPlusMetadata(this.seriesId);
+    }
+
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
-
-      const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
-
-      if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
-        //this.loadReviews(true);
-        this.loadPlusMetadata(this.seriesId);
-      }
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -693,19 +692,19 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  loadRecommendations() {
-    this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
-      rec.ownedSeries.map(r => {
-        this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
-      });
-      this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
-      this.hasRecommendations = this.combinedRecs.length > 0;
-      this.cdRef.markForCheck();
-    });
-  }
+  // loadRecommendations() {
+  //   this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
+  //     rec.ownedSeries.map(r => {
+  //       this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
+  //     });
+  //     this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
+  //     this.hasRecommendations = this.combinedRecs.length > 0;
+  //     this.cdRef.markForCheck();
+  //   });
+  // }
 
   loadPlusMetadata(seriesId: number) {
-    this.metadataService.getSeriesMetadataFromPlus(this.seriesId).subscribe(data => {
+    this.metadataService.getSeriesMetadataFromPlus(seriesId).subscribe(data => {
       if (data === null) return;
 
       // Reviews
@@ -721,12 +720,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
   }
-  loadReviews(loadRecs: boolean = false) {
+  loadReviews() {
     this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
       this.reviews = [...reviews];
-      if (loadRecs) {
-        this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
-      }
       this.cdRef.markForCheck();
     });
   }

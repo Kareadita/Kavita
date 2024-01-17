@@ -8,7 +8,6 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
-using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities.Enums;
 using API.Extensions;
@@ -22,7 +21,7 @@ namespace API.Controllers;
 #nullable enable
 
 public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ILicenseService licenseService,
-    IRatingService ratingService, IReviewService reviewService, IRecommendationService recommendationService)
+    IRatingService ratingService, IReviewService reviewService, IRecommendationService recommendationService, IExternalMetadataService metadataService)
     : BaseApiController
 {
     /// <summary>
@@ -199,11 +198,13 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(seriesDetail);
         }
 
+        seriesDetail = await metadataService.GetSeriesDetail(User.GetUserId(), seriesId);
+
         // Temp solution, needs to be updated with new API
-        seriesDetail.Ratings = await ratingService.GetRatings(seriesId);
-        seriesDetail.Reviews = await reviewService.GetReviewsForSeries(User.GetUserId(), seriesId);
-        seriesDetail.Recommendations =
-            await recommendationService.GetRecommendationsForSeries(User.GetUserId(), seriesId);
+        // seriesDetail.Ratings = await ratingService.GetRatings(seriesId);
+        // seriesDetail.Reviews = await reviewService.GetReviewsForSeries(User.GetUserId(), seriesId);
+        // seriesDetail.Recommendations =
+        //     await recommendationService.GetRecommendationsForSeries(User.GetUserId(), seriesId);
 
         return Ok(seriesDetail);
 

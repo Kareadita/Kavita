@@ -87,7 +87,7 @@ public class ExternalMetadataService : IExternalMetadataService
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
         if (series == null || series.Library.Type == LibraryType.Comic) return new SeriesDetailPlusDto();
-        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
