@@ -165,6 +165,10 @@ export class BookmarksComponent implements OnInit {
       this.bookmarks = bookmarks;
       this.bookmarks.forEach(bmk => {
         this.clearingSeries[bmk.seriesId] = false;
+        if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
+          this.seriesIds[bmk.seriesId] = 0;
+        }
+        this.seriesIds[bmk.seriesId] += 1;
       });
 
       const distinctSeriesMap = new Map();
