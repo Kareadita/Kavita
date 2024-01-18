@@ -9,8 +9,8 @@
                 <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('token-valid')"></i>
                 <span class="visually-hidden">{{t('token-valid')}}</span>
               } @else {
-                <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('token-not-valid')"></i>
-                <span class="visually-hidden">{{t('token-not-valid')}}</span>
+                <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('token-expired')"></i>
+                <span class="visually-hidden">{{t('token-expired')}}</span>
               }
             </h4>
 

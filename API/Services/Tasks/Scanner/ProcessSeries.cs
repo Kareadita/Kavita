@@ -122,10 +122,16 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an exception finding existing series for {SeriesName} with Localized name of {LocalizedName} for library {LibraryId}. This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan", firstInfo.Series, firstInfo.LocalizedSeries, library.Id);
+            var series2 = await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format, false);
+            var details = $"Series 1: {firstInfo.Series}    Series 2: {series2.Name}" + "\n" +
+                          $"Localized: {firstInfo.LocalizedSeries}    Localized: {series2.LocalizedName}" + "\n" +
+                          $"Filename: {_directoryService.FileSystem.FileInfo.New(firstInfo.FullFilePath).Directory}    Filename: {series2.FolderPath}";
+            _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
+            firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
+
             await _eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent($"There was an exception finding existing series for {firstInfo.Series} with Localized name of {firstInfo.LocalizedSeries} for library {library.Id}",
-                    "This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan."));
+                MessageFactory.ErrorEvent($"Scanner found a Series {firstInfo.Series} which matched another Series {firstInfo.LocalizedSeries} in a different folder parallel to Library {library.Name} root folder. This is not allowed. Please correct",
+                    details));
             return;
         }
 

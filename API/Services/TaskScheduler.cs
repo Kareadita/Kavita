@@ -151,9 +151,8 @@ public class TaskScheduler : ITaskScheduler
     {
         // KavitaPlus based (needs license check)
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        if (!await _licenseService.HasActiveSubscription(license))
+        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license))
         {
-
             return;
         }
         RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
