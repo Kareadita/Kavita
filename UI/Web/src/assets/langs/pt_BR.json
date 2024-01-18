@@ -264,7 +264,8 @@
         "token-input-label": "{{service}} token vai aqui",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "Token Válido"
     },
     "typeahead": {
         "locked-field": "O campo está bloqueado",

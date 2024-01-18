@@ -264,7 +264,8 @@
         "token-input-label": "{{service}} Token在这里填写",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "令牌有效"
     },
     "typeahead": {
         "locked-field": "字段已锁定",
