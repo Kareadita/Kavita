@@ -233,7 +233,8 @@
         "cancel": "取消",
         "save": "保存",
         "valid-email": "{{validation.valid-email}}",
-        "has-invalid-email": "您似乎没有设置有效的电子邮件。更改电子邮件将要求管理员向您发送链接以完成此操作。"
+        "has-invalid-email": "您似乎没有设置有效的电子邮件。更改电子邮件将要求管理员向您发送链接以完成此操作。",
+        "email-confirmed": "此电子邮件已确认"
     },
     "change-age-restriction": {
         "age-restriction-label": "年龄限制",
@@ -660,7 +661,8 @@
         "publishers-title": "出版社",
         "promoted": "{{common.promoted}}",
         "see-more": "查看更多",
-        "see-less": "收起"
+        "see-less": "收起",
+        "rating-title": "评分"
     },
     "badge-expander": {
         "more-items": "和{{count}}个更多"
@@ -1644,7 +1646,8 @@
         "external-source-already-exists": "已经存在具有相同名称、主机、API密匙的外部源",
         "k+-reset-key": "这会将您的密钥与服务器解开，并允许您重新注册 Kavita 实例。",
         "k+-reset-key-success": "您的许可证尚未注册。使用“编辑”按钮重新注册您的实例并重新激活 Kavita+",
-        "email-not-sent": "存档的电子邮件不是有效的电子邮件，无法发送。链接已转储到日志中。管理员可以提供此链接来完成流程。"
+        "email-not-sent": "存档的电子邮件不是有效的电子邮件，无法发送。链接已转储到日志中。管理员可以提供此链接来完成流程。",
+        "anilist-token-expired": "您的 AniList 令牌已过期。在您在“用户设置”>“帐户”中重新生成之前，Scrobbling 将不再处理"
     },
     "actionable": {
         "scan-library": "扫描资料库",

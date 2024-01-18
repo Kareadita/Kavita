@@ -13,7 +13,8 @@
         "not-granted": "Nebyl vám udělen přístup k žádným knihovnám.",
         "on-deck-title": "Na palubě",
         "recently-updated-title": "Nedávno aktualizovaná řada",
-        "recently-added-title": "Nově přidaná série"
+        "recently-added-title": "Nově přidaná série",
+        "more-in-genre-title": "Více v {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -57,7 +58,8 @@
         "title": "Upravit recenzi",
         "review-label": "Recenze",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "Recenze musí mít alespoň {{count}} znaků"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -68,7 +70,7 @@
     "review-card": {
         "your-review": "Toto je vaše recenze",
         "external-review": "Externí recenze",
-        "local-review": "Recenze",
+        "local-review": "Místní recenze",
         "rating-percentage": "Hodnocení {{r}} %"
     },
     "want-to-read": {
@@ -143,7 +145,8 @@
         "clients-api-key-tooltip": "Klíč API je jako heslo. Udržujte to v tajnosti, Udržujte to v bezpečí.",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Chytré filtry"
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -227,7 +230,9 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "has-invalid-email": "Zdá se, že nemáte nastavenou platnou e-mailovou adresu. Změna e-mailu se bude vyžadovat, aby vám administrátor poslal odkaz k dokončení této akce.",
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "Věkové omezení",
@@ -243,7 +248,8 @@
         "regen-warning": "Obnovení klíče API zruší platnost všech stávajících klientů.",
         "no-key": "CHYBA – KLÍČ NENÍ NASTAVEN",
         "confirm-reset": "Tím zrušíte platnost všech konfigurací OPDS, které jste nastavili. Jste si jistý, že chcete pokračovat?",
-        "key-reset": "Obnovení klíče API"
+        "key-reset": "Obnovení klíče API",
+        "hide": "Skrýt"
     },
     "scrobbling-providers": {
         "title": "Poskytovatelé scroblingu",
@@ -268,8 +274,8 @@
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "Průhledná",
-        "filter": "Filtr",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "Otevřít filtrované vyhledávání pro {{item}}"
     },
     "user-stats-info-cards": {
@@ -282,6 +288,186 @@
         "chapters-read-label": "Přečtené kapitoly",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "Průměrné čtení / týden",
-        "last-active-label": "Poslední aktivní"
+        "last-active-label": "Poslední aktivní",
+        "chapters": "{{value}} kapitoly"
+    },
+    "user-stats": {
+        "read-percentage": "% Přečteno",
+        "library-read-progress-title": "Průběh čtení knihovny"
+    },
+    "top-readers": {
+        "title": "Nejlepší čtenáři",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "all-time": "{{time-periods.all-time}}",
+        "time-selection-label": "Časové okno",
+        "comics-label": "Komiksy: {{value}} hod",
+        "manga-label": "Manga: {{value}} hod",
+        "books-label": "Knihy: {{value}} hod",
+        "this-week": "{{time-periods.this-week}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}"
+    },
+    "day-of-week-pipe": {
+        "sunday": "Neděle",
+        "saturday": "Sobota"
+    },
+    "cbl-import-result-pipe": {
+        "success": "Úspěch",
+        "partial": "Částečný",
+        "failure": "Selhání"
+    },
+    "cbl-conflict-reason-pipe": {
+        "chapter-missing": "{{series}}: Kapitola {{chapter}} v Kavitě chybí. Tato položka bude přeskočena.",
+        "name-conflict": "Na vašem účtu již existuje seznam četby ({{readingListName}}), který odpovídá souboru cbl.",
+        "success": "{{series}} svazek {{volume}} kapitola {{chapter}} úspěšně namapovány.",
+        "volume-missing": "{{series}}: Svazek {{volume}} v Kavitě chybí nebo váš účet nemá oprávnění. Všechny položky s tímto číslem svazku budou přeskočeny.",
+        "series-collision": "Série, {{seriesLink}}, koliduje s jinou sérií stejného jména v jiné knihovně.",
+        "series-missing": "Série {{series}} v Kavitě chybí nebo váš účet nemá oprávnění. Všechny položky s touto sérií budou z importu přeskočeny.",
+        "empty-file": "Soubor cbl je prázdný, není třeba nic dělat.",
+        "all-chapter-missing": "Všechny kapitoly nelze přiřadit ke kapitolám v Kavitě.",
+        "invalid-file": "Soubor je poškozen nebo neodpovídá očekávaným značkám/specifikace.",
+        "all-series-missing": "Ve vašem účtu chybí přístup ke všem sériím v seznamu nebo Kavita v seznamu nic nemá."
+    },
+    "time-duration-pipe": {
+        "hours": "{{value}} hodin",
+        "minutes": "{{value}} minut",
+        "days": "{{value}} dní",
+        "years": "{{value}} let",
+        "months": "{{value}} měsíců"
+    },
+    "time-ago-pipe": {
+        "never": "Nikdy",
+        "mins-ago": "před {{value}} minutami",
+        "just-now": "právě teď",
+        "min-ago": "před minutou",
+        "hour-ago": "před hodinou",
+        "hours-ago": "před {{value}} hodinami",
+        "day-ago": "před dnem",
+        "days-ago": "před {{value}} dny",
+        "month-ago": "před měsícem",
+        "months-ago": "před {{value}} měsíci",
+        "year-ago": "před rokem",
+        "years-ago": "před {{value}} lety"
+    },
+    "relationship-pipe": {
+        "adaptation": "Přizpůsobování",
+        "alternative-setting": "Alternativní nastavení",
+        "alternative-version": "Alternativní verze",
+        "contains": "Obsahuje",
+        "doujinshi": "Doujinshi",
+        "character": "Znak",
+        "other": "Jiný",
+        "prequel": "Prequel",
+        "sequel": "Sequel",
+        "side-story": "Vedlejší příběh",
+        "spin-off": "Spin Off",
+        "parent": "Rodič",
+        "edition": "Edice"
+    },
+    "person-role-pipe": {
+        "character": "Charakter",
+        "cover-artist": "Autor obálky",
+        "writer": "Spisovatel",
+        "artist": "Umělec",
+        "colorist": "Kolorista",
+        "editor": "Editor",
+        "inker": "Inker",
+        "letterer": "Dopisovatel",
+        "other": "Ostatní"
+    },
+    "manga-format-pipe": {
+        "archive": "Archiv",
+        "epub": "EPUB",
+        "image": "Obraz",
+        "pdf": "PDF",
+        "unknown": "Neznámý"
+    },
+    "age-rating-pipe": {
+        "mature-17-plus": "Dospělý 17+",
+        "rating-pending": "Hodnocení čeká na vyřízení",
+        "teen": "Dospívající",
+        "not-applicable": "Nelze použít",
+        "pg": "PG",
+        "ma15-plus": "MA15+",
+        "everyone-10-plus": "Všem 10+",
+        "early-childhood": "Rané dětství",
+        "adults-only": "Pouze dospělí 18+",
+        "everyone": "Každý",
+        "r18-plus": "R18+",
+        "unknown": "Neznámý",
+        "g": "G",
+        "kids-to-adults": "Děti k dospělým",
+        "mature": "Dospělý",
+        "x18-plus": "X18+"
+    },
+    "reset-password": {
+        "title": "Resetovat heslo",
+        "submit": "{{common.submit}}",
+        "description": "Zadejte e-mail svého účtu. Kavita vám pošle e-mail, pokud je v záznamech platný, jinak požádejte správce o odkaz z protokolů.",
+        "email-label": "{{common.email}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}"
+    },
+    "reset-password-modal": {
+        "save": "{{common.save}}",
+        "title": "Resetujte heslo uživatele {{username}}",
+        "new-password-label": "Nové heslo",
+        "error-label": "Chyba: ",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}"
+    },
+    "changelog": {
+        "published-label": "Publikováno: ",
+        "description": "Pokud nevidíte {{installed}}",
+        "download": "Stáhnout",
+        "available": "Dostupný",
+        "installed": "Instalováno",
+        "description-continued": "tag, máte noční vydání. Jako dostupné se zobrazí pouze hlavní verze."
+    },
+    "invite-user": {
+        "email": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "setup-user-account": "Nastavení uživatelského účtu",
+        "inviting": "Pozvánka…",
+        "title": "Pozvat uživatele",
+        "close": "{{common.close}}",
+        "setup-user-account-tooltip": "Zkopírujte toto a vložte na novou kartu. Možná se budete muset odhlásit.",
+        "invite-url-label": "Adresa URL pozvánky",
+        "invite": "Pozvat",
+        "description": "Pozvěte uživatele na svůj server zadáním jeho e-mailu. Obdrží e-mail pro vytvoření účtu. Aby to fungovalo, musíte mít nastaveno pole Název hostitele na kartě <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a> nebo mít přístup k instanci prostřednictvím je to vzdálená URL. <br/><br/>Případně můžete použít uživatelské jméno, ale mějte na paměti, že obnovení hesla nebude dostupné pro účty založené na uživatelských jménech. Pokud nechcete používat naši e-mailovou službu, můžete hostovat svou vlastní e-mailovou službu.",
+        "setup-user-title": "Uživatel byl pozván",
+        "setup-user-description": "Pro nastavení účtu pro svého uživatele můžete použít následující odkaz níže nebo použít tlačítko kopírování. Před použitím odkazu k registraci nového uživatele se možná budete muset odhlásit. Pokud Kavita dokáže určit váš server jako externě přístupný (nebo je nastaven název hostitele), bude uživateli odeslán e-mail a uživatelé mohou použít odkazy k dokončení nastavení svého účtu. V opačném případě použijte odkaz níže nebo v protokolech k ručnímu odeslání nebo nastavení jejich účtu."
+    },
+    "directory-picker": {
+        "title": "Vyberte adresář",
+        "close": "{{common.close}}",
+        "path-label": "Cesta"
+    },
+    "publication-status-pipe": {
+        "hiatus": "Mezera",
+        "completed": "Dokončeno",
+        "cancelled": "Zrušeno",
+        "ongoing": "Pokračující",
+        "ended": "Skončilo"
+    },
+    "all-series": {
+        "series-count": "{{common.series-count}}",
+        "title": "Všechny řady"
+    },
+    "role-selector": {
+        "title": "Role"
+    },
+    "library-type-pipe": {
+        "book": "Kniha",
+        "comic": "Komiks",
+        "manga": "Manga"
+    },
+    "all-filters": {
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "title": "Všechny chytré filtry"
+    },
+    "announcements": {
+        "title": "Oznámení"
     }
 }

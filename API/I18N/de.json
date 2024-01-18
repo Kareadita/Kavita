@@ -171,5 +171,10 @@
     "external-source-doesnt-exist": "Externe Quelle existiert nicht",
     "external-sources": "Externe Quellen",
     "external-source-required": "ApiSchlüssel und Host erforderlich",
-    "smart-filter-already-in-use": "Es gibt einen bestehenden Stream mit diesem Smart Filter"
+    "smart-filter-already-in-use": "Es gibt einen bestehenden Stream mit diesem Smart Filter",
+    "more-in-genre": "Mehr in Genre {0}",
+    "browse-more-in-genre": "Mehr in {0} stöbern",
+    "recently-updated": "Zuletzt aktualisiert",
+    "browse-recently-updated": "Zuletzt aktualisiert durchsuchen",
+    "unable-to-reset-k+": "Aufgrund eines Fehlers konnte die Kavita+ Lizenz nicht zurückgesetzt werden. Kontaktieren Sie den Kavita+ Support"
 }

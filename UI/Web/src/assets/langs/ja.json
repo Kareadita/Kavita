@@ -4,7 +4,7 @@
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "パスワードを忘れた",
+        "forgot-password": "パスワードをお忘れですか?",
         "submit": "{{common.submit}}"
     },
     "dashboard": {
@@ -238,9 +238,23 @@
         "username": "ユーザーネーム",
         "password": "パスワード",
         "chapter-num": "チャプター",
-        "volume-num": "Volume",
+        "volume-num": "ボリューム",
         "series-count": "{{num}} シリーズ",
-        "item-count": "{{num}} アイテム"
+        "item-count": "{{num}} アイテム",
+        "reset-to-default": "デフォルトにリセット",
+        "add": "追加",
+        "read": "読む",
+        "create": "作成",
+        "remove": "削除",
+        "edit": "編集",
+        "select-all": "全選択",
+        "help": "ヘルプ",
+        "submit": "送信",
+        "reset": "リセット",
+        "apply": "適用",
+        "save": "保存",
+        "clear": "クリア",
+        "filter": "絞り込み"
     },
     "series-metadata-detail": {
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -257,7 +271,7 @@
         "links-title": "リンク",
         "editors-title": "編集者",
         "tags-title": "タグ",
-        "cover-artists-title": "アシスタント",
+        "cover-artists-title": "カバーアーティスト",
         "letterers-title": "校正",
         "translators-title": "翻訳者",
         "characters-title": "キャラクター"
@@ -285,7 +299,8 @@
         "clear": "{{common.clear}}",
         "filter-label": "{{common.filter}}",
         "donate": "寄付する",
-        "home": "ホーム"
+        "home": "ホーム",
+        "donate-tooltip": "Kavita+にサブスクライブすることでこれを削除できます"
     },
     "all-series": {
         "title": "すべてのシリーズ",
@@ -389,7 +404,7 @@
         "save": "{{common.save}}",
         "font-size-book-label": "文字サイズ",
         "clients-opds-description": "外部クライアントを使用する場合は以下のAPIもしくは接続用URLを使用してください｡これはパスワードのように機能するのでプライバシーを保持してください｡",
-        "line-height-book-tooltip": "本の行間隔をどれくらいにしますか？",
+        "line-height-book-tooltip": "書籍の行間の間隔",
         "clients-opds-url-tooltip": "OPDS URL",
         "margin-book-label": "余白"
     },
@@ -411,7 +426,7 @@
         "title": "デバイスマネージャ",
         "description": "このセクションは、ウェブブラウザでKavitaに接続できないデバイスを設定するためのものです。",
         "devices-title": "デバイス",
-        "delete": "お問い合わせ",
+        "delete": "{{common.delete}}",
         "add": "{{common.apply}}",
         "email-label": "メール: ",
         "edit": "{{common.edit}}",
@@ -475,8 +490,8 @@
     },
     "restriction-selector": {
         "age-rating-label": "年齢制限",
-        "title": "年齢制限",
-        "description": "選択された場合、少なくとも1つのアイテムが選択された制限値を上回っているシリーズおよびリーディングリストは、すべての結果から取り除かれます。",
+        "title": "年齢制限の設定",
+        "description": "選択した場合、少なくとも1つのアイテムが選択した制限よりも大きいすべてのシリーズおよび読書リストは、結果から削除されます。",
         "not-applicable-for-admins": "これは管理者には適応されません。",
         "no-restriction": "無制限",
         "include-unknowns-tooltip": "Trueの場合、コンテンツが年齢制限付きのものであっても全て許可されます｡これによりタグ付けされていないメディアが対象年齢以下のユーザーに閲覧されます｡",
@@ -513,7 +528,9 @@
         "activate-save": "{{common.save}}",
         "activate-discordId-tooltip": "DiscordアカウントをKavita+にリンクしてください。これにより、Kavitaを形成するための非公開のチャンネルへのアクセスが得られます。",
         "activate-email-label": "{{common.email}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "discord-validation": "これは有効なDiscordユーザーIDではありません。 ユーザ ID は、あなたのユーザ名ではありません.",
+        "activate-reset-tooltip": "ライセンスをサーバーに結びつけます｡ライセンスとメールアドレスがどちらも必要です｡"
     },
     "read-more": {
         "read-less": "あまり読まない",
@@ -667,7 +684,8 @@
         "email-label": "{{common.email}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "has-invalid-email": "有効なメールセットがないようです。 メールを変更するには、管理者がこのアクションを完了するためにリンクを送信する必要があります."
     },
     "top-readers": {
         "title": "最も読んだ",
@@ -828,7 +846,7 @@
         "left-to-right": "左から右へ",
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
         "on": "ON",
-        "writing-style-tooltip": "テキストの方向を変更します。水平は左から右、垂直は上から下です。",
+        "writing-style-tooltip": "テキストの方向を変更します。水平は横書き、垂直は縦書きです。",
         "horizontal": "水平",
         "off": "OFF",
         "margin-label": "{{user-preferences.margin-book-label}}",
@@ -848,12 +866,19 @@
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
         "fullscreen-tooltip": "フルスクリーンモード",
         "exit": "終了",
-        "enter": "Enter"
+        "enter": "Enter",
+        "layout-mode-option-1col": "1行",
+        "layout-mode-option-scroll": "スクロール",
+        "theme-dark": "ダーク",
+        "theme-black": "ブラック",
+        "layout-mode-option-2col": "2行",
+        "color-theme-title": "カラー テーマ:",
+        "layout-mode-tooltip": "Scroll: EPUBファイルを反映します（通常、1章ごとに1つの長いスクロールページ）。<br/>1列: 1回に1つの仮想ページを作成します。<br/>2列: 1回に2つの仮想ページを作成し、横に配置します。"
     },
     "file-type-group-pipe": {
         "epub": "Epub",
-        "archive": "Archive",
-        "pdf": "Pdf",
+        "archive": "アーカイブ",
+        "pdf": "PDF",
         "image": "画像"
     },
     "library-detail": {
