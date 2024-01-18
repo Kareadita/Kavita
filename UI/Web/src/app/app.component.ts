@@ -7,11 +7,12 @@ import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import { Observable } from 'rxjs';
+import {interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ServerService} from "./_services/server.service";
 
 @Component({
     selector: 'app-root',
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit {
   private readonly offcanvas = inject(NgbOffcanvas);
   public readonly navService = inject(NavService);
   public readonly cdRef = inject(ChangeDetectorRef);
+  public readonly serverService = inject(ServerService);
 
   constructor(private accountService: AccountService,
     private libraryService: LibraryService,
@@ -95,6 +97,14 @@ export class AppComponent implements OnInit {
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
       // On load, make an initial call for valid license
       this.accountService.hasValidLicense().subscribe();
+
+      interval(4 * 60 * 60 * 1000) // 4 hours in milliseconds
+        .pipe(
+          switchMap(() => this.accountService.currentUser$),
+          filter(u => this.accountService.hasAdminRole(u!)),
+          switchMap(_ => this.serverService.checkForUpdates())
+        )
+        .subscribe();
     }
   }
 }

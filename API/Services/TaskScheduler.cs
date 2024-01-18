@@ -35,6 +35,7 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
+    Task CheckForUpdate();
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -242,14 +243,14 @@ public class TaskScheduler : ITaskScheduler
     public void ScheduleUpdaterTasks()
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
-        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
+        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(1, 2)} * * *", RecurringJobOptions);
         BackgroundJob.Enqueue(() => CheckForUpdate());
     }
 
     public void ScanFolder(string folderPath, TimeSpan delay)
     {
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] { normalizedFolder }))
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder]))
         {
             _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);

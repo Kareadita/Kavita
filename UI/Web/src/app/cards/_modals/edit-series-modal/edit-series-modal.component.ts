@@ -440,10 +440,6 @@ export class EditSeriesModalComponent implements OnInit {
       return a.isoCode == b.isoCode;
     }
 
-    if (this.metadata.language === undefined || this.metadata.language === null || this.metadata.language === '') {
-      this.metadata.language = 'en';
-    }
-
     const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
     if (l !== undefined) {
       this.languageSettings.savedData = l;

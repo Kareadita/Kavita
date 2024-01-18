@@ -291,4 +291,15 @@ public class ServerController : BaseApiController
         return Ok(await _emailService.GetVersion(emailServiceUrl));
     }
 
+    /// <summary>
+    /// Checks for updates and pushes an event to the UI
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("check-for-updates")]
+    public async Task<ActionResult> CheckForAnnouncements()
+    {
+        await _taskScheduler.CheckForUpdate();
+        return Ok();
+    }
+
 }
