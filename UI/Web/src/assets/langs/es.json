@@ -374,7 +374,10 @@
         "permission-error": "No tienes permiso para cambiar tu dirección de correo electrónico. Contacta a un administrador del servidor.",
         "required-field": "{{validation.required-field}}",
         "reset": "{{common.reset}}",
-        "setup-user-account": "Configurar cuenta de usuario"
+        "setup-user-account": "Configurar cuenta de usuario",
+        "has-invalid-email": "Parece que no tienes una dirección de correo electrónico válida. Cambiar el correo electrónico requerirá que el administrador le envíe un enlace para completar esta acción.",
+        "valid-email": "{{validation.valid-email}}",
+        "email-confirmed": "Este correo electrónico está confirmado"
     },
     "change-age-restriction": {
         "save": "{{common.save}}",
@@ -653,7 +656,9 @@
         "invite": "Invitar",
         "inviting": "Invitando…",
         "description": "Invite a un usuario a su servidor introduciendo su correo electrónico. Recibirán un correo electrónico para crear una cuenta. Para que esto funcione, debe tener configurado el campo Nombre del host en la pestaña <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> o acceder a su instancia a través de su dirección URL remota. <br/><br/>Alternativamente, puede utilizar un nombre de usuario, pero tenga en cuenta que los restablecimientos de la contraseña no estarán disponibles para las cuentas basadas en nombres de usuario. Si no desea utilizar nuestro servicio de correo electrónico, puede alojar su propio servicio de correo electrónico.",
-        "setup-user-description": "Puede utilizar el siguiente enlace para configurar la cuenta de usuario o utilizar el botón de copia. Es posible que tenga que cerrar la sesión antes de utilizar el enlace para registrar un nuevo usuario. Si Kavita puede determinar que tu servidor es accesible externamente (o el nombre de host está configurado), se habrá enviado un correo electrónico al usuario y éste podrá utilizar los enlaces para terminar de configurar su cuenta. De lo contrario, utilice el enlace de abajo o en los registros para mandarselo manualmenteanualmente o configurar su cuenta."
+        "setup-user-description": "Puede utilizar el siguiente enlace para configurar la cuenta de usuario o utilizar el botón de copia. Es posible que tenga que cerrar la sesión antes de utilizar el enlace para registrar un nuevo usuario. Si Kavita puede determinar que tu servidor es accesible externamente (o el nombre de host está configurado), se habrá enviado un correo electrónico al usuario y éste podrá utilizar los enlaces para terminar de configurar su cuenta. De lo contrario, utilice el enlace de abajo o en los registros para mandarselo manualmenteanualmente o configurar su cuenta.",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
     },
     "license": {
         "manage": "Administrar",
@@ -674,9 +679,11 @@
         "activate-delete": "{{common.delete}}",
         "activate-save": "{{common.save}}",
         "title": "Licencia Kavita+",
-        "activate-discordId-label": "ID de usuario de Discord",
+        "activate-discordId-label": "Id. de usuario de Discord",
         "activate-reset": "{{common.reset}}",
-        "activate-discordId-tooltip": "Vincula tu cuenta de Discord con Kavita+. Esto te da acceso a canales ocultos para ayudar a dar forma a Kavita"
+        "activate-discordId-tooltip": "Vincula tu cuenta de Discord con Kavita+. Esto te da acceso a canales ocultos para ayudar a dar forma a Kavita.",
+        "discord-validation": "Este no es un ID de usuario de Discord válido. Tu ID de usuario no es tu nombre de usuario de discordia.",
+        "activate-reset-tooltip": "Desvincule su licencia con este servidor. Requiere licencia y correo electrónico."
     },
     "series-metadata-detail": {
         "translators-title": "Traductores",
@@ -696,7 +703,8 @@
         "colorists-title": "Coloristas",
         "editors-title": "Editores",
         "inkers-title": "Entintadores",
-        "publishers-title": "Editoriales"
+        "publishers-title": "Editoriales",
+        "rating-title": "Valoraciones"
     },
     "update-notification-modal": {
         "close": "{{common.close}}",
@@ -721,7 +729,8 @@
         "home": "Inicio",
         "want-to-read": "Quiero Leer",
         "back": "Atras",
-        "more": "Ver más"
+        "more": "Ver más",
+        "donate-tooltip": "Puedes eliminarlo suscribiéndote a Kavita+"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -966,7 +975,7 @@
         "device-created": "Dispositivo creado",
         "confirm-delete-multiple-series": "¿Estás seguro de que deseas eliminar la serie {{count}}? No se modificarán los archivos en el disco.",
         "forced-scan-queued": "Se ha iniciado un escaneo forzoso de {{name}}",
-        "email-sent-to-no-existing": "Se ha enviado un correo electrónico a {{email}} para confirmación.",
+        "email-sent-to-no-existing": "El correo electrónico existente no es válido. Se ha volcado un enlace a los registros. Solicite al administrador un enlace para completar el cambio de correo electrónico.",
         "password-reset": "Restablecer contraseña",
         "library-created": "Biblioteca creada con éxito. Se ha iniciado un escaneo.",
         "alert-long-running": "Este proceso es de larga duración. Por favor, dale tiempo a completarse antes de volverlo a iniciar.",
@@ -1032,7 +1041,9 @@
         "reading-list-updated": "Lista de lectura actualizada",
         "reset-base-url": "La dirección URL base se ha restablecido",
         "k+-reset-key": "Esto desvinculará tu clave de un servidor y te permitirá volver a registrar una instancia de Kavita.",
-        "k+-reset-key-success": "Se ha anulado el registro de su licencia. Utilice el botón Editar para volver a registrar su instancia y reactivar Kavita+"
+        "k+-reset-key-success": "Se ha anulado el registro de su licencia. Utilice el botón Editar para volver a registrar su instancia y reactivar Kavita+",
+        "email-not-sent": "El correo electrónico archivado no es válido y no se puede enviar. Se ha volcado un enlace en los registros. El administrador puede proporcionar este enlace para completar el flujo.",
+        "anilist-token-expired": "Tu token de AniList ha caducado. El scrobbling dejará de procesarse hasta que lo vuelva a generar en Configuración de usuario > Cuenta"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -1662,7 +1673,8 @@
         "setup-user-tooltip": "Configurar usuario",
         "setup-user-alt": "Configurar usuario {{user}}",
         "resend": "Reenviar",
-        "last-active-title": "Activo por última vez:"
+        "last-active-title": "Activo por última vez:",
+        "username-pattern": "El nombre de usuario sólo puede contener los siguientes caracteres y espacios en blanco: {{characters}}"
     },
     "manga-format-stats": {
         "title": "Formato",

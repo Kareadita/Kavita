@@ -233,7 +233,8 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Parece que você não tem um conjunto de e-mail válido. A alteração do e-mail exigirá que o administrador lhe envie um link para concluir esta ação.",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "email-confirmed": "Este e-mail está confirmado"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrição de Etária",
@@ -530,9 +531,11 @@
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
         "activate-save": "{{common.save}}",
-        "activate-discordId-label": "ID de usuário do Discord",
+        "activate-discordId-label": "ID de Usuário do Discord",
         "activate-reset": "{{common.reset}}",
-        "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para ajudar a moldar Kavita"
+        "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para moldar Kavita.",
+        "discord-validation": "Este não é um ID de usuário válido do Discord. Seu ID de usuário não é seu nome de usuário discord.",
+        "activate-reset-tooltip": "Desvincule sua licença com este servidor. Requer licença e e-mail."
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -658,7 +661,8 @@
         "publishers-title": "Editoras",
         "promoted": "{{common.promoted}}",
         "see-more": "Veja Mais",
-        "see-less": "Veja Menos"
+        "see-less": "Veja Menos",
+        "rating-title": "Avaliações"
     },
     "badge-expander": {
         "more-items": "e {{count}} mais"
@@ -1642,7 +1646,8 @@
         "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API",
         "k+-reset-key": "Isso desvinculará sua chave de um servidor e permitirá que você registre novamente uma instância Kavita.",
         "k+-reset-key-success": "Sua licença foi cancelada. Use o botão Editar para registrar novamente sua instância e reativar o Kavita+",
-        "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo."
+        "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo.",
+        "anilist-token-expired": "Seu token AniList expirou. O scrobbling não será mais processado até que você o gere novamente nas Configurações do Usuário > Conta"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",

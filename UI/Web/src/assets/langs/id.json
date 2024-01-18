@@ -10,7 +10,11 @@
     "dashboard": {
         "server-settings-link": "Pengaturan server",
         "not-granted": "Kamu belum diberikan akses ke pustaka apa pun.",
-        "more-in-genre-title": "Lainnya di {{genre}}"
+        "more-in-genre-title": "Lainnya di {{genre}}",
+        "no-libraries": "Pustaka belum dibuat. Harap buat terlebih dahulu",
+        "on-deck-title": "Terakhir Dibaca",
+        "recently-added-title": "Seri yang Baru Ditambahkan",
+        "recently-updated-title": "Seri yang Baru Diubah"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -24,6 +28,98 @@
         "update": "Perbarui"
     },
     "user-scrobble-history": {
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "title": "Riwayat Ekstrak",
+        "not-applicable": "Tidak Dapat Diterapkan",
+        "created-header": "Dibuat",
+        "last-modified-header": "Terakhir Diubah",
+        "type-header": "Tipe",
+        "series-header": "Seri",
+        "data-header": "Data",
+        "is-processed-header": "Telah Diproses",
+        "no-data": "Data Kosong",
+        "volume-and-chapter-num": "Volume {{v}} Bab {{n}}",
+        "rating": "Penilaian {{r}}",
+        "processed": "Telah Diproses",
+        "not-processed": "Belum Diproses"
+    },
+    "user-preferences": {
+        "locale-tooltip": "Bahasa yang seharusnya digunakan oleh Kavita",
+        "blur-unread-summaries-label": "Kaburkan Ringkasan Seri yang Belum Dibaca",
+        "blur-unread-summaries-tooltip": "Kaburkan ringkasan pada volume atau bab yang belum dibaca (untuk menghindari spoiler)",
+        "prompt-on-download-label": "Pertanyaan saat Mengunduh",
+        "prompt-on-download-tooltip": "Peringatan ketika unduhan melebihi ukuran {{size}}MB",
+        "disable-animations-label": "Matikan Animasi",
+        "disable-animations-tooltip": "Matikan animasi di situs. Berguna untuk pembaca e-ink.",
+        "collapse-series-relationships-label": "Sembunyikan Hubungan Seri",
+        "collapse-series-relationships-tooltip": "Haruskah Kavita menampilkan Seri yang tidak memiliki hubungan atau yang merupakan induk/prekuel",
+        "share-series-reviews-label": "Bagikan Ulasan Seri",
+        "share-series-reviews-tooltip": "Haruskah Kavita menyertakan ulasan Anda tentang Seri untuk pengguna lain",
+        "reading-direction-book-label": "Arah Baca",
+        "font-family-label": "Jenis Font",
+        "font-family-tooltip": "Jenis Font untuk dimuat. Bawaan akan memuat font bawaan buku",
+        "writing-style-label": "Gaya Penulisan",
+        "global-settings-title": "Pengaturan Global",
+        "page-layout-mode-label": "Mode Tata Letak Halaman",
+        "page-layout-mode-tooltip": "Tampilkan item sebagai kartu atau tampilan daftar pada halaman Detail Seri.",
+        "smart-filters-tab": "Filter Pintar",
+        "success-toast": "Pengaturan pengguna berhasil diubah",
+        "image-reader-settings-title": "Pembaca Gambar",
+        "reading-direction-label": "Orientasi Baca",
+        "reading-direction-tooltip": "Arah untuk mengklik agar beralih ke halaman berikutnya. Dari Kanan ke Kiri berarti Anda mengklik pada sisi kiri layar untuk beralih ke halaman berikutnya.",
+        "scaling-option-label": "Opsi Skala",
+        "scaling-option-tooltip": "Bagaimana cara menyesuaikan skala gambar ke layar Anda.",
+        "page-splitting-label": "Pemisahan Halaman",
+        "page-splitting-tooltip": "Bagaimana cara memisahkan gambar yang lebarnya penuh (gambar kiri dan kanan digabungkan)",
+        "reading-mode-label": "Mode Membaca",
+        "layout-mode-label": "Mode Tata Letak",
+        "layout-mode-tooltip": "Tampilkan satu gambar ke layar atau dua gambar berdampingan",
+        "background-color-label": "Warna Latar Belakang",
+        "emulate-comic-book-label": "Emulasikan buku komik",
+        "auto-close-menu-label": "Tutup Menu Otomatis",
+        "show-screen-hints-label": "Tampilkan Petunjuk Layar",
+        "swipe-to-paginate-label": "Geser untuk Memutar Halaman",
+        "book-reader-settings-title": "Pembaca Buku",
+        "tap-to-paginate-label": "Ketuk untuk Memutar Halaman",
+        "tap-to-paginate-tooltip": "Haruskan sisi layar pembaca buku bisa diketuk untuk pindah ke halaman sebelumnya/berikutnya",
+        "immersive-mode-label": "Mode Imersif",
+        "immersive-mode-tooltip": "Ini akan menyembunyikan menu dengan mengklik dokumen pembaca dan mengaktifkan ketuk untuk memutar halaman",
+        "writing-style-tooltip": "Mengubah arah teks. Horizontal dari kiri ke kanan, vertikal dari atas ke bawah.",
+        "layout-mode-book-label": "Mode Tata Letak",
+        "layout-mode-book-tooltip": "Bagaimana konten harus ditata. Gulir itu sesuai dengan bawaan buku. 1 atau 2 Kolom itu sesuai dengan tinggi perangkat dan dimuat dalam 1 atau 2 kolom teks per halaman",
+        "color-theme-book-tooltip": "Warna tema apa yang akan diterapkan pada konten pembaca buku dan menu",
+        "color-theme-book-label": "Warna Tema",
+        "font-size-book-label": "Ukuran Font",
+        "line-height-book-label": "Jarak Baris",
+        "line-height-book-tooltip": "Berapa banyak spasi antara baris dalam buku",
+        "reading-direction-book-tooltip": "Cara mengklik untuk beralih ke halaman berikutnya. Dari Kanan ke Kiri berarti mengklik di sisi kiri layar."
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Progres Bacaan",
+        "score-updated": "Pembaruan Penilaian",
+        "want-to-read-add": "Ingin Dibaca: Tambah",
+        "want-to-read-remove": "Ingin Dibaca: Hapus",
+        "review": "Berikan ulasan"
+    },
+    "review-series-modal": {
+        "close": "{{common.close}}",
+        "title": "Ubah Ulasan",
+        "review-label": "Ulasan"
+    },
+    "spoiler": {
+        "click-to-show": "Spoiler, klik untuk tampilkan"
+    },
+    "toasts": {
+        "library-created": "Perpustakaan berhasil dibuat. Pemindaian telah dimulai.",
+        "age-restriction-updated": "Batasan Usia telah diperbarui",
+        "email-sent-to": "Email telah dikirim ke alamat email lama Anda untuk konfirmasi.",
+        "email-sent-to-no-existing": "Email yang ada tidak valid. Tautan telah dibuang ke log. Minta tautan kepada admin untuk menyelesaikan perubahan email.",
+        "change-email-private": "Server tidak dapat diakses secara publik. Minta admin untuk mengambil tautan konfirmasi Anda dari log",
+        "device-created": "Perangkat dibuat",
+        "confirm-regen-covers": "Menyegarkan sampul akan memaksa semua gambar sampul dihitung ulang. Ini adalah operasi yang berat. Apakah Anda yakin tidak ingin melakukan Pemindaian sebagai gantinya?",
+        "alert-long-running": "Proses ini berjalan lama. Mohon berikan waktu untuk menyelesaikannya sebelum meminta kembali.",
+        "anilist-token-updated": "Token AniList telah diperbarui",
+        "confirm-delete-multiple-series": "Apakah Anda yakin ingin menghapus seri {{count}}? Tindakan ini tidak akan mengubah file pada disk.",
+        "device-updated": "Perangkat diperbarui"
     }
 }
