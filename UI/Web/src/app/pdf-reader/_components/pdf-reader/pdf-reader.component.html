@@ -33,6 +33,7 @@
       [backgroundColor]="backgroundColor"
       [customToolbar]="multiToolbar"
       [language]="user.preferences.locale"
+      [(scrollMode)]="scrollMode"
 
       (pageChange)="saveProgress()"
       (pdfLoadingStarts)="updateLoading(true)"
@@ -86,6 +87,14 @@
 
           <div class="verticalToolbarSeparator hiddenSmallView"></div>
           <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
+
+          <pdf-single-page-mode [show]="true" [scrollMode]="scrollMode"></pdf-single-page-mode>
+          <pdf-vertical-scroll-mode [show]="true" [scrollMode]="scrollMode"></pdf-vertical-scroll-mode>
+          <pdf-horizontal-scroll [show]="true" [scrollMode]="scrollMode"></pdf-horizontal-scroll>
+          <pdf-wrapped-scroll-mode [show]="true" [scrollMode]="scrollMode"></pdf-wrapped-scroll-mode>
+          <pdf-no-spread [show]=true [scrollMode]="scrollMode"></pdf-no-spread>
+          <pdf-odd-spread [show]=true [scrollMode]="scrollMode"></pdf-odd-spread>
+          <pdf-even-spread [show]="true" [scrollMode]="scrollMode"></pdf-even-spread>
         </div>
 
       </div>
