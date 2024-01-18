@@ -643,6 +643,7 @@ public class ScrobblingService : IScrobblingService
             .Concat(addToWantToRead.Select(r => r.AppUser))
             .Concat(removeWantToRead.Select(r => r.AppUser))
             .Concat(ratingEvents.Select(r => r.AppUser))
+            .Where(user => !string.IsNullOrEmpty(user.AniListAccessToken))
             .DistinctBy(u => u.Id)
             .ToList();
         foreach (var user in usersToScrobble)
@@ -886,6 +887,7 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user, string license)
     {
+        if (string.IsNullOrEmpty(user.AniListAccessToken)) return 0;
         try
         {
             if (!userRateLimits.ContainsKey(user.Id))
