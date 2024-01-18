@@ -48,7 +48,7 @@ public class UnitOfWork : IUnitOfWork
         _userManager = userManager;
     }
 
-    public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper);
+    public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper, _userManager);
     public IUserRepository UserRepository => new UserRepository(_context, _userManager, _mapper);
     public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
