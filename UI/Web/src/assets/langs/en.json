@@ -284,6 +284,7 @@
     "scrobbling-providers": {
         "title": "Scrobbling Providers",
         "requires": "This feature requires an active {{product}} license",
+        "token-valid": "Token Valid",
         "token-expired": "Token Expired",
         "no-token-set": "No Token Set",
         "token-set":  "Token Set",

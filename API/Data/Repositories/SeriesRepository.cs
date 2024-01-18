@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data.ManualMigrations;
 using API.Data.Misc;
 using API.Data.Scanner;
@@ -31,6 +32,7 @@ using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SQLite;
 
@@ -152,14 +154,16 @@ public class SeriesRepository : ISeriesRepository
 {
     private readonly DataContext _context;
     private readonly IMapper _mapper;
+    private readonly UserManager<AppUser> _userManager;
 
     private readonly Regex _yearRegex = new Regex(@"\d{4}", RegexOptions.Compiled,
         Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 
-    public SeriesRepository(DataContext context, IMapper mapper)
+    public SeriesRepository(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
     {
         _context = context;
         _mapper = mapper;
+        _userManager = userManager;
     }
 
     public void Add(Series series)
@@ -462,14 +466,18 @@ public class SeriesRepository : ISeriesRepository
             .SelectMany(v => v.Chapters)
             .SelectMany(c => c.Files.Select(f => f.Id));
 
-        result.Files = await _context.MangaFile
-            .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
-            .AsSplitQuery()
-            .Take(maxRecords)
-            .OrderBy(f => f.FilePath)
-            .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-
+        // Need to check if an admin
+        var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
+        if (await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+        {
+            result.Files = await _context.MangaFile
+                .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
+                .AsSplitQuery()
+                .Take(maxRecords)
+                .OrderBy(f => f.FilePath)
+                .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
 
         result.Chapters = await _context.Chapter
             .Include(c => c.Files)

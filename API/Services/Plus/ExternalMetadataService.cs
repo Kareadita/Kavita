@@ -114,11 +114,19 @@ public class ExternalMetadataService : IExternalMetadataService
                 Reviews = result.Reviews
             };
         }
-        catch (Exception e)
+        catch (FlurlHttpException ex)
         {
-            _logger.LogError(e, "An error happened during the request to Kavita+ API");
-            return null;
+            if (ex.StatusCode == 404)
+            {
+                return null;
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error happened during the request to Kavita+ API");
+        }
+
+        return null;
     }
 
     private async Task<RecommendationDto> ProcessRecommendations(Series series, AppUser user, IEnumerable<MediaRecommendationDto> recs)

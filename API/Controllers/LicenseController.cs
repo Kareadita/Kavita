@@ -31,12 +31,7 @@ public class LicenseController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        var ret = await licenseService.HasActiveLicense(forceCheck);
-        if (ret)
-        {
-            await taskScheduler.ScheduleKavitaPlusTasks();
-        }
-        return Ok(ret);
+        return Ok(await licenseService.HasActiveLicense(forceCheck));
     }
 
     /// <summary>

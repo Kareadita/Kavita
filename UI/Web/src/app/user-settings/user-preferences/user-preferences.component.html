@@ -436,8 +436,10 @@
                 }
 
                 @defer (when tab.fragment === FragmentID.Scrobbling; prefetch on idle) {
-                  <app-user-scrobble-history></app-user-scrobble-history>
-                  <app-user-holds></app-user-holds>
+                  @if(hasActiveLicense) {
+                    <app-user-scrobble-history></app-user-scrobble-history>
+                    <app-user-holds></app-user-holds>
+                  }
                 }
               </ng-template>
           </li>

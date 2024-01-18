@@ -190,23 +190,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId)
     {
-        var seriesDetail = new SeriesDetailPlusDto();
         if (!await licenseService.HasActiveLicense())
         {
-            seriesDetail.Recommendations = null;
-            seriesDetail.Ratings = Enumerable.Empty<RatingDto>();
-            return Ok(seriesDetail);
+            return Ok(null);
         }
 
-        seriesDetail = await metadataService.GetSeriesDetail(User.GetUserId(), seriesId);
-
-        // Temp solution, needs to be updated with new API
-        // seriesDetail.Ratings = await ratingService.GetRatings(seriesId);
-        // seriesDetail.Reviews = await reviewService.GetReviewsForSeries(User.GetUserId(), seriesId);
-        // seriesDetail.Recommendations =
-        //     await recommendationService.GetRecommendationsForSeries(User.GetUserId(), seriesId);
-
-        return Ok(seriesDetail);
+        return Ok(await metadataService.GetSeriesDetail(User.GetUserId(), seriesId));
 
     }
 }

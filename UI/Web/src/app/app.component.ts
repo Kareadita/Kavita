@@ -93,6 +93,8 @@ export class AppComponent implements OnInit {
       // Bootstrap anything that's needed
       this.themeService.getThemes().subscribe();
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
+      // On load, make an initial call for valid license
+      this.accountService.hasValidLicense().subscribe();
     }
   }
 }

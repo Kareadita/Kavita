@@ -106,6 +106,7 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Library
             .Include(l => l.AppUsers)
             .Includes(includes)
+            .AsSplitQuery()
             .ToListAsync();
     }
 

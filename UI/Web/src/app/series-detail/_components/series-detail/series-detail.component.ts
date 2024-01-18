@@ -692,16 +692,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  // loadRecommendations() {
-  //   this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
-  //     rec.ownedSeries.map(r => {
-  //       this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
-  //     });
-  //     this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
-  //     this.hasRecommendations = this.combinedRecs.length > 0;
-  //     this.cdRef.markForCheck();
-  //   });
-  // }
 
   loadPlusMetadata(seriesId: number) {
     this.metadataService.getSeriesMetadataFromPlus(seriesId).subscribe(data => {
