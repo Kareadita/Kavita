@@ -349,16 +349,26 @@ public class Startup
             opts.IncludeQueryInRequestPath = true;
         });
 
+        var allowIframing = Configuration.AllowIFraming;
+
         app.Use(async (context, next) =>
         {
             context.Response.Headers[HeaderNames.Vary] =
                 new[] { "Accept-Encoding" };
 
-            // Don't let the site be iframed outside the same origin (clickjacking)
-            context.Response.Headers.XFrameOptions = Configuration.XFrameOptions;
 
-            // Setup CSP to ensure we load assets only from these origins
-            context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
+            if (!allowIframing)
+            {
+                // Don't let the site be iframed outside the same origin (clickjacking)
+                context.Response.Headers.XFrameOptions = "SAMEORIGIN";
+
+                // Setup CSP to ensure we load assets only from these origins
+                context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
+            }
+            else
+            {
+                logger.LogCritical("appsetting.json has allow iframing on! This may allow for clickjacking on the server. User beware");
+            }
 
             await next();
         });
