@@ -3,10 +3,11 @@
   "version": "0.7.12.1",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "npm run cache-langs && ng serve",
+    "build": "npm run cache-langs && ng build",
     "minify-langs": "node minify-json.js",
-    "prod": "ng build --configuration production && npm run minify-langs",
+    "cache-langs": "node hash-localization.js",
+    "prod": "ng build --configuration production && npm run minify-langs && npm run cache-langs",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
     "e2e": "ng e2e"
