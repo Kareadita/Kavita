@@ -38,7 +38,7 @@
               </div>
             }
             <div class="mb-3">
-              <label for="email" class="form-label visually-hidden">{{t('email-label')}}</label>
+              <label for="email" class="form-label">{{t('email-label')}}</label>
               <input class="form-control custom-input" type="email" id="email" formControlName="email"
                      [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
               <div id="email-validations" class="invalid-feedback" *ngIf="form.get('email')?.errors">
