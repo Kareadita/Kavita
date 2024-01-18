@@ -14,7 +14,7 @@
       <PackageReference Include="Flurl.Http" Version="3.2.4" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.16.0.82469">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.17.0.82934">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
