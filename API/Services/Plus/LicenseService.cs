@@ -212,7 +212,7 @@ public class LicenseService(
         catch (Exception e)
         {
             logger.LogError(e, "An error happened during the request to Kavita+ API");
-            throw;
+            return false;
         }
     }
 
