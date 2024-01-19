@@ -1,0 +1,20 @@
+<div class="modal-header">
+  <h4 class="modal-title" id="modal-basic-title">You are massively out of date!</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+  <div class="modal-body scrollable-modal">
+    <p><strong>Kavita has moved docker repositories!</strong></p>
+    <p>You are no longer receiving updates. Kavita has over 4K active installs on v0.7.8. You need to migrate to the new docker repo to continue receiving updates.</p>
+    <p>Please switch your docker container to use <code>jvmilazz0/kavita:latest</code> to continue using Kavita and receiving important security and feature updates.</p>
+
+
+    <p>You can also setup <a href="https://crazymax.dev/diun/" target="_blank" rel="noopener noreferrer">Diun</a> to get notifications, Watchtower for automatic updates, or subscribe to releases on Github or join the discord to get pings when releases come out.</p>
+
+    <p>Dockerhub: <a href="https://hub.docker.com/r/jvmilazz0/kavita" target="_blank" rel="noopener noreferrer">https://hub.docker.com/r/jvmilazz0/kavita</a></p>
+
+    <p class="mt-2">Note: This message will continue to popup until you update or explicitly rollback to v0.7.8 tag (there is no reason to stay on old releases)</p>
+
+  </div>
+  <div class="modal-footer" style="justify-content: normal">
+    <button type="submit" class="btn btn-primary" (click)="close()">Okay</button>
+  </div>

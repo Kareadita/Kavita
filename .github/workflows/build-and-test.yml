@@ -257,7 +257,7 @@ jobs:
           body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
-          
+
 
       - name: Check Out Repo
         uses: actions/checkout@v3
@@ -415,15 +415,15 @@ jobs:
           - name: Login to Docker Hub
             uses: docker/login-action@v2
             with:
-                username: ${{ secrets.DOCKER_HUB_USERNAME }}
-                password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+                username: ${{ secrets.DOCKER_HUB_USERNAME_LEGACY }}
+                password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN_LEGACY }}
 
           - name: Login to GitHub Container Registry
             uses: docker/login-action@v2
             with:
                 registry: ghcr.io
                 username: ${{ github.actor }}
-                password: ${{ secrets.GITHUB_TOKEN }}
+                password: ${{ secrets.GITHUB_TOKEN_LEGACY }}
 
           - name: Set up QEMU
             uses: docker/setup-qemu-action@v2
@@ -439,7 +439,7 @@ jobs:
                 context: .
                 platforms: linux/amd64,linux/arm/v7,linux/arm64
                 push: true
-                tags: kizaing/kavita:canary, kizaing/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
+                tags: kizaing/kavita:canary, kizaing/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:latest, ghcr.io/kareadita/kavita:${{ steps.parse-version.outputs.VERSION }}, kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:nightly, ghcr.io/kareadita/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
 
           - name: Image digest
             run: echo ${{ steps.docker_build.outputs.digest }}
