@@ -150,7 +150,7 @@ public class SettingsController : BaseApiController
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        return Ok(await _emailService.TestConnectivity(user!.Email));
+        return Ok(await _emailService.SendTestEmail(user!.Email));
     }
 
     /// <summary>
@@ -162,10 +162,7 @@ public class SettingsController : BaseApiController
     public async Task<ActionResult<bool>> IsEmailSetup()
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var isSetup = !string.IsNullOrEmpty(settings.SmtpConfig.Host)
-                      && !string.IsNullOrEmpty(settings.SmtpConfig.UserName)
-                      && !string.IsNullOrEmpty(settings.HostName);
-        return Ok(isSetup);
+        return Ok(settings.IsEmailSetup());
     }
 
 

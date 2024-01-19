@@ -38,7 +38,7 @@ public interface IEmailService
     Task<bool> SendMigrationEmail(EmailMigrationDto data);
     Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
     Task<bool> SendFilesToEmail(SendToDto data);
-    Task<EmailTestResultDto> TestConnectivity(string adminEmail);
+    Task<EmailTestResultDto> SendTestEmail(string adminEmail);
     Task<bool> IsEmailEnabled();
     Task<bool> IsDefaultEmailService();
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
@@ -69,22 +69,36 @@ public class EmailService : IEmailService
     }
 
     /// <summary>
-    /// Test if this instance is accessible outside the network
+    /// Test if the email settings are working. Rejects if user email isn't valid or not all data is setup in server settings.
     /// </summary>
-    /// <remarks>This will do some basic filtering to auto return false if the emailUrl is a LAN ip</remarks>
     /// <returns></returns>
-    public async Task<EmailTestResultDto> TestConnectivity(string adminEmail)
+    public async Task<EmailTestResultDto> SendTestEmail(string adminEmail)
     {
         var result = new EmailTestResultDto
         {
             EmailAddress = adminEmail
         };
+
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!IsValidEmail(adminEmail) || !settings.IsEmailSetup())
+        {
+            result.ErrorMessage = "You need to fill in more information in settings and ensure your account has a valid email to send a test email";
+            result.Successful = false;
+            return result;
+        }
+
+        // TODO: Come back and update the template. We can't do it with the v0.8.0 release
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{Host}}", settings.HostName),
+        };
+
         try
         {
             var emailOptions = new EmailOptionsDto()
             {
                 Subject = "KavitaEmail Test",
-                Body = GetEmailBody("EmailTest"),
+                Body = UpdatePlaceHolders(GetEmailBody("EmailTest"), placeholders),
                 ToEmails = new List<string>()
                 {
                     adminEmail

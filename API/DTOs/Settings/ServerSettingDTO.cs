@@ -92,4 +92,15 @@ public class ServerSettingDto
     /// SMTP Configuration
     /// </summary>
     public SmtpConfigDto SmtpConfig { get; set; }
+
+    /// <summary>
+    /// Are at least some basics filled in
+    /// </summary>
+    /// <returns></returns>
+    public bool IsEmailSetup()
+    {
+        return !string.IsNullOrEmpty(SmtpConfig.Host)
+               && !string.IsNullOrEmpty(SmtpConfig.UserName)
+               && !string.IsNullOrEmpty(HostName);
+    }
 }
