@@ -33,7 +33,7 @@ internal class EmailOptionsDto
 
 public interface IEmailService
 {
-    Task SendConfirmationEmail(ConfirmationEmailDto data);
+    Task SendInviteEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
     Task<bool> SendMigrationEmail(EmailMigrationDto data);
     Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
@@ -123,6 +123,7 @@ public class EmailService : IEmailService
             .Value);
     }
 
+    [Obsolete]
     public async Task<bool> IsDefaultEmailService()
     {
         return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value!
@@ -172,14 +173,29 @@ public class EmailService : IEmailService
         return new EmailAddressAttribute().IsValid(email);
     }
 
-    public async Task SendConfirmationEmail(ConfirmationEmailDto data)
+    /// <summary>
+    /// Sends an invite email to a user to setup their account
+    /// </summary>
+    /// <param name="data"></param>
+    public async Task SendInviteEmail(ConfirmationEmailDto data)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        var success = await SendEmailWithPost(emailLink + "/api/invite/confirm", data);
-        if (!success)
+        var placeholders = new List<KeyValuePair<string, string>>
         {
-            _logger.LogError("There was a critical error sending Confirmation email");
-        }
+            new ("{{InvitingUser}}", data.InvitingUser),
+            new ("{{Link}}", data.ServerConfirmationLink)
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
+            Body = UpdatePlaceHolders(GetEmailBody("EmailConfirm"), placeholders),
+            ToEmails = new List<string>()
+            {
+                data.EmailAddress
+            }
+        };
+
+        await SendEmail(emailOptions);
     }
 
     public Task<bool> CheckIfAccessible(string host)

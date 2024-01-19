@@ -579,8 +579,7 @@ public class AccountController : BaseApiController
 
 
     /// <summary>
-    /// Invites a user to the server. Will generate a setup link for continuing setup. If the server is not accessible, no
-    /// email will be sent.
+    /// Invites a user to the server. Will generate a setup link for continuing setup. If email is not setup, a link will be presented to user to continue setup.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -679,15 +678,15 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
         }
 
-
         try
         {
             var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
-            if (!_emailService.IsValidEmail(dto.Email))
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            if (!_emailService.IsValidEmail(dto.Email) || !settings.IsEmailSetup())
             {
-                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email, so will not send an email to address", dto.Email.Replace(Environment.NewLine, string.Empty));
+                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email or email is not setup", dto.Email.Replace(Environment.NewLine, string.Empty));
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,
@@ -696,22 +695,29 @@ public class AccountController : BaseApiController
                 });
             }
 
-            var accessible = await _accountService.CheckIfAccessible(Request);
-            if (accessible)
+            BackgroundJob.Enqueue(() => _emailService.SendInviteEmail(new ConfirmationEmailDto()
             {
-                // Do the email send on a background thread to ensure UI can move forward without having to wait for a timeout when users use fake emails
-                BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
-                {
-                    EmailAddress = dto.Email,
-                    InvitingUser = adminUser.UserName,
-                    ServerConfirmationLink = emailLink
-                }));
-            }
+                EmailAddress = dto.Email,
+                InvitingUser = adminUser.UserName,
+                ServerConfirmationLink = emailLink
+            }));
+
+            // var accessible = await _accountService.CheckIfAccessible(Request);
+            // if (accessible)
+            // {
+            //     // Do the email send on a background thread to ensure UI can move forward without having to wait for a timeout when users use fake emails
+            //     BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+            //     {
+            //         EmailAddress = dto.Email,
+            //         InvitingUser = adminUser.UserName,
+            //         ServerConfirmationLink = emailLink
+            //     }));
+            // }
 
             return Ok(new InviteUserResponse
             {
                 EmailLink = emailLink,
-                EmailSent = accessible
+                EmailSent = true
             });
         }
         catch (Exception ex)

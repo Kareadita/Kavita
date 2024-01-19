@@ -461,7 +461,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Invites a user to the server. Will generate a setup link for continuing setup. If the server is not accessible, no\r\nemail will be sent.",
+        "summary": "Invites a user to the server. Will generate a setup link for continuing setup. If email is not setup, a link will be presented to user to continue setup.",
         "requestBody": {
           "description": "",
           "content": {
