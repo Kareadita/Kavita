@@ -10110,7 +10110,7 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Sends a test email from the Email Service. Will not send if email service is the Default Provider",
+        "summary": "Sends a test email from the Email Service.",
         "requestBody": {
           "description": "",
           "content": {
@@ -10148,6 +10148,36 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EmailTestResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/is-email-setup": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Is the minimum information setup for Email to work",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -14954,6 +14984,10 @@
             "type": "boolean"
           },
           "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailAddress": {
             "type": "string",
             "nullable": true
           }

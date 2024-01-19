@@ -301,5 +301,4 @@ public class ServerController : BaseApiController
         await _taskScheduler.CheckForUpdate();
         return Ok();
     }
-
 }

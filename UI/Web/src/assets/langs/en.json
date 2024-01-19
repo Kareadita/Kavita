@@ -212,6 +212,7 @@
         "no-devices": "There are no devices setup yet",
         "platform-label": "Platform: ",
         "email-label": "Email: ",
+        "email-setup-alert": "Want to send files to your devices? Have the your admin setup Email settings first!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
@@ -1980,6 +1981,7 @@
         "file-send-to": "File(s) emailed to {{name}}",
         "theme-missing": "The active theme no longer exists. Please refresh the page.",
         "email-sent": "Email sent to {{email}}",
+        "email-not-sent-test": "There was an exception when sending the email. Check logs for details. This indicates improper settings.",
         "email-not-sent": "Email on file is not a valid email and can not be sent. A link has been dumped in logs. The admin can provide this link to complete flow.",
         "k+-license-saved": "License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.",
         "k+-unlocked": "Kavita+ unlocked!",

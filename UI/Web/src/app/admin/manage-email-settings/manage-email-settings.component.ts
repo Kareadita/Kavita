@@ -105,4 +105,14 @@ export class ManageEmailSettingsComponent implements OnInit {
       console.error('error: ', err);
     });
   }
+
+  test() {
+    this.settingsService.testEmailServerSettings().subscribe(res => {
+      if (res.successful) {
+        this.toastr.success(translate('toasts.email-sent', {email: res.emailAddress}));
+      } else {
+        this.toastr.error(translate('toasts.email-not-sent-test'))
+      }
+    });
+  }
 }

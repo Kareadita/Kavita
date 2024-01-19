@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit
+} from '@angular/core';
 import { Device } from 'src/app/_models/device/device';
 import { DeviceService } from 'src/app/_services/device.service';
 import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
@@ -9,6 +13,7 @@ import { NgIf, NgFor } from '@angular/common';
 import { EditDeviceComponent } from '../edit-device/edit-device.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {SettingsService} from "../../admin/settings.service";
 
 @Component({
     selector: 'app-manage-devices',
@@ -18,26 +23,25 @@ import {TranslocoDirective} from "@ngneat/transloco";
     standalone: true,
     imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective]
 })
-export class ManageDevicesComponent implements OnInit, OnDestroy {
+export class ManageDevicesComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly deviceService = inject(DeviceService);
+  private readonly settingsService = inject(SettingsService);
 
   devices: Array<Device> = [];
   addDeviceIsCollapsed: boolean = true;
   device: Device | undefined;
-
-
-  private readonly onDestroy = new Subject<void>();
-
-  constructor(public deviceService: DeviceService, private toastr: ToastrService,
-    private readonly cdRef: ChangeDetectorRef) { }
+  hasEmailSetup = false;
 
   ngOnInit(): void {
+    this.settingsService.isEmailSetup().subscribe(res => {
+      this.hasEmailSetup = res;
+      this.cdRef.markForCheck();
+    });
     this.loadDevices();
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   loadDevices() {
     this.addDeviceIsCollapsed = true;

@@ -141,7 +141,7 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
-    /// Sends a test email from the Email Service. Will not send if email service is the Default Provider
+    /// Sends a test email from the Email Service.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -150,8 +150,22 @@ public class SettingsController : BaseApiController
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        var emailService = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return Ok(await _emailService.TestConnectivity(dto.Url, user!.Email, !emailService.Equals(EmailService.DefaultApiUrl)));
+        return Ok(await _emailService.TestConnectivity(user!.Email));
+    }
+
+    /// <summary>
+    /// Is the minimum information setup for Email to work
+    /// </summary>
+    /// <returns></returns>
+    [Authorize]
+    [HttpGet("is-email-setup")]
+    public async Task<ActionResult<bool>> IsEmailSetup()
+    {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var isSetup = !string.IsNullOrEmpty(settings.SmtpConfig.Host)
+                      && !string.IsNullOrEmpty(settings.SmtpConfig.UserName)
+                      && !string.IsNullOrEmpty(settings.HostName);
+        return Ok(isSetup);
     }
 
 

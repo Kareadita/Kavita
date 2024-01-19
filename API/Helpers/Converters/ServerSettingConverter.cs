@@ -47,9 +47,6 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.BookmarkDirectory:
                     destination.BookmarksDirectory = row.Value;
                     break;
-                case ServerSettingKey.EmailServiceUrl:
-                    destination.EmailServiceUrl = row.Value;
-                    break;
                 case ServerSettingKey.InstallVersion:
                     destination.InstallVersion = row.Value;
                     break;
