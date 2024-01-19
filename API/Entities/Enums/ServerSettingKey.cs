@@ -52,6 +52,7 @@ public enum ServerSettingKey
     /// Is Authentication needed for non-admin accounts
     /// </summary>
     /// <remarks>Deprecated. This is no longer used v0.5.1+. Assume Authentication is always in effect</remarks>
+    [Obsolete("Not supported as of v0.5.1")]
     [Description("EnableAuthentication")]
     EnableAuthentication = 8,
     /// <summary>
@@ -147,6 +148,33 @@ public enum ServerSettingKey
     /// The size of the cover image thumbnail. Defaults to <see cref="CoverImageSize"/>.Default
     /// </summary>
     [Description("CoverImageSize")]
-    CoverImageSize = 27
+    CoverImageSize = 27,
+    #region EmailSettings
+    /// <summary>
+    /// The address of the emailer host
+    /// </summary>
+    [Description("EmailSenderAddress")]
+    EmailSenderAddress = 28,
+    /// <summary>
+    /// What the email name should be
+    /// </summary>
+    [Description("EmailSenderDisplayName")]
+    EmailSenderDisplayName = 29,
+    [Description("EmailAuthUserName")]
+    EmailAuthUserName = 30,
+    [Description("EmailAuthPassword")]
+    EmailAuthPassword = 31,
+    [Description("EmailHost")]
+    EmailHost = 32,
+    [Description("EmailPort")]
+    EmailPort = 33,
+    [Description("EmailEnableSsl")]
+    EmailEnableSsl = 34,
+    /// <summary>
+    /// Number of bytes that the sender allows to be sent through
+    /// </summary>
+    [Description("EmailSizeLimit")]
+    EmailSizeLimit = 35,
+    #endregion
 
 }

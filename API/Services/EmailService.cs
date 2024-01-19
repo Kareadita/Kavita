@@ -179,6 +179,10 @@ public class EmailService : IEmailService
         if (await IsDefaultEmailService()) return false;
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
         return await SendEmailWithFiles(emailLink + "/api/sendto", data.FilePaths, data.DestinationEmail);
+
+        // Check if Email is setup and confirmed (they will need to hit test)
+
+
     }
 
     private async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)

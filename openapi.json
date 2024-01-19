@@ -18631,6 +18631,9 @@
             "type": "integer",
             "description": "How large the cover images should be",
             "format": "int32"
+          },
+          "smtpConfig": {
+            "$ref": "#/components/schemas/SmtpConfigDto"
           }
         },
         "additionalProperties": false
@@ -18909,6 +18912,51 @@
             "type": "string",
             "description": "This is the Filter url encoded. It is decoded and reconstructed into a API.DTOs.Filtering.v2.FilterV2Dto",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SmtpConfigDto": {
+        "type": "object",
+        "properties": {
+          "senderAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "senderDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "host": {
+            "type": "string",
+            "nullable": true
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enableSsl": {
+            "type": "boolean"
+          },
+          "isBodyHtml": {
+            "type": "boolean"
+          },
+          "allowSendTo": {
+            "type": "boolean",
+            "description": "If enabled, this allows Kavita to upload files (temporarily) and send the files as attachments"
+          },
+          "sizeLimit": {
+            "type": "integer",
+            "description": "Limit in bytes for allowing files to be added as attachments. Defaults to 25MB",
+            "format": "int32"
           }
         },
         "additionalProperties": false

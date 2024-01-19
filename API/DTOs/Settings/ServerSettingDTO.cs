@@ -88,4 +88,8 @@ public class ServerSettingDto
     /// How large the cover images should be
     /// </summary>
     public CoverImageSize CoverImageSize { get; set; }
+    /// <summary>
+    /// SMTP Configuration
+    /// </summary>
+    public SmtpConfigDto SmtpConfig { get; set; }
 }
