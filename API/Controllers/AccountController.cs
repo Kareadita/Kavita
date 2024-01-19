@@ -334,7 +334,9 @@ public class AccountController : BaseApiController
 
 
     /// <summary>
-    /// Initiates the flow to update a user's email address. The email address is not changed in this API. A confirmation link is sent/dumped which will
+    /// Initiates the flow to update a user's email address.
+    ///
+    /// If email is not setup, then the email address is not changed in this API. A confirmation link is sent/dumped which will
     /// validate the email. It must be confirmed for the email to update.
     /// </summary>
     /// <param name="dto"></param>
@@ -374,9 +376,21 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "generate-token"));
         }
 
-        user.EmailConfirmed = false;
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var shouldEmailUser = serverSettings.IsEmailSetup() || !_emailService.IsValidEmail(user.Email);
+        user.EmailConfirmed = !shouldEmailUser;
         user.ConfirmationToken = token;
         await _userManager.UpdateAsync(user);
+
+        if (!shouldEmailUser)
+        {
+            return Ok(new InviteUserResponse
+            {
+                EmailLink = string.Empty,
+                EmailSent = false
+            });
+        }
+
 
         // Send a confirmation email
         try
@@ -396,30 +410,27 @@ public class AccountController : BaseApiController
             }
 
 
-            var accessible = await _accountService.CheckIfAccessible(Request);
-            if (accessible)
+            try
             {
-                try
+                var invitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName!;
+                // Email the old address of the update change
+                BackgroundJob.Enqueue(() => _emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
                 {
-                    // Email the old address of the update change
-                    await _emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
-                    {
-                        EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
-                        InstallId = BuildInfo.Version.ToString(),
-                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName!,
-                        ServerConfirmationLink = emailLink
-                    });
-                }
-                catch (Exception)
-                {
-                    /* Swallow exception */
-                }
+                    EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
+                    InstallId = BuildInfo.Version.ToString(),
+                    InvitingUser = invitingUser,
+                    ServerConfirmationLink = emailLink
+                }));
+            }
+            catch (Exception)
+            {
+                /* Swallow exception */
             }
 
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
-                EmailSent = accessible
+                EmailSent = true
             });
         }
         catch (Exception ex)
@@ -702,18 +713,6 @@ public class AccountController : BaseApiController
                 ServerConfirmationLink = emailLink
             }));
 
-            // var accessible = await _accountService.CheckIfAccessible(Request);
-            // if (accessible)
-            // {
-            //     // Do the email send on a background thread to ensure UI can move forward without having to wait for a timeout when users use fake emails
-            //     BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
-            //     {
-            //         EmailAddress = dto.Email,
-            //         InvitingUser = adminUser.UserName,
-            //         ServerConfirmationLink = emailLink
-            //     }));
-            // }
-
             return Ok(new InviteUserResponse
             {
                 EmailLink = emailLink,
@@ -843,7 +842,6 @@ public class AccountController : BaseApiController
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
             MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
-        // Perform Login code
         return Ok();
     }
 

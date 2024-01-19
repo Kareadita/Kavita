@@ -39,10 +39,8 @@ public interface IEmailService
     Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> SendTestEmail(string adminEmail);
-    Task<bool> IsEmailEnabled();
     Task<bool> IsDefaultEmailService();
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
-    Task<string?> GetVersion(string emailUrl);
     bool IsValidEmail(string email);
 }
 
@@ -117,11 +115,6 @@ public class EmailService : IEmailService
         return result;
     }
 
-    public async Task<bool> IsEmailEnabled()
-    {
-        return !string.IsNullOrEmpty((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailHost))!
-            .Value);
-    }
 
     [Obsolete]
     public async Task<bool> IsDefaultEmailService()
@@ -138,34 +131,6 @@ public class EmailService : IEmailService
         {
             _logger.LogError("There was a critical error sending Confirmation email");
         }
-    }
-
-    public async Task<string> GetVersion(string emailUrl)
-    {
-        try
-        {
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var response = await $"{emailUrl}/api/about/version"
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(10))
-                .GetStringAsync();
-
-            if (!string.IsNullOrEmpty(response))
-            {
-                return response.Replace("\"", string.Empty);
-            }
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        return null;
     }
 
     public bool IsValidEmail(string email)
@@ -252,7 +217,8 @@ public class EmailService : IEmailService
 
     public async Task<bool> SendFilesToEmail(SendToDto data)
     {
-        if (await IsEmailEnabled()) return false;
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (serverSetting.IsEmailSetup()) return false;
 
         var emailOptions = new EmailOptionsDto()
         {

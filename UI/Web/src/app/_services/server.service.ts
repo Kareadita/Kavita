@@ -73,8 +73,4 @@ export class ServerService {
   clearMediaAlerts() {
     return this.http.post(this.baseUrl + 'server/clear-media-alerts', {});
   }
-
-  getEmailVersion() {
-    return this.http.get<string>(this.baseUrl + 'server/email-version', TextResonse);
-  }
 }

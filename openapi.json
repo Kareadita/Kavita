@@ -315,7 +315,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Initiates the flow to update a user's email address. The email address is not changed in this API. A confirmation link is sent/dumped which will\r\nvalidate the email. It must be confirmed for the email to update.",
+        "summary": "Initiates the flow to update a user's email address.\r\n            \r\nIf email is not setup, then the email address is not changed in this API. A confirmation link is sent/dumped which will\r\nvalidate the email. It must be confirmed for the email to update.",
         "requestBody": {
           "description": "",
           "content": {
@@ -9835,36 +9835,6 @@
         "responses": {
           "200": {
             "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Server/email-version": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Returns the KavitaEmail version for non-default instances",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
           }
         }
       }

@@ -74,7 +74,13 @@ export class ChangeEmailComponent implements OnInit {
       if (updateEmailResponse.emailSent) {
         this.toastr.success(translate('toasts.email-sent-to'));
       } else {
-        this.toastr.success(translate('toasts.change-email-private'));
+        this.toastr.success(translate('toasts.change-email-no-email'));
+        this.accountService.refreshAccount().subscribe(user => {
+          this.user = user;
+          this.form.get('email')?.setValue(this.user?.email);
+          this.cdRef.markForCheck();
+        });
+
       }
 
       this.isViewMode = true;

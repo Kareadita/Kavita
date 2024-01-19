@@ -12,9 +12,8 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {ServerService} from "../../_services/server.service";
 import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
 
 @Component({
@@ -28,13 +27,11 @@ import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
 export class ManageEmailSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly serverService = inject(ServerService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
-  emailVersion: string | null = null;
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
@@ -49,11 +46,6 @@ export class ManageEmailSettingsComponent implements OnInit {
       this.settingsForm.addControl('senderAddress', new FormControl(this.serverSettings.smtpConfig.senderAddress, []));
       this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
       this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
-      this.cdRef.markForCheck();
-    });
-
-    this.serverService.getEmailVersion().subscribe(version => {
-      this.emailVersion = version;
       this.cdRef.markForCheck();
     });
   }

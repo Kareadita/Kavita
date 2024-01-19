@@ -243,7 +243,7 @@
     },
 
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "New Email",
         "current-password-label": "Current Password",
         "email-not-confirmed": "This email is not confirmed",
         "email-confirmed": "This email is confirmed",
@@ -2006,7 +2006,7 @@
         "age-restriction-updated": "Age Restriction has been updated",
         "email-sent-to-no-existing": "Existing email is not valid. A link has been dumped to logs. Ask admin for link to complete email change.",
         "email-sent-to": "An email has been sent to your old email address for confirmation.",
-        "change-email-private": "The server is not publicly accessible. Ask the admin to fetch your confirmation link from the logs",
+        "change-email-no-email": "Email has been updated",
         "device-updated": "Device updated",
         "device-created": "Device created",
         "confirm-regen-covers": "Refresh covers will force all cover images to be recalculated. This is a heavy operation. Are you sure you don't want to perform a Scan instead?",

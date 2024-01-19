@@ -310,7 +310,7 @@ export class AccountService {
   }
 
 
-  private refreshAccount() {
+  refreshAccount() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
       if (user) {
