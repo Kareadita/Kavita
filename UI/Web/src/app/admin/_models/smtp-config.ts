@@ -6,7 +6,5 @@ export interface SmtpConfig {
   host: string;
   port: number;
   enableSsl: boolean;
-  isBodyHtml: boolean;
-  allowSendTo?: boolean;
   sizeLimit: number;
 }

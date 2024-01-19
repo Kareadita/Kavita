@@ -92,7 +92,7 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.EmailPort:
                     destination.SmtpConfig ??= new SmtpConfigDto();
-                    destination.SmtpConfig.Port = int.Parse(row.Value);
+                    destination.SmtpConfig.Port = string.IsNullOrEmpty(row.Value) ? 0 : int.Parse(row.Value);
                     break;
                 case ServerSettingKey.EmailAuthPassword:
                     destination.SmtpConfig ??= new SmtpConfigDto();

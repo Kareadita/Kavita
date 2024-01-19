@@ -18946,13 +18946,6 @@
           "enableSsl": {
             "type": "boolean"
           },
-          "isBodyHtml": {
-            "type": "boolean"
-          },
-          "allowSendTo": {
-            "type": "boolean",
-            "description": "If enabled, this allows Kavita to upload files (temporarily) and send the files as attachments"
-          },
           "sizeLimit": {
             "type": "integer",
             "description": "Limit in bytes for allowing files to be added as attachments. Defaults to 25MB",

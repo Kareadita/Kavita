@@ -80,6 +80,7 @@ public enum ServerSettingKey
     /// If SMTP is enabled on the server
     /// </summary>
     [Description("CustomEmailService")]
+    [Obsolete("Use Email settings instead")]
     EmailServiceUrl = 13,
     /// <summary>
     /// If Kavita should save bookmarks as WebP images

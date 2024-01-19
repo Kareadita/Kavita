@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
 using API.DTOs.Settings;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
@@ -233,6 +234,10 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            UpdateEmailSettings(setting, updateSettingsDto);
+
+
+
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
                 if (OsInfo.IsDocker) continue;
@@ -390,6 +395,57 @@ public class SettingsController : BaseApiController
         _logger.LogInformation("Server Settings updated");
         await _taskScheduler.ScheduleTasks();
         return Ok(updateSettingsDto);
+    }
+
+    private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    {
+        if (setting.Key == ServerSettingKey.EmailHost && updateSettingsDto.SmtpConfig.Host + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.Host + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailPort && updateSettingsDto.SmtpConfig.Port + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.Port + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailAuthPassword && updateSettingsDto.SmtpConfig.Password + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.Password + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailAuthUserName && updateSettingsDto.SmtpConfig.UserName + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.UserName + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailSenderAddress && updateSettingsDto.SmtpConfig.SenderAddress + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.SenderAddress + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailSenderDisplayName && updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailSizeLimit && updateSettingsDto.SmtpConfig.SizeLimit + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.SizeLimit + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailEnableSsl && updateSettingsDto.SmtpConfig.EnableSsl + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.EnableSsl + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
     }
 
     [Authorize(Policy = "RequireAdminRole")]
