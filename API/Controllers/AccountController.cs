@@ -904,26 +904,28 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
             return BadRequest(await _localizationService.Translate(user.Id, "confirm-email"));
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
-        _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
         if (!_emailService.IsValidEmail(user.Email))
         {
-            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send", user.Email);
+            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send. Admin must change it in UI", user.Email);
             return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
         }
-        if (await _accountService.CheckIfAccessible(Request))
-        {
-            await _emailService.SendForgotPasswordEmail(new PasswordResetEmailDto()
-            {
-                EmailAddress = user.Email,
-                ServerConfirmationLink = emailLink,
-                InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-            });
-            return Ok(await _localizationService.Translate(user.Id, "email-sent"));
-        }
 
-        return Ok(await _localizationService.Translate(user.Id, "not-accessible-password"));
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
+        user.ConfirmationToken = token;
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+
+        var installId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value;
+        BackgroundJob.Enqueue(() => _emailService.SendForgotPasswordEmail(new PasswordResetEmailDto()
+        {
+            EmailAddress = user.Email,
+            ServerConfirmationLink = emailLink,
+            InstallId = installId
+        }));
+
+        return Ok(await _localizationService.Translate(user.Id, "email-sent"));
     }
 
     [HttpGet("email-confirmed")]

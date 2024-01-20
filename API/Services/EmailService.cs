@@ -211,7 +211,7 @@ public class EmailService : IEmailService
     public async Task<bool> SendFilesToEmail(SendToDto data)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (serverSetting.IsEmailSetup()) return false;
+        if (!serverSetting.IsEmailSetup()) return false;
 
         var emailOptions = new EmailOptionsDto()
         {
@@ -225,51 +225,6 @@ public class EmailService : IEmailService
         };
 
         await SendEmail(emailOptions);
-
-
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return await SendEmailWithFiles(emailLink + "/api/sendto", data.FilePaths, data.DestinationEmail);
-
-        // Check if Email is setup and confirmed (they will need to hit test)
-
-
-    }
-
-    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 300)
-    {
-        try
-        {
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var response = await (url)
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithTimeout(timeoutSecs)
-                .AllowHttpStatus("4xx")
-                .PostMultipartAsync(mp =>
-                {
-                    mp.AddString("email", destEmail);
-                    var index = 1;
-                    foreach (var filepath in filePaths)
-                    {
-                        mp.AddFile("file" + index, filepath, _downloadService.GetContentTypeFromFile(filepath));
-                        index++;
-                    }
-                }
-                );
-
-            if (response.StatusCode != StatusCodes.Status200OK)
-            {
-                var errorMessage = await response.GetStringAsync();
-                throw new KavitaException(errorMessage);
-            }
-        }
-        catch (FlurlHttpException ex)
-        {
-            _logger.LogError(ex, "There was an exception when sending Email for SendTo");
-            return false;
-        }
         return true;
     }
 

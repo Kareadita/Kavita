@@ -1620,7 +1620,9 @@
         "tags": [
           "Device"
         ],
+        "summary": "Sends a collection of chapters to the user's device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
