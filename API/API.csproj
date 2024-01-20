@@ -191,7 +191,9 @@
 
   <ItemGroup>
     <Folder Include="config\themes" />
-    <Folder Include="EmailTemplates" />
+    <Content Include="EmailTemplates\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="I18N\**" />
   </ItemGroup>
 
