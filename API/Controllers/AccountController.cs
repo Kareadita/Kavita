@@ -334,7 +334,9 @@ public class AccountController : BaseApiController
 
 
     /// <summary>
-    /// Initiates the flow to update a user's email address. The email address is not changed in this API. A confirmation link is sent/dumped which will
+    /// Initiates the flow to update a user's email address.
+    ///
+    /// If email is not setup, then the email address is not changed in this API. A confirmation link is sent/dumped which will
     /// validate the email. It must be confirmed for the email to update.
     /// </summary>
     /// <param name="dto"></param>
@@ -374,9 +376,21 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "generate-token"));
         }
 
-        user.EmailConfirmed = false;
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var shouldEmailUser = serverSettings.IsEmailSetup() || !_emailService.IsValidEmail(user.Email);
+        user.EmailConfirmed = !shouldEmailUser;
         user.ConfirmationToken = token;
         await _userManager.UpdateAsync(user);
+
+        if (!shouldEmailUser)
+        {
+            return Ok(new InviteUserResponse
+            {
+                EmailLink = string.Empty,
+                EmailSent = false
+            });
+        }
+
 
         // Send a confirmation email
         try
@@ -396,30 +410,27 @@ public class AccountController : BaseApiController
             }
 
 
-            var accessible = await _accountService.CheckIfAccessible(Request);
-            if (accessible)
+            try
             {
-                try
+                var invitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName!;
+                // Email the old address of the update change
+                BackgroundJob.Enqueue(() => _emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
                 {
-                    // Email the old address of the update change
-                    await _emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
-                    {
-                        EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
-                        InstallId = BuildInfo.Version.ToString(),
-                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName!,
-                        ServerConfirmationLink = emailLink
-                    });
-                }
-                catch (Exception)
-                {
-                    /* Swallow exception */
-                }
+                    EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
+                    InstallId = BuildInfo.Version.ToString(),
+                    InvitingUser = invitingUser,
+                    ServerConfirmationLink = emailLink
+                }));
+            }
+            catch (Exception)
+            {
+                /* Swallow exception */
             }
 
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
-                EmailSent = accessible
+                EmailSent = true
             });
         }
         catch (Exception ex)
@@ -579,8 +590,7 @@ public class AccountController : BaseApiController
 
 
     /// <summary>
-    /// Invites a user to the server. Will generate a setup link for continuing setup. If the server is not accessible, no
-    /// email will be sent.
+    /// Invites a user to the server. Will generate a setup link for continuing setup. If email is not setup, a link will be presented to user to continue setup.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -679,15 +689,15 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
         }
 
-
         try
         {
             var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
-            if (!_emailService.IsValidEmail(dto.Email))
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            if (!_emailService.IsValidEmail(dto.Email) || !settings.IsEmailSetup())
             {
-                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email, so will not send an email to address", dto.Email.Replace(Environment.NewLine, string.Empty));
+                _logger.LogInformation("[Invite User] {Email} doesn't appear to be an email or email is not setup", dto.Email.Replace(Environment.NewLine, string.Empty));
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,
@@ -696,22 +706,17 @@ public class AccountController : BaseApiController
                 });
             }
 
-            var accessible = await _accountService.CheckIfAccessible(Request);
-            if (accessible)
+            BackgroundJob.Enqueue(() => _emailService.SendInviteEmail(new ConfirmationEmailDto()
             {
-                // Do the email send on a background thread to ensure UI can move forward without having to wait for a timeout when users use fake emails
-                BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
-                {
-                    EmailAddress = dto.Email,
-                    InvitingUser = adminUser.UserName,
-                    ServerConfirmationLink = emailLink
-                }));
-            }
+                EmailAddress = dto.Email,
+                InvitingUser = adminUser.UserName,
+                ServerConfirmationLink = emailLink
+            }));
 
             return Ok(new InviteUserResponse
             {
                 EmailLink = emailLink,
-                EmailSent = accessible
+                EmailSent = true
             });
         }
         catch (Exception ex)
@@ -837,7 +842,6 @@ public class AccountController : BaseApiController
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
             MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
-        // Perform Login code
         return Ok();
     }
 
@@ -882,6 +886,10 @@ public class AccountController : BaseApiController
     [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ForgotPassword([FromQuery] string email)
     {
+
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!settings.IsEmailSetup()) return Ok(await _localizationService.Get("en", "email-not-enabled"));
+
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
         if (user == null)
         {
@@ -896,26 +904,28 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
             return BadRequest(await _localizationService.Translate(user.Id, "confirm-email"));
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
-        _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
         if (!_emailService.IsValidEmail(user.Email))
         {
-            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send", user.Email);
+            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send. Admin must change it in UI", user.Email);
             return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
         }
-        if (await _accountService.CheckIfAccessible(Request))
-        {
-            await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
-            {
-                EmailAddress = user.Email,
-                ServerConfirmationLink = emailLink,
-                InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-            });
-            return Ok(await _localizationService.Translate(user.Id, "email-sent"));
-        }
 
-        return Ok(await _localizationService.Translate(user.Id, "not-accessible-password"));
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
+        user.ConfirmationToken = token;
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+
+        var installId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value;
+        BackgroundJob.Enqueue(() => _emailService.SendForgotPasswordEmail(new PasswordResetEmailDto()
+        {
+            EmailAddress = user.Email,
+            ServerConfirmationLink = emailLink,
+            InstallId = installId
+        }));
+
+        return Ok(await _localizationService.Translate(user.Id, "email-sent"));
     }
 
     [HttpGet("email-confirmed")]
@@ -965,7 +975,7 @@ public class AccountController : BaseApiController
     /// <returns></returns>
     [HttpPost("resend-confirmation-email")]
     [EnableRateLimiting("Authentication")]
-    public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
+    public async Task<ActionResult<InviteUserResponse>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return BadRequest(await _localizationService.Get("en", "no-user"));
@@ -976,95 +986,46 @@ public class AccountController : BaseApiController
         if (user.EmailConfirmed) return BadRequest(await _localizationService.Translate(user.Id, "user-already-confirmed"));
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
+        user.ConfirmationToken = token;
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
         if (!_emailService.IsValidEmail(user.Email))
         {
             _logger.LogCritical("[Email Migration]: User {UserName} is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.UserName, user.Email);
-            return BadRequest(await _localizationService.Translate(user.Id, "invalid-email"));
         }
 
-        if (await _accountService.CheckIfAccessible(Request))
+
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var shouldEmailUser = serverSettings.IsEmailSetup() || !_emailService.IsValidEmail(user.Email);
+
+        if (!shouldEmailUser)
         {
-            try
+            return Ok(new InviteUserResponse()
             {
-                await _emailService.SendMigrationEmail(new EmailMigrationDto()
-                {
-                    EmailAddress = user.Email!,
-                    Username = user.UserName!,
-                    ServerConfirmationLink = emailLink,
-                    InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an issue resending invite email");
-                return BadRequest(await _localizationService.Translate(user.Id, "generic-invite-email"));
-            }
-            return Ok(emailLink);
+                EmailLink = emailLink,
+                EmailSent = false,
+                InvalidEmail = !_emailService.IsValidEmail(user.Email)
+            });
         }
 
-        return BadRequest(await _localizationService.Translate(user.Id, "not-accessible"));
+        BackgroundJob.Enqueue(() => _emailService.SendInviteEmail(new ConfirmationEmailDto()
+        {
+            EmailAddress = user.Email!,
+            InvitingUser = User.GetUsername(),
+            ServerConfirmationLink = emailLink,
+            InstallId = serverSettings.InstallId
+        }));
+
+        return Ok(new InviteUserResponse()
+        {
+            EmailLink = emailLink,
+            EmailSent = true,
+            InvalidEmail = !_emailService.IsValidEmail(user.Email)
+        });
     }
-
-    /// <summary>
-    /// This is similar to invite. Essentially we authenticate the user's password then go through invite email flow
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [AllowAnonymous]
-    [HttpPost("migrate-email")]
-    public async Task<ActionResult<string>> MigrateEmail(MigrateUserEmailDto dto)
-    {
-        // If there is an admin account already, return
-        var users = await _unitOfWork.UserRepository.GetAdminUsersAsync();
-        if (users.Any()) return BadRequest(await _localizationService.Get("en", "admin-already-exists"));
-
-        // Check if there is an existing invite
-        var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
-        if (emailValidationErrors.Any())
-        {
-            var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
-                return BadRequest(await _localizationService.Get("en", "user-already-registered", invitedUser!.UserName));
-
-            _logger.LogInformation("A user is attempting to login, but hasn't accepted email invite");
-            return BadRequest(await _localizationService.Get("en", "user-already-invited"));
-        }
-
-
-        var user = await _userManager.Users
-            .Include(u => u.UserPreferences)
-            .SingleOrDefaultAsync(x => x.NormalizedUserName == dto.Username.ToUpper());
-        if (user == null) return BadRequest(await _localizationService.Get("en", "invalid-username"));
-
-        var validPassword = await _signInManager.UserManager.CheckPasswordAsync(user, dto.Password);
-        if (!validPassword) return BadRequest(await _localizationService.Get("en", "bad-credentials"));
-
-        try
-        {
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-            user.Email = dto.Email;
-            if (!await ConfirmEmailToken(token, user)) return BadRequest(await _localizationService.Get("en", "critical-email-migration"));
-            _unitOfWork.UserRepository.Update(user);
-
-            await _unitOfWork.CommitAsync();
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "There was an issue during email migration. Contact support");
-            _unitOfWork.UserRepository.Delete(user);
-            await _unitOfWork.CommitAsync();
-        }
-
-        return BadRequest(await _localizationService.Get("en", "critical-email-migration"));
-    }
-
-
 
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
     {

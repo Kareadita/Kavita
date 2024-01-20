@@ -14,19 +14,9 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class PluginController : BaseApiController
+public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService, ILogger<PluginController> logger)
+    : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ITokenService _tokenService;
-    private readonly ILogger<PluginController> _logger;
-
-    public PluginController(IUnitOfWork unitOfWork, ITokenService tokenService, ILogger<PluginController> logger)
-    {
-        _unitOfWork = unitOfWork;
-        _tokenService = tokenService;
-        _logger = logger;
-    }
-
     /// <summary>
     /// Authenticate with the Server given an apiKey. This will log you in by returning the user object and the JWT token.
     /// </summary>
@@ -42,11 +32,11 @@ public class PluginController : BaseApiController
         // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
         // Should log into access table so we can tell the user
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var userAgent = HttpContext.Request.Headers["User-Agent"];
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userAgent = HttpContext.Request.Headers.UserAgent;
+        var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0)
         {
-            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName.Replace(Environment.NewLine, string.Empty), new
+            logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName.Replace(Environment.NewLine, string.Empty), new
             {
                 IpAddress = ipAddress,
                 UserAgent = userAgent,
@@ -54,15 +44,15 @@ public class PluginController : BaseApiController
             });
             throw new KavitaUnauthenticatedUserException();
         }
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
         return new UserDto
         {
             Username = user.UserName!,
-            Token = await _tokenService.CreateToken(user),
-            RefreshToken = await _tokenService.CreateRefreshToken(user),
+            Token = await tokenService.CreateToken(user),
+            RefreshToken = await tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 
@@ -76,8 +66,8 @@ public class PluginController : BaseApiController
     [HttpGet("version")]
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0) throw new KavitaUnauthenticatedUserException();
-        return Ok((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
+        return Ok((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
     }
 }

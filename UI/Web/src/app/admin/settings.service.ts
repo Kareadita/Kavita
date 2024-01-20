@@ -11,6 +11,7 @@ import { ServerSettings } from './_models/server-settings';
 export interface EmailTestResult {
   successful: boolean;
   errorMessage: string;
+  emailAddress: string;
 }
 
 @Injectable({
@@ -46,12 +47,12 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-base-url', {});
   }
 
-  resetEmailServerSettings() {
-    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-email-url', {});
+  testEmailServerSettings() {
+    return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {});
   }
 
-  testEmailServerSettings(emailUrl: string) {
-    return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {url: emailUrl});
+  isEmailSetup() {
+    return this.http.get<string>(this.baseUrl + 'server/is-email-setup', TextResonse).pipe(map(d => d == "true"));
   }
 
   getTaskFrequencies() {

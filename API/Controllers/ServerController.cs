@@ -276,22 +276,6 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
-    /// Returns the KavitaEmail version for non-default instances
-    /// </summary>
-    /// <returns></returns>
-    [Authorize("RequireAdminRole")]
-    [HttpGet("email-version")]
-    public async Task<ActionResult<string?>> GetEmailVersion()
-    {
-        var emailServiceUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))
-            .Value;
-
-        if (emailServiceUrl.Equals(EmailService.DefaultApiUrl)) return Ok(null);
-
-        return Ok(await _emailService.GetVersion(emailServiceUrl));
-    }
-
-    /// <summary>
     /// Checks for updates and pushes an event to the UI
     /// </summary>
     /// <returns></returns>
@@ -301,5 +285,4 @@ public class ServerController : BaseApiController
         await _taskScheduler.CheckForUpdate();
         return Ok();
     }
-
 }

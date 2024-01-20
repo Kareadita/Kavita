@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
 using API.DTOs.Settings;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
@@ -119,28 +120,7 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
-    /// Resets the email service url
-    /// </summary>
-    /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("reset-email-url")]
-    public async Task<ActionResult<ServerSettingDto>> ResetEmailServiceUrlSettings()
-    {
-        _logger.LogInformation("{UserName} is resetting Email Service Url Setting", User.GetUsername());
-        var emailSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl);
-        emailSetting.Value = EmailService.DefaultApiUrl;
-        _unitOfWork.SettingsRepository.Update(emailSetting);
-
-        if (!await _unitOfWork.CommitAsync())
-        {
-            await _unitOfWork.RollbackAsync();
-        }
-
-        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
-    }
-
-    /// <summary>
-    /// Sends a test email from the Email Service. Will not send if email service is the Default Provider
+    /// Sends a test email from the Email Service.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -149,8 +129,19 @@ public class SettingsController : BaseApiController
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        var emailService = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return Ok(await _emailService.TestConnectivity(dto.Url, user!.Email, !emailService.Equals(EmailService.DefaultApiUrl)));
+        return Ok(await _emailService.SendTestEmail(user!.Email));
+    }
+
+    /// <summary>
+    /// Is the minimum information setup for Email to work
+    /// </summary>
+    /// <returns></returns>
+    [Authorize]
+    [HttpGet("is-email-setup")]
+    public async Task<ActionResult<bool>> IsEmailSetup()
+    {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        return Ok(settings.IsEmailSetup());
     }
 
 
@@ -233,6 +224,10 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            UpdateEmailSettings(setting, updateSettingsDto);
+
+
+
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
                 if (OsInfo.IsDocker) continue;
@@ -288,17 +283,6 @@ public class SettingsController : BaseApiController
                 setting.Value = UrlHelper.RemoveEndingSlash(setting.Value);
                 _unitOfWork.SettingsRepository.Update(setting);
             }
-
-            if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
-            {
-                setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;
-                setting.Value = UrlHelper.RemoveEndingSlash(setting.Value);
-                FlurlHttp.ConfigureClient(setting.Value, cli =>
-                    cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
-
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
 
             if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
             {
@@ -390,6 +374,63 @@ public class SettingsController : BaseApiController
         _logger.LogInformation("Server Settings updated");
         await _taskScheduler.ScheduleTasks();
         return Ok(updateSettingsDto);
+    }
+
+    private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    {
+        if (setting.Key == ServerSettingKey.EmailHost && updateSettingsDto.SmtpConfig.Host + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.Host + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailPort && updateSettingsDto.SmtpConfig.Port + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.Port + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailAuthPassword && updateSettingsDto.SmtpConfig.Password + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.Password + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailAuthUserName && updateSettingsDto.SmtpConfig.UserName + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.UserName + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailSenderAddress && updateSettingsDto.SmtpConfig.SenderAddress + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.SenderAddress + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailSenderDisplayName && updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailSizeLimit && updateSettingsDto.SmtpConfig.SizeLimit + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.SizeLimit + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailEnableSsl && updateSettingsDto.SmtpConfig.EnableSsl + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.EnableSsl + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailCustomizedTemplates && updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
     }
 
     [Authorize(Policy = "RequireAdminRole")]

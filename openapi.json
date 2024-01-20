@@ -315,7 +315,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Initiates the flow to update a user's email address. The email address is not changed in this API. A confirmation link is sent/dumped which will\r\nvalidate the email. It must be confirmed for the email to update.",
+        "summary": "Initiates the flow to update a user's email address.\r\n            \r\nIf email is not setup, then the email address is not changed in this API. A confirmation link is sent/dumped which will\r\nvalidate the email. It must be confirmed for the email to update.",
         "requestBody": {
           "description": "",
           "content": {
@@ -461,7 +461,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Invites a user to the server. Will generate a setup link for continuing setup. If the server is not accessible, no\r\nemail will be sent.",
+        "summary": "Invites a user to the server. Will generate a setup link for continuing setup. If email is not setup, a link will be presented to user to continue setup.",
         "requestBody": {
           "description": "",
           "content": {
@@ -778,67 +778,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Account/migrate-email": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "This is similar to invite. Essentially we authenticate the user's password then go through invite email flow",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MigrateUserEmailDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MigrateUserEmailDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/MigrateUserEmailDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               }
             }
@@ -1670,7 +1620,9 @@
         "tags": [
           "Device"
         ],
+        "summary": "Sends a collection of chapters to the user's device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -9848,36 +9800,6 @@
         }
       }
     },
-    "/api/Server/email-version": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Returns the KavitaEmail version for non-default instances",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Server/check-for-updates": {
       "get": {
         "tags": [
@@ -10084,42 +10006,12 @@
         }
       }
     },
-    "/api/Settings/reset-email-url": {
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Resets the email service url",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Settings/test-email-url": {
       "post": {
         "tags": [
           "Settings"
         ],
-        "summary": "Sends a test email from the Email Service. Will not send if email service is the Default Provider",
+        "summary": "Sends a test email from the Email Service.",
         "requestBody": {
           "description": "",
           "content": {
@@ -10157,6 +10049,36 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EmailTestResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/is-email-setup": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Is the minimum information setup for Email to work",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -14965,6 +14887,10 @@
           "errorMessage": {
             "type": "string",
             "nullable": true
+          },
+          "emailAddress": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -15615,6 +15541,25 @@
         },
         "additionalProperties": false
       },
+      "InviteUserResponse": {
+        "type": "object",
+        "properties": {
+          "emailLink": {
+            "type": "string",
+            "description": "Email link used to setup the user account",
+            "nullable": true
+          },
+          "emailSent": {
+            "type": "boolean",
+            "description": "Was an email sent (ie is this server accessible)"
+          },
+          "invalidEmail": {
+            "type": "boolean",
+            "description": "When a user has an invalid email and is attempting to perform a flow."
+          }
+        },
+        "additionalProperties": false
+      },
       "JobDto": {
         "type": "object",
         "properties": {
@@ -16257,24 +16202,6 @@
         },
         "additionalProperties": false,
         "description": "Represents a member of a Kavita server."
-      },
-      "MigrateUserEmailDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
       },
       "NextExpectedChapterDto": {
         "type": "object",
@@ -18572,11 +18499,6 @@
             "description": "Where Bookmarks are stored.",
             "nullable": true
           },
-          "emailServiceUrl": {
-            "type": "string",
-            "description": "Email service to use for the invite user flow, forgot password, etc.",
-            "nullable": true
-          },
           "installVersion": {
             "type": "string",
             "nullable": true
@@ -18640,6 +18562,9 @@
             "type": "integer",
             "description": "How large the cover images should be",
             "format": "int32"
+          },
+          "smtpConfig": {
+            "$ref": "#/components/schemas/SmtpConfigDto"
           }
         },
         "additionalProperties": false
@@ -18918,6 +18843,48 @@
             "type": "string",
             "description": "This is the Filter url encoded. It is decoded and reconstructed into a API.DTOs.Filtering.v2.FilterV2Dto",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SmtpConfigDto": {
+        "type": "object",
+        "properties": {
+          "senderAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "senderDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "host": {
+            "type": "string",
+            "nullable": true
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enableSsl": {
+            "type": "boolean"
+          },
+          "sizeLimit": {
+            "type": "integer",
+            "description": "Limit in bytes for allowing files to be added as attachments. Defaults to 25MB",
+            "format": "int32"
+          },
+          "customizedTemplates": {
+            "type": "boolean",
+            "description": "Should Kavita use config/templates for Email templates or the default ones"
           }
         },
         "additionalProperties": false

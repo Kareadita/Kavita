@@ -38,11 +38,6 @@ public class ServerSettingDto
     /// </summary>
     /// <remarks>If null or empty string, will default back to default install setting aka <see cref="DirectoryService.BookmarkDirectory"/></remarks>
     public string BookmarksDirectory { get; set; } = default!;
-    /// <summary>
-    /// Email service to use for the invite user flow, forgot password, etc.
-    /// </summary>
-    /// <remarks>If null or empty string, will default back to default install setting aka <see cref="EmailService.DefaultApiUrl"/></remarks>
-    public string EmailServiceUrl { get; set; } = default!;
     public string InstallVersion { get; set; } = default!;
     /// <summary>
     /// Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.
@@ -88,4 +83,20 @@ public class ServerSettingDto
     /// How large the cover images should be
     /// </summary>
     public CoverImageSize CoverImageSize { get; set; }
+    /// <summary>
+    /// SMTP Configuration
+    /// </summary>
+    public SmtpConfigDto SmtpConfig { get; set; }
+
+    /// <summary>
+    /// Are at least some basics filled in
+    /// </summary>
+    /// <returns></returns>
+    public bool IsEmailSetup()
+    {
+        //return false;
+        return !string.IsNullOrEmpty(SmtpConfig.Host)
+               && !string.IsNullOrEmpty(SmtpConfig.UserName)
+               && !string.IsNullOrEmpty(HostName);
+    }
 }
