@@ -99,6 +99,7 @@ public class ServerSettingDto
     /// <returns></returns>
     public bool IsEmailSetup()
     {
+        //return false;
         return !string.IsNullOrEmpty(SmtpConfig.Host)
                && !string.IsNullOrEmpty(SmtpConfig.UserName)
                && !string.IsNullOrEmpty(HostName);

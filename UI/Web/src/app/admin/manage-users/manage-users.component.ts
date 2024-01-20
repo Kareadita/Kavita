@@ -99,7 +99,7 @@ export class ManageUsersComponent implements OnInit {
         setTimeout(() => {
           this.loadMembers();
           this.toastr.success(this.translocoService.translate('toasts.user-deleted', {user: member.username}));
-        }, 30); // SetTimeout because I've noticed this can run superfast and not give enough time for data to flush
+        }, 30); // SetTimeout because I've noticed this can run super fast and not give enough time for data to flush
       });
     }
   }
@@ -112,15 +112,13 @@ export class ManageUsersComponent implements OnInit {
   }
 
   resendEmail(member: Member) {
-    this.serverService.isServerAccessible().subscribe(canAccess => {
-      this.accountService.resendConfirmationEmail(member.id).subscribe(async (email) => {
-        if (canAccess) {
-          this.toastr.info(this.translocoService.translate('toasts.email-sent', {user: member.username}));
-          return;
-        }
-        await this.confirmService.alert(
-          this.translocoService.translate('toasts.click-email-link') + '<br/> <a href="' + email + '" target="_blank" rel="noopener noreferrer">' + email + '</a>');
-      });
+    this.accountService.resendConfirmationEmail(member.id).subscribe(async (response) => {
+      if (response.emailSent) {
+        this.toastr.info(this.translocoService.translate('toasts.email-sent', {user: member.username}));
+        return;
+      }
+      await this.confirmService.alert(
+        this.translocoService.translate('toasts.click-email-link') + '<br/> <a href="' + response.emailLink + '" target="_blank" rel="noopener noreferrer">' + response.emailLink + '</a>');
     });
   }
 

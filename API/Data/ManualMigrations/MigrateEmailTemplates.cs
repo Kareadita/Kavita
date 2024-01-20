@@ -19,7 +19,7 @@ public static class MigrateEmailTemplates
 
     public static async Task Migrate(IDirectoryService directoryService, ILogger<Program> logger)
     {
-        var files = directoryService.GetFiles(directoryService.TemplateDirectory);
+        var files = directoryService.GetFiles(directoryService.CustomizedTemplateDirectory);
         if (files.Any())
         {
             logger.LogCritical("Running MigrateEmailTemplates migration - Completed. This is not an error");
@@ -27,12 +27,12 @@ public static class MigrateEmailTemplates
         }
 
         // Write files to directory
-        await DownloadAndWriteToFile(EmailChange, Path.Join(directoryService.TemplateDirectory, "EmailChange.html"), logger);
-        await DownloadAndWriteToFile(EmailConfirm, Path.Join(directoryService.TemplateDirectory, "EmailConfirm.html"), logger);
-        await DownloadAndWriteToFile(EmailMigration, Path.Join(directoryService.TemplateDirectory, "EmailMigration.html"), logger);
-        await DownloadAndWriteToFile(EmailPasswordReset, Path.Join(directoryService.TemplateDirectory, "EmailPasswordReset.html"), logger);
-        await DownloadAndWriteToFile(SendToDevice, Path.Join(directoryService.TemplateDirectory, "SendToDevice.html"), logger);
-        await DownloadAndWriteToFile(EmailTest, Path.Join(directoryService.TemplateDirectory, "EmailTest.html"), logger);
+        await DownloadAndWriteToFile(EmailChange, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailChange.html"), logger);
+        await DownloadAndWriteToFile(EmailConfirm, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailConfirm.html"), logger);
+        await DownloadAndWriteToFile(EmailMigration, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailMigration.html"), logger);
+        await DownloadAndWriteToFile(EmailPasswordReset, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailPasswordReset.html"), logger);
+        await DownloadAndWriteToFile(SendToDevice, Path.Join(directoryService.CustomizedTemplateDirectory, "SendToDevice.html"), logger);
+        await DownloadAndWriteToFile(EmailTest, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailTest.html"), logger);
 
 
 

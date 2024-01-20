@@ -176,6 +176,11 @@ public enum ServerSettingKey
     /// </summary>
     [Description("EmailSizeLimit")]
     EmailSizeLimit = 35,
+    /// <summary>
+    /// Should Kavita use config/templates for Email templates or the default ones
+    /// </summary>
+    [Description("EmailCustomizedTemplates")]
+    EmailCustomizedTemplates = 36,
     #endregion
 
 }

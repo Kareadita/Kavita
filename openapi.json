@@ -778,17 +778,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               }
             }
@@ -10045,36 +10045,6 @@
         }
       }
     },
-    "/api/Settings/reset-email-url": {
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Resets the email service url",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Settings/test-email-url": {
       "post": {
         "tags": [
@@ -15610,6 +15580,25 @@
         },
         "additionalProperties": false
       },
+      "InviteUserResponse": {
+        "type": "object",
+        "properties": {
+          "emailLink": {
+            "type": "string",
+            "description": "Email link used to setup the user account",
+            "nullable": true
+          },
+          "emailSent": {
+            "type": "boolean",
+            "description": "Was an email sent (ie is this server accessible)"
+          },
+          "invalidEmail": {
+            "type": "boolean",
+            "description": "When a user has an invalid email and is attempting to perform a flow."
+          }
+        },
+        "additionalProperties": false
+      },
       "JobDto": {
         "type": "object",
         "properties": {
@@ -18954,6 +18943,10 @@
             "type": "integer",
             "description": "Limit in bytes for allowing files to be added as attachments. Defaults to 25MB",
             "format": "int32"
+          },
+          "customizedTemplates": {
+            "type": "boolean",
+            "description": "Should Kavita use config/templates for Email templates or the default ones"
           }
         },
         "additionalProperties": false

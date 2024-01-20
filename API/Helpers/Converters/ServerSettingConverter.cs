@@ -115,6 +115,10 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.SmtpConfig ??= new SmtpConfigDto();
                     destination.SmtpConfig.SizeLimit = int.Parse(row.Value);
                     break;
+                case ServerSettingKey.EmailCustomizedTemplates:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.CustomizedTemplates = bool.Parse(row.Value);
+                    break;
             }
         }
 

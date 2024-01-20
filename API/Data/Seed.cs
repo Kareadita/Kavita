@@ -248,6 +248,7 @@ public static class Seed
             new() {Key = ServerSettingKey.EmailSenderDisplayName, Value = string.Empty},
             new() {Key = ServerSettingKey.EmailEnableSsl, Value = "true"},
             new() {Key = ServerSettingKey.EmailSizeLimit, Value = 26_214_400 + string.Empty},
+            new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

@@ -13,4 +13,8 @@ public class SmtpConfigDto
     /// Limit in bytes for allowing files to be added as attachments. Defaults to 25MB
     /// </summary>
     public int SizeLimit { get; set; } = 26_214_400;
+    /// <summary>
+    /// Should Kavita use config/templates for Email templates or the default ones
+    /// </summary>
+    public bool CustomizedTemplates { get; set; } = false;
 }

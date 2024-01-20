@@ -26,6 +26,7 @@ public interface IDirectoryService
     string SiteThemeDirectory { get; }
     string FaviconDirectory { get; }
     string LocalizationDirectory { get; }
+    string CustomizedTemplateDirectory { get; }
     string TemplateDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
@@ -82,6 +83,7 @@ public class DirectoryService : IDirectoryService
     public string SiteThemeDirectory { get; }
     public string FaviconDirectory { get; }
     public string LocalizationDirectory { get; }
+    public string CustomizedTemplateDirectory { get; }
     public string TemplateDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
@@ -116,7 +118,9 @@ public class DirectoryService : IDirectoryService
         FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
         ExistOrCreate(FaviconDirectory);
         LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
-        TemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "templates");
+        CustomizedTemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "templates");
+        ExistOrCreate(CustomizedTemplateDirectory);
+        TemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "EmailTemplates");
         ExistOrCreate(TemplateDirectory);
     }
 

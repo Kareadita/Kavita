@@ -7,4 +7,5 @@ export interface SmtpConfig {
   port: number;
   enableSsl: boolean;
   sizeLimit: number;
+  customizedTemplates: boolean;
 }

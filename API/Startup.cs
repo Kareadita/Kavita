@@ -245,7 +245,7 @@ public class Startup
                     await MigrateLibrariesToHaveAllFileTypes.Migrate(unitOfWork, dataContext, logger);
 
                     // v0.7.14
-                    MigrateEmailTemplates.Migrate(directoryService, logger);
+                    await MigrateEmailTemplates.Migrate(directoryService, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

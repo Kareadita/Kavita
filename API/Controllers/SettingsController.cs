@@ -120,27 +120,6 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
-    /// Resets the email service url
-    /// </summary>
-    /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("reset-email-url")]
-    public async Task<ActionResult<ServerSettingDto>> ResetEmailServiceUrlSettings()
-    {
-        _logger.LogInformation("{UserName} is resetting Email Service Url Setting", User.GetUsername());
-        var emailSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl);
-        emailSetting.Value = EmailService.DefaultApiUrl;
-        _unitOfWork.SettingsRepository.Update(emailSetting);
-
-        if (!await _unitOfWork.CommitAsync())
-        {
-            await _unitOfWork.RollbackAsync();
-        }
-
-        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
-    }
-
-    /// <summary>
     /// Sends a test email from the Email Service.
     /// </summary>
     /// <param name="dto"></param>
@@ -455,6 +434,12 @@ public class SettingsController : BaseApiController
         if (setting.Key == ServerSettingKey.EmailEnableSsl && updateSettingsDto.SmtpConfig.EnableSsl + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.EnableSsl + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EmailCustomizedTemplates && updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
     }

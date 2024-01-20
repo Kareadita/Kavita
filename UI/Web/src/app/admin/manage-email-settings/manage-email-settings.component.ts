@@ -46,6 +46,7 @@ export class ManageEmailSettingsComponent implements OnInit {
       this.settingsForm.addControl('senderAddress', new FormControl(this.serverSettings.smtpConfig.senderAddress, []));
       this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
       this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
+      this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
       this.cdRef.markForCheck();
     });
   }
@@ -61,6 +62,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsForm.addControl('senderAddress', new FormControl(this.serverSettings.smtpConfig.senderAddress, []));
     this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
     this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
+    this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
@@ -78,6 +80,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     modelSettings.smtpConfig.senderAddress = this.settingsForm.get('senderAddress')?.value;
     modelSettings.smtpConfig.senderDisplayName = this.settingsForm.get('senderDisplayName')?.value;
     modelSettings.smtpConfig.sizeLimit = this.settingsForm.get('sizeLimit')?.value;
+    modelSettings.smtpConfig.customizedTemplates = this.settingsForm.get('customizedTemplates')?.value;
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;

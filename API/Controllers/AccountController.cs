@@ -969,7 +969,7 @@ public class AccountController : BaseApiController
     /// <returns></returns>
     [HttpPost("resend-confirmation-email")]
     [EnableRateLimiting("Authentication")]
-    public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
+    public async Task<ActionResult<InviteUserResponse>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return BadRequest(await _localizationService.Get("en", "no-user"));
@@ -989,27 +989,34 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(user.Id, "invalid-email"));
         }
 
-        if (await _accountService.CheckIfAccessible(Request))
+
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var shouldEmailUser = serverSettings.IsEmailSetup() || !_emailService.IsValidEmail(user.Email);
+
+        if (!shouldEmailUser)
         {
-            try
+            return Ok(new InviteUserResponse()
             {
-                await _emailService.SendMigrationEmail(new EmailMigrationDto()
-                {
-                    EmailAddress = user.Email!,
-                    Username = user.UserName!,
-                    ServerConfirmationLink = emailLink,
-                    InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an issue resending invite email");
-                return BadRequest(await _localizationService.Translate(user.Id, "generic-invite-email"));
-            }
-            return Ok(emailLink);
+                EmailLink = emailLink,
+                EmailSent = false,
+                InvalidEmail = !_emailService.IsValidEmail(user.Email)
+            });
         }
 
-        return BadRequest(await _localizationService.Translate(user.Id, "not-accessible"));
+        BackgroundJob.Enqueue(() => _emailService.SendInviteEmail(new ConfirmationEmailDto()
+        {
+            EmailAddress = user.Email!,
+            InvitingUser = User.GetUsername(),
+            ServerConfirmationLink = emailLink,
+            InstallId = serverSettings.InstallId
+        }));
+
+        return Ok(new InviteUserResponse()
+        {
+            EmailLink = emailLink,
+            EmailSent = true,
+            InvalidEmail = !_emailService.IsValidEmail(user.Email)
+        });
     }
 
     /// <summary>
