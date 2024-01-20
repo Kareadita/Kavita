@@ -12,7 +12,6 @@ public static class MigrateEmailTemplates
 {
     private const string EmailChange = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/EmailChange.html";
     private const string EmailConfirm = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/EmailConfirm.html";
-    private const string EmailMigration = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/EmailMigration.html";
     private const string EmailPasswordReset = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/EmailPasswordReset.html";
     private const string SendToDevice = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/SendToDevice.html";
     private const string EmailTest = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/EmailTest.html";
@@ -29,7 +28,6 @@ public static class MigrateEmailTemplates
         // Write files to directory
         await DownloadAndWriteToFile(EmailChange, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailChange.html"), logger);
         await DownloadAndWriteToFile(EmailConfirm, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailConfirm.html"), logger);
-        await DownloadAndWriteToFile(EmailMigration, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailMigration.html"), logger);
         await DownloadAndWriteToFile(EmailPasswordReset, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailPasswordReset.html"), logger);
         await DownloadAndWriteToFile(SendToDevice, Path.Join(directoryService.CustomizedTemplateDirectory, "SendToDevice.html"), logger);
         await DownloadAndWriteToFile(EmailTest, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailTest.html"), logger);
