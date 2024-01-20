@@ -35,7 +35,7 @@ public interface IEmailService
 {
     Task SendInviteEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
-    Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
+    Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto);
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> SendTestEmail(string adminEmail);
     Task<bool> IsDefaultEmailService();
@@ -187,7 +187,7 @@ public class EmailService : IEmailService
         return Task.FromResult(true);
     }
 
-    public async Task<bool> SendPasswordResetEmail(PasswordResetEmailDto dto)
+    public async Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto)
     {
         var placeholders = new List<KeyValuePair<string, string>>
         {
@@ -345,7 +345,6 @@ public class EmailService : IEmailService
 
     private async Task<string> GetEmailBody(string templateName)
     {
-        // Get Template
         var templatePath = await GetTemplatePath(templateName);
 
         var body = await File.ReadAllTextAsync(templatePath);

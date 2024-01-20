@@ -284,17 +284,6 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
-            {
-                setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;
-                setting.Value = UrlHelper.RemoveEndingSlash(setting.Value);
-                FlurlHttp.ConfigureClient(setting.Value, cli =>
-                    cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
-
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-
             if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
             {
                 // Validate new directory can be used

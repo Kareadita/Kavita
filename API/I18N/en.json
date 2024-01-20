@@ -39,6 +39,7 @@
     "admin-already-exists": "Admin already exists",
     "invalid-username": "Invalid username",
     "critical-email-migration": "There was an issue during email migration. Contact support",
+    "email-not-enabled": "Email is not enabled on this server. You cannot perform this action.",
 
     "chapter-doesnt-exist": "Chapter does not exist",
     "file-missing": "File was not found in book",

@@ -114,7 +114,7 @@ export class ManageUsersComponent implements OnInit {
   resendEmail(member: Member) {
     this.accountService.resendConfirmationEmail(member.id).subscribe(async (response) => {
       if (response.emailSent) {
-        this.toastr.info(this.translocoService.translate('toasts.email-sent', {user: member.username}));
+        this.toastr.info(this.translocoService.translate('toasts.email-sent', {email: member.username}));
         return;
       }
       await this.confirmService.alert(

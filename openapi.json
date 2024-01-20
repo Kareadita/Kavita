@@ -796,56 +796,6 @@
         }
       }
     },
-    "/api/Account/migrate-email": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "This is similar to invite. Essentially we authenticate the user's password then go through invite email flow",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MigrateUserEmailDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MigrateUserEmailDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/MigrateUserEmailDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Account/opds-url": {
       "get": {
         "tags": [
@@ -16242,24 +16192,6 @@
         "additionalProperties": false,
         "description": "Represents a member of a Kavita server."
       },
-      "MigrateUserEmailDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "NextExpectedChapterDto": {
         "type": "object",
         "properties": {
@@ -18554,11 +18486,6 @@
           "bookmarksDirectory": {
             "type": "string",
             "description": "Where Bookmarks are stored.",
-            "nullable": true
-          },
-          "emailServiceUrl": {
-            "type": "string",
-            "description": "Email service to use for the invite user flow, forgot password, etc.",
             "nullable": true
           },
           "installVersion": {

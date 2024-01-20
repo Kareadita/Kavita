@@ -886,6 +886,10 @@ public class AccountController : BaseApiController
     [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ForgotPassword([FromQuery] string email)
     {
+
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!settings.IsEmailSetup()) return Ok(await _localizationService.Get("en", "email-not-enabled"));
+
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
         if (user == null)
         {
@@ -910,7 +914,7 @@ public class AccountController : BaseApiController
         }
         if (await _accountService.CheckIfAccessible(Request))
         {
-            await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
+            await _emailService.SendForgotPasswordEmail(new PasswordResetEmailDto()
             {
                 EmailAddress = user.Email,
                 ServerConfirmationLink = emailLink,
@@ -980,13 +984,15 @@ public class AccountController : BaseApiController
         if (user.EmailConfirmed) return BadRequest(await _localizationService.Translate(user.Id, "user-already-confirmed"));
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
+        user.ConfirmationToken = token;
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
         if (!_emailService.IsValidEmail(user.Email))
         {
             _logger.LogCritical("[Email Migration]: User {UserName} is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.UserName, user.Email);
-            return BadRequest(await _localizationService.Translate(user.Id, "invalid-email"));
         }
 
 
@@ -1018,64 +1024,6 @@ public class AccountController : BaseApiController
             InvalidEmail = !_emailService.IsValidEmail(user.Email)
         });
     }
-
-    /// <summary>
-    /// This is similar to invite. Essentially we authenticate the user's password then go through invite email flow
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [AllowAnonymous]
-    [HttpPost("migrate-email")]
-    public async Task<ActionResult<string>> MigrateEmail(MigrateUserEmailDto dto)
-    {
-        // If there is an admin account already, return
-        var users = await _unitOfWork.UserRepository.GetAdminUsersAsync();
-        if (users.Any()) return BadRequest(await _localizationService.Get("en", "admin-already-exists"));
-
-        // Check if there is an existing invite
-        var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
-        if (emailValidationErrors.Any())
-        {
-            var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
-                return BadRequest(await _localizationService.Get("en", "user-already-registered", invitedUser!.UserName));
-
-            _logger.LogInformation("A user is attempting to login, but hasn't accepted email invite");
-            return BadRequest(await _localizationService.Get("en", "user-already-invited"));
-        }
-
-
-        var user = await _userManager.Users
-            .Include(u => u.UserPreferences)
-            .SingleOrDefaultAsync(x => x.NormalizedUserName == dto.Username.ToUpper());
-        if (user == null) return BadRequest(await _localizationService.Get("en", "invalid-username"));
-
-        var validPassword = await _signInManager.UserManager.CheckPasswordAsync(user, dto.Password);
-        if (!validPassword) return BadRequest(await _localizationService.Get("en", "bad-credentials"));
-
-        try
-        {
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-            user.Email = dto.Email;
-            if (!await ConfirmEmailToken(token, user)) return BadRequest(await _localizationService.Get("en", "critical-email-migration"));
-            _unitOfWork.UserRepository.Update(user);
-
-            await _unitOfWork.CommitAsync();
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "There was an issue during email migration. Contact support");
-            _unitOfWork.UserRepository.Delete(user);
-            await _unitOfWork.CommitAsync();
-        }
-
-        return BadRequest(await _localizationService.Get("en", "critical-email-migration"));
-    }
-
-
 
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
     {

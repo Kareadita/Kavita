@@ -51,9 +51,8 @@ export class ConfirmEmailChangeComponent implements OnInit {
       this.cdRef.markForCheck();
 
       // Once we are confirmed, we need to refresh our user information (in case the user is already authenticated)
-      this.accountService.refreshAccount().subscribe(() => {
-        setTimeout(() => this.router.navigateByUrl('login'), 2000);
-      });
+      this.accountService.refreshAccount().subscribe();
+      setTimeout(() => this.router.navigateByUrl('login'), 2000);
     });
   }
 
