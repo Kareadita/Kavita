@@ -1215,7 +1215,8 @@
         "discord-title": "Discord:",
         "donations-title": "Donations:",
         "source-title": "Source:",
-        "feature-request-title": "Feature Requests"
+        "feature-request-title": "Feature Requests:",
+        "localization-title": "Localizations:"
     },
 
     "manage-tasks-settings": {
