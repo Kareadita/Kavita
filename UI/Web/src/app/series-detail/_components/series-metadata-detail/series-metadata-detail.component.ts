@@ -33,6 +33,7 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ImageComponent} from "../../../shared/image/image.component";
+import {Rating} from "../../../_models/rating";
 
 
 @Component({
@@ -68,6 +69,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
    */
   @Input() readingLists: Array<ReadingList> = [];
   @Input({required: true}) series!: Series;
+  @Input({required: true}) ratings: Array<Rating> = [];
 
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;

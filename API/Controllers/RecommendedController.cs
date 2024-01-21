@@ -40,39 +40,6 @@ public class RecommendedController : BaseApiController
     }
 
     /// <summary>
-    /// For Kavita+ users, this will return recommendations on the server.
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    // [HttpGet("recommendations")]
-    // [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
-    // public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
-    // {
-    //     var userId = User.GetUserId();
-    //     if (!await _licenseService.HasActiveLicense())
-    //     {
-    //         return Ok(new RecommendationDto());
-    //     }
-    //
-    //     if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))
-    //     {
-    //         return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-restricted"));
-    //     }
-    //
-    //     var cacheKey = $"{CacheKey}-{seriesId}-{userId}";
-    //     var results = await _cacheProvider.GetAsync<RecommendationDto>(cacheKey);
-    //     if (results.HasValue)
-    //     {
-    //         return Ok(results.Value);
-    //     }
-    //
-    //     var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
-    //     await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(10));
-    //     return Ok(ret);
-    // }
-
-
-    /// <summary>
     /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>

@@ -107,6 +107,7 @@ import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
+import {Rating} from "../../../_models/rating";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -203,6 +204,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   activeTabId = TabID.Storyline;
 
   reviews: Array<UserReview> = [];
+  ratings: Array<Rating> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
@@ -699,6 +701,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // Reviews
       this.reviews = [...data.reviews];
+      this.ratings = [...data.ratings];
 
       // Recommendations
       data.recommendations.ownedSeries.map(r => {
