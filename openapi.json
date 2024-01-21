@@ -15030,6 +15030,9 @@
             "format": "int32",
             "nullable": true
           },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
           "externalSeriesMetadatas": {
             "type": "array",
             "items": {

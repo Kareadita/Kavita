@@ -19,6 +19,7 @@ public class ExternalRecommendation
     /// When null, represents an external series. When set, it is a Series
     /// </summary>
     public int? SeriesId { get; set; }
+    public virtual Series Series { get; set; }
 
     // Relationships
     public ICollection<ExternalSeriesMetadata> ExternalSeriesMetadatas { get; set; } = null!;

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240121215454_ExternalSeriesMetadata")]
+    [Migration("20240121223643_ExternalSeriesMetadata")]
     partial class ExternalSeriesMetadata
     {
         /// <inheritdoc />
@@ -1075,6 +1075,8 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SeriesId");
 
                     b.ToTable("ExternalRecommendation");
                 });
@@ -2311,6 +2313,15 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Chapter");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.ExternalRecommendation", b =>
+                {
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.Metadata.ExternalSeriesMetadata", b =>

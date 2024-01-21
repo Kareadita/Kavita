@@ -73,7 +73,7 @@ public class UnitOfWork : IUnitOfWork
     public IUserTableOfContentRepository UserTableOfContentRepository => new UserTableOfContentRepository(_context, _mapper);
     public IAppUserSmartFilterRepository AppUserSmartFilterRepository => new AppUserSmartFilterRepository(_context, _mapper);
     public IAppUserExternalSourceRepository AppUserExternalSourceRepository => new AppUserExternalSourceRepository(_context, _mapper);
-    public IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository => new ExternalSeriesMetadataRepository(_context, _mapper);
+    public IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository => new ExternalSeriesMetadataRepository(_context, _mapper, _userManager);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

@@ -46,6 +46,11 @@ namespace API.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ExternalRecommendation", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExternalRecommendation_Series_SeriesId",
+                        column: x => x.SeriesId,
+                        principalTable: "Series",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -171,6 +176,11 @@ namespace API.Data.Migrations
                 name: "IX_ExternalRatingExternalSeriesMetadata_ExternalSeriesMetadatasId",
                 table: "ExternalRatingExternalSeriesMetadata",
                 column: "ExternalSeriesMetadatasId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExternalRecommendation_SeriesId",
+                table: "ExternalRecommendation",
+                column: "SeriesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExternalRecommendationExternalSeriesMetadata_ExternalSeriesMetadatasId",
