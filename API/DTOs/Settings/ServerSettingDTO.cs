@@ -8,11 +8,12 @@ public class ServerSettingDto
 
     public string CacheDirectory { get; set; } = default!;
     public string TaskScan { get; set; } = default!;
+    public string TaskBackup { get; set; } = default!;
+    public string TaskCleanup { get; set; } = default!;
     /// <summary>
     /// Logging level for server. Managed in appsettings.json.
     /// </summary>
     public string LoggingLevel { get; set; } = default!;
-    public string TaskBackup { get; set; } = default!;
     /// <summary>
     /// Port the server listens on. Managed in appsettings.json.
     /// </summary>

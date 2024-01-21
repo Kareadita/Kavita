@@ -182,5 +182,9 @@ public enum ServerSettingKey
     [Description("EmailCustomizedTemplates")]
     EmailCustomizedTemplates = 36,
     #endregion
-
+    /// <summary>
+    /// When the cleanup task should run - Critical to keeping Kavita working
+    /// </summary>
+    [Description("TaskCleanup")]
+    TaskCleanup = 37
 }

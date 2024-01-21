@@ -177,17 +177,7 @@ public class SettingsController : BaseApiController
 
         foreach (var setting in currentSettings)
         {
-            if (setting.Key == ServerSettingKey.TaskBackup && updateSettingsDto.TaskBackup != setting.Value)
-            {
-                setting.Value = updateSettingsDto.TaskBackup;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
-            {
-                setting.Value = updateSettingsDto.TaskScan;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
+            UpdateSchedulingSettings(setting, updateSettingsDto);
 
             if (setting.Key == ServerSettingKey.OnDeckProgressDays &&
                 updateSettingsDto.OnDeckProgressDays + string.Empty != setting.Value)
@@ -393,6 +383,27 @@ public class SettingsController : BaseApiController
         return Ok(updateSettingsDto);
     }
 
+    private void UpdateSchedulingSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    {
+        if (setting.Key == ServerSettingKey.TaskBackup && updateSettingsDto.TaskBackup != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskBackup;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskScan;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.TaskCleanup && updateSettingsDto.TaskCleanup != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskCleanup;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+    }
+
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
     {
         if (setting.Key == ServerSettingKey.EmailHost &&
@@ -459,6 +470,10 @@ public class SettingsController : BaseApiController
         }
     }
 
+    /// <summary>
+    /// All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.
+    /// </summary>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("task-frequencies")]
     public ActionResult<IEnumerable<string>> GetTaskFrequencies()

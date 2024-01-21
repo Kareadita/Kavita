@@ -141,7 +141,10 @@ public class TaskScheduler : ITaskScheduler
             RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), Cron.Weekly, RecurringJobOptions);
         }
 
-        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, RecurringJobOptions);
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCleanup)).Value;
+        _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
+        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
 

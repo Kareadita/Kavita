@@ -43,6 +43,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
+  taskFrequenciesForCleanup: Array<string> = [];
   logLevels: Array<string> = [];
 
   recurringTasks$: Observable<Array<Job>> = of([]);
@@ -116,8 +117,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       }
     },
   ];
-
-  customOption = translate('manage-tasks-settings.custom');
+  customOption = 'custom';
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService, private modalService: NgbModal,
@@ -131,10 +131,14 @@ export class ManageTasksSettingsComponent implements OnInit {
     }).subscribe(result => {
       this.taskFrequencies = result.frequencies;
       this.taskFrequencies.push(this.customOption);
+
+      this.taskFrequenciesForCleanup = this.taskFrequencies.filter(f => f !== 'disabled');
+
       this.logLevels = result.levels;
       this.serverSettings = result.settings;
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('taskCleanup', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
 
       if (!this.taskFrequencies.includes(this.serverSettings.taskScan)) {
         this.settingsForm.get('taskScan')?.setValue(this.customOption);
@@ -150,9 +154,15 @@ export class ManageTasksSettingsComponent implements OnInit {
         this.settingsForm.addControl('taskBackupCustom', new FormControl('', [Validators.required]));
       }
 
+      if (!this.taskFrequenciesForCleanup.includes(this.serverSettings.taskCleanup)) {
+        this.settingsForm.get('taskCleanup')?.setValue(this.customOption);
+        this.settingsForm.addControl('taskCleanupCustom', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
+      } else {
+        this.settingsForm.addControl('taskCleanupCustom', new FormControl('', [Validators.required]));
+      }
+
       this.settingsForm.get('taskScanCustom')?.valueChanges.pipe(
         debounceTime(100),
-        //distinctUntilChanged(),
         switchMap(val => this.settingsService.isValidCronExpression(val)),
         tap(isValid => {
           if (isValid) {
@@ -167,13 +177,26 @@ export class ManageTasksSettingsComponent implements OnInit {
 
       this.settingsForm.get('taskBackupCustom')?.valueChanges.pipe(
         debounceTime(100),
-        //distinctUntilChanged(),
         switchMap(val => this.settingsService.isValidCronExpression(val)),
         tap(isValid => {
           if (isValid) {
             this.settingsForm.get('taskBackupCustom')?.setErrors(null);
           } else {
             this.settingsForm.get('taskBackupCustom')?.setErrors({invalidCron: true})
+          }
+          this.cdRef.markForCheck();
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe();
+
+      this.settingsForm.get('taskCleanupCustom')?.valueChanges.pipe(
+        debounceTime(100),
+        switchMap(val => this.settingsService.isValidCronExpression(val)),
+        tap(isValid => {
+          if (isValid) {
+            this.settingsForm.get('taskCleanupCustom')?.setErrors(null);
+          } else {
+            this.settingsForm.get('taskCleanupCustom')?.setErrors({invalidCron: true})
           }
           this.cdRef.markForCheck();
         }),
@@ -187,25 +210,11 @@ export class ManageTasksSettingsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  // cronValidator(control: AbstractControl): { [key: string]: any } | null {
-  //   const cronExpression = control.value;
-  //
-  //   const cronResult = cron(cronExpression);
-  //
-  //   if (cronResult.isValid()) {
-  //     return null; // No validation error
-  //   } else {
-  //     return { invalidCron: true }; // Validation error
-  //   }
-  // }
-
-  // isCustomSchedule(value: string) {
-  //   return this.cronNotation.test(value);
-  // }
 
   resetForm() {
     this.settingsForm.get('taskScan')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
+    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup);
 
     if (!this.taskFrequencies.includes(this.serverSettings.taskScan)) {
       this.settingsForm.get('taskScanCustom')?.setValue(this.serverSettings.taskScan);
@@ -219,6 +228,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.settingsForm.get('taskBackupCustom')?.setValue('');
     }
 
+    if (!this.taskFrequencies.includes(this.serverSettings.taskCleanup)) {
+      this.settingsForm.get('taskCleanupCustom')?.setValue(this.serverSettings.taskCleanup);
+    } else {
+      this.settingsForm.get('taskCleanupCustom')?.setValue('');
+    }
+
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
@@ -227,6 +242,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.taskBackup = this.settingsForm.get('taskBackup')?.value;
     modelSettings.taskScan = this.settingsForm.get('taskScan')?.value;
+    modelSettings.taskCleanup = this.settingsForm.get('taskCleanup')?.value;
 
     if (this.serverSettings.taskBackup === this.customOption) {
       modelSettings.taskBackup = this.settingsForm.get('taskBackupCustom')?.value;
@@ -236,7 +252,9 @@ export class ManageTasksSettingsComponent implements OnInit {
       modelSettings.taskScan = this.settingsForm.get('taskScanCustom')?.value;
     }
 
-
+    if (this.serverSettings.taskScan === this.customOption) {
+      modelSettings.taskCleanup = this.settingsForm.get('taskCleanupCustom')?.value;
+    }
 
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {

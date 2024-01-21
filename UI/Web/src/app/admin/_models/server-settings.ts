@@ -6,6 +6,7 @@ export interface ServerSettings {
     cacheDirectory: string;
     taskScan: string;
     taskBackup: string;
+    taskCleanup: string;
     loggingLevel: string;
     port: number;
     ipAddresses: string;

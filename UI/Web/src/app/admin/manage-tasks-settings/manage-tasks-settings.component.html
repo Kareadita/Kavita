@@ -7,10 +7,10 @@
         <ng-template #taskScanTooltip>{{t('library-scan-tooltip')}}</ng-template>
         <span class="visually-hidden" id="settings-tasks-scan-help"><ng-container [ngTemplateOutlet]="taskScanTooltip"></ng-container></span>
         <select class="form-select" aria-describedby="settings-tasks-scan-help" formControlName="taskScan" id="settings-tasks-scan">
-          <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
+          <option *ngFor="let freq of taskFrequencies" [value]="freq">{{t(freq)}}</option>
         </select>
 
-        @if (settingsForm.get('taskScan')!.value === t('custom')) {
+        @if (settingsForm.get('taskScan')!.value === customOption) {
           <div class="mt-3">
             <label for="custom-task-scan" class="form-label">{{t('custom-label')}}</label>
             <input class="form-control" type="text"
@@ -38,10 +38,10 @@
         <ng-template #taskBackupTooltip>{{t('library-database-backup-tooltip')}}</ng-template>
         <span class="visually-hidden" id="settings-tasks-backup-help"><ng-container [ngTemplateOutlet]="taskBackupTooltip"></ng-container></span>
         <select class="form-select" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup" id="settings-tasks-backup">
-          <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
+          <option *ngFor="let freq of taskFrequencies" [value]="freq">{{t(freq)}}</option>
         </select>
 
-        @if (settingsForm.get('taskBackup')!.value === t('custom')) {
+        @if (settingsForm.get('taskBackup')!.value === customOption) {
           <div class="mt-3">
             <label for="custom-task-backup" class="form-label">{{t('custom-label')}}</label>
             <input class="form-control"  type="text"
@@ -55,6 +55,36 @@
                   {{t('required')}}
                 </div>
                 <div *ngIf="settingsForm.get('taskBackupCustom')?.errors?.invalidCron">
+                  {{t('cron-notation')}}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label for="settings-tasks-cleanup" class="form-label">{{t('cleanup-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="taskCleanupTooltip" role="button" tabindex="0"></i>
+        <ng-template #taskCleanupTooltip>{{t('cleanup-tooltip')}}</ng-template>
+        <span class="visually-hidden" id="settings-tasks-cleanup-help"><ng-container [ngTemplateOutlet]="taskCleanupTooltip"></ng-container></span>
+        <select class="form-select" aria-describedby="settings-tasks-cleanup-help" formControlName="taskCleanup" id="settings-tasks-cleanup">
+          <option *ngFor="let freq of taskFrequenciesForCleanup" [value]="freq">{{t(freq)}}</option>
+        </select>
+
+        @if (settingsForm.get('taskCleanup')!.value === customOption) {
+          <div class="mt-3">
+            <label for="custom-task-cleanup" class="form-label">{{t('custom-label')}}</label>
+            <input class="form-control"  type="text"
+                   id="custom-task-cleanup" formControlName="taskCleanupCustom"
+                   [class.is-invalid]="settingsForm.get('taskCleanupCustom')?.invalid && settingsForm.get('taskCleanupCustom')?.touched"
+                   aria-describedby="task-cleanup-validations">
+
+            @if (settingsForm.dirty || settingsForm.touched) {
+              <div id="task-cleanup-validations" class="invalid-feedback">
+                <div *ngIf="settingsForm.get('taskCleanupCustom')?.errors?.required">
+                  {{t('required')}}
+                </div>
+                <div *ngIf="settingsForm.get('taskCleanupCustom')?.errors?.invalidCron">
                   {{t('cron-notation')}}
                 </div>
               </div>

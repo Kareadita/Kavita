@@ -1225,6 +1225,8 @@
         "library-scan-tooltip": "How often Kavita will scan and refresh metadata around library files.",
         "library-database-backup-label": "Library Database Backup",
         "library-database-backup-tooltip": "How often Kavita will backup the database.",
+        "cleanup-label": "Cleanup",
+        "cleanup-tooltip": "How often Kavita will run cleanup tasks. This can be heavy and should be performed at midnight in most cases",
         "adhoc-tasks-title": "Ad-hoc Tasks",
         "job-title-header": "Job Title",
         "description-header": "Description",
@@ -1232,13 +1234,19 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "custom": "Custom",
+        "required": "{{validation.required-field}}",
+
         "custom-label": "Custom Schedule (Cron Notation)",
         "cron-notation": "You must use cron notation for custom scheduling",
 
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Last Executed",
         "cron-header": "Cron",
+
+        "disabled": "Disabled",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "custom": "Custom",
 
 
         "convert-media-task": "Convert Media to Target Encoding",

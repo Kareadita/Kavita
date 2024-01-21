@@ -18503,13 +18503,17 @@
             "type": "string",
             "nullable": true
           },
+          "taskBackup": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskCleanup": {
+            "type": "string",
+            "nullable": true
+          },
           "loggingLevel": {
             "type": "string",
             "description": "Logging level for server. Managed in appsettings.json.",
-            "nullable": true
-          },
-          "taskBackup": {
-            "type": "string",
             "nullable": true
           },
           "port": {
