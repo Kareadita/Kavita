@@ -9847,6 +9847,7 @@
         "tags": [
           "Settings"
         ],
+        "summary": "Returns the server settings",
         "responses": {
           "200": {
             "description": "Success",
@@ -10204,6 +10205,46 @@
       "get": {
         "tags": [
           "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/is-valid-cron": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Is the cron expression valid for Kavita's scheduler",
+        "parameters": [
+          {
+            "name": "cronExpression",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {

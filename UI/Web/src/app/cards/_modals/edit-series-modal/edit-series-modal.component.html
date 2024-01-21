@@ -30,10 +30,9 @@
               <div class="row g-0">
                 <div class="mb-3" style="width: 100%">
                   <label for="sort-name" class="form-label">{{t('sort-name-label')}}</label>
-                  <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
-                       [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
+                  <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
-                    <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
                     <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
                       <div class="invalid-feedback" *ngIf="errors.required">
                         {{t('required-field')}}

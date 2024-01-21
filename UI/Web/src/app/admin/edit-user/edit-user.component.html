@@ -28,9 +28,11 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="mb-3" style="width:100%">
                             <label for="email" class="form-label">{{t('email')}}</label>
-                            <input class="form-control" inputmode="email" type="email" id="email" formControlName="email" aria-describedby="email-validations">
+                            <input class="form-control" inputmode="email" type="email" id="email"
+                                   [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched"
+                                   formControlName="email" aria-describedby="email-validations">
                             <div id="email-validations" class="invalid-feedback"
-                                *ngIf="userForm.dirty || userForm.touched" [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+                                *ngIf="userForm.dirty || userForm.touched">
                                 <div *ngIf="userForm.get('email')?.errors?.required">
                                     {{t('required')}}
                                 </div>

@@ -75,6 +75,12 @@ public class SeriesMetadata : IHasConcurrencyToken
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
 
+    // External Metadata
+    // public int AniListAverageRating { get; set; }
+    // public int MalAverageRating { get; set; }
+    // public DateTime ExternalMetadataLastUpdated { get; set; }
+
+
 
     // Relationship
     public Series Series { get; set; } = null!;
