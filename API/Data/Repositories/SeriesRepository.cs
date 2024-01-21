@@ -47,7 +47,11 @@ public enum SeriesIncludes
     Metadata = 4,
     Related = 8,
     Library = 16,
-    Chapters = 32
+    Chapters = 32,
+    ExternalReviews = 64,
+    ExternalRatings = 128,
+    ExternalRecommendations = 256,
+
 }
 
 /// <summary>
@@ -150,6 +154,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
+    Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -669,6 +674,16 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId)
+    {
+        return _context.ExternalSeriesMetadata
+            .Where(s => s.SeriesId == seriesId)
+            .Include(s => s.ExternalReviews)
+            .Include(s => s.ExternalRatings)
+            .Include(s => s.ExternalRecommendations)
+            .FirstOrDefaultAsync();
     }
 
 

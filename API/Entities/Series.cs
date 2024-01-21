@@ -96,6 +96,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     public int AvgHoursToRead { get; set; }
 
     public SeriesMetadata Metadata { get; set; } = null!;
+    public ExternalSeriesMetadata ExternalSeriesMetadata { get; set; } = null!;
 
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
     public ICollection<AppUserProgress> Progress { get; set; } = null!;
@@ -112,6 +113,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     public List<Volume> Volumes { get; set; } = null!;
     public Library Library { get; set; } = null!;
     public int LibraryId { get; set; }
+
 
     public void UpdateLastFolderScanned()
     {

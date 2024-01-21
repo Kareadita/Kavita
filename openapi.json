@@ -10092,6 +10092,7 @@
         "tags": [
           "Settings"
         ],
+        "summary": "All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.",
         "responses": {
           "200": {
             "description": "Success",
@@ -14937,6 +14938,179 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "ExternalRating": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "favoriteCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "providerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalSeriesMetadatas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMetadata"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExternalRecommendation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalSeriesMetadatas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMetadata"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExternalReview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagline": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "Pure text version of the body",
+            "nullable": true
+          },
+          "rawBody": {
+            "type": "string",
+            "description": "Raw from the provider. Usually Markdown",
+            "nullable": true
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "siteUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Reviewer's username",
+            "nullable": true
+          },
+          "rating": {
+            "type": "integer",
+            "description": "An Optional Rating coming from the Review",
+            "format": "int32"
+          },
+          "score": {
+            "type": "integer",
+            "description": "The media's overall Score",
+            "format": "int32"
+          },
+          "totalVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalSeriesMetadatas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMetadata"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents an Externally supplied Review for a given Series"
+      },
       "ExternalSeriesDto": {
         "type": "object",
         "properties": {
@@ -14978,6 +15152,67 @@
           }
         },
         "additionalProperties": false
+      },
+      "ExternalSeriesMetadata": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalReview"
+            },
+            "description": "External Reviews for the Series. Managed by Kavita for Kavita+ users",
+            "nullable": true
+          },
+          "externalRatings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalRating"
+            },
+            "nullable": true
+          },
+          "externalRecommendations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalRecommendation"
+            },
+            "nullable": true
+          },
+          "averageExternalRating": {
+            "type": "integer",
+            "description": "Average External Rating. -1 means not set",
+            "format": "int32"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "googleBooksId": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastUpdatedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "External Metadata from Kavita+ for a Series"
       },
       "ExternalSourceDto": {
         "type": "object",
@@ -17574,6 +17809,9 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/SeriesMetadata"
+          },
+          "externalSeriesMetadata": {
+            "$ref": "#/components/schemas/ExternalSeriesMetadata"
           },
           "ratings": {
             "type": "array",

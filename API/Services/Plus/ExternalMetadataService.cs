@@ -76,8 +76,12 @@ public class ExternalMetadataService : IExternalMetadataService
             throw new KavitaException("Unable to find valid information from url for External Load");
         }
 
+        //
+
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        return await GetSeriesDetail(license, aniListId, malId, seriesId);
+        var details = await GetSeriesDetail(license, aniListId, malId, seriesId);
+
+        return details;
 
     }
 
@@ -90,6 +94,13 @@ public class ExternalMetadataService : IExternalMetadataService
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
+        // Let's try to get SeriesDetailPlusDto from the local DB.
+        var externalSeriesMetadata = await _unitOfWork.SeriesRepository.GetExternalSeriesMetadata(seriesId);
+
+        // Validate all the data is up to date, if not, ask Kavita+ for updated information
+
+        // Update the db and return
 
 
         try
@@ -113,6 +124,9 @@ public class ExternalMetadataService : IExternalMetadataService
                 Ratings = result.Ratings,
                 Reviews = result.Reviews
             };
+
+            // TODO: Cache information here
+
         }
         catch (FlurlHttpException ex)
         {
@@ -184,9 +198,10 @@ public class ExternalMetadataService : IExternalMetadataService
             SeriesName = string.Empty,
             LocalizedSeriesName = string.Empty
         };
+
         if (seriesId is > 0)
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId.Value, SeriesIncludes.Metadata | SeriesIncludes.Library);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId.Value, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalReviews);
             if (series != null)
             {
                 if (payload.AniListId <= 0)
