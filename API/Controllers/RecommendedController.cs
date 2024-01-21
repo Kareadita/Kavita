@@ -44,32 +44,32 @@ public class RecommendedController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("recommendations")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
-    public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
-    {
-        var userId = User.GetUserId();
-        if (!await _licenseService.HasActiveLicense())
-        {
-            return Ok(new RecommendationDto());
-        }
-
-        if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))
-        {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-restricted"));
-        }
-
-        var cacheKey = $"{CacheKey}-{seriesId}-{userId}";
-        var results = await _cacheProvider.GetAsync<RecommendationDto>(cacheKey);
-        if (results.HasValue)
-        {
-            return Ok(results.Value);
-        }
-
-        var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
-        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(10));
-        return Ok(ret);
-    }
+    // [HttpGet("recommendations")]
+    // [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
+    // public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
+    // {
+    //     var userId = User.GetUserId();
+    //     if (!await _licenseService.HasActiveLicense())
+    //     {
+    //         return Ok(new RecommendationDto());
+    //     }
+    //
+    //     if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))
+    //     {
+    //         return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-restricted"));
+    //     }
+    //
+    //     var cacheKey = $"{CacheKey}-{seriesId}-{userId}";
+    //     var results = await _cacheProvider.GetAsync<RecommendationDto>(cacheKey);
+    //     if (results.HasValue)
+    //     {
+    //         return Ok(results.Value);
+    //     }
+    //
+    //     var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
+    //     await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(10));
+    //     return Ok(ret);
+    // }
 
 
     /// <summary>

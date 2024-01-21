@@ -6850,47 +6850,6 @@
         }
       }
     },
-    "/api/Recommended/recommendations": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "For Kavita+ users, this will return recommendations on the server.",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecommendationDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecommendationDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecommendationDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Recommended/quick-reads": {
       "get": {
         "tags": [

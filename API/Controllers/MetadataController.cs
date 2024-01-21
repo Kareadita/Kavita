@@ -13,6 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
+using EasyCaching.Core;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,9 +22,12 @@ namespace API.Controllers;
 #nullable enable
 
 public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ILicenseService licenseService,
-    IRatingService ratingService, IReviewService reviewService, IRecommendationService recommendationService, IExternalMetadataService metadataService)
+    IExternalMetadataService metadataService, IEasyCachingProviderFactory cachingProviderFactory)
     : BaseApiController
 {
+    private readonly IEasyCachingProvider _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusSeriesDetail);
+    public const string CacheKey = "kavitaPlusSeriesDetail_";
+
     /// <summary>
     /// Fetches genres from the instance
     /// </summary>
@@ -48,7 +52,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="role">role</param>
     /// <returns></returns>
     [HttpGet("people-by-role")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"role"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["role"])]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(PersonRole? role)
     {
         return role.HasValue ?
@@ -62,7 +66,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all people</param>
     /// <returns></returns>
     [HttpGet("people")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds"])]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
@@ -79,7 +83,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all tags</param>
     /// <returns></returns>
     [HttpGet("tags")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds"])]
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
@@ -96,7 +100,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     [HttpGet("age-ratings")]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
@@ -195,6 +199,13 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(null);
         }
 
+        var cacheKey = CacheKey + seriesId;
+        var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey);
+        if (results.HasValue)
+        {
+            return results.Value;
+        }
+
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         if (user == null) return Unauthorized();
 
@@ -209,7 +220,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         ret.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
 
 
-        // TODO: Cache this
+        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(24));
 
         return Ok(ret);
 
