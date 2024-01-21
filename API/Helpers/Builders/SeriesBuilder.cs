@@ -27,7 +27,8 @@ public class SeriesBuilder : IEntityBuilder<Series>
             NormalizedName = name.ToNormalized(),
             NormalizedLocalizedName = name.ToNormalized(),
             Metadata = new SeriesMetadataBuilder().Build(),
-            Volumes = new List<Volume>()
+            Volumes = new List<Volume>(),
+            ExternalSeriesMetadata = new ExternalSeriesMetadata()
         };
     }
 

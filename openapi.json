@@ -20329,6 +20329,11 @@
             "description": "The main review",
             "nullable": true
           },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
+          },
           "seriesId": {
             "type": "integer",
             "description": "The series this is for",
@@ -20344,12 +20349,24 @@
             "description": "The user who wrote this",
             "nullable": true
           },
+          "totalVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rawBody": {
+            "type": "string",
+            "nullable": true
+          },
           "score": {
             "type": "integer",
             "description": "How many upvotes this review has gotten",
             "format": "int32"
           },
-          "externalUrl": {
+          "siteUrl": {
             "type": "string",
             "description": "If External, the url of the review",
             "nullable": true
@@ -20357,11 +20374,6 @@
           "isExternal": {
             "type": "boolean",
             "description": "Does this review come from an external Source"
-          },
-          "bodyJustText": {
-            "type": "string",
-            "description": "The main body with just text, for review preview",
-            "nullable": true
           },
           "provider": {
             "enum": [

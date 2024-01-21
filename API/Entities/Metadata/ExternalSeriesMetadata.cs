@@ -14,6 +14,10 @@ public class ExternalSeriesMetadata
     /// </summary>
     public ICollection<ExternalReview> ExternalReviews { get; set; } = null!;
     public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
+    /// <summary>
+    /// External recommendations will include all recommendations and will have a seriesId if it's on this Kavita instance.
+    /// </summary>
+    /// <remarks>Cleanup Service will perform matching to tie new series with recommendations</remarks>
     public ICollection<ExternalRecommendation> ExternalRecommendations { get; set; } = null!;
 
     /// <summary>

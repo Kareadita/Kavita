@@ -223,13 +223,13 @@ public class ReviewService : IReviewService
             IsExternal = true,
             Provider = r.Provider,
             BodyJustText = GetCharacters(r.Body),
-            ExternalUrl = r.SiteUrl
+            SiteUrl = r.SiteUrl
         });
 
         return ret.OrderByDescending(r => r.Score);
     }
 
-    private static string GetCharacters(string body)
+    public static string GetCharacters(string body)
     {
         if (string.IsNullOrEmpty(body)) return body;
 

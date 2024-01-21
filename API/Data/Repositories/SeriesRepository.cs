@@ -154,7 +154,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
-    Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
+
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -181,6 +181,11 @@ public class SeriesRepository : ISeriesRepository
     public void Attach(Series series)
     {
         _context.Series.Attach(series);
+    }
+
+    public void Attach(ExternalSeriesMetadata metadata)
+    {
+        _context.ExternalSeriesMetadata.Attach(metadata);
     }
 
     public void Update(Series series)
@@ -675,17 +680,6 @@ public class SeriesRepository : ISeriesRepository
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
-
-    public Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId)
-    {
-        return _context.ExternalSeriesMetadata
-            .Where(s => s.SeriesId == seriesId)
-            .Include(s => s.ExternalReviews)
-            .Include(s => s.ExternalRatings)
-            .Include(s => s.ExternalRecommendations)
-            .FirstOrDefaultAsync();
-    }
-
 
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {

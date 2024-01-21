@@ -15,7 +15,7 @@ public class ExternalRecommendation
     public long? MalId { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 
-    public int SeriesId { get; set; }
+    public int? SeriesId { get; set; }
 
     // Relationships
     public ICollection<ExternalSeriesMetadata> ExternalSeriesMetadatas { get; set; } = null!;

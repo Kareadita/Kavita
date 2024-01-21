@@ -10,8 +10,10 @@ using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers.Builders;
+using AutoMapper;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -39,6 +41,8 @@ internal class SeriesDetailPlusAPIDto
     public IEnumerable<MediaRecommendationDto> Recommendations { get; set; }
     public IEnumerable<UserReviewDto> Reviews { get; set; }
     public IEnumerable<RatingDto> Ratings { get; set; }
+    public int? AniListId { get; set; }
+    public long? MalId { get; set; }
 }
 
 public interface IExternalMetadataService
@@ -51,11 +55,13 @@ public class ExternalMetadataService : IExternalMetadataService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ExternalMetadataService> _logger;
+    private readonly IMapper _mapper;
 
-    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger)
+    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _mapper = mapper;
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -96,7 +102,36 @@ public class ExternalMetadataService : IExternalMetadataService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
         // Let's try to get SeriesDetailPlusDto from the local DB.
-        var externalSeriesMetadata = await _unitOfWork.SeriesRepository.GetExternalSeriesMetadata(seriesId);
+        var externalSeriesMetadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
+        if (externalSeriesMetadata == null)
+        {
+            externalSeriesMetadata = new ExternalSeriesMetadata();
+            series.ExternalSeriesMetadata = externalSeriesMetadata;
+            _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
+        }
+
+        var needsRefresh = externalSeriesMetadata.LastUpdatedUtc <= DateTime.UtcNow.Subtract(TimeSpan.FromDays(14));
+        if (!needsRefresh)
+        {
+            // Convert into DTOs and return
+            return new SeriesDetailPlusDto()
+            {
+                Ratings = externalSeriesMetadata.ExternalRatings.Select(r =>_mapper.Map<RatingDto>(r)),
+                Reviews = externalSeriesMetadata.ExternalReviews.Select(r =>
+                {
+                    var review = _mapper.Map<UserReviewDto>(r);
+                    review.SeriesId = seriesId;
+                    review.LibraryId = series.LibraryId;
+                    review.IsExternal = true;
+                    return review;
+                }),
+                Recommendations = new RecommendationDto()
+                {
+                    //ExternalSeries = externalSeriesMetadata.Ex
+                }
+            };
+        }
+
 
         // Validate all the data is up to date, if not, ask Kavita+ for updated information
 
@@ -118,15 +153,41 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             var recs = await ProcessRecommendations(series, user!, result.Recommendations);
-            return new SeriesDetailPlusDto()
+            var ret = new SeriesDetailPlusDto()
             {
                 Recommendations = recs,
                 Ratings = result.Ratings,
                 Reviews = result.Reviews
             };
 
-            // TODO: Cache information here
+            // Reviews
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
+            externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
+            {
+                var review = _mapper.Map<ExternalReview>(r);
+                review.SeriesId = externalSeriesMetadata.SeriesId;
+                return review;
+            }).ToList();
 
+            // Ratings
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+            externalSeriesMetadata.ExternalRatings = result.Ratings.Select(r =>
+            {
+                var rating = _mapper.Map<ExternalRating>(r);
+                rating.SeriesId = externalSeriesMetadata.SeriesId;
+                return rating;
+            }).ToList();
+
+            externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
+            externalSeriesMetadata.AverageExternalRating = (int) externalSeriesMetadata.ExternalRatings
+                .Where(r => r.AverageScore > 0)
+                .Average(r => r.AverageScore);
+            if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
+            if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
+
+            await _unitOfWork.CommitAsync();
+
+            return ret;
         }
         catch (FlurlHttpException ex)
         {

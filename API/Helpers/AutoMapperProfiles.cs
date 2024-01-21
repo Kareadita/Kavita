@@ -24,6 +24,7 @@ using API.Entities.Metadata;
 using API.Entities.Scrobble;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
+using API.Services;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
 using MediaError = API.Entities.MediaError;
@@ -244,6 +245,18 @@ public class AutoMapperProfiles : Profile
         // This is for cloning to ensure the records don't get overwritten when setting from SeedData
         CreateMap<AppUserDashboardStream, AppUserDashboardStream>();
         CreateMap<AppUserSideNavStream, AppUserSideNavStream>();
+
+        CreateMap<ExternalRating, RatingDto>();
+        CreateMap<RatingDto, ExternalRating>();
+        CreateMap<ExternalReview, UserReviewDto>()
+            .ForMember(dest => dest.IsExternal,
+                opt =>
+                    opt.MapFrom(src => true));
+
+        CreateMap<UserReviewDto, ExternalReview>()
+            .ForMember(dest => dest.BodyJustText,
+                opt =>
+                    opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
 
     }
 }
