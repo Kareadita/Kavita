@@ -41,7 +41,7 @@ namespace API.Data.Migrations
                     AniListId = table.Column<int>(type: "INTEGER", nullable: true),
                     MalId = table.Column<long>(type: "INTEGER", nullable: true),
                     Provider = table.Column<int>(type: "INTEGER", nullable: false),
-                    SeriesId = table.Column<int>(type: "INTEGER", nullable: false)
+                    SeriesId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

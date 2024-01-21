@@ -112,7 +112,7 @@ public class ReviewService : IReviewService
         return userRatings;
     }
 
-    private static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
+    public static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
     {
         IList<UserReviewDto> externalReviews;
         var totalReviews = reviews.Count;
@@ -155,62 +155,8 @@ public class ReviewService : IReviewService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return new List<UserReviewDto>();
 
-        // Get from the DB if it exists, else fallback to Kavita+
-        // var needsSaving = false;
-        //
-        // if (series.ExternalReviews.Max(r => r.LastModifiedUtc) >= DateTime.UtcNow.Subtract(TimeSpan.FromDays(14)))
-        // {
-        //     _logger.LogInformation("External Reviews for Series {SeriesName} is stale, refreshing from Kavita+", series.Name);
-        //     needsSaving = true;
-        // }
-        // else
-        // {
-        //     return series.ExternalReviews.Select(r => new UserReviewDto()
-        //     {
-        //         Body = r.Body,
-        //         Tagline = r.Tagline,
-        //         Score = r.Score,
-        //         Username = r.Username,
-        //         LibraryId = series.LibraryId,
-        //         SeriesId = series.Id,
-        //         IsExternal = true,
-        //         Provider = r.Source,
-        //         BodyJustText = GetCharacters(r.Body),
-        //         ExternalUrl = r.SiteUrl
-        //     }).OrderByDescending(r => r.Score);
-        // }
-
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         var results = (await GetReviews(license.Value, series)).ToList();
-
-
-        // if (needsSaving)
-        // {
-        //     _unitOfWork.ExternalReviewRepository.Remove(series.ExternalReviews);
-        //
-        //     var updatedReviews = results.Select(r => new ExternalReview()
-        //     {
-        //         Body = r.Body,
-        //         BodyJustText = GetCharacters(r.Body),
-        //         Source = r.Provider,
-        //         Username = r.Username,
-        //         Tagline = r.Tagline,
-        //         Score = r.Score,
-        //         Rating = r.Rating,
-        //         RawBody = r.RawBody,
-        //         SiteUrl = r.SiteUrl,
-        //         TotalVotes = r.TotalVotes,
-        //         SeriesId = seriesId
-        //     }).ToList();
-        //
-        //     foreach (var updatedReview in updatedReviews)
-        //     {
-        //         _unitOfWork.ExternalReviewRepository.Attach(updatedReview);
-        //     }
-        //
-        //     series.ExternalReviews = updatedReviews;
-        //     await _unitOfWork.CommitAsync();
-        // }
 
         var ret = results.Select(r => new UserReviewDto()
         {

@@ -82,7 +82,7 @@ public class ExternalMetadataService : IExternalMetadataService
             throw new KavitaException("Unable to find valid information from url for External Load");
         }
 
-        //
+        // This is for the Series drawer. We can get this extra information during the initial SeriesDetail call so it's all coming from the DB
 
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
         var details = await GetSeriesDetail(license, aniListId, malId, seriesId);
@@ -100,6 +100,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return new SeriesDetailPlusDto();
 
         // Let's try to get SeriesDetailPlusDto from the local DB.
         var externalSeriesMetadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
@@ -107,6 +108,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             externalSeriesMetadata = new ExternalSeriesMetadata();
             series.ExternalSeriesMetadata = externalSeriesMetadata;
+            externalSeriesMetadata.SeriesId = series.Id;
             _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
         }
 
@@ -114,10 +116,28 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!needsRefresh)
         {
             // Convert into DTOs and return
+            var seriesIdsOnServer = externalSeriesMetadata.ExternalRecommendations
+                .Where(r => r.SeriesId is > 0)
+                .Select(s => (int) s.SeriesId!)
+                .ToList();
+
+            var ownedSeries = (await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(seriesIdsOnServer, user.Id))
+                .ToList();
+            var canSeeExternalSeries = user is {AgeRestriction: AgeRating.NotApplicable} &&
+                                       await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+            var externalSeries = new List<ExternalSeriesDto>();
+            if (canSeeExternalSeries)
+            {
+                externalSeries = externalSeriesMetadata.ExternalRecommendations
+                    .Where(r => r.SeriesId is null or 0)
+                    .Select(r => _mapper.Map<ExternalSeriesDto>(r))
+                    .ToList();
+            }
+
             return new SeriesDetailPlusDto()
             {
                 Ratings = externalSeriesMetadata.ExternalRatings.Select(r =>_mapper.Map<RatingDto>(r)),
-                Reviews = externalSeriesMetadata.ExternalReviews.Select(r =>
+                Reviews = externalSeriesMetadata.ExternalReviews.OrderByDescending(r => r.Score).Select(r =>
                 {
                     var review = _mapper.Map<UserReviewDto>(r);
                     review.SeriesId = seriesId;
@@ -127,16 +147,11 @@ public class ExternalMetadataService : IExternalMetadataService
                 }),
                 Recommendations = new RecommendationDto()
                 {
-                    //ExternalSeries = externalSeriesMetadata.Ex
+                    ExternalSeries = externalSeries,
+                    OwnedSeries = ownedSeries
                 }
             };
         }
-
-
-        // Validate all the data is up to date, if not, ask Kavita+ for updated information
-
-        // Update the db and return
-
 
         try
         {
@@ -152,14 +167,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 .ReceiveJson<SeriesDetailPlusAPIDto>();
 
 
-            var recs = await ProcessRecommendations(series, user!, result.Recommendations);
-            var ret = new SeriesDetailPlusDto()
-            {
-                Recommendations = recs,
-                Ratings = result.Ratings,
-                Reviews = result.Reviews
-            };
-
             // Reviews
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
@@ -171,12 +178,21 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // Ratings
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+
             externalSeriesMetadata.ExternalRatings = result.Ratings.Select(r =>
             {
                 var rating = _mapper.Map<ExternalRating>(r);
                 rating.SeriesId = externalSeriesMetadata.SeriesId;
                 return rating;
             }).ToList();
+
+
+
+
+            // Recommendations
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+            externalSeriesMetadata.ExternalRecommendations ??= new List<ExternalRecommendation>();
+            var recs = await ProcessRecommendations(series, user!, result.Recommendations, externalSeriesMetadata);
 
             externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
             externalSeriesMetadata.AverageExternalRating = (int) externalSeriesMetadata.ExternalRatings
@@ -186,6 +202,13 @@ public class ExternalMetadataService : IExternalMetadataService
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
 
             await _unitOfWork.CommitAsync();
+
+            var ret = new SeriesDetailPlusDto()
+            {
+                Recommendations = recs,
+                Ratings = result.Ratings,
+                Reviews = result.Reviews
+            };
 
             return ret;
         }
@@ -204,7 +227,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return null;
     }
 
-    private async Task<RecommendationDto> ProcessRecommendations(Series series, AppUser user, IEnumerable<MediaRecommendationDto> recs)
+    private async Task<RecommendationDto> ProcessRecommendations(Series series, AppUser user, IEnumerable<MediaRecommendationDto> recs, ExternalSeriesMetadata externalSeriesMetadata)
     {
         var recDto = new RecommendationDto()
         {
@@ -214,6 +237,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var canSeeExternalSeries = user is {AgeRestriction: AgeRating.NotApplicable} &&
                                    await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        // NOTE: This can result in a series being recommended that shares the same name but different format
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
@@ -224,6 +248,17 @@ public class ExternalMetadataService : IExternalMetadataService
             if (seriesForRec != null)
             {
                 recDto.OwnedSeries.Add(seriesForRec);
+                externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
+                {
+                    SeriesId = seriesForRec.Id,
+                    AniListId = rec.AniListId,
+                    MalId = rec.MalId,
+                    Name = seriesForRec.Name,
+                    Url = rec.SiteUrl,
+                    CoverUrl = rec.CoverUrl,
+                    Summary = rec.Summary,
+                    Provider = rec.Provider
+                });
                 continue;
             }
 
@@ -238,6 +273,17 @@ public class ExternalMetadataService : IExternalMetadataService
                 Summary = rec.Summary,
                 AniListId = rec.AniListId,
                 MalId = rec.MalId
+            });
+            externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
+            {
+                SeriesId = null,
+                AniListId = rec.AniListId,
+                MalId = rec.MalId,
+                Name = rec.Name,
+                Url = rec.SiteUrl,
+                CoverUrl = rec.CoverUrl,
+                Summary = rec.Summary,
+                Provider = rec.Provider
             });
         }
 

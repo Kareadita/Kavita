@@ -1062,7 +1062,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Provider")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeriesId")
+                    b.Property<int?>("SeriesId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Summary")

@@ -14,6 +14,7 @@ public interface IExternalSeriesMetadataRepository
     void Attach(ExternalReview review);
     void Remove(IEnumerable<ExternalReview>? reviews);
     void Remove(IEnumerable<ExternalRating>? ratings);
+    void Remove(IEnumerable<ExternalRecommendation>? recommendations);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
     Task<IList<ExternalReview>> GetExternalReviews(int seriesId);
 }
@@ -54,6 +55,12 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     {
         if (ratings == null) return;
         _context.ExternalRating.RemoveRange(ratings);
+    }
+
+    public void Remove(IEnumerable<ExternalRecommendation> recommendations)
+    {
+        if (recommendations == null) return;
+        _context.ExternalRecommendation.RemoveRange(recommendations);
     }
 
     /// <summary>

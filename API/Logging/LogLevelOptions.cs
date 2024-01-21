@@ -65,8 +65,8 @@ public static class LogLevelOptions
                                          e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==
                                          "Serilog.AspNetCore.RequestLoggingMiddleware";
 
-        // If Minimum log level is Information, swallow all Request Logging messages
-        if (isRequestLoggingMiddleware && LogLevelSwitch.MinimumLevel >= LogEventLevel.Information)
+        // If Minimum log level is Warning, swallow all Request Logging messages
+        if (isRequestLoggingMiddleware && LogLevelSwitch.MinimumLevel > LogEventLevel.Information)
         {
             return false;
         }

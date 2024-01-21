@@ -195,7 +195,23 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(null);
         }
 
-        return Ok(await metadataService.GetSeriesDetail(User.GetUserId(), seriesId));
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        if (user == null) return Unauthorized();
+
+        var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
+        if (ret == null) return Ok(null);
+
+        var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
+            .ToList();
+        userReviews.AddRange(ret.Reviews);
+        ret.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
+
+
+        // TODO: Cache this
+
+        return Ok(ret);
 
     }
 }

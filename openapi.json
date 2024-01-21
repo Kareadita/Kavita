@@ -15026,7 +15026,9 @@
           },
           "seriesId": {
             "type": "integer",
-            "format": "int32"
+            "description": "When null, represents an external series. When set, it is a Series",
+            "format": "int32",
+            "nullable": true
           },
           "externalSeriesMetadatas": {
             "type": "array",
@@ -15180,6 +15182,7 @@
             "items": {
               "$ref": "#/components/schemas/ExternalRecommendation"
             },
+            "description": "External recommendations will include all recommendations and will have a seriesId if it's on this Kavita instance.",
             "nullable": true
           },
           "averageExternalRating": {
@@ -20354,8 +20357,8 @@
             "format": "int32"
           },
           "rating": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "rawBody": {
             "type": "string",

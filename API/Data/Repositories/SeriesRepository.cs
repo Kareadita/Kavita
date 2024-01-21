@@ -1242,8 +1242,10 @@ public class SeriesRepository : ISeriesRepository
             .Where(library => library.AppUsers.Any(x => x.Id == userId))
             .AsSplitQuery()
             .Select(l => l.Id);
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Series
+            .RestrictAgainstAgeRestriction(userRating)
             .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -1895,6 +1897,7 @@ public class SeriesRepository : ISeriesRepository
         SeriesDto? result = null;
         if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
         {
+            // TODO: I can likely work AniList and MalIds from ExternalSeriesMetadata in here
             result =  await _context.Series
                 .RestrictAgainstAgeRestriction(userRating)
                 .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))

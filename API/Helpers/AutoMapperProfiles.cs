@@ -12,6 +12,7 @@ using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -258,5 +259,6 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
 
+        CreateMap<ExternalRecommendation, ExternalSeriesDto>();
     }
 }

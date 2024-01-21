@@ -50,6 +50,7 @@ public record MediaRecommendationDto
     public string? Summary { get; set; }
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
+    public ScrobbleProvider Provider { get; set; }
 }
 
 public interface IRecommendationService

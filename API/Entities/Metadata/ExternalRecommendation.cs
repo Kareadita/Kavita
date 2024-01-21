@@ -15,6 +15,9 @@ public class ExternalRecommendation
     public long? MalId { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 
+    /// <summary>
+    /// When null, represents an external series. When set, it is a Series
+    /// </summary>
     public int? SeriesId { get; set; }
 
     // Relationships

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240121185303_ExternalSeriesMetadata")]
+    [Migration("20240121215454_ExternalSeriesMetadata")]
     partial class ExternalSeriesMetadata
     {
         /// <inheritdoc />
@@ -1065,7 +1065,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Provider")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeriesId")
+                    b.Property<int?>("SeriesId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Summary")
