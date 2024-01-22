@@ -77,6 +77,7 @@ public static class FilterFieldValueConverter
                 .Select(x => (MangaFormat) Enum.Parse(typeof(MangaFormat), x))
                 .ToList(),
             FilterField.ReadTime => int.Parse(value),
+            FilterField.AverageRating => float.Parse(value),
             _ => throw new ArgumentException("Invalid field type")
         };
     }

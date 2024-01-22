@@ -15574,7 +15574,8 @@
               24,
               25,
               26,
-              27
+              27,
+              28
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",

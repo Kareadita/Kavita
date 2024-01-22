@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -53,11 +53,12 @@ class FilterRowUi {
 
 const unitLabels: Map<FilterField, FilterRowUi> = new Map([
     [FilterField.ReadingDate, new FilterRowUi('unit-reading-date')],
+    [FilterField.AverageRating, new FilterRowUi('unit-average-rating')],
     [FilterField.ReadProgress, new FilterRowUi('unit-reading-progress')],
 ]);
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
+const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating, FilterField.AverageRating];
 const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
@@ -219,6 +220,7 @@ export class MetadataFilterRowComponent implements OnInit {
       stmt.value = stmt.value + '';
     }
 
+    console.log('stmt: ', stmt)
     if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field)  && !BooleanFields.includes(stmt.field))) return;
     this.filterStatement.emit(stmt);
   }
@@ -332,7 +334,7 @@ export class MetadataFilterRowComponent implements OnInit {
       this.predicateType$.next(PredicateType.Number);
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
-        this.formGroup.get('comparison')?.patchValue(NumberFields[0]);
+        this.formGroup.get('comparison')?.patchValue(NumberComparisons[0]);
       }
       return;
     }

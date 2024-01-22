@@ -1629,6 +1629,7 @@
 
     "metadata-filter-row": {
         "unit-reading-date": "Date",
+        "unit-average-rating": "Average Rating (Kavita+) - only for cached series",
         "unit-reading-progress": "Percent"
     },
 
@@ -1929,7 +1930,8 @@
         "path": "Path",
         "file-path": "File Path",
         "want-to-read": "Want to Read",
-        "read-date": "Reading Date"
+        "read-date": "Reading Date",
+        "average-rating": "Average Rating"
     },
 
     "filter-comparison-pipe": {
