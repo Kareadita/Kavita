@@ -3571,6 +3571,7 @@
           "Metadata"
         ],
         "summary": "Fetches the details needed from Kavita+ for Series Detail page",
+        "description": "This will hit upstream K+ if the data in local db is 2 weeks old",
         "parameters": [
           {
             "name": "seriesId",

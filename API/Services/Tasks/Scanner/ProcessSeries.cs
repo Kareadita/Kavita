@@ -235,6 +235,9 @@ public class ProcessSeries : IProcessSeries
 
                 if (seriesAdded)
                 {
+                    // See if any recommendations can link up to the series
+                    _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
+                    await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
                 }

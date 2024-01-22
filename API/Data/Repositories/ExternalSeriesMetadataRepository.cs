@@ -27,6 +27,7 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId, int limit = 25);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user);
+    Task LinkRecommendationsToSeries(Series series);
 }
 
 public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepository
@@ -146,5 +147,25 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         };
 
         return seriesDetailPlusDto;
+    }
+
+    /// <summary>
+    /// Searches Recommendations without a SeriesId on record and attempts to link based on Series Name/Localized Name
+    /// </summary>
+    /// <param name="series"></param>
+    /// <returns></returns>
+    public async Task LinkRecommendationsToSeries(Series series)
+    {
+        var recMatches = await _context.ExternalRecommendation
+            .Where(r => r.SeriesId == null || r.SeriesId == 0)
+            .Where(r => EF.Functions.Like(r.Name, series.Name) ||
+                        EF.Functions.Like(r.Name, series.LocalizedName))
+            .ToListAsync();
+        foreach (var rec in recMatches)
+        {
+            rec.SeriesId = series.Id;
+        }
+
+        await _context.SaveChangesAsync();
     }
 }
