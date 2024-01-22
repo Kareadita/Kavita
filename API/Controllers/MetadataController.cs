@@ -188,6 +188,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <summary>
     /// Fetches the details needed from Kavita+ for Series Detail page
     /// </summary>
+    /// <remarks>This will hit upstream K+ if the data in local db is 2 weeks old</remarks>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
@@ -199,23 +200,25 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(null);
         }
 
-        var cacheKey = CacheKey + seriesId;
-        var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey);
-        if (results.HasValue)
-        {
-            return results.Value;
-        }
-
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         if (user == null) return Unauthorized();
-
-        var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
-        if (ret == null) return Ok(null);
-
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
             .Where(r => !string.IsNullOrEmpty(r.Body))
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
             .ToList();
+
+        var cacheKey = CacheKey + seriesId + "_" + user.Id;
+        var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey);
+        if (results.HasValue)
+        {
+            var cachedResult = results.Value;
+            userReviews.AddRange(cachedResult.Reviews);
+            cachedResult.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
+            return cachedResult;
+        }
+
+        var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
+        if (ret == null) return Ok(null);
         userReviews.AddRange(ret.Reviews);
         ret.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
 

@@ -9,7 +9,6 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {Router} from '@angular/router';
-import {ReaderService} from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
 import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';

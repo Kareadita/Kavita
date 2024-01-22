@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using API.Constants;
+﻿using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
-using API.DTOs.Recommendation;
 using API.Extensions;
 using API.Helpers;
-using API.Services;
-using API.Services.Plus;
-using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 
 namespace API.Controllers;
 
@@ -22,21 +12,12 @@ namespace API.Controllers;
 public class RecommendedController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IRecommendationService _recommendationService;
-    private readonly ILicenseService _licenseService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IEasyCachingProvider _cacheProvider;
+
     public const string CacheKey = "recommendation_";
 
-    public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
-        ILicenseService licenseService, IEasyCachingProviderFactory cachingProviderFactory,
-        ILocalizationService localizationService)
+    public RecommendedController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _recommendationService = recommendationService;
-        _licenseService = licenseService;
-        _localizationService = localizationService;
-        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
     }
 
     /// <summary>
@@ -46,7 +27,7 @@ public class RecommendedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("quick-reads")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetQuickReads(User.GetUserId(), libraryId, userParams);
@@ -62,7 +43,7 @@ public class RecommendedController : BaseApiController
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpGet("quick-catchup-reads")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(User.GetUserId(), libraryId, userParams);
@@ -78,7 +59,7 @@ public class RecommendedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("highly-rated")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams? userParams)
     {
         var userId = User.GetUserId();
         userParams ??= UserParams.Default;
@@ -96,7 +77,7 @@ public class RecommendedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("more-in")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams? userParams)
     {
         var userId = User.GetUserId();
 
@@ -115,7 +96,7 @@ public class RecommendedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("rediscover")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetRediscover(User.GetUserId(), libraryId, userParams);

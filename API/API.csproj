@@ -85,7 +85,7 @@
     <PackageReference Include="NetVips.Native" Version="8.15.1" />
     <PackageReference Include="NReco.Logging.File" Version="1.2.0" />
     <PackageReference Include="Serilog" Version="3.1.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.2.0-dev-00752" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />

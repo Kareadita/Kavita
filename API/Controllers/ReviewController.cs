@@ -22,27 +22,19 @@ namespace API.Controllers;
 
 public class ReviewController : BaseApiController
 {
-    private readonly ILogger<ReviewController> _logger;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILicenseService _licenseService;
     private readonly IMapper _mapper;
     private readonly IReviewService _reviewService;
     private readonly IScrobblingService _scrobblingService;
-    private readonly IEasyCachingProvider _cacheProvider;
     public const string CacheKey = "review_";
 
-    public ReviewController(ILogger<ReviewController> logger, IUnitOfWork unitOfWork, ILicenseService licenseService,
-        IMapper mapper, IReviewService reviewService, IScrobblingService scrobblingService,
-        IEasyCachingProviderFactory cachingProviderFactory)
+    public ReviewController(IUnitOfWork unitOfWork,
+        IMapper mapper, IReviewService reviewService, IScrobblingService scrobblingService)
     {
-        _logger = logger;
         _unitOfWork = unitOfWork;
-        _licenseService = licenseService;
         _mapper = mapper;
         _reviewService = reviewService;
         _scrobblingService = scrobblingService;
-
-        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
     }
 
 
