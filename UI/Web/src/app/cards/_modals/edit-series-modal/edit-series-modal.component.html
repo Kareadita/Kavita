@@ -357,6 +357,12 @@
           <li [ngbNavItem]="tabs[TabID.CoverImage]">
             <a ngbNavLink>{{t(tabs[TabID.CoverImage])}}</a>
             <ng-template ngbNavContent>
+              <form [formGroup]="coverOptionForm" style="margin-bottom: 15px">
+                <label for="cover-display-option-port" class="form-label">Cover Display Options</label>
+                <select id="cover-display-option-port" class="form-select" formControlName="coverDisplayOptionSelected">
+                  <option *ngFor="let option of coverDisplayOptions" [ngValue]="option">{{ option | titlecase }}</option>
+                </select>
+              </form>
               <p class="alert alert-primary" role="alert">
                 {{t('cover-image-description')}}
               </p>

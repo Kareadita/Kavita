@@ -3607,6 +3607,45 @@
         }
       }
     },
+    "/api/Metadata/cover-display-options": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Get cover display options",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Opds/{apiKey}": {
       "post": {
         "tags": [
@@ -18044,6 +18083,16 @@
             "description": "A Comma-separated list of strings representing links from the series",
             "nullable": true
           },
+          "coverDisplayOption": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Series cover display option",
+            "format": "int32"
+          },
           "languageLocked": {
             "type": "boolean"
           },
@@ -18276,6 +18325,16 @@
             "type": "string",
             "description": "A comma-separated list of Urls",
             "nullable": true
+          },
+          "coverDisplayOption": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Series cover display option",
+            "format": "int32"
           },
           "languageLocked": {
             "type": "boolean"

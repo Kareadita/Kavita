@@ -96,6 +96,10 @@ export class MetadataService {
     return this.httpClient.get<Array<Person>>(this.baseUrl + 'metadata/people-by-role?role=' + role);
   }
 
+  getCoverDisplayOptions(){
+    return this.httpClient.get<Array<string>>(this.baseUrl + 'metadata/cover-display-options');
+  }
+
   createDefaultFilterDto(): SeriesFilterV2 {
     return {
       statements: [] as FilterStatement[],

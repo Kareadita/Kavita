@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240122094835_AddCoverDisplayOption")]
+    partial class AddCoverDisplayOption
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
@@ -1015,145 +1018,6 @@ namespace API.Data.Migrations
                     b.ToTable("MediaError");
                 });
 
-            modelBuilder.Entity("API.Entities.Metadata.ExternalRating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AverageScore")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FavoriteCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Provider")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ProviderUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ExternalRating");
-                });
-
-            modelBuilder.Entity("API.Entities.Metadata.ExternalRecommendation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("AniListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("CoverUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("MalId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Provider")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeriesId");
-
-                    b.ToTable("ExternalRecommendation");
-                });
-
-            modelBuilder.Entity("API.Entities.Metadata.ExternalReview", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Body")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BodyJustText")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Provider")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RawBody")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SiteUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Tagline")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("TotalVotes")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ExternalReview");
-                });
-
-            modelBuilder.Entity("API.Entities.Metadata.ExternalSeriesMetadata", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AniListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AverageExternalRating")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("GoogleBooksId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastUpdatedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("MalId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeriesId")
-                        .IsUnique();
-
-                    b.ToTable("ExternalSeriesMetadata");
-                });
-
             modelBuilder.Entity("API.Entities.Metadata.SeriesMetadata", b =>
                 {
                     b.Property<int>("Id")
@@ -1887,51 +1751,6 @@ namespace API.Data.Migrations
                     b.ToTable("CollectionTagSeriesMetadata");
                 });
 
-            modelBuilder.Entity("ExternalRatingExternalSeriesMetadata", b =>
-                {
-                    b.Property<int>("ExternalRatingsId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ExternalSeriesMetadatasId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("ExternalRatingsId", "ExternalSeriesMetadatasId");
-
-                    b.HasIndex("ExternalSeriesMetadatasId");
-
-                    b.ToTable("ExternalRatingExternalSeriesMetadata");
-                });
-
-            modelBuilder.Entity("ExternalRecommendationExternalSeriesMetadata", b =>
-                {
-                    b.Property<int>("ExternalRecommendationsId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ExternalSeriesMetadatasId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("ExternalRecommendationsId", "ExternalSeriesMetadatasId");
-
-                    b.HasIndex("ExternalSeriesMetadatasId");
-
-                    b.ToTable("ExternalRecommendationExternalSeriesMetadata");
-                });
-
-            modelBuilder.Entity("ExternalReviewExternalSeriesMetadata", b =>
-                {
-                    b.Property<int>("ExternalReviewsId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ExternalSeriesMetadatasId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("ExternalReviewsId", "ExternalSeriesMetadatasId");
-
-                    b.HasIndex("ExternalSeriesMetadatasId");
-
-                    b.ToTable("ExternalReviewExternalSeriesMetadata");
-                });
-
             modelBuilder.Entity("GenreSeriesMetadata", b =>
                 {
                     b.Property<int>("GenresId")
@@ -2318,26 +2137,6 @@ namespace API.Data.Migrations
                     b.Navigation("Chapter");
                 });
 
-            modelBuilder.Entity("API.Entities.Metadata.ExternalRecommendation", b =>
-                {
-                    b.HasOne("API.Entities.Series", "Series")
-                        .WithMany()
-                        .HasForeignKey("SeriesId");
-
-                    b.Navigation("Series");
-                });
-
-            modelBuilder.Entity("API.Entities.Metadata.ExternalSeriesMetadata", b =>
-                {
-                    b.HasOne("API.Entities.Series", "Series")
-                        .WithOne("ExternalSeriesMetadata")
-                        .HasForeignKey("API.Entities.Metadata.ExternalSeriesMetadata", "SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Series");
-                });
-
             modelBuilder.Entity("API.Entities.Metadata.SeriesMetadata", b =>
                 {
                     b.HasOne("API.Entities.Series", "Series")
@@ -2578,51 +2377,6 @@ namespace API.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ExternalRatingExternalSeriesMetadata", b =>
-                {
-                    b.HasOne("API.Entities.Metadata.ExternalRating", null)
-                        .WithMany()
-                        .HasForeignKey("ExternalRatingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Metadata.ExternalSeriesMetadata", null)
-                        .WithMany()
-                        .HasForeignKey("ExternalSeriesMetadatasId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ExternalRecommendationExternalSeriesMetadata", b =>
-                {
-                    b.HasOne("API.Entities.Metadata.ExternalRecommendation", null)
-                        .WithMany()
-                        .HasForeignKey("ExternalRecommendationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Metadata.ExternalSeriesMetadata", null)
-                        .WithMany()
-                        .HasForeignKey("ExternalSeriesMetadatasId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ExternalReviewExternalSeriesMetadata", b =>
-                {
-                    b.HasOne("API.Entities.Metadata.ExternalReview", null)
-                        .WithMany()
-                        .HasForeignKey("ExternalReviewsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Metadata.ExternalSeriesMetadata", null)
-                        .WithMany()
-                        .HasForeignKey("ExternalSeriesMetadatasId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("GenreSeriesMetadata", b =>
                 {
                     b.HasOne("API.Entities.Genre", null)
@@ -2765,8 +2519,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
-                    b.Navigation("ExternalSeriesMetadata");
-
                     b.Navigation("Metadata");
 
                     b.Navigation("Progress");

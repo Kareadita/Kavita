@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -227,5 +227,16 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
         return Ok(ret);
 
+    }
+
+    /// <summary>
+    /// Get cover display options
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("cover-display-options")]
+    public ActionResult<IList<string>> GetCoverDisplayOptions()
+    {
+        var optionStrings = Enum.GetNames(typeof(CoverDisplayOption));
+        return optionStrings.ToList();
     }
 }

@@ -49,6 +49,10 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// </summary>
     /// <remarks>This is not populated from Chapters of the Series</remarks>
     public string WebLinks { get; set; } = string.Empty;
+    /// <summary>
+    /// Series cover display option
+    /// </summary>
+    public CoverDisplayOption CoverDisplayOption { get; set; }
 
     // Locks
     public bool LanguageLocked { get; set; }
