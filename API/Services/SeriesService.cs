@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -163,6 +163,8 @@ public class SeriesService : ISeriesService
                     .Select(s => s.Trim())!
                 );
             }
+
+            series.Metadata.CoverDisplayOption = updateSeriesMetadataDto.SeriesMetadata?.CoverDisplayOption ?? CoverDisplayOption.Default;
 
 
             if (updateSeriesMetadataDto.CollectionTags.Any())
