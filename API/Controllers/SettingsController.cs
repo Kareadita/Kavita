@@ -125,19 +125,6 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
-    /// Sends a test email from the Email Service.
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("test-email-url")]
-    public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        return Ok(await _emailService.SendTestEmail(user!.Email));
-    }
-
-    /// <summary>
     /// Is the minimum information setup for Email to work
     /// </summary>
     /// <returns></returns>

@@ -752,6 +752,8 @@ public class ProcessSeries : IProcessSeries
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(s => s.Trim())
             );
+
+            // For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
         }
 
         if (!string.IsNullOrEmpty(comicInfo.Isbn))
