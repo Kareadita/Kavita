@@ -220,7 +220,6 @@ export class MetadataFilterRowComponent implements OnInit {
       stmt.value = stmt.value + '';
     }
 
-    console.log('stmt: ', stmt)
     if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field)  && !BooleanFields.includes(stmt.field))) return;
     this.filterStatement.emit(stmt);
   }
@@ -382,11 +381,9 @@ export class MetadataFilterRowComponent implements OnInit {
 
 
   onDateSelect(event: NgbDate) {
-    console.log('date selected: ', event);
     this.propagateFilterUpdate();
   }
   updateIfDateFilled() {
-    console.log('date inputted: ', this.formGroup.get('filterValue')?.value);
     this.propagateFilterUpdate();
   }
 
