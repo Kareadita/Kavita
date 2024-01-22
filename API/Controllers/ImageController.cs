@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -101,10 +101,38 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var seriesMetadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
+        if (seriesMetadata == null) return BadRequest();
+        string path;
+        switch (seriesMetadata.CoverDisplayOption)
+        {
+            case CoverDisplayOption.Random:
+                var rand = new Random(Guid.NewGuid().GetHashCode());
+                var volumeIds = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).Select(v => v.Id).ToList();
+                if (volumeIds.Count < 1)
+                    return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+                var randIndex = rand.Next(0, volumeIds.Count);
+                path = Path.Join(_directoryService.CoverImageDirectory,
+                                       await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeIds[randIndex]));
+                break;
+            case CoverDisplayOption.LatestVolume:
+                var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToList();
+                if (volumes.Count < 1)
+                    return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+                var latestVolumeNumber = volumes.Max(x => x.Number);
+                var latestId = volumes.First(v => v.Number == latestVolumeNumber).Id;
+                path = Path.Join(_directoryService.CoverImageDirectory,
+                    await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(latestId));
+                break;
+            default:
+                path = Path.Join(_directoryService.CoverImageDirectory,
+                    await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
+                break;
+        }
 
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+            return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+        var format = _directoryService.FileSystem.Path.GetExtension(path);
         Response.AddCacheHeader(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
