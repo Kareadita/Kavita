@@ -9,7 +9,6 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {Router} from '@angular/router';
-import {ReaderService} from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
 import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';
@@ -33,6 +32,7 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ImageComponent} from "../../../shared/image/image.component";
+import {Rating} from "../../../_models/rating";
 
 
 @Component({
@@ -68,6 +68,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
    */
   @Input() readingLists: Array<ReadingList> = [];
   @Input({required: true}) series!: Series;
+  @Input({required: true}) ratings: Array<Rating> = [];
 
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;

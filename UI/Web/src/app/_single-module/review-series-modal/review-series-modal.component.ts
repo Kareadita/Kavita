@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -40,8 +48,8 @@ export class ReviewSeriesModalComponent implements OnInit {
     if (model.reviewBody.length < this.minLength) {
       return;
     }
-    this.seriesService.updateReview(this.review.seriesId, model.reviewBody).subscribe(() => {
-      this.modal.close({success: true});
+    this.seriesService.updateReview(this.review.seriesId, model.reviewBody).subscribe(review => {
+      this.modal.close({success: true, review: review});
     });
   }
 }

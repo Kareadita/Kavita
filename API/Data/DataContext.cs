@@ -58,6 +58,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
     public DbSet<AppUserSideNavStream> AppUserSideNavStream { get; set; } = null!;
     public DbSet<AppUserExternalSource> AppUserExternalSource { get; set; } = null!;
+    public DbSet<ExternalReview> ExternalReview { get; set; } = null!;
+    public DbSet<ExternalRating> ExternalRating { get; set; } = null!;
+    public DbSet<ExternalSeriesMetadata> ExternalSeriesMetadata { get; set; } = null!;
+    public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

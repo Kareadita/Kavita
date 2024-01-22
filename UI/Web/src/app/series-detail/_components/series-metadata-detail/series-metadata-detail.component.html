@@ -6,7 +6,7 @@
 
   <app-metadata-detail [tags]="['']" [libraryId]="series.libraryId" [heading]="t('rating-title')">
     <ng-template #itemTemplate let-item>
-      <app-external-rating [seriesId]="series.id" [userRating]="series.userRating" [hasUserRated]="series.hasUserRated" [libraryType]="libraryType"></app-external-rating>
+      <app-external-rating [seriesId]="series.id" [ratings]="ratings" [userRating]="series.userRating" [hasUserRated]="series.hasUserRated" [libraryType]="libraryType"></app-external-rating>
     </ng-template>
   </app-metadata-detail>
 

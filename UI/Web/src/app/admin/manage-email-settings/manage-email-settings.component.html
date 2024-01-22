@@ -73,9 +73,6 @@
 
           <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
             <label for="settings-password" class="form-label">{{t('password-label')}}</label>
-            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
-            <ng-template #passwordTooltip>{{t('password-tooltip')}}</ng-template>
-            <span class="visually-hidden" id="settings-password-help"><ng-container [ngTemplateOutlet]="usernameTooltip"></ng-container></span>
             <input type="password" class="form-control" aria-describedby="manga-header" formControlName="password" id="settings-password" />
           </div>
         </div>

@@ -44,7 +44,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {filter, map, take} from 'rxjs/operators';
+import {filter, map, take, tap} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -107,6 +107,7 @@ import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
+import {Rating} from "../../../_models/rating";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -203,6 +204,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   activeTabId = TabID.Storyline;
 
   reviews: Array<UserReview> = [];
+  ratings: Array<Rating> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
@@ -699,6 +701,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // Reviews
       this.reviews = [...data.reviews];
+      this.ratings = [...data.ratings];
 
       // Recommendations
       data.recommendations.ownedSeries.map(r => {
@@ -843,6 +846,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const userReview = this.getUserReview();
 
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
+    modalRef.componentInstance.series = this.series;
     if (userReview.length > 0) {
       modalRef.componentInstance.review = userReview[0];
     } else {
@@ -852,12 +856,18 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         body: ''
       };
     }
-    modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean}) => {
-      if (closeResult.success) {
-        this.loadReviews(); // TODO: Ensure reviews get updated here
+
+    modalRef.closed.subscribe((closeResult) => {
+      // BUG: This never executes!
+      console.log('Close Result: ')
+      if (closeResult.success && closeResult.review !== null) {
+        const index = this.reviews.findIndex(r => r.username === closeResult.review!.username);
+        console.log('update index: ', index, ' with review ', closeResult.review);
+        this.reviews[index] = closeResult.review;
+        this.cdRef.markForCheck();
       }
     });
+
   }
 
 

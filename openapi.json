@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.0"
+    "version": "0.7.13.1"
   },
   "servers": [
     {
@@ -3571,6 +3571,7 @@
           "Metadata"
         ],
         "summary": "Fetches the details needed from Kavita+ for Series Detail page",
+        "description": "This will hit upstream K+ if the data in local db is 2 weeks old",
         "parameters": [
           {
             "name": "seriesId",
@@ -4594,56 +4595,6 @@
               "text/json": {
                 "schema": {
                   "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Rating": {
-      "get": {
-        "tags": [
-          "Rating"
-        ],
-        "summary": "Get the external ratings for a given series",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RatingDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RatingDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RatingDto"
-                  }
                 }
               }
             }
@@ -6850,47 +6801,6 @@
         }
       }
     },
-    "/api/Recommended/recommendations": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "For Kavita+ users, this will return recommendations on the server.",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecommendationDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecommendationDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecommendationDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Recommended/quick-reads": {
       "get": {
         "tags": [
@@ -7236,54 +7146,6 @@
       }
     },
     "/api/Review": {
-      "get": {
-        "tags": [
-          "Review"
-        ],
-        "summary": "Fetches reviews from the server for a given series",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserReviewDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserReviewDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserReviewDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
           "Review"
@@ -9847,6 +9709,7 @@
         "tags": [
           "Settings"
         ],
+        "summary": "Returns the server settings",
         "responses": {
           "200": {
             "description": "Success",
@@ -10091,6 +9954,7 @@
         "tags": [
           "Settings"
         ],
+        "summary": "All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.",
         "responses": {
           "200": {
             "description": "Success",
@@ -10204,6 +10068,46 @@
       "get": {
         "tags": [
           "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/is-valid-cron": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Is the cron expression valid for Kavita's scheduler",
+        "parameters": [
+          {
+            "name": "cronExpression",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -14896,6 +14800,184 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "ExternalRating": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "favoriteCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "providerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalSeriesMetadatas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMetadata"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExternalRecommendation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "When null, represents an external series. When set, it is a Series",
+            "format": "int32",
+            "nullable": true
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "externalSeriesMetadatas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMetadata"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExternalReview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagline": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "Pure text version of the body",
+            "nullable": true
+          },
+          "rawBody": {
+            "type": "string",
+            "description": "Raw from the provider. Usually Markdown",
+            "nullable": true
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "siteUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Reviewer's username",
+            "nullable": true
+          },
+          "rating": {
+            "type": "integer",
+            "description": "An Optional Rating coming from the Review",
+            "format": "int32"
+          },
+          "score": {
+            "type": "integer",
+            "description": "The media's overall Score",
+            "format": "int32"
+          },
+          "totalVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalSeriesMetadatas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMetadata"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents an Externally supplied Review for a given Series"
+      },
       "ExternalSeriesDto": {
         "type": "object",
         "properties": {
@@ -14937,6 +15019,68 @@
           }
         },
         "additionalProperties": false
+      },
+      "ExternalSeriesMetadata": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalReview"
+            },
+            "description": "External Reviews for the Series. Managed by Kavita for Kavita+ users",
+            "nullable": true
+          },
+          "externalRatings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalRating"
+            },
+            "nullable": true
+          },
+          "externalRecommendations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalRecommendation"
+            },
+            "description": "External recommendations will include all recommendations and will have a seriesId if it's on this Kavita instance.",
+            "nullable": true
+          },
+          "averageExternalRating": {
+            "type": "integer",
+            "description": "Average External Rating. -1 means not set",
+            "format": "int32"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "googleBooksId": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastUpdatedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "External Metadata from Kavita+ for a Series"
       },
       "ExternalSourceDto": {
         "type": "object",
@@ -15332,7 +15476,8 @@
               24,
               25,
               26,
-              27
+              27,
+              28
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",
@@ -17534,6 +17679,9 @@
           "metadata": {
             "$ref": "#/components/schemas/SeriesMetadata"
           },
+          "externalSeriesMetadata": {
+            "$ref": "#/components/schemas/ExternalSeriesMetadata"
+          },
           "ratings": {
             "type": "array",
             "items": {
@@ -18462,13 +18610,17 @@
             "type": "string",
             "nullable": true
           },
+          "taskBackup": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskCleanup": {
+            "type": "string",
+            "nullable": true
+          },
           "loggingLevel": {
             "type": "string",
             "description": "Logging level for server. Managed in appsettings.json.",
-            "nullable": true
-          },
-          "taskBackup": {
-            "type": "string",
             "nullable": true
           },
           "port": {
@@ -20046,6 +20198,11 @@
             "description": "The main review",
             "nullable": true
           },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
+          },
           "seriesId": {
             "type": "integer",
             "description": "The series this is for",
@@ -20061,12 +20218,24 @@
             "description": "The user who wrote this",
             "nullable": true
           },
+          "totalVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float"
+          },
+          "rawBody": {
+            "type": "string",
+            "nullable": true
+          },
           "score": {
             "type": "integer",
             "description": "How many upvotes this review has gotten",
             "format": "int32"
           },
-          "externalUrl": {
+          "siteUrl": {
             "type": "string",
             "description": "If External, the url of the review",
             "nullable": true
@@ -20074,11 +20243,6 @@
           "isExternal": {
             "type": "boolean",
             "description": "Does this review come from an external Source"
-          },
-          "bodyJustText": {
-            "type": "string",
-            "description": "The main body with just text, for review preview",
-            "nullable": true
           },
           "provider": {
             "enum": [

@@ -13,14 +13,12 @@ import {Rating} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {AccountService} from "../../../_services/account.service";
 import {LibraryType} from "../../../_models/library/library";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {ImageComponent} from "../../../shared/image/image.component";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-external-rating',
@@ -35,7 +33,6 @@ export class ExternalRatingComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
-  private readonly accountService = inject(AccountService);
   private readonly themeService = inject(ThemeService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
@@ -45,30 +42,14 @@ export class ExternalRatingComponent implements OnInit {
   @Input({required: true}) userRating!: number;
   @Input({required: true}) hasUserRated!: boolean;
   @Input({required: true}) libraryType!: LibraryType;
+  @Input({required: true}) ratings: Array<Rating> = [];
 
-
-  ratings: Array<Rating> = [];
   isLoading: boolean = false;
   overallRating: number = -1;
   starColor = this.themeService.getCssVariable('--rating-star-color');
 
   ngOnInit() {
-
     this.seriesService.getOverallRating(this.seriesId).subscribe(r => this.overallRating = r.averageScore);
-
-    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res) => {
-      if (!res) return;
-      this.isLoading = true;
-      this.cdRef.markForCheck();
-      this.seriesService.getRatings(this.seriesId).subscribe(res => {
-        this.ratings = res;
-        this.isLoading = false;
-        this.cdRef.markForCheck();
-      }, () => {
-        this.isLoading = false;
-        this.cdRef.markForCheck();
-      });
-    });
   }
 
   updateRating(rating: number) {

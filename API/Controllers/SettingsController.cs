@@ -14,7 +14,8 @@ using API.Logging;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
-using Flurl.Http;
+using Cronos;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
@@ -59,6 +60,10 @@ public class SettingsController : BaseApiController
         return Ok(settingsDto.BaseUrl);
     }
 
+    /// <summary>
+    /// Returns the server settings
+    /// </summary>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet]
     public async Task<ActionResult<ServerSettingDto>> GetSettings()
@@ -161,7 +166,8 @@ public class SettingsController : BaseApiController
         if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
             !updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks/"))
         {
-            bookmarkDirectory = _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
+            bookmarkDirectory =
+                _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
         }
 
         if (string.IsNullOrEmpty(updateSettingsDto.BookmarksDirectory))
@@ -171,39 +177,26 @@ public class SettingsController : BaseApiController
 
         foreach (var setting in currentSettings)
         {
-            if (setting.Key == ServerSettingKey.TaskBackup && updateSettingsDto.TaskBackup != setting.Value)
-            {
-                setting.Value = updateSettingsDto.TaskBackup;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
+            UpdateSchedulingSettings(setting, updateSettingsDto);
 
-            if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
-            {
-                setting.Value = updateSettingsDto.TaskScan;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.OnDeckProgressDays && updateSettingsDto.OnDeckProgressDays + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.OnDeckProgressDays &&
+                updateSettingsDto.OnDeckProgressDays + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.OnDeckProgressDays + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.OnDeckUpdateDays && updateSettingsDto.OnDeckUpdateDays + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.OnDeckUpdateDays &&
+                updateSettingsDto.OnDeckUpdateDays + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.OnDeckUpdateDays + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.CoverImageSize && updateSettingsDto.CoverImageSize + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.CoverImageSize &&
+                updateSettingsDto.CoverImageSize + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.CoverImageSize + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
-            {
-                setting.Value = updateSettingsDto.TaskScan;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
@@ -216,7 +209,8 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.CacheSize && updateSettingsDto.CacheSize + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.CacheSize &&
+                updateSettingsDto.CacheSize + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.CacheSize + string.Empty;
                 // CacheSize is managed in appSetting.json
@@ -232,10 +226,13 @@ public class SettingsController : BaseApiController
             {
                 if (OsInfo.IsDocker) continue;
                 // Validate IP addresses
-                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(',',
+                             StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                 {
-                    if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
-                        return BadRequest(await _localizationService.Translate(User.GetUserId(), "ip-address-invalid", ipAddress));
+                    if (!IPAddress.TryParse(ipAddress.Trim(), out _))
+                    {
+                        return BadRequest(await _localizationService.Translate(User.GetUserId(), "ip-address-invalid",
+                            ipAddress));
                     }
                 }
 
@@ -258,20 +255,23 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.LoggingLevel && updateSettingsDto.LoggingLevel + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.LoggingLevel &&
+                updateSettingsDto.LoggingLevel + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.LoggingLevel + string.Empty;
                 LogLevelOptions.SwitchLogLevel(updateSettingsDto.LoggingLevel);
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.EnableOpds && updateSettingsDto.EnableOpds + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.EnableOpds &&
+                updateSettingsDto.EnableOpds + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.EnableOpds + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.EncodeMediaAs && updateSettingsDto.EncodeMediaAs + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.EncodeMediaAs &&
+                updateSettingsDto.EncodeMediaAs + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.EncodeMediaAs + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
@@ -289,7 +289,8 @@ public class SettingsController : BaseApiController
                 // Validate new directory can be used
                 if (!await _directoryService.CheckWriteAccess(bookmarkDirectory))
                 {
-                    return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-dir-permissions"));
+                    return BadRequest(
+                        await _localizationService.Translate(User.GetUserId(), "bookmark-dir-permissions"));
                 }
 
                 originalBookmarkDirectory = setting.Value;
@@ -300,7 +301,8 @@ public class SettingsController : BaseApiController
 
             }
 
-            if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.AllowStatCollection &&
+                updateSettingsDto.AllowStatCollection + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.AllowStatCollection + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
@@ -314,27 +316,32 @@ public class SettingsController : BaseApiController
                 }
             }
 
-            if (setting.Key == ServerSettingKey.TotalBackups && updateSettingsDto.TotalBackups + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.TotalBackups &&
+                updateSettingsDto.TotalBackups + string.Empty != setting.Value)
             {
                 if (updateSettingsDto.TotalBackups > 30 || updateSettingsDto.TotalBackups < 1)
                 {
                     return BadRequest(await _localizationService.Translate(User.GetUserId(), "total-backups"));
                 }
+
                 setting.Value = updateSettingsDto.TotalBackups + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.TotalLogs && updateSettingsDto.TotalLogs + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.TotalLogs &&
+                updateSettingsDto.TotalLogs + string.Empty != setting.Value)
             {
                 if (updateSettingsDto.TotalLogs > 30 || updateSettingsDto.TotalLogs < 1)
                 {
                     return BadRequest(await _localizationService.Translate(User.GetUserId(), "total-logs"));
                 }
+
                 setting.Value = updateSettingsDto.TotalLogs + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.EnableFolderWatching && updateSettingsDto.EnableFolderWatching + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.EnableFolderWatching &&
+                updateSettingsDto.EnableFolderWatching + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.EnableFolderWatching + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
@@ -376,63 +383,97 @@ public class SettingsController : BaseApiController
         return Ok(updateSettingsDto);
     }
 
+    private void UpdateSchedulingSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    {
+        if (setting.Key == ServerSettingKey.TaskBackup && updateSettingsDto.TaskBackup != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskBackup;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskScan;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.TaskCleanup && updateSettingsDto.TaskCleanup != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskCleanup;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+    }
+
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
     {
-        if (setting.Key == ServerSettingKey.EmailHost && updateSettingsDto.SmtpConfig.Host + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailHost &&
+            updateSettingsDto.SmtpConfig.Host + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.Host + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailPort && updateSettingsDto.SmtpConfig.Port + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailPort &&
+            updateSettingsDto.SmtpConfig.Port + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.Port + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailAuthPassword && updateSettingsDto.SmtpConfig.Password + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailAuthPassword &&
+            updateSettingsDto.SmtpConfig.Password + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.Password + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailAuthUserName && updateSettingsDto.SmtpConfig.UserName + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailAuthUserName &&
+            updateSettingsDto.SmtpConfig.UserName + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.UserName + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailSenderAddress && updateSettingsDto.SmtpConfig.SenderAddress + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailSenderAddress &&
+            updateSettingsDto.SmtpConfig.SenderAddress + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.SenderAddress + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailSenderDisplayName && updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailSenderDisplayName &&
+            updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.SenderDisplayName + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailSizeLimit && updateSettingsDto.SmtpConfig.SizeLimit + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailSizeLimit &&
+            updateSettingsDto.SmtpConfig.SizeLimit + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.SizeLimit + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailEnableSsl && updateSettingsDto.SmtpConfig.EnableSsl + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailEnableSsl &&
+            updateSettingsDto.SmtpConfig.EnableSsl + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.EnableSsl + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
-        if (setting.Key == ServerSettingKey.EmailCustomizedTemplates && updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.EmailCustomizedTemplates &&
+            updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
     }
 
+    /// <summary>
+    /// All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.
+    /// </summary>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("task-frequencies")]
     public ActionResult<IEnumerable<string>> GetTaskFrequencies()
@@ -451,7 +492,7 @@ public class SettingsController : BaseApiController
     [HttpGet("log-levels")]
     public ActionResult<IEnumerable<string>> GetLogLevels()
     {
-        return Ok(new [] {"Trace", "Debug", "Information", "Warning", "Critical"});
+        return Ok(new[] {"Trace", "Debug", "Information", "Warning", "Critical"});
     }
 
     [HttpGet("opds-enabled")]
@@ -459,5 +500,17 @@ public class SettingsController : BaseApiController
     {
         var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         return Ok(settingsDto.EnableOpds);
+    }
+
+    /// <summary>
+    /// Is the cron expression valid for Kavita's scheduler
+    /// </summary>
+    /// <param name="cronExpression"></param>
+    /// <returns></returns>
+    [HttpGet("is-valid-cron")]
+    public ActionResult<bool> IsValidCron(string cronExpression)
+    {
+        // NOTE: This must match Hangfire's underlying cron system. Hangfire is unique
+        return Ok(CronHelper.IsValidCron(cronExpression));
     }
 }

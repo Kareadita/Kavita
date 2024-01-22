@@ -14,16 +14,13 @@ public static class CronConverter
     };
     public static string ConvertToCronNotation(string source)
     {
-        var destination = string.Empty;
-        destination = source.ToLower() switch
+        return source.ToLower() switch
         {
             "daily" => Cron.Daily(),
             "weekly" => Cron.Weekly(),
             "disabled" => Cron.Never(),
             "" => Cron.Never(),
-            _ => destination
+            _ => source
         };
-
-        return destination;
     }
 }

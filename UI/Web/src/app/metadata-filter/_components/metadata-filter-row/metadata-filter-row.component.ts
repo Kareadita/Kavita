@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -53,11 +53,12 @@ class FilterRowUi {
 
 const unitLabels: Map<FilterField, FilterRowUi> = new Map([
     [FilterField.ReadingDate, new FilterRowUi('unit-reading-date')],
+    [FilterField.AverageRating, new FilterRowUi('unit-average-rating')],
     [FilterField.ReadProgress, new FilterRowUi('unit-reading-progress')],
 ]);
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
+const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating, FilterField.AverageRating];
 const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
@@ -233,7 +234,7 @@ export class MetadataFilterRowComponent implements OnInit {
     } else if (BooleanFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (DateFields.includes(this.preset.field)) {
-      this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val)); // TODO: Figure out how this works
+      this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
     }
     else if (DropdownFields.includes(this.preset.field)) {
       if (this.MultipleDropdownAllowed || val.includes(',')) {
@@ -332,7 +333,7 @@ export class MetadataFilterRowComponent implements OnInit {
       this.predicateType$.next(PredicateType.Number);
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
-        this.formGroup.get('comparison')?.patchValue(NumberFields[0]);
+        this.formGroup.get('comparison')?.patchValue(NumberComparisons[0]);
       }
       return;
     }
@@ -380,11 +381,9 @@ export class MetadataFilterRowComponent implements OnInit {
 
 
   onDateSelect(event: NgbDate) {
-    console.log('date selected: ', event);
     this.propagateFilterUpdate();
   }
   updateIfDateFilled() {
-    console.log('date inputted: ', this.formGroup.get('filterValue')?.value);
     this.propagateFilterUpdate();
   }
 

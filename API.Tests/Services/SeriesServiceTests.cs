@@ -18,6 +18,7 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using API.Tests.Helpers;
+using EasyCaching.Core;
 using Hangfire;
 using Hangfire.InMemory;
 using Microsoft.Extensions.Caching.Memory;
@@ -58,7 +59,8 @@ public class SeriesServiceTests : AbstractDbTest
 
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), locService);
+            Substitute.For<IScrobblingService>(), locService,
+            Substitute.For<IEasyCachingProviderFactory>());
     }
     #region Setup
 

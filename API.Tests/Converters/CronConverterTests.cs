@@ -10,7 +10,8 @@ public class CronConverterTests
     [InlineData("disabled", "0 0 31 2 *")]
     [InlineData("weekly", "0 0 * * 1")]
     [InlineData("", "0 0 31 2 *")]
-    [InlineData("sdfgdf", "")]
+    [InlineData("sdfgdf", "sdfgdf")]
+    [InlineData("* * * * *", "* * * * *")]
     public void ConvertTest(string input, string expected)
     {
         Assert.Equal(expected, CronConverter.ConvertToCronNotation(input));

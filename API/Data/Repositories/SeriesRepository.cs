@@ -47,7 +47,11 @@ public enum SeriesIncludes
     Metadata = 4,
     Related = 8,
     Library = 16,
-    Chapters = 32
+    Chapters = 32,
+    ExternalReviews = 64,
+    ExternalRatings = 128,
+    ExternalRecommendations = 256,
+
 }
 
 /// <summary>
@@ -133,6 +137,8 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
+    public Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
+        MangaFormat format);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
@@ -148,6 +154,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
+
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -174,6 +181,11 @@ public class SeriesRepository : ISeriesRepository
     public void Attach(Series series)
     {
         _context.Series.Attach(series);
+    }
+
+    public void Attach(ExternalSeriesMetadata metadata)
+    {
+        _context.ExternalSeriesMetadata.Attach(metadata);
     }
 
     public void Update(Series series)
@@ -669,7 +681,6 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
 
-
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {
         var userProgress = await _context.AppUserProgresses
@@ -1124,6 +1135,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.ReleaseYear => query.HasReleaseYear(true, statement.Comparison, (int) value),
             FilterField.ReadTime => query.HasAverageReadTime(true, statement.Comparison, (int) value),
             FilterField.ReadingDate => query.HasReadingDate(true, statement.Comparison, (DateTime) value, userId),
+            FilterField.AverageRating => query.HasAverageRating(true, statement.Comparison, (float) value),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -1231,8 +1243,10 @@ public class SeriesRepository : ISeriesRepository
             .Where(library => library.AppUsers.Any(x => x.Id == userId))
             .AsSplitQuery()
             .Select(l => l.Id);
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Series
+            .RestrictAgainstAgeRestriction(userRating)
             .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -1571,6 +1585,27 @@ public class SeriesRepository : ISeriesRepository
     #nullable enable
     }
 
+    public async Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
+        MangaFormat format)
+    {
+        var normalizedSeries = seriesName.ToNormalized();
+        var normalizedLocalized = localizedName.ToNormalized();
+        return await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .Where(s => s.Format == format && format != MangaFormat.Unknown)
+            .Where(s =>
+                s.NormalizedName.Equals(normalizedSeries)
+                || s.NormalizedName.Equals(normalizedLocalized)
+
+                || s.NormalizedLocalizedName.Equals(normalizedSeries)
+                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
+
+                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
+            )
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
 
     /// <summary>
     /// Removes series that are not in the seenSeries list. Does not commit.
@@ -1863,6 +1898,7 @@ public class SeriesRepository : ISeriesRepository
         SeriesDto? result = null;
         if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
         {
+            // TODO: I can likely work AniList and MalIds from ExternalSeriesMetadata in here
             result =  await _context.Series
                 .RestrictAgainstAgeRestriction(userRating)
                 .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))

@@ -122,16 +122,28 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
-            var series2 = await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format, false);
-            var details = $"Series 1: {firstInfo.Series}    Series 2: {series2.Name}" + "\n" +
-                          $"Localized: {firstInfo.LocalizedSeries}    Localized: {series2.LocalizedName}" + "\n" +
-                          $"Filename: {_directoryService.FileSystem.FileInfo.New(firstInfo.FullFilePath).Directory}    Filename: {series2.FolderPath}";
-            _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
-            firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
+            var seriesCollisions = await _unitOfWork.SeriesRepository.GetAllSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
 
-            await _eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent($"Scanner found a Series {firstInfo.Series} which matched another Series {firstInfo.LocalizedSeries} in a different folder parallel to Library {library.Name} root folder. This is not allowed. Please correct",
-                    details));
+            seriesCollisions = seriesCollisions.Where(collision =>
+                collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
+
+            if (seriesCollisions.Any())
+            {
+                var tableRows = seriesCollisions.Select(collision =>
+                    $"<tr><td>Name: {firstInfo.Series}</td><td>Name: {collision.Name}</td></tr>" +
+                    $"<tr><td>Localized: {firstInfo.LocalizedSeries}</td><td>Localized: {collision.LocalizedName}</td></tr>" +
+                    $"<tr><td>Filename: {Parser.Parser.NormalizePath(_directoryService.FileSystem.FileInfo.New(firstInfo.FullFilePath).Directory?.ToString())}</td><td>Filename: {Parser.Parser.NormalizePath(collision.FolderPath)}</td></tr>"
+                );
+
+                var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
+
+                _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
+                    firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
+
+                await _eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.ErrorEvent($"Library {library.Name} Series collision on {firstInfo.Series}",
+                        htmlTable));
+            }
             return;
         }
 
@@ -223,6 +235,9 @@ public class ProcessSeries : IProcessSeries
 
                 if (seriesAdded)
                 {
+                    // See if any recommendations can link up to the series
+                    _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
+                    await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
                 }

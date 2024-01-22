@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs';
+import {map, of} from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TextResonse } from '../_types/text-response';
 import { ServerSettings } from './_models/server-settings';
@@ -25,10 +25,6 @@ export class SettingsService {
 
   getServerSettings() {
     return this.http.get<ServerSettings>(this.baseUrl + 'settings');
-  }
-
-  getBaseUrl() {
-    return this.http.get<string>(this.baseUrl + 'settings/base-url', TextResonse);
   }
 
   updateServerSettings(model: ServerSettings) {
@@ -69,5 +65,11 @@ export class SettingsService {
 
   getOpdsEnabled() {
     return this.http.get<string>(this.baseUrl + 'settings/opds-enabled', TextResonse).pipe(map(d => d === 'true'));
+  }
+
+  isValidCronExpression(val: string) {
+    if (val === '' || val === undefined || val === null) return of(false);
+    return this.http.get<string>(this.baseUrl + 'settings/is-valid-cron?cronExpression=' + val, TextResonse).pipe(map(d => d === 'true'));
+
   }
 }

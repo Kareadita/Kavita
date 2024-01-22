@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Constants;
+using API.Controllers;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -19,6 +21,7 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -29,7 +32,7 @@ namespace API.Services;
 public interface ISeriesService
 {
     Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId);
-    Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
+    Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto, int userId = 0);
     Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
@@ -51,6 +54,7 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly IEasyCachingProvider _cacheProvider;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -60,7 +64,8 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService,
+        IEasyCachingProviderFactory cachingProviderFactory)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -68,6 +73,8 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+
+        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusSeriesDetail);
 
     }
 
@@ -100,8 +107,15 @@ public class SeriesService : ISeriesService
         return minChapter;
     }
 
-    public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
+    /// <summary>
+    /// Updates the Series Metadata.
+    /// </summary>
+    /// <param name="updateSeriesMetadataDto"></param>
+    /// <param name="userId">If 0, does not bust any cache</param>
+    /// <returns></returns>
+    public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto, int userId = 0)
     {
+        var hasWebLinksChanged = false;
         try
         {
             var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
@@ -157,6 +171,8 @@ public class SeriesService : ISeriesService
                 series.Metadata.WebLinks = string.Empty;
             } else
             {
+                hasWebLinksChanged =
+                    series.Metadata.WebLinks.Equals(updateSeriesMetadataDto.SeriesMetadata?.WebLinks);
                 series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
                     .Split(",")
                     .Where(s => !string.IsNullOrEmpty(s))
@@ -299,13 +315,18 @@ public class SeriesService : ISeriesService
                 _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
             }
 
+            if (hasWebLinksChanged && userId > 0)
+            {
+                _logger.LogDebug("Clearing cache as series weblinks may have changed");
+                await _cacheProvider.RemoveAsync(MetadataController.CacheKey + seriesId + userId);
+            }
+
 
             if (updateSeriesMetadataDto.CollectionTags == null) return true;
             foreach (var tag in updateSeriesMetadataDto.CollectionTags)
             {
                 await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
-                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
-                        updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
+                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id, seriesId), false);
             }
             return true;
         }

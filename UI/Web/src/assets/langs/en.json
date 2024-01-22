@@ -1080,14 +1080,14 @@
         "host-name-validation": "Host name must start with http(s) and not end in /",
 
         "sender-address-label": "Sender Address",
-        "sender-address-tooltip": "",
+        "sender-address-tooltip": "This is the email address from which the receiver will see when they receive the email. Typically the email address associated with the account.",
         "sender-displayname-label": "Display Name",
-        "sender-displayname-tooltip": "",
+        "sender-displayname-tooltip": "The name from which the receiver will see when they receive the email",
         "host-label": "Host",
-        "host-tooltip": "",
+        "host-tooltip": "Outgoing/SMTP address of your email server",
         "port-label": "Port",
-        "port-tooltip": "",
         "username-label": "Username",
+        "username-tooltip": "The username used to authenticate against the host",
         "password-label": "Password",
         "enable-ssl-label": "Use SSL on Email Server",
         "size-limit-label": "Size Limit",
@@ -1215,7 +1215,8 @@
         "discord-title": "Discord:",
         "donations-title": "Donations:",
         "source-title": "Source:",
-        "feature-request-title": "Feature Requests"
+        "feature-request-title": "Feature Requests:",
+        "localization-title": "Localizations:"
     },
 
     "manage-tasks-settings": {
@@ -1224,6 +1225,8 @@
         "library-scan-tooltip": "How often Kavita will scan and refresh metadata around library files.",
         "library-database-backup-label": "Library Database Backup",
         "library-database-backup-tooltip": "How often Kavita will backup the database.",
+        "cleanup-label": "Cleanup",
+        "cleanup-tooltip": "How often Kavita will run cleanup tasks. This can be heavy and should be performed at midnight in most cases",
         "adhoc-tasks-title": "Ad-hoc Tasks",
         "job-title-header": "Job Title",
         "description-header": "Description",
@@ -1231,10 +1234,19 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
+        "required": "{{validation.required-field}}",
+
+        "custom-label": "Custom Schedule (Cron Notation)",
+        "cron-notation": "You must use cron notation for custom scheduling",
 
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Last Executed",
         "cron-header": "Cron",
+
+        "disabled": "Disabled",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "custom": "Custom",
 
 
         "convert-media-task": "Convert Media to Target Encoding",
@@ -1617,6 +1629,7 @@
 
     "metadata-filter-row": {
         "unit-reading-date": "Date",
+        "unit-average-rating": "Average Rating (Kavita+) - only for cached series",
         "unit-reading-progress": "Percent"
     },
 
@@ -1917,7 +1930,8 @@
         "path": "Path",
         "file-path": "File Path",
         "want-to-read": "Want to Read",
-        "read-date": "Reading Date"
+        "read-date": "Reading Date",
+        "average-rating": "Average Rating"
     },
 
     "filter-comparison-pipe": {

@@ -287,6 +287,60 @@ public static class SeriesFilter
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
+    public static IQueryable<Series> HasAverageRating(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, float rating)
+    {
+        if (!condition) return queryable;
+
+        var subQuery = queryable
+            .Where(s => s.ExternalSeriesMetadata != null)
+            .Include(s => s.ExternalSeriesMetadata)
+            .Select(s => new
+            {
+                Series = s,
+                AverageRating = s.ExternalSeriesMetadata.AverageExternalRating
+            })
+            .AsEnumerable();
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) < FloatingPointTolerance);
+                break;
+            case FilterComparison.GreaterThan:
+                subQuery = subQuery.Where(s => s.AverageRating > rating);
+                break;
+            case FilterComparison.GreaterThanEqual:
+                subQuery = subQuery.Where(s => s.AverageRating >= rating);
+                break;
+            case FilterComparison.LessThan:
+                subQuery = subQuery.Where(s => s.AverageRating < rating);
+                break;
+            case FilterComparison.LessThanEqual:
+                subQuery = subQuery.Where(s => s.AverageRating <= rating);
+                break;
+            case FilterComparison.NotEqual:
+                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) > FloatingPointTolerance);
+                break;
+            case FilterComparison.Matches:
+            case FilterComparison.Contains:
+            case FilterComparison.NotContains:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
+                throw new KavitaException($"{comparison} not applicable for Series.AverageRating");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+
+        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        return queryable.Where(s => ids.Contains(s.Id));
+    }
+
     public static IQueryable<Series> HasReadingDate(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, DateTime? date, int userId)
     {

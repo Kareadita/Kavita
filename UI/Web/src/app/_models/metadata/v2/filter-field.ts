@@ -28,7 +28,8 @@ export enum FilterField
     Path = 24,
     FilePath = 25,
     WantToRead = 26,
-    ReadingDate = 27
+    ReadingDate = 27,
+    AverageRating = 28
 }
 
 
