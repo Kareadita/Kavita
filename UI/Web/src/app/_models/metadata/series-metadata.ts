@@ -30,6 +30,7 @@ export interface SeriesMetadata {
     language: string;
     publicationStatus: PublicationStatus;
     webLinks: string;
+    coverDisplayOption: number;
 
     summaryLocked: boolean;
     genresLocked: boolean;

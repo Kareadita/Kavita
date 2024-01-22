@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.0"
+    "version": "0.7.13.1"
   },
   "servers": [
     {
@@ -3599,6 +3599,45 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SeriesDetailPlusDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Metadata/cover-display-options": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Get cover display options",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -17896,6 +17935,16 @@
             "description": "A Comma-separated list of strings representing links from the series",
             "nullable": true
           },
+          "coverDisplayOption": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Series cover display option",
+            "format": "int32"
+          },
           "languageLocked": {
             "type": "boolean"
           },
@@ -18128,6 +18177,16 @@
             "type": "string",
             "description": "A comma-separated list of Urls",
             "nullable": true
+          },
+          "coverDisplayOption": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Series cover display option",
+            "format": "int32"
           },
           "languageLocked": {
             "type": "boolean"

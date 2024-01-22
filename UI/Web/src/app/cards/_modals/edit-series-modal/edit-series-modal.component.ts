@@ -157,6 +157,9 @@ export class EditSeriesModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
 
+  coverDisplayOptions : Array<string> = [];
+  coverOptionForm! : FormGroup;
+
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
   get WebLinks() {
@@ -175,6 +178,10 @@ export class EditSeriesModalComponent implements OnInit {
     });
 
     this.initSeries = Object.assign({}, this.series);
+
+    this.coverOptionForm = this.fb.group({
+      coverDisplayOptionSelected: new FormControl('', [])
+    });
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
@@ -210,9 +217,19 @@ export class EditSeriesModalComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
+    this.metadataService.getCoverDisplayOptions().subscribe(options => {
+      this.coverDisplayOptions = options;
+      if (this.metadata !== undefined)
+        this.coverOptionForm.get('coverDisplayOptionSelected')?.patchValue(this.coverDisplayOptions[this.metadata.coverDisplayOption]);
+      this.cdRef.markForCheck();
+    });
+
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
       if (metadata) {
         this.metadata = metadata;
+
+        this.coverOptionForm.get('coverDisplayOptionSelected')?.patchValue(this.coverDisplayOptions[this.metadata.coverDisplayOption]);
+        this.cdRef.markForCheck();
 
         this.setupTypeaheads();
         this.editSeriesForm.get('summary')?.patchValue(this.metadata.summary);
@@ -517,6 +534,10 @@ export class EditSeriesModalComponent implements OnInit {
   save() {
     const model = this.editSeriesForm.value;
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
+    const coverDisplayOptionValue = this.coverOptionForm.get('coverDisplayOptionSelected')?.value || '';
+    this.metadata.coverDisplayOption = this.coverDisplayOptions.indexOf(coverDisplayOptionValue);
+    if (this.metadata.coverDisplayOption < 0)
+      this.metadata.coverDisplayOption = 0;
 
     const apis = [
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
