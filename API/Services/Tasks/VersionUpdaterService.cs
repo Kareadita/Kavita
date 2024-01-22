@@ -48,6 +48,7 @@ public interface IVersionUpdaterService
     Task<UpdateNotificationDto?> CheckForUpdate();
     Task PushUpdate(UpdateNotificationDto update);
     Task<IEnumerable<UpdateNotificationDto>> GetAllReleases();
+    Task<int> GetNumberOfReleasesBehind();
 }
 
 public class VersionUpdaterService : IVersionUpdaterService
@@ -85,6 +86,12 @@ public class VersionUpdaterService : IVersionUpdaterService
     {
         var updates = await GetGithubReleases();
         return updates.Select(CreateDto).Where(d => d != null)!;
+    }
+
+    public async Task<int> GetNumberOfReleasesBehind()
+    {
+        var updates = await GetAllReleases();
+        return updates.TakeWhile(update => update.UpdateVersion != update.CurrentVersion).Count();
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)

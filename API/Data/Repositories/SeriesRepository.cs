@@ -1930,7 +1930,8 @@ public class SeriesRepository : ISeriesRepository
     {
         // If there is 0 or 1 rating and that rating is you, return 0 back
         var countOfRatingsThatAreUser = await _context.AppUserRating
-            .Where(r => r.SeriesId == seriesId && r.HasBeenRated).CountAsync(u => u.AppUserId == userId);
+            .Where(r => r.SeriesId == seriesId && r.HasBeenRated)
+            .CountAsync(u => u.AppUserId == userId);
         if (countOfRatingsThatAreUser == 1)
         {
             return 0;

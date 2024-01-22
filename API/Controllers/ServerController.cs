@@ -189,6 +189,15 @@ public class ServerController : BaseApiController
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
 
+    /// <summary>
+    /// Returns how many versions out of date this install is
+    /// </summary>
+    [HttpGet("check-out-of-date")]
+    public async Task<ActionResult<int>> CheckHowOutOfDate()
+    {
+        return Ok(await _versionUpdaterService.GetNumberOfReleasesBehind());
+    }
+
 
     /// <summary>
     /// Pull the Changelog for Kavita from Github and display

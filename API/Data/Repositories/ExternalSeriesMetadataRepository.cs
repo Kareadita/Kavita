@@ -85,9 +85,9 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     {
         return _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
-            .Include(s => s.ExternalReviews.Take(25))
-            .Include(s => s.ExternalRatings.Take(25))
-            .Include(s => s.ExternalRecommendations.Take(25))
+            .Include(s => s.ExternalReviews.Take(limit))
+            .Include(s => s.ExternalRatings.Take(limit))
+            .Include(s => s.ExternalRecommendations.Take(limit))
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }

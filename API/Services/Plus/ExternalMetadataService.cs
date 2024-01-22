@@ -36,7 +36,7 @@ internal class ExternalMetadataIdsDto
     public MediaFormat? PlusMediaFormat { get; set; } = MediaFormat.Unknown;
 }
 
-internal class SeriesDetailPlusAPIDto
+internal class SeriesDetailPlusApiDto
 {
     public IEnumerable<MediaRecommendationDto> Recommendations { get; set; }
     public IEnumerable<UserReviewDto> Reviews { get; set; }
@@ -108,7 +108,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!needsRefresh)
         {
             // Convert into DTOs and return
-            return await SerializeExternalSeriesDetail(seriesId, externalSeriesMetadata, user, series);
+            return await SerializeExternalSeriesDetail(seriesId, series.LibraryId, user);
         }
 
         try
@@ -123,7 +123,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new PlusSeriesDtoBuilder(series).Build())
-                .ReceiveJson<SeriesDetailPlusAPIDto>();
+                .ReceiveJson<SeriesDetailPlusApiDto>();
 
 
             // Clear out existing results
@@ -185,46 +185,9 @@ public class ExternalMetadataService : IExternalMetadataService
         return null;
     }
 
-    private async Task<SeriesDetailPlusDto?> SerializeExternalSeriesDetail(int seriesId, ExternalSeriesMetadata externalSeriesMetadata,
-        AppUser user, Series series)
+    private async Task<SeriesDetailPlusDto?> SerializeExternalSeriesDetail(int seriesId, int libraryId, AppUser user)
     {
-        var seriesIdsOnServer = externalSeriesMetadata.ExternalRecommendations
-            .Where(r => r.SeriesId is > 0)
-            .Select(s => (int) s.SeriesId!)
-            .ToList();
-
-        var ownedSeries = (await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(seriesIdsOnServer, user.Id))
-            .ToList();
-        var canSeeExternalSeries = user is {AgeRestriction: AgeRating.NotApplicable} &&
-                                   await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        var externalSeries = new List<ExternalSeriesDto>();
-        if (canSeeExternalSeries)
-        {
-            externalSeries = externalSeriesMetadata.ExternalRecommendations
-                .Where(r => r.SeriesId is null or 0)
-                .Select(r => _mapper.Map<ExternalSeriesDto>(r))
-                .ToList();
-        }
-
-        var ret = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, series.LibraryId, user);
-
-        return new SeriesDetailPlusDto()
-        {
-            Ratings = externalSeriesMetadata.ExternalRatings.Select(r => _mapper.Map<RatingDto>(r)),
-            Reviews = externalSeriesMetadata.ExternalReviews.OrderByDescending(r => r.Score).Select(r =>
-            {
-                var review = _mapper.Map<UserReviewDto>(r);
-                review.SeriesId = seriesId;
-                review.LibraryId = series.LibraryId;
-                review.IsExternal = true;
-                return review;
-            }),
-            Recommendations = new RecommendationDto()
-            {
-                ExternalSeries = externalSeries,
-                OwnedSeries = ownedSeries
-            }
-        };
+        return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, libraryId, user);
     }
 
     private async Task<ExternalSeriesMetadata> GetExternalSeriesMetadataForSeries(int seriesId, Series series)
