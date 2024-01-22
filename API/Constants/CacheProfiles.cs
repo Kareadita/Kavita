@@ -15,9 +15,6 @@ public static class EasyCacheProfiles
     /// Cache the libraries on the server
     /// </summary>
     public const string Library = "library";
-    public const string KavitaPlusReviews = "kavita+reviews";
-    public const string KavitaPlusRecommendations = "kavita+recommendations";
-    public const string KavitaPlusRatings = "kavita+ratings";
     public const string KavitaPlusExternalSeries = "kavita+externalSeries";
     /// <summary>
     /// Series Detail page for Kavita+ stuff

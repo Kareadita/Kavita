@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -39,16 +38,14 @@ public class SeriesController : BaseApiController
     private readonly ILicenseService _licenseService;
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
-    private readonly IEasyCachingProvider _ratingCacheProvider;
-    private readonly IEasyCachingProvider _reviewCacheProvider;
-    private readonly IEasyCachingProvider _recommendationCacheProvider;
     private readonly IEasyCachingProvider _externalSeriesCacheProvider;
-    private const string CacheKey = "recommendation_";
+    private const string CacheKey = "externalSeriesData_";
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
         ISeriesService seriesService, ILicenseService licenseService,
-        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService, IExternalMetadataService externalMetadataService)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService,
+        IExternalMetadataService externalMetadataService)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
@@ -58,9 +55,6 @@ public class SeriesController : BaseApiController
         _localizationService = localizationService;
         _externalMetadataService = externalMetadataService;
 
-        _ratingCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
-        _reviewCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
-        _recommendationCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
         _externalSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
     }
 
@@ -451,19 +445,6 @@ public class SeriesController : BaseApiController
         if (!await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "update-metadata-fail"));
 
-        if (await _licenseService.HasActiveLicense())
-        {
-            _logger.LogDebug("Clearing cache as series weblinks may have changed");
-            await _reviewCacheProvider.RemoveAsync(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-            await _ratingCacheProvider.RemoveAsync(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-
-            var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
-            foreach (var userId in allUsers)
-            {
-                await _recommendationCacheProvider.RemoveAsync(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
-            }
-        }
-
         return Ok(await _localizationService.Translate(User.GetUserId(), "series-updated"));
 
     }
@@ -605,7 +586,7 @@ public class SeriesController : BaseApiController
             await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
             return Ok(ret);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return BadRequest("Unable to load External Series details");
         }

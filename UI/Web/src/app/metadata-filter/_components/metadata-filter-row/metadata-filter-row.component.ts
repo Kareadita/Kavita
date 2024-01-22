@@ -234,7 +234,7 @@ export class MetadataFilterRowComponent implements OnInit {
     } else if (BooleanFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (DateFields.includes(this.preset.field)) {
-      this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val)); // TODO: Figure out how this works
+      this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
     }
     else if (DropdownFields.includes(this.preset.field)) {
       if (this.MultipleDropdownAllowed || val.includes(',')) {

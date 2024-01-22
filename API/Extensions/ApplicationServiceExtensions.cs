@@ -72,8 +72,6 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();
-        services.AddScoped<IReviewService, ReviewService>();
-        services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
 
         services.AddSqLite();
@@ -87,9 +85,6 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
 
             // KavitaPlus stuff
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusRecommendations);
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusRatings);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusSeriesDetail);
         });

@@ -264,13 +264,7 @@ public class ServerController : BaseApiController
     public async Task<ActionResult> BustReviewAndRecCache()
     {
         _logger.LogInformation("Busting Kavita+ Cache");
-        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
-        await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
-        await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
-        await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
         await provider.FlushAsync();
         provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusSeriesDetail);
         await provider.FlushAsync();
