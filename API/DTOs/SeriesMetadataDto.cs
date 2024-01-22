@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities.Enums;
@@ -62,6 +62,10 @@ public class SeriesMetadataDto
     /// A comma-separated list of Urls
     /// </summary>
     public string WebLinks { get; set; }
+    /// <summary>
+    /// Series cover display option
+    /// </summary>
+    public CoverDisplayOption CoverDisplayOption { get; set; }
 
     public bool LanguageLocked { get; set; }
     public bool SummaryLocked { get; set; }

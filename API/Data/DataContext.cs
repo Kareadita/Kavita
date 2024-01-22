@@ -137,6 +137,11 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);
+
+        builder.Entity<SeriesMetadata>()
+            .Property(metadata => metadata.CoverDisplayOption)
+            .HasDefaultValue(CoverDisplayOption.Default)
+            .HasConversion<string>();
     }
 
 
