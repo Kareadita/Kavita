@@ -28,7 +28,7 @@ export class ConfirmEmailComponent implements OnDestroy {
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required]),
     username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")]),
   });
 
   /**

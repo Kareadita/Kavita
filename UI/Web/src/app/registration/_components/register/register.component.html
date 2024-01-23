@@ -39,7 +39,7 @@
             {{t('password-validation')}}
           </ng-template>
           <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
-          <input id="password" class="form-control custom-input" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password"
+          <input id="password" class="form-control custom-input" maxlength="256" minlength="6" pattern="^.{6,256}$" formControlName="password"
                  type="password" aria-describedby="password-help" [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
           <div id="password-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
             <div *ngIf="registerForm.get('password')?.errors?.required">

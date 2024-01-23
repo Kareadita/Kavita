@@ -11,13 +11,13 @@
 
     &::before {
         content: "";
-        background-image: url('../../../../assets/images/login-bg.jpg');
-        background-size: cover;
+        background-image: var(--login-background-url);
+        background-size: var(--login-background-size);
         position: absolute;
         top: 0;
         right: 0;
         bottom: 0;
-        opacity: 0.1;
+        opacity: var(--login-background-opacity);
         width: 100%;
     }
 

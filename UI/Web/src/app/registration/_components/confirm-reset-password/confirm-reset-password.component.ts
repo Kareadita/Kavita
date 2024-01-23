@@ -22,7 +22,7 @@ export class ConfirmResetPasswordComponent {
   token: string = '';
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6)]),
   });
 
   constructor(private route: ActivatedRoute, private router: Router,

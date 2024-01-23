@@ -7,7 +7,7 @@
     --primary-color-darker-shade: #338A67;
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
-    --bs-body-bg: #292F33;
+    --bs-body-bg: #121212;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
@@ -257,7 +257,7 @@
     --rating-star-color: var(--primary-color);
 
     /** Login **/
-    --login-card-bg-color: #212328;
+    --login-card-bg-color: #212121;
     --login-logo-image: url("/assets/images/logo.png");
     --login-logo-height: 55px;
     --login-logo-width: 55px;
@@ -269,8 +269,11 @@
     --login-input-border-color: transparent;
     --login-input-border-color-focus: transparent;
     --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
-    --login-input-background-color: #343a40;
+    --login-input-background-color: #353535;
     --login-input-color: #fff;
     --login-input-placeholder-color: #cecece;
     --login-forgot-password-color: var(--primary-color);
+    --login-background-url: url('../../assets/images/login-bg.jpg');
+    --login-background-size: cover;
+    --login-background-opacity: 0.3;
   }
