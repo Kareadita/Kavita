@@ -11,8 +11,21 @@ a {
 }
 
 .custom-input {
-    background-color: #fff !important;
-    color: black !important;
+    background-color: #343A40 !important;
+    color: #fff !important;
+    border-color: var(--login-input-border-color);
+    font-family: "League Spartan", sans-serif;
+
+    &:focus {
+        border-color: var(--login-input-border-color-focus);
+        box-shadow: var(--login-input-box-shadow-focus);
+    }
+
+    &::placeholder {
+        opacity: 0.5;
+        color: #cecece;
+        font-family: "League Spartan", sans-serif;
+      }
 }
 
 .invalid-feedback {
