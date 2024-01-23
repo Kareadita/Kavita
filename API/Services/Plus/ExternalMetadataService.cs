@@ -149,7 +149,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Recommendations
 
             externalSeriesMetadata.ExternalRecommendations ??= new List<ExternalRecommendation>();
-            var recs = await ProcessRecommendations(series, user!, result.Recommendations, externalSeriesMetadata);
+            var recs = await ProcessRecommendations(series, user, result.Recommendations, externalSeriesMetadata);
 
             externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
             externalSeriesMetadata.AverageExternalRating = (int) externalSeriesMetadata.ExternalRatings
@@ -161,14 +161,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
             await _unitOfWork.CommitAsync();
 
-            var ret = new SeriesDetailPlusDto()
+            return new SeriesDetailPlusDto()
             {
                 Recommendations = recs,
                 Ratings = result.Ratings,
                 Reviews = result.Reviews
             };
-
-            return ret;
         }
         catch (FlurlHttpException ex)
         {
@@ -212,8 +210,6 @@ public class ExternalMetadataService : IExternalMetadataService
             OwnedSeries = new List<SeriesDto>()
         };
 
-        var canSeeExternalSeries = user is {AgeRestriction: AgeRating.NotApplicable} &&
-                                   await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         // NOTE: This can result in a series being recommended that shares the same name but different format
         foreach (var rec in recs)
         {
@@ -239,7 +235,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 continue;
             }
 
-            if (!canSeeExternalSeries) continue;
             // We can show this based on user permissions
             if (string.IsNullOrEmpty(rec.Name) || string.IsNullOrEmpty(rec.SiteUrl) || string.IsNullOrEmpty(rec.CoverUrl)) continue;
             recDto.ExternalSeries.Add(new ExternalSeriesDto()

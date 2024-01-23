@@ -9488,6 +9488,39 @@
         }
       }
     },
+    "/api/Server/check-out-of-date": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns how many versions out of date this install is",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/changelog": {
       "get": {
         "tags": [
@@ -9649,7 +9682,7 @@
         }
       }
     },
-    "/api/Server/bust-review-and-rec-cache": {
+    "/api/Server/bust-kavitaplus-cache": {
       "post": {
         "tags": [
           "Server"

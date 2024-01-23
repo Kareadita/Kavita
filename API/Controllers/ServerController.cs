@@ -269,7 +269,7 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
-    [HttpPost("bust-review-and-rec-cache")]
+    [HttpPost("bust-kavitaplus-cache")]
     public async Task<ActionResult> BustReviewAndRecCache()
     {
         _logger.LogInformation("Busting Kavita+ Cache");
