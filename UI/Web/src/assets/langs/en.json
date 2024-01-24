@@ -558,7 +558,7 @@
     "invite-user": {
         "title": "Invite User",
         "close": "{{common.close}}",
-        "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name field set in the <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab or be accessing your instance through it's remote URL. <br/><br/>Alternatively, you can use a username, but note that password resets won't be available for username-based accounts. If you do not want to use our email service, you can host your own email service.",
+        "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name and Email setting fields set in the <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab, otherwise a link will be presented to you to setup on the user's behalf.<br/><br/>The email is not required to be valid.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "User invited",
@@ -1302,6 +1302,7 @@
         "change-password-alt": "Change Password {{user}}",
         "resend": "Resend",
         "setup": "Setup",
+        "admin": "Admin",
         "last-active-title": "Last Active:",
         "roles-title": "Roles:",
         "none": "None",
