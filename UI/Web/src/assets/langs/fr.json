@@ -11,7 +11,7 @@
         "no-libraries": "Aucune bibliothèque configurée. Veuillez en ajouter une",
         "server-settings-link": "Paramètres serveur",
         "not-granted": "Vous n'avez accès à aucune bibliothèque.",
-        "on-deck-title": "Tableau de bord",
+        "on-deck-title": "En Cours",
         "recently-updated-title": "Séries mises à jour récemment",
         "recently-added-title": "Séries ajoutées récemment",
         "more-in-genre-title": "Plus dans {{genre}}"
@@ -189,7 +189,8 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita par un navigateur web mais qui, en revanche, disposent d'une adresse courriel acceptant de recevoir des fichiers."
+        "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita par un navigateur web mais qui, en revanche, disposent d'une adresse courriel acceptant de recevoir des fichiers.",
+        "email-setup-alert": "Vous souhaitez envoyer des fichiers à vos appareils? Configurez d'abord vos paramètres d'E-mail!"
     },
     "edit-device": {
         "device-name-label": "Nom du Périphérique",
@@ -214,7 +215,7 @@
         "permission-error": "Vous n'avez pas la permission de changer votre mot de passe. Contactez l'administrateur du serveur."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "Nouveau E-mail",
         "current-password-label": "Mot de passe actuel",
         "email-not-confirmed": "Cette adresse courriel n'a pas été confirmée",
         "email-updated-title": "Courriel Mise à jour",
@@ -230,7 +231,8 @@
         "email-updated-description": "Vous pouvez utiliser le lien suivant pour confirmer l'email de votre compte. Si votre serveur est accessible depuis l'extérieur, un email y sera envoyé avec un lien permettant de confirmer l'adresse.",
         "has-invalid-email": "Il semble que vous n'ayez pas défini d'adresse électronique valide. Pour modifier l'adresse électronique, l'administrateur devra vous envoyer un lien de confirmation.",
         "valid-email": "{{validation.valid-email}}",
-        "email-confirmed": "Cet e-mail est confirmé"
+        "email-confirmed": "Cet e-mail est confirmé",
+        "email-title": "E-mail"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restriction d'âge",
@@ -260,7 +262,8 @@
         "save": "{{common.save}}",
         "token-input-label": "{{service}} Le token vient ici",
         "title": "Fournisseur de partage communautaire",
-        "instructions": "Les nouveaux utilisateurs doivent cliquer sur \"{{scrobbling-providers.generate}}\" ci-dessous pour permettre à Kavita+ de parler avec {{service}}. Une fois que vous avez autorisé le programme, copiez et collez le jeton dans l'entrée ci-dessous. Vous pouvez régénérer votre token à tout moment."
+        "instructions": "Les nouveaux utilisateurs doivent cliquer sur \"{{scrobbling-providers.generate}}\" ci-dessous pour permettre à Kavita+ de parler avec {{service}}. Une fois que vous avez autorisé le programme, copiez et collez le jeton dans l'entrée ci-dessous. Vous pouvez régénérer votre token à tout moment.",
+        "token-valid": "Jeton valide"
     },
     "typeahead": {
         "locked-field": "Ce champ est vérouillé",
@@ -637,7 +640,8 @@
         "libraries": "Bibliothèques",
         "formats": "Formats",
         "summary": "Résumé",
-        "colorist": "Coloriste"
+        "colorist": "Coloriste",
+        "average-rating": "Note moyenne"
     },
     "relationship-pipe": {
         "adaptation": "Adaptation",
@@ -1239,9 +1243,25 @@
         "host-name-validation": "Le nom d'hôte doit commencer par http(s) et ne pas se terminer par /",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "description": "Kavita est livré avec un service de messagerie pour effectuer des tâches telles que l'invitation d'utilisateurs, les demandes de réinitialisation de mot de passe, etc. Les e-mails envoyés via notre service sont immédiatement supprimés. Vous pouvez utiliser votre propre service de messagerie en configurant le service {{link}}. Définissez l'URL du service de messagerie et utilisez le bouton Test pour vous assurer qu'il fonctionne. Vous pouvez réinitialiser ces paramètres par défaut à tout moment. Il n'existe aucun moyen de désactiver les e-mails pour l'authentification, même si vous n'êtes pas obligé d'utiliser une adresse e-mail valide pour les utilisateurs. Les liens de confirmation seront toujours enregistrés dans les journaux et présentés dans l'interface utilisateur. Les e-mails d'inscription/confirmation ne seront pas envoyés si vous n'accédez pas à Kavita via une URL accessible au public ou à moins que la fonctionnalité Nom d'hôte ne soit configurée.",
-        "send-to-warning": "Si vous souhaitez que l'envoi vers un appareil fonctionne, vous devez héberger votre propre service de messagerie.",
-        "title": "Services E-mail (SMTP)"
+        "description": "Kavita est livré avec un service de messagerie pour effectuer des tâches telles que l'invitation d'utilisateurs, les demandes de réinitialisation de mot de passe, etc. Les e-mails envoyés via notre service sont immédiatement supprimés. Vous pouvez utiliser votre propre service de messagerie en configurant le service {{link}}. Définissez l'URL du service de messagerie et utilisez le bouton Test pour vous assurer qu'il fonctionne. Vous pouvez réinitialiser ces paramètres par défaut à tout moment. Il n'existe aucun moyen de désactiver les e-mails pour l'authentification, même si vous n'êtes pas obligé d'utiliser une adresse e-mail valide pour les utilisateurs. Les liens de confirmation seront toujours enregistrés dans les journaux et présentés dans l'interface utilisateur. Les e-mails d'inscription/confirmation ne seront pas envoyés si vous n'accédez pas à Kavita via une URL accessible au public ou à moins que la fonctionnalité Nom d'hôte ne soit configurée. Pour utiliser certaines fonctions de Kavita comme \"Mot de passe oublié\" et \"Envoyer à l'appareil\", un fournisseur d'E-mail doit être configuré. D'autre fonctionnalités comme \"Changer mot de passe\" sont moins sécurisée sans E-mail configuré.",
+        "send-to-warning": "Si vous souhaitez que l'envoi vers un appareil fonctionne, vous devez paramétré votre service de messagerie.",
+        "title": "Services E-mail (SMTP)",
+        "email-settings-title": "Paramètres E-mail",
+        "sender-address-label": "Adresse d’expéditeur",
+        "sender-displayname-label": "Nom complet",
+        "sender-address-tooltip": "Il s'agit de l'adresse électronique que le destinataire verra lorsqu'il recevra l'e-mail. Il s'agit généralement de l'adresse électronique associée au compte.",
+        "host-label": "Hébergeur",
+        "port-label": "Port",
+        "username-label": "Pseudonyme",
+        "enable-ssl-label": "Utiliser SSL sur le serveur E-mail",
+        "size-limit-label": "Taille limite",
+        "size-limit-tooltip": "Combien de bytes le serveur E-mail peut supporter pour les pièces jointes",
+        "customized-templates-label": "Thème customisés",
+        "sender-displayname-tooltip": "Le nom que le destinataire verra lorsqu'il recevra le courrier électronique",
+        "host-tooltip": "Adresse sortante/SMTP de votre serveur de messagerie",
+        "password-label": "Mot de passe",
+        "customized-templates-tooltip": "Kavita doit-il utiliser le répertoire \"config/templates\" pour les modèles plutôt que celui par défaut? Vous êtes responsable de tenir à jour les changement des modèles.",
+        "username-tooltip": "Le nom d'utilisateur utilisé pour s'authentifier auprès de l'hôte"
     },
     "bulk-add-to-collection": {
         "collection-label": "Collection",
@@ -1341,10 +1361,11 @@
         "more-info-title": "Plus d'information",
         "title": "À propos du système",
         "source-title": "Source :",
-        "feature-request-title": "Requêtes de nouvelles fonctionnalités",
+        "feature-request-title": "Demandes de nouvelles fonctionnalités :",
         "donations-title": "Donations :",
         "wiki-title": "Wiki :",
-        "installId-title": "ID d'installation"
+        "installId-title": "ID d'installation",
+        "localization-title": "Localisations :"
     },
     "manage-tasks-settings": {
         "title": "Tâches récurrentes",
@@ -1386,7 +1407,16 @@
         "convert-media-task-desc": "Exécute une tâche de longue durée qui convertira tous les médias gérés par Kavita vers l'encodage cible. C'est lent (surtout sur les appareils ARM).",
         "check-for-updates-task-desc": "Vérifier s'il y a des versions stables en avance sur votre version.",
         "clean-up-want-to-read-task-desc": "Supprime toutes les séries que les utilisateurs ont lues dans leur intégralité, qui se trouvent dans A lire et dont le statut de publication est Terminé. Lancé toutes les 24 heures.",
-        "clean-up-want-to-read-task-success": "A lire a été nettoyé"
+        "clean-up-want-to-read-task-success": "A lire a été nettoyé",
+        "required": "{{validation.required-field}}",
+        "cron-notation": "Vous devez utiliser la notation cron pour la programmation personnalisée",
+        "custom-label": "Programme personnalisé (notation Cron)",
+        "disabled": "Désactivé",
+        "daily": "Quotidien",
+        "weekly": "Hebdomadaire",
+        "cleanup-label": "Nettoyage",
+        "cleanup-tooltip": "Fréquence à laquelle Kavita exécutera des tâches de nettoyage. Ces tâches peuvent être lourdes et devraient être exécutées à minuit dans la plupart des cas",
+        "custom": "Personallisé"
     },
     "manage-media-settings": {
         "cover-image-size-label": "Taille de l'image de couverture",
@@ -1682,7 +1712,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Pourcentage",
-        "unit-reading-date": "Date"
+        "unit-reading-date": "Date",
+        "unit-average-rating": "Note moyenne (Kavita+) - uniquement pour les séries mises en cache"
     },
     "file-breakdown-stats": {
         "format-title": "Format",
@@ -1767,7 +1798,6 @@
         "item-removed": "Élément retiré",
         "series-added-to-collection": "Série ajoutée à la collection {{collectionName}}",
         "confirm-regen-covers": "L'actualisation des couvertures oblige à recalculer toutes les images de couverture. Il s'agit d'une opération lourde. Êtes-vous sûr de ne pas vouloir effectuer un scan à la place ?",
-        "change-email-private": "Le serveur n'est pas accessible au public. Demandez à l'administrateur de récupérer votre lien de confirmation dans les journaux.",
         "k+-error": "Une erreur s'est produite lors de l'activation de votre licence. Veuillez réessayer.",
         "confirm-library-delete": "Êtes-vous sûr de vouloir supprimer la bibliothèque {{name}} ? Vous ne pouvez pas annuler cette action.",
         "book-settings-info": "Vous pouvez modifier les paramètres des livres, enregistrer ces paramètres pour tous les livres et afficher la table des matières à partir du tiroir.",
@@ -1790,7 +1820,9 @@
         "k+-reset-key-success": "Votre licence a été désenregistrée. Utilisez le bouton Modifier pour réenregistrer votre instance et réactiver Kavita+",
         "email-not-sent": "L'adresse électronique figurant dans le fichier n'est pas valide et ne peut être envoyée. Un lien a été déversé dans les journaux. L'administrateur peut fournir ce lien pour compléter le flux.",
         "k+-reset-key": "Cela vous permettra de détacher votre clé d'un serveur et de réenregistrer une instance Kavita.",
-        "anilist-token-expired": "Votre jeton AniList a expiré. Le scrobbling ne sera plus possible tant que vous ne l'aurez pas généré à nouveau dans Paramètres de l'utilisateur > Compte"
+        "anilist-token-expired": "Votre jeton AniList a expiré. Le scrobbling ne sera plus possible tant que vous ne l'aurez pas généré à nouveau dans Paramètres de l'utilisateur > Compte",
+        "change-email-no-email": "E-mail à été mis à jour",
+        "email-not-sent-test": "Il y a une erreur lors de l'envoi du mail. Vérifiez les logs pour plus de détails. Cette erreur indique une erreur de paramètres."
     },
     "manga-format-stats": {
         "title": "Format",

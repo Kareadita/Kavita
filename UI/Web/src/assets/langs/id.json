@@ -114,7 +114,6 @@
         "age-restriction-updated": "Batasan Usia telah diperbarui",
         "email-sent-to": "Email telah dikirim ke alamat email lama Anda untuk konfirmasi.",
         "email-sent-to-no-existing": "Email yang ada tidak valid. Tautan telah dibuang ke log. Minta tautan kepada admin untuk menyelesaikan perubahan email.",
-        "change-email-private": "Server tidak dapat diakses secara publik. Minta admin untuk mengambil tautan konfirmasi Anda dari log",
         "device-created": "Perangkat dibuat",
         "confirm-regen-covers": "Menyegarkan sampul akan memaksa semua gambar sampul dihitung ulang. Ini adalah operasi yang berat. Apakah Anda yakin tidak ingin melakukan Pemindaian sebagai gantinya?",
         "alert-long-running": "Proses ini berjalan lama. Mohon berikan waktu untuk menyelesaikannya sebelum meminta kembali.",

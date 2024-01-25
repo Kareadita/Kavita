@@ -218,7 +218,19 @@
         "words-count": "{{num}} ワード",
         "tags-title": "{{series-metadata-detail.tags-title}}",
         "links-title": "{{series-metadata-detail.links-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}"
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "less-than-hour": "<1時間",
+        "release-date-title": "リリース",
+        "last-read-title": "最後に読んだ",
+        "release-date-tooltip": "リリース日",
+        "hour": "時間",
+        "hours": "時間",
+        "length-title": "長さ",
+        "id-title": "ID",
+        "age-rating-title": "年齢制限",
+        "size-title": "サイズ",
+        "reading-time-title": "読書時間",
+        "date-added-title": "追加された日付"
     },
     "publication-status-stats": {
         "year-header": "年"
@@ -254,7 +266,8 @@
         "apply": "適用",
         "save": "保存",
         "clear": "クリア",
-        "filter": "絞り込み"
+        "filter": "絞り込み",
+        "issue-num": "問題"
     },
     "series-metadata-detail": {
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -274,7 +287,8 @@
         "cover-artists-title": "カバーアーティスト",
         "letterers-title": "校正",
         "translators-title": "翻訳者",
-        "characters-title": "キャラクター"
+        "characters-title": "キャラクター",
+        "rating-title": "評価"
     },
     "chapter-metadata-detail": {
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
@@ -286,7 +300,8 @@
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
         "writers-title": "{{series-metadata-detail.writers-title}}",
         "editors-title": "{{series-metadata-detail.editors-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}"
+        "colorists-title": "{{series-metadata-detail.colorists-title}}",
+        "no-data": "メタデータなし"
     },
     "side-nav": {
         "bookmarks": "ブックマーク",
@@ -311,11 +326,27 @@
         "genres-title": "{{series-metadata-detail.genres-title}}",
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
         "writers-title": "{{common.series-count}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "general-tab": "一般",
+        "pages": "ページ:",
+        "added": "追加:",
+        "files": "ファイル",
+        "no-summary": "概要はありません",
+        "unread": "未読",
+        "cover-tab": "カバー",
+        "metadata-tab": "メタデータ",
+        "size": "サイズ:",
+        "not-defined": "定義されていません",
+        "info-tab": "情報"
     },
     "edit-series-relation": {
         "parent": "{{relationship-pipe.parent}}",
-        "remove": "{{common.remove}}"
+        "remove": "{{common.remove}}",
+        "relationship": "関連",
+        "description-part-1": "どの関係を追加すべきかわからない場合は、以下をご覧ください。",
+        "description-part-2": "ヒントのためのwiki.",
+        "target-series": "対象のシリーズ",
+        "add-relationship": "関連を追加"
     },
     "want-to-read": {
         "series-count": "{{common.series-count}}",
@@ -333,7 +364,11 @@
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}",
         "confirm-single-delete": "{{seriesName}}を消去しますか？ これはもとに戻すことはできません｡",
-        "delete-single-success": "{{seriesName}}はすでに削除されました"
+        "delete-single-success": "{{seriesName}}はすでに削除されました",
+        "no-data": "ブックマークはありません。 作成しましょう｡",
+        "delete-success": "ブックマークが削除されました",
+        "no-data-2": "1",
+        "confirm-delete": "複数のシリーズのすべてのブックマークをクリアしたいですか? これは元に戻すことができません."
     },
     "card-detail-layout": {
         "jumpkey-count": "{{count}} シリーズ",
@@ -430,7 +465,8 @@
         "add": "{{common.apply}}",
         "email-label": "メール: ",
         "edit": "{{common.edit}}",
-        "platform-label": "プラットフォーム: "
+        "platform-label": "プラットフォーム: ",
+        "email-setup-alert": "デバイスにファイルを送信したいですか？まず､管理者がメールを設定する必要があります！"
     },
     "update-notification-modal": {
         "title": "新規アップデートのお知らせ!",
@@ -642,7 +678,8 @@
         "token-input-label": "{{service}} 関連するトークンをここに挿入",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "トークンが有効です"
     },
     "invite-user": {
         "setup-user-account": "ユーザーアカウントを設定",
@@ -681,11 +718,13 @@
         "required-field": "{{validation.required-field}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "email-label": "{{common.email}}",
+        "email-label": "新しいメール",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "valid-email": "{{validation.valid-email}}",
-        "has-invalid-email": "有効なメールセットがないようです。 メールを変更するには、管理者がこのアクションを完了するためにリンクを送信する必要があります."
+        "has-invalid-email": "有効なメールセットがないようです。 メールを変更するには、管理者がこのアクションを完了するためにリンクを送信する必要があります.",
+        "email-title": "メール",
+        "email-confirmed": "このメールアドレスは確認されました"
     },
     "top-readers": {
         "title": "最も読んだ",
@@ -873,7 +912,9 @@
         "theme-black": "ブラック",
         "layout-mode-option-2col": "2行",
         "color-theme-title": "カラー テーマ:",
-        "layout-mode-tooltip": "Scroll: EPUBファイルを反映します（通常、1章ごとに1つの長いスクロールページ）。<br/>1列: 1回に1つの仮想ページを作成します。<br/>2列: 1回に2つの仮想ページを作成し、横に配置します。"
+        "layout-mode-tooltip": "Scroll: EPUBファイルを反映します（通常、1章ごとに1つの長いスクロールページ）。<br/>1列: 1回に1つの仮想ページを作成します。<br/>2列: 1回に2つの仮想ページを作成し、横に配置します。",
+        "theme-paper": "紙",
+        "theme-white": "白"
     },
     "file-type-group-pipe": {
         "epub": "Epub",
@@ -982,7 +1023,14 @@
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
     },
     "manage-alerts": {
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "clear-alerts": "アラートをクリア",
+        "details-header": "詳細",
+        "description-part-2": "ウィキ.",
+        "comment-header": "コメント",
+        "description-part-1": "このテーブルには、メディアのスキャンまたは読み取り中に見つかった問題が含まれています。このリストは非管理です。いつでもクリアでき、ライブラリ（強制）スキャンを使用して分析を実行できます。一般的なエラーとその意味の一覧は以下で確認できます ",
+        "file-header": "ファイル",
+        "extension-header": "エクステンション"
     },
     "series-info-cards": {
         "less-than-hour": "{{entity-info-cards.less-than-hour}}",
@@ -992,7 +1040,21 @@
         "hours": "{{entity-info-cards.hours}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
         "words-count": "{{entity-info-cards.words-count}}",
-        "hour": "{{entity-info-cards.hour}}"
+        "hour": "{{entity-info-cards.hour}}",
+        "publication-status-title": "出版物",
+        "scrobbling-title": "スクロブリング",
+        "disabled": "無効",
+        "format-title": "フォーマット",
+        "last-read-title": "最後に読んだ",
+        "read-time-title": "読書時間",
+        "length-title": "長さ",
+        "language-title": "言語",
+        "on": "ON",
+        "time-left-title": "残り時間",
+        "release-year-tooltip": "出版年",
+        "publication-status-tooltip": "出版状況",
+        "scrobbling-tooltip": "スクロブリングステータス",
+        "off": "OFF"
     },
     "reading-activity": {
         "last-30-days": "{{time-periods.last-30-days}}",
@@ -1023,7 +1085,29 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "description": "Kavitaは、ユーザーの招待、パスワードリセットリクエストなどのタスクをサポートするためのメールサービスを備えています。当社のサービスを介して送信されるメールはすぐに削除されます。{{link}}サービスを設定することで、独自のメールサービスを使用することもできます。メールサービスのURLを設定し、動作を確認するためにテストボタンを使用できます。いつでもこれらの設定をデフォルトに戻すことができます。認証のためのメールを無効にする方法はありませんが、ユーザーには有効なメールアドレスを使用する必要はありません。確認リンクは常にログに保存され、UIで表示されます。登録/確認メールは、Kavitaに公にアクセス可能なURLを介してアクセスしていない場合、またはホスト名機能が構成されていない場合は送信されません。"
+        "description": "Kavitaの「パスワードを忘れた場合」や「デバイスに送信」などの一部の機能を使用するには、メールプロバイダを設定する必要があります。メールの設定がない場合、パスワードの変更などの他の機能はセキュリティが低くなります",
+        "title": "メールサービス(SMTP)",
+        "email-settings-title": "メール設定",
+        "host-name-validation": "ホスト名はhttp(s)で始まり、/で終わっていてはいけません",
+        "sender-address-label": "送信者のアドレス",
+        "send-to-warning": "デバイスへ送信する場合は、メールの設定を行う必要があります",
+        "email-url-tooltip": "電子メールサービスの完全修飾されたURLを使用してください。 エンドスラッシュは含まないでください.",
+        "email-url-label": "メールサービスURL",
+        "test": "テスト",
+        "host-name-label": "ホスト名",
+        "host-name-tooltip": "逆プロキシのドメイン名が設定されている場合、メール生成は常にこれを使用します。",
+        "host-label": "ホスト",
+        "port-label": "PORT",
+        "username-label": "ユーザーネーム",
+        "password-label": "パスワード",
+        "size-limit-label": "サイズ制限",
+        "enable-ssl-label": "メールサーバーでSSLを使用する",
+        "size-limit-tooltip": "メールサーバーが添付ファイルに対応できるバイト数(byte)",
+        "customized-templates-label": "カスタマイズされたテンプレート",
+        "customized-templates-tooltip": "Kavitaはデフォルトではなく、config/templatesディレクトリをテンプレートに使用すべきですか？テンプレートの変更については、ユーザーが最新情報を把握する責任があります。",
+        "sender-displayname-tooltip": "これは、受信者がメールを受け取るときに見る送信者のメールアドレスです。通常、アカウントに関連付けられたメールアドレスです",
+        "host-tooltip": "送信/SMTPアドレス",
+        "username-tooltip": "ホストに対して認証するために使用されるユーザー名"
     },
     "server-stats": {
         "total-files-tooltip": "総ファイル数: {{count}}",
@@ -1052,7 +1136,10 @@
         "promoted": "{{common.promoted}}",
         "filter-label": "{{common.filter}}",
         "create": "{{common.create}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "no-data": "まだコレクションが作成されていません",
+        "collection-label": "コレクション",
+        "title": "コレクションに追加"
     },
     "edit-reading-list-modal": {
         "title": "読書リストを編集: {{name}}",
@@ -1071,7 +1158,16 @@
     "manage-library": {
         "loading": "{{common.loading}}",
         "delete-library-by-name": "{{name}}を削除",
-        "edit-library-by-name": "{{name}}を削除"
+        "edit-library-by-name": "{{name}}を削除",
+        "add-library": "ライブラリを追加",
+        "no-data": "ライブラリはありません。作成しましょう｡",
+        "shared-folders-title": "共有フォルダ:",
+        "scan-library": "スキャンライブラリ",
+        "edit-library": "編集",
+        "type-title": "タイプ:",
+        "delete-library": "ライブラリを削除する",
+        "title": "ライブラリ",
+        "last-scanned-title": "最後のスキャン:"
     },
     "manage-external-sources": {
         "clear": "{{common.clear}}",
@@ -1084,7 +1180,13 @@
     "manage-media-settings": {
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "reset-to-default": "{{common.reset-to-default}}"
+        "reset-to-default": "{{common.reset-to-default}}",
+        "encode-as-warning": "一旦WebP/AVIFに変換すると、PNGに戻すことはできません。すべてのカバーを再生成するには、ライブラリでカバーを更新する必要があります。ブックマークとファビコンは変換できません。",
+        "media-warning": "メディアの変換タスクをトリガーする必要があります。[タスク]タブで行ってください",
+        "encode-as-label": "メディアを保存",
+        "encode-as-description-part-3": "AVIFを使いますか?",
+        "encode-as-description-part-1": "WebP/AVIFはファイルのスペース要件を大幅に削減できます。ただし、WebP/AVIFはすべてのブラウザやバージョンでサポートされているわけではありません。これらの設定があなたのセットアップに適しているかどうかを確認するには、以下を参照してください。 ",
+        "encode-as-description-part-2": "WebPを使いますか?"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}"
@@ -1158,7 +1260,15 @@
         "reset": "{{common.reset}}",
         "applied": "{{theme-manager.applied}}",
         "image-num": "画像{{num}}",
-        "apply": "{{common.apply}}"
+        "apply": "{{common.apply}}",
+        "url-label": "URL",
+        "drag-n-drop": "ドラッグ&ドロップ",
+        "back": "戻る",
+        "upload-continued": "イメージ",
+        "load": "ロード",
+        "reset-cover-tooltip": "カバーイメージをリセット",
+        "upload": "アップロード",
+        "url": "URL"
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
@@ -1169,7 +1279,10 @@
     },
     "bulk-operations": {
         "items-selected": "{{num}}個選択されました｡",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "mark-as-read": "読まれた印",
+        "mark-as-unread": "未読に印",
+        "title": "一括アクション"
     },
     "next-expected-card": {
         "title": "~{{date}}"
@@ -1178,5 +1291,23 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "delete": "{{common.delete}}"
+    },
+    "card-item": {
+        "cannot-read": "読むことができません"
+    },
+    "entity-title": {
+        "special": "スペシャル",
+        "issue-num": "問題 #",
+        "chapter": "チャプター"
+    },
+    "cover-image-size": {
+        "large": "ラージ(900x1277)",
+        "xlarge": "エクストララージ (1265x1795)"
+    },
+    "external-series-card": {
+        "open-external": "外部を開く"
+    },
+    "table-of-contents": {
+        "no-data": "この本は、目次がメタデータまたはTOCファイルに設定されていません"
     }
 }

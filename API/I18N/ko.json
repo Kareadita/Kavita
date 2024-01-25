@@ -69,7 +69,7 @@
     "generic-device-create": "장치를 생성하는 중에 오류가 발생했습니다",
     "device-doesnt-exist": "장치가 존재하지 않습니다",
     "generic-device-update": "장치를 업데이트 하는 중에 오류가 발생했습니다",
-    "send-to-kavita-email": "장치로 보내기는 Kavita의 이메일 서비스와 함께 사용할 수 없습니다. 직접 구성하십시오.",
+    "send-to-kavita-email": "이메일 설정 없이는 기기로 전송할 수 없습니다.",
     "no-cover-image": "표지 이미지 없음",
     "series-doesnt-exist": "시리즈가 존재하지 않습니다",
     "bookmarks-empty": "북마크는 비워둘 수 없습니다",
@@ -176,5 +176,9 @@
     "browse-more-in-genre": "{0}에서 더 찾아보기",
     "more-in-genre": "장르 {0}에서 더 보기",
     "recently-updated": "최근 업데이트됨",
-    "browse-recently-updated": "최근에 업데이트된 내용을 찾아보기"
+    "browse-recently-updated": "최근에 업데이트된 내용을 찾아보기",
+    "email-not-enabled": "이 서버에서는 이메일이 활성화되어 있지 않습니다. 이 작업을 수행할 수 없습니다.",
+    "send-to-size-limit": "보내려고 하는 파일은 이메일 전송 용량을 초과했습니다",
+    "send-to-unallowed": "본인 이외의 기기로는 전송할 수 없습니다",
+    "unable-to-reset-k+": "오류로 인해 Kavita+ 라이선스를 재설정할 수 없습니다. Kavita+ 지원팀에 문의하십시오"
 }

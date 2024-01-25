@@ -193,7 +193,8 @@
         "email-label": "电子邮件: ",
         "add": "添加",
         "delete": "删除",
-        "edit": "编辑"
+        "edit": "编辑",
+        "email-setup-alert": "想要将文件发送到您的设备吗？ 首先进行管理员设置电子邮件设置！"
     },
     "edit-device": {
         "device-name-label": "设备名称",
@@ -218,7 +219,7 @@
         "permission-error": "您无权更改密码，请与服务器管理员联系。"
     },
     "change-email": {
-        "email-label": "电子邮箱",
+        "email-label": "新电子邮件",
         "current-password-label": "当前密码",
         "email-not-confirmed": "此电子邮件未确认",
         "email-updated-title": "电子邮件已更新",
@@ -234,7 +235,8 @@
         "save": "保存",
         "valid-email": "{{validation.valid-email}}",
         "has-invalid-email": "您似乎没有设置有效的电子邮件。更改电子邮件将要求管理员向您发送链接以完成此操作。",
-        "email-confirmed": "此电子邮件已确认"
+        "email-confirmed": "此电子邮件已确认",
+        "email-title": "电子邮件"
     },
     "change-age-restriction": {
         "age-restriction-label": "年龄限制",
@@ -493,7 +495,7 @@
     "invite-user": {
         "title": "邀请用户",
         "close": "{{common.close}}",
-        "description": "通过输入用户的电子邮件，邀请用户访问您的服务器。他们将收到一封用于创建帐户的电子邮件。为此，您必须在 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">电子邮件</a> 选项卡中设置主机名字段，或者通过以下方式访问您的实例 这是远程 URL。 <br/><br/>或者，您可以使用用户名，但请注意，密码重置不适用于基于用户名的帐户。如果您不想使用我们的电子邮件服务，您可以托管自己的电子邮件服务。",
+        "description": "通过输入用户的电子邮件邀请他们到您的服务器。他们将收到一封创建帐户的电子邮件。为此，您必须在 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">电子邮件</a>选项卡中设置“主机名”和“电子邮件”设置字段，否则将显示一个代表用户进行设置的链接。<br/><br/>电子邮件不需要有效。",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "用户已邀请",
@@ -949,8 +951,8 @@
     },
     "manage-email-settings": {
         "title": "电子邮件服务（SMTP）",
-        "description": "Kavita提供一个开箱即用的电子邮件服务，用于邀请用户、重置密码等任务，通过我们服务发送的电子邮件会立即删除。您也可以通过设置 {{link}}  使用自己的电子邮件服务，请使用测试按钮确保设置的电子邮件服务的URL可以正常工作，您随时可以将这些设置重置为默认值。虽然您不需要为用户使用有效的电子邮件地址，但没有办法禁用电子邮件验证，确认链接始终保存在日志中并显示在UI中。如果您不是通过公共URL访问Kavita，或者除非配置了主机名功能，否则不会发送注册/确认电子邮件。",
-        "send-to-warning": "如果您希望\"发送到设备\"正常工作，您必须自行搭建电子邮件服务。",
+        "description": "为了使用 Kavita 的某些功能，例如忘记密码和发送到设备，必须设置电子邮件提供商。如果没有电子邮件设置，其他功能（例如密码更改）的安全性就会降低。",
+        "send-to-warning": "如果您希望\"发送到设备\"正常工作，您必须设置您的电子邮件设置",
         "email-url-label": "邮件服务器URL",
         "email-url-tooltip": "请使用完整的URL地址来配置电子邮件服务，不要包含结尾的斜杠。",
         "reset": "{{common.reset}}",
@@ -959,7 +961,23 @@
         "host-name-tooltip": "域名（反向代理）。如果设置了此项，始终使用此域名生成电子邮件。",
         "host-name-validation": "主机名必须以http(s)开头，不能以 / 结尾",
         "reset-to-default": "{{common.reset-to-default}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "sender-displayname-label": "显示名称",
+        "size-limit-label": "大小限制",
+        "email-settings-title": "电子邮件设置",
+        "sender-address-label": "发件人地址",
+        "host-label": "主机",
+        "port-label": "端口",
+        "username-label": "用户名",
+        "password-label": "密码",
+        "enable-ssl-label": "在电子邮件服务器上使用 SSL",
+        "size-limit-tooltip": "电子邮件服务器可以处理多少字节的附件",
+        "customized-templates-label": "定制模板",
+        "customized-templates-tooltip": "Kavita 是否应该使用 config/templates 目录作为模板，而不是默认目录？您有责任及时了解模板的变化。",
+        "host-tooltip": "您的邮件服务器的发送/SMTP 地址",
+        "sender-displayname-tooltip": "收件人收到电子邮件时将看到的姓名",
+        "username-tooltip": "用于对主机进行身份验证的用户名",
+        "sender-address-tooltip": "这是收件人收到电子邮件时将看到的电子邮件地址。通常是与帐户关联的电子邮件地址。"
     },
     "manage-library": {
         "title": "资料库",
@@ -1062,14 +1080,15 @@
         "discord-title": "Discord:",
         "donations-title": "捐赠:",
         "source-title": "源代码：",
-        "feature-request-title": "功能请求"
+        "feature-request-title": "功能请求:",
+        "localization-title": "本地化:"
     },
     "manage-tasks-settings": {
         "title": "周期性任务",
         "library-scan-label": "扫描资料库",
         "library-scan-tooltip": "Kavita扫描资料库并刷新元数据的频率。",
-        "library-database-backup-label": "备份资料库的数据库",
-        "library-database-backup-tooltip": "Kavita备份数据库的频率。",
+        "library-database-backup-label": "Kavita 备份",
+        "library-database-backup-tooltip": "Kavita 备份数据库和其他相关文件的频率。",
         "adhoc-tasks-title": "临时任务",
         "job-title-header": "任务名称",
         "description-header": "描述",
@@ -1104,7 +1123,16 @@
         "check-for-updates-task-desc": "查看您的版本之前是否有任何稳定版本发布。",
         "bust-locale-task-desc": "清除区域设置缓存，这可以解决更新后字符串无法正确显示的问题",
         "bust-locale-task-success": "区域设置缓存已清除",
-        "bust-locale-task": "清除区域设置缓存"
+        "bust-locale-task": "清除区域设置缓存",
+        "required": "{{validation.required-field}}",
+        "custom-label": "自定义计划（Cron 表示法）",
+        "cron-notation": "这不是有效的 Cron 表示法",
+        "disabled": "禁用",
+        "custom": "自定义",
+        "cleanup-label": "清理",
+        "cleanup-tooltip": "Kavita 运行清理任务的频率。这可能很繁重，在大多数情况下应该在午夜执行",
+        "daily": "每日",
+        "weekly": "每周"
     },
     "manage-users": {
         "title": "活跃用户",
@@ -1131,7 +1159,8 @@
         "sharing-title": "共享：",
         "no-data": "没有其他用户。",
         "loading": "{{common.loading}}",
-        "username-pattern": "用户名只能包含以下字符和空格： {{characters}}"
+        "username-pattern": "用户名只能包含以下字符和空格： {{characters}}",
+        "admin": "管理员"
     },
     "edit-collection-tags": {
         "title": "编辑{{collectionName}} 收藏",
@@ -1629,7 +1658,6 @@
         "age-restriction-updated": "年龄限制已更新",
         "email-sent-to-no-existing": "现有电子邮件无效。链接已转储到日志中。向管理员询问链接以完成电子邮件更改。",
         "email-sent-to": "已向您的旧电子邮件地址发送确认邮件。",
-        "change-email-private": "服务器不可公开访问。请向管理员索取您的确认链接，该链接可以从日志中获取",
         "device-updated": "设备已更新",
         "device-created": "设备已创建",
         "confirm-regen-covers": "刷新封面将强制重新生成所有封面图片。这是一项繁重的运算。您确定执行，而不想使用扫描操作代替吗？",
@@ -1648,7 +1676,9 @@
         "k+-reset-key": "这会将您的密钥与服务器解开，并允许您重新注册 Kavita 实例。",
         "k+-reset-key-success": "您的许可证尚未注册。使用“编辑”按钮重新注册您的实例并重新激活 Kavita+",
         "email-not-sent": "存档的电子邮件不是有效的电子邮件，无法发送。链接已转储到日志中。管理员可以提供此链接来完成流程。",
-        "anilist-token-expired": "您的 AniList 令牌已过期。在您在“用户设置”>“帐户”中重新生成之前，Scrobbling 将不再处理"
+        "anilist-token-expired": "您的 AniList 令牌已过期。在您在“用户设置”>“帐户”中重新生成之前，Scrobbling 将不再处理",
+        "email-not-sent-test": "发送电子邮件时出现异常。检查日志以获取详细信息。这表明设置不正确。",
+        "change-email-no-email": "电子邮件已更新"
     },
     "actionable": {
         "scan-library": "扫描资料库",
@@ -1788,7 +1818,8 @@
         "path": "路径",
         "file-path": "文件路径",
         "read-date": "阅读日期",
-        "want-to-read": "想读"
+        "want-to-read": "想读",
+        "average-rating": "平均评分"
     },
     "filter-comparison-pipe": {
         "begins-with": "开始于",
@@ -1836,7 +1867,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "百分比",
-        "unit-reading-date": "日期"
+        "unit-reading-date": "日期",
+        "unit-average-rating": "平均评分 (Kavita+) - 仅适用于缓存系列"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",

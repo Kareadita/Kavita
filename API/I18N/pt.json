@@ -20,7 +20,7 @@
     "generic-device-create": "Ocorreu um erro ao criar o dispositivo",
     "generic-device-update": "Ocorreu um erro ao atualizar o dispositivo",
     "greater-0": "{0} tem de ser superior a 0",
-    "send-to-kavita-email": "Enviar para dispositivo não pode ser usado com o serviço de email do Kavita. Por favor configure o seu serviço de email.",
+    "send-to-kavita-email": "Enviar para dispositivo não pode ser usado sem a configuração de Email",
     "bookmark-doesnt-exist": "Marcador inexistente",
     "file-doesnt-exist": "Ficheiro inexistente",
     "delete-library-while-scan": "Não pode eliminar a biblioteca enquanto uma análise está em curso. Por favor aguarde que a análise termine ou reinicie o Kavita e depois tente eliminar novamente",
@@ -177,5 +177,8 @@
     "more-in-genre": "Mais do Género {0}",
     "recently-updated": "Recém-Atualizados",
     "browse-recently-updated": "Ver Recém-Atualizados",
-    "unable-to-reset-k+": "Não foi possível redefinir a licença do Kavita+ devido a um erro. Entre em contacto com o suporte Kavita +"
+    "unable-to-reset-k+": "Não foi possível redefinir a licença do Kavita+ devido a um erro. Entre em contacto com o suporte Kavita +",
+    "email-not-enabled": "O email não está habilitado neste servidor. Não pode executar esta ação.",
+    "send-to-unallowed": "Não pode enviar para um dispositivo que não é seu",
+    "send-to-size-limit": "Os ficheiros que está a tentar enviar são demasiado grandes para o seu remetente"
 }
