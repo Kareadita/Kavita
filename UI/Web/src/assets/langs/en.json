@@ -1223,8 +1223,8 @@
         "title": "Recurring Tasks",
         "library-scan-label": "Library Scan",
         "library-scan-tooltip": "How often Kavita will scan and refresh metadata around library files.",
-        "library-database-backup-label": "Library Database Backup",
-        "library-database-backup-tooltip": "How often Kavita will backup the database.",
+        "library-database-backup-label": "Kavita Backup",
+        "library-database-backup-tooltip": "How often Kavita will backup the database and other related files.",
         "cleanup-label": "Cleanup",
         "cleanup-tooltip": "How often Kavita will run cleanup tasks. This can be heavy and should be performed at midnight in most cases",
         "adhoc-tasks-title": "Ad-hoc Tasks",
@@ -1237,7 +1237,7 @@
         "required": "{{validation.required-field}}",
 
         "custom-label": "Custom Schedule (Cron Notation)",
-        "cron-notation": "You must use cron notation for custom scheduling",
+        "cron-notation": "This is not valid Cron Notation",
 
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Last Executed",
