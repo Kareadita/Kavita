@@ -13,7 +13,7 @@ public class CronConverterTests
     [InlineData("", "0 0 31 2 *")]
     [InlineData("sdfgdf", "sdfgdf")]
     [InlineData("* * * * *", "* * * * *")]
-    [InlineData(null, "daily")]
+    [InlineData(null, "0 0 * * *")] // daily
     public void ConvertTest(string? input, string expected)
     {
         Assert.Equal(expected, CronConverter.ConvertToCronNotation(input));
