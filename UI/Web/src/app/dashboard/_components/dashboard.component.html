@@ -55,7 +55,7 @@
         <app-carousel-reel [items]="data" [title]="t('on-deck-title')" (sectionClick)="handleSectionClick(StreamId.OnDeck)">
           <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" [isOnDeck]="true"
-                             (reload)="reloadStream(stream.id)" (dataChanged)="reloadStream(stream.id)"></app-series-card>
+                             (reload)="reloadStream(stream.id, true)" (dataChanged)="reloadStream(stream.id)"></app-series-card>
           </ng-template>
         </app-carousel-reel>
       }
