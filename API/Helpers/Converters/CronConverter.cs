@@ -12,8 +12,14 @@ public static class CronConverter
         "daily",
         "weekly",
     };
-    public static string ConvertToCronNotation(string source)
+    /// <summary>
+    /// Converts to Cron Notation
+    /// </summary>
+    /// <param name="source">Defaults to daily</param>
+    /// <returns></returns>
+    public static string ConvertToCronNotation(string? source)
     {
+        if (string.IsNullOrEmpty(source)) return Cron.Daily();
         return source.ToLower() switch
         {
             "daily" => Cron.Daily(),

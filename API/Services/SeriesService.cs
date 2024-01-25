@@ -32,7 +32,7 @@ namespace API.Services;
 public interface ISeriesService
 {
     Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId);
-    Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto, int userId = 0);
+    Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
     Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
@@ -111,9 +111,8 @@ public class SeriesService : ISeriesService
     /// Updates the Series Metadata.
     /// </summary>
     /// <param name="updateSeriesMetadataDto"></param>
-    /// <param name="userId">If 0, does not bust any cache</param>
     /// <returns></returns>
-    public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto, int userId = 0)
+    public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
         var hasWebLinksChanged = false;
         try
@@ -315,10 +314,10 @@ public class SeriesService : ISeriesService
                 _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
             }
 
-            if (hasWebLinksChanged && userId > 0)
+            if (hasWebLinksChanged)
             {
                 _logger.LogDebug("Clearing cache as series weblinks may have changed");
-                await _cacheProvider.RemoveAsync(MetadataController.CacheKey + seriesId + userId);
+                await _cacheProvider.RemoveAsync(MetadataController.CacheKey + seriesId);
             }
 
 

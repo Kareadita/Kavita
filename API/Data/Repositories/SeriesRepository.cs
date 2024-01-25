@@ -490,6 +490,10 @@ public class SeriesRepository : ISeriesRepository
                 .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
+        else
+        {
+            result.Files = new List<MangaFileDto>();
+        }
 
         result.Chapters = await _context.Chapter
             .Include(c => c.Files)
@@ -1930,7 +1934,8 @@ public class SeriesRepository : ISeriesRepository
     {
         // If there is 0 or 1 rating and that rating is you, return 0 back
         var countOfRatingsThatAreUser = await _context.AppUserRating
-            .Where(r => r.SeriesId == seriesId && r.HasBeenRated).CountAsync(u => u.AppUserId == userId);
+            .Where(r => r.SeriesId == seriesId && r.HasBeenRated)
+            .CountAsync(u => u.AppUserId == userId);
         if (countOfRatingsThatAreUser == 1)
         {
             return 0;

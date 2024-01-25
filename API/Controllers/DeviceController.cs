@@ -142,7 +142,8 @@ public class DeviceController : BaseApiController
         if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "SeriesId"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
 
-        if (await _emailService.IsDefaultEmailService())
+        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetup();
+        if (!isEmailSetup)
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
 
         var userId = User.GetUserId();

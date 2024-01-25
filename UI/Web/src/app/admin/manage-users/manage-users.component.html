@@ -48,7 +48,7 @@
                 {{t('roles-title')}} <span *ngIf="roles.length === 0; else showRoles">{{null | defaultValue}}</span>
                 <ng-template #showRoles>
                   <ng-container *ngIf="hasAdminRole(member); else allRoles">
-                    <app-tag-badge class="col-auto">Admin</app-tag-badge>
+                    <app-tag-badge class="col-auto">{{t('admin')}}</app-tag-badge>
                   </ng-container>
                   <ng-template #allRoles>
                     <app-tag-badge *ngFor="let role of roles" class="col-auto">{{role}}</app-tag-badge>

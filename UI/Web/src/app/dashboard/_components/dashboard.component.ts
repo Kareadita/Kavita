@@ -193,12 +193,17 @@ export class DashboardComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  reloadStream(streamId: number) {
+  reloadStream(streamId: number, onDeck = false) {
     const index = this.streams.findIndex(s => s.id === streamId);
     if (index < 0) return;
-    this.streams[index] = {...this.streams[index]};
-    console.log('swapped out stream: ', this.streams[index]);
-    this.cdRef.detectChanges();
+    if (onDeck) {
+      // TODO: Need to figure out a better way to refresh just one stream
+      this.refreshStreams$.next();
+      this.cdRef.markForCheck();
+    } else {
+      this.streams[index] = {...this.streams[index]};
+      this.cdRef.markForCheck();
+    }
   }
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {

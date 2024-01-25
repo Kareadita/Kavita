@@ -85,9 +85,9 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     {
         return _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
-            .Include(s => s.ExternalReviews.Take(25))
-            .Include(s => s.ExternalRatings.Take(25))
-            .Include(s => s.ExternalRecommendations.Take(25))
+            .Include(s => s.ExternalReviews.Take(limit))
+            .Include(s => s.ExternalRatings.Take(limit))
+            .Include(s => s.ExternalRecommendations.Take(limit))
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }
@@ -138,7 +138,13 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         var seriesDetailPlusDto = new SeriesDetailPlusDto()
         {
             Ratings = seriesDetailDto.ExternalRatings.Select(r => _mapper.Map<RatingDto>(r)),
-            Reviews = seriesDetailDto.ExternalReviews.OrderByDescending(r => r.Score).Select(r => _mapper.Map<UserReviewDto>(r)),
+            Reviews = seriesDetailDto.ExternalReviews.OrderByDescending(r => r.Score)
+                .Select(r =>
+                {
+                    var ret = _mapper.Map<UserReviewDto>(r);
+                    ret.IsExternal = true;
+                    return ret;
+                }),
             Recommendations = new RecommendationDto()
             {
                 ExternalSeries = externalSeriesRecommendations,

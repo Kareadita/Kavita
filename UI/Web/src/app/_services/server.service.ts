@@ -63,7 +63,7 @@ export class ServerService {
   }
 
   bustCache() {
-    return this.http.post(this.baseUrl + 'server/bust-review-and-rec-cache', {});
+    return this.http.post(this.baseUrl + 'server/bust-kavitaplus-cache', {});
   }
 
   getMediaErrors() {

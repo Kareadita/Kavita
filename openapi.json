@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.1"
+    "version": "0.7.13.2"
   },
   "servers": [
     {
@@ -9488,6 +9488,39 @@
         }
       }
     },
+    "/api/Server/check-out-of-date": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns how many versions out of date this install is",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/changelog": {
       "get": {
         "tags": [
@@ -9649,7 +9682,7 @@
         }
       }
     },
-    "/api/Server/bust-review-and-rec-cache": {
+    "/api/Server/bust-kavitaplus-cache": {
       "post": {
         "tags": [
           "Server"
@@ -9862,56 +9895,6 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ServerSettingDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Settings/test-email-url": {
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Sends a test email from the Email Service.",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TestEmailDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TestEmailDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/TestEmailDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmailTestResultDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmailTestResultDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmailTestResultDto"
                 }
               }
             }
@@ -14782,24 +14765,6 @@
         },
         "additionalProperties": false
       },
-      "EmailTestResultDto": {
-        "type": "object",
-        "properties": {
-          "successful": {
-            "type": "boolean"
-          },
-          "errorMessage": {
-            "type": "string",
-            "nullable": true
-          },
-          "emailAddress": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents if Test Email Service URL was successful or not and if any error occured"
-      },
       "ExternalRating": {
         "type": "object",
         "properties": {
@@ -19104,16 +19069,6 @@
             "format": "int32"
           },
           "title": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "TestEmailDto": {
-        "type": "object",
-        "properties": {
-          "url": {
             "type": "string",
             "nullable": true
           }

@@ -45,6 +45,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('taskCleanup', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
       this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
@@ -77,6 +78,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
+    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup);
     this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
     this.settingsForm.get('port')?.setValue(this.serverSettings.port);
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);

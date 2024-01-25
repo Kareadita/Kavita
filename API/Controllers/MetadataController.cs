@@ -8,6 +8,7 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities.Enums;
 using API.Extensions;
@@ -207,13 +208,18 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
             .ToList();
 
-        var cacheKey = CacheKey + seriesId + "_" + user.Id;
+        var cacheKey = CacheKey + seriesId;
         var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey);
         if (results.HasValue)
         {
             var cachedResult = results.Value;
             userReviews.AddRange(cachedResult.Reviews);
             cachedResult.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
+            if (!await unitOfWork.UserRepository.IsUserAdminAsync(user))
+            {
+                cachedResult.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
+            }
+
             return cachedResult;
         }
 
@@ -221,9 +227,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (ret == null) return Ok(null);
         userReviews.AddRange(ret.Reviews);
         ret.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
-
-
         await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(24));
+
+        if (!await unitOfWork.UserRepository.IsUserAdminAsync(user))
+        {
+            ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
+        }
 
         return Ok(ret);
 

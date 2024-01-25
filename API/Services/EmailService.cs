@@ -7,12 +7,8 @@ using System.Net;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
-using API.Entities.Enums;
-using Flurl.Http;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using MailKit.Security;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
@@ -38,7 +34,6 @@ public interface IEmailService
     Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto);
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> SendTestEmail(string adminEmail);
-    Task<bool> IsDefaultEmailService();
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
     bool IsValidEmail(string email);
 }
@@ -47,7 +42,6 @@ public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IDownloadService _downloadService;
     private readonly IDirectoryService _directoryService;
 
     private const string TemplatePath = @"{0}.html";
@@ -57,11 +51,10 @@ public class EmailService : IEmailService
     public const string DefaultApiUrl = "https://email.kavitareader.com";
 
 
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDownloadService downloadService, IDirectoryService directoryService)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _downloadService = downloadService;
         _directoryService = directoryService;
     }
 
@@ -112,14 +105,6 @@ public class EmailService : IEmailService
         }
 
         return result;
-    }
-
-
-    [Obsolete]
-    public async Task<bool> IsDefaultEmailService()
-    {
-        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value!
-            .Equals(DefaultApiUrl);
     }
 
     /// <summary>
