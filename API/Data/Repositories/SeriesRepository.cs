@@ -490,6 +490,10 @@ public class SeriesRepository : ISeriesRepository
                 .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
+        else
+        {
+            result.Files = new List<MangaFileDto>();
+        }
 
         result.Chapters = await _context.Chapter
             .Include(c => c.Files)
