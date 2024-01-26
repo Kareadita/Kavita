@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
@@ -15,6 +15,8 @@ import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {filter} from "rxjs/operators";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -22,7 +24,9 @@ import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
     styleUrls: ['./manage-email-settings.component.scss'],
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe, ManageAlertsComponent, NgbAccordionBody, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem, NgForOf, TitleCasePipe]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
+    ManageAlertsComponent, NgbAccordionBody, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionDirective,
+    NgbAccordionHeader, NgbAccordionItem, NgForOf, TitleCasePipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -47,6 +51,7 @@ export class ManageEmailSettingsComponent implements OnInit {
       this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
       this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
       this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
+
       this.cdRef.markForCheck();
     });
   }
@@ -64,6 +69,22 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
     this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
     this.settingsForm.markAsPristine();
+    this.cdRef.markForCheck();
+  }
+
+  autofillGmail() {
+    this.settingsForm.get('host')?.setValue('smtp.gmail.com');
+    this.settingsForm.get('port')?.setValue(587);
+    this.settingsForm.get('sizeLimit')?.setValue(26214400);
+    this.settingsForm.get('enableSsl')?.setValue(true);
+    this.cdRef.markForCheck();
+  }
+
+  autofillOutlook() {
+    this.settingsForm.get('host')?.setValue('smtp-mail.outlook.com');
+    this.settingsForm.get('port')?.setValue(587 );
+    this.settingsForm.get('sizeLimit')?.setValue(1048576);
+    this.settingsForm.get('enableSsl')?.setValue(true);
     this.cdRef.markForCheck();
   }
 

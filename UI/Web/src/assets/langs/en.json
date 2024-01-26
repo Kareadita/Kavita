@@ -1094,6 +1094,8 @@
         "size-limit-tooltip": "How many bytes can the Email Server handle for attachments",
         "customized-templates-label": "Customized Templates",
         "customized-templates-tooltip": "Should Kavita use config/templates directory for templates rather than default? You are responsible to keep up to date with template changes.",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook",
 
         "reset-to-default": "{{common.reset-to-default}}",
         "save": "{{common.save}}"
