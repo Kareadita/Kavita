@@ -193,7 +193,8 @@
         "email-label": "Email: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "email-setup-alert": "Deseja enviar ficheiros para os seus dispositivos? Peça ao administrador para primeiro configurar o Email!"
     },
     "edit-device": {
         "device-name-label": "Nome do Dispositivo",
@@ -218,7 +219,7 @@
         "permission-error": "Não tem permissões para alterar a sua palavra passe. Contacte o administrador do servidor."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "Novo Email",
         "current-password-label": "Palavra Passe Atual",
         "email-not-confirmed": "Este email não está confirmado",
         "email-updated-title": "Email Atualizado",
@@ -233,7 +234,9 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Parece que não tem um email válido definido. A alteração de email requere que o administrador lhe envie um link para completar esta acção.",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "email-title": "Email",
+        "email-confirmed": "Este email está confirmado"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrição Etária",
@@ -263,7 +266,8 @@
         "token-input-label": "Colocar Token do {{service}} Aqui",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "Token Válido"
     },
     "typeahead": {
         "locked-field": "Campo bloqueado",
@@ -660,7 +664,8 @@
         "publishers-title": "Editoras",
         "promoted": "{{common.promoted}}",
         "see-more": "Ver Mais",
-        "see-less": "Ver Menos"
+        "see-less": "Ver Menos",
+        "rating-title": "Avaliações"
     },
     "badge-expander": {
         "more-items": "e mais {{count}}"
@@ -946,8 +951,8 @@
     },
     "manage-email-settings": {
         "title": "Serviços de Email (SMTP)",
-        "description": "O Kavita inclui um serviço de email que possibilita o convite de utilizadores, repor palavra passe, etc. Os emails enviados pelo nosso serviço são imediatamente apagados. Pode usar o seu próprio serviço ao configurar o serviço {{link}}. Indique o URL do serviço e use o botão Testar para confirmar que funciona. Pode repor estas configurações a qualquer altura. Não existe maneira de desabilitar os emails para autenticação, apesar de não ser necessário um endereço de email válido. Os links de confirmação serão sempre guardados nos logos e mostrados no UI. Os emails de registo/confirmação não serão enviados se não estiver a aceder ao Kavita a partir de um URL público ou se não tiver a funcionalidade Nome do Host configurado.",
-        "send-to-warning": "Para que a funcionalidade Enviar para Dispositivo funcione é necessário usar o seu próprio serviço de email.",
+        "description": "Para poder usar algumas funcionalidades do Kavita, como Esqueceu a Password e Enviar para Dispositivo, tem de configurar um serviço de email. Outras funcionalidades, como Alteração de Password, são menos seguras sem a configuração de Email.",
+        "send-to-warning": "Para que a funcionalidade Enviar para Dispositivo funcione é necessário configurar as definições de email",
         "email-url-label": "URL do Serviço de Email",
         "email-url-tooltip": "Use o URL completo do serviço de email. Não inclua a barra final.",
         "reset": "{{common.reset}}",
@@ -956,7 +961,19 @@
         "host-name-tooltip": "Nome de domínio (do Proxy Inverso). Quando definido, a geração de emails irá usar sempre este valor.",
         "host-name-validation": "O nome do host tem de começar por http(s) e não pode acabar com /",
         "reset-to-default": "{{common.reset-to-default}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-settings-title": "Configurações de Email",
+        "sender-address-label": "Endereço Remetente",
+        "sender-displayname-label": "Nome Exibido",
+        "host-label": "Host",
+        "password-label": "Senha",
+        "enable-ssl-label": "Usar SSL no Servidor de Email",
+        "customized-templates-label": "Templates Personalizados",
+        "port-label": "Porta",
+        "username-label": "Nome de utilizador",
+        "size-limit-label": "Limite de Tamanho",
+        "size-limit-tooltip": "Quantos bytes suporta o Servidor de Email para os anexos",
+        "customized-templates-tooltip": "O Kavita deve usar uma diretoria de configurações/templates para os templates em vez do comportamento por defeito? Ficará responsável por manter essa diretoria atualizada com as alterações de template."
     },
     "manage-library": {
         "title": "Bibliotecas",
@@ -1635,7 +1652,6 @@
         "confirm-delete-smart-filter": "Tem a certeza que deseja eliminar este Filtro Inteligente?",
         "confirm-library-type-change": "Ao alterar o tipo de biblioteca, será realizada uma análise com regras novas que poderá fazer com que as séries sejam recreadas e, assim, poderá perder o progresso e marcadores associados às mesmas. Deve fazer um backup antes de realizar esta ação. Deseja continuar?",
         "confirm-regen-covers": "Ao refrescar as capas todas as imagens das capas serão recalculadas. Isto é uma operação pesada. Em vez disso não pretende fazer uma Análise?",
-        "change-email-private": "O servidor não é acessível publicamente. Peça ao administrador para obter um link de confirmação a partir dos logs",
         "book-settings-info": "Pode modificar definições dos livros, guardar essas definições para todos os livros, e ver o índice a partir do drawer.",
         "smart-filter-deleted": "Filtro Inteligente Eliminado",
         "confirm-download-size": "O {{entityType}} tem {{size}}. Tem a certeza que quer continuar?",
@@ -1644,7 +1660,10 @@
         "k+-delete-key": "Isto apenas irá apagar a licença do Kavita e permitir que seja mostrado um link para comprar a licença. A sua subscrição não será cancelada! Use esta opção apenas quando assim indicado pelo suporte!",
         "k+-reset-key-success": "A sua licença foi desassociada. Use o botão Editar para voltar a registar a sua instância e voltar a ativar o Kavita+",
         "email-not-sent": "O email em ficheiro não é um email válido e não pode ser enviado. Foi colocado um link nos logs. O administrador pode disponibilizar este link para concluir o processo.",
-        "k+-reset-key": "Isto irá desassociar a sua chave do servidor e permitir voltar a registar uma instância Kavita."
+        "k+-reset-key": "Isto irá desassociar a sua chave do servidor e permitir voltar a registar uma instância Kavita.",
+        "email-not-sent-test": "Ocorreu uma exceção ao enviar o email. Verifique os logs para mais detalhes. Este problema indica configurações erradas.",
+        "change-email-no-email": "O Email foi atualizado",
+        "anilist-token-expired": "O seu token AniList expirou. O processo de scrobbling não irá funcionar enquanto não voltar a gerar um novo token em Definições de Utilizador > Conta"
     },
     "actionable": {
         "scan-library": "Analisar Biblioteca",
