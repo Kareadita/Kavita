@@ -298,6 +298,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
       this.isScrolling = false;
       this.cdRef.markForCheck();
+      return;
     }
 
     if (!this.isScrolling) {
@@ -322,6 +323,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       const img = this.findClosestVisibleImage(closestImages);
 
       if (img != null) {
+        this.debugLog('[handleScrollEndEvent] setting page while not scrolling ', img.getAttribute('page') || this.pageNum);
         this.setPageNum(parseInt(img.getAttribute('page') || this.pageNum + '', 10));
       }
     }
