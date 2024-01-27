@@ -206,9 +206,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
     .subscribe((event) => this.handleScrollEvent(event));
 
-    // fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scrollend')
-    // .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
-    // .subscribe((event) => this.handleScrollEndEvent(event));
+    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scrollend')
+    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
+    .subscribe((event) => this.handleScrollEndEvent(event));
   }
 
   ngOnInit(): void {

@@ -500,4 +500,16 @@ public class SettingsController : BaseApiController
         // NOTE: This must match Hangfire's underlying cron system. Hangfire is unique
         return Ok(CronHelper.IsValidCron(cronExpression));
     }
+
+    /// <summary>
+    /// Sends a test email to see if email settings are hooked up correctly
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("test-email-url")]
+    public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok(await _emailService.SendTestEmail(user!.Email));
+    }
 }

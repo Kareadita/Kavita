@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'manage-email-settings'">
   <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-      <h4>{{t('title')}}</h4>
+      <h4 id="email-header">{{t('title')}}</h4>
 
       <p>You must fill out both Host Name and SMTP settings to use email-based functionality within Kavita.</p>
 
@@ -11,8 +11,13 @@
         <span class="visually-hidden" id="settings-hostname-help">
           <ng-container [ngTemplateOutlet]="hostNameTooltip"></ng-container>
         </span>
-        <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-               [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
+        <div class="input-group">
+          <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
+                 [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
+          <button class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
+          <button class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
+        </div>
+
         <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
           <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
             {{t('host-name-validation')}}
@@ -27,15 +32,17 @@
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="senderAddressTooltip" role="button" tabindex="0"></i>
             <ng-template #senderAddressTooltip>{{t('sender-address-tooltip')}}</ng-template>
             <span class="visually-hidden" id="settings-sender-address-help"><ng-container [ngTemplateOutlet]="senderAddressTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="manga-header" formControlName="senderAddress" id="settings-sender-address" />
+            <input type="text" class="form-control" aria-describedby="email-header" formControlName="senderAddress" id="settings-sender-address" />
           </div>
+
+
 
           <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
             <label for="settings-sender-displayname" class="form-label">{{t('sender-displayname-label')}}</label>
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="senderDisplayNameTooltip" role="button" tabindex="0"></i>
             <ng-template #senderDisplayNameTooltip>{{t('sender-displayname-tooltip')}}</ng-template>
             <span class="visually-hidden" id="settings-sender-displayname-help"><ng-container [ngTemplateOutlet]="senderDisplayNameTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="manga-header" formControlName="senderDisplayName" id="settings-sender-displayname" />
+            <input type="text" class="form-control" aria-describedby="email-header" formControlName="senderDisplayName" id="settings-sender-displayname" />
           </div>
         </div>
 
@@ -45,12 +52,12 @@
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="hostTooltip" role="button" tabindex="0"></i>
             <ng-template #hostTooltip>{{t('host-tooltip')}}</ng-template>
             <span class="visually-hidden" id="settings-host-help"><ng-container [ngTemplateOutlet]="hostTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="manga-header" formControlName="host" id="settings-host" />
+            <input type="text" class="form-control" aria-describedby="email-header" formControlName="host" id="settings-host" />
           </div>
 
           <div class="col-md-4 col-sm-12 pe-2 ps-2 mb-2">
             <label for="settings-port" class="form-label">{{t('port-label')}}</label>
-            <input type="number" min="1" class="form-control" aria-describedby="manga-header" formControlName="port" id="settings-port" />
+            <input type="number" min="1" class="form-control" aria-describedby="email-header" formControlName="port" id="settings-port" />
           </div>
 
           <div class="col-md-4 col-sm-12 pe-2 ps-2 mb-2">
@@ -68,12 +75,12 @@
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="usernameTooltip" role="button" tabindex="0"></i>
             <ng-template #usernameTooltip>{{t('username-tooltip')}}</ng-template>
             <span class="visually-hidden" id="settings-username-help"><ng-container [ngTemplateOutlet]="usernameTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="manga-header" formControlName="userName" id="settings-username" />
+            <input type="text" class="form-control" aria-describedby="email-header" formControlName="userName" id="settings-username" />
           </div>
 
           <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
             <label for="settings-password" class="form-label">{{t('password-label')}}</label>
-            <input type="password" class="form-control" aria-describedby="manga-header" formControlName="password" id="settings-password" />
+            <input type="password" class="form-control" aria-describedby="email-header" formControlName="password" id="settings-password" />
           </div>
         </div>
 
@@ -83,7 +90,7 @@
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="sizeLimitTooltip" role="button" tabindex="0"></i>
             <ng-template #sizeLimitTooltip>{{t('size-limit-tooltip')}}</ng-template>
             <span class="visually-hidden" id="settings-size-limit-help"><ng-container [ngTemplateOutlet]="sizeLimitTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="manga-header" formControlName="sizeLimit" id="settings-size-limit" />
+            <input type="text" class="form-control" aria-describedby="email-header" formControlName="sizeLimit" id="settings-size-limit" />
           </div>
 
           <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">

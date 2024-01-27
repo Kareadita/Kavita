@@ -112,6 +112,13 @@ public class LibraryController : BaseApiController
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
         _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
 
+        // Restart Folder watching if on
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (settings.EnableFolderWatching)
+        {
+            await _libraryWatcher.RestartWatching();
+        }
+
         // Assign all the necessary users with this library side nav
         var userIds = admins.Select(u => u.Id).Append(User.GetUserId()).ToList();
         var userNeedingNewLibrary = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams))

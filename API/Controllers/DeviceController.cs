@@ -126,7 +126,7 @@ public class DeviceController : BaseApiController
         }
         finally
         {
-            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice,
+            await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
                 MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(userId, "send-to-device-status"),
                     "ended"), userId);
         }
@@ -167,15 +167,13 @@ public class DeviceController : BaseApiController
         }
         finally
         {
-            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice,
+            await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
                 MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
                     "ended"), userId);
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-send-to"));
     }
-
-
 
 }
 
