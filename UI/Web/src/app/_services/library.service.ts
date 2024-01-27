@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {DestroyRef, Injectable} from '@angular/core';
 import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {filter, map, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { JumpKey } from '../_models/jumpbar/jump-key';
 import { Library, LibraryType } from '../_models/library/library';
 import { DirectoryDto } from '../_models/system/directory-dto';
+import {EVENTS, MessageHubService} from "./message-hub.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Injectable({
@@ -18,7 +20,12 @@ export class LibraryService {
   private libraryNames: {[key:number]: string} | undefined = undefined;
   private libraryTypes: {[key: number]: LibraryType} | undefined = undefined;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private readonly messageHub: MessageHubService, private readonly destroyRef: DestroyRef) {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(e => e.event === EVENTS.LibraryModified),
+      tap((e) => {
+      this.libraryNames = undefined;
+    })).subscribe();
+  }
 
   getLibraryNames() {
     if (this.libraryNames != undefined) {
