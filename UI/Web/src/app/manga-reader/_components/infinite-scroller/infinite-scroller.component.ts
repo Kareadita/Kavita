@@ -533,6 +533,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
           this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
 
+          // This scrollToCurrentPage is needed to resume from the correct page, but it also select newly inserted images
+          // before we are ready
+          if (this.currentPageElem && !this.isElementVisible(this.currentPageElem) && !this.isScrolling) {
+            setTimeout(() => this.scrollToCurrentPage(), 100);
+          }
           // There needs to be a bit of time before we scroll
           // if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
           //   //this.scrollToCurrentPage();
