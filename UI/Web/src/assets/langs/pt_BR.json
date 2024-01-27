@@ -193,7 +193,8 @@
         "email-label": "Email: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "email-setup-alert": "Quer enviar arquivos para seus dispositivos? Peça ao seu administrador que configure as configurações de e-mail primeiro!"
     },
     "edit-device": {
         "device-name-label": "Nome do Dispositivo",
@@ -218,7 +219,7 @@
         "permission-error": "Você não tem permissão para alterar sua senha. Entre em contato com o administrador do servidor."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "Novo Email",
         "current-password-label": "Senha Atual",
         "email-not-confirmed": "Este e-mail não está confirmado",
         "email-updated-title": "E-mail atualizado",
@@ -234,7 +235,8 @@
         "save": "{{common.save}}",
         "has-invalid-email": "Parece que você não tem um conjunto de e-mail válido. A alteração do e-mail exigirá que o administrador lhe envie um link para concluir esta ação.",
         "valid-email": "{{validation.valid-email}}",
-        "email-confirmed": "Este e-mail está confirmado"
+        "email-confirmed": "Este e-mail está confirmado",
+        "email-title": "Email"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrição de Etária",
@@ -949,8 +951,8 @@
     },
     "manage-email-settings": {
         "title": "Serviço de E-Mail (SMTP)",
-        "description": "Kavita vem de fábrica com um serviço de e-mail para executar tarefas como convidar usuários, redefinir senhas, etc. Os e-mails enviados por meio de nosso serviço são excluídos imediatamente. Você pode usar seu próprio serviço de e-mail configurando o serviço {{link}}  . Defina a URL do serviço de e-mail e use o botão Testar para garantir que funcione. Você pode redefinir essas configurações para o padrão a qualquer momento. Não há como desabilitar e-mails para autenticação, embora você não seja obrigado a usar um endereço de e-mail válido para os usuários. Os links de confirmação sempre serão salvos nos logs e apresentados na interface do usuário. Os e-mails de registro/confirmação não serão enviados se você não estiver acessando o Kavita por meio de um URL publicamente acessível ou a menos que o recurso Nome do host esteja configurado.",
-        "send-to-warning": "se você deseja que o Enviar para Dispositivo funcione, você deve hospedar seu próprio serviço de e-mail.",
+        "description": "Para usar algumas funções do Kavita, como Esqueci a senha e Enviar para o dispositivo, um provedor de e-mail deve ser configurado. Outros recursos, como alteração de senha, são menos seguros sem configuração de e-mail.",
+        "send-to-warning": "se quiser que Enviar para dispositivo funcione, você deve definir suas configurações de e-mail",
         "email-url-label": "URL do Serviço de E-Mail",
         "email-url-tooltip": "Use URL totalmente qualificado do serviço de e-mail. Não inclua a barra final.",
         "reset": "{{common.reset}}",
@@ -959,7 +961,23 @@
         "host-name-tooltip": "Nome de Domínio (de Proxy Reverso). Se definido, a geração de email sempre usará isso.",
         "host-name-validation": "O nome do host deve começar com http(s) e não terminar com /",
         "reset-to-default": "{{common.reset-to-default}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-settings-title": "Configurações de E-mail",
+        "sender-address-label": "Endereço do Remetente",
+        "sender-displayname-label": "Nome de Exibição",
+        "host-label": "Host",
+        "port-label": "Porta",
+        "username-label": "Nome de usuário",
+        "password-label": "Senha",
+        "enable-ssl-label": "Usar SSL no servidor de e-mail",
+        "size-limit-label": "Limite de Tamanho",
+        "customized-templates-label": "Modelos Personalizados",
+        "size-limit-tooltip": "Quantos bytes o servidor de e-mail pode manipular para anexos",
+        "customized-templates-tooltip": "Kavita deve usar o diretório config/templates para modelos em vez do padrão? Você é responsável por se manter atualizado com as alterações do modelo.",
+        "sender-address-tooltip": "Este é o endereço de e-mail que o destinatário verá quando receber o e-mail. Normalmente, o endereço de e-mail associado à conta.",
+        "sender-displayname-tooltip": "O nome que o destinatário verá quando receber o e-mail",
+        "host-tooltip": "Endereço de saída/SMTP do seu servidor de e-mail",
+        "username-tooltip": "O nome de usuário usado para autenticação no host"
     },
     "manage-library": {
         "title": "Bibliotecas",
@@ -1062,7 +1080,8 @@
         "discord-title": "Discord:",
         "donations-title": "Doações:",
         "source-title": "Fonte:",
-        "feature-request-title": "Pedidos de Recursos"
+        "feature-request-title": "Solicitações de recursos:",
+        "localization-title": "Localizações:"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
@@ -1104,7 +1123,16 @@
         "bust-cache-task-success": "Kavita+ Cache eliminado",
         "bust-cache-task": "Eliminar Cache",
         "bust-locale-task": "Eliminar Cache Local",
-        "cron-header": "Cron"
+        "cron-header": "Cron",
+        "cleanup-label": "Limpeza",
+        "cleanup-tooltip": "Com que frequência o Kavita executará tarefas de limpeza. Isso pode ser pesado e deve ser realizado à meia-noite na maioria dos casos",
+        "required": "{{validation.required-field}}",
+        "disabled": "Desabilitado",
+        "daily": "Diário",
+        "custom-label": "Personalizar Agenda (Notação Cron)",
+        "cron-notation": "Você deve usar a notação cron para agendamento personalizado",
+        "weekly": "Semanal",
+        "custom": "Personalizado"
     },
     "manage-users": {
         "title": "Usuários Ativos",
@@ -1629,7 +1657,6 @@
         "age-restriction-updated": "Classificação etária foi atualizada",
         "email-sent-to-no-existing": "O e-mail existente não é válido. Um link foi despejado nos logs. Peça ao administrador o link para concluir a alteração do e-mail.",
         "email-sent-to": "Um e-mail foi enviado para seu endereço de e-mail antigo para confirmação.",
-        "change-email-private": "O servidor não é acessível publicamente. Peça ao administrador para buscar seu link de confirmação nos registros",
         "device-updated": "Dispositivo atualizado",
         "device-created": "Dispositivo criado",
         "confirm-regen-covers": "Atualizar capas forçará o recalculo de todas as imagens de capa. Esta é uma operação pesada. Tem certeza de que não deseja executar uma verificação?",
@@ -1648,7 +1675,9 @@
         "k+-reset-key": "Isso desvinculará sua chave de um servidor e permitirá que você registre novamente uma instância Kavita.",
         "k+-reset-key-success": "Sua licença foi cancelada. Use o botão Editar para registrar novamente sua instância e reativar o Kavita+",
         "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo.",
-        "anilist-token-expired": "Seu token AniList expirou. O scrobbling não será mais processado até que você o gere novamente nas Configurações do Usuário > Conta"
+        "anilist-token-expired": "Seu token AniList expirou. O scrobbling não será mais processado até que você o gere novamente nas Configurações do Usuário > Conta",
+        "email-not-sent-test": "Houve uma exceção ao enviar o e-mail. Verifique os registros para obter detalhes. Isso indica configurações inadequadas.",
+        "change-email-no-email": "O e-mail foi atualizado"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1788,7 +1817,8 @@
         "path": "Caminho",
         "file-path": "Caminho de Arquivo",
         "read-date": "Data de Leitura",
-        "want-to-read": "Quero Ler"
+        "want-to-read": "Quero Ler",
+        "average-rating": "Avaliação Média"
     },
     "filter-comparison-pipe": {
         "begins-with": "Começa com",
@@ -1836,7 +1866,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",
-        "unit-reading-date": "Data"
+        "unit-reading-date": "Data",
+        "unit-average-rating": "Avaliação média (Kavita+) – apenas para séries em cache"
     },
     "manage-external-sources": {
         "description": "Melhore a sua experiência adicionando servidores externos e inclua-os convenientemente no seu Navegador Lateral para acesso rápido ao seu servidor e ao servidor do seu amigo.",

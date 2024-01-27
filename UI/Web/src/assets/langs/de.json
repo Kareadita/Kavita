@@ -89,7 +89,7 @@
         "theme-tab": "Motiv",
         "devices-tab": "Geräte",
         "stats-tab": "Statistiken",
-        "scrobbling-tab": "Kritzeln",
+        "scrobbling-tab": "Scrobbling",
         "success-toast": "Benutzerpräferenzen aktualisiert",
         "global-settings-title": "Globale Einstellungen",
         "page-layout-mode-label": "Seitenlayoutmodus",
@@ -250,7 +250,7 @@
         "confirm-reset": "Alle bereits eingerichteten OPDS-Konfigurationen werden ungültig. Sind Sie sicher, dass Sie fortfahren möchten?",
         "key-reset": "API Schlüssel zurückgesetzt",
         "hide": "Ausblenden",
-        "show": "Show"
+        "show": "Anzeigen"
     },
     "scrobbling-providers": {
         "title": "Scrobbling Anbieter",

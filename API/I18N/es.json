@@ -38,7 +38,7 @@
     "forgot-password-generic": "Se enviará el correo si la dirección existe en nuestra base de datos",
     "generic-device-create": "Ha ocurrido un error al crear el dispositivo",
     "greater-0": "{0} debe ser mayor que 0",
-    "send-to-kavita-email": "Enviar al dispositivo no se puede utilizar con el servicio de correo electrónico de Kavita. Por favor, configura el tuyo propio.",
+    "send-to-kavita-email": "Enviar al dispositivo no se puede utilizar sin configurar el correo electrónico",
     "no-cover-image": "No hay imagen de portada",
     "bookmark-doesnt-exist": "El marcador no existe",
     "generic-favicon": "Ha ocurrido un error al obtener el icono para el dominio",
@@ -177,5 +177,8 @@
     "more-in-genre": "Más en el género {0}",
     "recently-updated": "Actualizado recientemente",
     "browse-recently-updated": "Examinar las últimas actualizaciones",
-    "unable-to-reset-k+": "No se ha podido restablecer la licencia de Kavita+ debido a un error. Contacta con el soporte de Kavita"
+    "unable-to-reset-k+": "No se ha podido restablecer la licencia de Kavita+ debido a un error. Contacta con el soporte de Kavita",
+    "send-to-unallowed": "No puedes enviar a un dispositivo que no sea el tuyo",
+    "email-not-enabled": "El correo electrónico no está habilitado en este servidor. No puede realizar esta acción.",
+    "send-to-size-limit": "El(Los) archivo(s) que intenta enviar es(son) demasiado(s) grande(s) para su programa de correo electrónico"
 }

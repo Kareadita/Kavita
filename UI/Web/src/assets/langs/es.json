@@ -327,7 +327,8 @@
         "platform-label": "Plataforma: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "email-label": "Correo electrónico: "
+        "email-label": "Correo electrónico: ",
+        "email-setup-alert": "¿Quieres enviar archivos a tus dispositivos? ¡Haz que tu administrador configure primero el correo electrónico!"
     },
     "edit-device": {
         "device-name-label": "Nombre del dispositivo",
@@ -366,7 +367,7 @@
         "save": "{{common.save}}",
         "cancel": "{{common.cancel}}",
         "email-updated-title": "Correo electrónico actualizado",
-        "email-label": "{{common.email}}",
+        "email-label": "Nuevo correo electrónico",
         "email-updated-description": "Puedes usar el siguiente enlace para confirmar el correo. Si el servidor es accesible externamente, se enviará un correo electrónico para confirmarlo.",
         "edit": "{{common.edit}}",
         "invite-url-label": "Enlace de invitación",
@@ -377,7 +378,8 @@
         "setup-user-account": "Configurar cuenta de usuario",
         "has-invalid-email": "Parece que no tienes una dirección de correo electrónico válida. Cambiar el correo electrónico requerirá que el administrador le envíe un enlace para completar esta acción.",
         "valid-email": "{{validation.valid-email}}",
-        "email-confirmed": "Este correo electrónico está confirmado"
+        "email-confirmed": "Este correo electrónico está confirmado",
+        "email-title": "Correo electrónico"
     },
     "change-age-restriction": {
         "save": "{{common.save}}",
@@ -407,7 +409,8 @@
         "title": "Proveedores de seguimiento",
         "token-expired": "Token expirado",
         "no-token-set": "Token no configurado",
-        "instructions": "Usuarios que usan el servicio por primera vez deben hacer clic en \"{{scrobbling-providers.generate}}\" debajo para permitir a Kavita+ comunicarse con {{service}}. Una vez autorizado, copia y pega el token en la caja de abajo. Puedes regenerar el token en cualquier momento."
+        "instructions": "Usuarios que usan el servicio por primera vez deben hacer clic en \"{{scrobbling-providers.generate}}\" debajo para permitir a Kavita+ comunicarse con {{service}}. Una vez autorizado, copia y pega el token en la caja de abajo. Puedes regenerar el token en cualquier momento.",
+        "token-valid": "Token válido"
     },
     "user-stats-info-cards": {
         "total-words-read-label": "Total de palabras leídas",
@@ -979,7 +982,6 @@
         "password-reset": "Restablecer contraseña",
         "library-created": "Biblioteca creada con éxito. Se ha iniciado un escaneo.",
         "alert-long-running": "Este proceso es de larga duración. Por favor, dale tiempo a completarse antes de volverlo a iniciar.",
-        "change-email-private": "No se puede acceder al servidor de forma externa. Pídele tu enlace de confirmación al administrador",
         "alert-bad-theme": "Hay un css no válido o inseguro en el tema. Por favor, ponte en contacto con tu administrador para corregirlo. Estableciendo el tema oscuro por defecto.",
         "confirm-delete-series": "¿Estás seguro de que deseas eliminar esta serie? No se modificarán los archivos en el disco.",
         "list-doesnt-exist": "Esta lista no existe",
@@ -1043,7 +1045,9 @@
         "k+-reset-key": "Esto desvinculará tu clave de un servidor y te permitirá volver a registrar una instancia de Kavita.",
         "k+-reset-key-success": "Se ha anulado el registro de su licencia. Utilice el botón Editar para volver a registrar su instancia y reactivar Kavita+",
         "email-not-sent": "El correo electrónico archivado no es válido y no se puede enviar. Se ha volcado un enlace en los registros. El administrador puede proporcionar este enlace para completar el flujo.",
-        "anilist-token-expired": "Tu token de AniList ha caducado. El scrobbling dejará de procesarse hasta que lo vuelva a generar en Configuración de usuario > Cuenta"
+        "anilist-token-expired": "Tu token de AniList ha caducado. El scrobbling dejará de procesarse hasta que lo vuelva a generar en Configuración de usuario > Cuenta",
+        "change-email-no-email": "Correo electrónico actualizado",
+        "email-not-sent-test": "Se ha producido una excepción al enviar el correo electrónico. Compruebe los registros para más detalles. Esto indica una configuración incorrecta."
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -1392,9 +1396,9 @@
         "extension-header": "Extensión"
     },
     "manage-email-settings": {
-        "send-to-warning": "Si quieres que Enviar a un dispositivo funcione debes alojar tu propio servicio de correo electrónico.",
+        "send-to-warning": "Si quieres que Enviar a dispositivo funcione debes configurar tus opciones de correo electrónico",
         "email-url-label": "URL del servicio de correo",
-        "description": "Kavita trae de serie un servicio de email para realizar tareas como invitar usuarios, solicitudes de restablecimiento de contraseña, etc. Los emails enviados por este medio son borrados inmediatamente. Puedes usar tu propio servicio de email configurando el servicio {{link}}. Añade la URL del servicio de email y comprueba que funciona mediante el botón Test. Puedes restaurar esta configuración a sus valores predeterminados en cualquier momento. No es posible deshabilitar los emails de autenticación, aunque no se requiere usar una dirección de email válida para los usuarios. Los enlaces de confirmación serán siempre guardados en los registros y mostrados en la interfaz gráfica. Los emails de registro/confirmación no serán enviados si no estás accediendo a Kavita por una URL públicamente accesible o a menos que la característica Host Name esté configurada.",
+        "description": "Para utilizar algunas funciones de Kavita como Olvidé mi contraseña y Enviar al dispositivo, debe configurarse un proveedor de correo electrónico. Otras funciones como el cambio de contraseña son menos seguras sin la configuración del correo electrónico.",
         "title": "Servicios de correo electrónico (SMTP)",
         "reset": "{{common.reset}}",
         "test": "Test",
@@ -1403,7 +1407,23 @@
         "host-name-tooltip": "Nombre de dominio (del proxy inverso). Si se indica, el generador de correos electrónicos usará siempre este.",
         "host-name-validation": "El nombre del anfitrión debe empezar con http(s) y no acabar en /",
         "save": "{{common.save}}",
-        "reset-to-default": "{{common.reset-to-default}}"
+        "reset-to-default": "{{common.reset-to-default}}",
+        "email-settings-title": "Ajustes del correo electrónico",
+        "sender-address-label": "Dirección del remitente",
+        "sender-address-tooltip": "Es la dirección de correo electrónico que el destinatario verá cuando reciba el mensaje. Normalmente es la dirección de correo electrónico asociada a la cuenta.",
+        "sender-displayname-label": "Nombre para mostrar",
+        "sender-displayname-tooltip": "El nombre que verá el destinatario cuando reciba el correo electrónico",
+        "host-label": "Host",
+        "host-tooltip": "Dirección de salida/SMTP de su servidor de correo electrónico",
+        "port-label": "Puerto",
+        "enable-ssl-label": "Utilizar SSL en el servidor de correo electrónico",
+        "username-label": "Nombre de usuario",
+        "password-label": "Contraseña",
+        "size-limit-label": "Límite del tamaño",
+        "size-limit-tooltip": "¿Cuántos bytes puede manejar el servidor de correo electrónico para los archivos adjuntos?",
+        "customized-templates-label": "Plantillas personalizadas",
+        "customized-templates-tooltip": "¿Debería Kavita utilizar el directorio config/templates para las plantillas en lugar del directorio por defecto? Usted es responsable de mantenerse al día con los cambios de plantilla.",
+        "username-tooltip": "El nombre de usuario utilizado para autenticarse contra el host"
     },
     "list-item": {
         "read": "{{common.read}}"
@@ -1575,7 +1595,8 @@
         "publication-status": "Estado de la publicación",
         "path": "Ruta",
         "series-name": "Nombre de la serie",
-        "collection-tags": "Etiquetas de la colección"
+        "collection-tags": "Etiquetas de la colección",
+        "average-rating": "Valoración media"
     },
     "filter-comparison-pipe": {
         "contains": "Contiene",
@@ -1602,10 +1623,11 @@
         "donations-title": "Donaciones:",
         "source-title": "Fuente:",
         "version-title": "Versión",
-        "feature-request-title": "Solicitudes de funciones",
+        "feature-request-title": "Petición de funciones:",
         "installId-title": "Instalar ID",
         "home-page-title": "Página de inicio:",
-        "title": "Sobre el sistema"
+        "title": "Sobre el sistema",
+        "localization-title": "Ubicaciones:"
     },
     "manage-tasks-settings": {
         "action-header": "Acción",
@@ -1647,7 +1669,16 @@
         "recurring-tasks-title": "{{title}}",
         "bust-locale-task-desc": "Borre la caché local; esto puede resolver los problemas con las cadenas que no se muestran correctamente después de las actualizaciones",
         "bust-locale-task-success": "Borrada la caché local",
-        "bust-locale-task": "Borrar la caché local"
+        "bust-locale-task": "Borrar la caché local",
+        "cleanup-label": "Limpiar",
+        "cleanup-tooltip": "¿Con qué frecuencia Kavita ejecutará tareas de limpieza?. Esto puede ser pesado y debe realizarse a medianoche en la mayoría de los casos",
+        "required": "{{validation.required-field}}",
+        "custom-label": "Programación personalizada (Notación Cron)",
+        "cron-notation": "Debe utilizar la notación cron para la programación personalizada",
+        "disabled": "Desactivado",
+        "daily": "A diario",
+        "weekly": "Semanalmente",
+        "custom": "Personalizado"
     },
     "manage-users": {
         "edit-user-tooltip": "Editar",
@@ -1803,7 +1834,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Portentaje",
-        "unit-reading-date": "Fecha"
+        "unit-reading-date": "Fecha",
+        "unit-average-rating": "Valoración media (Kavita+) - sólo para series en caché"
     },
     "manage-external-sources": {
         "description": "Mejora tu experiencia añadiendo servidores externos e inclúyelos cómodamente en tu barra lateral para acceder rápidamente tanto a tu servidor como al de tus amigos.",

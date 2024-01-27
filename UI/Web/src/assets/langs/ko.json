@@ -58,7 +58,9 @@
         "title": "리뷰 수정",
         "review-label": "평가",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "리뷰는 적어도 {{count}}자여야 합니다",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -116,7 +118,8 @@
         "see-less": "간단히 보기",
         "translators-title": "역자",
         "see-more": "더보기",
-        "promoted": "{{common.promoted}}"
+        "promoted": "{{common.promoted}}",
+        "rating-title": "평점"
     },
     "library-settings-modal": {
         "force-scan-tooltip": "이렇게 하면 라이브러리에서 강제로 스캔하여 새로운 스캔처럼 취급합니다",
@@ -251,7 +254,8 @@
         "change-password-tooltip": "비밀번호 변경",
         "change-password-alt": "비밀번호 변경 {{user}}",
         "online-now-tooltip": "지금 온라인",
-        "sharing-title": "공유:"
+        "sharing-title": "공유:",
+        "username-pattern": "사용자 이름은 다음 문자와 공백만 포함할 수 있습니다: {{characters}}"
     },
     "edit-collection-tags": {
         "series-title": "시리즈에 적용",
@@ -420,7 +424,6 @@
         "mark-read": "읽음으로 표시됨",
         "file-send-to": "파일이 {{name}}에 이메일로 전송됨",
         "device-updated": "장치 업데이트됨",
-        "change-email-private": "서버는 공개적으로 액세스할 수 없습니다. 로그에서 확인 링크를 가져오도록 관리자에게 요청하십시오",
         "no-series-collection-warning": "경고! 시리즈를 선택하지 않았습니다. 저장하면 컬렉션이 삭제됩니다. 계속 하시겠습니까?",
         "nothing-to-remove": "제거할 항목 없음",
         "series-added-to-reading-list": "읽기 목록에 추가된 시리즈",
@@ -441,7 +444,7 @@
         "library-created": "라이브러리가 성공적으로 생성되었습니다. 스캔이 시작되었습니다.",
         "anilist-token-updated": "AniList 토큰이 업데이트되었습니다",
         "age-restriction-updated": "연령 제한이 업데이트되었습니다",
-        "email-sent-to-no-existing": "확인을 위해 {{email}}로 이메일을 보냈습니다.",
+        "email-sent-to-no-existing": "기존 이메일이 유효하지 않습니다. 로그에 링크가 기록되었습니다. 이메일 변경을 완료하려면 관리자에게 링크를 요청하세요.",
         "confirm-download-size": "{{entityType}}은 {{size}}입니다. 정말 계속 하시겠습니까?",
         "user-deleted": "{{user}} 가 삭제되었습니다",
         "series-added-to-collection": "{{collectionName}} 컬렉션에 시리즈가 추가됨",
@@ -491,7 +494,13 @@
         "smart-filter-updated": "스마트 필터 생성/업데이트 되었습니다",
         "confirm-delete-smart-filter": "이 스마트 필터를 삭제하시겠습니까?",
         "smart-filter-deleted": "스마트 필터가 삭제되었습니다",
-        "external-source-already-exists": "이름/호스트/API 키가 동일한 외부 소스가 이미 존재합니다"
+        "external-source-already-exists": "이름/호스트/API 키가 동일한 외부 소스가 이미 존재합니다",
+        "change-email-no-email": "이메일이 업데이트되었습니다",
+        "email-not-sent-test": "이메일을 보낼 때 예외가 발생했습니다. 자세한 내용은 로그를 확인하세요. 이는 부적절한 설정을 나타냅니다.",
+        "email-not-sent": "파일에 있는 이메일이 유효한 이메일이 아니므로 보낼 수 없습니다. 로그에 링크가 기록되었습니다. 관리자는 이 링크를 제공하여 프로세스를 완료할 수 있습니다.",
+        "anilist-token-expired": "AniList 토큰이 만료되었습니다. 스크로블링은 사용자 설정 > 계정에서 다시 생성할 때까지 더 이상 처리되지 않습니다",
+        "k+-reset-key": "이 작업은 키를 서버에서 해제하고 Kavita 인스턴스를 다시 등록할 수 있도록 허용합니다.",
+        "k+-reset-key-success": "라이선스가 등록 해제되었습니다. 인스턴스를 다시 등록하고 Kavita+를 다시 활성화하려면 수정 버튼을 사용하세요"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -655,7 +664,9 @@
         "setup-user-account-tooltip": "이것을 복사하여 새 탭에 붙여넣으십시오. 로그아웃해야 할 수도 있습니다.",
         "title": "사용자 초대",
         "inviting": "초대중…",
-        "description": "이메일을 통해 사용자를 서버로 초대하려면, 그들의 이메일 주소를 입력해주세요. 그들은 계정을 생성할 수 있는 이메일을 받게 될 것입니다. 이 작업을 수행하려면 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에서 호스트 이름 필드를 설정해야하거나 인스턴스에 원격 URL을 통해 접근해야합니다. <br/><br/>또 다른 방법으로는 사용자 이름을 사용할 수 있지만, 사용자 이름 기반 계정의 경우 비밀번호 재설정이 불가능하다는 점을 참고하세요. 만약 우리 이메일 서비스를 사용하지 않고 싶다면, 자체 이메일 서비스를 호스팅할 수도 있습니다."
+        "description": "이메일을 통해 사용자를 서버로 초대하려면, 그들의 이메일 주소를 입력해주세요. 그들은 계정을 생성할 수 있는 이메일을 받게 될 것입니다. 이 작업을 수행하려면 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에서 호스트 이름 필드를 설정해야하거나 인스턴스에 원격 URL을 통해 접근해야합니다. <br/><br/>또 다른 방법으로는 사용자 이름을 사용할 수 있지만, 사용자 이름 기반 계정의 경우 비밀번호 재설정이 불가능하다는 점을 참고하세요. 만약 우리 이메일 서비스를 사용하지 않고 싶다면, 자체 이메일 서비스를 호스팅할 수도 있습니다.",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
@@ -887,16 +898,28 @@
     "manage-email-settings": {
         "reset": "{{common.reset}}",
         "title": "이메일 서비스(SMTP)",
-        "description": "Kavita는 사용자 초대, 비밀번호 재설정 요청 등과 같은 작업을 지원하는 이메일 서비스와 함께 즉시 제공됩니다. 당사 서비스를 통해 전송된 이메일은 즉시 삭제됩니다. {{link}} 서비스를 설정하여 자신의 이메일 서비스를 사용할 수 있습니다. 이메일 서비스의 URL을 설정하고 테스트 버튼을 사용하여 작동하는지 확인하십시오. 언제든지 이러한 설정을 기본값으로 재설정할 수 있습니다. 사용자에게 유효한 이메일 주소를 사용할 필요는 없지만 인증을 위해 이메일을 비활성화할 수 있는 방법은 없습니다. 확인 링크는 항상 로그에 저장되고 UI에 표시됩니다. 공개적으로 연결할 수 있는 URL을 통해 Kavita에 액세스하지 않거나 호스트 이름 기능이 구성되지 않은 경우 등록/확인 이메일이 전송되지 않습니다.",
+        "description": "비밀번호 잊어버리기와 기기로 전송과 같은 Kavita의 일부 기능을 사용하려면 이메일 공급자를 설정해야 합니다. 이메일 설정 없이는 비밀번호 변경과 같은 다른 기능이 보안이 적습니다.",
         "host-name-validation": "호스트 이름은 http(s)로 시작하고 /로 끝나지 않아야 합니다",
         "reset-to-default": "{{common.reset-to-default}}",
-        "send-to-warning": "Send to Device가 작동하려면 자체 이메일 서비스를 호스팅해야 합니다.",
+        "send-to-warning": "기기로 전송을 사용하려면 이메일 설정을 해야 합니다",
         "email-url-label": "이메일 서비스 URL",
         "host-name-label": "호스트 이름",
         "host-name-tooltip": "도메인 이름(역방향 프록시)을 설정하면 이메일 생성 시 항상 이것을 사용합니다.",
         "email-url-tooltip": "이메일 서비스의 정규화된 URL을 사용하세요. 종료 슬래시를 포함하지 마십시오.",
         "save": "{{common.save}}",
-        "test": "테스트"
+        "test": "테스트",
+        "sender-address-label": "송신자 주소",
+        "port-label": "포트",
+        "enable-ssl-label": "이메일 서버에서 SSL 사용",
+        "customized-templates-label": "사용자 정의된 템플릿",
+        "email-settings-title": "이메일 설정",
+        "sender-displayname-label": "표시 이름",
+        "host-label": "호스트",
+        "username-label": "유저이름",
+        "password-label": "패스워드",
+        "size-limit-label": "크기 제한",
+        "size-limit-tooltip": "이메일 서버는 첨부 파일에 대해 몇 바이트까지 처리할 수 있나요",
+        "customized-templates-tooltip": "Kavita는 기본 대신 config/templates 디렉토리를 템플릿에 사용해야 할까요? 템플릿 변경 사항을 최신으로 유지하는 것은 여러분의 책임입니다."
     },
     "manage-scrobble-errors": {
         "edit-item-alt": "편집 {{seriesName}}",
@@ -1270,7 +1293,7 @@
     "change-email": {
         "invite-url-tooltip": "복사하여 새 탭에 붙여넣기",
         "permission-error": "이메일을 변경할 수 있는 권한이 없습니다. 서버 관리자에게 문의하십시오.",
-        "email-label": "{{common.email}}",
+        "email-label": "새로운 이메일",
         "current-password-label": "현재 비밀번호",
         "email-not-confirmed": "이 이메일은 확인되지 않았습니다",
         "email-updated-title": "이메일 업데이트됨",
@@ -1281,7 +1304,11 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "email-updated-description": "아래 링크를 사용하여 계정의 이메일을 확인할 수 있습니다. 서버가 외부에서 액세스할 수 있는 경우 이메일이 전송되고 링크를 사용하여 이메일을 확인할 수 있습니다."
+        "email-updated-description": "아래 링크를 사용하여 계정의 이메일을 확인할 수 있습니다. 서버가 외부에서 액세스할 수 있는 경우 이메일이 전송되고 링크를 사용하여 이메일을 확인할 수 있습니다.",
+        "email-title": "이메일",
+        "has-invalid-email": "유효한 이메일이 설정되어 있지 않은 것 같습니다. 이메일 변경은 관리자가 해당 작업을 완료할 수 있도록 링크를 보내야 합니다.",
+        "email-confirmed": "이 이메일은 확인되었습니다",
+        "valid-email": "{{validation.valid-email}}"
     },
     "scrobbling-providers": {
         "requires": "이 기능에는 활성 {{product}} 라이선스가 필요합니다",
@@ -1294,7 +1321,8 @@
         "generate": "생성",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "유효한 토큰"
     },
     "top-readers": {
         "this-week": "{{time-periods.this-week}}",
@@ -1357,7 +1385,12 @@
         "no-license-key": "라이센스 키 없음",
         "license-valid": "라이센스가 유효합니다",
         "activate-email-label": "{{common.email}}",
-        "activate-delete": "삭제"
+        "activate-delete": "{{common.delete}}",
+        "discord-validation": "이것은 유효한 Discord 사용자 ID가 아닙니다. 사용자 ID는 Discord 사용자 이름이 아닙니다.",
+        "activate-reset-tooltip": "이 서버와의 라이선스 연결을 해제하세요. 라이선스와 이메일이 모두 필요합니다.",
+        "activate-discordId-tooltip": "Kavita+와 Discord 계정을 연결하세요. 이렇게 하면 Kavita를 형성하는 데 도움이 되는 숨겨진 채널에 액세스할 수 있습니다.",
+        "activate-reset": "{{common.reset}}",
+        "activate-discordId-label": "Discord 유저 아이디"
     },
     "confirm-email": {
         "password-validation": "{{validation.password-validation}}",
@@ -1548,7 +1581,8 @@
         "clear": "{{common.clear}}",
         "donate": "기부",
         "back": "뒤로가기",
-        "more": "더 보기"
+        "more": "더 보기",
+        "donate-tooltip": "Kavita+를 구독하여 제거할 수 있습니다"
     },
     "card-detail-layout": {
         "total-items": "{{count}} 총 항목",
@@ -1629,7 +1663,7 @@
     "review-card": {
         "your-review": "당신의 리뷰",
         "external-review": "외부 리뷰",
-        "local-review": "리뷰",
+        "local-review": "로컬 리뷰",
         "rating-percentage": "평점 {{r}}%"
     },
     "site-theme-provider-pipe": {
@@ -1645,7 +1679,8 @@
         "email-label": "이메일: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "email-setup-alert": "기기로 파일을 보내고 싶나요? 먼저 관리자에게 이메일 설정을 요청하세요!"
     },
     "change-age-restriction": {
         "age-restriction-label": "연령 제한",
@@ -1825,7 +1860,8 @@
         "vols-and-chapters": "{{volCount}} 볼륨 / {{chpCount}} 챕터",
         "tags-label": "{{filter-field-pipe.tags}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "provided-by-label": "제공자"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",

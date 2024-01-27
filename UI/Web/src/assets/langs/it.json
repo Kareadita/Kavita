@@ -1613,7 +1613,6 @@
         "age-restriction-updated": "Il limite di età è stato aggiornato",
         "email-sent-to-no-existing": "È stata inviata un'e-mail a {{email}} per conferma.",
         "email-sent-to": "Un'e-mail è stata inviata al tuo vecchio indirizzo e-mail per conferma.",
-        "change-email-private": "Il server non è accessibile pubblicamente. Chiedi all'amministratore di recuperare il collegamento di conferma dai registri",
         "device-updated": "Dispositivo aggiornato",
         "device-created": "Dispositivo creato",
         "confirm-regen-covers": "Aggiorna copertine imporrà il ricalcolo di tutte le immagini di copertina. Questa è un'operazione pesante. Sei sicuro di non voler eseguire invece una scansione?",

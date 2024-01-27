@@ -41,7 +41,7 @@
     "chapter-doesnt-exist": "Chapitre non existant",
     "file-missing": "Fichier introuvable dans le livre",
     "generic-device-delete": "Erreur lors de la suppression de l'appareil",
-    "send-to-kavita-email": "Envoyer à l'appareil ne peut pas être utilisé par le service e-mail de Kavita. Veuillez configurer le votre.",
+    "send-to-kavita-email": "Envoyer à l'appareil ne peut pas être utilisé sans configurer E-mail",
     "generic-favicon": "Erreur lors de la récupération de la favicon pour le domaine",
     "generic-library": "Erreur critique. Essayez à nouveau.",
     "delete-library-while-scan": "Vous ne pouvez pas supprimer une bibliothèque lorsqu'une analyse est en cours. Veuillez attendre la fin de l'analyse ou redémarrez Kavita, puis essayez de la supprimer",
@@ -177,5 +177,8 @@
     "more-in-genre": "Plus dans le genre {0}",
     "recently-updated": "Récemment mis à jour",
     "browse-recently-updated": "Parcourir les mises à jour récentes",
-    "unable-to-reset-k+": "Impossible de réinitialiser la licence Kavita+ en raison d'une erreur. Contactez le support Kavita+"
+    "unable-to-reset-k+": "Impossible de réinitialiser la licence Kavita+ en raison d'une erreur. Contactez le support Kavita+",
+    "email-not-enabled": "E-mail non activé sur ce serveur. Vous ne pouvez pas lancer cette action.",
+    "send-to-unallowed": "Vous ne pouvez envoyer à un appareil qui ne vous appartient pas",
+    "send-to-size-limit": "Le(s) fichier(s) que vous essayez d'envoyer sont trop lourds pour votre emailer"
 }

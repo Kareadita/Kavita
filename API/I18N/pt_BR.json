@@ -1,7 +1,7 @@
 {
     "generic-error": "Alguma coisa deu errado. Por favor, tente outra vez",
     "collection-doesnt-exist": "A coleção não existe",
-    "send-to-kavita-email": "Enviar para o dispositivo não pode ser usado com o serviço de e-mail da Kavita. Por favor, configure o seu próprio.",
+    "send-to-kavita-email": "Enviar para dispositivo não pode ser usado sem configuração de e-mail",
     "volume-doesnt-exist": "O volume não existe",
     "no-cover-image": "Sem imagem de capa",
     "invalid-filename": "Nome de arquivo inválido",
@@ -177,5 +177,8 @@
     "more-in-genre": "Mais em Gênero {0}",
     "recently-updated": "Atualizado Recentemente",
     "browse-recently-updated": "Navegar Atualizado Recentemente",
-    "unable-to-reset-k+": "Não foi possível redefinir a licença Kavita+ devido a um erro. Entre em contato com o suporte Kavita +"
+    "unable-to-reset-k+": "Não foi possível redefinir a licença Kavita+ devido a um erro. Entre em contato com o suporte Kavita +",
+    "send-to-unallowed": "Você não pode enviar para um dispositivo que não seja seu",
+    "email-not-enabled": "O e-mail não está ativado neste servidor. Você não pode executar esta ação.",
+    "send-to-size-limit": "Os arquivos que você está tentando enviar são muito grandes para o seu e-mail"
 }
