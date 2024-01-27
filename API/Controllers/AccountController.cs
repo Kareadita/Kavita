@@ -395,7 +395,7 @@ public class AccountController : BaseApiController
         // Send a confirmation email
         try
         {
-            var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
+            var emailLink = await _emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
             _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
             if (!_emailService.IsValidEmail(user.Email))
@@ -585,7 +585,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.ConfirmationToken))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "manual-setup-fail"));
 
-        return await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email!, withBaseUrl);
+        return await _emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email!, withBaseUrl);
     }
 
 
@@ -691,7 +691,7 @@ public class AccountController : BaseApiController
 
         try
         {
-            var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
+            var emailLink = await _emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -911,7 +911,7 @@ public class AccountController : BaseApiController
         }
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
+        var emailLink = await _emailService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
         user.ConfirmationToken = token;
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
@@ -989,7 +989,7 @@ public class AccountController : BaseApiController
         user.ConfirmationToken = token;
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
-        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
+        var emailLink = await _emailService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
         if (!_emailService.IsValidEmail(user.Email))

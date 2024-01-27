@@ -5,10 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using API.Data;
 using API.DTOs.Email;
 using Kavita.Common;
 using MailKit.Security;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
@@ -36,6 +39,9 @@ public interface IEmailService
     Task<EmailTestResultDto> SendTestEmail(string adminEmail);
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
     bool IsValidEmail(string email);
+
+    Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email,
+        bool withHost = true);
 }
 
 public class EmailService : IEmailService
@@ -43,19 +49,17 @@ public class EmailService : IEmailService
     private readonly ILogger<EmailService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
+    private readonly IHostEnvironment _environment;
 
     private const string TemplatePath = @"{0}.html";
-    /// <summary>
-    /// This is used to initially set or reset the ServerSettingKey. Do not access from the code, access via UnitOfWork
-    /// </summary>
-    public const string DefaultApiUrl = "https://email.kavitareader.com";
+    private const string LocalHost = "localhost:4200";
 
-
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IHostEnvironment environment)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
+        _environment = environment;
     }
 
     /// <summary>
@@ -140,6 +144,26 @@ public class EmailService : IEmailService
     public bool IsValidEmail(string email)
     {
         return new EmailAddressAttribute().IsValid(email);
+    }
+
+    public async Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true)
+    {
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var host = _environment.IsDevelopment() ? LocalHost : request.Host.ToString();
+        var basePart = $"{request.Scheme}://{host}{request.PathBase}";
+        if (!string.IsNullOrEmpty(serverSettings.HostName))
+        {
+            basePart = serverSettings.HostName;
+            if (!serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
+            {
+                var removeCount = serverSettings.BaseUrl.EndsWith('/') ? 1 : 0;
+                basePart += serverSettings.BaseUrl[..^removeCount];
+            }
+        }
+
+        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}"
+            .Replace("//", "/");
     }
 
     /// <summary>

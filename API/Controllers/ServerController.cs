@@ -210,18 +210,6 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
-    /// Is this server accessible to the outside net
-    /// </summary>
-    /// <remarks>If the instance has the HostName set, this will return true whether or not it is accessible externally</remarks>
-    /// <returns></returns>
-    [HttpGet("accessible")]
-    [AllowAnonymous]
-    public async Task<ActionResult<bool>> IsServerAccessible()
-    {
-        return Ok(await _accountService.CheckIfAccessible(Request));
-    }
-
-    /// <summary>
     /// Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.
     /// </summary>
     /// <returns></returns>

@@ -50,10 +50,6 @@ export class ServerService {
     return this.http.get<UpdateVersionEvent[]>(this.baseUrl + 'server/changelog', {});
   }
 
-  isServerAccessible() {
-    return this.http.get<boolean>(this.baseUrl + 'server/accessible');
-  }
-
   getRecurringJobs() {
     return this.http.get<Job[]>(this.baseUrl + 'server/jobs');
   }
