@@ -24,7 +24,6 @@ import { WebtoonImage } from '../../_models/webtoon-image';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@ngneat/transloco";
-import {MangaReaderComponent} from "../manga-reader/manga-reader.component";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -157,7 +156,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Logs | DEBUG_MODES.Outline;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -518,7 +517,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.renderer.setAttribute(event.target, 'width', this.mangaReaderService.maxWidth() + '');
     this.renderer.setAttribute(event.target, 'height', event.target.height + '');
 
-    this.attachIntersectionObserverElem(event.target);
+    // Give a few milliseconds for the Ui to show the images and adjust scroll port before attaching to avoid premature intersection
+    const newImage = event.target;
+    this.attachIntersectionObserverElem(newImage)
+    //setTimeout(() => this.attachIntersectionObserverElem(newImage), 60);
 
     if (imagePage === this.pageNum) {
       Promise.all(Array.from(this.document.querySelectorAll('img'))
@@ -528,14 +530,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.debugLog('[Initialization] All images have loaded from initial prefetch, initFinished = true');
           this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
           this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
-          // There needs to be a bit of time before we scroll
-          if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
-            this.scrollToCurrentPage();
-          } else {
-            this.initFinished = true;
-            this.cdRef.markForCheck();
-          }
 
+          // There needs to be a bit of time before we scroll
+          // if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
+          //   //this.scrollToCurrentPage();
+          // } else {
+          //   this.initFinished = true;
+          //   this.cdRef.markForCheck();
+          // }
+
+          this.initFinished = true;
           this.allImagesLoaded = true;
           this.cdRef.markForCheck();
       });
@@ -548,14 +552,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    entries.forEach(entry => {
+    for(let entry of entries) {
       const imagePage = parseInt(entry.target.attributes.getNamedItem('page')?.value + '', 10);
       this.debugLog('[Intersection] Page ' + imagePage + ' is visible: ', entry.isIntersecting);
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
         this.prefetchWebtoonImages(imagePage);
+        break;
       }
-    });
+    }
   }
 
   /**
@@ -624,12 +629,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.allImagesLoaded = false;
-    this.cdRef.markForCheck();
     this.webtoonImages.next(data);
 
     if (!this.imagesLoaded.hasOwnProperty(page)) {
       this.imagesLoaded[page] = page;
     }
+    this.cdRef.markForCheck();
   }
 
   attachIntersectionObserverElem(elem: HTMLImageElement) {
