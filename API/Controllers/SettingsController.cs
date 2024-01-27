@@ -502,9 +502,8 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
-    /// Sends a test email from the Email Service.
+    /// Sends a test email to see if email settings are hooked up correctly
     /// </summary>
-    /// <param name="dto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("test-email-url")]
