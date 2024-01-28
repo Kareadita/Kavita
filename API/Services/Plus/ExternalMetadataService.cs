@@ -147,7 +147,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             // Recommendations
-
             externalSeriesMetadata.ExternalRecommendations ??= new List<ExternalRecommendation>();
             var recs = await ProcessRecommendations(series, user, result.Recommendations, externalSeriesMetadata);
 
@@ -165,7 +164,11 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Recommendations = recs,
                 Ratings = result.Ratings,
-                Reviews = result.Reviews
+                Reviews = result.Reviews.Select(r =>
+                {
+                    r.IsExternal = true;
+                    return r;
+                })
             };
         }
         catch (FlurlHttpException ex)
