@@ -123,7 +123,7 @@
                         <span>
                             <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions"
                                                   [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
-                            <ng-container *ngIf="chapter.minNumber !== '0'; else specialHeader">
+                            <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
                                 {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                             </ng-container>
                         </span>

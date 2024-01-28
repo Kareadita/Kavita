@@ -182,10 +182,10 @@ export class CardDetailDrawerComponent implements OnInit {
   }
 
   formatChapterNumber(chapter: Chapter) {
-    if (chapter.minNumber === '0') {
+    if (chapter.number === '0') {
       return '1';
     }
-    return chapter.minNumber;
+    return chapter.number;
   }
 
   performAction(action: ActionItem<any>, chapter: Chapter) {

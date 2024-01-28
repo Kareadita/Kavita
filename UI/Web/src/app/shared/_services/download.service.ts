@@ -115,7 +115,7 @@ export class DownloadService {
       case 'volume':
         return (downloadEntity as Volume).minNumber + '';
       case 'chapter':
-        return (downloadEntity as Chapter).minNumber;
+        return (downloadEntity as Chapter).number;
       case 'bookmark':
         return '';
       case 'logs':
