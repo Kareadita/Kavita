@@ -977,7 +977,9 @@
         "sender-address-tooltip": "Este é o endereço de e-mail que o destinatário verá quando receber o e-mail. Normalmente, o endereço de e-mail associado à conta.",
         "sender-displayname-tooltip": "O nome que o destinatário verá quando receber o e-mail",
         "host-tooltip": "Endereço de saída/SMTP do seu servidor de e-mail",
-        "username-tooltip": "O nome de usuário usado para autenticação no host"
+        "username-tooltip": "O nome de usuário usado para autenticação no host",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "manage-library": {
         "title": "Bibliotecas",
@@ -1159,7 +1161,8 @@
         "sharing-title": "Compartilhando:",
         "no-data": "Não há outros usuários.",
         "loading": "{{common.loading}}",
-        "username-pattern": "O nome de usuário só pode conter os seguintes caracteres e espaços em branco: {{characters}}"
+        "username-pattern": "O nome de usuário só pode conter os seguintes caracteres e espaços em branco: {{characters}}",
+        "admin": "Admin"
     },
     "edit-collection-tags": {
         "title": "Editar {{collectionName}} Coleção",

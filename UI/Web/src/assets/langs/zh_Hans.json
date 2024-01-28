@@ -977,7 +977,9 @@
         "host-tooltip": "您的邮件服务器的发送/SMTP 地址",
         "sender-displayname-tooltip": "收件人收到电子邮件时将看到的姓名",
         "username-tooltip": "用于对主机进行身份验证的用户名",
-        "sender-address-tooltip": "这是收件人收到电子邮件时将看到的电子邮件地址。通常是与帐户关联的电子邮件地址。"
+        "sender-address-tooltip": "这是收件人收到电子邮件时将看到的电子邮件地址。通常是与帐户关联的电子邮件地址。",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "manage-library": {
         "title": "资料库",
