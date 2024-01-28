@@ -77,10 +77,11 @@ public class AccountController : BaseApiController
     [HttpPost("reset-password")]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
-        _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
-
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
+        _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
 
         if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
@@ -319,6 +320,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> ResetApiKey()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername()) ?? throw new KavitaUnauthenticatedUserException();
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         user.ApiKey = HashUtil.ApiKey();
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
@@ -345,7 +347,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> UpdateEmail(UpdateEmailDto? dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole)) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
@@ -450,7 +452,7 @@ public class AccountController : BaseApiController
         if (user == null) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        if (!await _accountService.HasChangeRestrictionRole(user)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
         user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;
@@ -898,7 +900,7 @@ public class AccountController : BaseApiController
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-        if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
+        if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole or PolicyConstants.ReadOnlyRole))
             return Unauthorized(await _localizationService.Translate(user.Id, "permission-denied"));
 
         if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
@@ -973,6 +975,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
+    [Authorize("RequireAdminRole")]
     [HttpPost("resend-confirmation-email")]
     [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<InviteUserResponse>> ResendConfirmationSendEmail([FromQuery] int userId)

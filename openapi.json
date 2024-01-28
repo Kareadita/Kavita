@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.5"
+    "version": "0.7.13.6"
   },
   "servers": [
     {
@@ -9560,37 +9560,6 @@
         }
       }
     },
-    "/api/Server/accessible": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Is this server accessible to the outside net",
-        "description": "If the instance has the HostName set, this will return true whether or not it is accessible externally",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Server/jobs": {
       "get": {
         "tags": [
@@ -10109,6 +10078,36 @@
               "text/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/test-email-url": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Sends a test email to see if email settings are hooked up correctly",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTestResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTestResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTestResultDto"
                 }
               }
             }
@@ -14764,6 +14763,24 @@
           }
         },
         "additionalProperties": false
+      },
+      "EmailTestResultDto": {
+        "type": "object",
+        "properties": {
+          "successful": {
+            "type": "boolean"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailAddress": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
       "ExternalRating": {
         "type": "object",

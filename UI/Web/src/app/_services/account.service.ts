@@ -20,7 +20,8 @@ export enum Role {
   ChangePassword = 'Change Password',
   Bookmark = 'Bookmark',
   Download = 'Download',
-  ChangeRestriction = 'Change Restriction'
+  ChangeRestriction = 'Change Restriction',
+  ReadOnly = 'Read Only'
 }
 
 @Injectable({
@@ -78,6 +79,10 @@ export class AccountService {
 
   hasBookmarkRole(user: User) {
     return user && user.roles.includes(Role.Bookmark);
+  }
+
+  hasReadOnlyRole(user: User) {
+    return user && user.roles.includes(Role.ReadOnly);
   }
 
   getRoles() {

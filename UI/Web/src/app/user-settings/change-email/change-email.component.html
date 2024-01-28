@@ -15,7 +15,7 @@
             </h4>
           </div>
           <div class="col-1 text-end">
-            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()" [disabled]="!canEdit">{{isViewMode ? t('edit') : t('cancel')}}</button>
           </div>
         </div>
       </div>
