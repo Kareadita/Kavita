@@ -8,7 +8,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
 {
     public int Id { get; set; }
     /// <summary>
-    /// A String representation of the volume number. Allows for floats.
+    /// A String representation of the volume number. Allows for floats. Can also include a range (1-2).
     /// </summary>
     /// <remarks>For Books with Series_index, this will map to the Series Index.</remarks>
     public required string Name { get; set; }
