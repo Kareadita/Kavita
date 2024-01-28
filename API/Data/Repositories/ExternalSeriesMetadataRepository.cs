@@ -122,6 +122,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             externalSeriesRecommendations = seriesDetailDto.ExternalRecommendations
                 .Where(r => r.SeriesId is null or 0)
                 .Select(r => _mapper.Map<ExternalSeriesDto>(r))
+                .DefaultIfEmpty()
                 .ToList();
         }
 
@@ -133,12 +134,17 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
+            .DefaultIfEmpty()
             .ToListAsync();
 
         var seriesDetailPlusDto = new SeriesDetailPlusDto()
         {
-            Ratings = seriesDetailDto.ExternalRatings.Select(r => _mapper.Map<RatingDto>(r)),
-            Reviews = seriesDetailDto.ExternalReviews.OrderByDescending(r => r.Score)
+            Ratings = seriesDetailDto.ExternalRatings
+                .DefaultIfEmpty()
+                .Select(r => _mapper.Map<RatingDto>(r)),
+            Reviews = seriesDetailDto.ExternalReviews
+                .DefaultIfEmpty()
+                .OrderByDescending(r => r.Score)
                 .Select(r =>
                 {
                     var ret = _mapper.Map<UserReviewDto>(r);

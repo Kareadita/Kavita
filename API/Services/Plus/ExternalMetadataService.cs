@@ -150,10 +150,13 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.ExternalRecommendations ??= new List<ExternalRecommendation>();
             var recs = await ProcessRecommendations(series, user, result.Recommendations, externalSeriesMetadata);
 
-            externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
-            externalSeriesMetadata.AverageExternalRating = (int) externalSeriesMetadata.ExternalRatings
+            var extRatings = externalSeriesMetadata.ExternalRatings
                 .Where(r => r.AverageScore > 0)
-                .Average(r => r.AverageScore);
+                .ToList();
+
+            externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
+            externalSeriesMetadata.AverageExternalRating = extRatings.Count != 0 ? (int) extRatings
+                .Average(r => r.AverageScore) : 0;
 
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
@@ -164,11 +167,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Recommendations = recs,
                 Ratings = result.Ratings,
-                Reviews = result.Reviews.Select(r =>
-                {
-                    r.IsExternal = true;
-                    return r;
-                })
+                Reviews = externalSeriesMetadata.ExternalReviews.Select(r => _mapper.Map<UserReviewDto>(r))
             };
         }
         catch (FlurlHttpException ex)
