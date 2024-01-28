@@ -704,22 +704,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.ratings = [...data.ratings];
 
       // Recommendations
-      data.recommendations.ownedSeries.map(r => {
-        this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
-      });
       this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
       this.hasRecommendations = this.combinedRecs.length > 0;
 
       this.cdRef.markForCheck();
     });
   }
-  loadReviews() {
-    this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
-      this.reviews = [...reviews];
-      this.cdRef.markForCheck();
-    });
-  }
-
 
   setContinuePoint() {
     this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => {
