@@ -15,6 +15,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// The minimum number in the Name field in Int form
     /// </summary>
+    /// <remarks>Removed in v0.7.13.8, this was an int and we need the ability to have 0.5 volumes render on the UI</remarks>
     [Obsolete("Use MinNumber and MaxNumber instead")]
     public int Number { get; set; }
     /// <summary>

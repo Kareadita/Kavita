@@ -759,7 +759,7 @@ public class ReadingListServiceTests
         var fablesSeries = new SeriesBuilder("Fables").Build();
         fablesSeries.Volumes.Add(
             new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithName("2002")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .Build()
@@ -937,7 +937,7 @@ public class ReadingListServiceTests
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new VolumeBuilder("1")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithName("2002")
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
@@ -945,7 +945,7 @@ public class ReadingListServiceTests
             .Build()
         );
         fables2Series.Volumes.Add(new VolumeBuilder("1")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithName("2003")
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
@@ -980,13 +980,13 @@ public class ReadingListServiceTests
         var fables2Series = new SeriesBuilder("Fablesa: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new VolumeBuilder("2002")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
             .Build());
         fables2Series.Volumes.Add(new VolumeBuilder("2003")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
@@ -1036,7 +1036,7 @@ public class ReadingListServiceTests
         // Mock up our series
         var fablesSeries = new SeriesBuilder("Fables")
             .WithVolume(new VolumeBuilder("2002")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .WithChapter(new ChapterBuilder("3").Build())
@@ -1045,7 +1045,7 @@ public class ReadingListServiceTests
 
         var fables2Series = new SeriesBuilder("Fables: The Last Castle")
             .WithVolume(new VolumeBuilder("2003")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .WithChapter(new ChapterBuilder("3").Build())
@@ -1094,13 +1094,13 @@ public class ReadingListServiceTests
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new VolumeBuilder("2002")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
             .Build());
         fables2Series.Volumes.Add(new VolumeBuilder("2003")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
@@ -1153,13 +1153,13 @@ public class ReadingListServiceTests
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new VolumeBuilder("2002")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
             .Build());
         fables2Series.Volumes.Add(new VolumeBuilder("2003")
-            .WithNumber(1)
+            .WithMinNumber(1)
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())

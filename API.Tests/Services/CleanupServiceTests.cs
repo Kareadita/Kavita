@@ -395,7 +395,7 @@ public class CleanupServiceTests : AbstractDbTest
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(c)
                 .Build())
             .Build();

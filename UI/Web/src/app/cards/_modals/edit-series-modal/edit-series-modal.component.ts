@@ -282,7 +282,7 @@ export class EditSeriesModalComponent implements OnInit {
       });
       this.seriesVolumes.forEach(vol => {
         vol.volumeFiles = vol.chapters?.sort(this.utilityService.sortChapters).map((c: Chapter) => c.files.map((f: any) => {
-          f.chapter = c.number;
+          f.chapter = c.minNumber;
           return f;
         })).flat();
       });
