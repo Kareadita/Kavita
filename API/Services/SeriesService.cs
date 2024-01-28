@@ -99,7 +99,7 @@ public class SeriesService : ISeriesService
             .FirstOrDefault();
 
         if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.Number || chapNum == 0))
+            (chapNum >= minVolumeNumber.MinNumber || chapNum == 0))
         {
             return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
@@ -521,7 +521,7 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            processedVolumes = volumes.Where(v => v.Number > 0).ToList();
+            processedVolumes = volumes.Where(v => v.MinNumber > 0).ToList();
             processedVolumes.ForEach(v =>
             {
                 v.Name = $"Volume {v.Name}";
@@ -532,7 +532,7 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            if (v.Number == 0) return c;
+            if (v.MinNumber == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
         }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
@@ -558,7 +558,7 @@ public class SeriesService : ISeriesService
         }
 
         var storylineChapters = volumes
-            .Where(v => v.Number == 0)
+            .Where(v => v.MinNumber == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
             .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
             .ToList();
@@ -799,7 +799,7 @@ public class SeriesService : ISeriesService
         float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var lastChapterNumber);
 
-        var lastVolumeNum = chapters.Select(c => c.Volume.Number).Max();
+        var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
 
         var result = new NextExpectedChapterDto
         {
@@ -812,7 +812,7 @@ public class SeriesService : ISeriesService
         if (lastChapterNumber > 0)
         {
             result.ChapterNumber = (int) Math.Truncate(lastChapterNumber) + 1;
-            result.VolumeNumber = lastChapter.Volume.Number;
+            result.VolumeNumber = lastChapter.Volume.MinNumber;
             result.Title = series.Library.Type switch
             {
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),

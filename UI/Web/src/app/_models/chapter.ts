@@ -7,7 +7,7 @@ import { AgeRating } from './metadata/age-rating';
 export interface Chapter {
     id: number;
     range: string;
-    number: string;
+    minNumber: string;
     files: Array<MangaFile>;
     /**
      * This is used in the UI, it is not updated or sent to Backend

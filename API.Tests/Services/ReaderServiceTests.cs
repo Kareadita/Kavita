@@ -136,7 +136,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("0")
                     .WithPages(1)
                     .Build())
@@ -166,7 +166,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("0")
                     .WithPages(1)
                     .Build())
@@ -205,7 +205,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("0")
                     .WithPages(1)
                     .Build())
@@ -260,7 +260,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("0")
                     .WithPages(1)
                     .Build())
@@ -299,7 +299,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("0")
                     .WithPages(1)
                     .Build())
@@ -347,19 +347,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithNumber(3)
+                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -382,7 +382,7 @@ public class ReaderServiceTests
         Assert.Equal("2", actualChapter.Range);
     }
 
-    //[Fact]
+    [Fact]
     public async Task GetNextChapterIdAsync_ShouldGetNextVolume_WhenUsingRanges()
     {
         // V1 -> V2
@@ -390,15 +390,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1-2")
-                .WithNumber(1)
-                .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder("2").Build())
+                .WithMinNumber(1)
+                .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3-4")
-                .WithNumber(2)
-                .WithChapter(new ChapterBuilder("21").Build())
-                .WithChapter(new ChapterBuilder("22").Build())
+                .WithMinNumber(2)
+                .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
@@ -414,7 +412,8 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
-        Assert.Equal("3-4", actualChapter.Range);
+        Assert.Equal("3-4", actualChapter.Volume.Name);
+        Assert.Equal("1", actualChapter.Range);
     }
 
     [Fact]
@@ -467,19 +466,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithNumber(3)
+                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -508,19 +507,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1.5")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithNumber(3)
+                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -550,13 +549,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
@@ -585,18 +584,18 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("66").Build())
                 .WithChapter(new ChapterBuilder("67").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
@@ -627,13 +626,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
@@ -659,7 +658,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -685,7 +684,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -712,14 +711,14 @@ public class ReaderServiceTests
     //
     //     var series = new SeriesBuilder("Test")
     //         .WithVolume(new VolumeBuilder("0")
-    //             .WithNumber(0)
+    //             .WithMinNumber(0)
     //             .WithChapter(new ChapterBuilder("1").Build())
     //             .WithChapter(new ChapterBuilder("2").Build())
     //             .WithChapter(new ChapterBuilder("0").WithIsSpecial(true).Build())
     //             .Build())
     //
     //         .WithVolume(new VolumeBuilder("1")
-    //             .WithNumber(1)
+    //             .WithMinNumber(1)
     //             .WithChapter(new ChapterBuilder("2").Build())
     //             .Build())
     //         .Build();
@@ -746,13 +745,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
@@ -782,7 +781,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
@@ -813,13 +812,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
@@ -846,12 +845,12 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
@@ -881,12 +880,12 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
             .Build();
@@ -907,7 +906,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
-        Assert.Equal(2, actualChapter.Volume.Number);
+        Assert.Equal(2, actualChapter.Volume.MinNumber);
     }
 
     #endregion
@@ -922,19 +921,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithNumber(3)
+                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -965,19 +964,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1.5")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithNumber(3)
+                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -1089,13 +1088,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
@@ -1127,7 +1126,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -1157,7 +1156,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
@@ -1186,13 +1185,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
@@ -1221,20 +1220,20 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("5").Build())
                 .WithChapter(new ChapterBuilder("6").Build())
                 .WithChapter(new ChapterBuilder("7").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("2").WithIsSpecial(true).Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("3").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("4").WithIsSpecial(true).Build())
                 .Build())
@@ -1269,7 +1268,7 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -1299,12 +1298,12 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
@@ -1337,12 +1336,12 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("0")
-                .WithNumber(0)
+                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
@@ -1375,12 +1374,12 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithNumber(1)
+                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithNumber(2)
+                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
             .Build();
@@ -1396,7 +1395,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
-        Assert.Equal(1, actualChapter.Volume.Number);
+        Assert.Equal(1, actualChapter.Volume.MinNumber);
     }
 
     #endregion

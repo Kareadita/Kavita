@@ -36,7 +36,7 @@ public class ScrobbleEvent : IEntityDate
     /// <summary>
     /// Depends on the ScrobbleEvent if filled in
     /// </summary>
-    public int? VolumeNumber { get; set; }
+    public int? VolumeNumber { get; set; } // TODO: Migrate this to float
     /// <summary>
     /// Has this event been processed and pushed to Provider
     /// </summary>

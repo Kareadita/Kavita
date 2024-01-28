@@ -1836,7 +1836,7 @@ public class SeriesRepository : ISeriesRepository
                 ChapterNumber = c.Number,
                 ChapterRange = c.Range,
                 IsSpecial = c.IsSpecial,
-                VolumeNumber = c.Volume.Number,
+                VolumeNumber = c.Volume.MinNumber,
                 ChapterTitle = c.Title,
                 AgeRating = c.Volume.Series.Metadata.AgeRating
             })

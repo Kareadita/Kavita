@@ -244,8 +244,10 @@ public class Startup
                     await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
                     await MigrateLibrariesToHaveAllFileTypes.Migrate(unitOfWork, dataContext, logger);
 
+
                     // v0.7.14
                     await MigrateEmailTemplates.Migrate(directoryService, logger);
+                    await MigrateVolumeNumber.Migrate(unitOfWork, dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

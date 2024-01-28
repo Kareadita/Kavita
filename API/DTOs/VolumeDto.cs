@@ -9,9 +9,10 @@ namespace API.DTOs;
 public class VolumeDto : IHasReadTimeEstimate
 {
     public int Id { get; set; }
-    /// <inheritdoc cref="Volume.Number"/>
-    public int Number { get; set; }
-
+    /// <inheritdoc cref="Volume.MinNumber"/>
+    public float MinNumber { get; set; }
+    /// <inheritdoc cref="Volume.MaxNumber"/>
+    public float MaxNumber { get; set; }
     /// <inheritdoc cref="Volume.Name"/>
     public string Name { get; set; } = default!;
     public int Pages { get; set; }

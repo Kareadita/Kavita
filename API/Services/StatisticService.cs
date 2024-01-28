@@ -287,7 +287,7 @@ public class StatisticService : IStatisticService
             TotalPeople = distinctPeople,
             TotalSize = await _context.MangaFile.SumAsync(m => m.Bytes),
             TotalTags = await _context.Tag.CountAsync(),
-            VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync(),
+            VolumeCount = await _context.Volume.Where(v => v.MinNumber != 0).CountAsync(),
             MostActiveUsers = mostActiveUsers,
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
