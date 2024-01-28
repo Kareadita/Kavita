@@ -44,13 +44,13 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
       this.user = user;
       this.cdRef.markForCheck();
     });
 
     this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
-      return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
+      return user !== undefined && !this.accountService.hasReadOnlyRole(user) && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
     }));
     this.cdRef.markForCheck();
 

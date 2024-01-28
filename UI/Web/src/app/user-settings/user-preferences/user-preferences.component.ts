@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import {take, tap} from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import {
   readingDirections,
@@ -129,7 +129,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   hasActiveLicense = false;
-
+  canEdit = true;
 
 
 
@@ -142,6 +142,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
+    this.settingsService.getOpdsEnabled().subscribe(res => {
+      this.opdsEnabled = res;
+      this.cdRef.markForCheck();
+    });
+
     this.localizationService.getLocales().subscribe(res => {
       this.locales = res;
       this.cdRef.markForCheck();
@@ -149,7 +154,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
 
 
-    this.accountService.hasValidLicense$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
         this.tabs.push({title: 'scrobbling-tab', fragment: FragmentID.Scrobbling});
         this.hasActiveLicense = true;
@@ -169,10 +174,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     });
 
 
-    this.settingsService.getOpdsEnabled().subscribe(res => {
-      this.opdsEnabled = res;
-      this.cdRef.markForCheck();
-    });
+
   }
 
   ngOnInit(): void {

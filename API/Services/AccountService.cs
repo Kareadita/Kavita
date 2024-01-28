@@ -26,7 +26,7 @@ public interface IAccountService
     Task<IEnumerable<ApiException>> ValidateEmail(string email);
     Task<bool> HasBookmarkPermission(AppUser? user);
     Task<bool> HasDownloadPermission(AppUser? user);
-    Task<bool> HasChangeRestrictionRole(AppUser? user);
+    Task<bool> CanChangeAgeRestriction(AppUser? user);
 }
 
 public class AccountService : IAccountService
@@ -128,14 +128,15 @@ public class AccountService : IAccountService
     }
 
     /// <summary>
-    /// Does the user have Change Restriction permission or admin rights
+    /// Does the user have Change Restriction permission or admin rights and not Read Only
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
-    public async Task<bool> HasChangeRestrictionRole(AppUser? user)
+    public async Task<bool> CanChangeAgeRestriction(AppUser? user)
     {
         if (user == null) return false;
         var roles = await _userManager.GetRolesAsync(user);
+        if (roles.Contains(PolicyConstants.ReadOnlyRole)) return false;
         return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 
