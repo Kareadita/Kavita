@@ -27,13 +27,6 @@
     </div>
   </div>
 
-<!--  <ng-container *ngFor="let item of webtoonImages | async; let index = index;">-->
-<!--    <img src="{{item.src}}" style="display: block"-->
-<!--         class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}} {{initFinished ? '' : 'full-opacity'}}"-->
-<!--         *ngIf="item.page >= pageNum - bufferPages && item.page <= pageNum + bufferPages" rel="nofollow" alt="image"-->
-<!--         (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">-->
-<!--  </ng-container>-->
-
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
       <img src="{{item.src}}" style="display: block"

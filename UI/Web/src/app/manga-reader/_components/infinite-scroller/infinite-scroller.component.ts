@@ -96,7 +96,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
   @ViewChild('bottomSpacer', {static: false}) bottomSpacer!: ElementRef;
-  bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries), { threshold: 1 });
+  bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
+    { threshold: 1.0 });
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -554,7 +555,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
     if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
-      console.log('The whole bottom spacer is visible');
+      this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
       this.loadNextChapter.emit();
     }
   }
