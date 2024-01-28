@@ -20239,7 +20239,7 @@
           },
           "name": {
             "type": "string",
-            "description": "A String representation of the volume number. Allows for floats.",
+            "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
             "nullable": true
           },
           "number": {

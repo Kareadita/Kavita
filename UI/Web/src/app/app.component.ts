@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
-import {map, shareReplay, take} from 'rxjs/operators';
+import {map, shareReplay, take, tap} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
@@ -67,8 +67,21 @@ export class AppComponent implements OnInit {
 
       });
 
+    // Every hour, have the UI check for an update. People seriously stay out of date
+    // interval(60 * 60 * 1000) // 60 minutes in milliseconds
+    //   .pipe(
+    //     switchMap(() => this.accountService.currentUser$),
+    //     filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
+    //     switchMap(_ => this.serverService.checkForUpdates())
+    //   )
+    //   .subscribe();
 
-    this.transitionState$ = this.accountService.currentUser$.pipe(map((user) => {
+
+    this.transitionState$ = this.accountService.currentUser$.pipe(
+      tap(user => {
+
+      }),
+      map((user) => {
       if (!user) return false;
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
