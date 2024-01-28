@@ -298,7 +298,7 @@ public class ScrobblingService : IScrobblingService
             var prevVol = $"{existingEvt.VolumeNumber}";
 
             existingEvt.VolumeNumber =
-                await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
+                (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
             existingEvt.ChapterNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
@@ -319,7 +319,7 @@ public class ScrobblingService : IScrobblingService
                 MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
                 AppUserId = userId,
                 VolumeNumber =
-                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
+                    (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
                 ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
                 Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -660,7 +660,7 @@ public class ScrobblingService : IScrobblingService
             foreach (var readEvt in readEvents)
             {
                 readEvt.VolumeNumber =
-                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
+                    (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
                         readEvt.AppUser.Id);
                 readEvt.ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(readEvt.SeriesId,

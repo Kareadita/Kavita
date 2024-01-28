@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.6"
+    "version": "0.7.13.7"
   },
   "servers": [
     {
@@ -16338,8 +16338,8 @@
             "format": "float"
           },
           "volumeNumber": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "expectedDate": {
             "type": "string",
@@ -20247,6 +20247,16 @@
             "description": "The minimum number in the Name field in Int form",
             "format": "int32"
           },
+          "minNumber": {
+            "type": "number",
+            "description": "The minimum number in the Name field",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
+            "format": "float"
+          },
           "chapters": {
             "type": "array",
             "items": {
@@ -20317,6 +20327,10 @@
           "number": {
             "type": "integer",
             "format": "int32"
+          },
+          "minimumNumber": {
+            "type": "number",
+            "format": "float"
           },
           "name": {
             "type": "string",
