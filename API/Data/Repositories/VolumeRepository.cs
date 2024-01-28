@@ -152,7 +152,7 @@ public class VolumeRepository : IVolumeRepository
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
-            .OrderBy(vol => vol.Number)
+            .OrderBy(vol => vol.MinNumber)
             .ToListAsync();
     }
 
@@ -215,7 +215,7 @@ public class VolumeRepository : IVolumeRepository
 
     private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
     {
-        foreach (var v in volumes.Where(vDto => vDto.Number == 0))
+        foreach (var v in volumes.Where(vDto => vDto.MinNumber == 0))
         {
             v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
         }

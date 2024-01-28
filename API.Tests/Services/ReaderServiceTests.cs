@@ -382,7 +382,7 @@ public class ReaderServiceTests
         Assert.Equal("2", actualChapter.Range);
     }
 
-    //[Fact]
+    [Fact]
     public async Task GetNextChapterIdAsync_ShouldGetNextVolume_WhenUsingRanges()
     {
         // V1 -> V2
@@ -391,14 +391,12 @@ public class ReaderServiceTests
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1-2")
                 .WithNumber(1)
-                .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder("2").Build())
+                .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3-4")
                 .WithNumber(2)
-                .WithChapter(new ChapterBuilder("21").Build())
-                .WithChapter(new ChapterBuilder("22").Build())
+                .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
@@ -414,7 +412,8 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
-        Assert.Equal("3-4", actualChapter.Range);
+        Assert.Equal("3-4", actualChapter.Volume.Name);
+        Assert.Equal("1", actualChapter.Range);
     }
 
     [Fact]

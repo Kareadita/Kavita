@@ -20245,7 +20245,8 @@
           "number": {
             "type": "integer",
             "description": "The minimum number in the Name field in Int form",
-            "format": "int32"
+            "format": "int32",
+            "deprecated": true
           },
           "minNumber": {
             "type": "number",
@@ -20324,11 +20325,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "number": {
-            "type": "integer",
-            "format": "int32"
+          "minNumber": {
+            "type": "number",
+            "format": "float"
           },
-          "minimumNumber": {
+          "maxNumber": {
             "type": "number",
             "format": "float"
           },

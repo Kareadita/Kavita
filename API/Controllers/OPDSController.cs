@@ -1109,7 +1109,7 @@ public class OpdsController : BaseApiController
                 title += $" - {volume.Name}";
             }
         }
-        else if (volume.Number != 0)
+        else if (volume.MinNumber != 0)
         {
             title = $"{series.Name} - Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }

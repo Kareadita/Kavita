@@ -521,7 +521,7 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            processedVolumes = volumes.Where(v => v.Number > 0).ToList();
+            processedVolumes = volumes.Where(v => v.MinNumber > 0).ToList();
             processedVolumes.ForEach(v =>
             {
                 v.Name = $"Volume {v.Name}";
@@ -532,7 +532,7 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            if (v.Number == 0) return c;
+            if (v.MinNumber == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
         }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
@@ -558,7 +558,7 @@ public class SeriesService : ISeriesService
         }
 
         var storylineChapters = volumes
-            .Where(v => v.Number == 0)
+            .Where(v => v.MinNumber == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
             .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
             .ToList();

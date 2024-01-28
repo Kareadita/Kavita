@@ -104,14 +104,14 @@ public class TachiyomiService : ITachiyomiService
 
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
         // We only encode for single-file volumes
-        if (volumeWithProgress!.Number != 0 && volumeWithProgress.Chapters.Count == 1)
+        if (volumeWithProgress!.MinNumber != 0 && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
             return new ChapterDto()
             {
                 // Use R to ensure that localization of underlying system doesn't affect the stringification
                 // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                Number = (volumeWithProgress.Number / 10_000f).ToString("R", EnglishCulture)
+                Number = (volumeWithProgress.MinNumber / 10_000f).ToString("R", EnglishCulture)
 
             };
         }

@@ -15,6 +15,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// The minimum number in the Name field in Int form
     /// </summary>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
     public int Number { get; set; }
     /// <summary>
     /// The minimum number in the Name field
