@@ -17,6 +17,8 @@ public class VolumeBuilder : IEntityBuilder<Volume>
             Name = volumeNumber,
             // TODO / BUG: Try to use float based Number which will allow Epub's with < 1 volumes to show in series detail
             Number = (int) Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
+            MinNumber = Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
+            MaxNumber = Services.Tasks.Scanner.Parser.Parser.MaxNumberFromRange(volumeNumber),
             Chapters = new List<Chapter>()
         };
     }
@@ -27,9 +29,9 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         return this;
     }
 
-    public VolumeBuilder WithNumber(int number)
+    public VolumeBuilder WithNumber(float number)
     {
-        _volume.Number = number;
+        _volume.Number = (int) number;
         return this;
     }
 

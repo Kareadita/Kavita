@@ -619,7 +619,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.OrderBy(v => v.Number))
+        foreach (var volume in volumes.OrderBy(v => v.MinNumber))
         {
             var chapters = volume.Chapters
                 .Where(c => !c.IsSpecial && Parser.MaxNumberFromRange(c.Range) <= chapterNumber)
@@ -631,7 +631,7 @@ public class ReaderService : IReaderService
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.Where(v => v.Number <= volumeNumber && v.Number > 0).OrderBy(v => v.Number))
+        foreach (var volume in volumes.Where(v => v.MinNumber <= volumeNumber && v.MinNumber > 0).OrderBy(v => v.MinNumber))
         {
             await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }

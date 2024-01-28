@@ -99,7 +99,7 @@ public class SeriesService : ISeriesService
             .FirstOrDefault();
 
         if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.Number || chapNum == 0))
+            (chapNum >= minVolumeNumber.MinNumber || chapNum == 0))
         {
             return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
@@ -799,7 +799,7 @@ public class SeriesService : ISeriesService
         float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var lastChapterNumber);
 
-        var lastVolumeNum = chapters.Select(c => c.Volume.Number).Max();
+        var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
 
         var result = new NextExpectedChapterDto
         {
@@ -812,7 +812,7 @@ public class SeriesService : ISeriesService
         if (lastChapterNumber > 0)
         {
             result.ChapterNumber = (int) Math.Truncate(lastChapterNumber) + 1;
-            result.VolumeNumber = lastChapter.Volume.Number;
+            result.VolumeNumber = lastChapter.Volume.MinNumber;
             result.Title = series.Library.Type switch
             {
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),

@@ -907,7 +907,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
-        Assert.Equal(2, actualChapter.Volume.Number);
+        Assert.Equal(2, actualChapter.Volume.MinNumber);
     }
 
     #endregion
@@ -1396,7 +1396,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
-        Assert.Equal(1, actualChapter.Volume.Number);
+        Assert.Equal(1, actualChapter.Volume.MinNumber);
     }
 
     #endregion

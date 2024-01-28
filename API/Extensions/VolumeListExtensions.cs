@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Extensions;
 #nullable enable
@@ -22,16 +23,16 @@ public static class VolumeListExtensions
 
         if (seriesFormat == MangaFormat.Epub || seriesFormat == MangaFormat.Pdf)
         {
-            return volumes.MinBy(x => x.Number);
+            return volumes.MinBy(x => x.MinNumber);
         }
 
 
-        if (volumes.Any(x => x.Number != 0))
+        if (volumes.Any(x => x.MinNumber != 0f)) // TODO: Refactor this so we can avoid a magic number
         {
-            return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
+            return volumes.OrderBy(x => x.MinNumber).FirstOrDefault(x => x.MinNumber != 0);
         }
 
         // We only have 1 volume of chapters, we need to be cautious if there are specials, as we don't want to order them first
-        return volumes.MinBy(x => x.Number);
+        return volumes.MinBy(x => x.MinNumber);
     }
 }

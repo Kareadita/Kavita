@@ -185,7 +185,7 @@ public class VolumeRepository : IVolumeRepository
             .ThenInclude(c => c.People)
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Tags)
-            .OrderBy(volume => volume.Number)
+            .OrderBy(volume => volume.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
             .AsSplitQuery()

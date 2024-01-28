@@ -32,7 +32,7 @@ public interface IAppUserProgressRepository
     Task<ProgressDto?> GetUserProgressDtoAsync(int chapterId, int userId);
     Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId);
     Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
-    Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
+    Task<float> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
     Task<DateTime?> GetLatestProgressForSeries(int seriesId, int userId);
     Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId);
     Task UpdateAllProgressThatAreMoreThanChapterPages();
@@ -172,14 +172,14 @@ public class AppUserProgressRepository : IAppUserProgressRepository
         return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(Parser.MaxNumberFromRange(d)));
     }
 
-    public async Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
+    public async Task<float> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
     {
         var list = await _context.AppUserProgresses
             .Join(_context.Chapter, appUserProgresses => appUserProgresses.ChapterId, chapter => chapter.Id,
                 (appUserProgresses, chapter) => new {appUserProgresses, chapter})
             .Where(p => p.appUserProgresses.SeriesId == seriesId && p.appUserProgresses.AppUserId == userId &&
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
-            .Select(p => p.chapter.Volume.Number)
+            .Select(p => p.chapter.Volume.MaxNumber)
             .ToListAsync();
         return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
     }
