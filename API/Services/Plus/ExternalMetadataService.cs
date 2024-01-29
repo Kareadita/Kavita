@@ -224,7 +224,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 recDto.OwnedSeries.Add(seriesForRec);
                 externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
                 {
-                    SeriesId = series.Id,
+                    SeriesId = seriesForRec.Id,
                     AniListId = rec.AniListId,
                     MalId = rec.MalId,
                     Name = seriesForRec.Name,
