@@ -127,13 +127,14 @@ public class ProcessSeries : IProcessSeries
             seriesCollisions = seriesCollisions.Where(collision =>
                 collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
 
-            if (seriesCollisions.Any())
+            if (seriesCollisions.Count > 1)
             {
-                var tableRows = seriesCollisions.Select(collision =>
-                    $"<tr><td>Name: {firstInfo.Series}</td><td>Name: {collision.Name}</td></tr>" +
-                    $"<tr><td>Localized: {firstInfo.LocalizedSeries}</td><td>Localized: {collision.LocalizedName}</td></tr>" +
-                    $"<tr><td>Filename: {Parser.Parser.NormalizePath(_directoryService.FileSystem.FileInfo.New(firstInfo.FullFilePath).Directory?.ToString())}</td><td>Filename: {Parser.Parser.NormalizePath(collision.FolderPath)}</td></tr>"
-                );
+                var firstCollision = seriesCollisions[0];
+                var secondCollision = seriesCollisions[1];
+
+                var tableRows = $"<tr><td>Name: {firstCollision.Name}</td><td>Name: {secondCollision.Name}</td></tr>" +
+                                $"<tr><td>Localized: {firstCollision.LocalizedName}</td><td>Localized: {secondCollision.LocalizedName}</td></tr>" +
+                                $"<tr><td>Filename: {Parser.Parser.NormalizePath(firstCollision.FolderPath)}</td><td>Filename: {Parser.Parser.NormalizePath(secondCollision.FolderPath)}</td></tr>";
 
                 var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
 
