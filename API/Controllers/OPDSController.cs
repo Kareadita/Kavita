@@ -1250,7 +1250,7 @@ public class OpdsController : BaseApiController
         if (progress != null)
         {
             link.LastRead = progress.PageNum;
-            link.LastReadDate = progress.LastModifiedUtc;
+            link.LastReadDate = progress.LastModifiedUtc.ToString("o"); // Adhere to ISO 8601
         }
         link.IsPageStream = true;
         return link;

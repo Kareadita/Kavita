@@ -39,7 +39,7 @@ public class FeedLink
     /// </summary>
     /// <remarks>Attribute MUST conform Atom's Date construct</remarks>
     [XmlAttribute("lastReadDate", Namespace = "http://vaemendis.net/opds-pse/ns")]
-    public DateTime LastReadDate { get; set; }
+    public string LastReadDate { get; set; }
 
     public bool ShouldSerializeLastReadDate()
     {

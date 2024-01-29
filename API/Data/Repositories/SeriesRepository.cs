@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
-using API.Data.ManualMigrations;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
@@ -14,7 +12,6 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
-using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -34,7 +31,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SQLite;
 
 
 namespace API.Data.Repositories;
@@ -95,6 +91,7 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
+    Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
@@ -566,6 +563,26 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Relations)
             .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user)
+    {
+        var allowedLibraries = await _context.Library
+            .Where(library => library.AppUsers.Any(x => x.Id == user.Id))
+            .Select(l => l.Id)
+            .ToListAsync();
+        var restriction = new AgeRestriction()
+        {
+            AgeRating = user.AgeRestriction,
+            IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+        };
+        return await _context.Series
+            .Include(s => s.Metadata)
+            .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(restriction)
+            .AsSplitQuery()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
@@ -1889,22 +1906,25 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// Uses multiple names to find a match against a series then ensures the user has appropriate access to it. If not, returns null.
+    /// Uses multiple names to find a match against a series. If not, returns null.
     /// </summary>
+    /// <remarks>This does not restrict to the user at all. That is handled at the API level.</remarks>
     /// <param name="userId"></param>
     /// <param name="names"></param>
     /// <returns></returns>
     public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl)
     {
-        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var libraryIds = await _context.Library.GetUserLibrariesByType(userId, libraryType).ToListAsync();
+        var libraryIds = await _context.Library
+            .Where(lib => lib.Type == libraryType)
+            .Select(l => l.Id)
+            .ToListAsync();
+
         var normalizedNames = names.Select(n => n.ToNormalized()).ToList();
         SeriesDto? result = null;
         if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
         {
             // TODO: I can likely work AniList and MalIds from ExternalSeriesMetadata in here
             result =  await _context.Series
-                .RestrictAgainstAgeRestriction(userRating)
                 .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
                 .Where(s => libraryIds.Contains(s.Library.Id))
                 .WhereIf(!string.IsNullOrEmpty(aniListUrl), s => s.Metadata.WebLinks.Contains(aniListUrl))
@@ -1917,7 +1937,6 @@ public class SeriesRepository : ISeriesRepository
         if (result != null) return result;
 
         return await _context.Series
-            .RestrictAgainstAgeRestriction(userRating)
             .Where(s => normalizedNames.Contains(s.NormalizedName) ||
                         normalizedNames.Contains(s.NormalizedLocalizedName))
             .Where(s => libraryIds.Contains(s.Library.Id))

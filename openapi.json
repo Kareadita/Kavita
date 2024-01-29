@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.9"
+    "version": "0.7.13.10"
   },
   "servers": [
     {
@@ -20336,6 +20336,12 @@
           "name": {
             "type": "string",
             "nullable": true
+          },
+          "number": {
+            "type": "number",
+            "description": "This will map to MinNumber. Number was removed in v0.7.13.8",
+            "format": "float",
+            "deprecated": true
           },
           "pages": {
             "type": "integer",

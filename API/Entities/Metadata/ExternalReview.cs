@@ -25,7 +25,6 @@ public class ExternalReview
     /// Reviewer's username
     /// </summary>
     public string Username { get; set; }
-
     /// <summary>
     /// An Optional Rating coming from the Review
     /// </summary>
@@ -35,6 +34,7 @@ public class ExternalReview
     /// </summary>
     public int Score { get; set; }
     public int TotalVotes { get; set; }
+
 
     public int SeriesId { get; set; }
 

@@ -101,14 +101,14 @@ public class ExternalMetadataService : IExternalMetadataService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return new SeriesDetailPlusDto();
 
-        // Let's try to get SeriesDetailPlusDto from the local DB.
-        var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series);
-        var needsRefresh = externalSeriesMetadata.LastUpdatedUtc <= DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
+        var needsRefresh =
+            await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId,
+                DateTime.UtcNow.Subtract(_externalSeriesMetadataCache));
 
         if (!needsRefresh)
         {
             // Convert into DTOs and return
-            return await SerializeExternalSeriesDetail(seriesId, series.LibraryId, user);
+            return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, series.LibraryId, user);
         }
 
         try
@@ -127,6 +127,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             // Clear out existing results
+            var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
@@ -150,10 +151,13 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.ExternalRecommendations ??= new List<ExternalRecommendation>();
             var recs = await ProcessRecommendations(series, user, result.Recommendations, externalSeriesMetadata);
 
-            externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
-            externalSeriesMetadata.AverageExternalRating = (int) externalSeriesMetadata.ExternalRatings
+            var extRatings = externalSeriesMetadata.ExternalRatings
                 .Where(r => r.AverageScore > 0)
-                .Average(r => r.AverageScore);
+                .ToList();
+
+            externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
+            externalSeriesMetadata.AverageExternalRating = extRatings.Count != 0 ? (int) extRatings
+                .Average(r => r.AverageScore) : 0;
 
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
@@ -164,11 +168,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Recommendations = recs,
                 Ratings = result.Ratings,
-                Reviews = result.Reviews.Select(r =>
-                {
-                    r.IsExternal = true;
-                    return r;
-                })
+                Reviews = externalSeriesMetadata.ExternalReviews.Select(r => _mapper.Map<UserReviewDto>(r))
             };
         }
         catch (FlurlHttpException ex)
@@ -186,10 +186,6 @@ public class ExternalMetadataService : IExternalMetadataService
         return null;
     }
 
-    private async Task<SeriesDetailPlusDto?> SerializeExternalSeriesDetail(int seriesId, int libraryId, AppUser user)
-    {
-        return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, libraryId, user);
-    }
 
     private async Task<ExternalSeriesMetadata> GetExternalSeriesMetadataForSeries(int seriesId, Series series)
     {

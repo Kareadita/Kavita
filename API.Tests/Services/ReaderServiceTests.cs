@@ -703,6 +703,37 @@ public class ReaderServiceTests
         Assert.Equal(-1, nextChapter);
     }
 
+    // This is commented out because, while valid, I can't solve how to make this pass (https://github.com/Kareadita/Kavita/issues/2099)
+    // [Fact]
+    // public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials_FirstIsVolume()
+    // {
+    //     await ResetDb();
+    //
+    //     var series = new SeriesBuilder("Test")
+    //         .WithVolume(new VolumeBuilder("0")
+    //             .WithMinNumber(0)
+    //             .WithChapter(new ChapterBuilder("1").Build())
+    //             .WithChapter(new ChapterBuilder("2").Build())
+    //             .Build())
+    //         .WithVolume(new VolumeBuilder("1")
+    //             .WithMinNumber(1)
+    //             .WithChapter(new ChapterBuilder("0").Build())
+    //             .Build())
+    //         .Build();
+    //     series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+    //
+    //     _context.Series.Add(series);
+    //     _context.AppUser.Add(new AppUser()
+    //     {
+    //         UserName = "majora2007"
+    //     });
+    //
+    //     await _context.SaveChangesAsync();
+    //
+    //     var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+    //     Assert.Equal(-1, nextChapter);
+    // }
+
     // This is commented out because, while valid, I can't solve how to make this pass
     // [Fact]
     // public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_WithSpecials()

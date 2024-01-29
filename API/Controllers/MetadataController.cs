@@ -5,11 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Misc;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
@@ -193,7 +196,6 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId)
     {
         if (!await licenseService.HasActiveLicense())
@@ -203,6 +205,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         if (user == null) return Unauthorized();
+
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
             .Where(r => !string.IsNullOrEmpty(r.Body))
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
@@ -213,28 +216,35 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (results.HasValue)
         {
             var cachedResult = results.Value;
-            userReviews.AddRange(cachedResult.Reviews);
-            cachedResult.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
-            if (!await unitOfWork.UserRepository.IsUserAdminAsync(user))
-            {
-                cachedResult.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
-            }
-
+            await PrepareSeriesDetail(userReviews, cachedResult, user);
             return cachedResult;
         }
 
         var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
         if (ret == null) return Ok(null);
-        userReviews.AddRange(ret.Reviews);
-        ret.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
-        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(24));
+        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
-        if (!await unitOfWork.UserRepository.IsUserAdminAsync(user))
+        // For some reason if we don't use a different instance, the cache keeps changes made below
+        var newCacheResult = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
+        await PrepareSeriesDetail(userReviews, newCacheResult, user);
+
+        return Ok(newCacheResult);
+
+    }
+
+    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret, AppUser user)
+    {
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
+        ret.Reviews = userReviews;
+
+        if (!isAdmin)
         {
+            // Re-obtain owned series and take into account age restriction
+            ret.Recommendations.OwnedSeries =
+                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
+                    ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
             ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
         }
-
-        return Ok(ret);
-
     }
 }
