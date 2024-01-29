@@ -101,14 +101,14 @@ public class ExternalMetadataService : IExternalMetadataService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return new SeriesDetailPlusDto();
 
-        // Let's try to get SeriesDetailPlusDto from the local DB.
-        var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series);
-        var needsRefresh = externalSeriesMetadata.LastUpdatedUtc <= DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
+        var needsRefresh =
+            await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId,
+                DateTime.UtcNow.Subtract(_externalSeriesMetadataCache));
 
         if (!needsRefresh)
         {
             // Convert into DTOs and return
-            return await SerializeExternalSeriesDetail(seriesId, series.LibraryId, user);
+            return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, series.LibraryId, user);
         }
 
         try
@@ -127,9 +127,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             // Clear out existing results
+            var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+
+            await _unitOfWork.CommitAsync();
 
             externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
             {
@@ -185,10 +188,6 @@ public class ExternalMetadataService : IExternalMetadataService
         return null;
     }
 
-    private async Task<SeriesDetailPlusDto?> SerializeExternalSeriesDetail(int seriesId, int libraryId, AppUser user)
-    {
-        return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, libraryId, user);
-    }
 
     private async Task<ExternalSeriesMetadata> GetExternalSeriesMetadataForSeries(int seriesId, Series series)
     {
@@ -225,7 +224,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 recDto.OwnedSeries.Add(seriesForRec);
                 externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
                 {
-                    SeriesId = seriesForRec.Id,
+                    SeriesId = series.Id,
                     AniListId = rec.AniListId,
                     MalId = rec.MalId,
                     Name = seriesForRec.Name,

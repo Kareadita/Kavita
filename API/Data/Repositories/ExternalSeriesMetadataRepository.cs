@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -26,6 +27,7 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalRating>? ratings);
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId, int limit = 25);
+    Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId, DateTime expireTime);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user);
     Task LinkRecommendationsToSeries(Series series);
 }
@@ -92,11 +94,16 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .FirstOrDefaultAsync();
     }
 
+    public async Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId, DateTime expireTime)
+    {
+        var row = await _context.ExternalSeriesMetadata
+            .Where(s => s.SeriesId == seriesId)
+            .FirstOrDefaultAsync();
+        return row == null || row.LastUpdatedUtc <= expireTime;
+    }
+
     public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user)
     {
-        var canSeeExternalSeries = user is { AgeRestriction: AgeRating.NotApplicable } &&
-                                   await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
-
         var allowedLibraries = await _context.Library
             .Where(library => library.AppUsers.Any(x => x.Id == user.Id))
             .Select(l => l.Id)
@@ -117,24 +124,14 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         }
 
         var externalSeriesRecommendations = new List<ExternalSeriesDto>();
-        if (!canSeeExternalSeries)
-        {
-            externalSeriesRecommendations = seriesDetailDto.ExternalRecommendations
-                .Where(r => r.SeriesId is null or 0)
-                .Select(r => _mapper.Map<ExternalSeriesDto>(r))
-                .DefaultIfEmpty()
-                .ToList();
-        }
-
-
         var ownedSeriesRecommendations = await _context.ExternalRecommendation
-            .Where(r => r.SeriesId > 0 && allowedLibraries.Contains(r.Series.LibraryId))
+            .Where(r => r.SeriesId > 0 && allowedLibraries.Contains(r.Series.LibraryId)
+                                       && r.SeriesId == seriesId)
             .Join(_context.Series, r => r.SeriesId, s => s.Id, (recommendation, series) => series)
             .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
-            .DefaultIfEmpty()
             .ToListAsync();
 
         var seriesDetailPlusDto = new SeriesDetailPlusDto()

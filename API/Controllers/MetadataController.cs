@@ -203,6 +203,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         if (user == null) return Unauthorized();
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
             .Where(r => !string.IsNullOrEmpty(r.Body))
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
@@ -215,7 +216,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             var cachedResult = results.Value;
             userReviews.AddRange(cachedResult.Reviews);
             cachedResult.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
-            if (!await unitOfWork.UserRepository.IsUserAdminAsync(user))
+            if (!isAdmin)
             {
                 cachedResult.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
             }
@@ -225,11 +226,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
         var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
         if (ret == null) return Ok(null);
-        userReviews.AddRange(ret.Reviews);
-        ret.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
-        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(24));
+        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
-        if (!await unitOfWork.UserRepository.IsUserAdminAsync(user))
+        userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
+        ret.Reviews = userReviews;
+
+        if (!isAdmin)
         {
             ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
         }
