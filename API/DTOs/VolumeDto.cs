@@ -15,6 +15,11 @@ public class VolumeDto : IHasReadTimeEstimate
     public float MaxNumber { get; set; }
     /// <inheritdoc cref="Volume.Name"/>
     public string Name { get; set; } = default!;
+    /// <summary>
+    /// This will map to MinNumber. Number was removed in v0.7.13.8
+    /// </summary>
+    [Obsolete("Use MinNumber")]
+    public float Number { get; set; }
     public int Pages { get; set; }
     public int PagesRead { get; set; }
     public DateTime LastModifiedUtc { get; set; }

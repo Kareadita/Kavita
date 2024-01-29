@@ -46,7 +46,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.Bookmark.ChapterId))
             .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series));
         CreateMap<LibraryDto, Library>();
-        CreateMap<Volume, VolumeDto>();
+        CreateMap<Volume, VolumeDto>()
+            .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.MinNumber));
         CreateMap<MangaFile, MangaFileDto>();
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
