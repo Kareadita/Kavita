@@ -57,7 +57,7 @@ public class PanelsController : BaseApiController
             PageNum = 0,
             ChapterId = chapterId,
             VolumeId = 0,
-            SeriesId = 0
+            SeriesId = 0,
         });
         return Ok(progress);
     }
