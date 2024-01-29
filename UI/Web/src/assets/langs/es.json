@@ -658,7 +658,7 @@
         "close": "{{common.close}}",
         "invite": "Invitar",
         "inviting": "Invitando…",
-        "description": "Invite a un usuario a su servidor introduciendo su correo electrónico. Recibirán un correo electrónico para crear una cuenta. Para que esto funcione, debe tener configurado el campo Nombre del host en la pestaña <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> o acceder a su instancia a través de su dirección URL remota. <br/><br/>Alternativamente, puede utilizar un nombre de usuario, pero tenga en cuenta que los restablecimientos de la contraseña no estarán disponibles para las cuentas basadas en nombres de usuario. Si no desea utilizar nuestro servicio de correo electrónico, puede alojar su propio servicio de correo electrónico.",
+        "description": "Invite a un usuario a su servidor introduciendo su correo electrónico. Recibirán un correo electrónico para crear una cuenta. Para que esto funcione, debe tener los campos de configuración Nombre de host y Correo electrónico configurados en la pestaña <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Correo electrónico</a>; de lo contrario, se le presentará un enlace para que realice la configuración en nombre del usuario.<br/><br/>No es necesario que el correo electrónico sea válido.",
         "setup-user-description": "Puede utilizar el siguiente enlace para configurar la cuenta de usuario o utilizar el botón de copia. Es posible que tenga que cerrar la sesión antes de utilizar el enlace para registrar un nuevo usuario. Si Kavita puede determinar que tu servidor es accesible externamente (o el nombre de host está configurado), se habrá enviado un correo electrónico al usuario y éste podrá utilizar los enlaces para terminar de configurar su cuenta. De lo contrario, utilice el enlace de abajo o en los registros para mandarselo manualmenteanualmente o configurar su cuenta.",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}"
@@ -1423,7 +1423,9 @@
         "size-limit-tooltip": "¿Cuántos bytes puede manejar el servidor de correo electrónico para los archivos adjuntos?",
         "customized-templates-label": "Plantillas personalizadas",
         "customized-templates-tooltip": "¿Debería Kavita utilizar el directorio config/templates para las plantillas en lugar del directorio por defecto? Usted es responsable de mantenerse al día con los cambios de plantilla.",
-        "username-tooltip": "El nombre de usuario utilizado para autenticarse contra el host"
+        "username-tooltip": "El nombre de usuario utilizado para autenticarse contra el host",
+        "outlook-label": "Outlook",
+        "gmail-label": "Gmail"
     },
     "list-item": {
         "read": "{{common.read}}"
@@ -1638,11 +1640,11 @@
         "title": "Tareas recurrentes",
         "library-scan-label": "Escaneo de biblioteca",
         "download-logs-task": "Descargar registros",
-        "library-database-backup-label": "Copia de seguridad de la base de datos de la biblioteca",
+        "library-database-backup-label": "Copia de seguridad de Kavita",
         "bust-cache-task-desc": "Eliminar la caché de Kavita+ - solamente se debería usar cuando se depuren malas coincidencias.",
         "convert-media-task-desc": "Inicia una tarea de ejecución lenta que convertirá todos los archivos gestionados por Kavita a la codificación objetivo. Esto es lento (especialmente en dispositivos ARM).",
         "adhoc-tasks-title": "Tareas ad-hoc",
-        "library-database-backup-tooltip": "Cada cuánto tiempo Kavita hará una copia de seguridad de la base de datos.",
+        "library-database-backup-tooltip": "¿Con qué frecuencia Kavita hará copias de seguridad de la base de datos y otros archivos relacionados?",
         "job-title-header": "Puesto de trabajo",
         "bust-cache-task": "Eliminar caché",
         "bust-cache-task-success": "Caché de Kavita+ eliminada",
@@ -1674,7 +1676,7 @@
         "cleanup-tooltip": "¿Con qué frecuencia Kavita ejecutará tareas de limpieza?. Esto puede ser pesado y debe realizarse a medianoche en la mayoría de los casos",
         "required": "{{validation.required-field}}",
         "custom-label": "Programación personalizada (Notación Cron)",
-        "cron-notation": "Debe utilizar la notación cron para la programación personalizada",
+        "cron-notation": "Esta no es una notación cron válida",
         "disabled": "Desactivado",
         "daily": "A diario",
         "weekly": "Semanalmente",
@@ -1705,7 +1707,8 @@
         "setup-user-alt": "Configurar usuario {{user}}",
         "resend": "Reenviar",
         "last-active-title": "Activo por última vez:",
-        "username-pattern": "El nombre de usuario sólo puede contener los siguientes caracteres y espacios en blanco: {{characters}}"
+        "username-pattern": "El nombre de usuario sólo puede contener los siguientes caracteres y espacios en blanco: {{characters}}",
+        "admin": "Admr."
     },
     "manga-format-stats": {
         "title": "Formato",
