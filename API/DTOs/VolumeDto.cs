@@ -16,7 +16,7 @@ public class VolumeDto : IHasReadTimeEstimate
     /// <inheritdoc cref="Volume.Name"/>
     public string Name { get; set; } = default!;
     /// <summary>
-    /// This will map to MinNumber. Number was removed in v0.7.13.8
+    /// This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14
     /// </summary>
     [Obsolete("Use MinNumber")]
     public float Number { get; set; }

@@ -20337,6 +20337,12 @@
             "type": "string",
             "nullable": true
           },
+          "number": {
+            "type": "number",
+            "description": "This will map to MinNumber. Number was removed in v0.7.13.8",
+            "format": "float",
+            "deprecated": true
+          },
           "pages": {
             "type": "integer",
             "format": "int32"
