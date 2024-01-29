@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
-using API.Data.ManualMigrations;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
@@ -14,7 +12,6 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
-using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -34,7 +31,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SQLite;
 
 
 namespace API.Data.Repositories;
@@ -95,6 +91,7 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
+    Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
@@ -566,6 +563,22 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Relations)
             .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user)
+    {
+        var restriction = new AgeRestriction()
+        {
+            AgeRating = user.AgeRestriction,
+            IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+        };
+        return await _context.Series
+            .Include(s => s.Metadata)
+            .Where(s => seriesIds.Contains(s.Id))
+            .RestrictAgainstAgeRestriction(restriction)
+            .AsSplitQuery()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 

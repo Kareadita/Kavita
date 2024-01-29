@@ -109,8 +109,6 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .Select(l => l.Id)
             .ToListAsync();
 
-        var userRating = await _context.AppUser.GetUserAgeRestriction(user.Id);
-
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)
             .Include(m => m.ExternalRatings)
@@ -122,21 +120,6 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         {
             return null; // or handle the case when seriesDetailDto is not found
         }
-
-        // External tables must be reached from SeriesMetadata
-        // var ownedSeriesRecommendations = await _context.ExternalSeriesMetadata
-        //     .Where(s => s.SeriesId == seriesId)
-        //     .Where(series => series.ExternalRecommendations.Any(r => r.SeriesId > 0
-        //                                                              && allowedLibraries.Contains(r.Series.LibraryId)))
-        //     .Select(s => s.Series)
-        //     .RestrictAgainstAgeRestriction(userRating)
-        //     .OrderBy(series => series.SortName.ToLower())
-        //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-        //     .ToListAsync();
-
-        // TODO: Instead of selecting from DB, let's just take the existing seriesDetailDto and perform
-        // owned/external on that. Move RestrictAgainstAgeRestriction needs to be in the controller
-
 
         var externalSeriesRecommendations = seriesDetailDto.ExternalRecommendations
             .Where(r => r.SeriesId == null)
@@ -153,15 +136,6 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        // var ownedSeriesRecommendations = await _context.ExternalRecommendation
-        //     .Where(r => r.SeriesId > 0 && allowedLibraries.Contains(r.Series.LibraryId))
-        //     .Join(_context.Series, r => r.SeriesId, s => s.Id, (recommendation, series) => series)
-        //     .RestrictAgainstAgeRestriction(userRating)
-        //     .OrderBy(s => s.SortName.ToLower())
-        //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-        //     .AsNoTracking()
-        //     .ToListAsync();
 
         var seriesDetailPlusDto = new SeriesDetailPlusDto()
         {

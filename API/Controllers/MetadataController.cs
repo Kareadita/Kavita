@@ -5,11 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Misc;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
@@ -203,7 +206,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         if (user == null) return Unauthorized();
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
             .Where(r => !string.IsNullOrEmpty(r.Body))
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
@@ -214,13 +217,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (results.HasValue)
         {
             var cachedResult = results.Value;
-            userReviews.AddRange(cachedResult.Reviews);
-            cachedResult.Reviews = ReviewService.SelectSpectrumOfReviews(userReviews);
-            if (!isAdmin)
-            {
-                cachedResult.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
-            }
-
+            await PrepareSeriesDetail(userReviews, cachedResult, user);
             return cachedResult;
         }
 
@@ -228,15 +225,25 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (ret == null) return Ok(null);
         await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
+        await PrepareSeriesDetail(userReviews, ret, user);
+
+        return Ok(ret);
+
+    }
+
+    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret, AppUser user)
+    {
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
         if (!isAdmin)
         {
+            // Re-obtain owned series and take into account age restriction
+            ret.Recommendations.OwnedSeries =
+                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
+                    ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
             ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
         }
-
-        return Ok(ret);
-
     }
 }
