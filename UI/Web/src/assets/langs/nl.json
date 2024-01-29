@@ -58,7 +58,8 @@
         "title": "Beoordeling bewerken",
         "review-label": "Beoordeling",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "min-length": "Review moet minimum {{count}} characters hebben"
     },
     "review-card-modal": {
         "close": "{{common.close}}",

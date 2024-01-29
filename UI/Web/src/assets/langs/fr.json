@@ -780,7 +780,7 @@
         "setup-user-account-tooltip": "Copier et coller dans un nouvel onglet. Vous devrait peut-être vous déconnecter.",
         "setup-user-title": "Utilisateurs invités",
         "invite": "Inviter",
-        "description": "Invitez un utilisateur sur votre serveur en saisissant son email. Ils recevront un e-mail pour créer un compte. Pour que cela fonctionne, vous devez avoir le champ Nom d'hôte défini dans l'onglet <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a> ou accéder à votre instance via son URL distante. <br/><br/>Vous pouvez également utiliser un nom d'utilisateur, mais notez que la réinitialisation du mot de passe ne sera pas disponible pour les comptes basés sur un nom d'utilisateur. Si vous ne souhaitez pas utiliser notre service de messagerie, vous pouvez héberger votre propre service de messagerie.",
+        "description": "Invitez un utilisateur sur votre serveur en saisissant son email. Ils recevront un e-mail pour créer un compte. Pour que cela fonctionne, vous devez avoir les champs Nom d'hôte et E-mail définis dans l'onglet <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a>, dans le cas contraire, un lien vous sera présenté pour que vous puissiez configurer le système au nom de l'utilisateur.<br/><br/>Il n'est pas nécessaire que l'adresse électronique soit valide.",
         "setup-user-description": "Vous pouvez utiliser le lien suivant ci-dessous pour configurer le compte de votre utilisateur ou utiliser le bouton Copier. Vous devrez peut-être vous déconnecter avant d'utiliser le lien pour enregistrer un nouvel utilisateur. Si Kavita peut déterminer votre serveur comme accessible en externe (ou si le nom d'hôte est défini), un e-mail aura été envoyé à l'utilisateur et les liens pourront être utilisés par lui pour terminer la configuration de son compte. Sinon, utilisez le lien ci-dessous ou celui dans les journaux pour leur envoyer manuellement ou configurer leur compte.",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}"
@@ -1261,7 +1261,9 @@
         "host-tooltip": "Adresse sortante/SMTP de votre serveur de messagerie",
         "password-label": "Mot de passe",
         "customized-templates-tooltip": "Kavita doit-il utiliser le répertoire \"config/templates\" pour les modèles plutôt que celui par défaut? Vous êtes responsable de tenir à jour les changement des modèles.",
-        "username-tooltip": "Le nom d'utilisateur utilisé pour s'authentifier auprès de l'hôte"
+        "username-tooltip": "Le nom d'utilisateur utilisé pour s'authentifier auprès de l'hôte",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "bulk-add-to-collection": {
         "collection-label": "Collection",
@@ -1375,7 +1377,7 @@
         "clean-up-want-to-read-task": "Nettoyer A lire",
         "analyze-files-task-success": "L'analyse du fichier a été mise en attente",
         "backup-database-task-success": "Une tâche de sauvegarde de la base de données a été mise en file d'attente",
-        "library-database-backup-label": "Sauvegarde de la base de données de bibliothèques",
+        "library-database-backup-label": "Sauvegarde de Kavita",
         "bust-cache-task-desc": "Nettoie  le cache de Kavita+ - ne doit être utilisé que lors du débogage de mauvaises correspondances.",
         "download-logs-task": "Télécharges les journaux",
         "backup-database-task-desc": "Effectue une sauvegarde de la base de données, des marque-pages, des thèmes, des couvertures téléchargées manuellement et des fichiers de configuration.",
@@ -1392,7 +1394,7 @@
         "check-for-updates-task": "Vérifier les mises à jour",
         "description-header": "Description",
         "action-header": "Action",
-        "library-database-backup-tooltip": "A quelle fréquence Kavita sauvegardera la base de données.",
+        "library-database-backup-tooltip": "A quelle fréquence Kavita sauvegardera la base de données et autres fichiers liés.",
         "bust-locale-task": "Nettoyer le cache local",
         "adhoc-tasks-title": "Tâches ponctuelles",
         "clear-reading-cache-task": "Effacer le cache de lecture",
@@ -1409,7 +1411,7 @@
         "clean-up-want-to-read-task-desc": "Supprime toutes les séries que les utilisateurs ont lues dans leur intégralité, qui se trouvent dans A lire et dont le statut de publication est Terminé. Lancé toutes les 24 heures.",
         "clean-up-want-to-read-task-success": "A lire a été nettoyé",
         "required": "{{validation.required-field}}",
-        "cron-notation": "Vous devez utiliser la notation cron pour la programmation personnalisée",
+        "cron-notation": "Ceci n'est pas une notation Cron valide",
         "custom-label": "Programme personnalisé (notation Cron)",
         "disabled": "Désactivé",
         "daily": "Quotidien",
@@ -1487,7 +1489,8 @@
         "pending-title": "En attente",
         "online-now-tooltip": "En ligne",
         "setup-user-alt": "Configurer l'utilisateur {{user}}",
-        "username-pattern": "Le nom d'utilisateur ne peut contenir que les caractères et espaces suivants : {{caractères}}"
+        "username-pattern": "Le nom d'utilisateur ne peut contenir que les caractères et espaces suivants : {{caractères}}",
+        "admin": "Admin"
     },
     "admin-dashboard": {
         "users-tab": "Utilisateurs",

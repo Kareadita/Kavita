@@ -691,7 +691,7 @@
         "setup-user-title": "ユーザーを招待",
         "invite": "招待",
         "required-field": "{{common.required-field}}",
-        "description": "ユーザーをサーバーに招待するには、彼らのメールアドレスを入力してください。彼らはアカウントを作成するためのメールを受け取ります。これが機能するためには、<a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> タブでホスト名フィールドが設定されているか、リモートURLを介してインスタンスにアクセスしている必要があります。<br/><br/> 代わりにユーザー名を使用することもできますが、ユーザー名ベースのアカウントではパスワードのリセットが利用できないことに注意してください。弊社のメールサービスを使用したくない場合は、独自のメールサービスをホストすることもできます。",
+        "description": "ユーザーをサーバーに招待するには、招待する人のメールアドレスを入力してください。招待メールが送付されます。これを機能させるには、<a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a>タブでホスト名とメール設定フィールドを設定している必要があります。そうでない場合、ユーザーの代わりに設定するためのリンクが提示されます。<br/><br/>メールは有効である必要はありません。",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "email": "{{common.email}}",
@@ -940,7 +940,9 @@
         "title": "{{collectionName}}のコレクションを編集する",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "cover-image-tab": "カバーイメージ",
+        "general-tab": "一般"
     },
     "collection-detail": {
         "series-header": "シリーズ",
@@ -957,7 +959,9 @@
     },
     "draggable-ordered-list": {
         "reorder-label": "再設定",
-        "instructions-alt": "リオーダーの入力に数値を入力すると、その項目はその位置に挿入され、他のすべての項目の順序が更新されます。"
+        "instructions-alt": "リオーダーの入力に数値を入力すると、その項目はその位置に挿入され、他のすべての項目の順序が更新されます。",
+        "remove-item-alt": "アイテムを削除",
+        "bulk-select-label": "バルク選択項目"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -1068,12 +1072,22 @@
         "loading": "{{common.loading}}",
         "filter-label": "{{common.filter}}",
         "close": "{{common.close}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "title": "読書リストに追加",
+        "reading-list-label": "読書リスト",
+        "promoted-alt": "プロモーション",
+        "no-data": "まだ作成されていないリスト"
     },
     "events-widget": {
         "close": "{{common.close}}",
         "users-online-count": "{{num}} 人のユーザーがオンラインです",
-        "downloading-item": "{{item}}をダウンロードしています"
+        "downloading-item": "{{item}}をダウンロードしています",
+        "title-alt": "活動内容",
+        "dismiss-all": "却下 すべて",
+        "update-available": "最新情報",
+        "no-data": "詳しくはこちら",
+        "more-info": "詳しくはこちら",
+        "active-events-title": "活動的なでき事:"
     },
     "generic-list-modal": {
         "clear": "{{common.clear}}",
@@ -1107,7 +1121,11 @@
         "customized-templates-tooltip": "Kavitaはデフォルトではなく、config/templatesディレクトリをテンプレートに使用すべきですか？テンプレートの変更については、ユーザーが最新情報を把握する責任があります。",
         "sender-displayname-tooltip": "これは、受信者がメールを受け取るときに見る送信者のメールアドレスです。通常、アカウントに関連付けられたメールアドレスです",
         "host-tooltip": "送信/SMTPアドレス",
-        "username-tooltip": "ホストに対して認証するために使用されるユーザー名"
+        "username-tooltip": "ホストに対して認証するために使用されるユーザー名",
+        "sender-displayname-label": "表示名",
+        "sender-address-tooltip": "これは、受信者がメールを受け取るときに見る送信者のメールアドレスです。通常、アカウントに関連付けられたメールアドレスです。",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "server-stats": {
         "total-files-tooltip": "総ファイル数: {{count}}",
@@ -1128,7 +1146,15 @@
     "grouped-typeahead": {
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
-        "bookmarks": "{{side-nav.bookmarks}}"
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "tags": "タグ",
+        "people": "人",
+        "genres": "ジャンル",
+        "libraries": "ライブラリ",
+        "reading-lists": "リーディングリスト",
+        "collections": "コレクション",
+        "files": "ファイル",
+        "chapters": "チャプター"
     },
     "bulk-add-to-collection": {
         "close": "{{common.close}}",
@@ -1144,7 +1170,11 @@
     "edit-reading-list-modal": {
         "title": "読書リストを編集: {{name}}",
         "required-field": "{{validation.required-field}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "cover-image-tab": "カバーイメージ",
+        "general-tab": "一般",
+        "save": "{{common.save}}",
+        "year-validation": "1000, 0 以上の空白"
     },
     "metadata-filter": {
         "reset": "{{common.reset}}",
@@ -1175,7 +1205,13 @@
     },
     "manage-scrobble-errors": {
         "filter-label": "{{common.filter}}",
-        "edit-item-alt": "{{seriesName}}を編集"
+        "edit-item-alt": "{{seriesName}}を編集",
+        "comment-header": "コメント",
+        "description": "ここには、スクロブリング中に見つかった問題が含まれています。このリストはいつでもクリアでき、自動的に更新されます。不明なシリーズがある場合は、シリーズ名またはローカライズされたシリーズ名を修正するか、プロバイダのためのウェブリンクを追加するのが最善です。",
+        "created-header": "作成",
+        "series-header": "シリーズ",
+        "clear-errors": "エラーをクリア",
+        "edit-header": "編集"
     },
     "manage-media-settings": {
         "reset": "{{common.reset}}",
@@ -1186,10 +1222,23 @@
         "encode-as-label": "メディアを保存",
         "encode-as-description-part-3": "AVIFを使いますか?",
         "encode-as-description-part-1": "WebP/AVIFはファイルのスペース要件を大幅に削減できます。ただし、WebP/AVIFはすべてのブラウザやバージョンでサポートされているわけではありません。これらの設定があなたのセットアップに適しているかどうかを確認するには、以下を参照してください。 ",
-        "encode-as-description-part-2": "WebPを使いますか?"
+        "encode-as-description-part-2": "WebPを使いますか?",
+        "encode-as-tooltip": "カビタが管理するすべてのメディア(カバー、ブックマーク、ファビコン)は、このタイプとしてエンコードされます.",
+        "bookmark-dir-tooltip": "ブックマークの保存場所です。ディレクトリ内の他のファイルが削除される可能性があるため、大きなストレージを備えた場所を選んでください。Dockerを使用している場合は、追加のボリュームをマウントして使用してください。",
+        "change": "チェンジ",
+        "bookmark-dir-label": "ブックマーク ディレクトリ",
+        "media-issue-title": "メディアの問題",
+        "scrobble-issue-title": "Scrobbleの問題",
+        "cover-image-size-tooltip": "カバー画像の生成サイズはどれくらいにすべきですか。注意: デフォルトよりも大きいサイズは、ページの読み込み時間が長くなります。",
+        "cover-image-size-label": "カバー イメージのサイズ"
     },
     "stream-list-item": {
-        "remove": "{{common.remove}}"
+        "remove": "{{common.remove}}",
+        "library": "ライブラリー",
+        "smart-filter": "スマートフィルター",
+        "external-source": "外部ソース",
+        "load-filter": "フィルターを読み込む",
+        "provided": "提供される"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
@@ -1200,7 +1249,18 @@
         "read": "{{common.read}}"
     },
     "nav-header": {
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "promoted": "(プロモーション)",
+        "server-settings": "サーバー設定",
+        "announcements": "お知らせ",
+        "logout": "ログアウト",
+        "settings": "設定",
+        "search-alt": "検索…",
+        "no-data": "結果が見つかりません",
+        "skip-alt": "メインコンテンツまでスキップ",
+        "search-series-alt": "検索シリーズ",
+        "scroll-to-top-alt": "トップへ戻る",
+        "all-filters": "スマートフィルター"
     },
     "customize-dashboard-streams": {
         "filter": "{{common.filter}}",
@@ -1209,7 +1269,15 @@
         "clear": "{{common.clear}}"
     },
     "shortcuts-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "close-reader": "リーダーを閉じる",
+        "double-click": "ダブルクリック",
+        "toggle-menu": "メニュー",
+        "title": "キーボードショートカット",
+        "next-page": "次のページへ",
+        "go-to": "ページダイアログを開く",
+        "prev-page": "前のページへ",
+        "bookmark": "現在のページをブックマーク"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}"
@@ -1224,7 +1292,14 @@
     "reading-list-detail": {
         "characters-title": "{{series-metadata-detail.characters-title}}",
         "read": "{{common.read}}",
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "incognito-alt": "(シークレットモード)",
+        "no-data": "何も追加しません",
+        "page-settings-title": "ページ設定",
+        "remove-read": "読んだ本を取り除く",
+        "order-numbers-label": "注文番号",
+        "continue": "続き",
+        "read-options-alt": "読書オプション"
     },
     "download-indicator": {
         "progress": "{{percentage}}% ダウンロードされました"
@@ -1236,16 +1311,84 @@
         "edit-user-alt": "次のユーザーを編集する: {{user}}",
         "resend-invite-alt": "{{user}}にもう一度招待を送る",
         "change-password-alt": "{{user}}のパスワードを変更する",
-        "username-pattern": "ユーザー名は、次の文字と空白のみを含むことができます。 {{characters}}"
+        "username-pattern": "ユーザー名は、次の文字と空白のみを含むことができます。 {{characters}}",
+        "sharing-title": "共有:",
+        "never": "もう質問しない",
+        "online-now-tooltip": "オンライン",
+        "you-alt": "(あなた)",
+        "resend": "再送信",
+        "setup-user-tooltip": "セットアップ ユーザー",
+        "edit-user-tooltip": "編集",
+        "pending-title": "ペンディング",
+        "title": "アクティブユーザー",
+        "last-active-title": "最後の活動:",
+        "change-password-tooltip": "パスワード変更",
+        "admin": "アドミン",
+        "roles-title": "役職:",
+        "none": "なし",
+        "no-data": "他の利用者はいません.",
+        "setup": "セットアップ",
+        "invite": "招待",
+        "delete-user-tooltip": "ユーザー削除",
+        "resend-invite-tooltip": "招待状を受け取る"
     },
     "reading-lists": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "create-one-part-1": "作ってみる",
+        "no-data": "読書リストはありません.",
+        "title": "リーディングリスト",
+        "create-one-part-2": "1"
     },
     "manage-tasks-settings": {
         "recurring-tasks-title": "{{title}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "reset-to-default": "{{common.reset-to-default}}"
+        "reset-to-default": "{{common.reset-to-default}}",
+        "title": "定期的なタスク",
+        "library-scan-label": "ライブラリスキャン",
+        "job-title-header": "役職名",
+        "clear-reading-cache-task-success": "キャッシュがクリアされました",
+        "clean-up-want-to-read-task": "読みたいをクリア",
+        "clean-up-want-to-read-task-desc": "ユーザーが完全に読み終えたシリーズで、Want to Readに含まれ、かつ公開ステータスがCompletedのものを削除します。24時間ごとに実行されます。",
+        "clear-reading-cache-task-desc": "読書のためのキャッシュされたファイルをクリアします。前回24時間以内に読んでいたファイルを更新したばかりの場合に便利です。",
+        "cleanup-tooltip": "Kavitaがクリーンアップタスクを実行する頻度です。これは負荷がかかる可能性があり、ほとんどの場合は深夜に実行する必要があります｡",
+        "required": "{{validation.required-field}}",
+        "library-database-backup-label": "Kavitaバックアップ",
+        "cleanup-label": "クリーンアップ",
+        "daily": "デイリー",
+        "weekly": "ウィークリー",
+        "custom": "カスタム",
+        "convert-media-task": "メディアをターゲットエンコーディングに変換する",
+        "convert-media-task-desc": "すべてのkavita-managedメディアをターゲットエンコーディングに変換する長時間実行タスクを実行します。 これは遅いです(特にARMデバイスで).",
+        "convert-media-success": "メディアをターゲットエンコーディングに変換する処理がキューに追加されました｡",
+        "bust-cache-task": "バストキャッシュ",
+        "bust-cache-task-desc": "Kavita+キャッシュをクリアします。悪い一致のデバッグ時にのみ使用するべきです。",
+        "bust-cache-task-success": "Kavita+キャッシュがクリアされました｡",
+        "bust-locale-task-desc": "ロケールキャッシュをクリアします。これにより、更新後に文字列が正しく表示されない問題が修正されることがあります｡",
+        "clear-reading-cache-task": "読書キャッシュのクリア",
+        "adhoc-tasks-title": "アドホックタスク",
+        "description-header": "説明",
+        "custom-label": "カスタムスケジュール（Cron表記）",
+        "cron-notation": "これは有効なCron表記ではありません",
+        "cron-header": "CRON",
+        "disabled": "無効",
+        "bust-locale-task": "ロケールキャッシュをクリアする",
+        "bust-locale-task-success": "ロケールキャッシュがクリアされました｡",
+        "library-scan-tooltip": "Kavitaがライブラリファイルの周りでスキャンおよびメタデータを定期的に更新する頻度です。",
+        "action-header": "アクション",
+        "library-database-backup-tooltip": "Kavitaがデータベースおよびその他の関連ファイルを定期的にバックアップする頻度です。",
+        "last-executed-header": "最終実行",
+        "download-logs-task": "ログをダウンロード",
+        "clean-up-want-to-read-task-success": "読みたいことはクリーンアップされています",
+        "backup-database-task-desc": "データベース、ブックマーク、テーマ、手動でアップロードしたカバー、および構成ファイルのバックアップを取ります。",
+        "backup-database-task": "バックアップデータベース",
+        "backup-database-task-success": "データベースのバックアップのジョブがキューに追加されました",
+        "analyze-files-task": "ファイル分析",
+        "analyze-files-task-desc": "拡張子とサイズを生成するためにファイルを分析する長時間実行されるタスクを実行します。これはv0.7リリースのために一度だけ実行する必要があります。v0.7以降にインストールした場合は不要です。",
+        "download-logs-task-desc": "すべてのログファイルをzipに変換し、ダウンロードします.",
+        "analyze-files-task-success": "ファイルの分析がキューに追加されました",
+        "check-for-updates-task": "アップデートの確認",
+        "check-for-updates-task-desc": "あなたのバージョンよりも新しい安定版があるか確認してください"
     },
     "manage-settings": {
         "save": "{{common.save}}",
@@ -1253,7 +1396,44 @@
         "max-backup-validation": "{{num}}以上のバックアップを持つことはできません｡",
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
-        "field-required": "{{validation.field-required}}"
+        "field-required": "{{validation.field-required}}",
+        "logging-level-tooltip": "問題を特定するのにデバッグを使用します。デバッグは多くのディスクスペースを消費する可能性があります。",
+        "folder-watching-label": "フォルダ監視",
+        "min-days-validation": "最低一日以上必要です",
+        "min-cache-validation": "50メガバイト以上.",
+        "opds-label": "OPDS",
+        "min-backup-validation": "バックアップが1つ以上ある必要があります",
+        "log-label": "ログの日数",
+        "on-deck-last-progress-tooltip": "On Deckをキックする前の最後の進捗からの日数です。",
+        "ip-address-validation": "IP アドレスは、有効な IPv4 または IPv6 アドレスのみを含むことができます",
+        "base-url-validation": "ベースのURLは、/で始まり、/で終わる必要があります。",
+        "ip-address-label": "IPアドレス",
+        "ip-address-tooltip": "サーバーがリッスンするIPアドレスのカンマ区切りのリストです。Dockerで実行している場合は固定されています。有効にするには再起動が必要です。",
+        "log-tooltip": "維持するログの数。 デフォルトは30、最小は1、最大は30です.",
+        "on-deck-last-progress-label": "on deck 最終進捗状況(日)",
+        "allow-stats-label": "匿名利用コレクションを許可",
+        "on-deck-last-chapter-add-tooltip": "On Deckに含めるために最後の章が追加されてからの日数です。",
+        "folder-watching-tooltip": "Kavitaにライブラリフォルダを監視し、変更を検知してこれに対してスキャンを実行する機能を提供します。これにより、手動でスキャンを呼び出すか、夜間のスキャンを待つ必要なく、コンテンツを更新できます。スキャンをトリガーする前に常に10分間待機します。",
+        "min-logs-validation": "少なくとも1つのログを持っている必要があります",
+        "port-tooltip": "サーバーがリッスンするIPアドレスのカンマ区切りのリストです。Dockerで実行している場合は固定されています。有効にするには再起動が必要です。",
+        "backup-label": "日次バックアップ",
+        "backup-tooltip": "維持するバックアップの数。 デフォルトは30、最小は1、最大は30です.",
+        "cache-size-tooltip": "重い API をキャッシュするメモリの量。 デフォルトは75MBです.",
+        "cache-size-label": "キャッシュ サイズ",
+        "send-data": "データの送信",
+        "enable-opds": "OPDSを有効にする",
+        "notice": "お知らせ:",
+        "base-url-label": "BASE URL",
+        "port-label": "ポート",
+        "logging-level-label": "ログレベル",
+        "cache-size-validation": "最低50MB以上が必要です.",
+        "restart-required": "ポート、ベースのURL、キャッシュサイズ、またはIPを変更し有効にするためにKavitaを手動で再起動する必要があります。",
+        "base-url-tooltip": "これを使用すると、KavitaをベースのURL（たとえばyourdomain.com/kavita）でホストできます。ただし、非ルートユーザーを使用しているDockerではサポートされていません。",
+        "opds-tooltip": "OPDSサポートを有効にすると、すべてのユーザーがOPDSを使用してサーバーからコンテンツを読み取りおよびダウンロードできるようになります。",
+        "allow-stats-tooltip-part-1": "Kavitaのサーバーに匿名の使用データを送信します。これには使用された特定の機能、ファイルの数、OSバージョン、Kavitaのインストールバージョン、CPU、およびメモリの情報が含まれます。この情報は機能の優先順位付け、バグ修正、およびパフォーマンスの調整に使用されます。有効にするには再起動が必要です。 ",
+        "allow-stats-tooltip-part-2": "収集するものについて.",
+        "enable-folder-watching": "フォルダ監視を有効にする",
+        "on-deck-last-chapter-add-label": "デッキ最終章追加(日)"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "入る→ {{url}}",
@@ -1302,12 +1482,30 @@
     },
     "cover-image-size": {
         "large": "ラージ(900x1277)",
-        "xlarge": "エクストララージ (1265x1795)"
+        "xlarge": "エクストララージ (1265x1795)",
+        "medium": "ミディアム (640x909)",
+        "default": "デフォルト (320x455)"
     },
     "external-series-card": {
         "open-external": "外部を開く"
     },
     "table-of-contents": {
         "no-data": "この本は、目次がメタデータまたはTOCファイルに設定されていません"
+    },
+    "manage-system": {
+        "discord-title": "Discord:",
+        "donations-title": "寄付:",
+        "title": "システムについて",
+        "wiki-title": "ウィキ:",
+        "feature-request-title": "リクエスト:",
+        "localization-title": "ローカライゼーション",
+        "version-title": "バージョン",
+        "home-page-title": "ホームページ:",
+        "installId-title": "IDのインストール",
+        "more-info-title": "さらなる詳細",
+        "source-title": "ソース:"
+    },
+    "default-date-pipe": {
+        "never": "もう質問しない"
     }
 }
