@@ -156,7 +156,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
-        this.tabs.push({title: 'scrobbling-tab', fragment: FragmentID.Scrobbling});
+        if (this.tabs.filter(t => t.fragment == FragmentID.Scrobbling).length === 0) {
+          this.tabs.push({title: 'scrobbling-tab', fragment: FragmentID.Scrobbling});
+        }
+
         this.hasActiveLicense = true;
         this.cdRef.markForCheck();
       }
