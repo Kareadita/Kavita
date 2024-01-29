@@ -196,7 +196,6 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId)
     {
         if (!await licenseService.HasActiveLicense())
@@ -225,9 +224,11 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (ret == null) return Ok(null);
         await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
-        await PrepareSeriesDetail(userReviews, ret, user);
+        // For some reason if we don't use a different instance, the cache keeps changes made below
+        var newCacheResult = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
+        await PrepareSeriesDetail(userReviews, newCacheResult, user);
 
-        return Ok(ret);
+        return Ok(newCacheResult);
 
     }
 

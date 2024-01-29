@@ -88,8 +88,8 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         return _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
             .Include(s => s.ExternalReviews.Take(limit))
-            .Include(s => s.ExternalRatings.Take(limit))
-            .Include(s => s.ExternalRecommendations.Take(limit))
+            .Include(s => s.ExternalRatings.OrderBy(r => r.AverageScore).Take(limit))
+            .Include(s => s.ExternalRecommendations.OrderBy(r => r.Id).Take(limit))
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }
@@ -104,11 +104,6 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
 
     public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user)
     {
-        var allowedLibraries = await _context.Library
-            .Where(library => library.AppUsers.Any(x => x.Id == user.Id))
-            .Select(l => l.Id)
-            .ToListAsync();
-
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)
             .Include(m => m.ExternalRatings)
@@ -132,7 +127,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .ToList();
 
         var ownedSeriesRecommendations = await _context.Series
-            .Where(s => ownedIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
+            .Where(s => ownedIds.Contains(s.Id))
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
