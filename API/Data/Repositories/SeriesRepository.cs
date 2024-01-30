@@ -363,8 +363,8 @@ public class SeriesRepository : ISeriesRepository
             .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .IsRestricted(QueryContext.Search)
             .AsSplitQuery()
-            .Take(maxRecords)
             .OrderBy(l => l.Name.ToLower())
+            .Take(maxRecords)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -383,8 +383,8 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Library)
             .AsNoTracking()
             .AsSplitQuery()
-            .Take(maxRecords)
             .OrderBy(s => s.SortName!.ToLower())
+            .Take(maxRecords)
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -420,8 +420,8 @@ public class SeriesRepository : ISeriesRepository
             .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
-            .Take(maxRecords)
             .OrderBy(r => r.NormalizedTitle)
+            .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -431,7 +431,6 @@ public class SeriesRepository : ISeriesRepository
             .Where(c => c.Promoted || isAdmin)
             .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.NormalizedTitle)
-            .AsNoTracking()
             .AsSplitQuery()
             .Take(maxRecords)
             .OrderBy(c => c.NormalizedTitle)
@@ -443,8 +442,8 @@ public class SeriesRepository : ISeriesRepository
             .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
             .Distinct()
-            .Take(maxRecords)
             .OrderBy(p => p.NormalizedName)
+            .Take(maxRecords)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -453,8 +452,8 @@ public class SeriesRepository : ISeriesRepository
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
             .Distinct()
-            .Take(maxRecords)
             .OrderBy(t => t.NormalizedTitle)
+            .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -463,8 +462,8 @@ public class SeriesRepository : ISeriesRepository
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
             .Distinct()
-            .Take(maxRecords)
             .OrderBy(t => t.NormalizedTitle)
+            .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -482,8 +481,8 @@ public class SeriesRepository : ISeriesRepository
             result.Files = await _context.MangaFile
                 .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
                 .AsSplitQuery()
-                .Take(maxRecords)
                 .OrderBy(f => f.FilePath)
+                .Take(maxRecords)
                 .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -499,8 +498,8 @@ public class SeriesRepository : ISeriesRepository
                 )
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
-            .Take(maxRecords)
             .OrderBy(c => c.TitleName)
+            .Take(maxRecords)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
