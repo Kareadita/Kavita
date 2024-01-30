@@ -39,7 +39,12 @@ export class ServerService {
   }
 
   checkForUpdate() {
-    return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update', {});
+    return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update');
+  }
+
+  checkHowOutOfDate() {
+    return this.http.get<string>(this.baseUrl + 'server/checkHowOutOfDate', TextResonse)
+      .pipe(map(r => parseInt(r, 10)));
   }
 
   checkForUpdates() {

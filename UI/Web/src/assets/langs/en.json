@@ -546,6 +546,15 @@
         "title": "Announcements"
     },
 
+    "out-of-date-modal": {
+        "title": "Don't fall behind!",
+        "close": "{{common.close}}",
+        "subtitle": "It seems your install is more than {{count}} versions behind!",
+        "description-1": "Please consider upgrading so that you're running the latest version of Kavita.",
+        "description-2": "Take a look at our <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> for instructions on how to update.",
+        "description-3": "If there is a specific reason you haven't updated yet we would love to know what is keeping you on an outdated version! Stop by our discord and let us know what is blocking your upgrade path."
+    },
+
     "changelog": {
         "installed": "Installed",
         "download": "Download",

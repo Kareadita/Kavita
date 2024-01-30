@@ -1,0 +1,18 @@
+<ng-container *transloco="let t; read:'out-of-date-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+
+    <p><strong>{{t('subtitle', {count: versionsOutOfDate})}}</strong></p>
+    <p>{{t('description-1')}}</p>
+    <p [innerHTML]="t('description-2') | safeHtml"></p>
+    <p>{{t('description-3')}}</p>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-link me-1" href="https://discord.gg/b52wT37kt7" target="_blank" rel="noreferrer noopener">Discord</a>
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+  </div>
+
+</ng-container>
