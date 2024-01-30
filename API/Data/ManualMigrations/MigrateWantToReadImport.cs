@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
@@ -17,9 +18,15 @@ public static class MigrateWantToReadImport
     public static async Task Migrate(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<Program> logger)
     {
         var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
+        var outputFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration-imported.csv");
 
-        if (!File.Exists(importFile))
+        logger.LogCritical(
+            "Running MigrateWantToReadImport migration - Please be patient, this may take some time. This is not an error");
+
+        if (!File.Exists(importFile) || File.Exists(outputFile))
         {
+            logger.LogCritical(
+                "Running MigrateWantToReadImport migration - Completed. This is not an error");
             return;
         }
 
@@ -33,14 +40,21 @@ public static class MigrateWantToReadImport
         {
             // Read the values of AppUserId and Id columns
             var appUserId = csvReader.GetField<int>("AppUserId");
+            var seriesId = csvReader.GetField<int>("Id");
             var user = await unitOfWork.UserRepository.GetUserByIdAsync(appUserId, AppUserIncludes.WantToRead);
-            if (user == null) continue;
+            if (user == null || user.WantToRead.Any(w => w.SeriesId == seriesId)) continue;
+
             user.WantToRead.Add(new AppUserWantToRead()
             {
-                SeriesId = csvReader.GetField<int>("Id")
+                SeriesId = seriesId
             });
         }
 
         await unitOfWork.CommitAsync();
+        reader.Close();
+
+        directoryService.CopyFileToDirectory(importFile, outputFile);
+        logger.LogCritical(
+            "Running MigrateWantToReadImport migration - Completed. This is not an error");
     }
 }

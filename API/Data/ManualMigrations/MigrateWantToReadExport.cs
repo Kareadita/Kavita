@@ -70,9 +70,10 @@ public static class MigrateWantToReadExport
             csvWriter.WriteField(id);
             await csvWriter.NextRecordAsync();
         }
+
+
         await result2.CloseAsync();
         writer.Close();
-
 
         logger.LogCritical(
             "Running MigrateWantToReadExport migration - Completed. This is not an error");
