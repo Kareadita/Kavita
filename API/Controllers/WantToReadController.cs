@@ -93,9 +93,8 @@ public class WantToReadController : BaseApiController
         if (user == null) return Unauthorized();
 
         var existingIds = user.WantToRead.Select(s => s.SeriesId).ToList();
-        existingIds.AddRange(dto.SeriesIds);
+        var idsToAdd = dto.SeriesIds.Except(existingIds);
 
-        var idsToAdd = existingIds.Distinct().ToList();
         foreach (var id in idsToAdd)
         {
             user.WantToRead.Add(new AppUserWantToRead()
@@ -103,12 +102,6 @@ public class WantToReadController : BaseApiController
                 SeriesId = id
             });
         }
-
-        // var seriesToAdd =  await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(idsToAdd);
-        // foreach (var series in seriesToAdd)
-        // {
-        //     user.WantToRead.Add(series);
-        // }
 
         if (!_unitOfWork.HasChanges()) return Ok();
         if (await _unitOfWork.CommitAsync())
