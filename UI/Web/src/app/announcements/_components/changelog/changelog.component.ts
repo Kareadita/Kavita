@@ -21,7 +21,6 @@ export class ChangelogComponent implements OnInit {
   constructor(private serverService: ServerService) { }
 
   ngOnInit(): void {
-
     this.serverService.getChangelog().subscribe(updates => {
       this.updates = updates;
       this.isLoading = false;

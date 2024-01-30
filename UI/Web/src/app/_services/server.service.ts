@@ -39,7 +39,7 @@ export class ServerService {
   }
 
   checkForUpdate() {
-    return this.http.get<UpdateVersionEvent>(this.baseUrl + 'server/check-update', {});
+    return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update', {});
   }
 
   checkForUpdates() {

@@ -67,15 +67,6 @@ export class AppComponent implements OnInit {
 
       });
 
-    // Every hour, have the UI check for an update. People seriously stay out of date
-    interval(60 * 60 * 1000) // 60 minutes in milliseconds
-      .pipe(
-        switchMap(() => this.accountService.currentUser$),
-        filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
-        switchMap(_ => this.serverService.checkForUpdates())
-      )
-      .subscribe();
-
 
     this.transitionState$ = this.accountService.currentUser$.pipe(
       tap(user => {
@@ -111,11 +102,17 @@ export class AppComponent implements OnInit {
       // On load, make an initial call for valid license
       this.accountService.hasValidLicense().subscribe();
 
-      interval(4 * 60 * 60 * 1000) // 4 hours in milliseconds
+      // Every hour, have the UI check for an update. People seriously stay out of date
+      interval(60 * 60 * 1000) // 60 minutes in milliseconds
         .pipe(
           switchMap(() => this.accountService.currentUser$),
-          filter(u => this.accountService.hasAdminRole(u!)),
-          switchMap(_ => this.serverService.checkForUpdates())
+          filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
+          switchMap(_ => this.serverService.checkForUpdate()),
+          tap(update => {
+            if (update === null) return;
+            // TODO: pop a notification
+
+          })
         )
         .subscribe();
     }

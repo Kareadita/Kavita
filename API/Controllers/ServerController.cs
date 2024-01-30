@@ -177,10 +177,21 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
+    /// Checks for updates and pushes an event to the UI
+    /// </summary>
+    /// <remarks>Some users have websocket issues so this is not always reliable to alert the user</remarks>
+    [HttpGet("check-for-updates")]
+    public async Task<ActionResult> CheckForAnnouncements()
+    {
+        await _taskScheduler.CheckForUpdate();
+        return Ok();
+    }
+
+    /// <summary>
     /// Checks for updates, if no updates that are > current version installed, returns null
     /// </summary>
     [HttpGet("check-update")]
-    public async Task<ActionResult<UpdateNotificationDto>> CheckForUpdates()
+    public async Task<ActionResult<UpdateNotificationDto?>> CheckForUpdates()
     {
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
@@ -264,14 +275,4 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
-    /// <summary>
-    /// Checks for updates and pushes an event to the UI
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("check-for-updates")]
-    public async Task<ActionResult> CheckForAnnouncements()
-    {
-        await _taskScheduler.CheckForUpdate();
-        return Ok();
-    }
 }

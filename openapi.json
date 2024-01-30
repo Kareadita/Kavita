@@ -9458,6 +9458,20 @@
         }
       }
     },
+    "/api/Server/check-for-updates": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Checks for updates and pushes an event to the UI",
+        "description": "Some users have websocket issues so this is not always reliable to alert the user",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/check-update": {
       "get": {
         "tags": [
@@ -9657,19 +9671,6 @@
           "Server"
         ],
         "summary": "Bust Kavita+ Cache",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Server/check-for-updates": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Checks for updates and pushes an event to the UI",
         "responses": {
           "200": {
             "description": "Success"
