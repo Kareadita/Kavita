@@ -488,9 +488,12 @@ public class CleanupServiceTests : AbstractDbTest
         var user = new AppUser()
         {
             UserName = "CleanupWantToRead_ShouldRemoveFullyReadSeries",
-            WantToRead = new List<Series>()
+            WantToRead = new List<AppUserWantToRead>()
             {
-                s
+                new AppUserWantToRead()
+                {
+                    SeriesId = s.Id
+                }
             }
         };
         _context.AppUser.Add(user);

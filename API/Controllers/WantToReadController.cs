@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.WantToRead;
+using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -91,16 +92,23 @@ public class WantToReadController : BaseApiController
             AppUserIncludes.WantToRead);
         if (user == null) return Unauthorized();
 
-        var existingIds = user.WantToRead.Select(s => s.Id).ToList();
+        var existingIds = user.WantToRead.Select(s => s.SeriesId).ToList();
         existingIds.AddRange(dto.SeriesIds);
 
         var idsToAdd = existingIds.Distinct().ToList();
-
-        var seriesToAdd =  await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(idsToAdd);
-        foreach (var series in seriesToAdd)
+        foreach (var id in idsToAdd)
         {
-            user.WantToRead.Add(series);
+            user.WantToRead.Add(new AppUserWantToRead()
+            {
+                SeriesId = id
+            });
         }
+
+        // var seriesToAdd =  await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(idsToAdd);
+        // foreach (var series in seriesToAdd)
+        // {
+        //     user.WantToRead.Add(series);
+        // }
 
         if (!_unitOfWork.HasChanges()) return Ok();
         if (await _unitOfWork.CommitAsync())
@@ -127,7 +135,9 @@ public class WantToReadController : BaseApiController
             AppUserIncludes.WantToRead);
         if (user == null) return Unauthorized();
 
-        user.WantToRead = user.WantToRead.Where(s => !dto.SeriesIds.Contains(s.Id)).ToList();
+        user.WantToRead = user.WantToRead
+            .Where(s => !dto.SeriesIds.Contains(s.SeriesId))
+            .ToList();
 
         if (!_unitOfWork.HasChanges()) return Ok();
         if (await _unitOfWork.CommitAsync())

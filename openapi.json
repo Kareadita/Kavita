@@ -12545,7 +12545,7 @@
           "wantToRead": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Series"
+              "$ref": "#/components/schemas/AppUserWantToRead"
             },
             "description": "A list of Series the user want's to read",
             "nullable": true
@@ -13263,6 +13263,31 @@
         },
         "additionalProperties": false,
         "description": "A personal table of contents for a given user linked with a given book"
+      },
+      "AppUserWantToRead": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "appUserId": {
+            "type": "integer",
+            "description": "User this table of content belongs to",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "BookChapterItem": {
         "type": "object",

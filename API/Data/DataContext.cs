@@ -62,6 +62,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ExternalRating> ExternalRating { get; set; } = null!;
     public DbSet<ExternalSeriesMetadata> ExternalSeriesMetadata { get; set; } = null!;
     public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
+    public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

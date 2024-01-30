@@ -31,7 +31,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// <summary>
     /// A list of Series the user want's to read
     /// </summary>
-    public ICollection<Series> WantToRead { get; set; } = null!;
+    public ICollection<AppUserWantToRead> WantToRead { get; set; } = null!;
     /// <summary>
     /// A list of Devices which allows the user to send files to
     /// </summary>

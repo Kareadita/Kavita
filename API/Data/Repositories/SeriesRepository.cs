@@ -1043,7 +1043,9 @@ public class SeriesRepository : ISeriesRepository
         var wantToReadStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == FilterField.WantToRead);
         if (wantToReadStmt == null) return query;
 
-        var seriesIds = _context.AppUser.Where(u => u.Id == userId).SelectMany(u => u.WantToRead).Select(s => s.Id);
+        var seriesIds = _context.AppUser.Where(u => u.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Select(s => s.SeriesId);
         if (bool.Parse(wantToReadStmt.Value))
         {
             query = query.Where(s => seriesIds.Contains(s.Id));
@@ -1869,7 +1871,8 @@ public class SeriesRepository : ISeriesRepository
         var query = _context.AppUser
             .Where(user => user.Id == userId)
             .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => libraryIds.Contains(s.Series.LibraryId))
+            .Select(w => w.Series)
             .AsSplitQuery()
             .AsNoTracking();
 
@@ -1884,7 +1887,8 @@ public class SeriesRepository : ISeriesRepository
         var query = _context.AppUser
             .Where(user => user.Id == userId)
             .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => libraryIds.Contains(s.Series.LibraryId))
+            .Select(w => w.Series)
             .AsSplitQuery()
             .AsNoTracking();
 
@@ -1899,7 +1903,8 @@ public class SeriesRepository : ISeriesRepository
         return await _context.AppUser
             .Where(user => user.Id == userId)
             .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => libraryIds.Contains(s.Series.LibraryId))
+            .Select(w => w.Series)
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
@@ -1994,7 +1999,7 @@ public class SeriesRepository : ISeriesRepository
         var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
         return await _context.AppUser
             .Where(user => user.Id == userId)
-            .SelectMany(u => u.WantToRead.Where(s => s.Id == seriesId && libraryIds.Contains(s.LibraryId)))
+            .SelectMany(u => u.WantToRead.Where(s => s.SeriesId == seriesId && libraryIds.Contains(s.Series.LibraryId)))
             .AsSplitQuery()
             .AsNoTracking()
             .AnyAsync();

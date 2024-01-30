@@ -529,6 +529,7 @@ API/config/pre-metadata/
 API/config/post-metadata/
 API/config/relations-imported.csv
 API/config/relations.csv
+API/config/want-to-read-migration.csv
 API.Tests/TestResults/
 UI/Web/.vscode/settings.json
 /API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*
