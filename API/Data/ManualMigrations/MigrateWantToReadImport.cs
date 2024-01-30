@@ -23,7 +23,6 @@ public static class MigrateWantToReadImport
         logger.LogCritical(
             "Running MigrateWantToReadImport migration - Please be patient, this may take some time. This is not an error");
 
-
         if (!File.Exists(importFile) || File.Exists(outputFile))
         {
             logger.LogCritical(
