@@ -38,18 +38,16 @@ public class ServerController : BaseApiController
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
     private readonly IScannerService _scannerService;
-    private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEasyCachingProviderFactory _cachingProviderFactory;
     private readonly ILocalizationService _localizationService;
-    private readonly IEmailService _emailService;
 
     public ServerController(ILogger<ServerController> logger,
-        IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
+        IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService,
+        IStatsService statsService, ICleanupService cleanupService, IScannerService scannerService,
         ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory,
-        ILocalizationService localizationService, IEmailService emailService)
+        ILocalizationService localizationService)
     {
         _logger = logger;
         _backupService = backupService;
@@ -58,12 +56,10 @@ public class ServerController : BaseApiController
         _statsService = statsService;
         _cleanupService = cleanupService;
         _scannerService = scannerService;
-        _accountService = accountService;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _cachingProviderFactory = cachingProviderFactory;
         _localizationService = localizationService;
-        _emailService = emailService;
     }
 
     /// <summary>
