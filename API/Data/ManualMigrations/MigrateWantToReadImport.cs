@@ -18,10 +18,11 @@ public static class MigrateWantToReadImport
     public static async Task Migrate(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<Program> logger)
     {
         var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
-        var outputFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration-imported.csv");
+        var outputFile = Path.Join(directoryService.ConfigDirectory, "imported-want-to-read-migration.csv");
 
         logger.LogCritical(
             "Running MigrateWantToReadImport migration - Please be patient, this may take some time. This is not an error");
+
 
         if (!File.Exists(importFile) || File.Exists(outputFile))
         {
@@ -53,7 +54,7 @@ public static class MigrateWantToReadImport
         await unitOfWork.CommitAsync();
         reader.Close();
 
-        directoryService.CopyFileToDirectory(importFile, outputFile);
+        File.WriteAllLines(outputFile, await File.ReadAllLinesAsync(importFile));
         logger.LogCritical(
             "Running MigrateWantToReadImport migration - Completed. This is not an error");
     }
