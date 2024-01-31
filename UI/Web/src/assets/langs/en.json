@@ -1199,6 +1199,9 @@
         "folder-watching-label": "Folder Watching",
         "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. Will always wait 10 minutes before triggering scan.",
         "enable-folder-watching": "Enable Folder Watching",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}",
 
 
         "reset-to-default": "{{common.reset-to-default}}",
