@@ -1655,7 +1655,8 @@
         "last-chapter-added": "Item Added",
         "time-to-read": "Time to Read",
         "release-year": "Release Year",
-        "read-progress": "Last Read"
+        "read-progress": "Last Read",
+        "average-rating": "Average Rating"
     },
 
     "edit-series-modal": {
