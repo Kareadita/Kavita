@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using API.Services;
@@ -72,8 +73,11 @@ public static class MigrateWantToReadExport
         }
 
 
-        await result2.CloseAsync();
-        writer.Close();
+        try
+        {
+            await result2.CloseAsync();
+            writer.Close();
+        } catch (Exception) {/* Swallow */}
 
         logger.LogCritical(
             "Running MigrateWantToReadExport migration - Completed. This is not an error");
