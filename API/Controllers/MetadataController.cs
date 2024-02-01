@@ -234,7 +234,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
     private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret, AppUser user)
     {
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
