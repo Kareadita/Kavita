@@ -176,7 +176,7 @@
         </li>
 
         <li [ngbNavItem]="TabID.Volumes" *ngIf="ShowVolumeTab">
-          <a ngbNavLink>{{libraryType === LibraryType.Book ? t('books-tab') : t('volumes-tab')}}</a>
+          <a ngbNavLink>{{UseBookLogic ? t('books-tab') : t('volumes-tab')}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">

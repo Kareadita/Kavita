@@ -334,6 +334,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return this.chapters.length > 0;
   }
 
+  get UseBookLogic() {
+    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
+  }
+
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
@@ -374,6 +378,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
         this.renderMode = user.preferences.globalPageLayoutMode;
         this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
+        console.log('setting renderMode', this.renderMode)
         this.cdRef.markForCheck();
       }
     });
@@ -421,6 +426,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
       if (val == null) return;
       this.renderMode = val;
+      console.log('setting renderMode (valueChanges)', this.renderMode)
       this.cdRef.markForCheck();
     });
   }
@@ -599,20 +605,23 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-    
+
     if (loadExternal) {
       this.loadPlusMetadata(this.seriesId);
     }
-    
+
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
-      
+
+      console.log('library type: ', this.libraryType);
       if (this.libraryType === LibraryType.LightNovel) {
         this.renderMode = PageLayoutMode.List;
+        console.log('setting renderMode (manual)', this.renderMode)
+        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
         this.cdRef.markForCheck();
       }
 
@@ -723,7 +732,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (data.ratings) {
         this.ratings = [...data.ratings];
       }
-      
+
 
       // Recommendations
       if (data.recommendations) {

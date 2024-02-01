@@ -28,5 +28,5 @@ public enum LibraryType
     /// Allows Books to Scrobble with AniList for Kavita+
     /// </summary>
     [Description("Light Novel")]
-    LightNovel = 5,
+    LightNovel = 4,
 }
