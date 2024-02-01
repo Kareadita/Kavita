@@ -97,9 +97,9 @@ public class ExternalMetadataService : IExternalMetadataService
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-        if (series == null || series.Library.Type == LibraryType.Comic) return new SeriesDetailPlusDto();
+        if (series == null || series.Library.Type == LibraryType.Comic) return null;
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return new SeriesDetailPlusDto();
+        if (user == null) return null;
 
         var needsRefresh =
             await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId,
