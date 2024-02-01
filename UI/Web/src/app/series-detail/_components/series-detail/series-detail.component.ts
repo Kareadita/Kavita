@@ -587,7 +587,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-    if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
+    if (loadExternal) {
       this.loadPlusMetadata(this.seriesId);
     }
 
@@ -701,10 +701,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // Reviews
       this.reviews = [...data.reviews];
-      this.ratings = [...data.ratings];
+      if (data.ratings) {
+        this.ratings = [...data.ratings];
+      }
+      
 
       // Recommendations
-      this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
+      if (data.recommendations) {
+        this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
+      }
+
       this.hasRecommendations = this.combinedRecs.length > 0;
 
       this.cdRef.markForCheck();

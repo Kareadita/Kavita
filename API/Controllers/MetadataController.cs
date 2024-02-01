@@ -207,7 +207,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (user == null) return Unauthorized();
 
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
-            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .Where(r => !string.IsNullOrEmpty(r.BodyJustText))
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
             .ToList();
 
@@ -221,7 +221,13 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         }
 
         var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
-        if (ret == null) return Ok(null);
+        if (ret == null) return Ok(new SeriesDetailPlusDto()
+        {
+            Reviews = userReviews,
+            Recommendations = null,
+            Ratings = null
+        });
+
         await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
         // For some reason if we don't use a different instance, the cache keeps changes made below
