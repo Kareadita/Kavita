@@ -599,26 +599,23 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-
-    if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
+    
+    if (loadExternal) {
       this.loadPlusMetadata(this.seriesId);
     }
-
-
+    
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
-
-
-
+      this.series = results.series;
+      
       if (this.libraryType === LibraryType.LightNovel) {
         this.renderMode = PageLayoutMode.List;
         this.cdRef.markForCheck();
       }
 
-      this.series = results.series;
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -723,10 +720,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // Reviews
       this.reviews = [...data.reviews];
-      this.ratings = [...data.ratings];
+      if (data.ratings) {
+        this.ratings = [...data.ratings];
+      }
+      
 
       // Recommendations
-      this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
+      if (data.recommendations) {
+        this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
+      }
+
       this.hasRecommendations = this.combinedRecs.length > 0;
 
       this.cdRef.markForCheck();
