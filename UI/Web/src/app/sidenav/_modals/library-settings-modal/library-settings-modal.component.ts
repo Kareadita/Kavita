@@ -74,7 +74,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  @Input({required: true}) library!: Library;
+  @Input({required: true}) library!: Library | undefined;
 
   active = TabID.General;
   imageUrls: Array<string> = [];
@@ -237,8 +237,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   forceScan() {
-    this.libraryService.scan(this.library.id, true)
-      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library.name})));
+    this.libraryService.scan(this.library!.id, true)
+      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name})));
   }
 
   async save() {
@@ -295,7 +295,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   applyCoverImage(coverUrl: string) {
-    this.uploadService.updateLibraryCoverImage(this.library.id, coverUrl).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe(() => {});
   }
 
   updateCoverImageIndex(selectedIndex: number) {
@@ -304,7 +304,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library.id, '').subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, '').subscribe(() => {});
   }
 
   openDirectoryPicker() {

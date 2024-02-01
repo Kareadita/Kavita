@@ -325,6 +325,7 @@ public class ExternalMetadataService : IExternalMetadataService
             LibraryType.Manga => seriesFormat == MangaFormat.Epub ? MediaFormat.LightNovel : MediaFormat.Manga,
             LibraryType.Comic => MediaFormat.Comic,
             LibraryType.Book => MediaFormat.Book,
+            LibraryType.LightNovel => MediaFormat.LightNovel,
             _ => MediaFormat.Unknown
         };
     }

@@ -4,7 +4,8 @@ import {
   DOCUMENT,
   NgClass,
   NgFor,
-  NgIf, NgOptimizedImage,
+  NgIf,
+  NgOptimizedImage,
   NgStyle,
   NgSwitch,
   NgSwitchCase,
@@ -44,7 +45,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {filter, map, take, tap} from 'rxjs/operators';
+import {map, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -129,7 +130,7 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
-const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
+const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.LightNovel];
 
 @Component({
     selector: 'app-series-detail',
@@ -320,6 +321,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
     }
+  }
+
+  get ShowStorylineTab() {
+    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel) && (this.volumes.length > 0 || this.chapters.length > 0);
+  }
+
+  get ShowVolumeTab() {
+    return this.volumes.length > 0;
+  }
+  get ShowChaptersTab() {
+    return this.chapters.length > 0;
   }
 
   get ScrollingBlockHeight() {
@@ -587,15 +599,25 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
+
     if (KavitaPlusSupportedLibraryTypes.includes(this.libraryType) && loadExternal) {
       this.loadPlusMetadata(this.seriesId);
     }
+
 
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
+
+
+
+      if (this.libraryType === LibraryType.LightNovel) {
+        this.renderMode = PageLayoutMode.List;
+        this.cdRef.markForCheck();
+      }
+
       this.series = results.series;
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');

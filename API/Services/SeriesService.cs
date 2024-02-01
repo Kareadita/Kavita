@@ -504,7 +504,7 @@ public class SeriesService : ISeriesService
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
-        if (libraryType == LibraryType.Book)
+        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             foreach (var volume in volumes)
@@ -548,7 +548,7 @@ public class SeriesService : ISeriesService
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;
-        if (libraryType == LibraryType.Book)
+        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             retChapters = Array.Empty<ChapterDto>();
         } else
@@ -591,7 +591,7 @@ public class SeriesService : ISeriesService
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
-        if (libraryType == LibraryType.Book)
+        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
@@ -629,6 +629,7 @@ public class SeriesService : ISeriesService
         return libraryType switch
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
+            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterTitle),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
@@ -651,6 +652,7 @@ public class SeriesService : ISeriesService
         return (libraryType switch
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
+            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", string.Empty),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
@@ -738,7 +740,8 @@ public class SeriesService : ISeriesService
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
         }
-        if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
+        if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) ||
+            (series.Library.Type is LibraryType.Book or LibraryType.LightNovel))
         {
             return _emptyExpectedChapter;
         }
@@ -818,6 +821,7 @@ public class SeriesService : ISeriesService
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
                 LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", "#", result.ChapterNumber),
                 LibraryType.Book => await _localizationService.Translate(userId, "book-num", result.ChapterNumber),
+                LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", result.ChapterNumber),
                 _ => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber)
             };
         }

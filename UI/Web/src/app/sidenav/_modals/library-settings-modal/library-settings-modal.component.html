@@ -2,7 +2,7 @@
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
       <ng-container *ngIf="!isAddLibrary; else addLibraryTitle">
-        {{t('edit-title', {name: library.name | sentenceCase})}}
+        {{t('edit-title', {name: library!.name | sentenceCase})}}
       </ng-container>
       <ng-template #addLibraryTitle>
         {{t('add-title')}}
@@ -43,7 +43,7 @@
             </div>
             <div *ngIf="!isAddLibrary">
               {{t('last-scanned-label')}}
-              <span>{{library.lastScanned | date: 'short' | defaultDate}}</span>
+              <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
             </div>
           </ng-template>
         </li>

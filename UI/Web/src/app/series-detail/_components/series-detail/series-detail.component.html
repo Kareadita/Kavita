@@ -133,7 +133,7 @@
 
       </div>
 
-      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata?.summary?.length === 0}">
+      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata.summary.length === 0}">
         <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
                            iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
                            [clickableTitle]="true" (sectionClick)="openReviewModal()">
@@ -147,7 +147,7 @@
     <ng-container *ngIf="series">
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
-        <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
+        <li [ngbNavItem]="TabID.Storyline" *ngIf="ShowStorylineTab">
           <a ngbNavLink>{{t('storyline-tab')}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
@@ -175,7 +175,7 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
+        <li [ngbNavItem]="TabID.Volumes" *ngIf="ShowVolumeTab">
           <a ngbNavLink>{{libraryType === LibraryType.Book ? t('books-tab') : t('volumes-tab')}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
@@ -196,7 +196,7 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
+        <li [ngbNavItem]="TabID.Chapters" *ngIf="ShowChaptersTab">
           <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
