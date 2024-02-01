@@ -495,7 +495,7 @@
     "invite-user": {
         "title": "Convidar Usuário",
         "close": "{{common.close}}",
-        "description": "Convide um usuário para o seu servidor digitando o email dele. Eles receberão um e-mail para criar uma conta. Para que isso funcione você deve ter o campo Host Name definido no <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> ou acesse sua instância por meio de sua URL remoto. <br/><br/>Como alternativa, você pode usar um nome de usuário, mas observe que as redefinições de senha não estarão disponíveis para contas baseadas em nome de usuário. Se não quiser usar nosso serviço de e-mail, você pode hospedar seu próprio serviço de e-mail.",
+        "description": "Convide um usuário para o seu servidor digitando o email dele. Eles receberão um e-mail para criar uma conta. Para que isso funcione, você deve ter os campos de configuração Nome do host e Email definidos na aba he <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> , caso contrário, um link será apresentado para você configurar em nome do usuário. <br/><br/>O e-mail não precisa ser válido.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Usuário Convidado",
@@ -1089,8 +1089,8 @@
         "title": "Tarefas Recorrentes",
         "library-scan-label": "Escanear Biblioteca",
         "library-scan-tooltip": "Com que frequência o Kavita verificará e atualizará os metadados nos arquivos da biblioteca.",
-        "library-database-backup-label": "Backup do Banco de Dados da Biblioteca",
-        "library-database-backup-tooltip": "Com que frequência o Kavita fará backup do banco de dados.",
+        "library-database-backup-label": "Backup Kavita",
+        "library-database-backup-tooltip": "Com que frequência o Kavita fará backup do banco de dados e de outros arquivos relacionados.",
         "adhoc-tasks-title": "Tarefas Ad-hocs",
         "job-title-header": "Título da Tarefa",
         "description-header": "Descrição",
@@ -1132,7 +1132,7 @@
         "disabled": "Desabilitado",
         "daily": "Diário",
         "custom-label": "Personalizar Agenda (Notação Cron)",
-        "cron-notation": "Você deve usar a notação cron para agendamento personalizado",
+        "cron-notation": "Esta não é uma notação Cron válida",
         "weekly": "Semanal",
         "custom": "Personalizado"
     },
