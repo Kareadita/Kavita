@@ -3,12 +3,12 @@
   "version": "0.7.12.1",
   "scripts": {
     "ng": "ng",
-    "start": "npm run cache-langs && ng serve",
-    "build": "npm run cache-langs && ng build",
+    "start": "npm run cache-locale && ng serve",
+    "build": "npm run cache-locale && ng build",
     "minify-langs": "node minify-json.js",
-    "cache-langs": "node hash-localization.js",
-    "cache-langs-prime": "node hash-localization-prime.js",
-    "prod": "npm run cache-langs-prime && ng build --configuration production &&  npm run minify-langs && npm run cache-langs",
+    "cache-locale": "node hash-localization.js",
+    "cache-locale-prime": "node hash-localization-prime.js",
+    "prod": "npm run cache-locale-prime && ng build --configuration production &&  npm run minify-langs && npm run cache-locale",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
     "e2e": "ng e2e"

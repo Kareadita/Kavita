@@ -6,6 +6,21 @@
       </div>
 
       <div class="mb-3">
+        <label for="settings-hostname" class="form-label">{{t('host-name-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
+        <ng-template #hostNameTooltip>{{t('host-name-tooltip')}}</ng-template>
+        <span class="visually-hidden" id="settings-hostname-help">
+          <ng-container [ngTemplateOutlet]="hostNameTooltip"></ng-container>
+        </span>
+        <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
+               [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
+        <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
+          <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
+            {{t('host-name-validation')}}
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
         <label for="settings-baseurl" class="form-label">{{t('base-url-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
         <ng-template #baseUrlTooltip>{{t('base-url-tooltip')}}</ng-template>
         <span class="visually-hidden" id="settings-cachedir-help">

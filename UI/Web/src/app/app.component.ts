@@ -13,6 +13,8 @@ import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.compon
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerService} from "./_services/server.service";
+import {ImportCblModalComponent} from "./reading-list/_modals/import-cbl-modal/import-cbl-modal.component";
+import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 
 @Component({
     selector: 'app-root',
@@ -67,15 +69,6 @@ export class AppComponent implements OnInit {
 
       });
 
-    // Every hour, have the UI check for an update. People seriously stay out of date
-    // interval(60 * 60 * 1000) // 60 minutes in milliseconds
-    //   .pipe(
-    //     switchMap(() => this.accountService.currentUser$),
-    //     filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
-    //     switchMap(_ => this.serverService.checkForUpdates())
-    //   )
-    //   .subscribe();
-
 
     this.transitionState$ = this.accountService.currentUser$.pipe(
       tap(user => {
@@ -111,11 +104,21 @@ export class AppComponent implements OnInit {
       // On load, make an initial call for valid license
       this.accountService.hasValidLicense().subscribe();
 
-      interval(4 * 60 * 60 * 1000) // 4 hours in milliseconds
+      // Every hour, have the UI check for an update. People seriously stay out of date
+      interval(2* 60 * 60 * 1000) // 2 hours in milliseconds
         .pipe(
           switchMap(() => this.accountService.currentUser$),
-          filter(u => this.accountService.hasAdminRole(u!)),
-          switchMap(_ => this.serverService.checkForUpdates())
+          filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
+          switchMap(_ => this.serverService.checkHowOutOfDate()),
+          filter(versionOutOfDate => {
+            return !isNaN(versionOutOfDate) && versionOutOfDate > 2;
+          }),
+          tap(versionOutOfDate => {
+            if (!this.ngbModal.hasOpenModals()) {
+              const ref = this.ngbModal.open(OutOfDateModalComponent, {size: 'xl', fullscreen: 'md'});
+              ref.componentInstance.versionsOutOfDate = 3;
+            }
+          })
         )
         .subscribe();
     }

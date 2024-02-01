@@ -488,13 +488,19 @@ public class CleanupServiceTests : AbstractDbTest
         var user = new AppUser()
         {
             UserName = "CleanupWantToRead_ShouldRemoveFullyReadSeries",
-            WantToRead = new List<Series>()
-            {
-                s
-            }
         };
         _context.AppUser.Add(user);
 
+        await _unitOfWork.CommitAsync();
+
+        // Add want to read
+        user.WantToRead = new List<AppUserWantToRead>()
+        {
+            new AppUserWantToRead()
+            {
+                SeriesId = s.Id
+            }
+        };
         await _unitOfWork.CommitAsync();
 
         await _readerService.MarkSeriesAsRead(user, s.Id);

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.13.10"
+    "version": "0.7.13.11"
   },
   "servers": [
     {
@@ -9458,6 +9458,20 @@
         }
       }
     },
+    "/api/Server/check-for-updates": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Checks for updates and pushes an event to the UI",
+        "description": "Some users have websocket issues so this is not always reliable to alert the user",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/check-update": {
       "get": {
         "tags": [
@@ -9657,19 +9671,6 @@
           "Server"
         ],
         "summary": "Bust Kavita+ Cache",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Server/check-for-updates": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Checks for updates and pushes an event to the UI",
         "responses": {
           "200": {
             "description": "Success"
@@ -12545,7 +12546,7 @@
           "wantToRead": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Series"
+              "$ref": "#/components/schemas/AppUserWantToRead"
             },
             "description": "A list of Series the user want's to read",
             "nullable": true
@@ -13263,6 +13264,31 @@
         },
         "additionalProperties": false,
         "description": "A personal table of contents for a given user linked with a given book"
+      },
+      "AppUserWantToRead": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "appUserId": {
+            "type": "integer",
+            "description": "User this table of content belongs to",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "BookChapterItem": {
         "type": "object",
@@ -19034,7 +19060,8 @@
               4,
               5,
               6,
-              7
+              7,
+              8
             ],
             "type": "integer",
             "format": "int32"
@@ -20339,7 +20366,7 @@
           },
           "number": {
             "type": "number",
-            "description": "This will map to MinNumber. Number was removed in v0.7.13.8",
+            "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
             "format": "float",
             "deprecated": true
           },

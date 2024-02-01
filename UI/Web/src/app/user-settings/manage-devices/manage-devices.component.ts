@@ -12,8 +12,9 @@ import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { NgIf, NgFor } from '@angular/common';
 import { EditDeviceComponent } from '../edit-device/edit-device.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {SettingsService} from "../../admin/settings.service";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
     selector: 'app-manage-devices',
@@ -28,6 +29,7 @@ export class ManageDevicesComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly deviceService = inject(DeviceService);
   private readonly settingsService = inject(SettingsService);
+  private readonly confirmService = inject(ConfirmService);
 
   devices: Array<Device> = [];
   addDeviceIsCollapsed: boolean = true;
@@ -53,7 +55,8 @@ export class ManageDevicesComponent implements OnInit {
     });
   }
 
-  deleteDevice(device: Device) {
+  async deleteDevice(device: Device) {
+    if (!await this.confirmService.confirm(translate('toasts.delete-device'))) return;
     this.deviceService.deleteDevice(device.id).subscribe(() => {
       const index = this.devices.indexOf(device);
       this.devices.splice(index, 1);

@@ -40,7 +40,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
-      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, []));
+      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
 
       this.settingsForm.addControl('host', new FormControl(this.serverSettings.smtpConfig.host, []));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.smtpConfig.port, []));

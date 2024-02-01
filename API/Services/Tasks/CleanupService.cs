@@ -288,8 +288,8 @@ public class CleanupService : ICleanupService
             var seriesIds = series.Select(s => s.Id).ToList();
             if (seriesIds.Count == 0) continue;
 
-            user.WantToRead ??= new List<Series>();
-            user.WantToRead = user.WantToRead.Where(s => !seriesIds.Contains(s.Id)).ToList();
+            user.WantToRead ??= new List<AppUserWantToRead>();
+            user.WantToRead = user.WantToRead.Where(s => !seriesIds.Contains(s.SeriesId)).ToList();
             _unitOfWork.UserRepository.Update(user);
         }
 

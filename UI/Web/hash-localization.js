@@ -14,6 +14,12 @@ function generateChecksum(str, algorithm, encoding) {
 
 const result = {};
 
+// Remove file if it exists
+const cacheBustingFilePath = './i18n-cache-busting.json';
+if (fs.existsSync(cacheBustingFilePath)) {
+    fs.unlinkSync(cacheBustingFilePath);
+}
+
 glob.sync(`${jsonFilesDir}**/*.json`).forEach(path => {
     let tokens = path.split('dist\\browser\\assets\\langs\\');
     if (tokens.length === 1) {

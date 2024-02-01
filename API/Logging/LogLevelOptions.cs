@@ -73,8 +73,10 @@ public static class LogLevelOptions
 
         if (isRequestLoggingMiddleware)
         {
-            if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/api/health") return false;
-            if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/hubs/messages") return false;
+            var path = e.Properties["Path"].ToString().Replace("\"", string.Empty);
+            if (e.Properties.ContainsKey("Path") && path == "/api/health") return false;
+            if (e.Properties.ContainsKey("Path") && path == "/hubs/messages") return false;
+            if (e.Properties.ContainsKey("Path") && path.StartsWith("/api/image")) return false;
         }
 
         return true;

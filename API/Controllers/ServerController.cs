@@ -38,18 +38,16 @@ public class ServerController : BaseApiController
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
     private readonly IScannerService _scannerService;
-    private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEasyCachingProviderFactory _cachingProviderFactory;
     private readonly ILocalizationService _localizationService;
-    private readonly IEmailService _emailService;
 
     public ServerController(ILogger<ServerController> logger,
-        IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
+        IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService,
+        IStatsService statsService, ICleanupService cleanupService, IScannerService scannerService,
         ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory,
-        ILocalizationService localizationService, IEmailService emailService)
+        ILocalizationService localizationService)
     {
         _logger = logger;
         _backupService = backupService;
@@ -58,12 +56,10 @@ public class ServerController : BaseApiController
         _statsService = statsService;
         _cleanupService = cleanupService;
         _scannerService = scannerService;
-        _accountService = accountService;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _cachingProviderFactory = cachingProviderFactory;
         _localizationService = localizationService;
-        _emailService = emailService;
     }
 
     /// <summary>
@@ -181,10 +177,21 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
+    /// Checks for updates and pushes an event to the UI
+    /// </summary>
+    /// <remarks>Some users have websocket issues so this is not always reliable to alert the user</remarks>
+    [HttpGet("check-for-updates")]
+    public async Task<ActionResult> CheckForAnnouncements()
+    {
+        await _taskScheduler.CheckForUpdate();
+        return Ok();
+    }
+
+    /// <summary>
     /// Checks for updates, if no updates that are > current version installed, returns null
     /// </summary>
     [HttpGet("check-update")]
-    public async Task<ActionResult<UpdateNotificationDto>> CheckForUpdates()
+    public async Task<ActionResult<UpdateNotificationDto?>> CheckForUpdates()
     {
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
@@ -268,14 +275,4 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
-    /// <summary>
-    /// Checks for updates and pushes an event to the UI
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("check-for-updates")]
-    public async Task<ActionResult> CheckForAnnouncements()
-    {
-        await _taskScheduler.CheckForUpdate();
-        return Ok();
-    }
 }

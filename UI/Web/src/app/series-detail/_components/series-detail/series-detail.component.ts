@@ -288,7 +288,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters;
 
     // We must augment chapter indices as Bulk Selection assumes all on one page, but Storyline has mixed
-    const chapterIndexModifier = this.activeTabId === TabID.Storyline ? this.volumes.length + 1 : 0;
+    const chapterIndexModifier = this.activeTabId === TabID.Storyline ? this.volumes.length : 0;
     const selectedChapterIds = chapterArray.filter((_chapter, index: number) => {
       const mappedIndex = index + chapterIndexModifier;
       return selectedChapterIndexes.includes(mappedIndex + '');
