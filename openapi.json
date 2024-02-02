@@ -7198,7 +7198,7 @@
         "tags": [
           "Review"
         ],
-        "summary": "",
+        "summary": "Deletes the user's review for the given series",
         "parameters": [
           {
             "name": "seriesId",

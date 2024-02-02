@@ -865,8 +865,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
 
     modalRef.closed.subscribe((closeResult) => {
-      // BUG: This never executes!
-      console.log('Close Result: ')
       this.updateOrDeleteReview(closeResult);
     });
 

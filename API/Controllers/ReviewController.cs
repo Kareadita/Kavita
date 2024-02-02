@@ -63,9 +63,8 @@ public class ReviewController : BaseApiController
     }
 
     /// <summary>
-    ///
+    /// Deletes the user's review for the given series
     /// </summary>
-    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpDelete]
     public async Task<ActionResult> DeleteReview(int seriesId)
