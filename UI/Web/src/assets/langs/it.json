@@ -58,7 +58,8 @@
         "title": "Modifica revisione",
         "review-label": "Revisione",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -216,7 +217,6 @@
         "permission-error": "Non sei autorizzato a modificare la tua password. Contatta l'amministratore del server."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
         "current-password-label": "Password Corrente",
         "email-not-confirmed": "Questa email non è stata confermata",
         "email-updated-title": "Email Aggiornata",
@@ -229,7 +229,8 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrizione per età",
@@ -497,7 +498,9 @@
         "invite-url-label": "URL invito",
         "invite": "Invito",
         "inviting": "Sto Invitando…",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "notice": "{{manage-settings.notice}}",
+        "email-not-sent": "{{toasts.email-not-sent}}"
     },
     "library-selector": {
         "title": "Librerie",
@@ -522,8 +525,9 @@
         "activate-description": "Inserisci il codice di licenza e l'e-mail utilizzati per registrarti con Stripe",
         "activate-license-label": "Chiave Licenza",
         "activate-email-label": "{{common.email}}",
-        "activate-delete": "Eliminare",
-        "activate-save": "{{common.save}}"
+        "activate-delete": "{{common.delete}}",
+        "activate-save": "{{common.save}}",
+        "activate-reset": "{{common.reset}}"
     },
     "book-line-overlay": {
         "copy": "Copia",
@@ -944,7 +948,9 @@
         "host-name-tooltip": "Nome di dominio (del proxy inverso). Se impostato, la generazione della posta elettronica utilizzerà sempre questo.",
         "host-name-validation": "Il nome host deve iniziare con http(s) e non terminare con /",
         "reset-to-default": "{{common.reset-to-default}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "manage-library": {
         "title": "Librerie",
@@ -1035,7 +1041,10 @@
         "max-backup-validation": "Non puoi avere più di {{num}} backup",
         "min-backup-validation": "Devi avere almeno 1 backup",
         "ip-address-validation": "Gli indirizzi IP possono contenere solo indirizzi IPv4 o IPv6 validi",
-        "base-url-validation": "L'URL di base deve iniziare e terminare con /"
+        "base-url-validation": "L'URL di base deve iniziare e terminare con /",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "manage-system": {
         "title": "Informazioni sul sistema",
@@ -1047,7 +1056,7 @@
         "discord-title": "Discord:",
         "donations-title": "Donazioni:",
         "source-title": "Sorgente:",
-        "feature-request-title": "Richieste di funzionalità"
+        "feature-request-title": "Richieste di funzionalità:"
     },
     "manage-tasks-settings": {
         "title": "Task ricorrenti",
@@ -1896,5 +1905,8 @@
         "archive": "Archivio",
         "pdf": "Pdf",
         "image": "Immagine"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
     }
 }

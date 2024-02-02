@@ -495,7 +495,7 @@
     "invite-user": {
         "title": "Convidar Utilizador",
         "close": "{{common.close}}",
-        "description": "Convide um utilizador para o servidor ao introduzir um email. O utilizador receberá um email para criar a conta. Para que isto funcione tem de preencher o campo \"Host Name\" na aba <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> ou aceder à sua instância a partir do URL remoto. <br/><br/> Alternativamente poderá usar um nome de utilizador, mas tenha em consideração que os resets de password não estarão disponíveis para contas baseadas em nome de utilizador. Se não quiser usar o nosso serviço de email, poderá usar um serviço hospedado por si.",
+        "description": "Convide um utilizador para o servidor ao introduzir um email. O utilizador receberá um email para criar a conta. Para que isto funcione tem de preencher os campos \"Host Name\" e \"Email\" na aba <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a>, caso contrário irá ser mostrado um link para fazer a configuração pelo utilizador. <br/><br/>O email não tem de ser válido.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Utilizador convidado",
@@ -973,7 +973,13 @@
         "username-label": "Nome de utilizador",
         "size-limit-label": "Limite de Tamanho",
         "size-limit-tooltip": "Quantos bytes suporta o Servidor de Email para os anexos",
-        "customized-templates-tooltip": "O Kavita deve usar uma diretoria de configurações/templates para os templates em vez do comportamento por defeito? Ficará responsável por manter essa diretoria atualizada com as alterações de template."
+        "customized-templates-tooltip": "O Kavita deve usar uma diretoria de configurações/templates para os templates em vez do comportamento por defeito? Ficará responsável por manter essa diretoria atualizada com as alterações de template.",
+        "sender-displayname-tooltip": "O nome que o destinatário verá quando receber o email",
+        "sender-address-tooltip": "Este é o endereço de e-mail que o destinatário verá quando receber o email. Normalmente, o endereço de email associado à conta.",
+        "host-tooltip": "Endereço de saída/SMTP do seu servidor de email",
+        "username-tooltip": "O nome de utilizador usado para autenticar no host",
+        "outlook-label": "Outlook",
+        "gmail-label": "Gmail"
     },
     "manage-library": {
         "title": "Bibliotecas",
@@ -1064,7 +1070,10 @@
         "max-backup-validation": "Não pode ter mais que {{num}} backup",
         "min-backup-validation": "Tem de ter no mínimo 1 backup",
         "ip-address-validation": "Os endereços IP têm de ser endereços IPv4 ou IPv6 válidos",
-        "base-url-validation": "O URL Base tem de começar e terminar com /"
+        "base-url-validation": "O URL Base tem de começar e terminar com /",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "manage-system": {
         "title": "Sobre o Sistema",
@@ -1076,14 +1085,15 @@
         "discord-title": "Discord:",
         "donations-title": "Donativos:",
         "source-title": "Código fonte:",
-        "feature-request-title": "Pedidos de Funcionalidades"
+        "feature-request-title": "Pedidos de Funcionalidades:",
+        "localization-title": "Idiomas:"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
         "library-scan-label": "Análisar Biblioteca",
         "library-scan-tooltip": "A frequência com que o Kavita analisa e refresca os metadados dos ficheiros das bibliotecas.",
-        "library-database-backup-label": "Cópia de segurança da BD da Biblioteca",
-        "library-database-backup-tooltip": "Com que frequência o Kavita faz uma cópia de segurança da BD.",
+        "library-database-backup-label": "Cópia de segurança do Kavita",
+        "library-database-backup-tooltip": "Com que frequência o Kavita faz uma cópia de segurança da BD e outros ficheiros relacionados.",
         "adhoc-tasks-title": "Tarefas Ad-hoc",
         "job-title-header": "Título da Tarefa",
         "description-header": "Descrição",
@@ -1118,7 +1128,16 @@
         "check-for-updates-task-desc": "Verificar se há algum lançamento Estável posterior à sua versão.",
         "bust-locale-task-desc": "Limpa a cache de traduções. Isto pode resolver problemas de textos que não estão correctos a seguir a uma atualização",
         "bust-locale-task-success": "Cache de Traduções limpa",
-        "bust-locale-task": "Limpar Cache de Traduções"
+        "bust-locale-task": "Limpar Cache de Traduções",
+        "custom-label": "Agendamento Personalizado (Notação Cron)",
+        "disabled": "Desabilitado",
+        "required": "{{validation.required-field}}",
+        "cron-notation": "Isto não é uma Notação Cron válida",
+        "cleanup-label": "Limpar",
+        "cleanup-tooltip": "Frequência com que o Kavita corre as tarefas de limpeza. Estas tarefas podem ser pesadas e, na maioria dos casos, devem ser feitas à meia noite",
+        "custom": "Personalizado",
+        "daily": "Diário",
+        "weekly": "Semanal"
     },
     "manage-users": {
         "title": "Utilizadores Ativos",
@@ -1145,7 +1164,8 @@
         "sharing-title": "A Partilhar:",
         "no-data": "Não existem outros utilizadores.",
         "loading": "{{common.loading}}",
-        "username-pattern": "O nome de utilizador só pode conter os seguintes caracteres e o espaço em branco: {{characters}}"
+        "username-pattern": "O nome de utilizador só pode conter os seguintes caracteres e o espaço em branco: {{characters}}",
+        "admin": "Admin"
     },
     "edit-collection-tags": {
         "title": "Editar Coleção {{collectionName}}",
@@ -1427,7 +1447,8 @@
         "last-chapter-added": "Item Adicionado",
         "time-to-read": "Tempo para Ler",
         "release-year": "Ano de Lançamento",
-        "read-progress": "Última Leitura"
+        "read-progress": "Última Leitura",
+        "average-rating": "Classificação Média"
     },
     "edit-series-modal": {
         "title": "Detalhes de {{seriesName}}",
@@ -1663,7 +1684,8 @@
         "k+-reset-key": "Isto irá desassociar a sua chave do servidor e permitir voltar a registar uma instância Kavita.",
         "email-not-sent-test": "Ocorreu uma exceção ao enviar o email. Verifique os logs para mais detalhes. Este problema indica configurações erradas.",
         "change-email-no-email": "O Email foi atualizado",
-        "anilist-token-expired": "O seu token AniList expirou. O processo de scrobbling não irá funcionar enquanto não voltar a gerar um novo token em Definições de Utilizador > Conta"
+        "anilist-token-expired": "O seu token AniList expirou. O processo de scrobbling não irá funcionar enquanto não voltar a gerar um novo token em Definições de Utilizador > Conta",
+        "delete-device": "Tem a certeza que deseja eliminar este dispositivo?"
     },
     "actionable": {
         "scan-library": "Analisar Biblioteca",
@@ -1803,7 +1825,8 @@
         "file-path": "Caminho do Ficheiro",
         "want-to-read": "Leituras Futuras",
         "collection-tags": "Tags de Coleção",
-        "path": "Caminho"
+        "path": "Caminho",
+        "average-rating": "Classificação Média"
     },
     "metadata-builder": {
         "remove-rule": "Remover Linha",
@@ -1821,7 +1844,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Percentagem",
-        "unit-reading-date": "Data"
+        "unit-reading-date": "Data",
+        "unit-average-rating": "Classificação Média (Kavita+) - apenas para séries em cache"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -1933,5 +1957,13 @@
         "archive": "Arquivo",
         "pdf": "Pdf",
         "image": "Imagem"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}",
+        "description-1": "Por favor pondere atualizar para que esteja a usar a última versão do Kavita.",
+        "title": "Não fique para trás!",
+        "description-3": "Se existir uma razão específica para não ter atualizado gostaríamos de saber os seus motivos! Vá ao nosso discord e diga-nos o que está a impedi-lo de fazer a atualização.",
+        "subtitle": "A sua instalação está mais de {{count}} versões atrasada!",
+        "description-2": "Veja no nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> as instruções sobre como atualizar."
     }
 }

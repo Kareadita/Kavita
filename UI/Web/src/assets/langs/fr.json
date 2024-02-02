@@ -1354,7 +1354,10 @@
         "ip-address-label": "Adresses IP",
         "ip-address-validation": "Les adresses IP ne peuvent contenir que des adresses IPv4 ou IPv6 valides",
         "max-backup-validation": "Vous ne pouvez pas avoir plus de {{num}} sauvegarde(s)",
-        "cache-size-validation": "Vous devez disposer d'au moins 50 Mo."
+        "cache-size-validation": "Vous devez disposer d'au moins 50 Mo.",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "manage-system": {
         "discord-title": "Discord :",
@@ -1952,5 +1955,8 @@
     },
     "next-expected-card": {
         "title": "~{{date}}"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
     }
 }

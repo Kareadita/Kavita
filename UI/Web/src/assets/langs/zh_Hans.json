@@ -1070,7 +1070,10 @@
         "max-backup-validation": "不能超过{{num}}个备份",
         "min-backup-validation": "至少 1 个备份",
         "ip-address-validation": "IP地址只能包含有效的IPv4或IPv6地址",
-        "base-url-validation": "基本URL必须以/开头和结尾"
+        "base-url-validation": "基本URL必须以/开头和结尾",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "manage-system": {
         "title": "关于系统",
@@ -1952,5 +1955,8 @@
         "archive": "档案",
         "pdf": "Pdf",
         "image": "图片"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
     }
 }
