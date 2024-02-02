@@ -298,7 +298,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         try
         {
-            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-info")
+            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
