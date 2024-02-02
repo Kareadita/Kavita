@@ -1736,7 +1736,10 @@
         "allow-stats-tooltip-part-1": "Kavitaのサーバーに匿名の使用データを送信します。これには使用された特定の機能、ファイルの数、OSバージョン、Kavitaのインストールバージョン、CPU、およびメモリの情報が含まれます。この情報は機能の優先順位付け、バグ修正、およびパフォーマンスの調整に使用されます。有効にするには再起動が必要です。 ",
         "allow-stats-tooltip-part-2": "収集するものについて.",
         "enable-folder-watching": "フォルダ監視を有効にする",
-        "on-deck-last-chapter-add-label": "デッキ最終章追加(日)"
+        "on-deck-last-chapter-add-label": "デッキ最終章追加(日)",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "入る→ {{url}}",
@@ -1952,5 +1955,8 @@
         "valid-email": "これは有効な電子メールでなければなりません",
         "password-validation": "パスワードは6文字と32文字の間の長さでなければなりません",
         "required-field": "必須項目"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
     }
 }

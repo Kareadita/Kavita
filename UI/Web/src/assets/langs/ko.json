@@ -228,7 +228,10 @@
         "min-cache-validation": "50MB여야 합니다.",
         "max-backup-validation": "{{num}}개 이상의 백업을 가질 수 없습니다",
         "min-backup-validation": "백업이 1개 이상 있어야 합니다",
-        "base-url-validation": "기본 URL은 /로 시작하고 끝나야 합니다"
+        "base-url-validation": "기본 URL은 /로 시작하고 끝나야 합니다",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "manage-users": {
         "resend": "재전송",
@@ -919,7 +922,9 @@
         "password-label": "패스워드",
         "size-limit-label": "크기 제한",
         "size-limit-tooltip": "이메일 서버는 첨부 파일에 대해 몇 바이트까지 처리할 수 있나요",
-        "customized-templates-tooltip": "Kavita는 기본 대신 config/templates 디렉토리를 템플릿에 사용해야 할까요? 템플릿 변경 사항을 최신으로 유지하는 것은 여러분의 책임입니다."
+        "customized-templates-tooltip": "Kavita는 기본 대신 config/templates 디렉토리를 템플릿에 사용해야 할까요? 템플릿 변경 사항을 최신으로 유지하는 것은 여러분의 책임입니다.",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "manage-scrobble-errors": {
         "edit-item-alt": "편집 {{seriesName}}",
@@ -1933,5 +1938,8 @@
         "archive": "아카이브",
         "pdf": "Pdf",
         "image": "Image"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
     }
 }

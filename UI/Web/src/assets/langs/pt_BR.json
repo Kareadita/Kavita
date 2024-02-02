@@ -1070,7 +1070,10 @@
         "max-backup-validation": "Você não pode ter mais de {{num}} backups",
         "min-backup-validation": "Você deve ter pelo menos 1 backup",
         "ip-address-validation": "Endereços IP só podem conter endereços IPv4 ou IPv6 válidos",
-        "base-url-validation": "O URL base deve começar e terminar com /"
+        "base-url-validation": "O URL base deve começar e terminar com /",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}"
     },
     "manage-system": {
         "title": "Sobre o Sistema",
@@ -1444,7 +1447,8 @@
         "last-chapter-added": "Item Adicionado",
         "time-to-read": "Tempo para Ler",
         "release-year": "Ano de Lançamento",
-        "read-progress": "Última Leitura"
+        "read-progress": "Última Leitura",
+        "average-rating": "Avaliação Média"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -1680,7 +1684,8 @@
         "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo.",
         "anilist-token-expired": "Seu token AniList expirou. O scrobbling não será mais processado até que você o gere novamente nas Configurações do Usuário > Conta",
         "email-not-sent-test": "Houve uma exceção ao enviar o e-mail. Verifique os registros para obter detalhes. Isso indica configurações inadequadas.",
-        "change-email-no-email": "O e-mail foi atualizado"
+        "change-email-no-email": "O e-mail foi atualizado",
+        "delete-device": "Tem certeza de que deseja excluir este dispositivo?"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1952,5 +1957,13 @@
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}",
+        "description-1": "Considere atualizar para executar a versão mais recente do Kavita.",
+        "description-2": "Dê uma olhada em nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obter instruções sobre como atualizar.",
+        "title": "Não fique para trás!",
+        "subtitle": "Parece que sua instalação está mais de {{count}} versões atrasada!",
+        "description-3": "Se houver um motivo específico para você ainda não ter atualizado, adoraríamos saber o que o mantém em uma versão desatualizada! Visite nosso discord e conte-nos o que está bloqueando seu caminho de atualização."
     }
 }
