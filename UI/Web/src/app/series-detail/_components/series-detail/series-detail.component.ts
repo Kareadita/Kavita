@@ -4,7 +4,8 @@ import {
   DOCUMENT,
   NgClass,
   NgFor,
-  NgIf, NgOptimizedImage,
+  NgIf,
+  NgOptimizedImage,
   NgStyle,
   NgSwitch,
   NgSwitchCase,
@@ -44,7 +45,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {filter, map, take, tap} from 'rxjs/operators';
+import {map, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -75,7 +76,11 @@ import {ReaderService} from 'src/app/_services/reader.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {ReviewSeriesModalComponent} from '../../../_single-module/review-series-modal/review-series-modal.component';
+import {
+  ReviewSeriesModalCloseAction,
+  ReviewSeriesModalCloseEvent,
+  ReviewSeriesModalComponent
+} from '../../../_single-module/review-series-modal/review-series-modal.component';
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
@@ -137,7 +142,13 @@ const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent, NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle,
+    TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
+    NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
+    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
+    LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -704,7 +715,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (data.ratings) {
         this.ratings = [...data.ratings];
       }
-      
+
 
       // Recommendations
       if (data.recommendations) {
@@ -854,16 +865,34 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
 
     modalRef.closed.subscribe((closeResult) => {
-      // BUG: This never executes!
-      console.log('Close Result: ')
-      if (closeResult.success && closeResult.review !== null) {
-        const index = this.reviews.findIndex(r => r.username === closeResult.review!.username);
-        console.log('update index: ', index, ' with review ', closeResult.review);
-        this.reviews[index] = closeResult.review;
-        this.cdRef.markForCheck();
-      }
+      this.updateOrDeleteReview(closeResult);
     });
 
+  }
+
+  updateOrDeleteReview(closeResult: ReviewSeriesModalCloseEvent) {
+    if (closeResult.action === ReviewSeriesModalCloseAction.Close) return;
+
+    const index = this.reviews.findIndex(r => r.username === closeResult.review!.username);
+    if (closeResult.action === ReviewSeriesModalCloseAction.Edit) {
+      if (index === -1 ) {
+        // A new series was added:
+        this.reviews = [closeResult.review, ...this.reviews];
+        this.cdRef.markForCheck();
+        return;
+      }
+      // An edit occurred
+      this.reviews[index] = closeResult.review;
+      this.cdRef.markForCheck();
+      return;
+    }
+
+    if (closeResult.action === ReviewSeriesModalCloseAction.Delete) {
+      // An edit occurred
+      this.reviews = [...this.reviews.filter(r => r.username !== closeResult.review!.username)];
+      this.cdRef.markForCheck();
+      return;
+    }
   }
 
 

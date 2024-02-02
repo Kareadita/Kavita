@@ -10,7 +10,7 @@ namespace API.Services;
 
 public static class ReviewService
 {
-    public static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
+    public static IEnumerable<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
     {
         IList<UserReviewDto> externalReviews;
         var totalReviews = reviews.Count;
@@ -42,8 +42,9 @@ public static class ReviewService
             externalReviews = reviews;
         }
 
-        return externalReviews;
+        return externalReviews.OrderByDescending(r => r.Score);
     }
+
     public static string GetCharacters(string body)
     {
         if (string.IsNullOrEmpty(body)) return body;

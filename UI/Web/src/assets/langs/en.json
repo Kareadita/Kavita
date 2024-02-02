@@ -65,6 +65,7 @@
         "review-label": "Review",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
         "min-length": "Review must be at least {{count}} characters",
         "required": "{{validation.required-field}}"
     },
@@ -2011,6 +2012,8 @@
         "mark-unread": "Marked as Unread",
         "series-removed-want-to-read": "Series removed from Want to Read list",
         "series-deleted": "Series deleted",
+        "delete-review": "Are you sure you want to delete your review?",
+        "review-deleted": "Review deleted",
         "file-send-to": "File(s) emailed to {{name}}",
         "theme-missing": "The active theme no longer exists. Please refresh the page.",
         "email-sent": "Email sent to {{email}}",
