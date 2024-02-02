@@ -72,7 +72,21 @@ enum StepID {
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
+  protected readonly LibraryType = LibraryType;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
+
+  public readonly utilityService = inject(UtilityService);
+  public readonly modal = inject(NgbActiveModal);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly uploadService = inject(UploadService);
+  private readonly modalService = inject(NgbModal);
+  private readonly settingService = inject(SettingsService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly imageService = inject(ImageService);
 
   @Input({required: true}) library!: Library | undefined;
 
@@ -101,14 +115,10 @@ export class LibrarySettingsModalComponent implements OnInit {
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
 
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly TabID = TabID;
-
-
-  constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
-    private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
-    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
-    private imageService: ImageService) { }
+  get IsKavitaPlusEligible() {
+    const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
+    return libType === LibraryType.Manga || libType === LibraryType.LightNovel;
+  }
 
   ngOnInit(): void {
     this.settingService.getLibraryTypes().subscribe((types) => {

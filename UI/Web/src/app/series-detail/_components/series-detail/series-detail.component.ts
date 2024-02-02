@@ -706,12 +706,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   updateSelectedTab() {
     // Book libraries only have Volumes or Specials enabled
-    if (this.libraryType === LibraryType.Book) {
+    if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
         this.activeTabId = TabID.Specials;
       } else {
         this.activeTabId = TabID.Volumes;
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -720,6 +721,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     } else {
       this.activeTabId = TabID.Storyline;
     }
+    this.cdRef.markForCheck();
   }
 
 
