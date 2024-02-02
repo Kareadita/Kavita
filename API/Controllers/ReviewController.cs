@@ -61,4 +61,24 @@ public class ReviewController : BaseApiController
             _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
         return Ok(_mapper.Map<UserReviewDto>(rating));
     }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpDelete]
+    public async Task<ActionResult> DeleteReview(int seriesId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
+        if (user == null) return Unauthorized();
+
+        user.Ratings = user.Ratings.Where(r => r.SeriesId != seriesId).ToList();
+
+        _unitOfWork.UserRepository.Update(user);
+
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
 }

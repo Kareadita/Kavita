@@ -7193,6 +7193,27 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/Scrobbling/anilist-token": {
