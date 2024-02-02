@@ -171,7 +171,7 @@ public class SeriesService : ISeriesService
             } else
             {
                 hasWebLinksChanged =
-                    series.Metadata.WebLinks.Equals(updateSeriesMetadataDto.SeriesMetadata?.WebLinks);
+                    series.Metadata.WebLinks != updateSeriesMetadataDto.SeriesMetadata?.WebLinks;
                 series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
                     .Split(",")
                     .Where(s => !string.IsNullOrEmpty(s))
