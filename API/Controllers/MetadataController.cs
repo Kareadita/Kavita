@@ -207,7 +207,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (user == null) return Unauthorized();
 
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
-            .Where(r => !string.IsNullOrEmpty(r.BodyJustText))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
             .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
             .ToList();
 
@@ -221,12 +221,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         }
 
         var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
-        if (ret == null) return Ok(new SeriesDetailPlusDto()
+        if (ret == null)
         {
-            Reviews = userReviews,
-            Recommendations = null,
-            Ratings = null
-        });
+            // Cache  an empty result, so we don't constantly hit K+ when we know nothing is going to resolve
+            ret = new SeriesDetailPlusDto()
+            {
+                Reviews = new List<UserReviewDto>(),
+                Recommendations = null,
+                Ratings = null
+            };
+            await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
+
+            var newCacheResult2 = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
+            await PrepareSeriesDetail(userReviews, newCacheResult2, user);
+
+            return Ok(newCacheResult2);
+        }
 
         await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
@@ -244,7 +254,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
-        if (!isAdmin)
+        if (!isAdmin && ret.Recommendations != null)
         {
             // Re-obtain owned series and take into account age restriction
             ret.Recommendations.OwnedSeries =

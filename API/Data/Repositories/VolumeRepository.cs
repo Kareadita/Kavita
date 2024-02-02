@@ -241,7 +241,9 @@ public class VolumeRepository : IVolumeRepository
                 c.LastReadingProgress = progresses.Max(p => p.LastModified);
             }
 
-            v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
+            v.PagesRead = userProgress
+                .Where(p => p.VolumeId == v.Id)
+                .Sum(p => p.PagesRead);
         }
     }
 }
