@@ -132,20 +132,31 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var seriesDetailPlusDto = new SeriesDetailPlusDto()
+        IEnumerable<UserReviewDto> reviews = new List<UserReviewDto>();
+        if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Any())
         {
-            Ratings = seriesDetailDto.ExternalRatings
-                .DefaultIfEmpty()
-                .Select(r => _mapper.Map<RatingDto>(r)),
-            Reviews = seriesDetailDto.ExternalReviews
-                .DefaultIfEmpty()
-                .OrderByDescending(r => r.Score)
+            reviews = seriesDetailDto.ExternalReviews
                 .Select(r =>
                 {
                     var ret = _mapper.Map<UserReviewDto>(r);
                     ret.IsExternal = true;
                     return ret;
-                }),
+                })
+                .OrderByDescending(r => r.Score);
+        }
+
+        IEnumerable<RatingDto> ratings = new List<RatingDto>();
+        if (seriesDetailDto.ExternalRatings != null && seriesDetailDto.ExternalRatings.Any())
+        {
+            ratings = seriesDetailDto.ExternalRatings
+                .Select(r => _mapper.Map<RatingDto>(r));
+        }
+
+
+        var seriesDetailPlusDto = new SeriesDetailPlusDto()
+        {
+            Ratings = ratings,
+            Reviews = reviews,
             Recommendations = new RecommendationDto()
             {
                 ExternalSeries = externalSeriesRecommendations,

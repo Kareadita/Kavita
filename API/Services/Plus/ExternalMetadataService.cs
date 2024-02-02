@@ -114,7 +114,7 @@ public class ExternalMetadataService : IExternalMetadataService
         try
         {
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/series-detail")
+            var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
@@ -298,7 +298,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         try
         {
-            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
+            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-info")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
