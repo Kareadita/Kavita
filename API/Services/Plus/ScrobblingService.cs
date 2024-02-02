@@ -377,7 +377,7 @@ public class ScrobblingService : IScrobblingService
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return true;
-        if (library.Type == LibraryType.Comic) return true;
+        if (!ExternalMetadataService.IsLibraryTypeSupported(library.Type)) return true;
         return false;
     }
 

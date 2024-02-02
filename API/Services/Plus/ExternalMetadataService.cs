@@ -68,6 +68,11 @@ public class ExternalMetadataService : IExternalMetadataService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
+    public static bool IsLibraryTypeSupported(LibraryType type)
+    {
+        return type != LibraryType.Comic && type != LibraryType.Book;
+    }
+
     /// <summary>
     /// Retrieves Metadata about a Recommended External Series
     /// </summary>
@@ -97,7 +102,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-        if (series == null || series.Library.Type == LibraryType.Comic) return null;
+        if (series == null || !IsLibraryTypeSupported(series.Library.Type)) return null;
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return null;
 
