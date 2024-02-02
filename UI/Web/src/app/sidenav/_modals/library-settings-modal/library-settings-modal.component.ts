@@ -126,7 +126,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    if (this.library && this.library.type === LibraryType.Comic) {
+    if (this.library && (this.library.type === LibraryType.Comic || this.library.type === LibraryType.Book)) {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
       this.libraryForm.get('allowScrobbling')?.disable();
     }
@@ -171,6 +171,12 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
+            break;
+          case LibraryType.LightNovel:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
             break;
           case LibraryType.Images:
