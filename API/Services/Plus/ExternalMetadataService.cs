@@ -48,7 +48,7 @@ internal class SeriesDetailPlusApiDto
 public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
-    Task<SeriesDetailPlusDto?> GetSeriesDetail(int seriesId);
+    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -66,6 +66,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+    }
+
+    public static bool IsPlusEligible(LibraryType type)
+    {
+        return type != LibraryType.Comic;
     }
 
     /// <summary>
@@ -97,7 +102,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public async Task<SeriesDetailPlusDto?> GetSeriesDetail(int seriesId)
+    public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId)
     {
         var needsRefresh =
             await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId,
@@ -193,18 +198,17 @@ public class ExternalMetadataService : IExternalMetadataService
     private async Task<ExternalSeriesMetadata> GetExternalSeriesMetadataForSeries(int seriesId, Series series)
     {
         var externalSeriesMetadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
-        if (externalSeriesMetadata == null)
-        {
-            externalSeriesMetadata = new ExternalSeriesMetadata();
-            series.ExternalSeriesMetadata = externalSeriesMetadata;
-            externalSeriesMetadata.SeriesId = series.Id;
-            _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
-        }
+        if (externalSeriesMetadata != null) return externalSeriesMetadata;
 
+        externalSeriesMetadata = new ExternalSeriesMetadata();
+        series.ExternalSeriesMetadata = externalSeriesMetadata;
+        externalSeriesMetadata.SeriesId = series.Id;
+        _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
         return externalSeriesMetadata;
     }
 
-    private async Task<RecommendationDto> ProcessRecommendations(Series series, IEnumerable<MediaRecommendationDto> recs, ExternalSeriesMetadata externalSeriesMetadata)
+    private async Task<RecommendationDto> ProcessRecommendations(Series series, IEnumerable<MediaRecommendationDto> recs,
+        ExternalSeriesMetadata externalSeriesMetadata)
     {
         var recDto = new RecommendationDto()
         {

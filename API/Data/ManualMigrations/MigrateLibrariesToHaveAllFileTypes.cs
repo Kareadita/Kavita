@@ -15,9 +15,20 @@ public static class MigrateLibrariesToHaveAllFileTypes
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
+        if (await dataContext.Library.AnyAsync(l => l.LibraryFileTypes.Count == 0))
+        {
+            logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Completed. This is not an error");
+            return;
+        }
+
         logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Please be patient, this may take some time. This is not an error");
-        var allLibs = await dataContext.Library.Include(l => l.LibraryFileTypes).ToListAsync();
-        foreach (var library in allLibs.Where(library => library.LibraryFileTypes.Count == 0))
+
+        var allLibs = await dataContext.Library
+            .Include(l => l.LibraryFileTypes)
+            .Where(library => library.LibraryFileTypes.Count == 0)
+            .ToListAsync();
+
+        foreach (var library in allLibs)
         {
             switch (library.Type)
             {
@@ -57,11 +68,14 @@ public static class MigrateLibrariesToHaveAllFileTypes
                     });
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    break;
             }
         }
 
-        await dataContext.SaveChangesAsync();
+        if (unitOfWork.HasChanges())
+        {
+            await dataContext.SaveChangesAsync();
+        }
         logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Completed. This is not an error");
     }
 }

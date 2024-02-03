@@ -196,7 +196,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
-    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId)
+    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId, LibraryType libraryType)
     {
         if (!await licenseService.HasActiveLicense())
         {
@@ -220,7 +220,11 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return cachedResult;
         }
 
-        var ret = await metadataService.GetSeriesDetail(seriesId);
+        SeriesDetailPlusDto? ret = null;
+        if (ExternalMetadataService.IsPlusEligible(libraryType))
+        {
+            ret = await metadataService.GetSeriesDetailPlus(seriesId);
+        }
         if (ret == null)
         {
             // Cache  an empty result, so we don't constantly hit K+ when we know nothing is going to resolve
