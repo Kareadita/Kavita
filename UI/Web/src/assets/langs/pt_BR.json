@@ -60,7 +60,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "A análise deve ter pelo menos {{count}} caracteres",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -1685,7 +1686,9 @@
         "anilist-token-expired": "Seu token AniList expirou. O scrobbling não será mais processado até que você o gere novamente nas Configurações do Usuário > Conta",
         "email-not-sent-test": "Houve uma exceção ao enviar o e-mail. Verifique os registros para obter detalhes. Isso indica configurações inadequadas.",
         "change-email-no-email": "O e-mail foi atualizado",
-        "delete-device": "Tem certeza de que deseja excluir este dispositivo?"
+        "delete-device": "Tem certeza de que deseja excluir este dispositivo?",
+        "review-deleted": "Análise excluída",
+        "delete-review": "Tem certeza de que deseja excluir sua análise?"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",

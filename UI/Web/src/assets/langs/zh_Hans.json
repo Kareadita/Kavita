@@ -60,7 +60,8 @@
         "close": "关闭",
         "save": "保存",
         "min-length": "评论必须至少有 {{count}} 个字符",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "关闭",
@@ -1447,7 +1448,8 @@
         "last-chapter-added": "添加时间",
         "time-to-read": "阅读时间",
         "release-year": "发行年份",
-        "read-progress": "上次阅读"
+        "read-progress": "上次阅读",
+        "average-rating": "平均评分"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 详细信息",
@@ -1683,7 +1685,10 @@
         "email-not-sent": "存档的电子邮件不是有效的电子邮件，无法发送。链接已转储到日志中。管理员可以提供此链接来完成流程。",
         "anilist-token-expired": "您的 AniList 令牌已过期。在您在“用户设置”>“帐户”中重新生成之前，Scrobbling 将不再处理",
         "email-not-sent-test": "发送电子邮件时出现异常。检查日志以获取详细信息。这表明设置不正确。",
-        "change-email-no-email": "电子邮件已更新"
+        "change-email-no-email": "电子邮件已更新",
+        "delete-review": "您确定要删除您的评论吗？",
+        "review-deleted": "评论已删除",
+        "delete-device": "您确定要删除该设备吗？"
     },
     "actionable": {
         "scan-library": "扫描资料库",
@@ -1957,6 +1962,11 @@
         "image": "图片"
     },
     "out-of-date-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title": "不要落后！",
+        "subtitle": "您的安装似乎落后了超过 {{count}} 个版本！",
+        "description-1": "请考虑升级，以便运行最新版本的 Kavita。",
+        "description-2": "请查看我们的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>，了解有关如何更新的说明。",
+        "description-3": "如果您有特定原因尚未更新，我们很想知道是什么让您一直使用过时的版本！停止我们的 discord，让我们知道是什么阻碍了您的升级之路。"
     }
 }
