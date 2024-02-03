@@ -47,7 +47,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
@@ -265,6 +265,12 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     switch (action.action) {
       case(Action.Edit):
         this.openEditCollectionTagModal(this.collectionTag);
+        break;
+      case (Action.Delete):
+        this.collectionService.deleteTag(this.collectionTag.id).subscribe(() => {
+          this.toastr.success(translate('toasts.collection-tag-deleted'));
+          this.router.navigateByUrl('collections');
+        });
         break;
       default:
         break;
