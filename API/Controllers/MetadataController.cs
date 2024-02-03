@@ -220,7 +220,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return cachedResult;
         }
 
-        var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
+        var ret = await metadataService.GetSeriesDetail(seriesId);
         if (ret == null)
         {
             // Cache  an empty result, so we don't constantly hit K+ when we know nothing is going to resolve
@@ -253,6 +253,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
+
+        if (ret.Recommendations != null)
+        {
+            ret.Recommendations.OwnedSeries ??= new List<SeriesDto>();
+            await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
+        }
 
         if (!isAdmin && ret.Recommendations != null)
         {

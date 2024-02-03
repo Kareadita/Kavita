@@ -28,7 +28,7 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId, int limit = 25);
     Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId, DateTime expireTime);
-    Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user);
+    Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
 }
 
@@ -102,7 +102,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         return row == null || row.LastUpdatedUtc <= expireTime;
     }
 
-    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user)
+    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId)
     {
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)

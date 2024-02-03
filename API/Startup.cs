@@ -256,8 +256,8 @@ public class Startup
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
-
                     await unitOfWork.CommitAsync();
+
                     logger.LogInformation("Running Migrations - complete");
                 }).GetAwaiter()
                 .GetResult();
@@ -357,15 +357,13 @@ public class Startup
             opts.IncludeQueryInRequestPath = true;
         });
 
-        var allowIframing = Configuration.AllowIFraming;
-
         app.Use(async (context, next) =>
         {
             context.Response.Headers[HeaderNames.Vary] =
                 new[] { "Accept-Encoding" };
 
 
-            if (!allowIframing)
+            if (!Configuration.AllowIFraming)
             {
                 // Don't let the site be iframed outside the same origin (clickjacking)
                 context.Response.Headers.XFrameOptions = "SAMEORIGIN";
