@@ -44,7 +44,7 @@ public class ScrobblingController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("anilist-token")]
-    public async Task<ActionResult> GetAniListToken()
+    public async Task<ActionResult<string>> GetAniListToken()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
