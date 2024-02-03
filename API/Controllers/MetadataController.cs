@@ -203,12 +203,9 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(null);
         }
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        if (user == null) return Unauthorized();
-
-        var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
+        var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, User.GetUserId()))
             .Where(r => !string.IsNullOrEmpty(r.Body))
-            .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
+            .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
             .ToList();
 
         var cacheKey = CacheKey + seriesId;
@@ -216,7 +213,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         if (results.HasValue)
         {
             var cachedResult = results.Value;
-            await PrepareSeriesDetail(userReviews, cachedResult, user);
+            await PrepareSeriesDetail(userReviews, cachedResult);
             return cachedResult;
         }
 
@@ -237,7 +234,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
 
             var newCacheResult2 = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
-            await PrepareSeriesDetail(userReviews, newCacheResult2, user);
+            await PrepareSeriesDetail(userReviews, newCacheResult2);
 
             return Ok(newCacheResult2);
         }
@@ -246,23 +243,19 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
 
         // For some reason if we don't use a different instance, the cache keeps changes made below
         var newCacheResult = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
-        await PrepareSeriesDetail(userReviews, newCacheResult, user);
+        await PrepareSeriesDetail(userReviews, newCacheResult);
 
         return Ok(newCacheResult);
 
     }
 
-    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret, AppUser user)
+    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret)
     {
-        var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
-
-        if (ret.Recommendations != null)
-        {
-            ret.Recommendations.OwnedSeries ??= new List<SeriesDto>();
-            await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
-        }
 
         if (!isAdmin && ret.Recommendations != null)
         {
@@ -271,6 +264,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
                 await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
                     ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
             ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
+        }
+
+        if (ret.Recommendations != null)
+        {
+            ret.Recommendations.OwnedSeries ??= new List<SeriesDto>();
+            await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
         }
     }
 }
