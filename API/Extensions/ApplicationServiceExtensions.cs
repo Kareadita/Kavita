@@ -105,9 +105,11 @@ public static class ApplicationServiceExtensions
     {
         services.AddDbContextPool<DataContext>(options =>
         {
-            options.UseSqlite("Data source=config/kavita.db");
+            options.UseSqlite("Data source=config/kavita.db", builder =>
+            {
+                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
             options.EnableDetailedErrors();
-
             options.EnableSensitiveDataLogging();
         });
     }

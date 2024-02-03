@@ -18,9 +18,6 @@ public static class MigrateWantToReadExport
 {
     public static async Task Migrate(DataContext dataContext, IDirectoryService directoryService, ILogger<Program> logger)
     {
-        logger.LogCritical(
-            "Running MigrateWantToReadExport migration - Please be patient, this may take some time. This is not an error");
-
         var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
         if (File.Exists(importFile))
         {
@@ -28,6 +25,9 @@ public static class MigrateWantToReadExport
                 "Running MigrateWantToReadExport migration - Completed. This is not an error");
             return;
         }
+
+        logger.LogCritical(
+            "Running MigrateWantToReadExport migration - Please be patient, this may take some time. This is not an error");
 
         await using var command = dataContext.Database.GetDbConnection().CreateCommand();
         command.CommandText = "Select AppUserId, Id from Series WHERE AppUserId IS NOT NULL ORDER BY AppUserId;";

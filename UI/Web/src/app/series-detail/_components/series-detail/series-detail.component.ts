@@ -598,9 +598,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-    if (loadExternal) {
-      this.loadPlusMetadata(this.seriesId);
-    }
 
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
@@ -608,6 +605,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
+
+      if (loadExternal) {
+        this.loadPlusMetadata(this.seriesId, this.libraryType);
+      }
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -706,8 +707,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
 
-  loadPlusMetadata(seriesId: number) {
-    this.metadataService.getSeriesMetadataFromPlus(seriesId).subscribe(data => {
+  loadPlusMetadata(seriesId: number, libraryType: LibraryType) {
+    this.metadataService.getSeriesMetadataFromPlus(seriesId, libraryType).subscribe(data => {
       if (data === null) return;
 
       // Reviews

@@ -26,9 +26,9 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalReview>? reviews);
     void Remove(IEnumerable<ExternalRating>? ratings);
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
-    Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId, int limit = 25);
+    Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
     Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId, DateTime expireTime);
-    Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user);
+    Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
 }
 
@@ -36,13 +36,11 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
 {
     private readonly DataContext _context;
     private readonly IMapper _mapper;
-    private readonly UserManager<AppUser> _userManager;
 
-    public ExternalSeriesMetadataRepository(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
+    public ExternalSeriesMetadataRepository(DataContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
-        _userManager = userManager;
     }
 
     public void Attach(ExternalSeriesMetadata metadata)
@@ -83,13 +81,13 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId, int limit = 25)
+    public Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId)
     {
         return _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
-            .Include(s => s.ExternalReviews.Take(limit))
-            .Include(s => s.ExternalRatings.OrderBy(r => r.AverageScore).Take(limit))
-            .Include(s => s.ExternalRecommendations.OrderBy(r => r.Id).Take(limit))
+            .Include(s => s.ExternalReviews)
+            .Include(s => s.ExternalRatings.OrderBy(r => r.AverageScore))
+            .Include(s => s.ExternalRecommendations.OrderBy(r => r.Id))
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }
@@ -102,7 +100,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         return row == null || row.LastUpdatedUtc <= expireTime;
     }
 
-    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId, int libraryId, AppUser user)
+    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId)
     {
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)

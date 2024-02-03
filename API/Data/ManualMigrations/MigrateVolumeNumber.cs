@@ -15,14 +15,15 @@ public static class MigrateVolumeNumber
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
-        logger.LogCritical(
-            "Running MigrateVolumeNumber migration - Please be patient, this may take some time. This is not an error");
         if (await dataContext.Volume.AnyAsync(v => v.MaxNumber > 0))
         {
             logger.LogCritical(
                 "Running MigrateVolumeNumber migration - Completed. This is not an error");
             return;
         }
+
+        logger.LogCritical(
+            "Running MigrateVolumeNumber migration - Please be patient, this may take some time. This is not an error");
 
         // Get all volumes
         foreach (var volume in dataContext.Volume)

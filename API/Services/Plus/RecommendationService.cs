@@ -63,7 +63,7 @@ public class RecommendationService : IRecommendationService
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsForUser(userId, rec.RecommendationNames,
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIds(rec.RecommendationNames,
                 series.Library.Type, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
                 ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
 

@@ -93,13 +93,10 @@ public class Program
                     Task.Run(async () =>
                         {
                             // Apply all migrations on startup
-                            var dataContext = services.GetRequiredService<DataContext>();
-                            var directoryService = services.GetRequiredService<IDirectoryService>();
-
                             logger.LogInformation("Running Migrations");
 
                             // v0.7.14
-                            await MigrateWantToReadExport.Migrate(dataContext, directoryService, logger);
+                            await MigrateWantToReadExport.Migrate(context, directoryService, logger);
 
                             await unitOfWork.CommitAsync();
                             logger.LogInformation("Running Migrations - complete");

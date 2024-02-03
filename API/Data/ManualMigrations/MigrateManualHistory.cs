@@ -14,15 +14,15 @@ public static class MigrateManualHistory
 {
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
-        logger.LogCritical(
-            "Running MigrateManualHistory migration - Please be patient, this may take some time. This is not an error");
-
         if (await dataContext.ManualMigrationHistory.AnyAsync())
         {
             logger.LogCritical(
                 "Running MigrateManualHistory migration - Completed. This is not an error");
             return;
         }
+
+        logger.LogCritical(
+            "Running MigrateManualHistory migration - Please be patient, this may take some time. This is not an error");
 
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {

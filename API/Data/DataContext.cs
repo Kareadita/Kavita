@@ -144,7 +144,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .IsUnique(false);
     }
 
-
+    #nullable enable
     private static void OnEntityTracked(object? sender, EntityTrackedEventArgs e)
     {
         if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
@@ -161,6 +161,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         entity.LastModified = DateTime.Now;
         entity.LastModifiedUtc = DateTime.UtcNow;
     }
+    #nullable disable
 
     private void OnSaveChanges()
     {

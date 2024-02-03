@@ -246,6 +246,7 @@ public static class SeriesFilter
                     .Where(p => p != null && p.AppUserId == userId)
                     .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100)
             })
+            .AsSplitQuery()
             .AsEnumerable();
 
         switch (comparison)
@@ -300,6 +301,7 @@ public static class SeriesFilter
                 Series = s,
                 AverageRating = s.ExternalSeriesMetadata.AverageExternalRating
             })
+            .AsSplitQuery()
             .AsEnumerable();
 
         switch (comparison)
@@ -358,6 +360,7 @@ public static class SeriesFilter
                     .Max()
             })
             .Where(s => s.MaxDate != null)
+            .AsSplitQuery()
             .AsEnumerable();
 
         switch (comparison)

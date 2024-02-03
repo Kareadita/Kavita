@@ -14,9 +14,9 @@ public static class MigrateUserLibrarySideNavStream
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
-        logger.LogCritical("Running MigrateUserLibrarySideNavStream migration - Please be patient, this may take some time. This is not an error");
 
-        var usersWithLibraryStreams = await dataContext.AppUser.Include(u => u.SideNavStreams)
+        var usersWithLibraryStreams = await dataContext.AppUser
+            .Include(u => u.SideNavStreams)
             .AnyAsync(u => u.SideNavStreams.Count > 0 && u.SideNavStreams.Any(s => s.LibraryId > 0));
 
         if (usersWithLibraryStreams)
@@ -24,6 +24,8 @@ public static class MigrateUserLibrarySideNavStream
             logger.LogCritical("Running MigrateUserLibrarySideNavStream migration - complete. Nothing to do");
             return;
         }
+
+        logger.LogCritical("Running MigrateUserLibrarySideNavStream migration - Please be patient, this may take some time. This is not an error");
 
         var users = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
         foreach (var user in users)
