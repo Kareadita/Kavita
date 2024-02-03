@@ -174,6 +174,8 @@ public class LicenseService(
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an issue connecting to Kavita+");
+            await provider.FlushAsync();
+            await provider.SetAsync(CacheKey, false, _licenseCacheTimeout);
         }
 
         return false;

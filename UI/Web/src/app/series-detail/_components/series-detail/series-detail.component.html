@@ -5,6 +5,7 @@
         <h2 class="title text-break">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
           <span>{{series.name}}</span>
+          <app-loading [loading]="isLoadingExtra" [size]="'spinner-border-sm'"></app-loading>
         </h2>
       </ng-container>
       <ng-container subtitle *ngIf="series.localizedName !== series.name">

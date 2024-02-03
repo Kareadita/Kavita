@@ -200,6 +200,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isAdmin = false;
   hasDownloadingRole = false;
   isLoading = true;
+  isLoadingExtra = false;
   showBook = true;
 
   currentlyReadingChapter: Chapter | undefined = undefined;
@@ -708,7 +709,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   loadPlusMetadata(seriesId: number, libraryType: LibraryType) {
+    this.isLoadingExtra = true;
+    this.cdRef.markForCheck();
     this.metadataService.getSeriesMetadataFromPlus(seriesId, libraryType).subscribe(data => {
+      this.isLoadingExtra = false;
+      this.cdRef.markForCheck();
       if (data === null) return;
 
       // Reviews
