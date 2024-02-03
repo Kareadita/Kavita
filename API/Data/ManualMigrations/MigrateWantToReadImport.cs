@@ -20,15 +20,15 @@ public static class MigrateWantToReadImport
         var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
         var outputFile = Path.Join(directoryService.ConfigDirectory, "imported-want-to-read-migration.csv");
 
-        logger.LogCritical(
-            "Running MigrateWantToReadImport migration - Please be patient, this may take some time. This is not an error");
-
         if (!File.Exists(importFile) || File.Exists(outputFile))
         {
             logger.LogCritical(
                 "Running MigrateWantToReadImport migration - Completed. This is not an error");
             return;
         }
+
+        logger.LogCritical(
+            "Running MigrateWantToReadImport migration - Please be patient, this may take some time. This is not an error");
 
         using var reader = new StreamReader(importFile);
         using var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);

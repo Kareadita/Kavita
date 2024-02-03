@@ -1499,7 +1499,10 @@
         "on-deck-last-progress-tooltip": "Número de dias desde el ultimo progreso antes de quitar contenido de En portada.",
         "on-deck-last-chapter-add-tooltip": "El numero de dias desde que el ultimo capitulo fue agregado para incluirlo en En portada.",
         "on-deck-last-progress-label": "Ultimo progreso en portada (dias)",
-        "on-deck-last-chapter-add-label": "Último capitulo agregado a En portada (dias)"
+        "on-deck-last-chapter-add-label": "Último capitulo agregado a En portada (dias)",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}"
     },
     "manage-media-settings": {
         "encode-as-description-part-1": "WebP/AVIF puede reducir drásticamente el espacio requerido para archivos. WebP/AVIF no está soportado por todos los navegadores o versiones. Para comprobar si estos ajustes son apropiados para tu configuración, visita ",
@@ -1952,5 +1955,8 @@
     "all-filters": {
         "title": "Todos los filtros inteligentes",
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
     }
 }

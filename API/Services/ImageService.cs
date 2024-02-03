@@ -458,6 +458,7 @@ public class ImageService : IImageService
 
         for (var i = 0; i < coverImages.Count; i++)
         {
+            if (!File.Exists(coverImages[i])) continue;
             var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
             tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
 

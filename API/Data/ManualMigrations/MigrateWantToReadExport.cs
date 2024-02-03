@@ -18,40 +18,22 @@ public static class MigrateWantToReadExport
 {
     public static async Task Migrate(DataContext dataContext, IDirectoryService directoryService, ILogger<Program> logger)
     {
-        logger.LogCritical(
-            "Running MigrateWantToReadExport migration - Please be patient, this may take some time. This is not an error");
-
-        var columnExists = false;
-        await using var command = dataContext.Database.GetDbConnection().CreateCommand();
-        command.CommandText = "PRAGMA table_info('Series')";
-
-        await dataContext.Database.OpenConnectionAsync();
-        await using var result = await command.ExecuteReaderAsync();
-        while (await result.ReadAsync())
-        {
-            var columnName = result["name"].ToString();
-            if (columnName != "AppUserId") continue;
-
-            logger.LogInformation("Column 'AppUserId' exists in the 'Series' table. Running migration...");
-            // Your migration logic here
-            columnExists = true;
-            break;
-        }
-
-        await result.CloseAsync();
-
-        if (!columnExists)
+        var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
+        if (File.Exists(importFile))
         {
             logger.LogCritical(
                 "Running MigrateWantToReadExport migration - Completed. This is not an error");
             return;
         }
 
-        await using var command2 = dataContext.Database.GetDbConnection().CreateCommand();
+        logger.LogCritical(
+            "Running MigrateWantToReadExport migration - Please be patient, this may take some time. This is not an error");
+
+        await using var command = dataContext.Database.GetDbConnection().CreateCommand();
         command.CommandText = "Select AppUserId, Id from Series WHERE AppUserId IS NOT NULL ORDER BY AppUserId;";
 
         await dataContext.Database.OpenConnectionAsync();
-        await using var result2 = await command.ExecuteReaderAsync();
+        await using var result = await command.ExecuteReaderAsync();
 
         await using var writer = new StreamWriter(Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv"));
         await using var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
@@ -62,10 +44,10 @@ public static class MigrateWantToReadExport
         await csvWriter.NextRecordAsync();
 
         // Write data
-        while (await result2.ReadAsync())
+        while (await result.ReadAsync())
         {
-            var appUserId = result2["AppUserId"].ToString();
-            var id = result2["Id"].ToString();
+            var appUserId = result["AppUserId"].ToString();
+            var id = result["Id"].ToString();
 
             csvWriter.WriteField(appUserId);
             csvWriter.WriteField(id);
@@ -75,7 +57,7 @@ public static class MigrateWantToReadExport
 
         try
         {
-            await result2.CloseAsync();
+            await dataContext.Database.CloseConnectionAsync();
             writer.Close();
         } catch (Exception) {/* Swallow */}
 

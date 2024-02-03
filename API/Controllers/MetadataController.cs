@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -196,61 +197,75 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
-    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId)
+    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId, LibraryType libraryType, CancellationToken cancellationToken)
     {
-        if (!await licenseService.HasActiveLicense())
-        {
-            return Ok(null);
-        }
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        if (user == null) return Unauthorized();
-
-        var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, user.Id))
-            .Where(r => !string.IsNullOrEmpty(r.BodyJustText))
-            .OrderByDescending(review => review.Username.Equals(user.UserName) ? 1 : 0)
+        var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, User.GetUserId()))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
             .ToList();
 
         var cacheKey = CacheKey + seriesId;
-        var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey);
+        var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey, cancellationToken);
         if (results.HasValue)
         {
             var cachedResult = results.Value;
-            await PrepareSeriesDetail(userReviews, cachedResult, user);
+            await PrepareSeriesDetail(userReviews, cachedResult);
             return cachedResult;
         }
 
-        var ret = await metadataService.GetSeriesDetail(user.Id, seriesId);
-        if (ret == null) return Ok(new SeriesDetailPlusDto()
+        SeriesDetailPlusDto? ret = null;
+        if (ExternalMetadataService.IsLibraryTypeSupported(libraryType) && await licenseService.HasActiveLicense())
         {
-            Reviews = userReviews,
-            Recommendations = null,
-            Ratings = null
-        });
+            ret = await metadataService.GetSeriesDetailPlus(seriesId);
+        }
+        if (ret == null)
+        {
+            // Cache  an empty result, so we don't constantly hit K+ when we know nothing is going to resolve
+            ret = new SeriesDetailPlusDto()
+            {
+                Reviews = new List<UserReviewDto>(),
+                Recommendations = null,
+                Ratings = null
+            };
+            await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48), cancellationToken);
 
-        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48));
+            var newCacheResult2 = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
+            await PrepareSeriesDetail(userReviews, newCacheResult2);
+
+            return Ok(newCacheResult2);
+        }
+
+        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48), cancellationToken);
 
         // For some reason if we don't use a different instance, the cache keeps changes made below
-        var newCacheResult = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
-        await PrepareSeriesDetail(userReviews, newCacheResult, user);
+        var newCacheResult = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey, cancellationToken)).Value;
+        await PrepareSeriesDetail(userReviews, newCacheResult);
 
         return Ok(newCacheResult);
 
     }
 
-    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret, AppUser user)
+    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret)
     {
-        var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId())!;
+
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
-        if (!isAdmin)
+        if (!isAdmin && ret.Recommendations != null)
         {
             // Re-obtain owned series and take into account age restriction
             ret.Recommendations.OwnedSeries =
                 await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
                     ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
             ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
+        }
+
+        if (ret.Recommendations != null)
+        {
+            ret.Recommendations.OwnedSeries ??= new List<SeriesDto>();
+            await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
         }
     }
 }

@@ -146,7 +146,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
-    Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
+    Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
     Task<int> GetAverageUserRating(int seriesId, int userId);
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
@@ -1918,7 +1918,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="names"></param>
     /// <returns></returns>
-    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl)
+    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl)
     {
         var libraryIds = await _context.Library
             .Where(lib => lib.Type == libraryType)

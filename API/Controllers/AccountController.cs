@@ -188,12 +188,14 @@ public class AccountController : BaseApiController
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
+                .AsSplitQuery()
                 .SingleOrDefaultAsync(x => x.ApiKey == loginDto.ApiKey);
         }
         else
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
+                .AsSplitQuery()
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
         }
 

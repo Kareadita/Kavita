@@ -7,7 +7,6 @@ namespace Kavita.Common;
 /// The user does not exist (aka unauthorized). This will be caught by middleware and Unauthorized() returned to UI
 /// </summary>
 /// <remarks>This will always log to Security Log</remarks>
-[Serializable]
 public class KavitaUnauthenticatedUserException : Exception
 {
     public KavitaUnauthenticatedUserException()
@@ -18,8 +17,4 @@ public class KavitaUnauthenticatedUserException : Exception
 
     public KavitaUnauthenticatedUserException(string message, Exception inner)
         : base(message, inner) { }
-
-    protected KavitaUnauthenticatedUserException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    { }
 }

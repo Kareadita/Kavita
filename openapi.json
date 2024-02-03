@@ -3584,6 +3584,21 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "libraryType",
+            "in": "query",
+            "schema": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
@@ -7194,6 +7209,27 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Deletes the user's review for the given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
