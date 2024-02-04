@@ -462,7 +462,15 @@
     <div class="modal-footer">
       @if (accountService.hasValidLicense$ | async) {
         <button type="button" class="btn btn-light" (click)="forceScan()" position="above"
-                [ngbTooltip]="t('force-refresh-tooltip')">{{t('force-refresh')}}</button>
+                [ngbTooltip]="t('force-refresh-tooltip')">
+          @if (forceIsLoading) {
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">loading...</span>
+            </div>
+          } @else {
+            {{t('force-refresh')}}
+          }
+        </button>
       }
       <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
       <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">{{t('save')}}</button>

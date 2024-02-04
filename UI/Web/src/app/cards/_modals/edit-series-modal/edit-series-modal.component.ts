@@ -51,12 +51,13 @@ import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {TranslocoDatePipe} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
 import {LibraryType} from "../../../_models/library/library";
+import {ToastrService} from "ngx-toastr";
 
 enum TabID {
   General = 0,
@@ -66,6 +67,13 @@ enum TabID {
   CoverImage = 4,
   Related = 5,
   Info = 6,
+}
+
+export interface EditSeriesModalCloseResult {
+  success: boolean;
+  series: Series;
+  coverImageUpdate: boolean;
+  updateExternal: boolean
 }
 
 @Component({
@@ -115,6 +123,8 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
 
   protected readonly TabID = TabID;
   protected readonly PersonRole = PersonRole;
@@ -136,7 +146,9 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-  private readonly destroyRef = inject(DestroyRef);
+  hasForcedKPlus = false;
+  forceIsLoading = false;
+
 
   // Typeaheads
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
@@ -505,12 +517,16 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
+    this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset, updateExternal: this.hasForcedKPlus});
   }
 
   forceScan() {
+    this.forceIsLoading = true;
     this.metadataService.forceRefreshFromPlus(this.series.id).subscribe(() => {
-
+      this.hasForcedKPlus = true;
+      this.forceIsLoading = false;
+      this.toastr.info(translate('toasts.force-kavita+-refresh-success'));
+      this.cdRef.markForCheck();
     });
   }
 
@@ -550,7 +566,7 @@ export class EditSeriesModalComponent implements OnInit {
     this.saveNestedComponents.emit();
 
     forkJoin(apis).subscribe(results => {
-      this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset});
+      this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, updateExternal: this.hasForcedKPlus});
     });
   }
 
