@@ -48,7 +48,10 @@ import {catchError, forkJoin, Observable, of} from 'rxjs';
 import {map, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
-import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
+import {
+  EditSeriesModalCloseResult,
+  EditSeriesModalComponent
+} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
@@ -839,10 +842,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
+    modalRef.closed.subscribe((closeResult: EditSeriesModalCloseResult) => {
       if (closeResult.success) {
         window.scrollTo(0, 0);
-        this.loadSeries(this.seriesId);
+        this.loadSeries(this.seriesId, closeResult.updateExternal);
       }
 
       if (closeResult.coverImageUpdate) {

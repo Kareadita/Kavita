@@ -3,6 +3,7 @@ import {ServerService} from 'src/app/_services/server.service';
 import {ServerInfoSlim} from '../_models/server-info';
 import {NgIf} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {ChangelogComponent} from "../../announcements/_components/changelog/changelog.component";
 
 @Component({
     selector: 'app-manage-system',
@@ -10,7 +11,7 @@ import {TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./manage-system.component.scss'],
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, TranslocoDirective]
+  imports: [NgIf, TranslocoDirective, ChangelogComponent]
 })
 export class ManageSystemComponent implements OnInit {
 

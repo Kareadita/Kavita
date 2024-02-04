@@ -17,6 +17,7 @@ const result = {};
 // Remove file if it exists
 const cacheBustingFilePath = './i18n-cache-busting.json';
 if (fs.existsSync(cacheBustingFilePath)) {
+    console.log('Removing existing file')
     fs.unlinkSync(cacheBustingFilePath);
 }
 
