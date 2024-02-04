@@ -86,7 +86,6 @@ public static class ApplicationServiceExtensions
 
             // KavitaPlus stuff
             options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusSeriesDetail);
         });
 
         services.AddMemoryCache(options =>

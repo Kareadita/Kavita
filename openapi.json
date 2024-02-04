@@ -3576,7 +3576,7 @@
           {
             "name": "seriesId",
             "in": "query",
-            "description": "",
+            "description": "Series Id",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3585,7 +3585,7 @@
           {
             "name": "libraryType",
             "in": "query",
-            "description": "",
+            "description": "Library Type",
             "schema": {
               "enum": [
                 0,

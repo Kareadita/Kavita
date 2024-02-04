@@ -54,7 +54,6 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
-    private readonly IEasyCachingProvider _cacheProvider;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -64,8 +63,7 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService,
-        IEasyCachingProviderFactory cachingProviderFactory)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -73,9 +71,6 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
-
-        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusSeriesDetail);
-
     }
 
     /// <summary>
@@ -114,7 +109,6 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
-        var hasWebLinksChanged = false;
         try
         {
             var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
@@ -170,8 +164,6 @@ public class SeriesService : ISeriesService
                 series.Metadata.WebLinks = string.Empty;
             } else
             {
-                hasWebLinksChanged =
-                    series.Metadata.WebLinks != updateSeriesMetadataDto.SeriesMetadata?.WebLinks;
                 series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
                     .Split(",")
                     .Where(s => !string.IsNullOrEmpty(s))
@@ -313,13 +305,6 @@ public class SeriesService : ISeriesService
             {
                 _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
             }
-
-            if (hasWebLinksChanged)
-            {
-                _logger.LogDebug("Clearing cache as series weblinks may have changed");
-                await _cacheProvider.RemoveAsync(MetadataController.CacheKey + seriesId);
-            }
-
 
             if (updateSeriesMetadataDto.CollectionTags == null) return true;
             foreach (var tag in updateSeriesMetadataDto.CollectionTags)
