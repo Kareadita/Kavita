@@ -13,6 +13,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
+using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
@@ -25,6 +26,7 @@ using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
 using API.Helpers.Converters;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
@@ -151,7 +153,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
-
+    Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -699,6 +701,30 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId)
+    {
+        return await _context.Series
+            .Where(s => s.Id == seriesId)
+            .Select(series => new PlusSeriesDto()
+            {
+                MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
+                SeriesName = series.Name,
+                AltSeriesName = series.LocalizedName,
+                AniListId = ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks,
+                    ScrobblingService.AniListWeblinkWebsite),
+                MalId = ScrobblingService.ExtractId<long?>(series.Metadata.WebLinks,
+                    ScrobblingService.MalWeblinkWebsite),
+                GoogleBooksId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
+                    ScrobblingService.GoogleBooksWeblinkWebsite),
+                MangaDexId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
+                    ScrobblingService.MangaDexWeblinkWebsite),
+                VolumeCount = series.Volumes.Count,
+                ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
+                Year = series.Metadata.ReleaseYear
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)

@@ -3585,6 +3585,7 @@
           {
             "name": "libraryType",
             "in": "query",
+            "description": "",
             "schema": {
               "enum": [
                 0,
@@ -15127,8 +15128,9 @@
             "type": "string",
             "nullable": true
           },
-          "lastUpdatedUtc": {
+          "validUntilUtc": {
             "type": "string",
+            "description": "Data is valid until this time",
             "format": "date-time"
           },
           "series": {

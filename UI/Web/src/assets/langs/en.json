@@ -1377,7 +1377,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
         "kavita+-desc-part-2": "premium benefits",
-        "kavita+-desc-part-3": "today!"
+        "kavita+-desc-part-3": "today!",
+        "kavita+-requirement": "Kavita+ is designed to work only with the latest release - 2 versions. Anything outside of that is subject to not working.",
+        "kavita+-releases": "See releases"
     },
 
     "collection-detail": {
