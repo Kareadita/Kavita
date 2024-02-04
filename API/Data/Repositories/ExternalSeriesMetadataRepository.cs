@@ -32,6 +32,7 @@ public interface IExternalSeriesMetadataRepository
     Task LinkRecommendationsToSeries(Series series);
     Task<bool> IsBlacklistedSeries(int seriesId);
     Task CreateBlacklistedSeries(int seriesId);
+    Task RemoveFromBlacklist(int seriesId);
 }
 
 public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepository

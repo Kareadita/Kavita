@@ -90,7 +90,7 @@ public static class ApplicationServiceExtensions
 
         services.AddMemoryCache(options =>
         {
-            options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 50 MB
+            options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
 

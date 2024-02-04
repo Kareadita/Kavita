@@ -3565,6 +3565,45 @@
         }
       }
     },
+    "/api/Metadata/force-refresh": {
+      "post": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.\r\nThis then attempts to refresh data from Kavita+ for this series.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "libraryType",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "enum": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Metadata/series-detail-plus": {
       "get": {
         "tags": [

@@ -178,10 +178,25 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     [HttpGet("chapter-summary")]
     public async Task<ActionResult<string>> GetChapterSummary(int chapterId)
     {
+        // TODO: This doesn't seem used anywhere
         if (chapterId <= 0) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         if (chapter == null) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         return Ok(chapter.Summary);
+    }
+
+    /// <summary>
+    /// If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.
+    /// This then attempts to refresh data from Kavita+ for this series.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    /// <returns></returns>
+    [HttpPost("force-refresh")]
+    public async Task<ActionResult> ForceRefresh(int seriesId, LibraryType libraryType)
+    {
+        await metadataService.ForceKavitaPlusRefresh(seriesId, libraryType);
+        return Ok();
     }
 
     /// <summary>

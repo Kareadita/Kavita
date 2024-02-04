@@ -12,7 +12,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
-using API.Helpers.Builders;
 using AutoMapper;
 using Flurl.Http;
 using Kavita.Common;
@@ -49,7 +48,7 @@ public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
-    Task BlacklistSeries(int seriesId);
+    Task ForceKavitaPlusRefresh(int seriesId, LibraryType libraryType);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -86,13 +85,21 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
-    /// When a series fails to match with Kavita+, the series is then added to a Blacklist so that Kavita isn't spammed constantly
+    /// Removes from Blacklist and Invalidates the cache
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
     /// <returns></returns>
-    public Task BlacklistSeries(int seriesId)
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task ForceKavitaPlusRefresh(int seriesId, LibraryType libraryType)
     {
-        throw new NotImplementedException();
+        // Remove from Blacklist if applicable
+        if (!IsPlusEligible(libraryType)) return;
+        await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+        var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
+        if (metadata == null) return;
+        metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
+        await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
