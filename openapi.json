@@ -3580,21 +3580,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "libraryType",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "enum": [
-                0,
-                1,
-                2,
-                3
-              ],
-              "type": "integer",
-              "format": "int32"
-            }
           }
         ],
         "responses": {

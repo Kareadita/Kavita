@@ -55,12 +55,13 @@ export class ManageTasksSettingsComponent implements OnInit {
       api: this.serverService.convertMedia(),
       successMessage: 'convert-media-task-success'
     },
-    {
-      name: 'bust-cache-task',
-      description: 'bust-cache-task-desc',
-      api: this.serverService.bustCache(),
-      successMessage: 'bust-cache-task-success'
-    },
+    // I removed this as it's not really needed given that External Recs are the only thing that fill this cache now
+    // {
+    //   name: 'bust-cache-task',
+    //   description: 'bust-cache-task-desc',
+    //   api: this.serverService.bustCache(),
+    //   successMessage: 'bust-cache-task-success'
+    // },
     {
       name: 'bust-locale-task',
       description: 'bust-locale-task-desc',

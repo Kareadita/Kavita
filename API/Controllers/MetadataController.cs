@@ -190,12 +190,11 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// This then attempts to refresh data from Kavita+ for this series.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="libraryType"></param>
     /// <returns></returns>
     [HttpPost("force-refresh")]
-    public async Task<ActionResult> ForceRefresh(int seriesId, LibraryType libraryType)
+    public async Task<ActionResult> ForceRefresh(int seriesId)
     {
-        await metadataService.ForceKavitaPlusRefresh(seriesId, libraryType);
+        await metadataService.ForceKavitaPlusRefresh(seriesId);
         return Ok();
     }
 

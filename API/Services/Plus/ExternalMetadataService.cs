@@ -48,7 +48,7 @@ public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
-    Task ForceKavitaPlusRefresh(int seriesId, LibraryType libraryType);
+    Task ForceKavitaPlusRefresh(int seriesId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -56,6 +56,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ExternalMetadataService> _logger;
     private readonly IMapper _mapper;
+    private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
@@ -64,11 +65,12 @@ public class ExternalMetadataService : IExternalMetadataService
         Reviews = ArraySegment<UserReviewDto>.Empty
     };
 
-    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper)
+    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
+        _licenseService = licenseService;
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -88,12 +90,12 @@ public class ExternalMetadataService : IExternalMetadataService
     /// Removes from Blacklist and Invalidates the cache
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="libraryType"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public async Task ForceKavitaPlusRefresh(int seriesId, LibraryType libraryType)
+    public async Task ForceKavitaPlusRefresh(int seriesId)
     {
+        if (!await _licenseService.HasActiveLicense()) return;
         // Remove from Blacklist if applicable
+        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
         if (!IsPlusEligible(libraryType)) return;
         await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
         var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
@@ -133,7 +135,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     public async Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType)
     {
-        if (!IsPlusEligible(libraryType)) return _defaultReturn;
+        if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense()) return _defaultReturn;
 
         // Check blacklist (bad matches)
         if (await _unitOfWork.ExternalSeriesMetadataRepository.IsBlacklistedSeries(seriesId)) return _defaultReturn;

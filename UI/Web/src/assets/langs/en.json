@@ -1720,9 +1720,9 @@
         "chapter-title": "Chapter:",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Highest Count found across all ComicInfo in the Series",
-        "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series"
-
-
+        "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series",
+        "force-refresh": "Force Refresh",
+        "force-refresh-tooltip": "Force refresh external metadata from Kavita+"
     },
 
     "day-breakdown": {

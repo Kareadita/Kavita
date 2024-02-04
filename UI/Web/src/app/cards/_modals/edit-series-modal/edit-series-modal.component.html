@@ -460,6 +460,10 @@
       <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
+      @if (accountService.hasValidLicense$ | async) {
+        <button type="button" class="btn btn-light" (click)="forceScan()" position="above"
+                [ngbTooltip]="t('force-refresh-tooltip')">{{t('force-refresh')}}</button>
+      }
       <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
       <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">{{t('save')}}</button>
     </div>

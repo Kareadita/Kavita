@@ -55,6 +55,8 @@ import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoDatePipe} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
+import {AccountService} from "../../../_services/account.service";
+import {LibraryType} from "../../../_models/library/library";
 
 enum TabID {
   General = 0,
@@ -112,6 +114,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  public readonly accountService = inject(AccountService);
 
   protected readonly TabID = TabID;
   protected readonly PersonRole = PersonRole;
@@ -503,6 +506,12 @@ export class EditSeriesModalComponent implements OnInit {
 
   close() {
     this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
+  }
+
+  forceScan() {
+    this.metadataService.forceRefreshFromPlus(this.series.id).subscribe(() => {
+
+    });
   }
 
   fetchCollectionTags(filter: string = '') {
