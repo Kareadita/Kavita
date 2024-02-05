@@ -73,8 +73,13 @@
         </ng-container>
       </td>
       <td>
-        <i class="fa-regular fa-circle icon" aria-hidden="true" *ngIf="!item.isProcessed"></i>
-        <i class="fa-solid fa-check-circle icon" aria-hidden="true" *ngIf="item.isProcessed"></i>
+        @if(item.isProcessed) {
+          <i class="fa-solid fa-check-circle icon" aria-hidden="true"></i>
+        } @else if (item.isErrored) {
+          <i class="fa-solid fa-circle-exclamation icon error" aria-hidden="true" [ngbTooltip]="item.errorDetails"></i>
+        } @else {
+          <i class="fa-regular fa-circle icon" aria-hidden="true"></i>
+        }
         <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">
           {{item.isProcessed ? t('processed') : t('not-processed')}}
         </span>

@@ -36,11 +36,19 @@ public class ScrobbleEvent : IEntityDate
     /// <summary>
     /// Depends on the ScrobbleEvent if filled in
     /// </summary>
-    public int? VolumeNumber { get; set; } // TODO: Migrate this to float
+    public float? VolumeNumber { get; set; }
     /// <summary>
     /// Has this event been processed and pushed to Provider
     /// </summary>
     public bool IsProcessed { get; set; }
+    /// <summary>
+    /// Was there an error processing this event
+    /// </summary>
+    public bool IsErrored { get; set; }
+    /// <summary>
+    /// The error details
+    /// </summary>
+    public string? ErrorDetails { get; set; }
     /// <summary>
     /// The date this was processed
     /// </summary>

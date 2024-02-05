@@ -5,7 +5,7 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEvent, ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ScrobbleEventTypePipe} from "../scrobble-event-type.pipe";
-import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, take} from "rxjs/operators";
 import {PaginatedResult, Pagination} from "../../_models/pagination";
@@ -20,7 +20,7 @@ import {ToastrService} from "ngx-toastr";
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
