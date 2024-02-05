@@ -493,7 +493,7 @@ public class ScrobblingService : IScrobblingService
                 {
                     _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                     {
-                        Comment = $"Series ({evt.Series.Name}) cannot be matched for Scrobbling. Add a Weblink on the Series to fix this.",
+                        Comment = UnknownSeriesErrorMessage,
                         Details = data.SeriesName,
                         LibraryId = evt.LibraryId,
                         SeriesId = evt.SeriesId
