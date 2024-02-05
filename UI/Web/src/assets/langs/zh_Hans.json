@@ -491,7 +491,8 @@
         "published-label": "出版： ",
         "available": "可用",
         "description": "如果您没有看到{{installed}}",
-        "description-continued": "标签，那么您正在使用测试版。只有主版本才会显示为可用。"
+        "description-continued": "标签，那么您正在使用测试版。只有主版本才会显示为可用。",
+        "nightly": "每晚： {{version}}"
     },
     "invite-user": {
         "title": "邀请用户",
@@ -1087,7 +1088,8 @@
         "donations-title": "捐赠:",
         "source-title": "源代码：",
         "feature-request-title": "功能请求:",
-        "localization-title": "本地化:"
+        "localization-title": "本地化:",
+        "updates-title": "更新历史"
     },
     "manage-tasks-settings": {
         "title": "周期性任务",
@@ -1213,7 +1215,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+是一项高级订阅服务，可为Kavita上的所有用户解锁功能。购买订阅解锁 ",
         "kavita+-desc-part-2": "高级会员福利",
-        "kavita+-desc-part-3": "！"
+        "kavita+-desc-part-3": "！",
+        "kavita+-requirement": "Kavita+ 设计为仅适用于最新版本 - 2 个版本。除此之外的任何内容都可能无法正常工作。",
+        "kavita+-releases": "查看版本"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
@@ -1509,7 +1513,9 @@
         "chapter-title": "章节：",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "在系列的所有ComicInfo中找到的最高计数",
-        "max-issue-tooltip": "从系列中的所有ComicInfo中获取最大话数或卷数字段"
+        "max-issue-tooltip": "从系列中的所有ComicInfo中获取最大话数或卷数字段",
+        "force-refresh-tooltip": "从 Kavita+ 强制刷新外部元数据",
+        "force-refresh": "强制刷新"
     },
     "day-breakdown": {
         "title": "每日统计分析",
@@ -1688,7 +1694,9 @@
         "change-email-no-email": "电子邮件已更新",
         "delete-review": "您确定要删除您的评论吗？",
         "review-deleted": "评论已删除",
-        "delete-device": "您确定要删除该设备吗？"
+        "delete-device": "您确定要删除该设备吗？",
+        "collection-tag-deleted": "收藏标签已删除",
+        "force-kavita+-refresh-success": "Kavita+ 外部元数据已失效"
     },
     "actionable": {
         "scan-library": "扫描资料库",

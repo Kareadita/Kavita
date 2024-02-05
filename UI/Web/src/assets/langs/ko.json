@@ -60,7 +60,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "리뷰는 적어도 {{count}}자여야 합니다",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -258,7 +259,8 @@
         "change-password-alt": "비밀번호 변경 {{user}}",
         "online-now-tooltip": "지금 온라인",
         "sharing-title": "공유:",
-        "username-pattern": "사용자 이름은 다음 문자와 공백만 포함할 수 있습니다: {{characters}}"
+        "username-pattern": "사용자 이름은 다음 문자와 공백만 포함할 수 있습니다: {{characters}}",
+        "admin": "관리자"
     },
     "edit-collection-tags": {
         "series-title": "시리즈에 적용",
@@ -359,7 +361,8 @@
         "created": "생성됨",
         "time-to-read": "완독 예상 시간",
         "last-chapter-added": "추가된 항목",
-        "read-progress": "마지막으로 읽음"
+        "read-progress": "마지막으로 읽음",
+        "average-rating": "평균 평점"
     },
     "manga-format-stats": {
         "title": "포맷",
@@ -503,7 +506,11 @@
         "email-not-sent": "파일에 있는 이메일이 유효한 이메일이 아니므로 보낼 수 없습니다. 로그에 링크가 기록되었습니다. 관리자는 이 링크를 제공하여 프로세스를 완료할 수 있습니다.",
         "anilist-token-expired": "AniList 토큰이 만료되었습니다. 스크로블링은 사용자 설정 > 계정에서 다시 생성할 때까지 더 이상 처리되지 않습니다",
         "k+-reset-key": "이 작업은 키를 서버에서 해제하고 Kavita 인스턴스를 다시 등록할 수 있도록 허용합니다.",
-        "k+-reset-key-success": "라이선스가 등록 해제되었습니다. 인스턴스를 다시 등록하고 Kavita+를 다시 활성화하려면 수정 버튼을 사용하세요"
+        "k+-reset-key-success": "라이선스가 등록 해제되었습니다. 인스턴스를 다시 등록하고 Kavita+를 다시 활성화하려면 수정 버튼을 사용하세요",
+        "delete-device": "이 기기를 삭제하시겠습니까?",
+        "delete-review": "리뷰를 삭제하시겠습니까?",
+        "review-deleted": "리뷰가 삭제되었습니다",
+        "collection-tag-deleted": "컬렉션 태그가 삭제되었습니다"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -667,7 +674,7 @@
         "setup-user-account-tooltip": "이것을 복사하여 새 탭에 붙여넣으십시오. 로그아웃해야 할 수도 있습니다.",
         "title": "사용자 초대",
         "inviting": "초대중…",
-        "description": "이메일을 통해 사용자를 서버로 초대하려면, 그들의 이메일 주소를 입력해주세요. 그들은 계정을 생성할 수 있는 이메일을 받게 될 것입니다. 이 작업을 수행하려면 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에서 호스트 이름 필드를 설정해야하거나 인스턴스에 원격 URL을 통해 접근해야합니다. <br/><br/>또 다른 방법으로는 사용자 이름을 사용할 수 있지만, 사용자 이름 기반 계정의 경우 비밀번호 재설정이 불가능하다는 점을 참고하세요. 만약 우리 이메일 서비스를 사용하지 않고 싶다면, 자체 이메일 서비스를 호스팅할 수도 있습니다.",
+        "description": "이메일을 입력하여 사용자를 서버에 초대하세요. 계정을 만들 수 있는 이메일을 받게 됩니다. 이 기능이 작동하려면 <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에 호스트 이름 및 이메일 설정 필드가 설정되어 있어야 합니다. 그렇지 않으면 사용자를 대신하여 설정할 수 있는 링크가 제공됩니다.<br/><br/>이메일이 유효할 필요는 없습니다.",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}"
     },
@@ -924,7 +931,11 @@
         "size-limit-tooltip": "이메일 서버는 첨부 파일에 대해 몇 바이트까지 처리할 수 있나요",
         "customized-templates-tooltip": "Kavita는 기본 대신 config/templates 디렉토리를 템플릿에 사용해야 할까요? 템플릿 변경 사항을 최신으로 유지하는 것은 여러분의 책임입니다.",
         "gmail-label": "Gmail",
-        "outlook-label": "Outlook"
+        "outlook-label": "Outlook",
+        "sender-address-tooltip": "이는 수신자가 이메일을 받을 때 볼 수 있는 이메일 주소입니다. 일반적으로 계정과 연결된 이메일 주소입니다.",
+        "sender-displayname-tooltip": "수신자가 이메일을 받을 때 보게 될 이름",
+        "username-tooltip": "호스트에 대해 인증하는 데 사용되는 사용자 이름",
+        "host-tooltip": "이메일 서버의 발신/SMTP 주소"
     },
     "manage-scrobble-errors": {
         "edit-item-alt": "편집 {{seriesName}}",
@@ -937,7 +948,7 @@
         "filter-label": "{{common.filter}}"
     },
     "manage-tasks-settings": {
-        "library-database-backup-tooltip": "Kavita가 데이터베이스를 백업하는 빈도입니다.",
+        "library-database-backup-tooltip": "Kavita가 데이터베이스 및 기타 관련 파일을 백업하는 빈도입니다.",
         "adhoc-tasks-title": "임시 작업",
         "job-title-header": "작업 이름",
         "reset-to-default": "{{common.reset-to-default}}",
@@ -960,7 +971,7 @@
         "cron-header": "크론",
         "convert-media-task": "미디어를 대상 인코딩으로 변환",
         "title": "반복 작업",
-        "library-database-backup-label": "라이브러리 데이터베이스 백업",
+        "library-database-backup-label": "Kavita 백업",
         "action-header": "행동",
         "save": "{{common.save}}",
         "recurring-tasks-title": "{{title}}",
@@ -976,7 +987,16 @@
         "check-for-updates-task-desc": "버전보다 앞서 안정적인 릴리스가 있는지 확인하십시오.",
         "bust-locale-task-desc": "로케일 캐시를 지웁니다. 업데이트 후 문자열이 올바르게 표시되지 않는 문제를 해결할 수 있습니다",
         "bust-locale-task-success": "로케일 캐시 지워짐",
-        "bust-locale-task": "로케일 캐시 지우기"
+        "bust-locale-task": "로케일 캐시 지우기",
+        "weekly": "매주",
+        "disabled": "비활성",
+        "required": "{{validation.required-field}}",
+        "custom-label": "사용자 정의 일정(Cron 표기법)",
+        "cleanup-label": "정리",
+        "cleanup-tooltip": "Kavita가 정리 작업을 실행하는 빈도입니다. 이 작업은 무거울 수 있으므로 대부분의 경우 자정에 수행해야 합니다",
+        "custom": "커스텀",
+        "cron-notation": "유효한 크론 표기법이 아닙니다",
+        "daily": "매일"
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
@@ -1609,7 +1629,7 @@
         "read": "{{common.read}}"
     },
     "manage-system": {
-        "feature-request-title": "기능 요청",
+        "feature-request-title": "기능 요청:",
         "title": "시스템 정보",
         "version-title": "버전",
         "installId-title": "인스톨 아이디",
@@ -1618,7 +1638,8 @@
         "wiki-title": "위키:",
         "discord-title": "디스코드:",
         "donations-title": "기부:",
-        "source-title": "소스:"
+        "source-title": "소스:",
+        "localization-title": "현지화:"
     },
     "library-detail": {
         "library-tab": "라이브러리",
@@ -1802,7 +1823,8 @@
         "path": "경로",
         "file-path": "파일 경로",
         "want-to-read": "읽고 싶어요",
-        "read-date": "읽은 날짜"
+        "read-date": "읽은 날짜",
+        "average-rating": "평균 평점"
     },
     "filter-comparison-pipe": {
         "is-not-in-last": "마지막에 없음",
@@ -1856,7 +1878,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "퍼센트",
-        "unit-reading-date": "날짜"
+        "unit-reading-date": "날짜",
+        "unit-average-rating": "평균 등급(Kavita+) - 캐시된 시리즈에만 해당"
     },
     "series-preview-drawer": {
         "genres-label": "{{filter-field-pipe.genres}}",
@@ -1940,6 +1963,11 @@
         "image": "Image"
     },
     "out-of-date-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title": "뒤처지지 마세요!",
+        "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
+        "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
+        "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>를 살펴보세요.",
+        "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
     }
 }
