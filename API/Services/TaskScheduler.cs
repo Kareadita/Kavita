@@ -56,6 +56,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IMediaConversionService _mediaConversionService;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILicenseService _licenseService;
+    private readonly IExternalMetadataService _externalMetadataService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -68,10 +69,11 @@ public class TaskScheduler : ITaskScheduler
     public const string BackupTaskId = "backup";
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
-    public const string CheckScrobblingTokens = "check-scrobbling-tokens";
-    public const string ProcessScrobblingEvents = "process-scrobbling-events";
-    public const string ProcessProcessedScrobblingEvents = "process-processed-scrobbling-events";
-    public const string LicenseCheck = "license-check";
+    public const string CheckScrobblingTokensId = "check-scrobbling-tokens";
+    public const string ProcessScrobblingEventsId = "process-scrobbling-events";
+    public const string ProcessProcessedScrobblingEventsId = "process-processed-scrobbling-events";
+    public const string LicenseCheckId = "license-check";
+    public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
@@ -88,7 +90,8 @@ public class TaskScheduler : ITaskScheduler
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService)
+        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
+        IExternalMetadataService externalMetadataService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -105,6 +108,7 @@ public class TaskScheduler : ITaskScheduler
         _mediaConversionService = mediaConversionService;
         _scrobblingService = scrobblingService;
         _licenseService = licenseService;
+        _externalMetadataService = externalMetadataService;
     }
 
     public async Task ScheduleTasks()
@@ -121,7 +125,8 @@ public class TaskScheduler : ITaskScheduler
         }
         else
         {
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false), Cron.Daily, RecurringJobOptions);
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false),
+                Cron.Daily, RecurringJobOptions);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
@@ -134,19 +139,24 @@ public class TaskScheduler : ITaskScheduler
                 // Override daily and make 2am so that everything on system has cleaned up and no blocking
                 schedule = Cron.Daily(2);
             }
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => schedule, RecurringJobOptions);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(),
+                () => schedule, RecurringJobOptions);
         }
         else
         {
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), Cron.Weekly, RecurringJobOptions);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(),
+                Cron.Weekly, RecurringJobOptions);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCleanup)).Value;
         _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
-        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(),
+            CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
 
-        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
-        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(),
+            Cron.Daily, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(),
+            Cron.Monthly, RecurringJobOptions);
 
         await ScheduleKavitaPlusTasks();
     }
@@ -159,14 +169,23 @@ public class TaskScheduler : ITaskScheduler
         {
             return;
         }
-        RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(CheckScrobblingTokensId, () => _scrobblingService.CheckExternalAccessTokens(),
+            Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
-        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.HasActiveLicense(true), LicenseService.Cron, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.HasActiveLicense(true),
+            LicenseService.Cron, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _licenseService.HasActiveLicense(true));
 
         // KavitaPlus Scrobbling (every 4 hours)
-        RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
-        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEvents, () => _scrobblingService.ClearProcessedEvents(), Cron.Daily, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
+            "0 */4 * * *", RecurringJobOptions);
+        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
+            Cron.Daily, RecurringJobOptions);
+
+        // Backfilling/Freshening Reviews/Rating/Recommendations
+        RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
+            () => _externalMetadataService.FetchExternalDataTask(), Cron.Hourly(Rnd.Next(0, 59)),
+            RecurringJobOptions);
     }
 
     #region StatsTasks
