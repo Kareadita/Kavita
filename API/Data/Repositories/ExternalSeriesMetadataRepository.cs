@@ -33,7 +33,7 @@ public interface IExternalSeriesMetadataRepository
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
     Task<bool> IsBlacklistedSeries(int seriesId);
-    Task CreateBlacklistedSeries(int seriesId);
+    Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true);
     Task RemoveFromBlacklist(int seriesId);
     Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit);
 }
@@ -200,14 +200,19 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     /// Creates a new instance against SeriesId and Saves to the DB
     /// </summary>
     /// <param name="seriesId"></param>
-    public async Task CreateBlacklistedSeries(int seriesId)
+    /// <param name="saveChanges"></param>
+    public async Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true)
     {
-        if (seriesId <= 0) return;
+        if (seriesId <= 0 || await _context.SeriesBlacklist.AnyAsync(s => s.SeriesId == seriesId)) return;
+
         await _context.SeriesBlacklist.AddAsync(new SeriesBlacklist()
         {
             SeriesId = seriesId
         });
-        await _context.SaveChangesAsync();
+        if (saveChanges)
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 
     /// <summary>

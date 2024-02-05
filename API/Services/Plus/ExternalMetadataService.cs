@@ -15,6 +15,7 @@ using API.Entities.Metadata;
 using API.Extensions;
 using AutoMapper;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -105,6 +106,8 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <remarks>To avoid blasting Kavita+ API, this only processes a few records. The goal is to slowly build </remarks>
     /// <returns></returns>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task FetchExternalDataTask()
     {
         // Find all Series that are eligible and limit
@@ -142,6 +145,8 @@ public class ExternalMetadataService : IExternalMetadataService
         await _unitOfWork.CommitAsync();
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public Task GetNewSeriesData(int seriesId, LibraryType libraryType)
     {
         // TODO: Implement this task

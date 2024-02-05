@@ -447,6 +447,7 @@ public class ScrobblingService : IScrobblingService
                             LibraryId = evt.LibraryId,
                             SeriesId = evt.SeriesId
                         });
+                        await _unitOfWork.ExternalSeriesMetadataRepository.CreateBlacklistedSeries(evt.SeriesId, false);
                     }
                 } else if (response.ErrorMessage != null && response.ErrorMessage.StartsWith("Review"))
                 {
@@ -479,7 +480,7 @@ public class ScrobblingService : IScrobblingService
                 {
                     _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                     {
-                        Comment = "Unknown Series",
+                        Comment = $"Series ({evt.Series.Name}) cannot be matched for Scrobbling. Add a Weblink on the Series to fix this.",
                         Details = data.SeriesName,
                         LibraryId = evt.LibraryId,
                         SeriesId = evt.SeriesId
@@ -762,6 +763,19 @@ public class ScrobblingService : IScrobblingService
                 _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                 {
                     Comment = "AniList token has expired and needs rotating. Scrobbles wont work until then",
+                    Details = $"User: {evt.AppUser.UserName}",
+                    LibraryId = evt.LibraryId,
+                    SeriesId = evt.SeriesId
+                });
+                await _unitOfWork.CommitAsync();
+                return 0;
+            }
+
+            if (await _unitOfWork.ExternalSeriesMetadataRepository.IsBlacklistedSeries(evt.SeriesId))
+            {
+                _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                {
+                    Comment = $"Series ({evt.Series.Name}) cannot be matched for Scrobbling. Add a Weblink on the Series to fix this.",
                     Details = $"User: {evt.AppUser.UserName}",
                     LibraryId = evt.LibraryId,
                     SeriesId = evt.SeriesId
