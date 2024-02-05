@@ -17345,8 +17345,8 @@
             "type": "boolean"
           },
           "volumeNumber": {
-            "type": "integer",
-            "format": "int32",
+            "type": "number",
+            "format": "float",
             "nullable": true
           },
           "chapterNumber": {
@@ -17377,6 +17377,13 @@
             ],
             "type": "integer",
             "format": "int32"
+          },
+          "isErrored": {
+            "type": "boolean"
+          },
+          "errorDetails": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -19500,6 +19507,18 @@
             "type": "string",
             "description": "Date of the publish",
             "nullable": true
+          },
+          "isOnNightlyInRelease": {
+            "type": "boolean",
+            "description": "Is the server on a nightly within this release"
+          },
+          "isReleaseNewer": {
+            "type": "boolean",
+            "description": "Is the server on an older version"
+          },
+          "isReleaseEqual": {
+            "type": "boolean",
+            "description": "Is the server on this version"
           }
         },
         "additionalProperties": false,

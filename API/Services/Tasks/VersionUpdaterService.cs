@@ -47,7 +47,7 @@ public interface IVersionUpdaterService
 {
     Task<UpdateNotificationDto?> CheckForUpdate();
     Task PushUpdate(UpdateNotificationDto update);
-    Task<IEnumerable<UpdateNotificationDto>> GetAllReleases();
+    Task<IList<UpdateNotificationDto>> GetAllReleases();
     Task<int> GetNumberOfReleasesBehind();
 }
 
@@ -82,10 +82,21 @@ public class VersionUpdaterService : IVersionUpdaterService
         return CreateDto(update);
     }
 
-    public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()
+    public async Task<IList<UpdateNotificationDto>> GetAllReleases()
     {
         var updates = await GetGithubReleases();
-        return updates.Select(CreateDto).Where(d => d != null)!;
+        var updateDtos = updates.Select(CreateDto)
+            .Where(d => d != null)
+            .OrderByDescending(d => d!.PublishDate)
+            .Select(d => d!)
+            .ToList();
+
+        // Find the latest dto
+        var latestRelease = updateDtos[0]!;
+        var isNightly = BuildInfo.Version > new Version(latestRelease.UpdateVersion);
+        latestRelease.IsOnNightlyInRelease = isNightly;
+
+        return updateDtos;
     }
 
     public async Task<int> GetNumberOfReleasesBehind()
@@ -108,7 +119,9 @@ public class VersionUpdaterService : IVersionUpdaterService
             UpdateTitle = update.Name,
             UpdateUrl = update.Html_Url,
             IsDocker = OsInfo.IsDocker,
-            PublishDate = update.Published_At
+            PublishDate = update.Published_At,
+            IsReleaseEqual = BuildInfo.Version == updateVersion,
+            IsReleaseNewer = BuildInfo.Version < updateVersion,
         };
     }
 
