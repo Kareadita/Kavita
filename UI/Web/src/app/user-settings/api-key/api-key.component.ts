@@ -57,7 +57,9 @@ export class ApiKeyComponent implements OnInit {
         key = translate('api-key.no-key');
       }
 
-      this.showRefresh = !this.accountService.hasReadOnlyRole(user!);
+      if (this.showRefresh) {
+        this.showRefresh = !this.accountService.hasReadOnlyRole(user!);
+      }
 
       if (this.transform != undefined) {
         this.key = this.transform(key);
