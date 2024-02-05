@@ -1,5 +1,5 @@
 name: Bug Report
-description: Help us make Kavita better for everyone by submitting issues you run into while using the program. 
+description: Help us make Kavita better for everyone by submitting issues you run into while using the program.
 title: "Put a short summary of what went wrong here"
 labels: ["needs-triage"]
 body:
@@ -11,7 +11,7 @@ body:
     attributes:
       label: What happened?
       description: Don't forget to tell us what steps you took so we can try to reproduce.
-      placeholder: Tell us what you see! 
+      placeholder: Tell us what you see!
     validations:
       required: true
   - type: textarea
@@ -19,13 +19,13 @@ body:
     attributes:
       label: What did you expect?
       description: What did you expect to happen?
-      placeholder: Tell us what you expected to see! Go in as much detail as possible so we can confirm if the behavior is something that is broken. 
+      placeholder: Tell us what you expected to see! Go in as much detail as possible so we can confirm if the behavior is something that is broken.
     validations:
       required: true
   - type: dropdown
     id: version
     attributes:
-      label: Kavita Version Number - Don't see your version number listed? Then your install is out and date. Please update and see if your issue still persists. 
+      label: Kavita Version Number - Don't see your version number listed? Then your install is out of date. Please update and see if your issue still persists.
       multiple: false
       options:
         - 0.7.13 - Stable
