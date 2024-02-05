@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Feature Requests
+    url: https://github.com/Kareadita/Kavita/discussions
+    about: Suggest an idea for the Kavita project
+  - name: Report a security vulnerability
+    url: https://github.com/Kareadita/Kavita/security/advisories/new/
+    about: Privately report a security vulnerability
