@@ -182,10 +182,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
             Cron.Daily, RecurringJobOptions);
 
-        // Backfilling/Freshening Reviews/Rating/Recommendations
-        RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
-            () => _externalMetadataService.FetchExternalDataTask(), Cron.Hourly(Rnd.Next(0, 59)),
-            RecurringJobOptions);
+        // Backfilling/Freshening Reviews/Rating/Recommendations (TODO: This will come in v0.8.x)
+        // RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
+        //     () => _externalMetadataService.FetchExternalDataTask(), Cron.Hourly(Rnd.Next(0, 59)),
+        //     RecurringJobOptions);
     }
 
     #region StatsTasks
