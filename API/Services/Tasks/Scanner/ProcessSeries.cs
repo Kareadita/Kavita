@@ -13,6 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
@@ -57,6 +58,7 @@ public class ProcessSeries : IProcessSeries
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly ICollectionTagService _collectionTagService;
     private readonly IReadingListService _readingListService;
+    private readonly IExternalMetadataService _externalMetadataService;
 
     private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
@@ -66,7 +68,7 @@ public class ProcessSeries : IProcessSeries
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService, IReadingListService readingListService)
+        ICollectionTagService collectionTagService, IReadingListService readingListService, IExternalMetadataService externalMetadataService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -79,6 +81,7 @@ public class ProcessSeries : IProcessSeries
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
         _readingListService = readingListService;
+        _externalMetadataService = externalMetadataService;
 
 
         _genres = new Dictionary<string, Genre>();
@@ -236,8 +239,9 @@ public class ProcessSeries : IProcessSeries
 
                 if (seriesAdded)
                 {
-                    // See if any recommendations can link up to the series
+                    // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
+                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
                     await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);

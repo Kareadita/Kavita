@@ -9,9 +9,13 @@
       <div class="card w-100 mb-2" style="width: 18rem;">
         <div class="card-body">
           <h4 class="card-title">{{update.updateTitle}}&nbsp;
-            <span class="badge bg-secondary" *ngIf="isNightly(update)">{{t('nightly', {version: update.currentVersion})}}</span>
-            <span class="badge bg-secondary" *ngIf="update.updateVersion === update.currentVersion">{{t('installed')}}</span>
-            <span class="badge bg-secondary" *ngIf="update.updateVersion > update.currentVersion">{{t('available')}}</span>
+            @if (update.isOnNightlyInRelease) {
+              <span class="badge bg-secondary">{{t('nightly', {version: update.currentVersion})}}</span>
+            } @else if (update.isReleaseEqual) {
+              <span class="badge bg-secondary">{{t('installed')}}</span>
+            } @else if (update.isReleaseNewer && indx === 0) {
+              <span class="badge bg-secondary">{{t('available')}}</span>
+            }
           </h4>
           <h6 class="card-subtitle mb-1 mt-1 text-muted">{{t('published-label')}}{{update.publishDate | date: 'short'}}</h6>
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -14,6 +15,7 @@ using API.Entities.Metadata;
 using API.Extensions;
 using AutoMapper;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -49,6 +51,15 @@ public interface IExternalMetadataService
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
     Task ForceKavitaPlusRefresh(int seriesId);
+    Task FetchExternalDataTask();
+    /// <summary>
+    /// This is an entry point and provides a level of protection against calling upstream API. Will only allow 100 new
+    /// series to fetch data within a day and enqueues background jobs at certain times to fetch that data.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    /// <returns></returns>
+    Task GetNewSeriesData(int seriesId, LibraryType libraryType);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -58,6 +69,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
@@ -72,6 +84,8 @@ public class ExternalMetadataService : IExternalMetadataService
         _mapper = mapper;
         _licenseService = licenseService;
 
+
+
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
@@ -83,7 +97,34 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     public static bool IsPlusEligible(LibraryType type)
     {
-        return type != LibraryType.Comic;
+        return !NonEligibleLibraryTypes.Contains(type);
+    }
+
+    /// <summary>
+    /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep
+    /// data in the DB non-stale and fetched.
+    /// </summary>
+    /// <remarks>To avoid blasting Kavita+ API, this only processes a few records. The goal is to slowly build </remarks>
+    /// <returns></returns>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public async Task FetchExternalDataTask()
+    {
+        // Find all Series that are eligible and limit
+        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeriesIdsWithoutMetadata(25);
+        if (ids.Count == 0) return;
+
+        _logger.LogInformation("Started Refreshing {Count} series data from Kavita+", ids.Count);
+        var count = 0;
+        foreach (var seriesId in ids)
+        {
+            // TODO: Rewrite this so it's streamlined and not multiple DB calls
+            var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+            await GetSeriesDetailPlus(seriesId, libraryType);
+            await Task.Delay(1500);
+            count++;
+        }
+        _logger.LogInformation("Finished Refreshing {Count} series data from Kavita+", count);
     }
 
     /// <summary>
@@ -102,6 +143,15 @@ public class ExternalMetadataService : IExternalMetadataService
         if (metadata == null) return;
         metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
         await _unitOfWork.CommitAsync();
+    }
+
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public Task GetNewSeriesData(int seriesId, LibraryType libraryType)
+    {
+        // TODO: Implement this task
+        if (!IsPlusEligible(libraryType)) return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -153,6 +203,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(seriesId);
             if (data == null) return _defaultReturn;
+            _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", data.SeriesName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
             var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")

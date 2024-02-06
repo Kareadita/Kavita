@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.DTOs.Recommendation;
+using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Plus;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -31,8 +33,9 @@ public interface IExternalSeriesMetadataRepository
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
     Task<bool> IsBlacklistedSeries(int seriesId);
-    Task CreateBlacklistedSeries(int seriesId);
+    Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true);
     Task RemoveFromBlacklist(int seriesId);
+    Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit);
 }
 
 public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepository
@@ -197,14 +200,19 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     /// Creates a new instance against SeriesId and Saves to the DB
     /// </summary>
     /// <param name="seriesId"></param>
-    public async Task CreateBlacklistedSeries(int seriesId)
+    /// <param name="saveChanges"></param>
+    public async Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true)
     {
-        if (seriesId <= 0) return;
+        if (seriesId <= 0 || await _context.SeriesBlacklist.AnyAsync(s => s.SeriesId == seriesId)) return;
+
         await _context.SeriesBlacklist.AddAsync(new SeriesBlacklist()
         {
             SeriesId = seriesId
         });
-        await _context.SaveChangesAsync();
+        if (saveChanges)
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 
     /// <summary>
@@ -223,5 +231,17 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             // Save the changes to the database
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit)
+    {
+        return await _context.Series
+            .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
+            .Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
+            .OrderByDescending(s => s.Library.Type)
+            .ThenBy(s => s.NormalizedName)
+            .Select(s => s.Id)
+            .Take(limit)
+            .ToListAsync();
     }
 }

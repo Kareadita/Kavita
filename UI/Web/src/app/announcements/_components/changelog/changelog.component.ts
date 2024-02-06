@@ -28,28 +28,4 @@ export class ChangelogComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
-  isNightly(update: UpdateVersionEvent) {
-    // Split the version numbers into arrays
-    const updateVersionArr = update.updateVersion.split('.');
-    const currentVersionArr = update.currentVersion.split('.');
-
-    // Compare the first three parts of the version numbers
-    for (let i = 0; i < 3; i++) {
-      const updatePart = parseInt(updateVersionArr[i]);
-      const currentPart = parseInt(currentVersionArr[i]);
-
-      // If any part of the update version is less than the corresponding part of the current version, return true
-      if (updatePart < currentPart) {
-        return true;
-      }
-      // If any part of the update version is greater than the corresponding part of the current version, return false
-      else if (updatePart > currentPart) {
-        return false;
-      }
-    }
-
-    // If all parts are equal, compare the length of the version numbers
-    return updateVersionArr.length < currentVersionArr.length;
-  }
 }

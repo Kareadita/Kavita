@@ -18,4 +18,10 @@ export interface ScrobbleEvent {
   createdUtc: string;
   volumeNumber: number | null;
   chapterNumber: number | null;
+  isErrored: boolean;
+  /**
+   * Null when not errored
+   */
+  errorDetails: string | null;
+
 }

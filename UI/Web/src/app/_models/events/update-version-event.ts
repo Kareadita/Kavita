@@ -6,4 +6,7 @@ export interface UpdateVersionEvent {
     updateUrl: string;
     isDocker: boolean;
     publishDate: string;
+    isOnNightlyInRelease: boolean;
+    isReleaseNewer: boolean;
+    isReleaseEqual: boolean;
 }
