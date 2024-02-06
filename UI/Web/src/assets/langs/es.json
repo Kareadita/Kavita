@@ -298,7 +298,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "La reseña debe tener al menos {{count}} caracteres",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -644,7 +645,8 @@
         "available": "Disponible",
         "description": "Si no ves una etiqueta {{installed}}",
         "description-continued": ", estás en una versión de desarrollo. Solo versiones estable aparecerán como disponible.",
-        "published-label": "Publicado: "
+        "published-label": "Publicado: ",
+        "nightly": "Nightly: {{version}}"
     },
     "invite-user": {
         "setup-user-title": "Usuario invitado",
@@ -1047,7 +1049,12 @@
         "email-not-sent": "El correo electrónico archivado no es válido y no se puede enviar. Se ha volcado un enlace en los registros. El administrador puede proporcionar este enlace para completar el flujo.",
         "anilist-token-expired": "Tu token de AniList ha caducado. El scrobbling dejará de procesarse hasta que lo vuelva a generar en Configuración de usuario > Cuenta",
         "change-email-no-email": "Correo electrónico actualizado",
-        "email-not-sent-test": "Se ha producido una excepción al enviar el correo electrónico. Compruebe los registros para más detalles. Esto indica una configuración incorrecta."
+        "email-not-sent-test": "Se ha producido una excepción al enviar el correo electrónico. Compruebe los registros para más detalles. Esto indica una configuración incorrecta.",
+        "delete-review": "¿Seguro que quieres borrar tu opinión?",
+        "delete-device": "¿Estás seguro de que quieres borrar este dispositivo?",
+        "review-deleted": "Revisión eliminada",
+        "collection-tag-deleted": "Etiqueta de la colección eliminada",
+        "force-kavita+-refresh-success": "Los metadatos externos de Kavita+ han sido invalidados"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -1086,7 +1093,8 @@
         "last-chapter-added": "Item añadido",
         "time-to-read": "Tiempo de lectura",
         "created": "Creado",
-        "read-progress": "Última vez leído"
+        "read-progress": "Última vez leído",
+        "average-rating": "Valoración media"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalles",
@@ -1146,7 +1154,9 @@
         "name-label": "Nombre",
         "localized-name-label": "Nombre encontrado",
         "highest-count-tooltip": "El recuento más alto encontrado en todos los ComicInfo de la serie",
-        "max-issue-tooltip": "Campo número o volumen máximo de todos los ComicInfo de la serie"
+        "max-issue-tooltip": "Campo número o volumen máximo de todos los ComicInfo de la serie",
+        "force-refresh": "Forzar la actualización",
+        "force-refresh-tooltip": "Forzar la actualización de metadatos externos de Kavita+"
     },
     "nav-header": {
         "search-alt": "Buscar…",
@@ -1558,7 +1568,9 @@
         "title": "Panel de administrador",
         "media-tab": "Multimedia",
         "kavita+-desc-part-1": "Kavita+ es un servicio de suscripción premium que desbloquea características para todos los usuarios en esta instancia de Kavita. Compra una suscripción para desblquear. ",
-        "kavita+-desc-part-2": "Ventajas del premium"
+        "kavita+-desc-part-2": "Ventajas del premium",
+        "kavita+-releases": "Ver las publicaciones",
+        "kavita+-requirement": "Kavita+ está diseñado para funcionar sólo con la última versión - 2 versiones. Cualquier cosa fuera de eso está sujeto a no funcionar."
     },
     "file-breakdown-stats": {
         "visualisation-label": "Visualización",
@@ -1632,7 +1644,8 @@
         "installId-title": "Instalar ID",
         "home-page-title": "Página de inicio:",
         "title": "Sobre el sistema",
-        "localization-title": "Ubicaciones:"
+        "localization-title": "Ubicaciones:",
+        "updates-title": "Historial de actualizaciones"
     },
     "manage-tasks-settings": {
         "action-header": "Acción",
@@ -1957,6 +1970,11 @@
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "out-of-date-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title": "¡No te quedes atrás!",
+        "subtitle": "¡Parece que tu instalación lleva más de {{count}} versiones de retraso!",
+        "description-1": "Por favor, considere la actualización para que esté ejecutando la última versión de Kavita.",
+        "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
+        "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
     }
 }
