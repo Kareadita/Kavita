@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -12,9 +13,9 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
-using API.Helpers.Builders;
 using AutoMapper;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -48,7 +49,17 @@ internal class SeriesDetailPlusApiDto
 public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
-    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId);
+    Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
+    Task ForceKavitaPlusRefresh(int seriesId);
+    Task FetchExternalDataTask();
+    /// <summary>
+    /// This is an entry point and provides a level of protection against calling upstream API. Will only allow 100 new
+    /// series to fetch data within a day and enqueues background jobs at certain times to fetch that data.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    /// <returns></returns>
+    Task GetNewSeriesData(int seriesId, LibraryType libraryType);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -56,21 +67,91 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ExternalMetadataService> _logger;
     private readonly IMapper _mapper;
-    private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(14);
+    private readonly ILicenseService _licenseService;
+    private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book);
+    private readonly SeriesDetailPlusDto _defaultReturn = new()
+    {
+        Recommendations = null,
+        Ratings = ArraySegment<RatingDto>.Empty,
+        Reviews = ArraySegment<UserReviewDto>.Empty
+    };
 
-    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper)
+    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
+        _licenseService = licenseService;
+
+
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public static bool IsLibraryTypeSupported(LibraryType type)
+    /// <summary>
+    /// Checks if the library type is allowed to interact with Kavita+
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsPlusEligible(LibraryType type)
     {
-        return type != LibraryType.Comic && type != LibraryType.Book;
+        return !NonEligibleLibraryTypes.Contains(type);
+    }
+
+    /// <summary>
+    /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep
+    /// data in the DB non-stale and fetched.
+    /// </summary>
+    /// <remarks>To avoid blasting Kavita+ API, this only processes a few records. The goal is to slowly build </remarks>
+    /// <returns></returns>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public async Task FetchExternalDataTask()
+    {
+        // Find all Series that are eligible and limit
+        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeriesIdsWithoutMetadata(25);
+        if (ids.Count == 0) return;
+
+        _logger.LogInformation("Started Refreshing {Count} series data from Kavita+", ids.Count);
+        var count = 0;
+        foreach (var seriesId in ids)
+        {
+            // TODO: Rewrite this so it's streamlined and not multiple DB calls
+            var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+            await GetSeriesDetailPlus(seriesId, libraryType);
+            await Task.Delay(1500);
+            count++;
+        }
+        _logger.LogInformation("Finished Refreshing {Count} series data from Kavita+", count);
+    }
+
+    /// <summary>
+    /// Removes from Blacklist and Invalidates the cache
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    public async Task ForceKavitaPlusRefresh(int seriesId)
+    {
+        if (!await _licenseService.HasActiveLicense()) return;
+        // Remove from Blacklist if applicable
+        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+        if (!IsPlusEligible(libraryType)) return;
+        await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+        var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
+        if (metadata == null) return;
+        metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
+        await _unitOfWork.CommitAsync();
+    }
+
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public Task GetNewSeriesData(int seriesId, LibraryType libraryType)
+    {
+        // TODO: Implement this task
+        if (!IsPlusEligible(libraryType)) return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -102,11 +183,15 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId)
+    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType)
     {
+        if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense()) return _defaultReturn;
+
+        // Check blacklist (bad matches)
+        if (await _unitOfWork.ExternalSeriesMetadataRepository.IsBlacklistedSeries(seriesId)) return _defaultReturn;
+
         var needsRefresh =
-            await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId,
-                DateTime.UtcNow.Subtract(_externalSeriesMetadataCache));
+            await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId);
 
         if (!needsRefresh)
         {
@@ -116,10 +201,9 @@ public class ExternalMetadataService : IExternalMetadataService
 
         try
         {
-            var series =
-                await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
-                    SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-            if (series == null || !IsLibraryTypeSupported(series.Library.Type)) return null;
+            var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(seriesId);
+            if (data == null) return _defaultReturn;
+            _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", data.SeriesName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
             var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
@@ -130,12 +214,13 @@ public class ExternalMetadataService : IExternalMetadataService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new PlusSeriesDtoBuilder(series).Build())
+                .PostJsonAsync(data)
                 .ReceiveJson<SeriesDetailPlusApiDto>();
 
 
             // Clear out existing results
-            var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series!);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
@@ -157,19 +242,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // Recommendations
             externalSeriesMetadata.ExternalRecommendations ??= new List<ExternalRecommendation>();
-            var recs = await ProcessRecommendations(series, result.Recommendations, externalSeriesMetadata);
+            var recs = await ProcessRecommendations(libraryType, result.Recommendations, externalSeriesMetadata);
 
             var extRatings = externalSeriesMetadata.ExternalRatings
                 .Where(r => r.AverageScore > 0)
                 .ToList();
 
-            externalSeriesMetadata.LastUpdatedUtc = DateTime.UtcNow;
+            externalSeriesMetadata.ValidUntilUtc = DateTime.UtcNow.Add(_externalSeriesMetadataCache);
             externalSeriesMetadata.AverageExternalRating = extRatings.Count != 0 ? (int) extRatings
                 .Average(r => r.AverageScore) : 0;
 
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
-
             await _unitOfWork.CommitAsync();
 
             return new SeriesDetailPlusDto()
@@ -181,9 +265,9 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         catch (FlurlHttpException ex)
         {
-            if (ex.StatusCode == 404)
+            if (ex.StatusCode == 500)
             {
-                return null;
+                return _defaultReturn;
             }
         }
         catch (Exception ex)
@@ -191,7 +275,10 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogError(ex, "An error happened during the request to Kavita+ API");
         }
 
-        return null;
+        // Blacklist the series as it wasn't found in Kavita+
+        await _unitOfWork.ExternalSeriesMetadataRepository.CreateBlacklistedSeries(seriesId);
+
+        return _defaultReturn;
     }
 
 
@@ -200,14 +287,16 @@ public class ExternalMetadataService : IExternalMetadataService
         var externalSeriesMetadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
         if (externalSeriesMetadata != null) return externalSeriesMetadata;
 
-        externalSeriesMetadata = new ExternalSeriesMetadata();
+        externalSeriesMetadata = new ExternalSeriesMetadata()
+        {
+            SeriesId = seriesId,
+        };
         series.ExternalSeriesMetadata = externalSeriesMetadata;
-        externalSeriesMetadata.SeriesId = series.Id;
         _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
         return externalSeriesMetadata;
     }
 
-    private async Task<RecommendationDto> ProcessRecommendations(Series series, IEnumerable<MediaRecommendationDto> recs,
+    private async Task<RecommendationDto> ProcessRecommendations(LibraryType libraryType, IEnumerable<MediaRecommendationDto> recs,
         ExternalSeriesMetadata externalSeriesMetadata)
     {
         var recDto = new RecommendationDto()
@@ -221,7 +310,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             // Find the series based on name and type and that the user has access too
             var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIds(rec.RecommendationNames,
-                series.Library.Type, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
+                libraryType, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
                 ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
 
             if (seriesForRec != null)

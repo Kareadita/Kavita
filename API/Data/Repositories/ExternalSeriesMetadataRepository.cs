@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.DTOs.Recommendation;
+using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Plus;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -27,9 +29,13 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalRating>? ratings);
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
-    Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId, DateTime expireTime);
+    Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
+    Task<bool> IsBlacklistedSeries(int seriesId);
+    Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true);
+    Task RemoveFromBlacklist(int seriesId);
+    Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit);
 }
 
 public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepository
@@ -92,12 +98,12 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .FirstOrDefaultAsync();
     }
 
-    public async Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId, DateTime expireTime)
+    public async Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId)
     {
         var row = await _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
             .FirstOrDefaultAsync();
-        return row == null || row.LastUpdatedUtc <= expireTime;
+        return row == null || row.ValidUntilUtc <= DateTime.UtcNow;
     }
 
     public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId)
@@ -183,5 +189,59 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    public Task<bool> IsBlacklistedSeries(int seriesId)
+    {
+        return _context.SeriesBlacklist.AnyAsync(s => s.SeriesId == seriesId);
+    }
+
+    /// <summary>
+    /// Creates a new instance against SeriesId and Saves to the DB
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="saveChanges"></param>
+    public async Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true)
+    {
+        if (seriesId <= 0 || await _context.SeriesBlacklist.AnyAsync(s => s.SeriesId == seriesId)) return;
+
+        await _context.SeriesBlacklist.AddAsync(new SeriesBlacklist()
+        {
+            SeriesId = seriesId
+        });
+        if (saveChanges)
+        {
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Removes the Series from Blacklist and Saves to the DB
+    /// </summary>
+    /// <param name="seriesId"></param>
+    public async Task RemoveFromBlacklist(int seriesId)
+    {
+        var seriesBlacklist = await _context.SeriesBlacklist.FirstOrDefaultAsync(sb => sb.SeriesId == seriesId);
+
+        if (seriesBlacklist != null)
+        {
+            // Remove the SeriesBlacklist entity from the context
+            _context.SeriesBlacklist.Remove(seriesBlacklist);
+
+            // Save the changes to the database
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit)
+    {
+        return await _context.Series
+            .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
+            .Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
+            .OrderByDescending(s => s.Library.Type)
+            .ThenBy(s => s.NormalizedName)
+            .Select(s => s.Id)
+            .Take(limit)
+            .ToListAsync();
     }
 }

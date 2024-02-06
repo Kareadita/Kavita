@@ -1087,7 +1087,8 @@
         "donations-title": "Doações:",
         "source-title": "Fonte:",
         "feature-request-title": "Solicitações de recursos:",
-        "localization-title": "Localizações:"
+        "localization-title": "Localizações:",
+        "updates-title": "Histórico de Atualizações"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
@@ -1213,7 +1214,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+ é um serviço de assinatura premium que desbloqueia recursos para todos os usuários nesta instância Kavita. Compre uma assinatura para desbloquear ",
         "kavita+-desc-part-2": "benefícios premium",
-        "kavita+-desc-part-3": "hoje!"
+        "kavita+-desc-part-3": "hoje!",
+        "kavita+-requirement": "Kavita+ foi projetado para funcionar apenas com a versão mais recente – 2 versões. Qualquer coisa fora disso está sujeita a não funcionar.",
+        "kavita+-releases": "Ver lançamentos"
     },
     "collection-detail": {
         "no-data": "Não há itens. Tente adicionar uma série.",
@@ -1509,7 +1512,9 @@
         "chapter-title": "Capítulo:",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Número mais alto encontrado em todos os ComicInfo da Série",
-        "max-issue-tooltip": "Campo Máx. de Número ou Volume de todos ComicInfo nas Séries"
+        "max-issue-tooltip": "Campo Máx. de Número ou Volume de todos ComicInfo nas Séries",
+        "force-refresh": "Forçar Atualização",
+        "force-refresh-tooltip": "Forçar a atualização de metadados externos do Kavita+"
     },
     "day-breakdown": {
         "x-axis-label": "Dia da Semana",
@@ -1688,7 +1693,8 @@
         "change-email-no-email": "O e-mail foi atualizado",
         "delete-device": "Tem certeza de que deseja excluir este dispositivo?",
         "review-deleted": "Análise excluída",
-        "delete-review": "Tem certeza de que deseja excluir sua análise?"
+        "delete-review": "Tem certeza de que deseja excluir sua análise?",
+        "collection-tag-deleted": "Etiqueta de coleção excluída"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",

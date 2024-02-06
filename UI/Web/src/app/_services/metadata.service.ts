@@ -33,6 +33,10 @@ export class MetadataService {
     return this.httpClient.get<SeriesDetailPlus | null>(this.baseUrl + 'metadata/series-detail-plus?seriesId=' + seriesId + '&libraryType=' + libraryType);
   }
 
+  forceRefreshFromPlus(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'metadata/force-refresh?seriesId=' + seriesId, {});
+  }
+
   getAllAgeRatings(libraries?: Array<number>) {
     let method = 'metadata/age-ratings'
     if (libraries != undefined && libraries.length > 0) {

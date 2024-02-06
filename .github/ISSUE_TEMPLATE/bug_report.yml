@@ -1,19 +1,16 @@
 name: Bug Report
-description: Create a report to help us improve
-title: "Bug Title Here"  # Add a title field
+description: Help us make Kavita better for everyone by submitting issues you run into while using the program.
+title: "Put a short summary of what went wrong here"
 labels: ["needs-triage"]
 body:
   - type: markdown
     attributes:
       value: "Thanks for taking the time to fill out this bug report!"
-  - type: markdown
-    attributes:
-      value: "If you have a feature request, please submit on [Github Discussions](https://github.com/Kareadita/Kavita/discussions/2529)."
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us what steps you took so we can try to reproduce.
+      description: Don't forget to tell us what steps you took so we can try to reproduce.
       placeholder: Tell us what you see!
     validations:
       required: true
@@ -22,24 +19,28 @@ body:
     attributes:
       label: What did you expect?
       description: What did you expect to happen?
-      placeholder: Tell us what you expected to see!
+      placeholder: Tell us what you expected to see! Go in as much detail as possible so we can confirm if the behavior is something that is broken.
     validations:
       required: true
-  - type: textarea
+  - type: dropdown
     id: version
     attributes:
-      label: Version
-      description: What version are you running?
-      placeholder: Can be found by going to Server Settings > System
+      label: Kavita Version Number - Don't see your version number listed? Then your install is out of date. Please update and see if your issue still persists.
+      multiple: false
+      options:
+        - 0.7.13 - Stable
+        - Nightly Testing Branch
     validations:
       required: true
   - type: dropdown
     id: OS
     attributes:
-      label: What OS is Kavita being run on?
+      label: What operating system is Kavita being hosted from?
       multiple: false
       options:
-        - Docker
+        - Docker (LSIO Container)
+        - Docker (Dockerhub Container)
+        - Docker (Other)
         - Windows
         - Linux
         - Mac
@@ -62,6 +63,7 @@ body:
         - Chrome
         - Safari
         - Microsoft Edge
+        - Other (List in "Additional Notes" box)
   - type: dropdown
     id: mobile-OS
     attributes:
@@ -92,5 +94,3 @@ body:
       label: Additional Notes
       description: Any other information about the issue not covered in this form?
       placeholder: e.g. Running Kavita on a Raspberry Pi, updating from X version, using LSIO container, etc
-    validations:
-      required: true

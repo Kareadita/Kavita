@@ -559,6 +559,7 @@
     "changelog": {
         "installed": "Installed",
         "download": "Download",
+        "nightly": "Nightly: {{version}}",
         "published-label": "Published: ",
         "available": "Available",
         "description": "If you do not see an {{installed}}",
@@ -1233,7 +1234,8 @@
         "donations-title": "Donations:",
         "source-title": "Source:",
         "feature-request-title": "Feature Requests:",
-        "localization-title": "Localizations:"
+        "localization-title": "Localizations:",
+        "updates-title": "Update History"
     },
 
     "manage-tasks-settings": {
@@ -1379,7 +1381,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
         "kavita+-desc-part-2": "premium benefits",
-        "kavita+-desc-part-3": "today!"
+        "kavita+-desc-part-3": "today!",
+        "kavita+-requirement": "Kavita+ is designed to work only with the latest release - 2 versions. Anything outside of that is subject to not working.",
+        "kavita+-releases": "See releases"
     },
 
     "collection-detail": {
@@ -1720,9 +1724,9 @@
         "chapter-title": "Chapter:",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Highest Count found across all ComicInfo in the Series",
-        "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series"
-
-
+        "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series",
+        "force-refresh": "Force Refresh",
+        "force-refresh-tooltip": "Force refresh external metadata from Kavita+"
     },
 
     "day-breakdown": {
@@ -2062,7 +2066,8 @@
         "smart-filter-updated": "Created/Updated smart filter",
         "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key",
         "anilist-token-expired": "Your AniList token is expired. Scrobbling will no longer process until you re-generate it in User Settings > Account",
-        "collection-tag-deleted": "Collection Tag deleted"
+        "collection-tag-deleted": "Collection Tag deleted",
+        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated"
     },
 
     "actionable": {

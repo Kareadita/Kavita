@@ -270,8 +270,6 @@ public class ServerController : BaseApiController
         _logger.LogInformation("Busting Kavita+ Cache");
         var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
         await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusSeriesDetail);
-        await provider.FlushAsync();
         return Ok();
     }
 

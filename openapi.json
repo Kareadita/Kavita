@@ -3568,6 +3568,30 @@
         }
       }
     },
+    "/api/Metadata/force-refresh": {
+      "post": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.\r\nThis then attempts to refresh data from Kavita+ for this series.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Metadata/series-detail-plus": {
       "get": {
         "tags": [
@@ -3579,7 +3603,7 @@
           {
             "name": "seriesId",
             "in": "query",
-            "description": "",
+            "description": "Series Id",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3588,6 +3612,7 @@
           {
             "name": "libraryType",
             "in": "query",
+            "description": "Library Type",
             "schema": {
               "enum": [
                 0,
@@ -7242,7 +7267,24 @@
         "summary": "Get the current user's AniList token",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -15116,8 +15158,9 @@
             "type": "string",
             "nullable": true
           },
-          "lastUpdatedUtc": {
+          "validUntilUtc": {
             "type": "string",
+            "description": "Data is valid until this time",
             "format": "date-time"
           },
           "series": {
@@ -17312,8 +17355,8 @@
             "type": "boolean"
           },
           "volumeNumber": {
-            "type": "integer",
-            "format": "int32",
+            "type": "number",
+            "format": "float",
             "nullable": true
           },
           "chapterNumber": {
@@ -17344,6 +17387,13 @@
             ],
             "type": "integer",
             "format": "int32"
+          },
+          "isErrored": {
+            "type": "boolean"
+          },
+          "errorDetails": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -19468,6 +19518,18 @@
             "type": "string",
             "description": "Date of the publish",
             "nullable": true
+          },
+          "isOnNightlyInRelease": {
+            "type": "boolean",
+            "description": "Is the server on a nightly within this release"
+          },
+          "isReleaseNewer": {
+            "type": "boolean",
+            "description": "Is the server on an older version"
+          },
+          "isReleaseEqual": {
+            "type": "boolean",
+            "description": "Is the server on this version"
           }
         },
         "additionalProperties": false,

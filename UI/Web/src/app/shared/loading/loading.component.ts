@@ -19,6 +19,4 @@ export class LoadingComponent {
    * Uses absolute positioning to ensure it loads over content
    */
   @Input() absolute: boolean = false;
-
-  constructor() { }
 }

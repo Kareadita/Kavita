@@ -2,23 +2,18 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
-using API.Data.Misc;
-using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
-using EasyCaching.Core;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,11 +21,10 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ILicenseService licenseService,
-    IExternalMetadataService metadataService, IEasyCachingProviderFactory cachingProviderFactory)
+public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
+    IExternalMetadataService metadataService)
     : BaseApiController
 {
-    private readonly IEasyCachingProvider _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusSeriesDetail);
     public const string CacheKey = "kavitaPlusSeriesDetail_";
 
     /// <summary>
@@ -43,7 +37,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        if (ids != null && ids.Count > 0)
+        if (ids is {Count: > 0})
         {
             return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, User.GetUserId()));
         }
@@ -61,7 +55,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(PersonRole? role)
     {
         return role.HasValue ?
-            Ok(await unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role!.Value)) :
+            Ok(await unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role.Value)) :
             Ok(await unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
     }
 
@@ -75,7 +69,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        if (ids != null && ids.Count > 0)
+        if (ids is {Count: > 0})
         {
             return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, User.GetUserId()));
         }
@@ -92,7 +86,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        if (ids != null && ids.Count > 0)
+        if (ids is {Count: > 0})
         {
             return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, User.GetUserId()));
         }
@@ -110,7 +104,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        if (ids != null && ids.Count > 0)
+        if (ids is {Count: > 0})
         {
             return Ok(await unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
         }
@@ -184,6 +178,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     [HttpGet("chapter-summary")]
     public async Task<ActionResult<string>> GetChapterSummary(int chapterId)
     {
+        // TODO: This doesn't seem used anywhere
         if (chapterId <= 0) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         if (chapter == null) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
@@ -191,58 +186,37 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     }
 
     /// <summary>
+    /// If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.
+    /// This then attempts to refresh data from Kavita+ for this series.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpPost("force-refresh")]
+    public async Task<ActionResult> ForceRefresh(int seriesId)
+    {
+        await metadataService.ForceKavitaPlusRefresh(seriesId);
+        return Ok();
+    }
+
+    /// <summary>
     /// Fetches the details needed from Kavita+ for Series Detail page
     /// </summary>
     /// <remarks>This will hit upstream K+ if the data in local db is 2 weeks old</remarks>
-    /// <param name="seriesId"></param>
+    /// <param name="seriesId">Series Id</param>
+    /// <param name="libraryType">Library Type</param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
-    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId, LibraryType libraryType, CancellationToken cancellationToken)
+    public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId, LibraryType libraryType)
     {
         var userReviews = (await unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, User.GetUserId()))
             .Where(r => !string.IsNullOrEmpty(r.Body))
             .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
             .ToList();
 
-        var cacheKey = CacheKey + seriesId;
-        var results = await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey, cancellationToken);
-        if (results.HasValue)
-        {
-            var cachedResult = results.Value;
-            await PrepareSeriesDetail(userReviews, cachedResult);
-            return cachedResult;
-        }
+        var ret = await metadataService.GetSeriesDetailPlus(seriesId, libraryType);
 
-        SeriesDetailPlusDto? ret = null;
-        if (ExternalMetadataService.IsLibraryTypeSupported(libraryType) && await licenseService.HasActiveLicense())
-        {
-            ret = await metadataService.GetSeriesDetailPlus(seriesId);
-        }
-        if (ret == null)
-        {
-            // Cache  an empty result, so we don't constantly hit K+ when we know nothing is going to resolve
-            ret = new SeriesDetailPlusDto()
-            {
-                Reviews = new List<UserReviewDto>(),
-                Recommendations = null,
-                Ratings = null
-            };
-            await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48), cancellationToken);
-
-            var newCacheResult2 = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey)).Value;
-            await PrepareSeriesDetail(userReviews, newCacheResult2);
-
-            return Ok(newCacheResult2);
-        }
-
-        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(48), cancellationToken);
-
-        // For some reason if we don't use a different instance, the cache keeps changes made below
-        var newCacheResult = (await _cacheProvider.GetAsync<SeriesDetailPlusDto>(cacheKey, cancellationToken)).Value;
-        await PrepareSeriesDetail(userReviews, newCacheResult);
-
-        return Ok(newCacheResult);
-
+        await PrepareSeriesDetail(userReviews, ret);
+        return Ok(ret);
     }
 
     private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret)
@@ -253,7 +227,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
-        if (!isAdmin && ret.Recommendations != null)
+        if (!isAdmin && ret.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction
             ret.Recommendations.OwnedSeries =
@@ -262,7 +236,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
         }
 
-        if (ret.Recommendations != null)
+        if (ret.Recommendations != null && user != null)
         {
             ret.Recommendations.OwnedSeries ??= new List<SeriesDto>();
             await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);

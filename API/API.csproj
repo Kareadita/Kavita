@@ -68,7 +68,6 @@
     <PackageReference Include="Hangfire" Version="1.8.9" />
     <PackageReference Include="Hangfire.InMemory" Version="0.7.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
-    <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.58" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
@@ -77,7 +76,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
@@ -102,7 +101,7 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.1" />
     <PackageReference Include="System.IO.Abstractions" Version="20.0.15" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.1" />
     <PackageReference Include="VersOne.Epub" Version="3.3.1" />

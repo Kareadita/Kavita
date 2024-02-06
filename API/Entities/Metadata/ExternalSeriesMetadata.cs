@@ -29,7 +29,10 @@ public class ExternalSeriesMetadata
     public long MalId { get; set; }
     public string GoogleBooksId { get; set; }
 
-    public DateTime LastUpdatedUtc { get; set; }
+    /// <summary>
+    /// Data is valid until this time
+    /// </summary>
+    public DateTime ValidUntilUtc { get; set; }
 
     public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }

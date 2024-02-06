@@ -246,10 +246,15 @@ public class EmailService : IEmailService
         };
         email.From.Add(new MailboxAddress(smtpConfig.SenderDisplayName, smtpConfig.SenderAddress));
 
+        // Inject the body into the base template
+        var fullBody = UpdatePlaceHolders(await GetEmailBody("base"), new List<KeyValuePair<string, string>>()
+        {
+            new ("{{Body}}", userEmailOptions.Body)
+        });
 
         var body = new BodyBuilder
         {
-            HtmlBody = userEmailOptions.Body
+            HtmlBody = fullBody
         };
 
         if (userEmailOptions.Attachments != null)
