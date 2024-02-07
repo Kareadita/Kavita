@@ -352,7 +352,9 @@
         "size-title": "크기:",
         "loading": "{{common.loading}}",
         "view-files": "파일 보기",
-        "highest-count-tooltip": "시리즈의 모든 ComicInfo에서 가장 높은 카운트를 찾았습니다"
+        "highest-count-tooltip": "시리즈의 모든 ComicInfo에서 가장 높은 카운트를 찾았습니다",
+        "force-refresh": "강제 새로 고침",
+        "force-refresh-tooltip": "Kavita+에서 외부 메타데이터 강제 새로 고침"
     },
     "sort-field-pipe": {
         "last-modified": "마지막 수정",
@@ -510,7 +512,8 @@
         "delete-device": "이 기기를 삭제하시겠습니까?",
         "delete-review": "리뷰를 삭제하시겠습니까?",
         "review-deleted": "리뷰가 삭제되었습니다",
-        "collection-tag-deleted": "컬렉션 태그가 삭제되었습니다"
+        "collection-tag-deleted": "컬렉션 태그가 삭제되었습니다",
+        "force-kavita+-refresh-success": "Kavita+ 외부 메타데이터가 무효화되었습니다."
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -659,7 +662,8 @@
         "installed": "설치됨",
         "download": "다운로드",
         "published-label": "게시됨: ",
-        "available": "사용 가능"
+        "available": "사용 가능",
+        "nightly": "야간: {{version}}"
     },
     "invite-user": {
         "invite": "초대",
@@ -1639,7 +1643,8 @@
         "discord-title": "디스코드:",
         "donations-title": "기부:",
         "source-title": "소스:",
-        "localization-title": "현지화:"
+        "localization-title": "현지화:",
+        "updates-title": "업데이트 내역"
     },
     "library-detail": {
         "library-tab": "라이브러리",
@@ -1659,7 +1664,8 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+는 이 Kavita 인스턴스의 모든 사용자를 위한 기능을 잠금 해제하는 프리미엄 구독 서비스입니다. 잠금 해제하려면 구독 구매 ",
         "kavita+-desc-part-2": "프리미엄 혜택",
-        "kavita+-desc-part-3": "오늘!"
+        "kavita+-desc-part-3": "오늘!",
+        "kavita+-requirement": "Kavita+ 는 최신 버전으로만 작동하도록 설계되었습니다 - 2. 그 이외의 버전은 작동하지 않을 수 있습니다."
     },
     "reading-lists": {
         "no-data": "읽기 목록이 없습니다.",
