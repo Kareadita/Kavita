@@ -1,11 +1,20 @@
 <!doctype html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Spartan:wght@500;700&display=swap" rel="stylesheet">
+	<meta charset="utf-8">
+	<!-- utf-8 works for most cases -->
+	<meta name="viewport" content="width=device-width">
+	<!-- Forcing initial-scale shouldn't be necessary -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<!-- Use the latest (edge) version of IE rendering engine -->
+	<meta name="x-apple-disable-message-reformatting">
+    <!-- Disable auto-scale in iOS 10 Mail entirely -->
+    <meta name="color-scheme" content="light dark"> 
+    <meta name="supported-color-schemes" content="light dark">
+    <!-- Supports dark mode -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Spartan:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <title>Kavita - {{Preheader}}</title>
     <style>
@@ -14,6 +23,31 @@
 ------------------------------------- */
 
         /*All the styling goes here*/
+
+        :root { 
+            Color-scheme: light dark;
+            supported-color-schemes: light dark;
+        } 
+
+        .dark-img { display: none !important; }
+
+        @media (prefers-color-scheme: dark) {
+        .dark-img {
+            display: inline-block !important;
+        }
+
+        .light-img {
+            display: none !important;
+        }
+        }
+
+        [data-ogsc] .dark-img {
+        display: inline-block !important;
+        }
+
+        [data-ogsc] .light-img {
+        display: none !important;
+        }
 
         img {
             border: none;
@@ -39,6 +73,7 @@
             mso-table-rspace: 0pt;
             min-width: 100%;
             width: 100%; }
+
         table td {
             font-family: sans-serif;
             font-size: 14px;
@@ -57,20 +92,19 @@
         /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
         .container {
             display: block;
-            Margin: 0 auto !important;
+            margin: 0 auto !important;
             /* makes it centered */
-            max-width: 580px;
-            padding: 10px;
-            width: 580px;
+            max-width: 680px;
+            width: 680px;
         }
 
         /* This should also be a block element, so that it will fill 100% of the .container */
         .content {
             box-sizing: border-box;
             display: block;
-            Margin: 0 auto;
-            max-width: 580px;
-            padding: 10px;
+            margin: 0 auto;
+            max-width: 680px;
+            padding: 0;
         }
 
         /* -------------------------------------
@@ -83,19 +117,59 @@
         }
 
         .header {
-            padding: 20px 0;
+            padding: 10px 40px;
             background-color: #4AC694;
+            background-image: linear-gradient(#4AC694, #4AC694);
+            text-align: center;
+        }
+
+        u + .body .gmail-blend-screen { 
+            background:#000;
+            mix-blend-mode:screen; 
+        }
+        u + .body .gmail-blend-difference { 
+            background:#000; 
+            mix-blend-mode:difference; 
+        }
+
+        @media (prefers-color-scheme: dark ) { 
+            .header { 
+                background-color: #4AC694 !important; 
+            } 
+
+            .header-text {
+                color: #fffffe !important;
+            }
+
+            .logo-text {
+            color: #fffffe !important;
+            }
         }
 
         .header-text {
             font-weight: 700;
             font-family: 'Spartan', sans-serif;
             text-decoration: none;
-            color: white;
+            color: #ffffff;
             font-size: 2rem;
             vertical-align: middle;
-            line-height: 40px;
         }
+
+        .logo-text {
+            color: #fff;
+        }
+
+        .header-text img {
+            vertical-align: middle;
+            width: 75px;
+        }
+
+        .header-text div {
+            vertical-align: middle;
+            min-height: 75px;
+            line-height: 75px;
+            display: inline-block;
+        }   
 
         .wrapper {
             box-sizing: border-box;
@@ -113,18 +187,26 @@
 
         .footer {
             clear: both;
-            Margin-top: 10px;
             text-align: center;
             width: 100%;
             background-color: #222;
+            background-image: linear-gradient(#222, #222);
+            color: #fffffe;
         }
         .footer td,
         .footer p,
         .footer span,
         .footer a {
-            color: #9a9ea6;
+            color: #fffffe;
             font-size: 12px;
             text-align: center;
+        }
+
+        .footer .icon {
+            margin:0; 
+            padding:0 10px; 
+            border:none; 
+            display:inline-block;
         }
 
         /* -------------------------------------
@@ -205,12 +287,14 @@
 
         .btn-primary table td {
             background-color: #4AC694;
+            background-image: linear-gradient(#4AC694, #4AC694);
         }
 
         .btn-primary a {
             background-color: #4AC694;
+            background-image: linear-gradient(#4AC694, #4AC694);
             border-color: #4AC694;
-            color: #ffffff;
+            color: #fffffe;
         }
 
         /* -------------------------------------
@@ -350,21 +434,33 @@
     </style>
 </head>
 <body class="">
+
+<!-- Visually Hidden Preheader Text-->
+<div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family: sans-serif;"> You've been sent a file from Kavita! </div>
+
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
     <tr>
-        <td>&nbsp;</td>
         <td class="container">
             <div class="header">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                    <tr>
-                        <td class="align-center" width="100%">
-                            <a class="header-text" href="https://www.kavitareader.com" target="_blank">
-                                <img src="https://www.kavitareader.com/img/email/logo-256.png" alt="Kavita" width="40" style="vertical-align:middle;">
-                                <span style="color: white!important">Kavita</span>
-                            </a>
-                        </td>
-                    </tr>
-                </table>
+
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td class="align-center" width="100%">
+                                    <a class="header-text" href="https://www.kavitareader.com" target="_blank">
+                                        <img class="light-img" src="https://www.kavitareader.com/img/email/logo-256.png" alt="Kavita" width="40" style="vertical-align:middle;" />
+                                        <!--[if !mso]><! -->
+                                        <img class="dark-img" src="https://www.kavitareader.com/img/email/logo-256.png" alt="Kavita" width="40" style="vertical-align:middle;" />
+                                        <!--<![endif]-->
+                                        <div class="gmail-screen">
+                                            <div class="gmail-difference">
+                                                <div class="logo-text" style="color: #ffffff">Kavita</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
             </div>
             <div class="content">
 
@@ -386,32 +482,40 @@
 
                 <!-- START FOOTER -->
                 <div class="footer">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                        <tr >
-                            <td class="content-block">
-                                <a href="https://discord.gg/b52wT37kt7" target="_blank">
-                                    <img style="width:25px" src="https://www.kavitareader.com/img/email/discord-white.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="Discord">
-                                </a>
-                            </td>
-                            <td class="content-block">
-                                <a href="https://github.com/Kareadita/Kavita/">
-                                    <img style="width:25px" src="https://www.kavitareader.com/img/email/github-white.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="Github">
-                                </a>
-                            </td>
-                            <td class="content-block">
-                                <a href="https://wiki.kavitareader.com/en">
-                                    <img style="width:25px" src="https://www.kavitareader.com/img/email/logo-white.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="Wiki">
-                                </a>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="gmail-blend-screen">
+                        <div class="gmail-blend-difference">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td class="content-block" style="text-align: center;"">
+                                        <table align="center" style="text-align: center;">
+                                            <tr>
+                                                <td class="icon">
+                                                    <a href="https://discord.gg/b52wT37kt7" target="_blank">
+                                                        <img style="width:25px" src="https://www.kavitareader.com/img/email/discord-white.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="Discord">
+                                                    </a>
+                                                </td>
+                                                <td class="icon">
+                                                    <a href="https://github.com/Kareadita/Kavita/">
+                                                        <img style="width:25px" src="https://www.kavitareader.com/img/email/github-white.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="Github">
+                                                    </a>
+                                                </td>
+                                                <td class="icon">
+                                                    <a href="https://wiki.kavitareader.com/en">
+                                                        <img style="width:25px" src="https://www.kavitareader.com/img/email/logo-white.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="Wiki">
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                            </table>
+                        </div>
+                    </div>
                 </div>
                 <!-- END FOOTER -->
 
                 <!-- END CENTERED WHITE CONTAINER -->
             </div>
         </td>
-        <td>&nbsp;</td>
     </tr>
 </table>
 </body>
