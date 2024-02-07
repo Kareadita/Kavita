@@ -98,6 +98,10 @@ export class ReaderSettingsComponent implements OnInit {
    */
   @Output() clickToPaginateChanged: EventEmitter<boolean> = new EventEmitter();
   /**
+   * Outputs when swipeToPaginate is changed
+   */
+  @Output() swipeToPaginateChanged: EventEmitter<boolean> = new EventEmitter();
+  /**
    * Outputs when a style is updated and the reader needs to render it
    */
   @Output() styleUpdate: EventEmitter<PageStyle> = new EventEmitter();
@@ -225,8 +229,19 @@ export class ReaderSettingsComponent implements OnInit {
         });
 
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
-        this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
-          this.clickToPaginateChanged.emit(value);
+        this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((clickToPaginate) => {
+          if (clickToPaginate) {
+            this.settingsForm.get('bookReaderSwipeToPaginate')?.setValue(false);
+          }
+          this.clickToPaginateChanged.emit(clickToPaginate);
+        });
+
+        this.settingsForm.addControl('bookReaderSwipeToPaginate', new FormControl(this.user.preferences.bookReaderSwipeToPaginate, []));
+        this.settingsForm.get('bookReaderSwipeToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((swipeToPaginate: boolean) => {
+          if (swipeToPaginate) {
+            this.settingsForm.get('bookReaderTapToPaginate')?.setValue(false);
+          }
+          this.swipeToPaginateChanged.emit(swipeToPaginate);
         });
 
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
@@ -265,6 +280,7 @@ export class ReaderSettingsComponent implements OnInit {
         this.readingDirection.emit(this.readingDirectionModel);
         this.bookReaderWritingStyle.emit(this.writingStyleModel);
         this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate);
+        this.swipeToPaginateChanged.emit(this.user.preferences.bookReaderSwipeToPaginate);
         this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
         this.immersiveMode.emit(this.user.preferences.bookReaderImmersiveMode);
 
@@ -290,6 +306,7 @@ export class ReaderSettingsComponent implements OnInit {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
+    this.settingsForm.get('bookReaderSwipeToPaginate')?.setValue(this.user.preferences.bookReaderSwipeToPaginate);
     this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
     this.settingsForm.get('bookReaderWritingStyle')?.setValue(this.user.preferences.bookReaderWritingStyle);

@@ -96,6 +96,17 @@
                 </div>
               </div>
               <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="swipe-pagination" class="form-label">{{t('swipe-to-paginate-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="swipePaginationTooltip" role="button" tabindex="0" aria-describedby="swipePagination-help"></i></label>
+                <ng-template #swipePaginationTooltip>{{t('swipe-to-paginate-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="swipePagination-help">
+                  <ng-container [ngTemplateOutlet]="swipePaginationTooltip"></ng-container>
+                </span>
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="swipe-pagination" formControlName="bookReaderSwipeToPaginate" class="form-check-input" aria-labelledby="swipePagination-help">
+                  <label>{{settingsForm.get('bookReaderSwipeToPaginate')?.value ? t('on') : t('off')}} </label>
+                </div>
+              </div>
+              <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
                 <label for="immersive-mode" class="form-label">{{t('immersive-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
                 <ng-template #immersiveModeTooltip>{{t('immersive-mode-tooltip')}}</ng-template>
                 <span class="visually-hidden" id="immersiveMode-help">

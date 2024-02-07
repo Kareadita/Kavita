@@ -873,6 +873,8 @@
         "writing-style-tooltip": "Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.",
         "tap-to-paginate-label": "Tap Pagination",
         "tap-to-paginate-tooltip": "Click the edges of the screen to paginate",
+        "swipe-to-paginate-label": "Swipe Pagination",
+        "swipe-to-paginate-tooltip": "Swipe from the edges of the screen to paginate",
         "on": "On",
         "off": "Off",
         "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
