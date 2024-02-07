@@ -13,7 +13,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe, NgClass, AsyncPipe} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass, NgFor, NgIf, NgStyle, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -29,9 +29,9 @@ import {
   take,
   tap
 } from 'rxjs';
-import { ChangeContext, LabelType, Options, NgxSliderModule } from 'ngx-slider-v2';
+import {ChangeContext, LabelType, NgxSliderModule, Options} from 'ngx-slider-v2';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbModal, NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
@@ -61,12 +61,12 @@ import {ChapterInfo} from '../../_models/chapter-info';
 import {DoubleNoCoverRendererComponent} from '../double-renderer-no-cover/double-no-cover-renderer.component';
 import {SwipeEvent} from 'src/app/ng-swipe/ag-swipe.core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { FullscreenIconPipe } from '../../../_pipes/fullscreen-icon.pipe';
-import { ReaderModeIconPipe } from '../../../_pipes/reader-mode-icon.pipe';
-import { FittingIconPipe } from '../../../_pipes/fitting-icon.pipe';
-import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
-import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
-import { LoadingComponent } from '../../../shared/loading/loading.component';
+import {FullscreenIconPipe} from '../../../_pipes/fullscreen-icon.pipe';
+import {ReaderModeIconPipe} from '../../../_pipes/reader-mode-icon.pipe';
+import {FittingIconPipe} from '../../../_pipes/fitting-icon.pipe';
+import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.component';
+import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
+import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {shareReplay} from "rxjs/operators";
 
@@ -676,11 +676,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         break;
       case ReaderMode.Webtoon:
-        if (event.key === KEY_CODES.DOWN_ARROW) {
-          this.nextPage()
-        } else if (event.key === KEY_CODES.UP_ARROW) {
-          this.prevPage()
-        }
         break;
     }
 
@@ -1220,14 +1215,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
 
-    const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+    const pageAmount = this.readerMode === ReaderMode.Webtoon ? 1 : Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.doubleNoCoverRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS)
                               );
 
-    const notInSplit = this.canvasRenderer.shouldMovePrev();
+    const notInSplit = this.readerMode === ReaderMode.Webtoon ? true : this.canvasRenderer.shouldMovePrev();
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
       // Move to next volume/chapter automatically

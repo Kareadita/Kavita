@@ -32,7 +32,8 @@
             </div>
 
             <div class="mb-3">
-              <label for="library-type" class="form-label">{{t('type-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
+              <label for="library-type" class="form-label">{{t('type-label')}}</label>
+              <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
               <ng-template #typeTooltip>{{t('type-tooltip')}}</ng-template>
               <span class="visually-hidden" id="library-type-help">
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
@@ -233,7 +234,7 @@
     </div>
   </form>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="forceScan()" position="above"
+    <button type="button" class="btn btn-light" (click)="forceScan()" [placement]="'above'"
             [ngbTooltip]="t('force-scan-tooltip')">{{t('force-scan')}}</button>
     <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
     <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>

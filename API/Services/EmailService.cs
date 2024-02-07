@@ -20,10 +20,11 @@ namespace API.Services;
 
 internal class EmailOptionsDto
 {
-    public IList<string> ToEmails { get; set; }
-    public string Subject { get; set; }
-    public string Body { get; set; }
-    public IList<KeyValuePair<string, string>> PlaceHolders { get; set; }
+    public required IList<string> ToEmails { get; set; }
+    public required string Subject { get; set; }
+    public required string Body { get; set; }
+    public required string Preheader { get; set; }
+    public IList<KeyValuePair<string, string>>? PlaceHolders { get; set; }
     /// <summary>
     /// Filenames to attach
     /// </summary>
@@ -81,7 +82,6 @@ public class EmailService : IEmailService
             return result;
         }
 
-        // TODO: Come back and update the template. We can't do it with the v0.8.0 release
         var placeholders = new List<KeyValuePair<string, string>>
         {
             new ("{{Host}}", settings.HostName),
@@ -91,8 +91,9 @@ public class EmailService : IEmailService
         {
             var emailOptions = new EmailOptionsDto()
             {
-                Subject = "KavitaEmail Test",
+                Subject = "Kavita - Email Test",
                 Body = UpdatePlaceHolders(await GetEmailBody("EmailTest"), placeholders),
+                Preheader = "Kavita - Email Test",
                 ToEmails = new List<string>()
                 {
                     adminEmail
@@ -127,6 +128,7 @@ public class EmailService : IEmailService
         {
             Subject = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
             Body = UpdatePlaceHolders(await GetEmailBody("EmailChange"), placeholders),
+            Preheader = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
             ToEmails = new List<string>()
             {
                 data.EmailAddress
@@ -182,6 +184,7 @@ public class EmailService : IEmailService
         {
             Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
             Body = UpdatePlaceHolders(await GetEmailBody("EmailConfirm"), placeholders),
+            Preheader = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
             ToEmails = new List<string>()
             {
                 data.EmailAddress
@@ -207,6 +210,7 @@ public class EmailService : IEmailService
         {
             Subject = UpdatePlaceHolders("A password reset has been requested", placeholders),
             Body = UpdatePlaceHolders(await GetEmailBody("EmailPasswordReset"), placeholders),
+            Preheader = "A password reset has been requested",
             ToEmails = new List<string>()
             {
                 dto.EmailAddress
@@ -225,6 +229,7 @@ public class EmailService : IEmailService
         var emailOptions = new EmailOptionsDto()
         {
             Subject = "Send file from Kavita",
+            Preheader = "File(s) sent from Kavita",
             ToEmails = new List<string>()
             {
                 data.DestinationEmail
@@ -249,7 +254,8 @@ public class EmailService : IEmailService
         // Inject the body into the base template
         var fullBody = UpdatePlaceHolders(await GetEmailBody("base"), new List<KeyValuePair<string, string>>()
         {
-            new ("{{Body}}", userEmailOptions.Body)
+            new ("{{Body}}", userEmailOptions.Body),
+            new ("{{Preheader}}", userEmailOptions.Preheader),
         });
 
         var body = new BodyBuilder
@@ -320,7 +326,7 @@ public class EmailService : IEmailService
         return body;
     }
 
-    private static string UpdatePlaceHolders(string text, IList<KeyValuePair<string, string>> keyValuePairs)
+    private static string UpdatePlaceHolders(string text, IList<KeyValuePair<string, string>>? keyValuePairs)
     {
         if (string.IsNullOrEmpty(text) || keyValuePairs == null) return text;
 
