@@ -32,13 +32,13 @@
         .dark-img { display: none !important; }
 
         @media (prefers-color-scheme: dark) {
-        .dark-img {
-            display: inline-block !important;
-        }
+            .dark-img {
+                display: inline-block !important;
+            }
 
-        .light-img {
-            display: none !important;
-        }
+            .light-img {
+                display: none !important;
+            }
         }
 
         [data-ogsc] .dark-img {
@@ -134,7 +134,7 @@
 
         @media (prefers-color-scheme: dark ) { 
             .header { 
-                background-color: #4AC694 !important; 
+                background-color: transparent !important; 
             } 
 
             .header-text {
@@ -142,17 +142,18 @@
             }
 
             .logo-text {
-            color: #fffffe !important;
+                color: #fffffe !important;
             }
         }
 
-        .header-text {
+        .header-text, .logo-text {
             font-weight: 700;
             font-family: 'Spartan', sans-serif;
             text-decoration: none;
             color: #ffffff;
             font-size: 2rem;
             vertical-align: middle;
+            margin: 0
         }
 
         .logo-text {
@@ -161,10 +162,10 @@
 
         .header-text img {
             vertical-align: middle;
-            width: 75px;
+            width: 200px;
         }
 
-        .header-text div {
+        .header-text div, .header-text p {
             vertical-align: middle;
             min-height: 75px;
             line-height: 75px;
@@ -207,6 +208,13 @@
             padding:0 10px; 
             border:none; 
             display:inline-block;
+        }
+
+        @media (prefers-color-scheme: dark ) { 
+            .footer { 
+                background-color: rgba(0,0,0,0) !important;
+                background-image: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)) !important;
+            } 
         }
 
         /* -------------------------------------
@@ -447,15 +455,10 @@
                             <tr>
                                 <td class="align-center" width="100%">
                                     <a class="header-text" href="https://www.kavitareader.com" target="_blank">
-                                        <img class="light-img" src="https://www.kavitareader.com/img/email/logo-256.png" alt="Kavita" width="40" style="vertical-align:middle;" />
+                                        <img class="light-img" src="https://www.kavitareader.com/img/email/email-logo.png" alt="Kavita" width="40" style="vertical-align:middle;" />
                                         <!--[if !mso]><! -->
-                                        <img class="dark-img" src="https://www.kavitareader.com/img/email/logo-256.png" alt="Kavita" width="40" style="vertical-align:middle;" />
+                                        <img class="dark-img" src="https://www.kavitareader.com/img/email/email-logo.png" alt="Kavita" width="40" style="vertical-align:middle;" />
                                         <!--<![endif]-->
-                                        <div class="gmail-screen">
-                                            <div class="gmail-difference">
-                                                <div class="logo-text" style="color: #ffffff">Kavita</div>
-                                            </div>
-                                        </div>
                                     </a>
                                 </td>
                             </tr>
