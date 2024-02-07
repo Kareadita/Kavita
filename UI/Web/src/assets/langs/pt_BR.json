@@ -491,7 +491,8 @@
         "published-label": "Publicado: ",
         "available": "Disponível",
         "description": "se você não vir um {{installed}}",
-        "description-continued": "tag, você está em um lançamento nightly . Somente as versões principais serão exibidas como disponíveis."
+        "description-continued": "tag, você está em um lançamento nightly . Somente as versões principais serão exibidas como disponíveis.",
+        "nightly": "Versão Experimental: {{version}}"
     },
     "invite-user": {
         "title": "Convidar Usuário",
@@ -1694,7 +1695,8 @@
         "delete-device": "Tem certeza de que deseja excluir este dispositivo?",
         "review-deleted": "Análise excluída",
         "delete-review": "Tem certeza de que deseja excluir sua análise?",
-        "collection-tag-deleted": "Etiqueta de coleção excluída"
+        "collection-tag-deleted": "Etiqueta de coleção excluída",
+        "force-kavita+-refresh-success": "Os metadados externos do Kavita+ foram invalidados"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
