@@ -114,17 +114,17 @@ public class ExternalMetadataService : IExternalMetadataService
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeriesIdsWithoutMetadata(25);
         if (ids.Count == 0) return;
 
-        _logger.LogInformation("Started Refreshing {Count} series data from Kavita+", ids.Count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
         var count = 0;
+        var libTypes = await _unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(ids);
         foreach (var seriesId in ids)
         {
-            // TODO: Rewrite this so it's streamlined and not multiple DB calls
-            var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+            var libraryType = libTypes[seriesId];
             await GetSeriesDetailPlus(seriesId, libraryType);
             await Task.Delay(1500);
             count++;
         }
-        _logger.LogInformation("Finished Refreshing {Count} series data from Kavita+", count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
     }
 
     /// <summary>
