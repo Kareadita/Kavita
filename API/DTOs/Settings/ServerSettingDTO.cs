@@ -95,9 +95,18 @@ public class ServerSettingDto
     /// <returns></returns>
     public bool IsEmailSetup()
     {
-        //return false;
         return !string.IsNullOrEmpty(SmtpConfig.Host)
                && !string.IsNullOrEmpty(SmtpConfig.UserName)
                && !string.IsNullOrEmpty(HostName);
+    }
+
+    /// <summary>
+    /// Are at least some basics filled in, but not hostname as not required for Send to Device
+    /// </summary>
+    /// <returns></returns>
+    public bool IsEmailSetupForSendToDevice()
+    {
+        return !string.IsNullOrEmpty(SmtpConfig.Host)
+               && !string.IsNullOrEmpty(SmtpConfig.UserName);
     }
 }
