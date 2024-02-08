@@ -152,7 +152,9 @@ public class ScannerService : IScannerService
                 _logger.LogCritical("[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
             }
         }
-        if (series != null && series.Library.Type != LibraryType.Book)
+
+        // TODO: Figure out why we have the library type restriction here
+        if (series != null && (series.Library.Type != LibraryType.Book || series.Library.Type != LibraryType.LightNovel))
         {
             if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {

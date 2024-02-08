@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.SignalR;
 using Flurl.Http;
-using HtmlAgilityPack;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using MarkdownDeep;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;

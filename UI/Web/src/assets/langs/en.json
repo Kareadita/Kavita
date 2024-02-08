@@ -811,6 +811,8 @@
         "last-scanned-label": "Last Scanned:",
         "type-label": "Type",
         "type-tooltip": "Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but have different naming in the UI.",
+        "kavitaplus-eligible-label": "Kavita+ Eligible",
+        "kavitaplus-eligible-tooltip": "Will Kavita+ pull information or support Scrobbling",
         "folder-description": "Add folders to your library",
         "browse": "Browse for Media Folders",
         "help-us-part-1": "Help us out by following ",

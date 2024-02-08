@@ -185,6 +185,7 @@ export class SideNavComponent implements OnInit {
   getLibraryTypeIcon(format: LibraryType) {
     switch (format) {
       case LibraryType.Book:
+      case LibraryType.LightNovel:
         return 'fa-book';
       case LibraryType.Comic:
       case LibraryType.Manga:
