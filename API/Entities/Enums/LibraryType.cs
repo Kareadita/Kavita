@@ -24,4 +24,9 @@ public enum LibraryType
     /// </summary>
     [Description("Image")]
     Image = 3,
+    /// <summary>
+    /// Allows Books to Scrobble with AniList for Kavita+
+    /// </summary>
+    [Description("Light Novel")]
+    LightNovel = 4,
 }

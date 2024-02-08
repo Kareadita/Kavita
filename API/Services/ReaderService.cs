@@ -776,6 +776,7 @@ public class ReaderService : IReaderService
                 }
                 return "Issue" + (includeSpace ? " " : string.Empty);
             case LibraryType.Book:
+            case LibraryType.LightNovel:
                 return "Book" + (includeSpace ? " " : string.Empty);
             default:
                 throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);

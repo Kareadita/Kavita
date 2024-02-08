@@ -137,7 +137,7 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
-const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
+const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.LightNovel];
 
 @Component({
     selector: 'app-series-detail',
@@ -335,6 +335,21 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
     }
+  }
+
+  get ShowStorylineTab() {
+    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel) && (this.volumes.length > 0 || this.chapters.length > 0);
+  }
+
+  get ShowVolumeTab() {
+    return this.volumes.length > 0;
+  }
+  get ShowChaptersTab() {
+    return this.chapters.length > 0;
+  }
+
+  get UseBookLogic() {
+    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
   }
 
   get ScrollingBlockHeight() {
@@ -614,6 +629,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPlusMetadata(this.seriesId, this.libraryType);
       }
 
+      if (this.libraryType === LibraryType.LightNovel) {
+        this.renderMode = PageLayoutMode.List;
+        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
+        this.cdRef.markForCheck();
+      }
+
+
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
@@ -694,12 +716,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   updateSelectedTab() {
     // Book libraries only have Volumes or Specials enabled
-    if (this.libraryType === LibraryType.Book) {
+    if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
         this.activeTabId = TabID.Specials;
       } else {
         this.activeTabId = TabID.Volumes;
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -708,6 +731,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     } else {
       this.activeTabId = TabID.Storyline;
     }
+    this.cdRef.markForCheck();
   }
 
 

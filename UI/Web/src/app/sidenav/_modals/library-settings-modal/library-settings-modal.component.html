@@ -2,7 +2,7 @@
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
       <ng-container *ngIf="!isAddLibrary; else addLibraryTitle">
-        {{t('edit-title', {name: library.name | sentenceCase})}}
+        {{t('edit-title', {name: library!.name | sentenceCase})}}
       </ng-container>
       <ng-template #addLibraryTitle>
         {{t('add-title')}}
@@ -33,8 +33,15 @@
 
             <div class="mb-3">
               <label for="library-type" class="form-label">{{t('type-label')}}</label>
-              <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
+              <i class="fa fa-info-circle ms-1" placement="top" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
+              @if(IsKavitaPlusEligible) {
+                <span class="float-end">
+                  {{t('kavitaplus-eligible-label')}}
+                  <i class="fa fa-info-circle ms-1" placement="top" [ngbTooltip]="kavitaplusEligibleTooltip" role="button" tabindex="0"></i>
+                </span>
+              }
               <ng-template #typeTooltip>{{t('type-tooltip')}}</ng-template>
+              <ng-template #kavitaplusEligibleTooltip>{{t('kavitaplus-eligible-tooltip')}}</ng-template>
               <span class="visually-hidden" id="library-type-help">
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
               </span>
@@ -44,7 +51,7 @@
             </div>
             <div *ngIf="!isAddLibrary">
               {{t('last-scanned-label')}}
-              <span>{{library.lastScanned | date: 'short' | defaultDate}}</span>
+              <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
             </div>
           </ng-template>
         </li>

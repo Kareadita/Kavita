@@ -20,7 +20,7 @@ public class LibraryBuilder : IEntityBuilder<Library>
             Series = new List<Series>(),
             Folders = new List<FolderPath>(),
             AppUsers = new List<AppUser>(),
-            AllowScrobbling = type is LibraryType.Book or LibraryType.Manga
+            AllowScrobbling = type is LibraryType.LightNovel or LibraryType.Manga
         };
     }
 

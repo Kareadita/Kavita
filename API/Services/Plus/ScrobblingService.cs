@@ -81,6 +81,9 @@ public class ScrobblingService : IScrobblingService
 
     private static readonly IList<ScrobbleProvider> BookProviders = new List<ScrobbleProvider>()
     {
+    };
+    private static readonly IList<ScrobbleProvider> LightNovelProviders = new List<ScrobbleProvider>()
+    {
         ScrobbleProvider.AniList
     };
     private static readonly IList<ScrobbleProvider> ComicProviders = new List<ScrobbleProvider>();
@@ -873,6 +876,12 @@ public class ScrobblingService : IScrobblingService
 
         if (readEvent.Series.Library.Type == LibraryType.Book &&
             BookProviders.Intersect(userProviders).Any())
+        {
+            return true;
+        }
+
+        if (readEvent.Series.Library.Type == LibraryType.LightNovel &&
+            LightNovelProviders.Intersect(userProviders).Any())
         {
             return true;
         }

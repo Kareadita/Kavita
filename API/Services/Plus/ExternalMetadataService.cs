@@ -69,7 +69,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
@@ -420,6 +420,7 @@ public class ExternalMetadataService : IExternalMetadataService
             LibraryType.Manga => seriesFormat == MangaFormat.Epub ? MediaFormat.LightNovel : MediaFormat.Manga,
             LibraryType.Comic => MediaFormat.Comic,
             LibraryType.Book => MediaFormat.Book,
+            LibraryType.LightNovel => MediaFormat.LightNovel,
             _ => MediaFormat.Unknown
         };
     }
