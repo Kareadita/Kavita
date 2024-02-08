@@ -1687,6 +1687,35 @@ public class ReaderServiceTests
 
     }
 
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenHasSpecial()
+    {
+        await ResetDb();
+        var series = new SeriesBuilder("Test")
+            // Loose chapters
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("Prologue").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("1", nextChapter.Range);
+    }
+
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {

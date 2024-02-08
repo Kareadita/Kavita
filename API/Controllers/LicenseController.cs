@@ -31,7 +31,9 @@ public class LicenseController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        return Ok(await licenseService.HasActiveLicense(forceCheck));
+        var result = await licenseService.HasActiveLicense(forceCheck);
+        await taskScheduler.ScheduleKavitaPlusTasks();
+        return Ok(result);
     }
 
     /// <summary>
@@ -66,7 +68,11 @@ public class LicenseController(
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
     {
         logger.LogInformation("Resetting license on file for Server");
-        if (await licenseService.ResetLicense(dto.License, dto.Email)) return Ok();
+        if (await licenseService.ResetLicense(dto.License, dto.Email))
+        {
+            await taskScheduler.ScheduleKavitaPlusTasks();
+            return Ok();
+        }
 
         return BadRequest(localizationService.Translate(User.GetUserId(), "unable-to-reset-k+"));
     }

@@ -1,36 +1,26 @@
-<table>
-    <tr>
-        <td valign="top" style="text-align: center; padding: 20px 0 10px 20px;">
-            <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 30px; line-height: 36px; font-weight: bold;">You've Been Invited</h1> </td>
-    </tr>
-    <tr>
-        <td valign="top" style="text-align: center; padding: 10px 20px 15px 20px; font-family: sans-serif; font-size: 18px; line-height: 20px;">
-            <p style="margin: 0;">You have been invited to {{InvitingUser}}'s Kavita instance.</p>
-        </td>
-    </tr>
-    <tr>
-        <td valign="top" style="text-align: center; padding: 10px 20px 15px 20px; font-family: sans-serif; font-size: 18px; line-height: 20px;">
-            <p style="margin: 0;">Please click the following link to setup an account for yourself and start reading.</p>
-        </td>
-    </tr>
-    <tr>
-        <td valign="top" align="center" style="text-align: center; padding: 15px 0px 20px 0px;">
-            <!-- Button : BEGIN -->
-            <center>
-                <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" class="center-on-narrow" style="text-align: center;">
-                    <tr>
-                        <td style="border-radius: 50px; background: #153643; text-align: center;" class="button-td">
-                            <a href="{{Link}}" style="background: #153643; border: 15px solid #153643; font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.1; text-align: center; text-decoration: none; display: block; border-radius: 50px; font-weight: bold;" class="button-a"> <span style="color:#ffffff;" class="button-link">&nbsp;&nbsp;&nbsp;&nbsp;ACCEPT INVITE&nbsp;&nbsp;&nbsp;&nbsp;</span> </a>
-                        </td>
-                    </tr>
-                </table>
-            </center>
-            <!-- Button : END -->
-        </td>
-    </tr>
-    <tr>
-        <td valign="top" style="text-align: center; padding: 10px 20px 15px 20px; font-family: sans-serif; font-size: 12px; line-height: 20px;">
-            <p style="margin: 0;">If the button above does not work, please find the link here: <a style="color:inherit;margin: 0;width: 100%;word-break: break-all;" href="{{Link}}">{{Link}}</a></p>
-        </td>
-    </tr>
-</table>
+<tr>
+    <td>
+        <h1>You've Been Invited!</h1>
+        <p>You have been invited to {{InvitingUser}}'s Kavita instance.</p>
+        <p>Please click the following link to setup an account for yourself and start reading.</p>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+            <tbody>
+            <tr>
+                <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                        <tr>
+                            <td> <a href="{{Link}}" target="_blank">ACCEPT INVITE</a> </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p class="small">If the button above does not work, please find the link here: <a class="small" href="{{Link}}" target="_blank">{{Link}}</a></p>
+
+    </td>
+</tr>

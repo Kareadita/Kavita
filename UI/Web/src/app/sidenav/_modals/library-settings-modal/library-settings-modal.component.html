@@ -241,7 +241,7 @@
     </div>
   </form>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="forceScan()" position="above"
+    <button type="button" class="btn btn-light" (click)="forceScan()" [placement]="'above'"
             [ngbTooltip]="t('force-scan-tooltip')">{{t('force-scan')}}</button>
     <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
     <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>

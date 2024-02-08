@@ -60,7 +60,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "La critique doit comporter au moins {{count}} caractères",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -133,7 +134,7 @@
         "writing-style-tooltip": "Change la direction du texte. Horizontal est de gauche à droite, vertical est de haut en bas.",
         "layout-mode-book-label": "Mise en page",
         "layout-mode-book-tooltip": "Comment le contenu devrait être mis en page. Défilement correspond à la présentation du livre. 1 ou 2 Colonnes utilise 1 ou 2 colonnes adaptées à la hauteur de l'appareil par page",
-        "color-theme-book-label": "Thème de Couleur",
+        "color-theme-book-label": "Couleur du thème",
         "color-theme-book-tooltip": "Quelle theme de couleur appliquer aux contenu et menu du lecteur de livre",
         "font-size-book-label": "Taille de la Police",
         "line-height-book-label": "Espacement de l'interligne",
@@ -560,7 +561,9 @@
         "info-tab": "Information",
         "letterer-label": "Lettreur",
         "highest-count-tooltip": "Nombre le plus élevé trouvé dans tous les ComicInfo de la série",
-        "max-issue-tooltip": "Numéro ou volume maximum de tous les ComicInfo de la série"
+        "max-issue-tooltip": "Numéro ou volume maximum de tous les ComicInfo de la série",
+        "force-refresh": "Forcer le rafraîchissement",
+        "force-refresh-tooltip": "Forcer le rafraîchissement des métadonnées externes de Kavita+"
     },
     "common": {
         "reset-to-default": "Réinitialiser aux valeurs par défaut",
@@ -704,31 +707,31 @@
     },
     "server-stats": {
         "tags": "Étiquettes",
-        "total-tags-tooltip": "Total d'étiquettes : {{count}}",
-        "total-tags-label": "Total d'étiquettes",
+        "total-tags-tooltip": "Nombre d'étiquettes : {{count}}",
+        "total-tags-label": "Nombre d'étiquettes",
         "tag-count": "{{num}} étiquettes",
         "recently-read-title": "Récemment lu",
         "reads": "lectures",
-        "total-genres-label": "Total de genres",
-        "total-files-tooltip": "Total de fichiers : {{count}}",
+        "total-genres-label": "Nombre de genres",
+        "total-files-tooltip": "Nombre de fichiers : {{count}}",
         "total-read-time-label": "Temps de lecture total",
-        "total-people-label": "Total de personnes",
+        "total-people-label": "Nombre de personnes",
         "genre-count": "{{num}} Genres",
-        "total-files-label": "Total de fichiers",
+        "total-files-label": "Nombre de fichiers",
         "popular-series-title": "Séries populaires",
-        "total-genres-tooltip": "Total de genres : {{count}}",
+        "total-genres-tooltip": "Nombre de genres : {{count}}",
         "total-size-label": "Taille totale",
-        "total-people-tooltip": "Total de personnes : {{count}}",
+        "total-people-tooltip": "Nombre de personnes : {{count}}",
         "popular-libraries-title": "Bibliothèques populaires",
-        "total-series-tooltip": "Total de séries : {{count}}",
+        "total-series-tooltip": "Nombre de séries : {{count}}",
         "release-years-title": "Années de sortie",
         "series": "séries",
         "most-active-users-title": "Utilisateurs les plus actifs",
         "total-read-time-tooltip": "Temps de lecture total : {{count}}",
-        "total-volumes-tooltip": "Total de volumes : {{count}}",
-        "total-series-label": "Total de séries",
+        "total-volumes-tooltip": "Nombre de volumes : {{count}}",
+        "total-series-label": "Nombre de séries",
         "people": "Personnes",
-        "total-volumes-label": "Total de volumes",
+        "total-volumes-label": "Nombre de volumes",
         "genres": "Genres",
         "people-count": "{{num}} Personnes"
     },
@@ -751,7 +754,8 @@
         "description": "Si vous ne voyez pas un {{installed}}",
         "available": "Disponible",
         "installed": "Installé",
-        "description-continued": "étiquette, vous êtes sur une version de développement quotidienne (nightly release). Seules les versions majeures seront disponibles."
+        "description-continued": "étiquette, vous êtes sur une version de développement quotidienne (nightly release). Seules les versions majeures seront disponibles.",
+        "nightly": "Nightly : {{version}}"
     },
     "publication-status-pipe": {
         "completed": "Achevé",
@@ -1370,7 +1374,8 @@
         "donations-title": "Donations :",
         "wiki-title": "Wiki :",
         "installId-title": "ID d'installation",
-        "localization-title": "Localisations :"
+        "localization-title": "Localisations :",
+        "updates-title": "Historique des mises à jour"
     },
     "manage-tasks-settings": {
         "title": "Tâches récurrentes",
@@ -1465,7 +1470,8 @@
         "last-modified": "Dernière modification",
         "read-progress": "Dernière lecture",
         "sort-name": "Nom",
-        "created": "Créé"
+        "created": "Créé",
+        "average-rating": "Note moyenne"
     },
     "manage-users": {
         "change-password-alt": "Modifier le mot de passe {{user}}",
@@ -1509,7 +1515,9 @@
         "statistics-tab": "Statistiques",
         "kavita+-tab": "Kavita+",
         "tasks-tab": "Tâches",
-        "kavita+-desc-part-2": "avantages premium"
+        "kavita+-desc-part-2": "avantages premium",
+        "kavita+-releases": "Voir les versions publiées",
+        "kavita+-requirement": "Kavita+ est conçu pour fonctionner uniquement avec la dernière version - 2 versions. Toute autre version est susceptible de ne pas fonctionner."
     },
     "import-cbl-modal": {
         "validate-warning": "Le CBL présente des problèmes qui empêchent l'importation. Corrigez ces problèmes et réessayez.",
@@ -1828,7 +1836,12 @@
         "k+-reset-key": "Cela vous permettra de détacher votre clé d'un serveur et de réenregistrer une instance Kavita.",
         "anilist-token-expired": "Votre jeton AniList a expiré. Le scrobbling ne sera plus possible tant que vous ne l'aurez pas généré à nouveau dans Paramètres de l'utilisateur > Compte",
         "change-email-no-email": "E-mail à été mis à jour",
-        "email-not-sent-test": "Il y a une erreur lors de l'envoi du mail. Vérifiez les logs pour plus de détails. Cette erreur indique une erreur de paramètres."
+        "email-not-sent-test": "Il y a une erreur lors de l'envoi du mail. Vérifiez les logs pour plus de détails. Cette erreur indique une erreur de paramètres.",
+        "delete-device": "Êtes-vous sûr de vouloir supprimer cet appareil ?",
+        "delete-review": "Êtes-vous sûr de vouloir supprimer votre avis ?",
+        "review-deleted": "Avis supprimé",
+        "collection-tag-deleted": "Étiquette de collection supprimée",
+        "force-kavita+-refresh-success": "Les métadonnées externes de Kavita+ ont été invalidées"
     },
     "manga-format-stats": {
         "title": "Format",
@@ -1957,6 +1970,11 @@
         "title": "~{{date}}"
     },
     "out-of-date-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "description-2": "Consultez notre <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pour savoir comment procéder à la mise à jour.",
+        "title": "Ne prenez pas de retard !",
+        "subtitle": "Il semble que votre installation soit en retard de plus de {{count}} versions !",
+        "description-1": "Veuillez envisager une mise à jour afin d'utiliser la dernière version de Kavita.",
+        "description-3": "S'il y a une raison spécifique pour laquelle vous n'avez pas encore mis à jour, nous aimerions savoir ce qui vous retient sur une version obsolète ! Arrêtez-vous sur notre discord et dites-nous ce qui bloque votre mise à jour."
     }
 }

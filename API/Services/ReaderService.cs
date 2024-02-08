@@ -531,8 +531,24 @@ public class ReaderService : IReaderService
          if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
          {
              // I think i need a way to sort volumes last
-             return volumes.OrderBy(v => v.MinNumber.ToString(CultureInfo.InvariantCulture).AsDouble(), _chapterSortComparer).First().Chapters
-                 .OrderBy(c => c.Number.AsFloat()).First();
+             var chapters = volumes.OrderBy(v => v.MinNumber, _chapterSortComparer).First().Chapters
+                 .OrderBy(c => c.Number.AsFloat())
+                 .ToList();
+
+             // If there are specials, then return the first Non-special
+             if (chapters.Exists(c => c.IsSpecial))
+             {
+                 var firstChapter = chapters.FirstOrDefault(c => !c.IsSpecial);
+                 if (firstChapter == null)
+                 {
+                     // If there is no non-special chapter, then return first chapter
+                     return chapters[0];
+                 }
+
+                 return firstChapter;
+             }
+             // Else use normal logic
+             return chapters[0];
          }
 
         // Loop through all chapters that are not in volume 0
