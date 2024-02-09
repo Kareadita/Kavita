@@ -143,6 +143,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);
+
+        builder.Entity<ExternalSeriesMetadata>()
+            .HasOne(em => em.Series)
+            .WithOne(s => s.ExternalSeriesMetadata)
+            .HasForeignKey<ExternalSeriesMetadata>(em => em.SeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     #nullable enable

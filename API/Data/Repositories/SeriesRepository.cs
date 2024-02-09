@@ -49,6 +49,7 @@ public enum SeriesIncludes
     ExternalReviews = 64,
     ExternalRatings = 128,
     ExternalRecommendations = 256,
+    ExternalMetadata = 512
 
 }
 
@@ -551,7 +552,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// Returns Volumes, Metadata, and Collection Tags
+    /// Returns Full Series including all external links
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
@@ -559,9 +560,20 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Include(s => s.Volumes)
+            .Include(s => s.Relations)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
-            .Include(s => s.Relations)
+
+
+            .Include(s => s.ExternalSeriesMetadata)
+
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalRatings)
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalReviews)
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalRecommendations)
+
             .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
             .ToListAsync();

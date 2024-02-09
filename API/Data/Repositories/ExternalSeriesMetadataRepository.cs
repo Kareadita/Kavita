@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface IExternalSeriesMetadataRepository
 {
@@ -28,6 +29,7 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalReview>? reviews);
     void Remove(IEnumerable<ExternalRating>? ratings);
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
+    void Remove(ExternalSeriesMetadata metadata);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
     Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
@@ -70,16 +72,22 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         _context.ExternalReview.RemoveRange(reviews);
     }
 
-    public void Remove(IEnumerable<ExternalRating> ratings)
+    public void Remove(IEnumerable<ExternalRating>? ratings)
     {
         if (ratings == null) return;
         _context.ExternalRating.RemoveRange(ratings);
     }
 
-    public void Remove(IEnumerable<ExternalRecommendation> recommendations)
+    public void Remove(IEnumerable<ExternalRecommendation>? recommendations)
     {
         if (recommendations == null) return;
         _context.ExternalRecommendation.RemoveRange(recommendations);
+    }
+
+    public void Remove(ExternalSeriesMetadata? metadata)
+    {
+        if (metadata == null) return;
+        _context.ExternalSeriesMetadata.Remove(metadata);
     }
 
     /// <summary>
