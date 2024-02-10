@@ -78,7 +78,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Reviews = ArraySegment<UserReviewDto>.Empty
     };
     // Allow 50 requests per 24 hours
-    private static readonly RateLimiter _rateLimiter = new RateLimiter(10, TimeSpan.FromMinutes(10), false);
+    private static readonly RateLimiter RateLimiter = new RateLimiter(10, TimeSpan.FromMinutes(10), false);
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {
@@ -154,12 +154,11 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="libraryType"></param>
     public async Task GetNewSeriesData(int seriesId, LibraryType libraryType)
     {
-        // TODO: I need this to only allow this to be called 50 times per 24 hours
         if (!IsPlusEligible(libraryType)) return;
 
         // Generate key based on seriesId and libraryType or any unique identifier for the request
         // Check if the request is allowed based on the rate limit
-        if (!_rateLimiter.TryAcquire(string.Empty))
+        if (!RateLimiter.TryAcquire(string.Empty))
         {
             // Request not allowed due to rate limit
             _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
