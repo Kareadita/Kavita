@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,7 +11,7 @@ using API.Extensions;
 namespace API.Services.Tasks.Scanner.Parser;
 #nullable enable
 
-public static class Parser
+public static partial class Parser
 {
     public const string DefaultChapter = "0";
     public const string DefaultVolume = "0";
@@ -59,6 +61,8 @@ public static class Parser
     /// </summary>
     private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
 
+    [GeneratedRegex(@"^\d+$")]
+    private static partial Regex IsNumberRegex();
 
     /// <summary>
     /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
@@ -634,13 +638,17 @@ public static class Parser
 
     #region Magazine
 
+    private static readonly Dictionary<string, int> _monthMappings = CreateMonthMappings();
     private static readonly Regex[] MagazineSeriesRegex = new[]
     {
-        // 3D World - 2018  UK
+        // 3D World - 2018  UK, 3D World - 022014
         new Regex(
-            @"(?<Series>.+?)(\b|_|\s)?-(\b|_|\s)(?<Year>\d{4}).+",
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*\d{4,6}.*",
             MatchOptions, RegexTimeout),
         // AIR International - April 2018  UK
+        new Regex(
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*.*",
+            MatchOptions, RegexTimeout),
         // The New Yorker - April 2, 2018  USA
         // AIR International Magazine 2006
         // AIR International Vol. 14 No. 3 (ISSN 1011-3250)
@@ -648,9 +656,34 @@ public static class Parser
 
     private static readonly Regex[] MagazineVolumeRegex = new[]
     {
-        // Batman & Wildcat (1 of 3)
+        // 3D World - 2018  UK, 3D World - 022014
         new Regex(
-            @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*\d{2}?(?<Volume>\d{4}).*",
+            MatchOptions, RegexTimeout),
+        // 3D World - Sept 2018
+        new Regex(
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*\D+(?<Volume>\d{4}).*",
+            MatchOptions, RegexTimeout),
+        // 3D World - Sept 2018
+        new Regex(
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*\D+(?<Volume>\d{4}).*",
+            MatchOptions, RegexTimeout),
+
+    };
+
+    private static readonly Regex[] MagazineChapterRegex = new[]
+    {
+        // 3D World - September 2023 #2
+        new Regex(
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*.*#(?<Chapter>\d+).*",
+            MatchOptions, RegexTimeout),
+        // Computer Weekly - September 2023
+        new Regex(
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*(?<Chapter>January|February|March|April|May|June|July|August|September|October|November|December).*",
+            MatchOptions, RegexTimeout),
+        // Computer Weekly - Sept 2023
+        new Regex(
+            @"^(?<Series>.+?)(_|\s)*-(_|\s)*(?<Chapter>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec).*",
             MatchOptions, RegexTimeout),
     };
 
@@ -801,12 +834,69 @@ public static class Parser
                 if (!group["Volume"].Success || group["Volume"] == Match.Empty) continue;
 
                 var value = group["Volume"].Value;
-                var hasPart = group["Part"].Success;
-                return FormatValue(value, hasPart);
+                return FormatValue(value, false);
             }
         }
 
         return DefaultVolume;
+    }
+
+
+    private static Dictionary<string, int> CreateMonthMappings()
+    {
+        Dictionary<string, int> mappings = new(StringComparer.OrdinalIgnoreCase);
+
+        // Add English month names and shorthands
+        for (var i = 1; i <= 12; i++)
+        {
+            var month = new DateTime(2022, i, 1);
+            var monthName = month.ToString("MMMM", CultureInfo.InvariantCulture);
+            var monthAbbreviation = month.ToString("MMM", CultureInfo.InvariantCulture);
+
+            mappings[monthName] = i;
+            mappings[monthAbbreviation] = i;
+        }
+
+        // Add mappings for other languages if needed
+        // Example: mappings["KoreanMonthName"] = correspondingNumericalValue;
+
+        return mappings;
+    }
+
+    static int ConvertMonthToNumber(string month, Dictionary<string, int> monthMappings)
+    {
+        // Check if the month exists in the mappings
+        if (monthMappings.TryGetValue(month, out int numericalValue))
+        {
+            return numericalValue;
+        }
+
+        // If the month is not found in mappings, you may handle other cases here,
+        // such as trying to parse non-English month names or returning a default value.
+        // For simplicity, we'll return 0 indicating failure.
+        return 0;
+    }
+
+    public static string ParseMagazineChapter(string filename)
+    {
+        foreach (var regex in MagazineChapterRegex)
+        {
+            var matches = regex.Matches(filename);
+            foreach (var groups in matches.Select(match => match.Groups))
+            {
+                if (!groups["Chapter"].Success || groups["Chapter"] == Match.Empty) continue;
+
+                var value = groups["Chapter"].Value;
+                // If value has non-digits, we need to convert to a digit
+                if (IsNumberRegex().IsMatch(value)) return FormatValue(value, false);
+                if (_monthMappings.TryGetValue(value, out var parsedMonth))
+                {
+                    return FormatValue($"{parsedMonth}", false);
+                }
+            }
+        }
+
+        return DefaultChapter;
     }
 
     private static string FormatValue(string value, bool hasPart)
@@ -1155,4 +1245,5 @@ public static class Parser
 
         return null;
     }
+
 }
