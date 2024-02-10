@@ -537,18 +537,18 @@ public class SeriesService : ISeriesService
             retChapters = Array.Empty<ChapterDto>();
         } else
         {
-            retChapters = chapters
-                .Where(ShouldIncludeChapter);
+            retChapters = chapters.Where(ShouldIncludeChapter);
         }
 
-        var storylineChapters = volumes
-            .Where(v => v.MinNumber == 0)
-            .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
-            .ToList();
+        var storylineChapters = libraryType == LibraryType.Magazine ? []
+            : volumes
+                .Where(v => v.MinNumber == 0)
+                .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
+                .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
+                .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
-        if (storylineChapters.Any()) {
+        if (storylineChapters.Count > 0) {
             retChapters = retChapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
 
@@ -615,8 +615,10 @@ public class SeriesService : ISeriesService
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
             LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterTitle),
+            LibraryType.Magazine => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
+            LibraryType.Image => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         };
     }

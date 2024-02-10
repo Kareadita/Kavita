@@ -63,10 +63,10 @@ export class UtilityService {
    */
    formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false) {
     switch(libraryType) {
-      case LibraryType.Magazine: // TODO: Figure out if we need something special
       case LibraryType.Book:
       case LibraryType.LightNovel:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
+      case LibraryType.Magazine: // TODO: Figure out if we need something special
       case LibraryType.Comic:
         if (includeHash) {
           return this.translocoService.translate('common.issue-hash-num');

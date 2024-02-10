@@ -687,6 +687,11 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
     };
 
+    private static readonly Regex YearRegex = new Regex(
+        @"(\b|\s|_)[1-9]{1}\d{3}(\b|\s|_)",
+        MatchOptions, RegexTimeout
+    );
+
     #endregion
 
 
@@ -858,23 +863,8 @@ public static partial class Parser
         }
 
         // Add mappings for other languages if needed
-        // Example: mappings["KoreanMonthName"] = correspondingNumericalValue;
 
         return mappings;
-    }
-
-    static int ConvertMonthToNumber(string month, Dictionary<string, int> monthMappings)
-    {
-        // Check if the month exists in the mappings
-        if (monthMappings.TryGetValue(month, out int numericalValue))
-        {
-            return numericalValue;
-        }
-
-        // If the month is not found in mappings, you may handle other cases here,
-        // such as trying to parse non-English month names or returning a default value.
-        // For simplicity, we'll return 0 indicating failure.
-        return 0;
     }
 
     public static string ParseMagazineChapter(string filename)
@@ -897,6 +887,12 @@ public static partial class Parser
         }
 
         return DefaultChapter;
+    }
+
+    public static string ParseYear(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return YearRegex.Match(value).Value;
     }
 
     private static string FormatValue(string value, bool hasPart)

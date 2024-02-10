@@ -125,13 +125,32 @@ public class DefaultParser : IDefaultParser
     {
         // Try to parse Series from the filename
         var libraryPath = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Parent?.FullName ?? rootPath;
-        ret.Series = Parser.ParseMagazineSeries(filePath);
-        if (string.IsNullOrEmpty(ret.Series))
+        var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+        ret.Series = Parser.ParseMagazineSeries(fileName);
+        ret.Volumes = Parser.ParseMagazineVolume(fileName);
+        ret.Chapters = Parser.ParseMagazineChapter(fileName);
+
+        if (string.IsNullOrEmpty(ret.Series) || (string.IsNullOrEmpty(ret.Chapters) && string.IsNullOrEmpty(ret.Volumes)))
         {
             // Fallback to the parent folder. We can also likely grab Volume (year) from here
-            var folders = _directoryService.GetFoldersTillRoot(libraryPath, filePath);
-            foreach (var folder in folders)
+            var folders = _directoryService.GetFoldersTillRoot(libraryPath, filePath).ToList();
+            // Usually the LAST folder is the Series and everything up to can have Volume
+
+            if (string.IsNullOrEmpty(ret.Series))
             {
+                ret.Series = Parser.CleanTitle(folders[^1]);
+            }
+            foreach (var folder in folders[..^1])
+            {
+                if (ret.Volumes == Parser.DefaultVolume)
+                {
+                    var vol = Parser.ParseYear(folder);
+                    if (vol != folder)
+                    {
+                        ret.Volumes = vol;
+                    }
+                }
+
 
             }
         }

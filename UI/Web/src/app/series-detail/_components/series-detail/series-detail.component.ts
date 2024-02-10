@@ -338,6 +338,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   get ShowStorylineTab() {
+    if (this.libraryType === LibraryType.Magazine) return false;
     return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel) && (this.volumes.length > 0 || this.chapters.length > 0);
   }
 
@@ -716,6 +717,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   updateSelectedTab() {
     // Book libraries only have Volumes or Specials enabled
+    if (this.libraryType === LibraryType.Magazine) {
+      if (this.volumes.length === 0) {
+        this.activeTabId = TabID.Chapters;
+      } else {
+        this.activeTabId = TabID.Volumes;
+      }
+      this.cdRef.markForCheck();
+      return;
+    }
+
     if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
         this.activeTabId = TabID.Specials;
