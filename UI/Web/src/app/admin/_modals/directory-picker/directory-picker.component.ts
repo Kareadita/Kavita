@@ -14,8 +14,6 @@ export interface DirectoryPickerResult {
   folderPath: string;
 }
 
-
-
 @Component({
   selector: 'app-directory-picker',
   templateUrl: './directory-picker.component.html',
@@ -129,33 +127,12 @@ export class DirectoryPickerComponent implements OnInit {
     });
   }
 
-  shareFolder(fullPath: string, event: any) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.modal.close({success: true, folderPath: fullPath});
-  }
-
   share() {
     this.modal.close({success: true, folderPath: this.path});
   }
 
   close() {
     this.modal.close({success: false, folderPath: undefined});
-  }
-
-  getStem(path: string): string {
-
-    const lastPath = this.routeStack.peek();
-    if (lastPath && lastPath != path) {
-      let replaced = path.replace(lastPath, '');
-      if (replaced.startsWith('/') || replaced.startsWith('\\')) {
-        replaced = replaced.substring(1, replaced.length);
-      }
-      return replaced;
-    }
-
-    return path;
   }
 
   navigateTo(index: number) {

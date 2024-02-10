@@ -68,12 +68,17 @@ enum TabID {
 })
 export class CardDetailDrawerComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly LibraryType = LibraryType;
+  protected readonly TabID = TabID;
+
   @Input() parentName = '';
   @Input() seriesId: number = 0;
   @Input() libraryId: number = 0;
   @Input({required: true}) data!: Volume | Chapter;
-  private readonly destroyRef = inject(DestroyRef);
-
 
   /**
    * If this is a volume, this will be first chapter for said volume.
@@ -104,26 +109,13 @@ export class CardDetailDrawerComponent implements OnInit {
   ];
   active = this.tabs[0];
 
-  chapterMetadata!: ChapterMetadata;
+  chapterMetadata: ChapterMetadata | undefined;
   summary: string = '';
 
   downloadInProgress: boolean = false;
 
-  get MangaFormat() {
-    return MangaFormat;
-  }
 
-  get Breakpoint() {
-    return Breakpoint;
-  }
 
-  get LibraryType() {
-    return LibraryType;
-  }
-
-  get TabID() {
-    return TabID;
-  }
 
   constructor(public utilityService: UtilityService,
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService,
@@ -160,7 +152,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
-    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
+    this.chapterActions.push({title: 'read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
     if (this.isChapter) {
       const chapter = this.utilityService.asChapter(this.data);
       this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, chapter);

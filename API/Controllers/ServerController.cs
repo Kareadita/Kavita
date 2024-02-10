@@ -38,18 +38,16 @@ public class ServerController : BaseApiController
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
     private readonly IScannerService _scannerService;
-    private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEasyCachingProviderFactory _cachingProviderFactory;
     private readonly ILocalizationService _localizationService;
-    private readonly IEmailService _emailService;
 
     public ServerController(ILogger<ServerController> logger,
-        IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
+        IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService,
+        IStatsService statsService, ICleanupService cleanupService, IScannerService scannerService,
         ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory,
-        ILocalizationService localizationService, IEmailService emailService)
+        ILocalizationService localizationService)
     {
         _logger = logger;
         _backupService = backupService;
@@ -58,12 +56,10 @@ public class ServerController : BaseApiController
         _statsService = statsService;
         _cleanupService = cleanupService;
         _scannerService = scannerService;
-        _accountService = accountService;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _cachingProviderFactory = cachingProviderFactory;
         _localizationService = localizationService;
-        _emailService = emailService;
     }
 
     /// <summary>
@@ -181,12 +177,32 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
+    /// Checks for updates and pushes an event to the UI
+    /// </summary>
+    /// <remarks>Some users have websocket issues so this is not always reliable to alert the user</remarks>
+    [HttpGet("check-for-updates")]
+    public async Task<ActionResult> CheckForAnnouncements()
+    {
+        await _taskScheduler.CheckForUpdate();
+        return Ok();
+    }
+
+    /// <summary>
     /// Checks for updates, if no updates that are > current version installed, returns null
     /// </summary>
     [HttpGet("check-update")]
-    public async Task<ActionResult<UpdateNotificationDto>> CheckForUpdates()
+    public async Task<ActionResult<UpdateNotificationDto?>> CheckForUpdates()
     {
         return Ok(await _versionUpdaterService.CheckForUpdate());
+    }
+
+    /// <summary>
+    /// Returns how many versions out of date this install is
+    /// </summary>
+    [HttpGet("check-out-of-date")]
+    public async Task<ActionResult<int>> CheckHowOutOfDate()
+    {
+        return Ok(await _versionUpdaterService.GetNumberOfReleasesBehind());
     }
 
 
@@ -198,18 +214,6 @@ public class ServerController : BaseApiController
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
     {
         return Ok(await _versionUpdaterService.GetAllReleases());
-    }
-
-    /// <summary>
-    /// Is this server accessible to the outside net
-    /// </summary>
-    /// <remarks>If the instance has the HostName set, this will return true whether or not it is accessible externally</remarks>
-    /// <returns></returns>
-    [HttpGet("accessible")]
-    [AllowAnonymous]
-    public async Task<ActionResult<bool>> IsServerAccessible()
-    {
-        return Ok(await _accountService.CheckIfAccessible(Request));
     }
 
     /// <summary>
@@ -260,35 +264,13 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
-    [HttpPost("bust-review-and-rec-cache")]
+    [HttpPost("bust-kavitaplus-cache")]
     public async Task<ActionResult> BustReviewAndRecCache()
     {
         _logger.LogInformation("Busting Kavita+ Cache");
-        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
-        await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
-        await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
-        await provider.FlushAsync();
-        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
         await provider.FlushAsync();
         return Ok();
-    }
-
-    /// <summary>
-    /// Returns the KavitaEmail version for non-default instances
-    /// </summary>
-    /// <returns></returns>
-    [Authorize("RequireAdminRole")]
-    [HttpGet("email-version")]
-    public async Task<ActionResult<string?>> GetEmailVersion()
-    {
-        var emailServiceUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))
-            .Value;
-
-        if (emailServiceUrl.Equals(EmailService.DefaultApiUrl)) return Ok(null);
-
-        return Ok(await _emailService.GetVersion(emailServiceUrl));
     }
 
 }

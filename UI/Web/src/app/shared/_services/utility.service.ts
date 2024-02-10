@@ -65,6 +65,7 @@ export class UtilityService {
     switch(libraryType) {
       case LibraryType.Magazine: // TODO: Figure out if we need something special
       case LibraryType.Book:
+      case LibraryType.LightNovel:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
         if (includeHash) {

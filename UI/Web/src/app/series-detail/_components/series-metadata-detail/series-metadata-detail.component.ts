@@ -9,7 +9,6 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {Router} from '@angular/router';
-import {ReaderService} from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
 import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';
@@ -33,6 +32,7 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ImageComponent} from "../../../shared/image/image.component";
+import {Rating} from "../../../_models/rating";
 
 
 @Component({
@@ -48,6 +48,18 @@ import {ImageComponent} from "../../../shared/image/image.component";
 })
 export class SeriesMetadataDetailComponent implements OnChanges {
 
+  protected readonly imageService = inject(ImageService);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+
+  protected readonly FilterField = FilterField;
+  protected readonly LibraryType = LibraryType;
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly TagBadgeCursor = TagBadgeCursor;
+  protected readonly Breakpoint = Breakpoint;
+
   @Input({required: true}) seriesMetadata!: SeriesMetadata;
   @Input({required: true}) libraryType!: LibraryType;
   @Input() hasReadingProgress: boolean = false;
@@ -56,26 +68,15 @@ export class SeriesMetadataDetailComponent implements OnChanges {
    */
   @Input() readingLists: Array<ReadingList> = [];
   @Input({required: true}) series!: Series;
+  @Input({required: true}) ratings: Array<Rating> = [];
 
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;
-
-  protected readonly imageService = inject(ImageService);
-  protected readonly utilityService = inject(UtilityService);
-  private readonly router = inject(Router);
-  private readonly readerService = inject(ReaderService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   /**
    * Html representation of Series Summary
    */
   seriesSummary: string = '';
-
-  protected FilterField = FilterField;
-  protected LibraryType = LibraryType;
-  protected MangaFormat = MangaFormat;
-  protected TagBadgeCursor = TagBadgeCursor;
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
@@ -121,6 +122,4 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   navigate(basePage: string, id: number) {
     this.router.navigate([basePage, id]);
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }

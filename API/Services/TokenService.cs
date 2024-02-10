@@ -142,8 +142,9 @@ public class TokenService : ITokenService
         return jwtClaim?.Value;
     }
 
-    public bool HasTokenExpired(string token)
+    public bool HasTokenExpired(string? token)
     {
+        if (string.IsNullOrEmpty(token)) return true;
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenContent = tokenHandler.ReadJwtToken(token);
         return tokenContent.ValidTo <= DateTime.UtcNow;

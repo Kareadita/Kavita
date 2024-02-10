@@ -6,7 +6,7 @@
       <form [formGroup]="registerForm" (ngSubmit)="submit()">
         <div class="mb-3">
           <label for="username" class="form-label">{{t('username-label')}}</label>
-          <input id="username" class="form-control" formControlName="username" type="text"
+          <input id="username" class="form-control" formControlName="username" type="text" autocomplete="username"
                  [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" aria-describedby="username-validations">
           <div id="username-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
             <div *ngIf="registerForm.get('username')?.errors?.required">
@@ -21,7 +21,7 @@
           <span class="visually-hidden" id="email-help">
             <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
           </span>
-          <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required aria-describedby="email-help"
+          <input class="form-control" type="email" inputmode="email" id="email" autocomplete="email" formControlName="email" required aria-describedby="email-help"
                  [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
           <div id="email-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
             <div *ngIf="registerForm.get('email')?.errors?.required">
@@ -39,7 +39,7 @@
             {{t('password-validation')}}
           </ng-template>
           <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
-          <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password"
+          <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password" autocomplete="new-password"
                  type="password" aria-describedby="password-help" [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
           <div id="password-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
             <div *ngIf="registerForm.get('password')?.errors?.required">

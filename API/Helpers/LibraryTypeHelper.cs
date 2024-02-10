@@ -13,8 +13,7 @@ public static class LibraryTypeHelper
         {
             LibraryType.Manga => MediaFormat.Manga,
             LibraryType.Comic => MediaFormat.Comic,
-            LibraryType.Book => MediaFormat.LightNovel,
-            _ => throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null)
+            LibraryType.LightNovel => MediaFormat.LightNovel,
         };
     }
 }

@@ -353,7 +353,7 @@ public static class Parser
     {
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
         new Regex(
-            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)(-c?\d+(\.\d)?)?)",
             MatchOptions, RegexTimeout),
         // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
         new Regex(
@@ -820,6 +820,11 @@ public static class Parser
         var from = RemoveLeadingZeroes(tokens[0]);
         if (tokens.Length != 2) return from;
 
+        // Occasionally users will use c01-c02 instead of c01-02, clean any leftover c
+        if (tokens[1].StartsWith("c", StringComparison.InvariantCultureIgnoreCase))
+        {
+            tokens[1] = tokens[1].Replace("c", string.Empty, StringComparison.InvariantCultureIgnoreCase);
+        }
         var to = RemoveLeadingZeroes(hasPart ? AddChapterPart(tokens[1]) : tokens[1]);
         return $"{from}-{to}";
     }

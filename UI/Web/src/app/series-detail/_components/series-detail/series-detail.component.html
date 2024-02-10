@@ -4,7 +4,13 @@
       <ng-container title>
         <h2 class="title text-break">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
-          <span>{{series.name}}</span>
+          <span>{{series.name}}
+            @if(isLoadingExtra || isLoading) {
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">loading...</span>
+              </div>
+            }
+          </span>
         </h2>
       </ng-container>
       <ng-container subtitle *ngIf="series.localizedName !== series.name">
@@ -105,30 +111,40 @@
           </div>
 
           <div class="col-auto ms-2 d-none d-md-block" *ngIf="isAdmin || hasDownloadingRole">
-            <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')" [disabled]="downloadInProgress">
-              <ng-container *ngIf="downloadInProgress; else notDownloading">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span class="visually-hidden">{{t('downloading-status')}}</span>
-              </ng-container>
-              <ng-template #notDownloading>
+            @if (download$ | async; as download) {
+              <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')" [disabled]="download !== null">
+                <ng-container *ngIf="download !== null; else notDownloading">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span class="visually-hidden">{{t('downloading-status')}}</span>
+                </ng-container>
+                <ng-template #notDownloading>
+                  <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                </ng-template>
+              </button>
+            } @else {
+              <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')">
                 <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
-              </ng-template>
-            </button>
+              </button>
+            }
           </div>
         </div>
-        <div *ngIf="seriesMetadata" class="mt-2">
-          <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
-                                      [libraryType]="libraryType"
-                                      [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
-        </div>
+
+        @if (seriesMetadata) {
+          <div class="mt-2">
+            <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
+                                        [libraryType]="libraryType" [ratings]="ratings"
+                                        [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
+          </div>
+        }
+
       </div>
 
-      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata?.summary?.length === 0}">
+      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata.summary.length === 0}">
         <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
                            iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
                            [clickableTitle]="true" (sectionClick)="openReviewModal()">
           <ng-template #carouselItem let-item let-position="idx">
-            <app-review-card [review]="item"></app-review-card>
+            <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
           </ng-template>
         </app-carousel-reel>
       </div>
@@ -137,7 +153,7 @@
     <ng-container *ngIf="series">
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
-        <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
+        <li [ngbNavItem]="TabID.Storyline" *ngIf="ShowStorylineTab">
           <a ngbNavLink>{{t('storyline-tab')}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
@@ -165,8 +181,8 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
-          <a ngbNavLink>{{libraryType === LibraryType.Book ? t('books-tab') : t('volumes-tab')}}</a>
+        <li [ngbNavItem]="TabID.Volumes" *ngIf="ShowVolumeTab">
+          <a ngbNavLink>{{UseBookLogic ? t('books-tab') : t('volumes-tab')}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
               <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
@@ -186,7 +202,7 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
+        <li [ngbNavItem]="TabID.Chapters" *ngIf="ShowChaptersTab">
           <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
           <ng-template ngbNavContent>
             <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">

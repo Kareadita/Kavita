@@ -33,6 +33,8 @@ public static class SeriesSort
             SortField.ReadProgress => query.DoOrderBy(s => s.Progress.Where(p => p.SeriesId == s.Id && p.AppUserId == userId)
                 .Select(p => p.LastModified)
                 .Max(), sortOptions),
+            SortField.AverageRating => query.DoOrderBy(s => s.ExternalSeriesMetadata.ExternalRatings
+                .Where(p => p.SeriesId == s.Id).Average(p => p.AverageScore), sortOptions),
             _ => query
         };
 

@@ -132,6 +132,9 @@
               </div>
             </li>
           </ng-container>
+          @if(activeDownloads.length > 1) {
+            <li class="list-group-item dark-menu-item">{{activeDownloads.length}} downloads in Queue</li>
+          }
         </ng-container>
 
 

@@ -1,34 +1,37 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 
-import {ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEvent, ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ScrobbleEventTypePipe} from "../scrobble-event-type.pipe";
-import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, take} from "rxjs/operators";
 import {PaginatedResult, Pagination} from "../../_models/pagination";
 import {SortableHeader, SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserScrobbleHistoryComponent implements OnInit {
 
-  private readonly scrobbleService = inject(ScrobblingService);
+  private readonly scrobblingService = inject(ScrobblingService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
+  protected readonly ScrobbleEventType = ScrobbleEventType;
 
   pagination: Pagination | undefined;
   events: Array<ScrobbleEvent> = [];
@@ -36,10 +39,15 @@ export class UserScrobbleHistoryComponent implements OnInit {
     'filter': new FormControl('', [])
   });
 
-  get ScrobbleEventType() { return ScrobbleEventType; }
-
   ngOnInit() {
     this.loadPage({column: 'createdUtc', direction: 'desc'});
+
+    this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+      if (hasExpired) {
+        this.toastr.error(translate('toasts.anilist-token-expired'));
+      }
+      this.cdRef.markForCheck();
+    });
 
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(query => {
       this.loadPage();
@@ -73,7 +81,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
     const field = this.mapSortColumnField(sortEvent?.column);
     const query = this.formGroup.get('filter')?.value;
 
-    this.scrobbleService.getScrobbleEvents({query, field, isDescending}, page, pageSize)
+    this.scrobblingService.getScrobbleEvents({query, field, isDescending}, page, pageSize)
       .pipe(take(1))
       .subscribe((result: PaginatedResult<ScrobbleEvent[]>) => {
       this.events = result.result;

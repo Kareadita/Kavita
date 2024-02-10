@@ -30,6 +30,7 @@ public interface IUnitOfWork
     IUserTableOfContentRepository UserTableOfContentRepository { get; }
     IAppUserSmartFilterRepository AppUserSmartFilterRepository { get; }
     IAppUserExternalSourceRepository AppUserExternalSourceRepository { get; }
+    IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -48,7 +49,7 @@ public class UnitOfWork : IUnitOfWork
         _userManager = userManager;
     }
 
-    public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper);
+    public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper, _userManager);
     public IUserRepository UserRepository => new UserRepository(_context, _userManager, _mapper);
     public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
@@ -72,6 +73,7 @@ public class UnitOfWork : IUnitOfWork
     public IUserTableOfContentRepository UserTableOfContentRepository => new UserTableOfContentRepository(_context, _mapper);
     public IAppUserSmartFilterRepository AppUserSmartFilterRepository => new AppUserSmartFilterRepository(_context, _mapper);
     public IAppUserExternalSourceRepository AppUserExternalSourceRepository => new AppUserExternalSourceRepository(_context, _mapper);
+    public IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository => new ExternalSeriesMetadataRepository(_context, _mapper);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

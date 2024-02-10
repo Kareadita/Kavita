@@ -92,18 +92,28 @@ public class DeviceController : BaseApiController
         return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(User.GetUserId()));
     }
 
+    /// <summary>
+    /// Sends a collection of chapters to the user's device
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("send-to")]
     public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
     {
         if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "ChapterIds"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
 
-        if (await _emailService.IsDefaultEmailService())
+        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
+        if (!isEmailSetup)
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
+
+        // // Validate that the device belongs to the user
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Devices);
+        if (user == null || user.Devices.All(d => d.Id != dto.DeviceId)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-unallowed"));
 
         var userId = User.GetUserId();
         await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
+            MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(userId, "send-to-device-status"),
                 "started"), userId);
         try
         {
@@ -112,16 +122,16 @@ public class DeviceController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(userId, ex.Message));
         }
         finally
         {
-            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice,
-                MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
+            await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(userId, "send-to-device-status"),
                     "ended"), userId);
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-send-to"));
+        return BadRequest(await _localizationService.Translate(userId, "generic-send-to"));
     }
 
 
@@ -132,7 +142,8 @@ public class DeviceController : BaseApiController
         if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "SeriesId"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
 
-        if (await _emailService.IsDefaultEmailService())
+        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
+        if (!isEmailSetup)
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
 
         var userId = User.GetUserId();
@@ -156,15 +167,13 @@ public class DeviceController : BaseApiController
         }
         finally
         {
-            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice,
+            await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
                 MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
                     "ended"), userId);
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-send-to"));
     }
-
-
 
 }
 

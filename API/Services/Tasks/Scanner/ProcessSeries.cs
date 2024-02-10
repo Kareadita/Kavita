@@ -13,6 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
@@ -57,6 +58,7 @@ public class ProcessSeries : IProcessSeries
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly ICollectionTagService _collectionTagService;
     private readonly IReadingListService _readingListService;
+    private readonly IExternalMetadataService _externalMetadataService;
 
     private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
@@ -66,7 +68,7 @@ public class ProcessSeries : IProcessSeries
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService, IReadingListService readingListService)
+        ICollectionTagService collectionTagService, IReadingListService readingListService, IExternalMetadataService externalMetadataService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -79,6 +81,7 @@ public class ProcessSeries : IProcessSeries
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
         _readingListService = readingListService;
+        _externalMetadataService = externalMetadataService;
 
 
         _genres = new Dictionary<string, Genre>();
@@ -122,11 +125,29 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
-            // TODO: Output more information to the user
-            _logger.LogError(ex, "There was an exception finding existing series for {SeriesName} with Localized name of {LocalizedName} for library {LibraryId}. This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan", firstInfo.Series, firstInfo.LocalizedSeries, library.Id);
-            await _eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent($"There was an exception finding existing series for {firstInfo.Series} with Localized name of {firstInfo.LocalizedSeries} for library {library.Id}",
-                    "This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan."));
+            var seriesCollisions = await _unitOfWork.SeriesRepository.GetAllSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
+
+            seriesCollisions = seriesCollisions.Where(collision =>
+                collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
+
+            if (seriesCollisions.Count > 1)
+            {
+                var firstCollision = seriesCollisions[0];
+                var secondCollision = seriesCollisions[1];
+
+                var tableRows = $"<tr><td>Name: {firstCollision.Name}</td><td>Name: {secondCollision.Name}</td></tr>" +
+                                $"<tr><td>Localized: {firstCollision.LocalizedName}</td><td>Localized: {secondCollision.LocalizedName}</td></tr>" +
+                                $"<tr><td>Filename: {Parser.Parser.NormalizePath(firstCollision.FolderPath)}</td><td>Filename: {Parser.Parser.NormalizePath(secondCollision.FolderPath)}</td></tr>";
+
+                var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
+
+                _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
+                    firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
+
+                await _eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.ErrorEvent($"Library {library.Name} Series collision on {firstInfo.Series}",
+                        htmlTable));
+            }
             return;
         }
 
@@ -218,6 +239,10 @@ public class ProcessSeries : IProcessSeries
 
                 if (seriesAdded)
                 {
+                    // See if any recommendations can link up to the series and pre-fetch external metadata for the series
+                    _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
+                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
+                    await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
                 }
@@ -732,6 +757,8 @@ public class ProcessSeries : IProcessSeries
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(s => s.Trim())
             );
+
+            // TODO: For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
         }
 
         if (!string.IsNullOrEmpty(comicInfo.Isbn))

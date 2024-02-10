@@ -237,6 +237,13 @@ export class ActionFactoryService {
             requiresAdmin: true,
             children: [],
           },
+          {
+            action: Action.Delete,
+            title: 'delete',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
         ],
       },
       {

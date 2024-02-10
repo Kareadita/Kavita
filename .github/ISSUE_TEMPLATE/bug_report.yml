@@ -1,24 +1,17 @@
 name: Bug Report
-description: Create a report to help us improve
-title: ""
+description: Help us make Kavita better for everyone by submitting issues you run into while using the program.
+title: "Put a short summary of what went wrong here"
 labels: ["needs-triage"]
-assignees:
 body:
   - type: markdown
     attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
-  - type: markdown
-    attributes:
-      value: |
-        If you have a feature request, please submit on [Github Discussions](https://github.com/Kareadita/Kavita/discussions/2529).
+      value: "Thanks for taking the time to fill out this bug report!"
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what steps you took so we can try to reproduce.
+      description: Don't forget to tell us what steps you took so we can try to reproduce.
       placeholder: Tell us what you see!
-      value: ""
     validations:
       required: true
   - type: textarea
@@ -26,33 +19,35 @@ body:
     attributes:
       label: What did you expect?
       description: What did you expect to happen?
-      placeholder: Tell us what you expected to see!
-      value: ""
+      placeholder: Tell us what you expected to see! Go in as much detail as possible so we can confirm if the behavior is something that is broken.
     validations:
       required: true
-  - type: textarea
+  - type: dropdown
     id: version
     attributes:
-      label: Version
-      description: What version are you running?
-      placeholder: Can be found by going to Server Settings > System
-      value: ""
+      label: Kavita Version Number - Don't see your version number listed? Then your install is out of date. Please update and see if your issue still persists.
+      multiple: false
+      options:
+        - 0.7.14 - Stable
+        - Nightly Testing Branch
     validations:
       required: true
   - type: dropdown
     id: OS
     attributes:
-      label: What OS is Kavita being run on?
+      label: What operating system is Kavita being hosted from?
       multiple: false
       options:
-        - Docker
+        - Docker (LSIO Container)
+        - Docker (Dockerhub Container)
+        - Docker (Other)
         - Windows
         - Linux
         - Mac
   - type: dropdown
     id: desktop-OS
     attributes:
-      label: If issue being seen on Desktop, what OS are you running where you see the issue?
+      label: If the issue is being seen on Desktop, what OS are you running where you see the issue?
       multiple: false
       options:
         - Windows
@@ -61,17 +56,18 @@ body:
   - type: dropdown
     id: desktop-browsers
     attributes:
-      label: If issue being seen in the UI, what browsers are you seeing the problem on?
+      label: If the issue is being seen in the UI, what browsers are you seeing the problem on?
       multiple: true
       options:
         - Firefox
         - Chrome
         - Safari
         - Microsoft Edge
+        - Other (List in "Additional Notes" box)
   - type: dropdown
     id: mobile-OS
     attributes:
-      label: If issue being seen on Mobile, what OS are you running where you see the issue?
+      label: If the issue is being seen on Mobile, what OS are you running where you see the issue?
       multiple: false
       options:
         - Android
@@ -79,7 +75,7 @@ body:
   - type: dropdown
     id: mobile-browsers
     attributes:
-      label: If issue being seen on UI, what browsers are you seeing the problem on?
+      label: If the issue is being seen on the UI, what browsers are you seeing the problem on?
       multiple: true
       options:
         - Firefox
@@ -97,7 +93,4 @@ body:
     attributes:
       label: Additional Notes
       description: Any other information about the issue not covered in this form?
-      placeholder: e.g. Running Kavita on a raspberry pi, updating from X version, using LSIO container, etc
-      value: ""
-    validations:
-      required: true
+      placeholder: e.g. Running Kavita on a Raspberry Pi, updating from X version, using LSIO container, etc

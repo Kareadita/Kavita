@@ -13,6 +13,9 @@
     --primary-color-scrollbar: rgba(74,198,148,0.75);
     --text-muted-color: lightgrey;
 
+    /* New Color scheme */
+    --secondary-color: #212328;
+
     /* Meta and Globals */
     --theme-color: #000000;
     --color-scheme: dark;
@@ -107,7 +110,7 @@
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
     --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
-    --side-nav-color: white;
+    --side-nav-text-color: white;
     --side-nav-border-radius: 5px;
     --side-nav-border: none;
     --side-nav-border-closed: none;
@@ -225,6 +228,7 @@
     --carousel-header-text-color: var(--body-text-color);
     --carousel-header-text-decoration: none;
     --carousel-hover-header-text-decoration: none;
+    --carousel-btn-color: var(--body-text-color);
 
     /** Drawer */
     --drawer-bg-color: #292929;
@@ -256,4 +260,7 @@
     /** Rating Star Color **/
     --rating-star-color: var(--primary-color);
 
-  }
+    /** Badge **/
+    --badge-text-color: var(--bs-badge-color);
+
+}

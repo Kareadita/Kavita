@@ -20,7 +20,8 @@ export enum Role {
   ChangePassword = 'Change Password',
   Bookmark = 'Bookmark',
   Download = 'Download',
-  ChangeRestriction = 'Change Restriction'
+  ChangeRestriction = 'Change Restriction',
+  ReadOnly = 'Read Only'
 }
 
 @Injectable({
@@ -78,6 +79,10 @@ export class AccountService {
 
   hasBookmarkRole(user: User) {
     return user && user.roles.includes(Role.Bookmark);
+  }
+
+  hasReadOnlyRole(user: User) {
+    return user && user.roles.includes(Role.ReadOnly);
   }
 
   getRoles() {
@@ -199,7 +204,7 @@ export class AccountService {
   }
 
   resendConfirmationEmail(userId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, TextResonse);
+    return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {});
   }
 
   inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRestriction}) {
@@ -310,7 +315,7 @@ export class AccountService {
   }
 
 
-  private refreshAccount() {
+  refreshAccount() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
       if (user) {

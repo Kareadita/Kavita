@@ -287,7 +287,7 @@ public class StatisticService : IStatisticService
             TotalPeople = distinctPeople,
             TotalSize = await _context.MangaFile.SumAsync(m => m.Bytes),
             TotalTags = await _context.Tag.CountAsync(),
-            VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync(),
+            VolumeCount = await _context.Volume.Where(v => v.MinNumber != 0).CountAsync(),
             MostActiveUsers = mostActiveUsers,
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
@@ -595,7 +595,8 @@ public class StatisticService : IStatisticService
             {
                 UserId = userId,
                 Username = users.First(u => u.Id == userId).UserName,
-                BooksTime = user[userId].TryGetValue(LibraryType.Book, out var bookTime) ? bookTime : 0,
+                BooksTime = user[userId].TryGetValue(LibraryType.Book, out var bookTime) ? bookTime : 0 +
+                    (user[userId].TryGetValue(LibraryType.LightNovel, out var bookTime2) ? bookTime2 : 0),
                 ComicsTime = user[userId].TryGetValue(LibraryType.Comic, out var comicTime) ? comicTime : 0,
                 MangaTime = user[userId].TryGetValue(LibraryType.Manga, out var mangaTime) ? mangaTime : 0,
             })

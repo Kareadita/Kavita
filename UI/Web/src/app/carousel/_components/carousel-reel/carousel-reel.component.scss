@@ -21,6 +21,10 @@
     .non-selectable {
         cursor: default;
     }
+
+  .carousel-btn > i {
+    color: var(--carousel-btn-color);
+  }
 }
 
 

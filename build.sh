@@ -133,6 +133,8 @@ then
     cd "$dir"
     Package "osx-x64"
     cd "$dir"
+    Package "osx-arm64"
+    cd "$dir"
 else
     Package "$RID"
     cd "$dir"

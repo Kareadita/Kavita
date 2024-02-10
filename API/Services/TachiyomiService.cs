@@ -9,6 +9,7 @@ using System.Linq;
 using API.Comparators;
 using API.Entities;
 using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 
@@ -68,21 +69,21 @@ public class TachiyomiService : ITachiyomiService
 
             // Else return the max chapter to Tachiyomi so it can consider everything read
             var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToImmutableList();
-            var looseLeafChapterVolume = volumes.Find(v => v.Number == 0);
+            var looseLeafChapterVolume = volumes.Find(v => v.MinNumber == 0);
             if (looseLeafChapterVolume == null)
             {
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes
                     [^1].Chapters
                     .OrderBy(c => c.Number.AsFloat(), ChapterSortComparerZeroFirst.Default)
                     .Last());
-                if (volumeChapter.Number == "0")
+                if (volumeChapter.Number == Parser.DefaultVolume)
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
                     return new ChapterDto()
                     {
                         // Use R to ensure that localization of underlying system doesn't affect the stringification
                         // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                        Number = (volume.Number / 10_000f).ToString("R", EnglishCulture)
+                        Number = (volume.MinNumber / 10_000f).ToString("R", EnglishCulture)
                     };
                 }
 
@@ -103,14 +104,14 @@ public class TachiyomiService : ITachiyomiService
 
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
         // We only encode for single-file volumes
-        if (volumeWithProgress!.Number != 0 && volumeWithProgress.Chapters.Count == 1)
+        if (volumeWithProgress!.MinNumber != 0 && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
             return new ChapterDto()
             {
                 // Use R to ensure that localization of underlying system doesn't affect the stringification
                 // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                Number = (volumeWithProgress.Number / 10_000f).ToString("R", EnglishCulture)
+                Number = (volumeWithProgress.MinNumber / 10_000f).ToString("R", EnglishCulture)
 
             };
         }

@@ -58,6 +58,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
     public DbSet<AppUserSideNavStream> AppUserSideNavStream { get; set; } = null!;
     public DbSet<AppUserExternalSource> AppUserExternalSource { get; set; } = null!;
+    public DbSet<ExternalReview> ExternalReview { get; set; } = null!;
+    public DbSet<ExternalRating> ExternalRating { get; set; } = null!;
+    public DbSet<ExternalSeriesMetadata> ExternalSeriesMetadata { get; set; } = null!;
+    public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
+    public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
+    public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -137,9 +143,15 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);
+
+        builder.Entity<ExternalSeriesMetadata>()
+            .HasOne(em => em.Series)
+            .WithOne(s => s.ExternalSeriesMetadata)
+            .HasForeignKey<ExternalSeriesMetadata>(em => em.SeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
-
+    #nullable enable
     private static void OnEntityTracked(object? sender, EntityTrackedEventArgs e)
     {
         if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
@@ -156,6 +168,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         entity.LastModified = DateTime.Now;
         entity.LastModifiedUtc = DateTime.UtcNow;
     }
+    #nullable disable
 
     private void OnSaveChanges()
     {

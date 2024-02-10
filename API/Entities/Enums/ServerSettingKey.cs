@@ -52,6 +52,7 @@ public enum ServerSettingKey
     /// Is Authentication needed for non-admin accounts
     /// </summary>
     /// <remarks>Deprecated. This is no longer used v0.5.1+. Assume Authentication is always in effect</remarks>
+    [Obsolete("Not supported as of v0.5.1")]
     [Description("EnableAuthentication")]
     EnableAuthentication = 8,
     /// <summary>
@@ -79,6 +80,7 @@ public enum ServerSettingKey
     /// If SMTP is enabled on the server
     /// </summary>
     [Description("CustomEmailService")]
+    [Obsolete("Use Email settings instead")]
     EmailServiceUrl = 13,
     /// <summary>
     /// If Kavita should save bookmarks as WebP images
@@ -147,6 +149,42 @@ public enum ServerSettingKey
     /// The size of the cover image thumbnail. Defaults to <see cref="CoverImageSize"/>.Default
     /// </summary>
     [Description("CoverImageSize")]
-    CoverImageSize = 27
-
+    CoverImageSize = 27,
+    #region EmailSettings
+    /// <summary>
+    /// The address of the emailer host
+    /// </summary>
+    [Description("EmailSenderAddress")]
+    EmailSenderAddress = 28,
+    /// <summary>
+    /// What the email name should be
+    /// </summary>
+    [Description("EmailSenderDisplayName")]
+    EmailSenderDisplayName = 29,
+    [Description("EmailAuthUserName")]
+    EmailAuthUserName = 30,
+    [Description("EmailAuthPassword")]
+    EmailAuthPassword = 31,
+    [Description("EmailHost")]
+    EmailHost = 32,
+    [Description("EmailPort")]
+    EmailPort = 33,
+    [Description("EmailEnableSsl")]
+    EmailEnableSsl = 34,
+    /// <summary>
+    /// Number of bytes that the sender allows to be sent through
+    /// </summary>
+    [Description("EmailSizeLimit")]
+    EmailSizeLimit = 35,
+    /// <summary>
+    /// Should Kavita use config/templates for Email templates or the default ones
+    /// </summary>
+    [Description("EmailCustomizedTemplates")]
+    EmailCustomizedTemplates = 36,
+    #endregion
+    /// <summary>
+    /// When the cleanup task should run - Critical to keeping Kavita working
+    /// </summary>
+    [Description("TaskCleanup")]
+    TaskCleanup = 37
 }

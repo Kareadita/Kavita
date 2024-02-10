@@ -126,7 +126,7 @@
     "user-already-registered": "用户已经注册为{0}",
     "critical-email-migration": "更改电子邮件地址时出现问题，请联系支持人员",
     "chapter-doesnt-exist": "章节不存在",
-    "send-to-kavita-email": "无法使用Kavita服务向设备发送电子邮件，请自行配置。",
+    "send-to-kavita-email": "如果没有电子邮件设置，则无法使用“发送到设备”",
     "generic-favicon": "获取图标时出现问题",
     "pdf-doesnt-exist": "PDF文件应该存在，但未找到",
     "no-series": "无法获取资料库中的系列",
@@ -177,5 +177,8 @@
     "more-in-genre": "更多类型 {0}",
     "recently-updated": "最近更新",
     "browse-recently-updated": "浏览最近更新",
-    "unable-to-reset-k+": "因为一些错误导致无法重置 Kavita+ 许可证。请联系 Kavita+ 支持人员"
+    "unable-to-reset-k+": "因为一些错误导致无法重置 Kavita+ 许可证。请联系 Kavita+ 支持人员",
+    "email-not-enabled": "此服务器上未启用电子邮件。您无法执行此操作。",
+    "send-to-unallowed": "您无法发送到不属于您的设备",
+    "send-to-size-limit": "您尝试发送的文件对于您的电子邮件来说太大"
 }

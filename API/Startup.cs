@@ -244,12 +244,20 @@ public class Startup
                     await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
                     await MigrateLibrariesToHaveAllFileTypes.Migrate(unitOfWork, dataContext, logger);
 
+
+                    // v0.7.14
+                    await MigrateEmailTemplates.Migrate(directoryService, logger);
+                    await MigrateVolumeNumber.Migrate(unitOfWork, dataContext, logger);
+                    await MigrateWantToReadImport.Migrate(unitOfWork, directoryService, logger);
+                    await MigrateManualHistory.Migrate(dataContext, logger);
+                    await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
-
                     await unitOfWork.CommitAsync();
+
                     logger.LogInformation("Running Migrations - complete");
                 }).GetAwaiter()
                 .GetResult();
@@ -354,11 +362,19 @@ public class Startup
             context.Response.Headers[HeaderNames.Vary] =
                 new[] { "Accept-Encoding" };
 
-            // Don't let the site be iframed outside the same origin (clickjacking)
-            context.Response.Headers.XFrameOptions = Configuration.XFrameOptions;
 
-            // Setup CSP to ensure we load assets only from these origins
-            context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
+            if (!Configuration.AllowIFraming)
+            {
+                // Don't let the site be iframed outside the same origin (clickjacking)
+                context.Response.Headers.XFrameOptions = "SAMEORIGIN";
+
+                // Setup CSP to ensure we load assets only from these origins
+                context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
+            }
+            else
+            {
+                logger.LogCritical("appsetting.json has allow iframing on! This may allow for clickjacking on the server. User beware");
+            }
 
             await next();
         });

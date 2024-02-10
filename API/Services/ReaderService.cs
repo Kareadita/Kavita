@@ -365,18 +365,17 @@ public class ReaderService : IReaderService
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
-        if (currentVolume.Number == 0)
+        if (currentVolume.MinNumber == 0)
         {
             // Handle specials by sorting on their Filename aka Range
             var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Range, dto => dto.Range);
             if (chapterId > 0) return chapterId;
         }
 
-        var currentVolumeNumber = currentVolume.Name.AsFloat();
         var next = false;
         foreach (var volume in volumes)
         {
-            var volumeNumbersMatch = Math.Abs(volume.Name.AsFloat() - currentVolumeNumber) < 0.00001f;
+            var volumeNumbersMatch = volume.Name == currentVolume.Name;
             if (volumeNumbersMatch && volume.Chapters.Count > 1)
             {
                 // Handle Chapters within current Volume
@@ -420,9 +419,9 @@ public class ReaderService : IReaderService
             else if (firstChapter.Number.AsDouble() == 0) return firstChapter.Id;
 
             // If on last volume AND there are no specials left, then let's return -1
-            var anySpecials = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
+            var anySpecials = volumes.Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
                 .SelectMany(v => v.Chapters.Where(c => c.IsSpecial)).Any();
-            if (currentVolume.Number != 0 && !anySpecials)
+            if (currentVolume.MinNumber != 0 && !anySpecials)
             {
                 return -1;
             }
@@ -434,10 +433,10 @@ public class ReaderService : IReaderService
         // This has an added problem that it will loop up to the beginning always
         // Should I change this to Max number? volumes.LastOrDefault()?.Number -> volumes.Max(v => v.Number)
 
-        if (currentVolume.Number != 0 && currentVolume.Number == volumes.LastOrDefault()?.Number && volumes.Count > 1)
+        if (currentVolume.MinNumber != 0 && currentVolume.MinNumber == volumes.LastOrDefault()?.MinNumber && volumes.Count > 1)
         {
             var chapterVolume = volumes.FirstOrDefault();
-            if (chapterVolume?.Number != 0) return -1;
+            if (chapterVolume?.MinNumber != 0) return -1;
 
             // This is my attempt at fixing a bug where we loop around to the beginning, but I just can't seem to figure it out
             // var orderedVolumes = volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).ToList();
@@ -479,7 +478,7 @@ public class ReaderService : IReaderService
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
-        if (currentVolume.Number == 0)
+        if (currentVolume.MinNumber == 0)
         {
             var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Range,
                 dto => dto.Range);
@@ -489,7 +488,7 @@ public class ReaderService : IReaderService
         var next = false;
         foreach (var volume in volumes)
         {
-            if (volume.Number == currentVolume.Number)
+            if (volume.MinNumber == currentVolume.MinNumber)
             {
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting).Reverse(),
                     currentChapter.Range, dto => dto.Range);
@@ -499,15 +498,15 @@ public class ReaderService : IReaderService
             }
             if (next)
             {
-                if (currentVolume.Number - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
+                if (currentVolume.MinNumber - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
                 var lastChapter = volume.Chapters.MaxBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting);
                 if (lastChapter == null) return -1;
                 return lastChapter.Id;
             }
         }
 
-        var lastVolume = volumes.MaxBy(v => v.Number);
-        if (currentVolume.Number == 0 && currentVolume.Number != lastVolume?.Number && lastVolume?.Chapters.Count > 1)
+        var lastVolume = volumes.MaxBy(v => v.MinNumber);
+        if (currentVolume.MinNumber == 0 && currentVolume.MinNumber != lastVolume?.MinNumber && lastVolume?.Chapters.Count > 1)
         {
             var lastChapter = lastVolume.Chapters.MaxBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting);
             if (lastChapter == null) return -1;
@@ -532,13 +531,29 @@ public class ReaderService : IReaderService
          if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
          {
              // I think i need a way to sort volumes last
-             return volumes.OrderBy(v => v.Number.ToString(CultureInfo.InvariantCulture).AsDouble(), _chapterSortComparer).First().Chapters
-                 .OrderBy(c => c.Number.AsFloat()).First();
+             var chapters = volumes.OrderBy(v => v.MinNumber, _chapterSortComparer).First().Chapters
+                 .OrderBy(c => c.Number.AsFloat())
+                 .ToList();
+
+             // If there are specials, then return the first Non-special
+             if (chapters.Exists(c => c.IsSpecial))
+             {
+                 var firstChapter = chapters.FirstOrDefault(c => !c.IsSpecial);
+                 if (firstChapter == null)
+                 {
+                     // If there is no non-special chapter, then return first chapter
+                     return chapters[0];
+                 }
+
+                 return firstChapter;
+             }
+             // Else use normal logic
+             return chapters[0];
          }
 
         // Loop through all chapters that are not in volume 0
         var volumeChapters = volumes
-            .Where(v => v.Number != 0)
+            .Where(v => v.MinNumber != 0)
             .SelectMany(v => v.Chapters)
             .ToList();
 
@@ -550,7 +565,7 @@ public class ReaderService : IReaderService
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default)
+        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, SortComparerZeroLast.Default)
                                              .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsDouble()))
                                              .ToList());
     }
@@ -619,7 +634,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.OrderBy(v => v.Number))
+        foreach (var volume in volumes.OrderBy(v => v.MinNumber))
         {
             var chapters = volume.Chapters
                 .Where(c => !c.IsSpecial && Parser.MaxNumberFromRange(c.Range) <= chapterNumber)
@@ -631,7 +646,7 @@ public class ReaderService : IReaderService
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.Where(v => v.Number <= volumeNumber && v.Number > 0).OrderBy(v => v.Number))
+        foreach (var volume in volumes.Where(v => v.MinNumber <= volumeNumber && v.MinNumber > 0).OrderBy(v => v.MinNumber))
         {
             await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
@@ -761,6 +776,7 @@ public class ReaderService : IReaderService
                 }
                 return "Issue" + (includeSpace ? " " : string.Empty);
             case LibraryType.Book:
+            case LibraryType.LightNovel:
                 return "Book" + (includeSpace ? " " : string.Empty);
             default:
                 throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);

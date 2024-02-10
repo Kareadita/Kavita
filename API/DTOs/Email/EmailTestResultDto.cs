@@ -7,4 +7,5 @@ public class EmailTestResultDto
 {
     public bool Successful { get; set; }
     public string ErrorMessage { get; set; } = default!;
+    public string EmailAddress { get; set; } = default!;
 }

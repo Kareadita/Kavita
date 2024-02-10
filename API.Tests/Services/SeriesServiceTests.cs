@@ -18,6 +18,7 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using API.Tests.Helpers;
+using EasyCaching.Core;
 using Hangfire;
 using Hangfire.InMemory;
 using Microsoft.Extensions.Caching.Memory;
@@ -1388,6 +1389,98 @@ public class SeriesServiceTests : AbstractDbTest
         await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
+    }
+
+    #endregion
+
+    #region DeleteMultipleSeries
+
+    [Fact]
+    public async Task DeleteMultipleSeries_ShouldDeleteSeries()
+    {
+        await ResetDb();
+        var lib1 = new LibraryBuilder("Test LIb")
+            .WithSeries(new SeriesBuilder("Test Series")
+                .WithMetadata(new SeriesMetadata()
+                {
+                    AgeRating = AgeRating.Everyone
+                })
+                .WithVolume(new VolumeBuilder("0")
+                    .WithChapter(new ChapterBuilder("1").WithFile(
+                        new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                            .WithPages(1)
+                            .Build()
+                    ).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Test Series Prequels").Build())
+            .WithSeries(new SeriesBuilder("Test Series Sequels").Build())
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .Build();
+        _context.Library.Add(lib1);
+
+        var lib2 = new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(new SeriesBuilder("Test Series 2").Build())
+            .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())
+            .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())// TODO: Is this a bug
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .Build();
+        _context.Library.Add(lib2);
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,
+            SeriesIncludes.Related | SeriesIncludes.ExternalRatings);
+        // Add relations
+        var addRelationDto = CreateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(4); // cross library link
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+
+
+        // Setup External Metadata stuff
+        series1.ExternalSeriesMetadata ??= new ExternalSeriesMetadata();
+        series1.ExternalSeriesMetadata.ExternalRatings = new List<ExternalRating>()
+        {
+            new ExternalRating()
+            {
+                SeriesId = 1,
+                Provider = ScrobbleProvider.Mal,
+                AverageScore = 1
+            }
+        };
+        series1.ExternalSeriesMetadata.ExternalRecommendations = new List<ExternalRecommendation>()
+        {
+            new ExternalRecommendation()
+            {
+                SeriesId = 2,
+                Name = "Series 2",
+                Url = "",
+                CoverUrl = ""
+            },
+            new ExternalRecommendation()
+            {
+                SeriesId = 0, // Causes a FK constraint
+                Name = "Series 2",
+                Url = "",
+                CoverUrl = ""
+            }
+        };
+        series1.ExternalSeriesMetadata.ExternalReviews = new List<ExternalReview>()
+        {
+            new ExternalReview()
+            {
+                Body = "",
+                Provider = ScrobbleProvider.Mal,
+                BodyJustText = ""
+            }
+        };
+
+        await _context.SaveChangesAsync();
+
+        // Ensure we can delete the series
+        Assert.True(await _seriesService.DeleteMultipleSeries(new[] {1, 2}));
+        Assert.Null(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1));
+        Assert.Null(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
     }
 
     #endregion

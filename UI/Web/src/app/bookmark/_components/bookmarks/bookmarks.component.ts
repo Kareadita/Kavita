@@ -9,11 +9,11 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs';
+import {take} from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { DownloadService } from 'src/app/shared/_services/download.service';
+import {DownloadService} from 'src/app/shared/_services/download.service';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -25,7 +25,6 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReaderService } from 'src/app/_services/reader.service';
-import { SeriesService } from 'src/app/_services/series.service';
 import {DecimalPipe, NgIf} from '@angular/common';
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
@@ -45,11 +44,25 @@ import {Title} from "@angular/platform-browser";
 })
 export class BookmarksComponent implements OnInit {
 
+  private readonly translocoService = inject(TranslocoService);
+  private readonly readerService = inject(ReaderService);
+  private readonly downloadService = inject(DownloadService);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly jumpbarService = inject(JumpbarService);
+  private readonly titleService = inject(Title);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly imageService = inject(ImageService);
+
   bookmarks: Array<PageBookmark> = [];
   series: Array<Series> = [];
   loadingBookmarks: boolean = false;
   seriesIds: {[id: number]: number} = {};
-  downloadingSeries: {[id: number]: boolean} = {};
   clearingSeries: {[id: number]: boolean} = {};
   actions: ActionItem<Series>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
@@ -64,16 +77,7 @@ export class BookmarksComponent implements OnInit {
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
 
-  private readonly translocoService = inject(TranslocoService);
-
-  constructor(private readerService: ReaderService,
-    private downloadService: DownloadService, private toastr: ToastrService,
-    private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService,
-    public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef,
-    private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
-    private jumpbarService: JumpbarService, private titleService: Title) {
-
+  constructor() {
       this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
         this.filter = filter;
 
@@ -160,8 +164,11 @@ export class BookmarksComponent implements OnInit {
     this.readerService.getAllBookmarks(this.filter).pipe(take(1)).subscribe(bookmarks => {
       this.bookmarks = bookmarks;
       this.bookmarks.forEach(bmk => {
-        this.downloadingSeries[bmk.seriesId] = false;
         this.clearingSeries[bmk.seriesId] = false;
+        if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
+          this.seriesIds[bmk.seriesId] = 0;
+        }
+        this.seriesIds[bmk.seriesId] += 1;
       });
 
       const distinctSeriesMap = new Map();
@@ -199,14 +206,7 @@ export class BookmarksComponent implements OnInit {
   }
 
   downloadBookmarks(series: Series) {
-    this.downloadingSeries[series.id] = true;
-    this.cdRef.markForCheck();
-    this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id), (d) => {
-      if (!d) {
-        this.downloadingSeries[series.id] = false;
-        this.cdRef.markForCheck();
-      }
-    });
+    this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id));
   }
 
   updateFilter(data: FilterEvent) {

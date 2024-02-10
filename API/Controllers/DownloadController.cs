@@ -103,7 +103,7 @@ public class DownloadController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series!.Name} - Volume {volume.Number}.zip");
+            return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series!.Name} - Volume {volume.Name}.zip");
         }
         catch (KavitaException ex)
         {
@@ -118,7 +118,7 @@ public class DownloadController : BaseApiController
         return await _accountService.HasDownloadPermission(user);
     }
 
-    private ActionResult GetFirstFileDownload(IEnumerable<MangaFile> files)
+    private PhysicalFileResult GetFirstFileDownload(IEnumerable<MangaFile> files)
     {
         var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
         return PhysicalFile(zipFile, contentType, Uri.EscapeDataString(fileDownloadName), true);
@@ -150,31 +150,40 @@ public class DownloadController : BaseApiController
 
     private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName)
     {
+        var username = User.GetUsername();
+        var filename = Path.GetFileNameWithoutExtension(downloadName);
         try
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.DownloadProgressEvent(User.GetUsername(),
-                    Path.GetFileNameWithoutExtension(downloadName), 0F, "started"));
+                MessageFactory.DownloadProgressEvent(username,
+                    filename, $"Downloading {filename}", 0F, "started"));
             if (files.Count == 1)
             {
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.DownloadProgressEvent(User.GetUsername(),
-                        Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
+                    MessageFactory.DownloadProgressEvent(username,
+                        filename, $"Downloading {filename}",1F, "ended"));
                 return GetFirstFileDownload(files);
             }
 
-            var filePath = _archiveService.CreateZipForDownload(files.Select(c => c.FilePath), tempFolder);
+            var filePath = _archiveService.CreateZipFromFoldersForDownload(files.Select(c => c.FilePath).ToList(), tempFolder, ProgressCallback);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.DownloadProgressEvent(User.GetUsername(),
-                    Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
+                MessageFactory.DownloadProgressEvent(username,
+                    filename, "Download Complete", 1F, "ended"));
             return PhysicalFile(filePath, DefaultContentType, Uri.EscapeDataString(downloadName), true);
+
+            async Task ProgressCallback(Tuple<string, float> progressInfo)
+            {
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.DownloadProgressEvent(username, filename, $"Extracting {Path.GetFileNameWithoutExtension(progressInfo.Item1)}",
+                        Math.Clamp(progressInfo.Item2, 0F, 1F)));
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when trying to download files");
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(),
-                    Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
+                    filename, "Download Complete", 1F, "ended"));
             throw;
         }
     }
@@ -216,15 +225,15 @@ public class DownloadController : BaseApiController
 
         var filename = $"{series!.Name} - Bookmarks.zip";
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), 0F));
+            MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}",0F));
         var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
         var filePath =  _archiveService.CreateZipForDownload(files,
             $"download_{userId}_{seriesIds}_bookmarks");
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), 1F));
+            MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}", 1F));
 
 
-        return PhysicalFile(filePath, DefaultContentType, System.Web.HttpUtility.UrlEncode(filename), true);
+        return PhysicalFile(filePath, DefaultContentType, Uri.EscapeDataString(filename), true);
     }
 
 }

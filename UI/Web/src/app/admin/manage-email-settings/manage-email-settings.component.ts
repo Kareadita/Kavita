@@ -1,14 +1,20 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {forkJoin, take} from 'rxjs';
-import {EmailTestResult, SettingsService} from '../settings.service';
+import {take} from 'rxjs';
+import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {NgIf, NgTemplateOutlet} from '@angular/common';
-import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
+import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {ServerService} from "../../_services/server.service";
+import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -16,39 +22,67 @@ import {ServerService} from "../../_services/server.service";
     styleUrls: ['./manage-email-settings.component.scss'],
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
+    ManageAlertsComponent, NgbAccordionBody, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionDirective,
+    NgbAccordionHeader, NgbAccordionItem, NgForOf, TitleCasePipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
-  serverSettings!: ServerSettings;
-  settingsForm: FormGroup = new FormGroup({});
-  link = '<a href="https://github.com/Kareadita/KavitaEmail" target="_blank" rel="noopener noreferrer">Kavita Email</a>';
-  emailVersion: string | null = null;
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly serverService = inject(ServerService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
 
-  constructor() { }
+  serverSettings!: ServerSettings;
+  settingsForm: FormGroup = new FormGroup({});
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
-      this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
-      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, []));
-      this.cdRef.markForCheck();
-    });
+      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
 
-    this.serverService.getEmailVersion().subscribe(version => {
-      this.emailVersion = version;
+      this.settingsForm.addControl('host', new FormControl(this.serverSettings.smtpConfig.host, []));
+      this.settingsForm.addControl('port', new FormControl(this.serverSettings.smtpConfig.port, []));
+      this.settingsForm.addControl('userName', new FormControl(this.serverSettings.smtpConfig.userName, []));
+      this.settingsForm.addControl('enableSsl', new FormControl(this.serverSettings.smtpConfig.enableSsl, []));
+      this.settingsForm.addControl('password', new FormControl(this.serverSettings.smtpConfig.password, []));
+      this.settingsForm.addControl('senderAddress', new FormControl(this.serverSettings.smtpConfig.senderAddress, []));
+      this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
+      this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
+      this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
+
       this.cdRef.markForCheck();
     });
   }
 
   resetForm() {
-    this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
     this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
+
+    this.settingsForm.addControl('host', new FormControl(this.serverSettings.smtpConfig.host, []));
+    this.settingsForm.addControl('port', new FormControl(this.serverSettings.smtpConfig.port, []));
+    this.settingsForm.addControl('userName', new FormControl(this.serverSettings.smtpConfig.userName, []));
+    this.settingsForm.addControl('enableSsl', new FormControl(this.serverSettings.smtpConfig.enableSsl, []));
+    this.settingsForm.addControl('password', new FormControl(this.serverSettings.smtpConfig.password, []));
+    this.settingsForm.addControl('senderAddress', new FormControl(this.serverSettings.smtpConfig.senderAddress, []));
+    this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
+    this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
+    this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
     this.settingsForm.markAsPristine();
+    this.cdRef.markForCheck();
+  }
+
+  autofillGmail() {
+    this.settingsForm.get('host')?.setValue('smtp.gmail.com');
+    this.settingsForm.get('port')?.setValue(587);
+    this.settingsForm.get('sizeLimit')?.setValue(26214400);
+    this.settingsForm.get('enableSsl')?.setValue(true);
+    this.cdRef.markForCheck();
+  }
+
+  autofillOutlook() {
+    this.settingsForm.get('host')?.setValue('smtp-mail.outlook.com');
+    this.settingsForm.get('port')?.setValue(587 );
+    this.settingsForm.get('sizeLimit')?.setValue(1048576);
+    this.settingsForm.get('enableSsl')?.setValue(true);
     this.cdRef.markForCheck();
   }
 
@@ -57,6 +91,15 @@ export class ManageEmailSettingsComponent implements OnInit {
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
     modelSettings.hostName = this.settingsForm.get('hostName')?.value;
 
+    modelSettings.smtpConfig.host = this.settingsForm.get('host')?.value;
+    modelSettings.smtpConfig.port = this.settingsForm.get('port')?.value;
+    modelSettings.smtpConfig.userName = this.settingsForm.get('userName')?.value;
+    modelSettings.smtpConfig.enableSsl = this.settingsForm.get('enableSsl')?.value;
+    modelSettings.smtpConfig.password = this.settingsForm.get('password')?.value;
+    modelSettings.smtpConfig.senderAddress = this.settingsForm.get('senderAddress')?.value;
+    modelSettings.smtpConfig.senderDisplayName = this.settingsForm.get('senderDisplayName')?.value;
+    modelSettings.smtpConfig.sizeLimit = this.settingsForm.get('sizeLimit')?.value;
+    modelSettings.smtpConfig.customizedTemplates = this.settingsForm.get('customizedTemplates')?.value;
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
@@ -77,32 +120,13 @@ export class ManageEmailSettingsComponent implements OnInit {
     });
   }
 
-  resetEmailServiceUrl() {
-    this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
-      this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
-      this.resetForm();
-      this.toastr.success(translate('toasts.email-service-reset'));
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
-  }
-
-  testEmailServiceUrl() {
-    if (this.settingsForm.get('emailServiceUrl')?.value === '') return;
-    forkJoin([this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value), this.serverService.getEmailVersion()])
-        .pipe(take(1)).subscribe(async (results) => {
-          const result = results[0] as EmailTestResult;
-      if (result.successful) {
-        const version = ('. Kavita Email: ' + results[1] ? 'v' + results[1] : '');
-        this.toastr.success(translate('toasts.email-service-reachable') + ' - ' +  version);
+  test() {
+    this.settingsService.testEmailServerSettings().subscribe(res => {
+      if (res.successful) {
+        this.toastr.success(translate('toasts.email-sent', {email: res.emailAddress}));
       } else {
-        this.toastr.error(translate('toasts.email-service-unresponsive') + result.errorMessage.split('(')[0]);
+        this.toastr.error(translate('toasts.email-not-sent-test'))
       }
-
-    }, (err: any) => {
-      console.error('error: ', err);
     });
-
   }
-
 }

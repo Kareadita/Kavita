@@ -18,8 +18,8 @@ public static class SeriesExtensions
     /// <remarks>This is under the assumption that the Volume already has a Cover Image calculated and set</remarks>
     public static string? GetCoverImage(this Series series)
     {
-        var volumes = (series.Volumes ?? new List<Volume>())
-            .OrderBy(v => v.Number, ChapterSortComparer.Default)
+        var volumes = (series.Volumes ?? [])
+            .OrderBy(v => v.MinNumber, ChapterSortComparer.Default)
             .ToList();
         var firstVolume = volumes.GetCoverImage(series.Format);
         if (firstVolume == null) return null;
@@ -34,20 +34,20 @@ public static class SeriesExtensions
         }
 
         // just volumes
-        if (volumes.TrueForAll(v => $"{v.Number}" != Parser.DefaultVolume))
+        if (volumes.TrueForAll(v => $"{v.MinNumber}" != Parser.DefaultVolume))
         {
             return firstVolume.CoverImage;
         }
         // If we have loose leaf chapters
 
         // if loose leaf chapters AND volumes, just return first volume
-        if (volumes.Count >= 1 && $"{volumes[0].Number}" != Parser.DefaultVolume)
+        if (volumes.Count >= 1 && $"{volumes[0].MinNumber}" != Parser.DefaultVolume)
         {
-            var looseLeafChapters = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
+            var looseLeafChapters = volumes.Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
                 .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
                 .ToList();
-            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].Number) > looseLeafChapters[0].Number.AsFloat())
+            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].MinNumber) > looseLeafChapters[0].Number.AsFloat())
             {
                 return looseLeafChapters[0].CoverImage;
             }
@@ -55,7 +55,7 @@ public static class SeriesExtensions
         }
 
         var firstLooseLeafChapter = volumes
-            .Where(v => $"{v.Number}" == Parser.DefaultVolume)
+            .Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
             .SelectMany(v => v.Chapters)
             .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
             .FirstOrDefault(c => !c.IsSpecial);

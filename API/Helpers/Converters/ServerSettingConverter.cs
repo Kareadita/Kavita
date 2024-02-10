@@ -23,11 +23,14 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.TaskScan:
                     destination.TaskScan = row.Value;
                     break;
-                case ServerSettingKey.LoggingLevel:
-                    destination.LoggingLevel = row.Value;
-                    break;
                 case ServerSettingKey.TaskBackup:
                     destination.TaskBackup = row.Value;
+                    break;
+                case ServerSettingKey.TaskCleanup:
+                    destination.TaskCleanup = row.Value;
+                    break;
+                case ServerSettingKey.LoggingLevel:
+                    destination.LoggingLevel = row.Value;
                     break;
                 case ServerSettingKey.Port:
                     destination.Port = int.Parse(row.Value);
@@ -46,9 +49,6 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.BookmarkDirectory:
                     destination.BookmarksDirectory = row.Value;
-                    break;
-                case ServerSettingKey.EmailServiceUrl:
-                    destination.EmailServiceUrl = row.Value;
                     break;
                 case ServerSettingKey.InstallVersion:
                     destination.InstallVersion = row.Value;
@@ -82,6 +82,45 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.CoverImageSize:
                     destination.CoverImageSize = Enum.Parse<CoverImageSize>(row.Value);
+                    break;
+                case ServerSettingKey.BackupDirectory:
+                    destination.BookmarksDirectory = row.Value;
+                    break;
+                case ServerSettingKey.EmailHost:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.Host = row.Value;
+                    break;
+                case ServerSettingKey.EmailPort:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.Port = string.IsNullOrEmpty(row.Value) ? 0 : int.Parse(row.Value);
+                    break;
+                case ServerSettingKey.EmailAuthPassword:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.Password = row.Value;
+                    break;
+                case ServerSettingKey.EmailAuthUserName:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.UserName = row.Value;
+                    break;
+                case ServerSettingKey.EmailSenderAddress:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.SenderAddress = row.Value;
+                    break;
+                case ServerSettingKey.EmailSenderDisplayName:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.SenderDisplayName = row.Value;
+                    break;
+                case ServerSettingKey.EmailEnableSsl:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.EnableSsl = bool.Parse(row.Value);
+                    break;
+                case ServerSettingKey.EmailSizeLimit:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.SizeLimit = int.Parse(row.Value);
+                    break;
+                case ServerSettingKey.EmailCustomizedTemplates:
+                    destination.SmtpConfig ??= new SmtpConfigDto();
+                    destination.SmtpConfig.CustomizedTemplates = bool.Parse(row.Value);
                     break;
             }
         }

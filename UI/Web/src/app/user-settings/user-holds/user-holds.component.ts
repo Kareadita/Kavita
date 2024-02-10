@@ -26,6 +26,4 @@ export class UserHoldsComponent {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly destroyRef = inject(DestroyRef);
   holds$ = this.scrobblingService.getHolds().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
-
-  constructor() {}
 }

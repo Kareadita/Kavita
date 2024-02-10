@@ -30,10 +30,9 @@
               <div class="row g-0">
                 <div class="mb-3" style="width: 100%">
                   <label for="sort-name" class="form-label">{{t('sort-name-label')}}</label>
-                  <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
-                       [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
+                  <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
-                    <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
                     <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
                       <div class="invalid-feedback" *ngIf="errors.required">
                         {{t('required-field')}}
@@ -461,6 +460,18 @@
       <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
+      @if (accountService.hasValidLicense$ | async) {
+        <button type="button" class="btn btn-light" (click)="forceScan()" position="above"
+                [ngbTooltip]="t('force-refresh-tooltip')">
+          @if (forceIsLoading) {
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">loading...</span>
+            </div>
+          } @else {
+            {{t('force-refresh')}}
+          }
+        </button>
+      }
       <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
       <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">{{t('save')}}</button>
     </div>

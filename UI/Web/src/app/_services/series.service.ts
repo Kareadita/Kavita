@@ -80,11 +80,11 @@ export class SeriesService {
   }
 
   delete(seriesId: number) {
-    return this.httpClient.delete<boolean>(this.baseUrl + 'series/' + seriesId);
+    return this.httpClient.delete<string>(this.baseUrl + 'series/' + seriesId, TextResonse).pipe(map(s => s === "true"));
   }
 
   deleteMultipleSeries(seriesIds: Array<number>) {
-    return this.httpClient.post<boolean>(this.baseUrl + 'series/delete-multiple', {seriesIds});
+    return this.httpClient.post<string>(this.baseUrl + 'series/delete-multiple', {seriesIds}, TextResonse).pipe(map(s => s === "true"));
   }
 
   updateRating(seriesId: number, userRating: number) {
@@ -209,14 +209,19 @@ export class SeriesService {
     return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
   }
 
-  getReviews(seriesId: number) {
-    return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'review?seriesId=' + seriesId);
-  }
 
+
+  deleteReview(seriesId: number) {
+    return this.httpClient.delete(this.baseUrl + 'review?seriesId=' + seriesId);
+  }
   updateReview(seriesId: number, body: string) {
     return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
       seriesId, body
     });
+  }
+
+  getReviews(seriesId: number) {
+    return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'review?seriesId=' + seriesId);
   }
 
   getRatings(seriesId: number) {

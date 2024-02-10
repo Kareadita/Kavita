@@ -43,6 +43,7 @@ public interface ILibraryRepository
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
+    Task<LibraryType> GetLibraryTypeBySeriesIdAsync(int seriesId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
@@ -54,6 +55,8 @@ public interface ILibraryRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<bool> GetAllowsScrobblingBySeriesId(int seriesId);
+
+    Task<IDictionary<int, LibraryType>> GetLibraryTypesBySeriesIdsAsync(IList<int> seriesIds);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -106,6 +109,7 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Library
             .Include(l => l.AppUsers)
             .Includes(includes)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -138,6 +142,14 @@ public class LibraryRepository : ILibraryRepository
             .Where(l => l.Id == libraryId)
             .AsNoTracking()
             .Select(l => l.Type)
+            .FirstAsync();
+    }
+
+    public async Task<LibraryType> GetLibraryTypeBySeriesIdAsync(int seriesId)
+    {
+        return await _context.Series
+            .Where(s => s.Id == seriesId)
+            .Select(s => s.Library.Type)
             .FirstAsync();
     }
 
@@ -340,5 +352,17 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Series.Where(s => s.Id == seriesId)
             .Select(s => s.Library.AllowScrobbling)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IDictionary<int, LibraryType>> GetLibraryTypesBySeriesIdsAsync(IList<int> seriesIds)
+    {
+        return await _context.Series
+            .Where(series => seriesIds.Contains(series.Id))
+            .Select(series => new
+            {
+                series.Id,
+                series.Library.Type
+            })
+            .ToDictionaryAsync(entity => entity.Id, entity => entity.Type);
     }
 }

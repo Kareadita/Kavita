@@ -283,7 +283,7 @@ public class StatsService : IStatsService
             .AsNoTracking()
             .AsSplitQuery()
             .MaxAsync(s => s.Volumes!
-                .Where(v => v.Number == 0)
+                .Where(v => v.MinNumber == 0)
                 .SelectMany(v => v.Chapters!)
                 .Count());
     }

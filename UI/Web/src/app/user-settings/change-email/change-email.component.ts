@@ -29,6 +29,7 @@ export class ChangeEmailComponent implements OnInit {
   emailLink: string = '';
   emailConfirmed: boolean = true;
   hasValidEmail: boolean = true;
+  canEdit: boolean = false;
 
 
   public get email() { return this.form.get('email'); }
@@ -38,8 +39,9 @@ export class ChangeEmailComponent implements OnInit {
   constructor(public accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
       this.user = user;
+      this.canEdit = !this.accountService.hasReadOnlyRole(user!);
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.form.addControl('password', new FormControl('', [Validators.required]));
       this.cdRef.markForCheck();
@@ -74,7 +76,13 @@ export class ChangeEmailComponent implements OnInit {
       if (updateEmailResponse.emailSent) {
         this.toastr.success(translate('toasts.email-sent-to'));
       } else {
-        this.toastr.success(translate('toasts.change-email-private'));
+        this.toastr.success(translate('toasts.change-email-no-email'));
+        this.accountService.refreshAccount().subscribe(user => {
+          this.user = user;
+          this.form.get('email')?.setValue(this.user?.email);
+          this.cdRef.markForCheck();
+        });
+
       }
 
       this.isViewMode = true;

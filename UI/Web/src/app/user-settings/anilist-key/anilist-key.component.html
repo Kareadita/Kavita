@@ -3,7 +3,18 @@
     <div class="card-body">
       <div class="card-title">
         <div class="container-fluid row mb-2">
-          <div class="col-10 col-sm-11"><h4 id="anilist-token-header">{{t('title')}}</h4></div>
+          <div class="col-10 col-sm-11">
+            <h4 id="anilist-token-header">{{t('title')}}
+              @if(!tokenExpired) {
+                <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('token-valid')"></i>
+                <span class="visually-hidden">{{t('token-valid')}}</span>
+              } @else {
+                <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('token-expired')"></i>
+                <span class="visually-hidden">{{t('token-expired')}}</span>
+              }
+            </h4>
+
+          </div>
           <div class="col-1 text-end">
             <button class="btn btn-primary btn-sm" [disabled]="!hasValidLicense" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
           </div>

@@ -13,7 +13,7 @@
     <strong>Scroll Top:</strong> {{getScrollTop()}}
   </div>
 
-  <div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+  <div *ngIf="atTop" #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
     <div style="height: 200px"></div>
     <div>
       <button class="btn btn-icon mx-auto">
@@ -27,14 +27,15 @@
     </div>
   </div>
 
-  <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-    <img src="{{item.src}}" style="display: block"
-         class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}} {{initFinished ? '' : 'full-opacity'}}"
-         *ngIf="item.page >= pageNum - bufferPages && item.page <= pageNum + bufferPages" rel="nofollow" alt="image"
-         (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
-  </ng-container>
+  <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
+    <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
+      <img src="{{item.src}}" style="display: block"
+           class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
+           rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+    </ng-container>
+  </div>
 
-  <div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
+  <div #bottomSpacer class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
     <div>
       <button class="btn btn-icon mx-auto">
         <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>

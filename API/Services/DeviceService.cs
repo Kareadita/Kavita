@@ -107,6 +107,10 @@ public class DeviceService : IDeviceService
 
     public async Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId)
     {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!settings.IsEmailSetup())
+            throw new KavitaException("send-to-kavita-email");
+
         var device = await _unitOfWork.DeviceRepository.GetDeviceById(deviceId);
         if (device == null) throw new KavitaException("device-doesnt-exist");
 
@@ -114,10 +118,15 @@ public class DeviceService : IDeviceService
         if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)) && device.Platform == DevicePlatform.Kindle)
             throw new KavitaException("send-to-permission");
 
+        // If the size of the files is too big
+        if (files.Sum(f => f.Bytes) >= settings.SmtpConfig.SizeLimit)
+            throw new KavitaException("send-to-size-limit");
+
 
         device.UpdateLastUsed();
         _unitOfWork.DeviceRepository.Update(device);
         await _unitOfWork.CommitAsync();
+
         var success = await _emailService.SendFilesToEmail(new SendToDto()
         {
             DestinationEmail = device.EmailAddress!,

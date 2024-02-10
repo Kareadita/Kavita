@@ -16,11 +16,7 @@ public static class EasyCacheProfiles
     /// </summary>
     public const string Library = "library";
     /// <summary>
-    /// Metadata filter
+    /// External Series metadata for Kavita+ recommendation
     /// </summary>
-    public const string Filter = "filter";
-    public const string KavitaPlusReviews = "kavita+reviews";
-    public const string KavitaPlusRecommendations = "kavita+recommendations";
-    public const string KavitaPlusRatings = "kavita+ratings";
     public const string KavitaPlusExternalSeries = "kavita+externalSeries";
 }

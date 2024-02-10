@@ -60,7 +60,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "A análise deve ter pelo menos {{count}} caracteres",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -193,7 +194,8 @@
         "email-label": "Email: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "email-setup-alert": "Quer enviar arquivos para seus dispositivos? Peça ao seu administrador que configure as configurações de e-mail primeiro!"
     },
     "edit-device": {
         "device-name-label": "Nome do Dispositivo",
@@ -218,7 +220,7 @@
         "permission-error": "Você não tem permissão para alterar sua senha. Entre em contato com o administrador do servidor."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "Novo Email",
         "current-password-label": "Senha Atual",
         "email-not-confirmed": "Este e-mail não está confirmado",
         "email-updated-title": "E-mail atualizado",
@@ -233,7 +235,9 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Parece que você não tem um conjunto de e-mail válido. A alteração do e-mail exigirá que o administrador lhe envie um link para concluir esta ação.",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "email-confirmed": "Este e-mail está confirmado",
+        "email-title": "Email"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrição de Etária",
@@ -263,7 +267,8 @@
         "token-input-label": "{{service}} token vai aqui",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "Token Válido"
     },
     "typeahead": {
         "locked-field": "O campo está bloqueado",
@@ -486,12 +491,13 @@
         "published-label": "Publicado: ",
         "available": "Disponível",
         "description": "se você não vir um {{installed}}",
-        "description-continued": "tag, você está em um lançamento nightly . Somente as versões principais serão exibidas como disponíveis."
+        "description-continued": "tag, você está em um lançamento nightly . Somente as versões principais serão exibidas como disponíveis.",
+        "nightly": "Versão Experimental: {{version}}"
     },
     "invite-user": {
         "title": "Convidar Usuário",
         "close": "{{common.close}}",
-        "description": "Convide um usuário para o seu servidor digitando o email dele. Eles receberão um e-mail para criar uma conta. Para que isso funcione você deve ter o campo Host Name definido no <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> ou acesse sua instância por meio de sua URL remoto. <br/><br/>Como alternativa, você pode usar um nome de usuário, mas observe que as redefinições de senha não estarão disponíveis para contas baseadas em nome de usuário. Se não quiser usar nosso serviço de e-mail, você pode hospedar seu próprio serviço de e-mail.",
+        "description": "Convide um usuário para o seu servidor digitando o email dele. Eles receberão um e-mail para criar uma conta. Para que isso funcione, você deve ter os campos de configuração Nome do host e Email definidos na aba he <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> , caso contrário, um link será apresentado para você configurar em nome do usuário. <br/><br/>O e-mail não precisa ser válido.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Usuário Convidado",
@@ -530,9 +536,11 @@
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
         "activate-save": "{{common.save}}",
-        "activate-discordId-label": "ID de usuário do Discord",
+        "activate-discordId-label": "ID de Usuário do Discord",
         "activate-reset": "{{common.reset}}",
-        "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para ajudar a moldar Kavita"
+        "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para moldar Kavita.",
+        "discord-validation": "Este não é um ID de usuário válido do Discord. Seu ID de usuário não é seu nome de usuário discord.",
+        "activate-reset-tooltip": "Desvincule sua licença com este servidor. Requer licença e e-mail."
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -658,7 +666,8 @@
         "publishers-title": "Editoras",
         "promoted": "{{common.promoted}}",
         "see-more": "Veja Mais",
-        "see-less": "Veja Menos"
+        "see-less": "Veja Menos",
+        "rating-title": "Avaliações"
     },
     "badge-expander": {
         "more-items": "e {{count}} mais"
@@ -944,8 +953,8 @@
     },
     "manage-email-settings": {
         "title": "Serviço de E-Mail (SMTP)",
-        "description": "Kavita vem de fábrica com um serviço de e-mail para executar tarefas como convidar usuários, redefinir senhas, etc. Os e-mails enviados por meio de nosso serviço são excluídos imediatamente. Você pode usar seu próprio serviço de e-mail configurando o serviço {{link}}  . Defina a URL do serviço de e-mail e use o botão Testar para garantir que funcione. Você pode redefinir essas configurações para o padrão a qualquer momento. Não há como desabilitar e-mails para autenticação, embora você não seja obrigado a usar um endereço de e-mail válido para os usuários. Os links de confirmação sempre serão salvos nos logs e apresentados na interface do usuário. Os e-mails de registro/confirmação não serão enviados se você não estiver acessando o Kavita por meio de um URL publicamente acessível ou a menos que o recurso Nome do host esteja configurado.",
-        "send-to-warning": "se você deseja que o Enviar para Dispositivo funcione, você deve hospedar seu próprio serviço de e-mail.",
+        "description": "Para usar algumas funções do Kavita, como Esqueci a senha e Enviar para o dispositivo, um provedor de e-mail deve ser configurado. Outros recursos, como alteração de senha, são menos seguros sem configuração de e-mail.",
+        "send-to-warning": "se quiser que Enviar para dispositivo funcione, você deve definir suas configurações de e-mail",
         "email-url-label": "URL do Serviço de E-Mail",
         "email-url-tooltip": "Use URL totalmente qualificado do serviço de e-mail. Não inclua a barra final.",
         "reset": "{{common.reset}}",
@@ -954,7 +963,25 @@
         "host-name-tooltip": "Nome de Domínio (de Proxy Reverso). Se definido, a geração de email sempre usará isso.",
         "host-name-validation": "O nome do host deve começar com http(s) e não terminar com /",
         "reset-to-default": "{{common.reset-to-default}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-settings-title": "Configurações de E-mail",
+        "sender-address-label": "Endereço do Remetente",
+        "sender-displayname-label": "Nome de Exibição",
+        "host-label": "Host",
+        "port-label": "Porta",
+        "username-label": "Nome de usuário",
+        "password-label": "Senha",
+        "enable-ssl-label": "Usar SSL no servidor de e-mail",
+        "size-limit-label": "Limite de Tamanho",
+        "customized-templates-label": "Modelos Personalizados",
+        "size-limit-tooltip": "Quantos bytes o servidor de e-mail pode manipular para anexos",
+        "customized-templates-tooltip": "Kavita deve usar o diretório config/templates para modelos em vez do padrão? Você é responsável por se manter atualizado com as alterações do modelo.",
+        "sender-address-tooltip": "Este é o endereço de e-mail que o destinatário verá quando receber o e-mail. Normalmente, o endereço de e-mail associado à conta.",
+        "sender-displayname-tooltip": "O nome que o destinatário verá quando receber o e-mail",
+        "host-tooltip": "Endereço de saída/SMTP do seu servidor de e-mail",
+        "username-tooltip": "O nome de usuário usado para autenticação no host",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "manage-library": {
         "title": "Bibliotecas",
@@ -1045,7 +1072,10 @@
         "max-backup-validation": "Você não pode ter mais de {{num}} backups",
         "min-backup-validation": "Você deve ter pelo menos 1 backup",
         "ip-address-validation": "Endereços IP só podem conter endereços IPv4 ou IPv6 válidos",
-        "base-url-validation": "O URL base deve começar e terminar com /"
+        "base-url-validation": "O URL base deve começar e terminar com /",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}"
     },
     "manage-system": {
         "title": "Sobre o Sistema",
@@ -1057,14 +1087,16 @@
         "discord-title": "Discord:",
         "donations-title": "Doações:",
         "source-title": "Fonte:",
-        "feature-request-title": "Pedidos de Recursos"
+        "feature-request-title": "Solicitações de recursos:",
+        "localization-title": "Localizações:",
+        "updates-title": "Histórico de Atualizações"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
         "library-scan-label": "Escanear Biblioteca",
         "library-scan-tooltip": "Com que frequência o Kavita verificará e atualizará os metadados nos arquivos da biblioteca.",
-        "library-database-backup-label": "Backup do Banco de Dados da Biblioteca",
-        "library-database-backup-tooltip": "Com que frequência o Kavita fará backup do banco de dados.",
+        "library-database-backup-label": "Backup Kavita",
+        "library-database-backup-tooltip": "Com que frequência o Kavita fará backup do banco de dados e de outros arquivos relacionados.",
         "adhoc-tasks-title": "Tarefas Ad-hocs",
         "job-title-header": "Título da Tarefa",
         "description-header": "Descrição",
@@ -1099,7 +1131,16 @@
         "bust-cache-task-success": "Kavita+ Cache eliminado",
         "bust-cache-task": "Eliminar Cache",
         "bust-locale-task": "Eliminar Cache Local",
-        "cron-header": "Cron"
+        "cron-header": "Cron",
+        "cleanup-label": "Limpeza",
+        "cleanup-tooltip": "Com que frequência o Kavita executará tarefas de limpeza. Isso pode ser pesado e deve ser realizado à meia-noite na maioria dos casos",
+        "required": "{{validation.required-field}}",
+        "disabled": "Desabilitado",
+        "daily": "Diário",
+        "custom-label": "Personalizar Agenda (Notação Cron)",
+        "cron-notation": "Esta não é uma notação Cron válida",
+        "weekly": "Semanal",
+        "custom": "Personalizado"
     },
     "manage-users": {
         "title": "Usuários Ativos",
@@ -1126,7 +1167,8 @@
         "sharing-title": "Compartilhando:",
         "no-data": "Não há outros usuários.",
         "loading": "{{common.loading}}",
-        "username-pattern": "O nome de usuário só pode conter os seguintes caracteres e espaços em branco: {{characters}}"
+        "username-pattern": "O nome de usuário só pode conter os seguintes caracteres e espaços em branco: {{characters}}",
+        "admin": "Admin"
     },
     "edit-collection-tags": {
         "title": "Editar {{collectionName}} Coleção",
@@ -1173,7 +1215,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+ é um serviço de assinatura premium que desbloqueia recursos para todos os usuários nesta instância Kavita. Compre uma assinatura para desbloquear ",
         "kavita+-desc-part-2": "benefícios premium",
-        "kavita+-desc-part-3": "hoje!"
+        "kavita+-desc-part-3": "hoje!",
+        "kavita+-requirement": "Kavita+ foi projetado para funcionar apenas com a versão mais recente – 2 versões. Qualquer coisa fora disso está sujeita a não funcionar.",
+        "kavita+-releases": "Ver lançamentos"
     },
     "collection-detail": {
         "no-data": "Não há itens. Tente adicionar uma série.",
@@ -1408,7 +1452,8 @@
         "last-chapter-added": "Item Adicionado",
         "time-to-read": "Tempo para Ler",
         "release-year": "Ano de Lançamento",
-        "read-progress": "Última Leitura"
+        "read-progress": "Última Leitura",
+        "average-rating": "Avaliação Média"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -1468,7 +1513,9 @@
         "chapter-title": "Capítulo:",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Número mais alto encontrado em todos os ComicInfo da Série",
-        "max-issue-tooltip": "Campo Máx. de Número ou Volume de todos ComicInfo nas Séries"
+        "max-issue-tooltip": "Campo Máx. de Número ou Volume de todos ComicInfo nas Séries",
+        "force-refresh": "Forçar Atualização",
+        "force-refresh-tooltip": "Forçar a atualização de metadados externos do Kavita+"
     },
     "day-breakdown": {
         "x-axis-label": "Dia da Semana",
@@ -1624,7 +1671,6 @@
         "age-restriction-updated": "Classificação etária foi atualizada",
         "email-sent-to-no-existing": "O e-mail existente não é válido. Um link foi despejado nos logs. Peça ao administrador o link para concluir a alteração do e-mail.",
         "email-sent-to": "Um e-mail foi enviado para seu endereço de e-mail antigo para confirmação.",
-        "change-email-private": "O servidor não é acessível publicamente. Peça ao administrador para buscar seu link de confirmação nos registros",
         "device-updated": "Dispositivo atualizado",
         "device-created": "Dispositivo criado",
         "confirm-regen-covers": "Atualizar capas forçará o recalculo de todas as imagens de capa. Esta é uma operação pesada. Tem certeza de que não deseja executar uma verificação?",
@@ -1642,7 +1688,15 @@
         "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API",
         "k+-reset-key": "Isso desvinculará sua chave de um servidor e permitirá que você registre novamente uma instância Kavita.",
         "k+-reset-key-success": "Sua licença foi cancelada. Use o botão Editar para registrar novamente sua instância e reativar o Kavita+",
-        "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo."
+        "email-not-sent": "O e-mail registrado não é um e-mail válido e não pode ser enviado. Um link foi despejado nos logs. O administrador pode fornecer este link para concluir o fluxo.",
+        "anilist-token-expired": "Seu token AniList expirou. O scrobbling não será mais processado até que você o gere novamente nas Configurações do Usuário > Conta",
+        "email-not-sent-test": "Houve uma exceção ao enviar o e-mail. Verifique os registros para obter detalhes. Isso indica configurações inadequadas.",
+        "change-email-no-email": "O e-mail foi atualizado",
+        "delete-device": "Tem certeza de que deseja excluir este dispositivo?",
+        "review-deleted": "Análise excluída",
+        "delete-review": "Tem certeza de que deseja excluir sua análise?",
+        "collection-tag-deleted": "Etiqueta de coleção excluída",
+        "force-kavita+-refresh-success": "Os metadados externos do Kavita+ foram invalidados"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1782,7 +1836,8 @@
         "path": "Caminho",
         "file-path": "Caminho de Arquivo",
         "read-date": "Data de Leitura",
-        "want-to-read": "Quero Ler"
+        "want-to-read": "Quero Ler",
+        "average-rating": "Avaliação Média"
     },
     "filter-comparison-pipe": {
         "begins-with": "Começa com",
@@ -1830,7 +1885,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",
-        "unit-reading-date": "Data"
+        "unit-reading-date": "Data",
+        "unit-average-rating": "Avaliação média (Kavita+) – apenas para séries em cache"
     },
     "manage-external-sources": {
         "description": "Melhore a sua experiência adicionando servidores externos e inclua-os convenientemente no seu Navegador Lateral para acesso rápido ao seu servidor e ao servidor do seu amigo.",
@@ -1912,5 +1968,13 @@
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}",
+        "description-1": "Considere atualizar para executar a versão mais recente do Kavita.",
+        "description-2": "Dê uma olhada em nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obter instruções sobre como atualizar.",
+        "title": "Não fique para trás!",
+        "subtitle": "Parece que sua instalação está mais de {{count}} versões atrasada!",
+        "description-3": "Se houver um motivo específico para você ainda não ter atualizado, adoraríamos saber o que o mantém em uma versão desatualizada! Visite nosso discord e conte-nos o que está bloqueando seu caminho de atualização."
     }
 }

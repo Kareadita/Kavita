@@ -8,14 +8,24 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
 {
     public int Id { get; set; }
     /// <summary>
-    /// A String representation of the volume number. Allows for floats.
+    /// A String representation of the volume number. Allows for floats. Can also include a range (1-2).
     /// </summary>
     /// <remarks>For Books with Series_index, this will map to the Series Index.</remarks>
     public required string Name { get; set; }
     /// <summary>
     /// The minimum number in the Name field in Int form
     /// </summary>
-    public required int Number { get; set; }
+    /// <remarks>Removed in v0.7.13.8, this was an int and we need the ability to have 0.5 volumes render on the UI</remarks>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
+    public int Number { get; set; }
+    /// <summary>
+    /// The minimum number in the Name field
+    /// </summary>
+    public required float MinNumber { get; set; }
+    /// <summary>
+    /// The maximum number in the Name field (same as Minimum if Name isn't a range)
+    /// </summary>
+    public required float MaxNumber { get; set; }
     public IList<Chapter> Chapters { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }

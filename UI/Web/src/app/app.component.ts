@@ -1,17 +1,20 @@
 import {ChangeDetectorRef, Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
-import {map, shareReplay, take} from 'rxjs/operators';
+import {map, shareReplay, take, tap} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import { Observable } from 'rxjs';
+import {interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ServerService} from "./_services/server.service";
+import {ImportCblModalComponent} from "./reading-list/_modals/import-cbl-modal/import-cbl-modal.component";
+import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 
 @Component({
     selector: 'app-root',
@@ -28,6 +31,7 @@ export class AppComponent implements OnInit {
   private readonly offcanvas = inject(NgbOffcanvas);
   public readonly navService = inject(NavService);
   public readonly cdRef = inject(ChangeDetectorRef);
+  public readonly serverService = inject(ServerService);
 
   constructor(private accountService: AccountService,
     private libraryService: LibraryService,
@@ -66,7 +70,11 @@ export class AppComponent implements OnInit {
       });
 
 
-    this.transitionState$ = this.accountService.currentUser$.pipe(map((user) => {
+    this.transitionState$ = this.accountService.currentUser$.pipe(
+      tap(user => {
+
+      }),
+      map((user) => {
       if (!user) return false;
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
@@ -93,6 +101,26 @@ export class AppComponent implements OnInit {
       // Bootstrap anything that's needed
       this.themeService.getThemes().subscribe();
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
+      // On load, make an initial call for valid license
+      this.accountService.hasValidLicense().subscribe();
+
+      // Every hour, have the UI check for an update. People seriously stay out of date
+      interval(2* 60 * 60 * 1000) // 2 hours in milliseconds
+        .pipe(
+          switchMap(() => this.accountService.currentUser$),
+          filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
+          switchMap(_ => this.serverService.checkHowOutOfDate()),
+          filter(versionOutOfDate => {
+            return !isNaN(versionOutOfDate) && versionOutOfDate > 2;
+          }),
+          tap(versionOutOfDate => {
+            if (!this.ngbModal.hasOpenModals()) {
+              const ref = this.ngbModal.open(OutOfDateModalComponent, {size: 'xl', fullscreen: 'md'});
+              ref.componentInstance.versionsOutOfDate = 3;
+            }
+          })
+        )
+        .subscribe();
     }
   }
 }

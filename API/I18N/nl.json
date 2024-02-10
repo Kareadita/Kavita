@@ -156,5 +156,8 @@
     "chapter-num": "Hoofdstuk {0}",
     "generic-scrobble-hold": "Er is een fout opgetreden bij het toevoegen van de bewaarplicht",
     "on-deck": "Aan het lezen",
-    "browse-on-deck": "Aan Het Lezen doorbladeren"
+    "browse-on-deck": "Aan Het Lezen doorbladeren",
+    "email-not-enabled": "Email is niet aangezet op deze server. Je kan deze actie niet uitvoeren.",
+    "collection-deleted": "Collectie verwijderd",
+    "invalid-email": "De email op het bestand van de gebruiker is geen geldige email. Bekijk het lognoek voor mogelijke weblinks."
 }

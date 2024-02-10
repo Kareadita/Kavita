@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Constants;
+using API.Controllers;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -19,6 +21,7 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -68,7 +71,6 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
-
     }
 
     /// <summary>
@@ -92,7 +94,7 @@ public class SeriesService : ISeriesService
             .FirstOrDefault();
 
         if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.Number || chapNum == 0))
+            (chapNum >= minVolumeNumber.MinNumber || chapNum == 0))
         {
             return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
@@ -100,6 +102,11 @@ public class SeriesService : ISeriesService
         return minChapter;
     }
 
+    /// <summary>
+    /// Updates the Series Metadata.
+    /// </summary>
+    /// <param name="updateSeriesMetadataDto"></param>
+    /// <returns></returns>
     public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
         try
@@ -299,13 +306,11 @@ public class SeriesService : ISeriesService
                 _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
             }
 
-
             if (updateSeriesMetadataDto.CollectionTags == null) return true;
             foreach (var tag in updateSeriesMetadataDto.CollectionTags)
             {
                 await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
-                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
-                        updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
+                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id, seriesId), false);
             }
             return true;
         }
@@ -422,6 +427,9 @@ public class SeriesService : ISeriesService
             }
 
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
+
+            _unitOfWork.SeriesRepository.Remove(series);
+
             var libraryIds = series.Select(s => s.LibraryId);
             var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
             foreach (var library in libraries)
@@ -429,11 +437,8 @@ public class SeriesService : ISeriesService
                 library.UpdateLastModified();
                 _unitOfWork.LibraryRepository.Update(library);
             }
+            await _unitOfWork.CommitAsync();
 
-            _unitOfWork.SeriesRepository.Remove(series);
-
-
-            if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync()) return true;
 
             foreach (var s in series)
             {
@@ -444,14 +449,13 @@ public class SeriesService : ISeriesService
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
             await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
             _taskScheduler.CleanupChapters(allChapterIds.ToArray());
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an issue when trying to delete multiple series");
             return false;
         }
-
-        return true;
     }
 
     /// <summary>
@@ -484,7 +488,7 @@ public class SeriesService : ISeriesService
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
-        if (libraryType == LibraryType.Book)
+        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             foreach (var volume in volumes)
@@ -501,7 +505,7 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            processedVolumes = volumes.Where(v => v.Number > 0).ToList();
+            processedVolumes = volumes.Where(v => v.MinNumber > 0).ToList();
             processedVolumes.ForEach(v =>
             {
                 v.Name = $"Volume {v.Name}";
@@ -512,7 +516,7 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            if (v.Number == 0) return c;
+            if (v.MinNumber == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
         }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
@@ -528,7 +532,7 @@ public class SeriesService : ISeriesService
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;
-        if (libraryType == LibraryType.Book)
+        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             retChapters = Array.Empty<ChapterDto>();
         } else
@@ -538,7 +542,7 @@ public class SeriesService : ISeriesService
         }
 
         var storylineChapters = volumes
-            .Where(v => v.Number == 0)
+            .Where(v => v.MinNumber == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
             .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
             .ToList();
@@ -571,7 +575,7 @@ public class SeriesService : ISeriesService
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
-        if (libraryType == LibraryType.Book)
+        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
@@ -582,6 +586,7 @@ public class SeriesService : ISeriesService
             }
             else if (volume.Name != "0")
             {
+                // If the titleName has Volume inside it, let's just send that back?
                 volume.Name += $" - {firstChapter.TitleName}";
             }
             // else
@@ -609,6 +614,7 @@ public class SeriesService : ISeriesService
         return libraryType switch
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
+            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterTitle),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
@@ -631,6 +637,7 @@ public class SeriesService : ISeriesService
         return (libraryType switch
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
+            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", string.Empty),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
@@ -718,7 +725,8 @@ public class SeriesService : ISeriesService
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
         }
-        if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) || series.Library.Type == LibraryType.Book)
+        if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) ||
+            (series.Library.Type is LibraryType.Book or LibraryType.LightNovel))
         {
             return _emptyExpectedChapter;
         }
@@ -779,7 +787,7 @@ public class SeriesService : ISeriesService
         float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var lastChapterNumber);
 
-        var lastVolumeNum = chapters.Select(c => c.Volume.Number).Max();
+        var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
 
         var result = new NextExpectedChapterDto
         {
@@ -792,12 +800,13 @@ public class SeriesService : ISeriesService
         if (lastChapterNumber > 0)
         {
             result.ChapterNumber = (int) Math.Truncate(lastChapterNumber) + 1;
-            result.VolumeNumber = lastChapter.Volume.Number;
+            result.VolumeNumber = lastChapter.Volume.MinNumber;
             result.Title = series.Library.Type switch
             {
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
                 LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", "#", result.ChapterNumber),
                 LibraryType.Book => await _localizationService.Translate(userId, "book-num", result.ChapterNumber),
+                LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", result.ChapterNumber),
                 _ => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber)
             };
         }

@@ -6,6 +6,8 @@ import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {TextResonse} from "../_types/text-response";
 import {DashboardStream} from "../_models/dashboard/dashboard-stream";
+import {AccountService} from "./account.service";
+import {tap} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -34,9 +36,16 @@ export class NavService {
   private renderer: Renderer2;
   baseUrl = environment.apiUrl;
 
-  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient) {
+  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient, private accountService: AccountService) {
     this.renderer = rendererFactory.createRenderer(null, null);
-    this.showNavBar();
+
+    // To avoid flashing, let's check if we are authenticated before we show
+    this.accountService.currentUser$.pipe(take(1)).subscribe(u => {
+      if (u) {
+        this.showNavBar();
+      }
+    });
+
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
     this.showSideNav();

@@ -8,6 +8,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface IAppUserSmartFilterRepository
 {
@@ -55,6 +56,7 @@ public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
 
     public async Task<AppUserSmartFilter?> GetById(int smartFilterId)
     {
-        return await _context.AppUserSmartFilter.FirstOrDefaultAsync(d => d.Id == smartFilterId);
+        return await _context.AppUserSmartFilter
+            .FirstOrDefaultAsync(d => d.Id == smartFilterId);
     }
 }

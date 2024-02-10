@@ -87,6 +87,27 @@ public class Program
                     }
                 }
 
+                // Apply Before manual migrations that need to run before actual migrations
+                try
+                {
+                    Task.Run(async () =>
+                        {
+                            // Apply all migrations on startup
+                            logger.LogInformation("Running Migrations");
+
+                            // v0.7.14
+                            await MigrateWantToReadExport.Migrate(context, directoryService, logger);
+
+                            await unitOfWork.CommitAsync();
+                            logger.LogInformation("Running Migrations - complete");
+                        }).GetAwaiter()
+                        .GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogCritical(ex, "An error occurred during migration");
+                }
+
                 await context.Database.MigrateAsync();
 
 

@@ -35,6 +35,7 @@
           </ng-container>
           <ng-container *ngIf="tab.fragment === TabID.KavitaPlus">
             <p>{{t('kavita+-desc-part-1')}} <a href="https://wiki.kavitareader.com/en/kavita-plus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a href="https://wiki.kavitareader.com/en/kavita-plus#faq" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
+            <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
             <app-license></app-license>
           </ng-container>
         </ng-template>

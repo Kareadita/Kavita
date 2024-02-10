@@ -157,6 +157,9 @@ export class SideNavComponent implements OnInit {
       case (Action.AnalyzeFiles):
         await this.actionService.analyzeFiles(library);
         break;
+      case (Action.Delete):
+        await this.actionService.deleteLibrary(library);
+        break;
       case (Action.Edit):
         this.actionService.editLibrary(library, () => window.scrollTo(0, 0));
         break;
@@ -182,6 +185,7 @@ export class SideNavComponent implements OnInit {
   getLibraryTypeIcon(format: LibraryType) {
     switch (format) {
       case LibraryType.Book:
+      case LibraryType.LightNovel:
         return 'fa-book';
       case LibraryType.Comic:
       case LibraryType.Manga:

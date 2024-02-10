@@ -1,77 +1,107 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using API.Data;
 using API.DTOs.Email;
-using API.Entities.Enums;
-using Flurl;
-using Flurl.Http;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
-using Kavita.Common.Helpers;
+using MailKit.Security;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 
 namespace API.Services;
 #nullable enable
 
+internal class EmailOptionsDto
+{
+    public required IList<string> ToEmails { get; set; }
+    public required string Subject { get; set; }
+    public required string Body { get; set; }
+    public required string Preheader { get; set; }
+    public IList<KeyValuePair<string, string>>? PlaceHolders { get; set; }
+    /// <summary>
+    /// Filenames to attach
+    /// </summary>
+    public IList<string>? Attachments { get; set; }
+}
+
 public interface IEmailService
 {
-    Task SendConfirmationEmail(ConfirmationEmailDto data);
+    Task SendInviteEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
-    Task<bool> SendMigrationEmail(EmailMigrationDto data);
-    Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
+    Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto);
     Task<bool> SendFilesToEmail(SendToDto data);
-    Task<EmailTestResultDto> TestConnectivity(string emailUrl, string adminEmail, bool sendEmail);
-    Task<bool> IsDefaultEmailService();
+    Task<EmailTestResultDto> SendTestEmail(string adminEmail);
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
-    Task<string?> GetVersion(string emailUrl);
     bool IsValidEmail(string email);
+
+    Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email,
+        bool withHost = true);
 }
 
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IDownloadService _downloadService;
+    private readonly IDirectoryService _directoryService;
+    private readonly IHostEnvironment _environment;
 
-    /// <summary>
-    /// This is used to initially set or reset the ServerSettingKey. Do not access from the code, access via UnitOfWork
-    /// </summary>
-    public const string DefaultApiUrl = "https://email.kavitareader.com";
+    private const string TemplatePath = @"{0}.html";
+    private const string LocalHost = "localhost:4200";
 
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDownloadService downloadService)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IHostEnvironment environment)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _downloadService = downloadService;
-
-
-        FlurlHttp.ConfigureClient(DefaultApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        _directoryService = directoryService;
+        _environment = environment;
     }
 
     /// <summary>
-    /// Test if this instance is accessible outside the network
+    /// Test if the email settings are working. Rejects if user email isn't valid or not all data is setup in server settings.
     /// </summary>
-    /// <remarks>This will do some basic filtering to auto return false if the emailUrl is a LAN ip</remarks>
-    /// <param name="emailUrl"></param>
-    /// <param name="sendEmail">Should an email be sent if connectivity is successful</param>
     /// <returns></returns>
-    public async Task<EmailTestResultDto> TestConnectivity(string emailUrl, string adminEmail, bool sendEmail)
+    public async Task<EmailTestResultDto> SendTestEmail(string adminEmail)
     {
-        var result = new EmailTestResultDto();
+        var result = new EmailTestResultDto
+        {
+            EmailAddress = adminEmail
+        };
+
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!IsValidEmail(adminEmail) || !settings.IsEmailSetup())
+        {
+            result.ErrorMessage = "You need to fill in more information in settings and ensure your account has a valid email to send a test email";
+            result.Successful = false;
+            return result;
+        }
+
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{Host}}", settings.HostName),
+        };
+
         try
         {
-            if (IsLocalIpAddress(emailUrl))
+            var emailOptions = new EmailOptionsDto()
             {
-                result.Successful = false;
-                result.ErrorMessage = "This is a local IP address";
-            }
-            result.Successful = await SendEmailWithGet($"{emailUrl}/api/test?adminEmail={Url.Encode(adminEmail)}&sendEmail={sendEmail}");
+                Subject = "Kavita - Email Test",
+                Body = UpdatePlaceHolders(await GetEmailBody("EmailTest"), placeholders),
+                Preheader = "Kavita - Email Test",
+                ToEmails = new List<string>()
+                {
+                    adminEmail
+                }
+            };
+
+            await SendEmail(emailOptions);
+            result.Successful = true;
         }
         catch (KavitaException ex)
         {
@@ -82,229 +112,232 @@ public class EmailService : IEmailService
         return result;
     }
 
-    public async Task<bool> IsDefaultEmailService()
-    {
-        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value!
-            .Equals(DefaultApiUrl);
-    }
-
+    /// <summary>
+    /// Sends an email that has a link that will finalize an Email Change
+    /// </summary>
+    /// <param name="data"></param>
     public async Task SendEmailChangeEmail(ConfirmationEmailDto data)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value;
-        var success = await SendEmailWithPost(emailLink + "/api/account/email-change", data);
-        if (!success)
+        var placeholders = new List<KeyValuePair<string, string>>
         {
-            _logger.LogError("There was a critical error sending Confirmation email");
-        }
-    }
+            new ("{{InvitingUser}}", data.InvitingUser),
+            new ("{{Link}}", data.ServerConfirmationLink)
+        };
 
-    public async Task<string> GetVersion(string emailUrl)
-    {
-        try
+        var emailOptions = new EmailOptionsDto()
         {
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var response = await $"{emailUrl}/api/about/version"
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(10))
-                .GetStringAsync();
-
-            if (!string.IsNullOrEmpty(response))
+            Subject = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
+            Body = UpdatePlaceHolders(await GetEmailBody("EmailChange"), placeholders),
+            Preheader = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
+            ToEmails = new List<string>()
             {
-                return response.Replace("\"", string.Empty);
+                data.EmailAddress
             }
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        };
 
-        return null;
+        await SendEmail(emailOptions);
     }
 
+    /// <summary>
+    /// Validates the email address. Does not test it actually receives mail
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     public bool IsValidEmail(string email)
     {
         return new EmailAddressAttribute().IsValid(email);
     }
 
-    public async Task SendConfirmationEmail(ConfirmationEmailDto data)
+    public async Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        var success = await SendEmailWithPost(emailLink + "/api/invite/confirm", data);
-        if (!success)
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var host = _environment.IsDevelopment() ? LocalHost : request.Host.ToString();
+        var basePart = $"{request.Scheme}://{host}{request.PathBase}";
+        if (!string.IsNullOrEmpty(serverSettings.HostName))
         {
-            _logger.LogError("There was a critical error sending Confirmation email");
-        }
-    }
-
-    public async Task<bool> CheckIfAccessible(string host)
-    {
-        // This is the only exception for using the default because we need an external service to check if the server is accessible for emails
-        try
-        {
-            if (IsLocalIpAddress(host))
+            basePart = serverSettings.HostName;
+            if (!serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
             {
-                _logger.LogDebug("[EmailService] Server is not accessible, using local ip");
-                return false;
+                var removeCount = serverSettings.BaseUrl.EndsWith('/') ? 1 : 0;
+                basePart += serverSettings.BaseUrl[..^removeCount];
             }
-
-            var url = DefaultApiUrl + "/api/reachable?host=" + host;
-            _logger.LogDebug("[EmailService] Checking if this server is accessible for sending an email to: {Url}", url);
-            return await SendEmailWithGet(url);
         }
-        catch (Exception)
+
+        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}"
+            .Replace("//", "/");
+    }
+
+    /// <summary>
+    /// Sends an invite email to a user to setup their account
+    /// </summary>
+    /// <param name="data"></param>
+    public async Task SendInviteEmail(ConfirmationEmailDto data)
+    {
+        var placeholders = new List<KeyValuePair<string, string>>
         {
-            return false;
-        }
+            new ("{{InvitingUser}}", data.InvitingUser),
+            new ("{{Link}}", data.ServerConfirmationLink)
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
+            Body = UpdatePlaceHolders(await GetEmailBody("EmailConfirm"), placeholders),
+            Preheader = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
+            ToEmails = new List<string>()
+            {
+                data.EmailAddress
+            }
+        };
+
+        await SendEmail(emailOptions);
     }
 
-    public async Task<bool> SendMigrationEmail(EmailMigrationDto data)
+    public Task<bool> CheckIfAccessible(string host)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return await SendEmailWithPost(emailLink + "/api/invite/email-migration", data);
+        return Task.FromResult(true);
     }
 
-    public async Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data)
+    public async Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return await SendEmailWithPost(emailLink + "/api/invite/email-password-reset", data);
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{Link}}", dto.ServerConfirmationLink),
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = UpdatePlaceHolders("A password reset has been requested", placeholders),
+            Body = UpdatePlaceHolders(await GetEmailBody("EmailPasswordReset"), placeholders),
+            Preheader = "A password reset has been requested",
+            ToEmails = new List<string>()
+            {
+                dto.EmailAddress
+            }
+        };
+
+        await SendEmail(emailOptions);
+        return true;
     }
 
     public async Task<bool> SendFilesToEmail(SendToDto data)
     {
-        if (await IsDefaultEmailService()) return false;
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return await SendEmailWithFiles(emailLink + "/api/sendto", data.FilePaths, data.DestinationEmail);
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!serverSetting.IsEmailSetupForSendToDevice()) return false;
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = "Send file from Kavita",
+            Preheader = "File(s) sent from Kavita",
+            ToEmails = new List<string>()
+            {
+                data.DestinationEmail
+            },
+            Body = await GetEmailBody("SendToDevice"),
+            Attachments = data.FilePaths.ToList()
+        };
+
+        await SendEmail(emailOptions);
+        return true;
     }
 
-    private async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
+    private async Task SendEmail(EmailOptionsDto userEmailOptions)
     {
+        var smtpConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).SmtpConfig;
+        var email = new MimeMessage()
+        {
+            Subject = userEmailOptions.Subject,
+        };
+        email.From.Add(new MailboxAddress(smtpConfig.SenderDisplayName, smtpConfig.SenderAddress));
+
+        // Inject the body into the base template
+        var fullBody = UpdatePlaceHolders(await GetEmailBody("base"), new List<KeyValuePair<string, string>>()
+        {
+            new ("{{Body}}", userEmailOptions.Body),
+            new ("{{Preheader}}", userEmailOptions.Preheader),
+        });
+
+        var body = new BodyBuilder
+        {
+            HtmlBody = fullBody
+        };
+
+        if (userEmailOptions.Attachments != null)
+        {
+            foreach (var attachment in userEmailOptions.Attachments)
+            {
+                await body.Attachments.AddAsync(attachment);
+            }
+        }
+
+        email.Body = body.ToMessageBody();
+
+        foreach (var toEmail in userEmailOptions.ToEmails)
+        {
+            email.To.Add(new MailboxAddress(toEmail, toEmail));
+        }
+
+        using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
+        smtpClient.Timeout = 20000;
+        var ssl = smtpConfig.EnableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None;
+
+        await smtpClient.ConnectAsync(smtpConfig.Host, smtpConfig.Port, ssl);
+        if (!string.IsNullOrEmpty(smtpConfig.UserName) && !string.IsNullOrEmpty(smtpConfig.Password))
+        {
+            await smtpClient.AuthenticateAsync(smtpConfig.UserName, smtpConfig.Password);
+        }
+
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault;
+
         try
         {
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var response = await (url)
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
-                .GetStringAsync();
-
-            if (!string.IsNullOrEmpty(response) && bool.Parse(response))
-            {
-                return true;
-            }
+            await smtpClient.SendAsync(email);
         }
         catch (Exception ex)
         {
-            throw new KavitaException(ex.Message);
+            _logger.LogError(ex, "There was an issue sending the email");
+            throw;
         }
-        return false;
+        finally
+        {
+            await smtpClient.DisconnectAsync(true);
+        }
     }
 
-
-    private async Task<bool> SendEmailWithPost(string url, object data, int timeoutSecs = 30)
+    private async Task<string> GetTemplatePath(string templateName)
     {
-        try
+        if ((await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).SmtpConfig.CustomizedTemplates)
         {
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var response = await (url)
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
-                .PostJsonAsync(data);
+            var templateDirectory = Path.Join(_directoryService.CustomizedTemplateDirectory, TemplatePath);
+            var fullName = string.Format(templateDirectory, templateName);
+            if (_directoryService.FileSystem.File.Exists(fullName)) return fullName;
+            _logger.LogError("Customized Templates is on, but template {TemplatePath} is missing", fullName);
+        }
 
-            if (response.StatusCode != StatusCodes.Status200OK)
+        return string.Format(Path.Join(_directoryService.TemplateDirectory, TemplatePath), templateName);
+    }
+
+    private async Task<string> GetEmailBody(string templateName)
+    {
+        var templatePath = await GetTemplatePath(templateName);
+
+        var body = await File.ReadAllTextAsync(templatePath);
+        return body;
+    }
+
+    private static string UpdatePlaceHolders(string text, IList<KeyValuePair<string, string>>? keyValuePairs)
+    {
+        if (string.IsNullOrEmpty(text) || keyValuePairs == null) return text;
+
+        foreach (var (key, value) in keyValuePairs)
+        {
+            if (text.Contains(key))
             {
-                var errorMessage = await response.GetStringAsync();
-                throw new KavitaException(errorMessage);
+                text = text.Replace(key, value);
             }
         }
-        catch (FlurlHttpException ex)
-        {
-            _logger.LogError(ex, "There was an exception when interacting with Email Service");
-            return false;
-        }
-        return true;
+
+        return text;
     }
-
-
-    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 300)
-    {
-        try
-        {
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var response = await (url)
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithTimeout(timeoutSecs)
-                .AllowHttpStatus("4xx")
-                .PostMultipartAsync(mp =>
-                {
-                    mp.AddString("email", destEmail);
-                    var index = 1;
-                    foreach (var filepath in filePaths)
-                    {
-                        mp.AddFile("file" + index, filepath, _downloadService.GetContentTypeFromFile(filepath));
-                        index++;
-                    }
-                }
-                );
-
-            if (response.StatusCode != StatusCodes.Status200OK)
-            {
-                var errorMessage = await response.GetStringAsync();
-                throw new KavitaException(errorMessage);
-            }
-        }
-        catch (FlurlHttpException ex)
-        {
-            _logger.LogError(ex, "There was an exception when sending Email for SendTo");
-            return false;
-        }
-        return true;
-    }
-
-    private static bool IsLocalIpAddress(string url)
-    {
-        var host = url.Split(':')[0];
-        try
-        {
-            // get host IP addresses
-            var hostIPs = Dns.GetHostAddresses(host);
-            // get local IP addresses
-            var localIPs = Dns.GetHostAddresses(Dns.GetHostName());
-
-            // test if any host IP equals to any local IP or to localhost
-            foreach (var hostIp in hostIPs)
-            {
-                // is localhost
-                if (IPAddress.IsLoopback(hostIp)) return true;
-                // is local address
-                if (localIPs.Contains(hostIp))
-                {
-                    return true;
-                }
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-
-        return false;
-    }
-
 }

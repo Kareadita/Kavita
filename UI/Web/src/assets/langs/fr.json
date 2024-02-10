@@ -11,7 +11,7 @@
         "no-libraries": "Aucune bibliothèque configurée. Veuillez en ajouter une",
         "server-settings-link": "Paramètres serveur",
         "not-granted": "Vous n'avez accès à aucune bibliothèque.",
-        "on-deck-title": "En cours",
+        "on-deck-title": "En Cours",
         "recently-updated-title": "Séries mises à jour récemment",
         "recently-added-title": "Séries ajoutées récemment",
         "more-in-genre-title": "Plus dans {{genre}}"
@@ -60,7 +60,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "La critique doit comporter au moins {{count}} caractères",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -77,7 +78,7 @@
     "want-to-read": {
         "title": "À Lire",
         "series-count": "{{common.series-count}}",
-        "no-items": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
+        "no-items": "Il n'y a pas d'élément. Essayez d'ajouter une série.",
         "no-items-filtered": "Aucun éléments correspondant aux critères."
     },
     "user-preferences": {
@@ -133,7 +134,7 @@
         "writing-style-tooltip": "Change la direction du texte. Horizontal est de gauche à droite, vertical est de haut en bas.",
         "layout-mode-book-label": "Mise en page",
         "layout-mode-book-tooltip": "Comment le contenu devrait être mis en page. Défilement correspond à la présentation du livre. 1 ou 2 Colonnes utilise 1 ou 2 colonnes adaptées à la hauteur de l'appareil par page",
-        "color-theme-book-label": "Thème de Couleur",
+        "color-theme-book-label": "Couleur du thème",
         "color-theme-book-tooltip": "Quelle theme de couleur appliquer aux contenu et menu du lecteur de livre",
         "font-size-book-label": "Taille de la Police",
         "line-height-book-label": "Espacement de l'interligne",
@@ -189,7 +190,8 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita par un navigateur web mais qui, en revanche, disposent d'une adresse courriel acceptant de recevoir des fichiers."
+        "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita par un navigateur web mais qui, en revanche, disposent d'une adresse courriel acceptant de recevoir des fichiers.",
+        "email-setup-alert": "Vous souhaitez envoyer des fichiers à vos appareils? Configurez d'abord vos paramètres d'E-mail!"
     },
     "edit-device": {
         "device-name-label": "Nom du Périphérique",
@@ -214,7 +216,7 @@
         "permission-error": "Vous n'avez pas la permission de changer votre mot de passe. Contactez l'administrateur du serveur."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "Nouveau E-mail",
         "current-password-label": "Mot de passe actuel",
         "email-not-confirmed": "Cette adresse courriel n'a pas été confirmée",
         "email-updated-title": "Courriel Mise à jour",
@@ -229,7 +231,9 @@
         "save": "{{common.save}}",
         "email-updated-description": "Vous pouvez utiliser le lien suivant pour confirmer l'email de votre compte. Si votre serveur est accessible depuis l'extérieur, un email y sera envoyé avec un lien permettant de confirmer l'adresse.",
         "has-invalid-email": "Il semble que vous n'ayez pas défini d'adresse électronique valide. Pour modifier l'adresse électronique, l'administrateur devra vous envoyer un lien de confirmation.",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "email-confirmed": "Cet e-mail est confirmé",
+        "email-title": "E-mail"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restriction d'âge",
@@ -259,7 +263,8 @@
         "save": "{{common.save}}",
         "token-input-label": "{{service}} Le token vient ici",
         "title": "Fournisseur de partage communautaire",
-        "instructions": "Les nouveaux utilisateurs doivent cliquer sur \"{{scrobbling-providers.generate}}\" ci-dessous pour permettre à Kavita+ de parler avec {{service}}. Une fois que vous avez autorisé le programme, copiez et collez le jeton dans l'entrée ci-dessous. Vous pouvez régénérer votre token à tout moment."
+        "instructions": "Les nouveaux utilisateurs doivent cliquer sur \"{{scrobbling-providers.generate}}\" ci-dessous pour permettre à Kavita+ de parler avec {{service}}. Une fois que vous avez autorisé le programme, copiez et collez le jeton dans l'entrée ci-dessous. Vous pouvez régénérer votre token à tout moment.",
+        "token-valid": "Jeton valide"
     },
     "typeahead": {
         "locked-field": "Ce champ est vérouillé",
@@ -369,7 +374,7 @@
     },
     "person-role-pipe": {
         "colorist": "Coloriste",
-        "editor": "Éditeur",
+        "editor": "Correcteur",
         "writer": "Scénariste",
         "other": "Autre",
         "penciller": "Crayonneur",
@@ -418,11 +423,12 @@
         "inkers-title": "Encreurs",
         "pencillers-title": "Crayonneurs",
         "links-title": "Liens",
-        "editors-title": "Éditeurs",
+        "editors-title": "Correcteurs",
         "promoted": "{{common.promoted}}",
         "cover-artists-title": "Artistes de couverture",
         "letterers-title": "Lettreurs",
-        "translators-title": "Traducteurs"
+        "translators-title": "Traducteurs",
+        "rating-title": "Notations"
     },
     "side-nav": {
         "home": "Accueil",
@@ -440,10 +446,10 @@
     },
     "all-collections": {
         "title": "Collections",
-        "create-one-part-1": "Essayez de créer",
+        "create-one-part-1": "Essayez d'en créer",
         "no-data": "Il n'y a pas de collections.",
         "item-count": "{{common.item-count}}",
-        "create-one-part-2": "un"
+        "create-one-part-2": "une"
     },
     "grouped-typeahead": {
         "collections": "Collections",
@@ -462,7 +468,7 @@
         "collections-label": "Collections",
         "tags-label": "Étiquettes",
         "character-label": "Personnage",
-        "limit-label": "Limiter",
+        "limit-label": "Limiter à",
         "in-progress": "En cours",
         "writer-label": "Écrivain",
         "rating-label": "Notation",
@@ -481,7 +487,7 @@
         "max": "Max",
         "read-progress-label": "Progression de lecture",
         "descending-alt": "Descent",
-        "editor-label": "Éditeur",
+        "editor-label": "Correcteur",
         "min": "Min",
         "format-label": "Format",
         "translator-label": "Traducteur",
@@ -541,7 +547,7 @@
         "loading": "{{common.loading}}",
         "save": "{{common.save}}",
         "cover-image-tab": "Image de couverture",
-        "editor-label": "Éditeur",
+        "editor-label": "Correcteur",
         "related-tab": "Lié",
         "total-pages-title": "État de la publication :",
         "last-added-title": "Dernier élément ajouté :",
@@ -555,7 +561,9 @@
         "info-tab": "Information",
         "letterer-label": "Lettreur",
         "highest-count-tooltip": "Nombre le plus élevé trouvé dans tous les ComicInfo de la série",
-        "max-issue-tooltip": "Numéro ou volume maximum de tous les ComicInfo de la série"
+        "max-issue-tooltip": "Numéro ou volume maximum de tous les ComicInfo de la série",
+        "force-refresh": "Forcer le rafraîchissement",
+        "force-refresh-tooltip": "Forcer le rafraîchissement des métadonnées externes de Kavita+"
     },
     "common": {
         "reset-to-default": "Réinitialiser aux valeurs par défaut",
@@ -596,14 +604,14 @@
         "ends-with": "Se termine par",
         "less-than": "Inférieur à",
         "begins-with": "Commence par",
-        "greater-than-or-equal": "Supérieur ou égal",
-        "not-equal": "Inégal",
+        "greater-than-or-equal": "Supérieur ou égal à",
+        "not-equal": "Différent de",
         "greater-than": "Supérieur à",
         "is-not-in-last": "N'est pas en dernier",
-        "less-than-or-equal": "Inférieur ou égal",
+        "less-than-or-equal": "Inférieur ou égal à",
         "contains": "Contient",
         "is-before": "Est avant",
-        "equal": "Égal",
+        "equal": "Égal à",
         "does-not-contain": "Ne contient pas",
         "is-after": "Est après"
     },
@@ -621,7 +629,7 @@
         "genres": "Genres",
         "inker": "Encreur",
         "translators": "Traducteurs",
-        "editor": "Éditeur",
+        "editor": "Correcteur",
         "read-time": "Temps de lecture",
         "read-date": "Date de lecture",
         "want-to-read": "À Lire",
@@ -635,7 +643,8 @@
         "libraries": "Bibliothèques",
         "formats": "Formats",
         "summary": "Résumé",
-        "colorist": "Coloriste"
+        "colorist": "Coloriste",
+        "average-rating": "Note moyenne"
     },
     "relationship-pipe": {
         "adaptation": "Adaptation",
@@ -698,31 +707,31 @@
     },
     "server-stats": {
         "tags": "Étiquettes",
-        "total-tags-tooltip": "Total d'étiquettes : {{count}}",
-        "total-tags-label": "Total d'étiquettes",
+        "total-tags-tooltip": "Nombre d'étiquettes : {{count}}",
+        "total-tags-label": "Nombre d'étiquettes",
         "tag-count": "{{num}} étiquettes",
         "recently-read-title": "Récemment lu",
         "reads": "lectures",
-        "total-genres-label": "Total de genres",
-        "total-files-tooltip": "Total de fichiers : {{count}}",
+        "total-genres-label": "Nombre de genres",
+        "total-files-tooltip": "Nombre de fichiers : {{count}}",
         "total-read-time-label": "Temps de lecture total",
-        "total-people-label": "Total de personnes",
+        "total-people-label": "Nombre de personnes",
         "genre-count": "{{num}} Genres",
-        "total-files-label": "Total de fichiers",
+        "total-files-label": "Nombre de fichiers",
         "popular-series-title": "Séries populaires",
-        "total-genres-tooltip": "Total de genres : {{count}}",
+        "total-genres-tooltip": "Nombre de genres : {{count}}",
         "total-size-label": "Taille totale",
-        "total-people-tooltip": "Total de personnes : {{count}}",
+        "total-people-tooltip": "Nombre de personnes : {{count}}",
         "popular-libraries-title": "Bibliothèques populaires",
-        "total-series-tooltip": "Total de séries : {{count}}",
+        "total-series-tooltip": "Nombre de séries : {{count}}",
         "release-years-title": "Années de sortie",
         "series": "séries",
         "most-active-users-title": "Utilisateurs les plus actifs",
         "total-read-time-tooltip": "Temps de lecture total : {{count}}",
-        "total-volumes-tooltip": "Total de volumes : {{count}}",
-        "total-series-label": "Total de séries",
+        "total-volumes-tooltip": "Nombre de volumes : {{count}}",
+        "total-series-label": "Nombre de séries",
         "people": "Personnes",
-        "total-volumes-label": "Total de volumes",
+        "total-volumes-label": "Nombre de volumes",
         "genres": "Genres",
         "people-count": "{{num}} Personnes"
     },
@@ -742,10 +751,11 @@
     "changelog": {
         "download": "Télécharger",
         "published-label": "Publié : ",
-        "description": "Si vous ne voyez pas un {{installed}",
+        "description": "Si vous ne voyez pas un {{installed}}",
         "available": "Disponible",
         "installed": "Installé",
-        "description-continued": "étiquette, vous êtes sur une version de développement quotidienne (nightly release). Seules les versions majeures seront disponibles."
+        "description-continued": "étiquette, vous êtes sur une version de développement quotidienne (nightly release). Seules les versions majeures seront disponibles.",
+        "nightly": "Nightly : {{version}}"
     },
     "publication-status-pipe": {
         "completed": "Achevé",
@@ -774,7 +784,7 @@
         "setup-user-account-tooltip": "Copier et coller dans un nouvel onglet. Vous devrait peut-être vous déconnecter.",
         "setup-user-title": "Utilisateurs invités",
         "invite": "Inviter",
-        "description": "Invitez un utilisateur sur votre serveur en saisissant son email. Ils recevront un e-mail pour créer un compte. Pour que cela fonctionne, vous devez avoir le champ Nom d'hôte défini dans l'onglet <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a> ou accéder à votre instance via son URL distante. <br/><br/>Vous pouvez également utiliser un nom d'utilisateur, mais notez que la réinitialisation du mot de passe ne sera pas disponible pour les comptes basés sur un nom d'utilisateur. Si vous ne souhaitez pas utiliser notre service de messagerie, vous pouvez héberger votre propre service de messagerie.",
+        "description": "Invitez un utilisateur sur votre serveur en saisissant son email. Ils recevront un e-mail pour créer un compte. Pour que cela fonctionne, vous devez avoir les champs Nom d'hôte et E-mail définis dans l'onglet <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a>, dans le cas contraire, un lien vous sera présenté pour que vous puissiez configurer le système au nom de l'utilisateur.<br/><br/>Il n'est pas nécessaire que l'adresse électronique soit valide.",
         "setup-user-description": "Vous pouvez utiliser le lien suivant ci-dessous pour configurer le compte de votre utilisateur ou utiliser le bouton Copier. Vous devrez peut-être vous déconnecter avant d'utiliser le lien pour enregistrer un nouvel utilisateur. Si Kavita peut déterminer votre serveur comme accessible en externe (ou si le nom d'hôte est défini), un e-mail aura été envoyé à l'utilisateur et les liens pourront être utilisés par lui pour terminer la configuration de son compte. Sinon, utilisez le lien ci-dessous ou celui dans les journaux pour leur envoyer manuellement ou configurer leur compte.",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}"
@@ -801,9 +811,11 @@
         "activate-email-label": "{{common.email}}",
         "edit": "{{common.edit}}",
         "invalid-license-tooltip": "Si votre souscription est terminée, vous devez envoyer un mail au support pour en obtenir une nouvelle",
-        "activate-discordId-label": "ID du compte Discord",
+        "activate-discordId-label": "Identifiant Discord",
         "activate-discordId-tooltip": "Lien vers votre compte Discord avec Kavita+. Cela vous donne accès à des canaux cachés pour aider à façonner Kavita.",
-        "activate-reset": "{{common.reset}}"
+        "activate-reset": "{{common.reset}}",
+        "discord-validation": "Ce n'est pas un identifiant Discord valide. Votre identifiant n'est pas votre nom d'utilisateur Discord.",
+        "activate-reset-tooltip": "Détachez votre licence de ce serveur. Nécessite une licence et un email."
     },
     "book-reader": {
         "bookmarks-header": "{{side-nav.bookmarks}}",
@@ -900,7 +912,7 @@
         "cover-description-extra": "L'image de la librairie ne doit pas être trop grande. Utilisez une petit image de 32x32 pixels. Kavita ne vérifie pas la taille.",
         "file-type-group-tooltip": "Quels types de fichiers Kavita devrait-il analyser ? Par exemple, Archive inclura les fichiers cb*, zip, rar, etc.",
         "folder-watching-tooltip": "Surcharger la surveillance des dossiers par le serveur pour cette bibliothèque. Si désactivé, la surveillance des dossiers ne sera pas exécutée pour les dossiers de cette bibliothèque.",
-        "manage-reading-list-tooltip": "Est-ce que Kavita doit créer des listes de lecture  à partir des tags StoryArc/StoryArcNumber et AlternativeSeries/AlternativeCount trouvés à l'intérieur des fichiers ComicInfo.xml",
+        "manage-reading-list-tooltip": "Est-ce que Kavita doit créer des listes de lecture à partir des tags StoryArc/StoryArcNumber et AlternativeSeries/AlternativeCount trouvés à l'intérieur des fichiers ComicInfo.xml",
         "manage-collection-tooltip": "Est-ce que Kavita doit créer des collections à partir des tags SeriesGroup trouvés à l'intérieur des fichiers ComicInfo.xml",
         "include-in-dashboard-tooltip": "Les séries de la bibliothèque doivent-elles être incluses sur le tableau de bord. Cela affecte tous les flux, comme On Deck, Récemment mis à jour, Récemment ajouté ou tout ajout personnalisé.",
         "allow-scrobbling-tooltip": "Est-ce que Kavita doit suivre l'activité des événements de lecture, du statut à lire, les notes et les avis des fournisseurs configurés. Cela ne se produira que si le serveur dispose d'un abonnement Kavita+ actif.",
@@ -993,7 +1005,7 @@
         "confirm-single-delete": "Êtes-vous sûr de vouloir effacer tous les marque-pages de {{seriesName}}. Ceci ne peut pas être annulé.",
         "confirm-delete": "Êtes-vous sûr de vouloir effacer tous les marque-pages de plusieurs séries ? Ceci ne peut pas être annulé.",
         "no-data-2": "un.",
-        "no-data": "Il n'y a aucun marque-page. Essayez d'en créer",
+        "no-data": "Il n'y a pas de marque-page. Essayez d'en créer",
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}",
         "delete-single-success": "Les marque-pages de {{seriesName}} ont été supprimés"
@@ -1078,7 +1090,7 @@
         "read": "Lire",
         "import-cbl": "Importer CBL",
         "mark-invisible": "Marquer comme invisible",
-        "remove-from-on-deck": "Retirer d'« En cours »",
+        "remove-from-on-deck": "Retirer du tableau de bord",
         "clear": "{{common.clear}}",
         "customize": "Personnaliser",
         "remove-rule-group": "Retirer le groupe de règles",
@@ -1235,9 +1247,27 @@
         "host-name-validation": "Le nom d'hôte doit commencer par http(s) et ne pas se terminer par /",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "description": "Kavita est livré avec un service de messagerie pour effectuer des tâches telles que l'invitation d'utilisateurs, les demandes de réinitialisation de mot de passe, etc. Les e-mails envoyés via notre service sont immédiatement supprimés. Vous pouvez utiliser votre propre service de messagerie en configurant le service {{link}}. Définissez l'URL du service de messagerie et utilisez le bouton Test pour vous assurer qu'il fonctionne. Vous pouvez réinitialiser ces paramètres par défaut à tout moment. Il n'existe aucun moyen de désactiver les e-mails pour l'authentification, même si vous n'êtes pas obligé d'utiliser une adresse e-mail valide pour les utilisateurs. Les liens de confirmation seront toujours enregistrés dans les journaux et présentés dans l'interface utilisateur. Les e-mails d'inscription/confirmation ne seront pas envoyés si vous n'accédez pas à Kavita via une URL accessible au public ou à moins que la fonctionnalité Nom d'hôte ne soit configurée.",
-        "send-to-warning": "Si vous souhaitez que l'envoi vers un appareil fonctionne, vous devez héberger votre propre service de messagerie.",
-        "title": "Services E-mail (SMTP)"
+        "description": "Kavita est livré avec un service de messagerie pour effectuer des tâches telles que l'invitation d'utilisateurs, les demandes de réinitialisation de mot de passe, etc. Les e-mails envoyés via notre service sont immédiatement supprimés. Vous pouvez utiliser votre propre service de messagerie en configurant le service {{link}}. Définissez l'URL du service de messagerie et utilisez le bouton Test pour vous assurer qu'il fonctionne. Vous pouvez réinitialiser ces paramètres par défaut à tout moment. Il n'existe aucun moyen de désactiver les e-mails pour l'authentification, même si vous n'êtes pas obligé d'utiliser une adresse e-mail valide pour les utilisateurs. Les liens de confirmation seront toujours enregistrés dans les journaux et présentés dans l'interface utilisateur. Les e-mails d'inscription/confirmation ne seront pas envoyés si vous n'accédez pas à Kavita via une URL accessible au public ou à moins que la fonctionnalité Nom d'hôte ne soit configurée. Pour utiliser certaines fonctions de Kavita comme \"Mot de passe oublié\" et \"Envoyer à l'appareil\", un fournisseur d'E-mail doit être configuré. D'autre fonctionnalités comme \"Changer mot de passe\" sont moins sécurisée sans E-mail configuré.",
+        "send-to-warning": "Si vous souhaitez que l'envoi vers un appareil fonctionne, vous devez paramétré votre service de messagerie.",
+        "title": "Services E-mail (SMTP)",
+        "email-settings-title": "Paramètres E-mail",
+        "sender-address-label": "Adresse d’expéditeur",
+        "sender-displayname-label": "Nom complet",
+        "sender-address-tooltip": "Il s'agit de l'adresse électronique que le destinataire verra lorsqu'il recevra l'e-mail. Il s'agit généralement de l'adresse électronique associée au compte.",
+        "host-label": "Hébergeur",
+        "port-label": "Port",
+        "username-label": "Pseudonyme",
+        "enable-ssl-label": "Utiliser SSL sur le serveur E-mail",
+        "size-limit-label": "Taille limite",
+        "size-limit-tooltip": "Combien de bytes le serveur E-mail peut supporter pour les pièces jointes",
+        "customized-templates-label": "Thème customisés",
+        "sender-displayname-tooltip": "Le nom que le destinataire verra lorsqu'il recevra le courrier électronique",
+        "host-tooltip": "Adresse sortante/SMTP de votre serveur de messagerie",
+        "password-label": "Mot de passe",
+        "customized-templates-tooltip": "Kavita doit-il utiliser le répertoire \"config/templates\" pour les modèles plutôt que celui par défaut? Vous êtes responsable de tenir à jour les changement des modèles.",
+        "username-tooltip": "Le nom d'utilisateur utilisé pour s'authentifier auprès de l'hôte",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook"
     },
     "bulk-add-to-collection": {
         "collection-label": "Collection",
@@ -1258,7 +1288,7 @@
     "manage-library": {
         "add-library": "Ajouter une bibliothèque",
         "loading": "{{common.loading}}",
-        "no-data": "Il n'y a pas de bibliothèques. Essayez d'en créer une.",
+        "no-data": "Il n'y a pas de bibliothèque. Essayez d'en créer une.",
         "title": "Bibliothèques",
         "type-title": "Type :",
         "scan-library": "Scan de la bibliothèque",
@@ -1289,9 +1319,9 @@
         "logging-level-tooltip": "Utilisez le débogage pour vous aider à identifier les problèmes. Le débogage peut consommer beaucoup d’espace disque.",
         "allow-stats-tooltip-part-2": "pour ce qui est collecté.",
         "backup-label": "Jours de sauvegardes",
-        "on-deck-last-progress-tooltip": "Le nombre de jours depuis la dernière progression avant de lancer quelque chose sur On Deck.",
+        "on-deck-last-progress-tooltip": "Nombre de jours depuis la dernière progression de lecture, avant de l'enlever du tableau de bord.",
         "logging-level-label": "Niveau de journalisation",
-        "on-deck-last-chapter-add-tooltip": "Le nombre de jours depuis que le dernier chapitre a été ajouté pour être inclus dans On Deck",
+        "on-deck-last-chapter-add-tooltip": "Durée (en jours) d'affichage des chapitres ajoutés récemments dans le tableau de bord.",
         "ip-address-tooltip": "Liste d'adresses IP séparées par des virgules sur lesquelles le serveur écoute. Ceci est nécessaire si vous utilisez Docker. Nécessite un redémarrage pour prendre effet.",
         "allow-stats-label": "Autoriser la collecte de données d'utilisation anonymes",
         "base-url-label": "URL de base",
@@ -1302,7 +1332,7 @@
         "enable-folder-watching": "Activer la surveillance des dossiers",
         "reset-to-default": "{{common.reset-to-default}}",
         "cache-size-label": "Taille du cache",
-        "on-deck-last-progress-label": "On Deck Dernière progression (jours)",
+        "on-deck-last-progress-label": "Tableau de bord Dernière progression (jours)",
         "base-url-tooltip": "Utilisez cela si vous souhaitez héberger Kavita sur une URL de base, i.e. votredomaine.com/kavita. Non pris en charge sur Docker en utilisant un utilisateur non root.",
         "backup-tooltip": "Le nombre de sauvegardes à maintenir. La valeur par défaut est 30, le minimum est 1, le maximum est 30.",
         "log-label": "Jours des journalisation",
@@ -1311,7 +1341,7 @@
         "folder-watching-tooltip": "Permet à Kavita de surveiller les dossiers de bibliothèque pour détecter les modifications et lancer un scan de ces modifications. Cela permet au contenu d'être mis à jour sans appeler manuellement des scans ni d'attendre des scans nocturnes. Attendra toujours 10 minutes avant de déclencher un scan.",
         "log-tooltip": "Le nombre de journalisation à conserver. La valeur par défaut est 30, le minimum est 1, le maximum est 30.",
         "opds-label": "OPDS",
-        "on-deck-last-chapter-add-label": "On Deck Dernier chapitre ajouté (jours)",
+        "on-deck-last-chapter-add-label": "Tableau de bord Chapitres récents (jours)",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "min-cache-validation": "Doit être à 50 Mo.",
@@ -1328,7 +1358,10 @@
         "ip-address-label": "Adresses IP",
         "ip-address-validation": "Les adresses IP ne peuvent contenir que des adresses IPv4 ou IPv6 valides",
         "max-backup-validation": "Vous ne pouvez pas avoir plus de {{num}} sauvegarde(s)",
-        "cache-size-validation": "Vous devez disposer d'au moins 50 Mo."
+        "cache-size-validation": "Vous devez disposer d'au moins 50 Mo.",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}"
     },
     "manage-system": {
         "discord-title": "Discord :",
@@ -1337,10 +1370,12 @@
         "more-info-title": "Plus d'information",
         "title": "À propos du système",
         "source-title": "Source :",
-        "feature-request-title": "Requêtes de nouvelles fonctionnalités",
+        "feature-request-title": "Demandes de nouvelles fonctionnalités :",
         "donations-title": "Donations :",
         "wiki-title": "Wiki :",
-        "installId-title": "ID d'installation"
+        "installId-title": "ID d'installation",
+        "localization-title": "Localisations :",
+        "updates-title": "Historique des mises à jour"
     },
     "manage-tasks-settings": {
         "title": "Tâches récurrentes",
@@ -1350,12 +1385,12 @@
         "clean-up-want-to-read-task": "Nettoyer A lire",
         "analyze-files-task-success": "L'analyse du fichier a été mise en attente",
         "backup-database-task-success": "Une tâche de sauvegarde de la base de données a été mise en file d'attente",
-        "library-database-backup-label": "Sauvegarde de la base de données de bibliothèques",
+        "library-database-backup-label": "Sauvegarde de Kavita",
         "bust-cache-task-desc": "Nettoie  le cache de Kavita+ - ne doit être utilisé que lors du débogage de mauvaises correspondances.",
         "download-logs-task": "Télécharges les journaux",
         "backup-database-task-desc": "Effectue une sauvegarde de la base de données, des marque-pages, des thèmes, des couvertures téléchargées manuellement et des fichiers de configuration.",
         "clear-reading-cache-task-success": "Le cache a été effacé",
-        "bust-locale-task-desc": "Nettoie le cache local. Cela peut résoudre les problèmes liés aux chaînes qui ne s'affichent pas correctement après une mise à jour.",
+        "bust-locale-task-desc": "Nettoie le cache local. Cela peut résoudre les problèmes liés aux chaînes qui ne s'affichent pas correctement après une mise à jour",
         "convert-media-task": "Convertir le média vers l'encodage cible",
         "bust-locale-task-success": "Cache local nettoyé",
         "reset": "{{common.reset}}",
@@ -1367,7 +1402,7 @@
         "check-for-updates-task": "Vérifier les mises à jour",
         "description-header": "Description",
         "action-header": "Action",
-        "library-database-backup-tooltip": "A quelle fréquence Kavita sauvegardera la base de données.",
+        "library-database-backup-tooltip": "A quelle fréquence Kavita sauvegardera la base de données et autres fichiers liés.",
         "bust-locale-task": "Nettoyer le cache local",
         "adhoc-tasks-title": "Tâches ponctuelles",
         "clear-reading-cache-task": "Effacer le cache de lecture",
@@ -1382,7 +1417,16 @@
         "convert-media-task-desc": "Exécute une tâche de longue durée qui convertira tous les médias gérés par Kavita vers l'encodage cible. C'est lent (surtout sur les appareils ARM).",
         "check-for-updates-task-desc": "Vérifier s'il y a des versions stables en avance sur votre version.",
         "clean-up-want-to-read-task-desc": "Supprime toutes les séries que les utilisateurs ont lues dans leur intégralité, qui se trouvent dans A lire et dont le statut de publication est Terminé. Lancé toutes les 24 heures.",
-        "clean-up-want-to-read-task-success": "A lire a été nettoyé"
+        "clean-up-want-to-read-task-success": "A lire a été nettoyé",
+        "required": "{{validation.required-field}}",
+        "cron-notation": "Ceci n'est pas une notation Cron valide",
+        "custom-label": "Programme personnalisé (notation Cron)",
+        "disabled": "Désactivé",
+        "daily": "Quotidien",
+        "weekly": "Hebdomadaire",
+        "cleanup-label": "Nettoyage",
+        "cleanup-tooltip": "Fréquence à laquelle Kavita exécutera des tâches de nettoyage. Ces tâches peuvent être lourdes et devraient être exécutées à minuit dans la plupart des cas",
+        "custom": "Personallisé"
     },
     "manage-media-settings": {
         "cover-image-size-label": "Taille de l'image de couverture",
@@ -1425,8 +1469,9 @@
         "last-chapter-added": "Élément ajouté",
         "last-modified": "Dernière modification",
         "read-progress": "Dernière lecture",
-        "sort-name": "Nom du tri",
-        "created": "Créé"
+        "sort-name": "Nom",
+        "created": "Créé",
+        "average-rating": "Note moyenne"
     },
     "manage-users": {
         "change-password-alt": "Modifier le mot de passe {{user}}",
@@ -1453,7 +1498,8 @@
         "pending-title": "En attente",
         "online-now-tooltip": "En ligne",
         "setup-user-alt": "Configurer l'utilisateur {{user}}",
-        "username-pattern": "Le nom d'utilisateur ne peut contenir que les caractères et espaces suivants : {{caractères}}"
+        "username-pattern": "Le nom d'utilisateur ne peut contenir que les caractères et espaces suivants : {{caractères}}",
+        "admin": "Admin"
     },
     "admin-dashboard": {
         "users-tab": "Utilisateurs",
@@ -1469,7 +1515,9 @@
         "statistics-tab": "Statistiques",
         "kavita+-tab": "Kavita+",
         "tasks-tab": "Tâches",
-        "kavita+-desc-part-2": "avantages premium"
+        "kavita+-desc-part-2": "avantages premium",
+        "kavita+-releases": "Voir les versions publiées",
+        "kavita+-requirement": "Kavita+ est conçu pour fonctionner uniquement avec la dernière version - 2 versions. Toute autre version est susceptible de ne pas fonctionner."
     },
     "import-cbl-modal": {
         "validate-warning": "Le CBL présente des problèmes qui empêchent l'importation. Corrigez ces problèmes et réessayez.",
@@ -1514,9 +1562,9 @@
     "reading-lists": {
         "item-count": "{{common.item-count}}",
         "title": "Listes de lecture",
-        "create-one-part-1": "Essayez de créer",
+        "create-one-part-1": "Essayez d'en créer",
         "no-data": "Il n'y a pas de liste de lecture.",
-        "create-one-part-2": "un"
+        "create-one-part-2": "une"
     },
     "manga-reader": {
         "height": "Hauteur",
@@ -1678,7 +1726,8 @@
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Pourcentage",
-        "unit-reading-date": "Date"
+        "unit-reading-date": "Date",
+        "unit-average-rating": "Note moyenne (Kavita+) - uniquement pour les séries mises en cache"
     },
     "file-breakdown-stats": {
         "format-title": "Format",
@@ -1763,7 +1812,6 @@
         "item-removed": "Élément retiré",
         "series-added-to-collection": "Série ajoutée à la collection {{collectionName}}",
         "confirm-regen-covers": "L'actualisation des couvertures oblige à recalculer toutes les images de couverture. Il s'agit d'une opération lourde. Êtes-vous sûr de ne pas vouloir effectuer un scan à la place ?",
-        "change-email-private": "Le serveur n'est pas accessible au public. Demandez à l'administrateur de récupérer votre lien de confirmation dans les journaux.",
         "k+-error": "Une erreur s'est produite lors de l'activation de votre licence. Veuillez réessayer.",
         "confirm-library-delete": "Êtes-vous sûr de vouloir supprimer la bibliothèque {{name}} ? Vous ne pouvez pas annuler cette action.",
         "book-settings-info": "Vous pouvez modifier les paramètres des livres, enregistrer ces paramètres pour tous les livres et afficher la table des matières à partir du tiroir.",
@@ -1785,7 +1833,15 @@
         "reset-base-url": "Réinitialisation de l'URL de base",
         "k+-reset-key-success": "Votre licence a été désenregistrée. Utilisez le bouton Modifier pour réenregistrer votre instance et réactiver Kavita+",
         "email-not-sent": "L'adresse électronique figurant dans le fichier n'est pas valide et ne peut être envoyée. Un lien a été déversé dans les journaux. L'administrateur peut fournir ce lien pour compléter le flux.",
-        "k+-reset-key": "Cela vous permettra de détacher votre clé d'un serveur et de réenregistrer une instance Kavita."
+        "k+-reset-key": "Cela vous permettra de détacher votre clé d'un serveur et de réenregistrer une instance Kavita.",
+        "anilist-token-expired": "Votre jeton AniList a expiré. Le scrobbling ne sera plus possible tant que vous ne l'aurez pas généré à nouveau dans Paramètres de l'utilisateur > Compte",
+        "change-email-no-email": "E-mail à été mis à jour",
+        "email-not-sent-test": "Il y a une erreur lors de l'envoi du mail. Vérifiez les logs pour plus de détails. Cette erreur indique une erreur de paramètres.",
+        "delete-device": "Êtes-vous sûr de vouloir supprimer cet appareil ?",
+        "delete-review": "Êtes-vous sûr de vouloir supprimer votre avis ?",
+        "review-deleted": "Avis supprimé",
+        "collection-tag-deleted": "Étiquette de collection supprimée",
+        "force-kavita+-refresh-success": "Les métadonnées externes de Kavita+ ont été invalidées"
     },
     "manga-format-stats": {
         "title": "Format",
@@ -1816,7 +1872,7 @@
         "help-link": "Plus d'informations"
     },
     "metadata-builder": {
-        "and": "Correspondre l'ensemble des éléments suivants",
+        "and": "Correspondre à l'ensemble des éléments suivants",
         "remove-rule": "Supprimer la ligne",
         "or": "Correspondre à l'un des éléments suivants",
         "add-rule": "Ajouter une règle"
@@ -1912,5 +1968,13 @@
     },
     "next-expected-card": {
         "title": "~{{date}}"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}",
+        "description-2": "Consultez notre <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pour savoir comment procéder à la mise à jour.",
+        "title": "Ne prenez pas de retard !",
+        "subtitle": "Il semble que votre installation soit en retard de plus de {{count}} versions !",
+        "description-1": "Veuillez envisager une mise à jour afin d'utiliser la dernière version de Kavita.",
+        "description-3": "S'il y a une raison spécifique pour laquelle vous n'avez pas encore mis à jour, nous aimerions savoir ce qui vous retient sur une version obsolète ! Arrêtez-vous sur notre discord et dites-nous ce qui bloque votre mise à jour."
     }
 }

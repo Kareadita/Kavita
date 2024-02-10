@@ -12,6 +12,7 @@ using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -24,6 +25,7 @@ using API.Entities.Metadata;
 using API.Entities.Scrobble;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
+using API.Services;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
 using MediaError = API.Entities.MediaError;
@@ -44,7 +46,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.Bookmark.ChapterId))
             .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series));
         CreateMap<LibraryDto, Library>();
-        CreateMap<Volume, VolumeDto>();
+        CreateMap<Volume, VolumeDto>()
+            .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.MinNumber));
         CreateMap<MangaFile, MangaFileDto>();
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
@@ -245,5 +248,18 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserDashboardStream, AppUserDashboardStream>();
         CreateMap<AppUserSideNavStream, AppUserSideNavStream>();
 
+        CreateMap<ExternalRating, RatingDto>();
+        CreateMap<RatingDto, ExternalRating>();
+        CreateMap<ExternalReview, UserReviewDto>()
+            .ForMember(dest => dest.IsExternal,
+                opt =>
+                    opt.MapFrom(src => true));
+
+        CreateMap<UserReviewDto, ExternalReview>()
+            .ForMember(dest => dest.BodyJustText,
+                opt =>
+                    opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
+
+        CreateMap<ExternalRecommendation, ExternalSeriesDto>();
     }
 }

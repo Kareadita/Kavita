@@ -25,8 +25,13 @@ public enum LibraryType
     [Description("Image")]
     Image = 3,
     /// <summary>
+    /// Allows Books to Scrobble with AniList for Kavita+
+    /// </summary>
+    [Description("Light Novel")]
+    LightNovel = 4,
+    /// <summary>
     /// Uses Magazine regex and is restricted to PDF and Archive by default
     /// </summary>
     [Description("Magazine")]
-    Magazine = 4
+    Magazine = 5
 }

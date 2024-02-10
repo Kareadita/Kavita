@@ -1,10 +1,12 @@
 import { EncodeFormat } from "./encode-format";
 import {CoverImageSize} from "./cover-image-size";
+import {SmtpConfig} from "./smtp-config";
 
 export interface ServerSettings {
     cacheDirectory: string;
     taskScan: string;
     taskBackup: string;
+    taskCleanup: string;
     loggingLevel: string;
     port: number;
     ipAddresses: string;
@@ -22,4 +24,5 @@ export interface ServerSettings {
     onDeckProgressDays: number;
     onDeckUpdateDays: number;
     coverImageSize: CoverImageSize;
+    smtpConfig: SmtpConfig;
 }

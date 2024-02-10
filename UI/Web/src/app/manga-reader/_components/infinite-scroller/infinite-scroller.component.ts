@@ -1,5 +1,6 @@
 import { DOCUMENT, NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, DestroyRef,
@@ -13,7 +14,7 @@ import {
   OnInit,
   Output,
   Renderer2,
-  SimpleChanges
+  SimpleChanges, ViewChild
 } from '@angular/core';
 import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -25,6 +26,7 @@ import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {MangaReaderComponent} from "../manga-reader/manga-reader.component";
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -59,9 +61,9 @@ const enum DEBUG_MODES {
     styleUrls: ['./infinite-scroller.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, TranslocoDirective]
+  imports: [NgIf, NgFor, AsyncPipe, TranslocoDirective, InfiniteScrollModule]
 })
-export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
+export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
 
   private readonly mangaReaderService = inject(ManagaReaderService);
   private readonly readerService = inject(ReaderService);
@@ -92,6 +94,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+
+  @ViewChild('bottomSpacer', {static: false}) bottomSpacer!: ElementRef;
+  bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
+    { threshold: 1.0 });
+
   private readonly destroyRef = inject(DestroyRef);
 
   readerElemRef!: ElementRef<HTMLDivElement>;
@@ -256,6 +263,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.setPageNum(this.pageNum, true);
       });
     }
+  }
+
+  ngAfterViewInit() {
+    this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer.nativeElement);
   }
 
   recalculateImageWidth() {
@@ -539,6 +550,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.allImagesLoaded = true;
           this.cdRef.markForCheck();
       });
+    }
+  }
+
+  handleBottomIntersection(entries: IntersectionObserverEntry[]) {
+    if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
+      this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
+      this.loadNextChapter.emit();
     }
   }
 

@@ -72,8 +72,6 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();
-        services.AddScoped<IReviewService, ReviewService>();
-        services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
 
         services.AddSqLite();
@@ -85,18 +83,14 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.License);
             options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
-            options.UseInMemory(EasyCacheProfiles.Filter);
 
             // KavitaPlus stuff
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusRecommendations);
-            options.UseInMemory(EasyCacheProfiles.KavitaPlusRatings);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
         });
 
         services.AddMemoryCache(options =>
         {
-            options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 50 MB
+            options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
 
@@ -110,9 +104,11 @@ public static class ApplicationServiceExtensions
     {
         services.AddDbContextPool<DataContext>(options =>
         {
-            options.UseSqlite("Data source=config/kavita.db");
+            options.UseSqlite("Data source=config/kavita.db", builder =>
+            {
+                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
             options.EnableDetailedErrors();
-
             options.EnableSensitiveDataLogging();
         });
     }

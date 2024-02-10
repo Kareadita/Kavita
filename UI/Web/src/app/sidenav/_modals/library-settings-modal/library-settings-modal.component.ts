@@ -72,9 +72,23 @@ enum StepID {
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
-  private readonly destroyRef = inject(DestroyRef);
+  protected readonly LibraryType = LibraryType;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
 
-  @Input({required: true}) library!: Library;
+  public readonly utilityService = inject(UtilityService);
+  public readonly modal = inject(NgbActiveModal);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly uploadService = inject(UploadService);
+  private readonly modalService = inject(NgbModal);
+  private readonly settingService = inject(SettingsService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly imageService = inject(ImageService);
+
+  @Input({required: true}) library!: Library | undefined;
 
   active = TabID.General;
   imageUrls: Array<string> = [];
@@ -101,14 +115,10 @@ export class LibrarySettingsModalComponent implements OnInit {
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
 
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly TabID = TabID;
-
-
-  constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
-    private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
-    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
-    private imageService: ImageService) { }
+  get IsKavitaPlusEligible() {
+    const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
+    return libType === LibraryType.Manga || libType === LibraryType.LightNovel;
+  }
 
   ngOnInit(): void {
     this.settingService.getLibraryTypes().subscribe((types) => {
@@ -126,7 +136,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    if (this.library && this.library.type === LibraryType.Comic) {
+    if (this.library && (this.library.type === LibraryType.Comic || this.library.type === LibraryType.Book)) {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
       this.libraryForm.get('allowScrobbling')?.disable();
     }
@@ -171,6 +181,12 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
+            break;
+          case LibraryType.LightNovel:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
             break;
           case LibraryType.Images:
@@ -243,8 +259,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   forceScan() {
-    this.libraryService.scan(this.library.id, true)
-      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library.name})));
+    this.libraryService.scan(this.library!.id, true)
+      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name})));
   }
 
   async save() {
@@ -301,7 +317,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   applyCoverImage(coverUrl: string) {
-    this.uploadService.updateLibraryCoverImage(this.library.id, coverUrl).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe(() => {});
   }
 
   updateCoverImageIndex(selectedIndex: number) {
@@ -310,7 +326,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library.id, '').subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, '').subscribe(() => {});
   }
 
   openDirectoryPicker() {

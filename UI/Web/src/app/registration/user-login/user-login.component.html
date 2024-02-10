@@ -7,19 +7,14 @@
           <div class="card-text">
             <div class="mb-3">
               <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
-              <input class="form-control custom-input" formControlName="username" id="username"
+              <input class="form-control custom-input" formControlName="username" id="username" autocomplete="username"
                      type="text" autofocus [placeholder]="t('username')">
             </div>
 
             <div class="mb-2">
               <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
-              <input class="form-control custom-input" formControlName="password" name="password"
-                     id="password" type="password" pattern="^.{6,32}$" [placeholder]="t('password')">
-              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.pattern"  >
-                <div class="" *ngIf="loginForm.get('password')?.errors?.pattern">
-                  {{t('password-validation')}}
-                </div>
-              </div>
+              <input class="form-control custom-input" formControlName="password" name="password" autocomplete="current-password"
+                     id="password" type="password" [placeholder]="t('password')">
             </div>
 
             <div class="mb-3">

@@ -3,7 +3,8 @@ import { HourEstimateRange } from './series-detail/hour-estimate-range';
 
 export interface Volume {
     id: number;
-    number: number;
+    minNumber: number;
+    maxNumber: number;
     name: string;
     createdUtc: string;
     lastModifiedUtc: string;

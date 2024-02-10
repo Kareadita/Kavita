@@ -1,86 +1,98 @@
 <app-side-nav-companion-bar></app-side-nav-companion-bar>
 
 <ng-container *transloco="let t; read: 'dashboard'">
-  <ng-container *ngIf="libraries$ | async as libraries">
-      <ng-container *ngIf="libraries.length === 0">
-          <div class="mt-3" *ngIf="isAdmin$ | async as isAdmin">
-              <div *ngIf="isAdmin" class="d-flex justify-content-center">
-                  <p>{{t('no-libraries')}} <a routerLink="/admin/dashboard" fragment="libraries">{{t('server-settings-link')}}</a></p>
-              </div>
-              <div *ngIf="!isAdmin" class="d-flex justify-content-center">
-                  <p>{{t('not-granted')}}</p>
-              </div>
-          </div>
-      </ng-container>
-  </ng-container>
+  @if (libraries$ | async; as libraries) {
+    @if (libraries.length === 0) {
+      @if (isAdmin$ | async; as isAdmin) {
+        <div class="mt-3">
+          @if (isAdmin) {
+            <div class="d-flex justify-content-center">
+              <p>{{t('no-libraries')}} <a routerLink="/admin/dashboard" fragment="libraries">{{t('server-settings-link')}}</a></p>
+            </div>
+          } @else {
+            <div class="d-flex justify-content-center">
+              <p>{{t('not-granted')}}</p>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
 
-  <ng-container *ngFor="let stream of streams">
-    <ng-container [ngSwitch]="stream.streamType">
-      <ng-container *ngSwitchCase="StreamType.OnDeck" [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+  @for(stream of streams; track stream.id) {
+    @switch (stream.streamType) {
+      @case (StreamType.OnDeck) {
+        <ng-container [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      }
+      @case (StreamType.RecentlyUpdated) {
+        <ng-container [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      }
+      @case (StreamType.NewlyAdded) {
+        <ng-container [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      }
+      @case (StreamType.SmartFilter) {
+        <ng-container [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      }
+      @case (StreamType.MoreInGenre) {
+        <ng-container [ngTemplateOutlet]="moreInGenre" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      }
+    }
 
-      <ng-container *ngSwitchCase="StreamType.RecentlyUpdated" [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
-
-      <ng-container *ngSwitchCase="StreamType.NewlyAdded" [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
-
-      <ng-container *ngSwitchCase="StreamType.SmartFilter" [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
-
-      <ng-container *ngSwitchCase="StreamType.MoreInGenre" [ngTemplateOutlet]="moreInGenre" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
-    </ng-container>
 
     <ng-template #smartFilter let-stream: DashboardStream>
-      <ng-container *ngIf="(stream.api | async) as data">
+      @if(stream.api | async; as data) {
         <app-carousel-reel [items]="data" [title]="stream.name" (sectionClick)="handleFilterSectionClick(stream)">
           <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId"
                              (reload)="reloadStream(item.id)" (dataChanged)="reloadStream(item.id)"></app-series-card>
           </ng-template>
         </app-carousel-reel>
-      </ng-container>
+      }
     </ng-template>
 
     <ng-template #onDeck let-stream: DashboardStream>
-      <ng-container *ngIf="(stream.api | async) as data">
-        <app-carousel-reel [items]="data" [title]="t('on-deck-title')" (sectionClick)="handleSectionClick('on deck')">
+      @if(stream.api | async; as data) {
+        <app-carousel-reel [items]="data" [title]="t('on-deck-title')" (sectionClick)="handleSectionClick(StreamId.OnDeck)">
           <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" [isOnDeck]="true"
-                             (reload)="reloadStream(stream.id)" (dataChanged)="reloadStream(stream.id)"></app-series-card>
+                             (reload)="reloadStream(stream.id, true)" (dataChanged)="reloadStream(stream.id)"></app-series-card>
           </ng-template>
         </app-carousel-reel>
-      </ng-container>
+      }
     </ng-template>
 
     <ng-template #recentlyUpdated let-stream: DashboardStream>
-      <ng-container *ngIf="(stream.api | async) as data">
-        <app-carousel-reel [items]="data" [title]="t('recently-updated-title')" (sectionClick)="handleSectionClick('recently updated series')">
+      @if(stream.api | async; as data) {
+        <app-carousel-reel [items]="data" [title]="t('recently-updated-title')" (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)">
           <ng-template #carouselItem let-item>
             <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
                            [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
           </ng-template>
         </app-carousel-reel>
-      </ng-container>
+      }
     </ng-template>
 
     <ng-template #newlyUpdated let-stream: DashboardStream>
-      <ng-container *ngIf="(stream.api | async) as data">
-        <app-carousel-reel [items]="data" [title]="t('recently-added-title')" (sectionClick)="handleSectionClick('newly added series')">
+      @if(stream.api | async; as data) {
+        <app-carousel-reel [items]="data" [title]="t('recently-added-title')" (sectionClick)="handleSectionClick(StreamId.NewlyAddedSeries)">
           <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" (dataChanged)="reloadStream(stream.id)"></app-series-card>
           </ng-template>
         </app-carousel-reel>
-      </ng-container>
+      }
     </ng-template>
 
     <ng-template #moreInGenre let-stream: DashboardStream>
-      <ng-container *ngIf="(stream.api | async) as data">
-        <app-carousel-reel [items]="data" [title]="t('more-in-genre-title', {genre: genre?.title})" (sectionClick)="handleSectionClick('more in genre')">
+      @if(stream.api | async; as data) {
+        <app-carousel-reel [items]="data" [title]="t('more-in-genre-title', {genre: genre?.title})" (sectionClick)="handleSectionClick(StreamId.MoreInGenre)">
           <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" (dataChanged)="reloadStream(stream.id)"></app-series-card>
           </ng-template>
         </app-carousel-reel>
-      </ng-container>
+      }
     </ng-template>
-
-</ng-container>
+  }
 
   <app-loading [loading]="isLoadingDashboard || (streamCount !== streamsLoaded)"></app-loading>
 </ng-container>
+

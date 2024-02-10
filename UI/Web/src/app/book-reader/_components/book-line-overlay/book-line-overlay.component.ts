@@ -84,12 +84,19 @@ export class BookLineOverlayComponent implements OnInit {
     const selection = window.getSelection();
     if (!event.target) return;
 
+
+
     if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
       if (this.selectedText !== '') {
         event.preventDefault();
         event.stopPropagation();
       }
-      this.reset();
+
+      const isRightClick = (event instanceof MouseEvent && event.button === 2);
+      if (!isRightClick) {
+        this.reset();
+      }
+
       return;
     }
 

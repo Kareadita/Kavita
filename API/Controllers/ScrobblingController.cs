@@ -39,22 +39,27 @@ public class ScrobblingController : BaseApiController
         _localizationService = localizationService;
     }
 
+    /// <summary>
+    /// Get the current user's AniList token
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("anilist-token")]
-    public async Task<ActionResult> GetAniListToken()
+    public async Task<ActionResult<string>> GetAniListToken()
     {
-        // Validate the license
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
         return Ok(user.AniListAccessToken);
     }
 
+    /// <summary>
+    /// Update the current user's AniList token
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update-anilist-token")]
     public async Task<ActionResult> UpdateAniListToken(AniListUpdateDto dto)
     {
-        // Validate the license
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
@@ -71,6 +76,11 @@ public class ScrobblingController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Checks if the current Scrobbling token for the given Provider has expired for the current user
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <returns></returns>
     [HttpGet("token-expired")]
     public async Task<ActionResult<bool>> HasTokenExpired(ScrobbleProvider provider)
     {
@@ -159,15 +169,20 @@ public class ScrobblingController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
         if (user == null) return Unauthorized();
         if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId))
-            return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+            return Ok(await _localizationService.Translate(user.Id, "nothing-to-do"));
 
-        var seriesHold = new ScrobbleHoldBuilder().WithSeriesId(seriesId).Build();
+        var seriesHold = new ScrobbleHoldBuilder()
+            .WithSeriesId(seriesId)
+            .Build();
         user.ScrobbleHolds.Add(seriesHold);
         _unitOfWork.UserRepository.Update(user);
         try
         {
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
+
+            // When a hold is placed on a series, clear any pre-existing Scrobble Events
+            await _scrobblingService.ClearEventsForSeries(user.Id, seriesId);
             return Ok();
         }
         catch (DbUpdateConcurrencyException ex)

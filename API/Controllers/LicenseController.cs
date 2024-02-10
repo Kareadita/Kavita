@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
-using API.DTOs.Account;
 using API.DTOs.License;
 using API.Entities.Enums;
 using API.Extensions;
@@ -20,7 +19,8 @@ public class LicenseController(
     IUnitOfWork unitOfWork,
     ILogger<LicenseController> logger,
     ILicenseService licenseService,
-    ILocalizationService localizationService)
+    ILocalizationService localizationService,
+    ITaskScheduler taskScheduler)
     : BaseApiController
 {
     /// <summary>
@@ -31,7 +31,9 @@ public class LicenseController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        return Ok(await licenseService.HasActiveLicense(forceCheck));
+        var result = await licenseService.HasActiveLicense(forceCheck);
+        await taskScheduler.ScheduleKavitaPlusTasks();
+        return Ok(result);
     }
 
     /// <summary>
@@ -57,6 +59,7 @@ public class LicenseController(
         setting.Value = null;
         unitOfWork.SettingsRepository.Update(setting);
         await unitOfWork.CommitAsync();
+        await taskScheduler.ScheduleKavitaPlusTasks();
         return Ok();
     }
 
@@ -65,7 +68,11 @@ public class LicenseController(
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
     {
         logger.LogInformation("Resetting license on file for Server");
-        if (await licenseService.ResetLicense(dto.License, dto.Email)) return Ok();
+        if (await licenseService.ResetLicense(dto.License, dto.Email))
+        {
+            await taskScheduler.ScheduleKavitaPlusTasks();
+            return Ok();
+        }
 
         return BadRequest(localizationService.Translate(User.GetUserId(), "unable-to-reset-k+"));
     }
@@ -82,6 +89,7 @@ public class LicenseController(
         try
         {
             await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
+            await taskScheduler.ScheduleKavitaPlusTasks();
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CardItemComponent} from '../../cards/card-item/card-item.component';
 import {SeriesCardComponent} from '../../cards/series-card/series-card.component';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
-import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgForOf, NgTemplateOutlet} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
@@ -30,6 +30,17 @@ import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ToastrService} from "ngx-toastr";
+import {ServerService} from "../../_services/server.service";
+
+enum StreamId {
+  OnDeck,
+  RecentlyUpdatedSeries,
+  NewlyAddedSeries,
+  MoreInGenre,
+}
+
 
 @Component({
   selector: 'app-dashboard',
@@ -37,8 +48,8 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent],
+  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgForOf, NgTemplateOutlet, LoadingComponent],
 })
 export class DashboardComponent implements OnInit {
 
@@ -55,6 +66,9 @@ export class DashboardComponent implements OnInit {
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly dashboardService = inject(DashboardService);
+  private readonly scrobblingService = inject(ScrobblingService);
+  private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
@@ -73,6 +87,7 @@ export class DashboardComponent implements OnInit {
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
   protected readonly StreamType = StreamType;
+  protected readonly StreamId = StreamId;
 
   constructor() {
     this.loadDashboard();
@@ -104,6 +119,14 @@ export class DashboardComponent implements OnInit {
         this.refreshStreams$.next();
       }
     });
+
+    this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+      if (hasExpired) {
+        this.toastr.error(translate('toasts.anilist-token-expired'));
+      }
+      this.cdRef.markForCheck();
+    });
+
 
     this.isAdmin$ = this.accountService.currentUser$.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -170,12 +193,17 @@ export class DashboardComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  reloadStream(streamId: number) {
+  reloadStream(streamId: number, onDeck = false) {
     const index = this.streams.findIndex(s => s.id === streamId);
     if (index < 0) return;
-    this.streams[index] = {...this.streams[index]};
-    console.log('swapped out stream: ', this.streams[index]);
-    this.cdRef.detectChanges();
+    if (onDeck) {
+      // TODO: Need to figure out a better way to refresh just one stream
+      this.refreshStreams$.next();
+      this.cdRef.markForCheck();
+    } else {
+      this.streams[index] = {...this.streams[index]};
+      this.cdRef.markForCheck();
+    }
   }
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
@@ -186,18 +214,18 @@ export class DashboardComponent implements OnInit {
     await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
   }
 
-  handleSectionClick(sectionTitle: string) {
-    if (sectionTitle.toLowerCase() === 'recently updated series') {
+  handleSectionClick(streamId: StreamId) {
+    if (streamId === StreamId.RecentlyUpdatedSeries) {
       const params: any = {};
       params['page'] = 1;
-      params['title'] = 'Recently Updated';
+      params['title'] = translate('dashboard.recently-updated-title');
       const filter = this.filterUtilityService.createSeriesV2Filter();
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    } else if (sectionTitle.toLowerCase() === 'on deck') {
+    } else if (streamId === StreamId.OnDeck) {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.on-deck-title');
@@ -210,7 +238,7 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    } else if (sectionTitle.toLowerCase() === 'newly added series') {
+    } else if (streamId === StreamId.NewlyAddedSeries) {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.recently-added-title');
@@ -220,10 +248,10 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
-    } else if (sectionTitle.toLowerCase() === 'more in genre') {
+    } else if (streamId === StreamId.MoreInGenre) {
       const params: any = {};
       params['page'] = 1;
-      params['title'] = translate('more-in-genre-title', {genre: this.genre?.title});
+      params['title'] = translate('dashboard.more-in-genre-title', {genre: this.genre?.title});
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();

@@ -39,6 +39,10 @@ export class EntityTitleComponent implements OnInit {
   titleName: string = '';
   volumeTitle: string = '';
 
+  get Number() {
+    if (this.utilityService.isVolume(this.entity)) return (this.entity as Volume).minNumber;
+    return (this.entity as Chapter).number;
+  }
 
   get LibraryType() {
     return LibraryType;
