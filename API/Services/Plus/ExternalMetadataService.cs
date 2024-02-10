@@ -78,7 +78,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Reviews = ArraySegment<UserReviewDto>.Empty
     };
     // Allow 50 requests per 24 hours
-    private static readonly RateLimiter RateLimiter = new RateLimiter(10, TimeSpan.FromMinutes(10), false);
+    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(12), false);
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {
@@ -122,7 +122,7 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var seriesId in ids)
         {
             var libraryType = libTypes[seriesId];
-            await GetSeriesDetailPlus(seriesId, libraryType);
+            await GetNewSeriesData(seriesId, libraryType);
             await Task.Delay(1500);
             count++;
         }
