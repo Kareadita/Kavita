@@ -12,7 +12,7 @@ import {
   tap,
   finalize,
   of,
-  filter, Subject,
+  filter,
 } from 'rxjs';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
@@ -71,6 +71,10 @@ export class DownloadService {
    * Size in bytes in which to inform the user for confirmation before download starts. Defaults to 100 MB.
    */
   public SIZE_WARNING = 104_857_600;
+  /**
+   * Sie in bytes in which to inform the user that anything above may fail on iOS due to device limits. (200MB)
+   */
+  private IOS_SIZE_WARNING = 209_715_200;
 
   private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
   /**
@@ -290,41 +294,18 @@ export class DownloadService {
 
   private downloadChapter(chapter: Chapter) {
     return this.downloadEntity(chapter);
-
-    // const downloadType = 'chapter';
-    // const subtitle = this.downloadSubtitle(downloadType, chapter);
-    // return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id,
-    //             {observe: 'events', responseType: 'blob', reportProgress: true}
-    //     ).pipe(
-    //       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-    //       download((blob, filename) => {
-    //         this.save(blob, decodeURIComponent(filename));
-    //       }),
-    //       tap((d) => this.updateDownloadState(d, downloadType, subtitle, chapter.id)),
-    //       finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-    //     );
   }
 
   private downloadVolume(volume: Volume) {
     return this.downloadEntity(volume);
-    // const downloadType = 'volume';
-    // const subtitle = this.downloadSubtitle(downloadType, volume);
-    // return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id,
-    //                   {observe: 'events', responseType: 'blob', reportProgress: true}
-    //         ).pipe(
-    //           throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-    //           download((blob, filename) => {
-    //             this.save(blob, decodeURIComponent(filename));
-    //           }),
-    //           tap((d) => this.updateDownloadState(d, downloadType, subtitle, volume.id)),
-    //           finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-    //         );
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
+    const showIosWarning = size > this.IOS_SIZE_WARNING && /iPad|iPhone|iPod/.test(navigator.userAgent);
     return (size < this.SIZE_WARNING ||
       await this.confirmService.confirm(translate('toasts.confirm-download-size',
-        {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})));
+        {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})
+      + (!showIosWarning ? '' : '<br/><br/>' + translate('toasts.confirm-download-size-ios'))));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {

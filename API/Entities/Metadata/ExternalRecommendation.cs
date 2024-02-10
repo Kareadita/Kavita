@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using API.Services.Plus;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace API.Entities.Metadata;
 
+[Index(nameof(SeriesId), IsUnique = false)]
 public class ExternalRecommendation
 {
     public int Id { get; set; }
@@ -19,7 +22,7 @@ public class ExternalRecommendation
     /// When null, represents an external series. When set, it is a Series
     /// </summary>
     public int? SeriesId { get; set; }
-    public virtual Series Series { get; set; }
+    //public virtual Series? Series { get; set; }
 
     // Relationships
     public ICollection<ExternalSeriesMetadata> ExternalSeriesMetadatas { get; set; } = null!;

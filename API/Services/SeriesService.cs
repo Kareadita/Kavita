@@ -427,6 +427,9 @@ public class SeriesService : ISeriesService
             }
 
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
+
+            _unitOfWork.SeriesRepository.Remove(series);
+
             var libraryIds = series.Select(s => s.LibraryId);
             var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
             foreach (var library in libraries)
@@ -434,11 +437,8 @@ public class SeriesService : ISeriesService
                 library.UpdateLastModified();
                 _unitOfWork.LibraryRepository.Update(library);
             }
+            await _unitOfWork.CommitAsync();
 
-            _unitOfWork.SeriesRepository.Remove(series);
-
-
-            if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync()) return true;
 
             foreach (var s in series)
             {
@@ -449,14 +449,13 @@ public class SeriesService : ISeriesService
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
             await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
             _taskScheduler.CleanupChapters(allChapterIds.ToArray());
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an issue when trying to delete multiple series");
             return false;
         }
-
-        return true;
     }
 
     /// <summary>

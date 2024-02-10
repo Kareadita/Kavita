@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.0.0"
+    "version": "0.7.14.1"
   },
   "servers": [
     {
@@ -8001,10 +8001,12 @@
         "tags": [
           "Series"
         ],
+        "summary": "Deletes a series from Kavita",
         "parameters": [
           {
             "name": "seriesId",
             "in": "path",
+            "description": "",
             "required": true,
             "schema": {
               "type": "integer",
@@ -14982,9 +14984,6 @@
             "description": "When null, represents an external series. When set, it is a Series",
             "format": "int32",
             "nullable": true
-          },
-          "series": {
-            "$ref": "#/components/schemas/Series"
           },
           "externalSeriesMetadatas": {
             "type": "array",

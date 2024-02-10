@@ -15,8 +15,6 @@ import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {filter} from "rxjs/operators";
 
 @Component({
     selector: 'app-manage-email-settings',

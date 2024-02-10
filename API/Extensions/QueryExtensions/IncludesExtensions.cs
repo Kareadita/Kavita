@@ -80,6 +80,12 @@ public static class IncludesExtensions
                 .ThenInclude(s => s.ExternalRatings);
         }
 
+        if (includeFlags.HasFlag(SeriesIncludes.ExternalMetadata))
+        {
+            query = query
+                .Include(s => s.ExternalSeriesMetadata);
+        }
+
         if (includeFlags.HasFlag(SeriesIncludes.ExternalRecommendations))
         {
             query = query

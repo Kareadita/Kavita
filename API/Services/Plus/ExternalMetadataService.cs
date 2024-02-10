@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Helpers;
 using AutoMapper;
 using Flurl.Http;
 using Hangfire;
@@ -76,6 +77,8 @@ public class ExternalMetadataService : IExternalMetadataService
         Ratings = ArraySegment<RatingDto>.Empty,
         Reviews = ArraySegment<UserReviewDto>.Empty
     };
+    // Allow 50 requests per 24 hours
+    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(12), false);
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {
@@ -83,7 +86,6 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger = logger;
         _mapper = mapper;
         _licenseService = licenseService;
-
 
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
@@ -114,17 +116,17 @@ public class ExternalMetadataService : IExternalMetadataService
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeriesIdsWithoutMetadata(25);
         if (ids.Count == 0) return;
 
-        _logger.LogInformation("Started Refreshing {Count} series data from Kavita+", ids.Count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
         var count = 0;
+        var libTypes = await _unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(ids);
         foreach (var seriesId in ids)
         {
-            // TODO: Rewrite this so it's streamlined and not multiple DB calls
-            var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
-            await GetSeriesDetailPlus(seriesId, libraryType);
+            var libraryType = libTypes[seriesId];
+            await GetNewSeriesData(seriesId, libraryType);
             await Task.Delay(1500);
             count++;
         }
-        _logger.LogInformation("Finished Refreshing {Count} series data from Kavita+", count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
     }
 
     /// <summary>
@@ -145,13 +147,30 @@ public class ExternalMetadataService : IExternalMetadataService
         await _unitOfWork.CommitAsync();
     }
 
-    [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public Task GetNewSeriesData(int seriesId, LibraryType libraryType)
+    /// <summary>
+    /// Fetches data from Kavita+
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    public async Task GetNewSeriesData(int seriesId, LibraryType libraryType)
     {
-        // TODO: Implement this task
-        if (!IsPlusEligible(libraryType)) return Task.CompletedTask;
-        return Task.CompletedTask;
+        if (!IsPlusEligible(libraryType)) return;
+
+        // Generate key based on seriesId and libraryType or any unique identifier for the request
+        // Check if the request is allowed based on the rate limit
+        if (!RateLimiter.TryAcquire(string.Empty))
+        {
+            // Request not allowed due to rate limit
+            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
+            return;
+        }
+
+        _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
+        // Prefetch SeriesDetail data
+        await GetSeriesDetailPlus(seriesId, libraryType);
+
+        // TODO: Fetch Series Metadata
+
     }
 
     /// <summary>
