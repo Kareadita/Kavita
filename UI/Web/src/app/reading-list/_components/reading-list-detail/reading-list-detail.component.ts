@@ -145,7 +145,8 @@ export class ReadingListDetailComponent implements OnInit {
   readChapter(item: ReadingListItem) {
     if (!this.readingList) return;
     const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
-    this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
+    this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId,
+      item.seriesFormat, item.libraryType), {queryParams: params});
   }
 
   async handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
@@ -209,7 +210,8 @@ export class ReadingListDetailComponent implements OnInit {
     if (!this.readingList) return;
     const firstItem = this.items[0];
     this.router.navigate(
-      this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat),
+      this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId,
+        firstItem.seriesFormat, firstItem.libraryType),
       {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
   }
 
@@ -226,7 +228,8 @@ export class ReadingListDetailComponent implements OnInit {
     }
 
     this.router.navigate(
-      this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat),
+      this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId,
+        currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat, currentlyReadingChapter.libraryType),
       {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
   }
 

@@ -14,5 +14,6 @@ public interface IChapterInfoDto
     public int Pages { get; set; }
     public bool IsSpecial { get; set; }
     public string ChapterTitle { get; set; }
+    public LibraryType LibraryType { get; set; }
 
 }

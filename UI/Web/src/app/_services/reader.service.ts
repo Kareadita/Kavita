@@ -1,23 +1,24 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {DestroyRef, Inject, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
-import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
-import { ChapterInfo } from '../manga-reader/_models/chapter-info';
-import { Chapter } from '../_models/chapter';
-import { HourEstimateRange } from '../_models/series-detail/hour-estimate-range';
-import { MangaFormat } from '../_models/manga-format';
-import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
-import { PageBookmark } from '../_models/readers/page-bookmark';
-import { ProgressBookmark } from '../_models/readers/progress-bookmark';
-import { FileDimension } from '../manga-reader/_models/file-dimension';
+import {Router} from '@angular/router';
+import {environment} from 'src/environments/environment';
+import {ChapterInfo} from '../manga-reader/_models/chapter-info';
+import {Chapter} from '../_models/chapter';
+import {HourEstimateRange} from '../_models/series-detail/hour-estimate-range';
+import {MangaFormat} from '../_models/manga-format';
+import {BookmarkInfo} from '../_models/manga-reader/bookmark-info';
+import {PageBookmark} from '../_models/readers/page-bookmark';
+import {ProgressBookmark} from '../_models/readers/progress-bookmark';
+import {FileDimension} from '../manga-reader/_models/file-dimension';
 import screenfull from 'screenfull';
-import { TextResonse } from '../_types/text-response';
-import { AccountService } from './account.service';
+import {TextResonse} from '../_types/text-response';
+import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import NoSleep from 'nosleep.js';
+import {LibraryType} from "../_models/library/library";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -72,12 +73,15 @@ export class ReaderService {
   }
 
 
-  getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
+  getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat, libraryType: LibraryType) {
     if (format === undefined) format = MangaFormat.ARCHIVE;
 
     if (format === MangaFormat.EPUB) {
       return ['library', libraryId, 'series', seriesId, 'book', chapterId];
     } else if (format === MangaFormat.PDF) {
+      if (libraryType === LibraryType.Magazine) {
+        return ['library', libraryId, 'series', seriesId, 'manga', chapterId];
+      }
       return ['library', libraryId, 'series', seriesId, 'pdf', chapterId];
     } else {
       return ['library', libraryId, 'series', seriesId, 'manga', chapterId];
@@ -131,8 +135,8 @@ export class ReaderService {
     return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);
   }
 
-  getPageUrl(chapterId: number, page: number) {
-    return `${this.baseUrl}reader/image?chapterId=${chapterId}&apiKey=${this.encodedKey}&page=${page}`;
+  getPageUrl(chapterId: number, page: number, extractPdf = false) {
+    return `${this.baseUrl}reader/image?chapterId=${chapterId}&apiKey=${this.encodedKey}&page=${page}&extractPdf=${extractPdf}`;
   }
 
   getThumbnailUrl(chapterId: number, page: number) {
@@ -143,8 +147,8 @@ export class ReaderService {
     return this.baseUrl + 'reader/bookmark-image?seriesId=' + seriesId + '&page=' + page + '&apiKey=' + encodeURIComponent(apiKey);
   }
 
-  getChapterInfo(chapterId: number, includeDimensions = false) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&includeDimensions=' + includeDimensions);
+  getChapterInfo(chapterId: number, includeDimensions = false, extractPdf = false) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + `reader/chapter-info?chapterId=${chapterId}&includeDimensions=${includeDimensions}&extractPdf=${extractPdf}`);
   }
 
   getFileDimensions(chapterId: number) {

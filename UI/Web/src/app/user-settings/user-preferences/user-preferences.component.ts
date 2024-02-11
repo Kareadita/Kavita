@@ -166,7 +166,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.route.fragment.subscribe(frag => {
         const tab = this.tabs.filter(item => item.fragment === frag);
-        console.log('tab: ', tab);
         if (tab.length > 0) {
           this.active = tab[0];
         } else {

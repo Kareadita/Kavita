@@ -638,9 +638,10 @@ public static partial class Parser
 
     #region Magazine
 
-    private static readonly Dictionary<string, int> _monthMappings = CreateMonthMappings();
-    private static readonly Regex[] MagazineSeriesRegex = new[]
-    {
+    private static readonly HashSet<string> GeoCodes = new(CreateCountryCodes());
+    private static readonly Dictionary<string, int> MonthMappings = CreateMonthMappings();
+    private static readonly Regex[] MagazineSeriesRegex =
+    [
         // 3D World - 2018  UK, 3D World - 022014
         new Regex(
             @"^(?<Series>.+?)(_|\s)*-(_|\s)*\d{4,6}.*",
@@ -649,10 +650,14 @@ public static partial class Parser
         new Regex(
             @"^(?<Series>.+?)(_|\s)*-(_|\s)*.*",
             MatchOptions, RegexTimeout),
+        // AIR International #1 // This breaks the way the code works
+        // new Regex(
+        // @"^(?<Series>.+?)(_|\s)+?#",
+        // MatchOptions, RegexTimeout)
         // The New Yorker - April 2, 2018  USA
         // AIR International Magazine 2006
         // AIR International Vol. 14 No. 3 (ISSN 1011-3250)
-    };
+    ];
 
     private static readonly Regex[] MagazineVolumeRegex = new[]
     {
@@ -846,6 +851,17 @@ public static partial class Parser
         return DefaultVolume;
     }
 
+    private static string[] CreateCountryCodes()
+    {
+        var codes = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+            .Select(culture => new RegionInfo(culture.Name).TwoLetterISORegionName)
+            .Distinct()
+            .OrderBy(code => code)
+            .ToList();
+        codes.Add("UK");
+        return codes.ToArray();
+    }
+
 
     private static Dictionary<string, int> CreateMonthMappings()
     {
@@ -879,7 +895,7 @@ public static partial class Parser
                 var value = groups["Chapter"].Value;
                 // If value has non-digits, we need to convert to a digit
                 if (IsNumberRegex().IsMatch(value)) return FormatValue(value, false);
-                if (_monthMappings.TryGetValue(value, out var parsedMonth))
+                if (MonthMappings.TryGetValue(value, out var parsedMonth))
                 {
                     return FormatValue($"{parsedMonth}", false);
                 }
@@ -889,7 +905,36 @@ public static partial class Parser
         return DefaultChapter;
     }
 
-    public static string ParseYear(string value)
+    /// <summary>
+    /// Tries to parse a GeoCode (UK, US) out of a string
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static string? ParseGeoCode(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        const string pattern = @"\b(?:\(|\[|\{)([A-Z]{2})(?:\)|\]|\})\b|^([A-Z]{2})$";
+
+        // Match the pattern in the input string
+        var match = Regex.Match(value, pattern, RegexOptions.IgnoreCase);
+
+        if (match.Success)
+        {
+            // Extract the GeoCode from the first capturing group if it exists,
+            // otherwise, extract the GeoCode from the second capturing group
+            var extractedCode = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value;
+
+            // Validate the extracted GeoCode against the list of valid GeoCodes
+            if (GeoCodes.Contains(extractedCode))
+            {
+                return extractedCode;
+            }
+        }
+
+        return null;
+    }
+
+    public static string? ParseYear(string? value)
     {
         if (string.IsNullOrEmpty(value)) return value;
         return YearRegex.Match(value).Value;

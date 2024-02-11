@@ -69,6 +69,7 @@ import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {shareReplay} from "rxjs/operators";
+import {LibraryService} from "../../../_services/library.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -151,6 +152,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   public readonly readerService = inject(ReaderService);
+  public readonly libraryService = inject(LibraryService);
   public readonly utilityService = inject(UtilityService);
   public readonly mangaReaderService = inject(ManagaReaderService);
 
@@ -411,7 +413,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
-    return this.readerService.getPageUrl(chapterId, pageNum);
+    return this.readerService.getPageUrl(chapterId, pageNum, this.libraryType == LibraryType.Magazine);
   }
 
   get CurrentPageBookmarked() {
@@ -493,6 +495,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
     this.bookmarkMode = this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true';
+
+    console.log('ngOnInit called: ', this.libraryId)
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
@@ -610,7 +614,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    this.init();
+    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
+      this.libraryType = type;
+      this.init();
+      this.cdRef.markForCheck();
+    });
+
   }
 
   ngAfterViewInit() {
@@ -888,15 +897,29 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    // When readingListMode and we loaded from continuous reader, library/seriesId doesn't get refreshed. Need to reobtain from the chapterId
+    if (this.readingListMode) {
+      console.log('chapterId: ', this.chapterId)
+      this.cdRef.markForCheck();
+    }
+
+    // First load gets library type from constructor. Any other loads will get from continuous reader
+    console.log('library type', this.libraryType, 'mag: ', LibraryType.Magazine, 'equal: ', this.libraryType == LibraryType.Magazine);
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
-      chapterInfo: this.readerService.getChapterInfo(this.chapterId, true),
+      chapterInfo: this.readerService.getChapterInfo(this.chapterId, true, this.libraryType == LibraryType.Magazine),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
     }).pipe(take(1)).subscribe(results => {
       if (this.readingListMode && (results.chapterInfo.seriesFormat === MangaFormat.EPUB || results.chapterInfo.seriesFormat === MangaFormat.PDF)) {
         // Redirect to the book reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
-        this.router.navigate(this.readerService.getNavigationArray(results.chapterInfo.libraryId, results.chapterInfo.seriesId, this.chapterId, results.chapterInfo.seriesFormat), {queryParams: params});
+        if (results.chapterInfo.libraryType === LibraryType.Magazine) {
+          this.router.navigate(this.readerService.getNavigationArray(results.chapterInfo.libraryId, results.chapterInfo.seriesId,
+            this.chapterId, results.chapterInfo.seriesFormat, results.chapterInfo.libraryType), {queryParams: params});
+        } else {
+          this.router.navigate(this.readerService.getNavigationArray(results.chapterInfo.libraryId, results.chapterInfo.seriesId,
+            this.chapterId, results.chapterInfo.seriesFormat, results.chapterInfo.libraryType), {queryParams: params});
+        }
         return;
       }
 
@@ -967,6 +990,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.closeReader();
       }, 200);
     });
+
+    // LibraryId is wrong on readinglist mode
+    // this.libraryService.getLibraryType(this.libraryId).subscribe((type) => {
+    //   this.libraryType = type;
+    //   console.log('library type', this.libraryType, 'mag: ', LibraryType.Magazine, 'equal: ', this.libraryType == LibraryType.Magazine);
+    //
+    // });
   }
 
   closeReader() {
@@ -1300,6 +1330,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
+
     if (chapterId > 0) {
       this.isLoading = true;
       this.cdRef.markForCheck();
@@ -1307,11 +1338,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId);
       // Load chapter Id onto route but don't reload
-      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
-      window.history.replaceState({}, '', newRoute);
-      this.init();
-      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
-      this.toastr.info(msg, '', {timeOut: 3000});
+
+
+      if (this.readingListMode) {
+        this.readerService.getChapterInfo(this.chapterId).subscribe(chapterInfo => {
+          this.libraryId = chapterInfo.libraryId;
+          this.seriesId = chapterInfo.seriesId;
+          this.libraryType = chapterInfo.libraryType;
+          this.#updatePageStateForNextChapter(direction);
+        });
+      } else {
+        this.#updatePageStateForNextChapter(direction);
+      }
     } else {
       // This will only happen if no actual chapter can be found
       const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter',
@@ -1325,6 +1363,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     }
+  }
+
+  #updatePageStateForNextChapter(direction: 'Next' | 'Prev') {
+    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+    window.history.replaceState({}, '', newRoute);
+    this.init();
+    const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+    this.toastr.info(msg, '', {timeOut: 3000});
   }
 
 
@@ -1434,7 +1480,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
       if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
-        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+        this.readerService.getChapterInfo(this.nextChapterId, false, this.libraryType == LibraryType.Magazine).pipe(take(1)).subscribe(res => {
           this.continuousChapterInfos[ChapterInfoPosition.Next] = res;
           this.nextChapterPrefetched = true;
           this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.FORWARD);
@@ -1442,7 +1488,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else if (this.pageNum <= 10) {
       if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
-        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+        this.readerService.getChapterInfo(this.prevChapterId, false, this.libraryType == LibraryType.Magazine).pipe(take(1)).subscribe(res => {
           this.continuousChapterInfos[ChapterInfoPosition.Previous] = res;
           this.prevChapterPrefetched = true;
           this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.BACKWARDS);

@@ -15,4 +15,5 @@ public class BookInfoDto : IChapterInfoDto
     public int Pages { get; set; }
     public bool IsSpecial { get; set; }
     public string ChapterTitle { get; set; } = default! ;
+    public LibraryType LibraryType { get; set; }
 }

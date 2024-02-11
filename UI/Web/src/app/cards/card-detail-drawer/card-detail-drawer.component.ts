@@ -263,7 +263,7 @@ export class CardDetailDrawerComponent implements OnInit {
     }
 
     const params = this.readerService.getQueryParamsObject(incognito, false);
-    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: params});
+    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format, this.libraryType), {queryParams: params});
     this.close();
   }
 

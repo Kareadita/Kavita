@@ -719,7 +719,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     // Book libraries only have Volumes or Specials enabled
     if (this.libraryType === LibraryType.Magazine) {
       if (this.volumes.length === 0) {
-        this.activeTabId = TabID.Chapters;
+        if (this.chapters.length > 0) {
+          this.activeTabId = TabID.Chapters;
+        } else {
+          this.activeTabId = TabID.Specials;
+        }
       } else {
         this.activeTabId = TabID.Volumes;
       }
@@ -840,7 +844,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.toastr.error(this.translocoService.translate('series-detail.no-pages'));
       return;
     }
-    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
+    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id,
+      chapter.files[0].format, this.libraryType), {queryParams: {incognitoMode}});
   }
 
   openVolume(volume: Volume) {

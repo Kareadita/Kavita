@@ -2949,6 +2949,45 @@
         }
       }
     },
+    "/api/Library/types": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Return pairs of all types",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryTypeDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryTypeDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryTypeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/License/valid-license": {
       "get": {
         "tags": [
@@ -13458,6 +13497,18 @@
           "chapterTitle": {
             "type": "string",
             "nullable": true
+          },
+          "libraryType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -16144,6 +16195,29 @@
           }
         },
         "additionalProperties": false
+      },
+      "LibraryTypeDto": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Simple pairing of LibraryId and LibraryType"
       },
       "LoginDto": {
         "type": "object",

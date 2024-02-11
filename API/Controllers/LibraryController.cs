@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -503,5 +504,15 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)
     {
         return Ok(await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId));
+    }
+
+    /// <summary>
+    /// Return pairs of all types
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("types")]
+    public async Task<ActionResult<IEnumerable<LibraryTypeDto>>> GetLibraryTypes()
+    {
+        return Ok(await _unitOfWork.LibraryRepository.GetLibraryTypesAsync(User.GetUserId()));
     }
 }

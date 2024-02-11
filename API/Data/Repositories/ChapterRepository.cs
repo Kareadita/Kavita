@@ -112,11 +112,11 @@ public class ChapterRepository : IChapterRepository
                 LibraryId = data.LibraryId,
                 Pages = data.Pages,
                 ChapterTitle = data.TitleName,
-                LibraryType = data.LibraryType
+                LibraryType = data.LibraryType,
             })
             .AsNoTracking()
             .AsSplitQuery()
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
 
         return chapterInfo;
     }

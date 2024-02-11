@@ -34,6 +34,8 @@ public class DefaultParser : IDefaultParser
     public ParserInfo? Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
     {
         var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+
+        // We can now remove this as there is the ability to turn off images for non-image libraries
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
         if (type != LibraryType.Image && Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
 
@@ -49,7 +51,7 @@ public class DefaultParser : IDefaultParser
         // If library type is Image or this is not a cover image in a non-image library, then use dedicated parsing mechanism
         if (type == LibraryType.Image || Parser.IsImage(filePath))
         {
-            // TODO: We can move this up one level
+            // TODO: We can move this up one level (out of DefaultParser - If we do different Parsers)
             return ParseImage(filePath, rootPath, ret);
         }
 
@@ -136,21 +138,33 @@ public class DefaultParser : IDefaultParser
             var folders = _directoryService.GetFoldersTillRoot(libraryPath, filePath).ToList();
             // Usually the LAST folder is the Series and everything up to can have Volume
 
+
             if (string.IsNullOrEmpty(ret.Series))
             {
                 ret.Series = Parser.CleanTitle(folders[^1]);
             }
+            var hasGeoCode = !string.IsNullOrEmpty(Parser.ParseGeoCode(ret.Series));
             foreach (var folder in folders[..^1])
             {
                 if (ret.Volumes == Parser.DefaultVolume)
                 {
                     var vol = Parser.ParseYear(folder);
-                    if (vol != folder)
+                    if (!string.IsNullOrEmpty(vol) && vol != folder)
                     {
                         ret.Volumes = vol;
                     }
                 }
 
+                // If folder has a language code in it, then we add that to the Series (Wired (UK))
+                if (!hasGeoCode)
+                {
+                    var geoCode = Parser.ParseGeoCode(folder);
+                    if (!string.IsNullOrEmpty(geoCode))
+                    {
+                        ret.Series = $"{ret.Series} ({geoCode})";
+                        hasGeoCode = true;
+                    }
+                }
 
             }
         }

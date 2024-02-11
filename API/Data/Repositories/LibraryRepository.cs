@@ -57,6 +57,7 @@ public interface ILibraryRepository
     Task<bool> GetAllowsScrobblingBySeriesId(int seriesId);
 
     Task<IDictionary<int, LibraryType>> GetLibraryTypesBySeriesIdsAsync(IList<int> seriesIds);
+    Task<IEnumerable<LibraryTypeDto>> GetLibraryTypesAsync(int userId);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -364,5 +365,18 @@ public class LibraryRepository : ILibraryRepository
                 series.Library.Type
             })
             .ToDictionaryAsync(entity => entity.Id, entity => entity.Type);
+    }
+
+    public async Task<IEnumerable<LibraryTypeDto>> GetLibraryTypesAsync(int userId)
+    {
+        return await _context.Library
+            .Where(l => l.AppUsers.Any(u => u.Id == userId))
+            .Select(l => new LibraryTypeDto()
+            {
+                LibraryType = l.Type,
+                LibraryId = l.Id
+            })
+            .AsSplitQuery()
+            .ToListAsync();
     }
 }

@@ -634,12 +634,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
-      if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
-        // Redirect to the manga reader.
-        const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
-        this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
-        return;
-      }
+      this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
+        this.libraryType = type;
+        this.cdRef.markForCheck();
+
+        if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
+          // Redirect to the manga reader.
+          const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
+          this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat, this.libraryType), {queryParams: params});
+          return;
+        }
+      });
+
 
       this.bookTitle = info.bookTitle;
       this.cdRef.markForCheck();
@@ -658,10 +664,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
 
         this.continuousChaptersStack.push(this.chapterId);
-
-        this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
-          this.libraryType = type;
-        });
 
         this.updateImageSizes();
 

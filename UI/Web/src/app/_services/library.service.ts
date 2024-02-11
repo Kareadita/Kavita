@@ -107,6 +107,20 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/update', model);
   }
 
+  getLibraryTypes() {
+    if (this.libraryTypes) return of(this.libraryTypes);
+    return this.httpClient.get<Array<{libraryId: number, libraryType: LibraryType}>>(this.baseUrl + 'library/types').pipe(map(types => {
+      if (this.libraryTypes === undefined) {
+        this.libraryTypes = {};
+      }
+      types.forEach(t => {
+        this.libraryTypes![t.libraryId] = t.libraryType;
+      });
+
+      return this.libraryTypes;
+    }));
+  }
+
   getLibraryType(libraryId: number) {
     if (this.libraryTypes != undefined && this.libraryTypes.hasOwnProperty(libraryId)) {
       return of(this.libraryTypes[libraryId]);

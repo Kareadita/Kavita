@@ -244,6 +244,7 @@ public class ReaderController : BaseApiController
             SeriesFormat = dto.SeriesFormat,
             SeriesId = dto.SeriesId,
             LibraryId = dto.LibraryId,
+            LibraryType = dto.LibraryType,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
             SeriesTotalPages = series.Pages,
@@ -283,6 +284,7 @@ public class ReaderController : BaseApiController
 
         return Ok(info);
     }
+
 
     /// <summary>
     /// Returns various information about all bookmark files for a Series. Side effect: This will cache the bookmark images for reading.
