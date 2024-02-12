@@ -785,7 +785,9 @@
         "help": "{{common.help}}",
         "file-type-group-label": "Tipos de archivos",
         "file-type-group-tooltip": "¿Qué tipos de archivos debe buscar Kavita? Por ejemplo, Archivo incluirá todos los archivos cb*, zip, rar, etc.",
-        "exclude-patterns-tooltip": "Configure un conjunto de patrones (sintaxis Glob) que Kavita comparará al escanear directorios y excluirá de los resultados del Scanner."
+        "exclude-patterns-tooltip": "Configure un conjunto de patrones (sintaxis Glob) que Kavita comparará al escanear directorios y excluirá de los resultados del Scanner.",
+        "kavitaplus-eligible-tooltip": "¿Kavita+ obtendrá información o admitirá Scrobbling?",
+        "kavitaplus-eligible-label": "Kavita+ admisible"
     },
     "all-series": {
         "series-count": "{{common.series-count}}",
@@ -1054,7 +1056,8 @@
         "delete-device": "¿Estás seguro de que quieres borrar este dispositivo?",
         "review-deleted": "Revisión eliminada",
         "collection-tag-deleted": "Etiqueta de la colección eliminada",
-        "force-kavita+-refresh-success": "Los metadatos externos de Kavita+ han sido invalidados"
+        "force-kavita+-refresh-success": "Los metadatos externos de Kavita+ han sido invalidados",
+        "confirm-download-size-ios": "iOS tiene problemas para descargar archivos de más de 200 MB, es posible que esta descarga no se complete."
     },
     "library-selector": {
         "title": "Bibliotecas",
