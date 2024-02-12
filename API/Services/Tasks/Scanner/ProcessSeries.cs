@@ -325,7 +325,7 @@ public class ProcessSeries : IProcessSeries
         {
             // If a series has a TotalCount of 1 (or no total count) and there is only a Special, mark it as Complete
             series.Metadata.MaxCount = series.Metadata.TotalCount;
-        } else if ((maxChapter == 0 || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
+        } else if ((maxChapter == Parser.Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
         {
             series.Metadata.MaxCount = maxVolume;
         } else if (maxVolume == series.Metadata.TotalCount)

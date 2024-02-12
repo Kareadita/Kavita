@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Interfaces;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.DTOs;
 
@@ -42,4 +43,13 @@ public class VolumeDto : IHasReadTimeEstimate
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public int AvgHoursToRead { get; set; }
+
+    /// <summary>
+    /// Is this a loose leaf volume
+    /// </summary>
+    /// <returns></returns>
+    public bool IsLooseLeaf()
+    {
+        return Math.Abs(this.MinNumber - Parser.DefaultVolumeNumber) < 0.001f;
+    }
 }

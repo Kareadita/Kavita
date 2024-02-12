@@ -736,8 +736,8 @@ public class ReadingListServiceTests
     }
 
     private static ReadingListItemDto CreateListItemDto(MangaFormat seriesFormat, LibraryType libraryType,
-        string volumeNumber = "-2147483648",
-        string chapterNumber = "-2147483648",
+        string volumeNumber = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+        string chapterNumber =API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
         string chapterTitleName = "")
     {
         return new ReadingListItemDto()

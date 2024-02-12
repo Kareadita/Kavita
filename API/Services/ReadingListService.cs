@@ -633,7 +633,7 @@ public class ReadingListService : IReadingListService
             var bookVolume = string.IsNullOrEmpty(book.Volume)
                 ? Parser.DefaultVolume
                 : book.Volume;
-            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.Find(v => v.MinNumber == 0);
+            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault();
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)

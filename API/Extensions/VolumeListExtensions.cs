@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
@@ -65,5 +66,15 @@ public static class VolumeListExtensions
     public static Volume? GetLooseLeafVolumeOrDefault(this IEnumerable<Volume> volumes)
     {
         return volumes.FirstOrDefault(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) < 0.001f);
+    }
+
+    public static IEnumerable<VolumeDto> WhereNotLooseLeaf(this IEnumerable<VolumeDto> volumes)
+    {
+        return volumes.Where(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) >= 0.001f);
+    }
+
+    public static IEnumerable<VolumeDto> WhereLooseLeaf(this IEnumerable<VolumeDto> volumes)
+    {
+        return volumes.Where(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) < 0.001f);
     }
 }

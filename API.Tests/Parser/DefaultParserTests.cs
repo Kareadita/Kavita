@@ -46,8 +46,8 @@ public class DefaultParserTests
     [Theory]
     [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
     [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
-    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster~-2147483648~1")]
-    [InlineData("/manga/Hajime no Ippo/Artbook/Hajime no Ippo - Artbook.cbz", "Hajime no Ippo~-2147483648~-2147483648")]
+    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster~0~1")]
+    [InlineData("/manga/Hajime no Ippo/Artbook/Hajime no Ippo - Artbook.cbz", "Hajime no Ippo~0~0")]
     public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string expectedParseInfo)
     {
         const string rootDirectory = "/manga/";

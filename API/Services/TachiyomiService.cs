@@ -104,7 +104,7 @@ public class TachiyomiService : ITachiyomiService
 
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
         // We only encode for single-file volumes
-        if (volumeWithProgress!.MinNumber != 0 && volumeWithProgress.Chapters.Count == 1)
+        if (!volumeWithProgress!.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
             return new ChapterDto()

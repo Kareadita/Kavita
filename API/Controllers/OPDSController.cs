@@ -19,6 +19,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -1109,7 +1110,7 @@ public class OpdsController : BaseApiController
                 title += $" - {volume.Name}";
             }
         }
-        else if (volume.MinNumber != 0)
+        else if (volume.MinNumber != Parser.DefaultVolumeNumber)
         {
             title = $"{series.Name} - Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }

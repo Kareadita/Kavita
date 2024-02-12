@@ -81,7 +81,7 @@ public class SeriesService : ISeriesService
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
         var sortedVolumes = series.Volumes
-            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != 0.0f)
+            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != Parser.DefaultVolumeNumber)
             .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
         var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
@@ -93,7 +93,7 @@ public class SeriesService : ISeriesService
             .FirstOrDefault();
 
         if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.MinNumber || chapNum == 0))
+            (chapNum >= minVolumeNumber.MinNumber || chapNum == Parser.DefaultChapterNumber))
         {
             return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
@@ -515,7 +515,7 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            if (v.MinNumber == 0) return c;
+            if (v.MinNumber == Parser.DefaultVolumeNumber) return c;
             c.VolumeTitle = v.Name;
             return c;
         }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
@@ -541,7 +541,7 @@ public class SeriesService : ISeriesService
         }
 
         var storylineChapters = volumes
-            .Where(v => v.MinNumber == 0)
+            .WhereLooseLeaf()
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
             .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
             .ToList();
