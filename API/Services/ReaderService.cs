@@ -146,9 +146,8 @@ public class ReaderService : IReaderService
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
 
             // Send out volume events for each distinct volume
-            if (!seenVolume.ContainsKey(chapter.VolumeId))
+            if (seenVolume.TryAdd(chapter.VolumeId, true))
             {
-                seenVolume[chapter.VolumeId] = true;
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));

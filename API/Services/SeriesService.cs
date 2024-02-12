@@ -83,8 +83,7 @@ public class SeriesService : ISeriesService
         var sortedVolumes = series.Volumes
             .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != 0.0f)
             .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
-        var minVolumeNumber = sortedVolumes
-            .MinBy(v => v.Name.AsFloat());
+        var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
 
         var allChapters = series.Volumes
@@ -584,7 +583,7 @@ public class SeriesService : ISeriesService
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
             }
-            else if (volume.Name != "0")
+            else if (volume.Name != Parser.DefaultVolume)
             {
                 // If the titleName has Volume inside it, let's just send that back?
                 volume.Name += $" - {firstChapter.TitleName}";

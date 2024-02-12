@@ -11,8 +11,10 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public static class Parser
 {
-    public const string DefaultChapter = "0";
+    public const string DefaultChapter = "0"; // -2147483648
     public const string DefaultVolume = "0";
+    public const int DefaultChapterNumber = 0;
+    public const int DefaultVolumeNumber = 0;
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser

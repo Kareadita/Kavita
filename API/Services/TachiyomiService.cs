@@ -69,7 +69,7 @@ public class TachiyomiService : ITachiyomiService
 
             // Else return the max chapter to Tachiyomi so it can consider everything read
             var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToImmutableList();
-            var looseLeafChapterVolume = volumes.Find(v => v.MinNumber == 0);
+            var looseLeafChapterVolume = volumes.GetLooseLeafVolumeOrDefault();
             if (looseLeafChapterVolume == null)
             {
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes

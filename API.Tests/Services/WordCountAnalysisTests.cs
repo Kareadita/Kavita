@@ -64,7 +64,7 @@ public class WordCountAnalysisTests : AbstractDbTest
 
         series.Volumes = new List<Volume>()
         {
-            new VolumeBuilder("0")
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithChapter(chapter)
                 .Build(),
         };
@@ -111,7 +111,7 @@ public class WordCountAnalysisTests : AbstractDbTest
             .Build();
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("0")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithChapter(chapter)
                 .Build())
             .Build();

@@ -132,7 +132,7 @@ Substitute.For<IMediaConversionService>());
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("0")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
                 .Build())
@@ -181,7 +181,7 @@ Substitute.For<IMediaConversionService>());
             .WithFormat(MangaFormat.Epub)
             .WithVolume(new VolumeBuilder("1")
                 .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder("0")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .Build())
                 .Build())
             .Build();

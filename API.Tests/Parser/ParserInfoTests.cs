@@ -11,14 +11,14 @@ public class ParserInfoTests
     {
         var p1 = new ParserInfo()
         {
-            Chapters = "0",
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/darker than black.cbz",
             IsSpecial = false,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
 
         var p2 = new ParserInfo()
@@ -30,7 +30,7 @@ public class ParserInfoTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "Darker Than Black",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
 
         var expected = new ParserInfo()
@@ -42,7 +42,7 @@ public class ParserInfoTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
         p1.Merge(p2);
 
@@ -62,12 +62,12 @@ public class ParserInfoTests
             IsSpecial = true,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
 
         var p2 = new ParserInfo()
         {
-            Chapters = "0",
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/darker than black.cbz",

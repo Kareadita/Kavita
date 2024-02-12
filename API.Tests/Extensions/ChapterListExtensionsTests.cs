@@ -30,7 +30,7 @@ public class ChapterListExtensionsTests
     {
         var info = new ParserInfo()
         {
-            Chapters = "0",
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/darker than black.cbz",
@@ -38,12 +38,12 @@ public class ChapterListExtensionsTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
 
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("darker than black - Some special", "0", CreateFile("/manga/darker than black - special.cbz", MangaFormat.Archive), true)
+            CreateChapter("darker than black - Some special", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/darker than black - special.cbz", MangaFormat.Archive), true)
         };
 
         var actualChapter = chapterList.GetChapterByRange(info);
@@ -57,7 +57,7 @@ public class ChapterListExtensionsTests
     {
         var info = new ParserInfo()
         {
-            Chapters = "0",
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/darker than black.cbz",
@@ -65,12 +65,12 @@ public class ChapterListExtensionsTests
             IsSpecial = true,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
 
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("darker than black", "0", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true)
+            CreateChapter("darker than black", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true)
         };
 
         var actualChapter = chapterList.GetChapterByRange(info);
@@ -83,7 +83,7 @@ public class ChapterListExtensionsTests
     {
         var info = new ParserInfo()
         {
-            Chapters = "0",
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/detective comics #001.cbz",
@@ -91,13 +91,13 @@ public class ChapterListExtensionsTests
             IsSpecial = true,
             Series = "detective comics",
             Title = "detective comics",
-            Volumes = "0"
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
         };
 
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
-            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
+            CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
+            CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
         };
 
         var actualChapter = chapterList.GetChapterByRange(info);
@@ -112,7 +112,7 @@ public class ChapterListExtensionsTests
     {
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("darker than black", "0", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true),
+            CreateChapter("darker than black", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true),
             CreateChapter("darker than black", "1", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), false),
         };
 
@@ -124,7 +124,7 @@ public class ChapterListExtensionsTests
     {
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("darker than black", "0", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true),
+            CreateChapter("darker than black", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true),
             CreateChapter("darker than black", "1", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), false),
         };
 
@@ -151,8 +151,8 @@ public class ChapterListExtensionsTests
     {
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
-            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
+            CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
+            CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
         };
 
         chapterList[0].ReleaseDate = new DateTime(10, 1, 1);
@@ -166,8 +166,8 @@ public class ChapterListExtensionsTests
     {
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
-            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
+            CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
+            CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
         };
 
         chapterList[0].ReleaseDate = new DateTime(2002, 1, 1);
