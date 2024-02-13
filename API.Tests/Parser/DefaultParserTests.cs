@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Tests.Parser;
 
@@ -44,19 +45,18 @@ public class DefaultParserTests
     }
 
     [Theory]
-    [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
-    [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
-    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster~0~1")]
-    [InlineData("/manga/Hajime no Ippo/Artbook/Hajime no Ippo - Artbook.cbz", "Hajime no Ippo~0~0")]
-    public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string expectedParseInfo)
+    [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", new [] {"Btooom!", "1", "1"})]
+    [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", new [] {"Btooom!", "1", "2"})]
+    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", new [] {"Monster", API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, "1"})]
+    [InlineData("/manga/Hajime no Ippo/Artbook/Hajime no Ippo - Artbook.cbz", new [] {"Hajime no Ippo", API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter})]
+    public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string[] expectedParseInfo)
     {
         const string rootDirectory = "/manga/";
-        var tokens = expectedParseInfo.Split("~");
         var actual = new ParserInfo {Series = "", Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume};
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
-        Assert.Equal(tokens[0], actual.Series);
-        Assert.Equal(tokens[1], actual.Volumes);
-        Assert.Equal(tokens[2], actual.Chapters);
+        Assert.Equal(expectedParseInfo[0], actual.Series);
+        Assert.Equal(expectedParseInfo[1], actual.Volumes);
+        Assert.Equal(expectedParseInfo[2], actual.Chapters);
     }
 
     [Theory]
