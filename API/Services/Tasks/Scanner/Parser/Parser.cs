@@ -11,6 +11,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public static class Parser
 {
+    // NOTE: If you change this, don't forget to change in the UI (see Series Detail)
     public const string DefaultChapter = "0"; // -2147483648
     public const string DefaultVolume = "0";
     public const int DefaultChapterNumber = 0;

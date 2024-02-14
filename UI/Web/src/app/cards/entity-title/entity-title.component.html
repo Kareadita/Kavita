@@ -7,9 +7,9 @@
       <ng-template #fullComicTitle>
         {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
         <ng-container *ngIf="includeVolume && volumeTitle !== ''">
-          {{Number !== 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+          {{Number !== LooseLeafOrSpecialNumber ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
         </ng-container>
-        {{Number !== 0 ? (isChapter ? t('issue-num') + Number : volumeTitle) : t('special')}}
+        {{Number !== LooseLeafOrSpecialNumber ? (isChapter ? t('issue-num') + Number : volumeTitle) : t('special')}}
       </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Manga">
@@ -19,9 +19,9 @@
       <ng-template #fullMangaTitle>
         {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
         <ng-container *ngIf="includeVolume && volumeTitle !== ''">
-          {{Number !== 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+          {{Number !== LooseLeafOrSpecialNumber ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
         </ng-container>
-        {{Number !== 0 ? (isChapter ? (t('chapter') + ' ')  + Number : volumeTitle) : t('special')}}
+        {{Number !== LooseLeafOrSpecialNumber ? (isChapter ? (t('chapter') + ' ')  + Number : volumeTitle) : t('special')}}
       </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Book">

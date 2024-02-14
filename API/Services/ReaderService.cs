@@ -364,7 +364,7 @@ public class ReaderService : IReaderService
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
-        if (currentVolume.MinNumber == Parser.DefaultVolumeNumber)
+        if (currentVolume.IsLooseLeaf())
         {
             // Handle specials by sorting on their Filename aka Range
             var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Range, dto => dto.Range);
@@ -420,7 +420,7 @@ public class ReaderService : IReaderService
             // If on last volume AND there are no specials left, then let's return -1
             var anySpecials = volumes.Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
                 .SelectMany(v => v.Chapters.Where(c => c.IsSpecial)).Any();
-            if (currentVolume.MinNumber != Parser.DefaultVolumeNumber && !anySpecials)
+            if (!currentVolume.IsLooseLeaf() && !anySpecials)
             {
                 return -1;
             }
@@ -432,10 +432,10 @@ public class ReaderService : IReaderService
         // This has an added problem that it will loop up to the beginning always
         // Should I change this to Max number? volumes.LastOrDefault()?.Number -> volumes.Max(v => v.Number)
 
-        if (currentVolume.MinNumber != Parser.DefaultVolumeNumber && currentVolume.MinNumber == volumes.LastOrDefault()?.MinNumber && volumes.Count > 1)
+        if (!currentVolume.IsLooseLeaf() && currentVolume.MinNumber == volumes.LastOrDefault()?.MinNumber && volumes.Count > 1)
         {
             var chapterVolume = volumes.FirstOrDefault();
-            if (chapterVolume?.MinNumber != Parser.DefaultVolumeNumber) return -1;
+            if (chapterVolume == null || !chapterVolume.IsLooseLeaf()) return -1;
 
             // This is my attempt at fixing a bug where we loop around to the beginning, but I just can't seem to figure it out
             // var orderedVolumes = volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).ToList();
@@ -477,7 +477,7 @@ public class ReaderService : IReaderService
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
-        if (currentVolume.MinNumber == Parser.DefaultVolumeNumber)
+        if (currentVolume.IsLooseLeaf())
         {
             var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Range,
                 dto => dto.Range);
@@ -505,7 +505,7 @@ public class ReaderService : IReaderService
         }
 
         var lastVolume = volumes.MaxBy(v => v.MinNumber);
-        if (currentVolume.MinNumber == Parser.DefaultVolumeNumber && currentVolume.MinNumber != lastVolume?.MinNumber && lastVolume?.Chapters.Count > 1)
+        if (currentVolume.IsLooseLeaf() && currentVolume.MinNumber != lastVolume?.MinNumber && lastVolume?.Chapters.Count > 1)
         {
             var lastChapter = lastVolume.Chapters.MaxBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting);
             if (lastChapter == null) return -1;

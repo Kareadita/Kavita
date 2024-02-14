@@ -515,7 +515,7 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            if (v.MinNumber == Parser.DefaultVolumeNumber) return c;
+            if (v.IsLooseLeaf()) return c;
             c.VolumeTitle = v.Name;
             return c;
         }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
@@ -574,6 +574,7 @@ public class SeriesService : ISeriesService
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
+        // TODO: Move this into DB
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
