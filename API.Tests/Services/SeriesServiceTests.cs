@@ -108,7 +108,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithTitle("Omake").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithTitle("Something").WithPages(1).Build())
                     .Build())
@@ -144,7 +144,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                     .Build())
@@ -181,12 +181,12 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
 
                 .WithVolume(new VolumeBuilder("3")
@@ -214,12 +214,12 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
 
                 .WithVolume(new VolumeBuilder("3")
@@ -252,11 +252,11 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test")
 
                 .WithVolume(new VolumeBuilder("2")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
 
                 .WithVolume(new VolumeBuilder("3")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
                 .Build())
             .Build());
@@ -280,7 +280,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub").WithIsSpecial(true).WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
@@ -316,14 +316,14 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test")
 
                 .WithVolume(new VolumeBuilder("2")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
 
                 .WithVolume(new VolumeBuilder("1.2")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("1")
-                    .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                     .Build())
                 .Build())
             .Build());
@@ -776,7 +776,7 @@ public class SeriesServiceTests : AbstractDbTest
         var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder("0")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).WithFile(file).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).WithFile(file).Build())
                 .WithChapter(new ChapterBuilder("A Special Case").WithIsSpecial(true).WithFile(file).WithPages(1).Build())
@@ -808,11 +808,11 @@ public class SeriesServiceTests : AbstractDbTest
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("0").WithPages(1).WithFile(file).Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).WithFile(file).Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1.5")
-                .WithChapter(new ChapterBuilder("0").WithPages(2).WithFile(file).Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(2).WithFile(file).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
@@ -866,7 +866,7 @@ public class SeriesServiceTests : AbstractDbTest
         var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder("0")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").WithPages(1).WithFile(file).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).WithFile(file).Build())
                 .Build())
@@ -1183,7 +1183,7 @@ public class SeriesServiceTests : AbstractDbTest
         await ResetDb();
         var lib1 = new LibraryBuilder("Test LIb")
             .WithSeries(new SeriesBuilder("Test Series")
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1").WithFile(
                         new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
                             .WithPages(1)
@@ -1405,7 +1405,7 @@ public class SeriesServiceTests : AbstractDbTest
                 {
                     AgeRating = AgeRating.Everyone
                 })
-                .WithVolume(new VolumeBuilder("0")
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1").WithFile(
                         new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
                             .WithPages(1)

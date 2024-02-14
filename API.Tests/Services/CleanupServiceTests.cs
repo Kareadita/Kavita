@@ -139,7 +139,7 @@ public class CleanupServiceTests : AbstractDbTest
         // Add 2 series with cover images
         _context.Series.Add(new SeriesBuilder("Test 1")
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c01.jpg").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithCoverImage("v01_c01.jpg").Build())
                 .WithCoverImage("v01_c01.jpg")
                 .Build())
             .WithCoverImage("series_01.jpg")
@@ -148,7 +148,7 @@ public class CleanupServiceTests : AbstractDbTest
 
         _context.Series.Add(new SeriesBuilder("Test 2")
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c03.jpg").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithCoverImage("v01_c03.jpg").Build())
                 .WithCoverImage("v01_c03.jpg")
                 .Build())
             .WithCoverImage("series_03.jpg")
@@ -389,12 +389,12 @@ public class CleanupServiceTests : AbstractDbTest
     [Fact]
     public async Task CleanupDbEntries_CleanupAbandonedChapters()
     {
-        var c = new ChapterBuilder("0")
+        var c = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
             .WithPages(1)
             .Build();
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("0")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithMinNumber(1)
                 .WithChapter(c)
                 .Build())
@@ -537,7 +537,7 @@ public class CleanupServiceTests : AbstractDbTest
         c.UserProgress = new List<AppUserProgress>();
         s.Volumes = new List<Volume>()
         {
-            new VolumeBuilder("0").WithChapter(c).Build()
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume).WithChapter(c).Build()
         };
         _context.Series.Add(s);
 

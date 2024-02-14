@@ -129,7 +129,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
         IsSpecial = info.IsSpecialInfo();
         if (IsSpecial)
         {
-            Number = "0";
+            Number = Parser.DefaultChapter;
         }
         Title = (IsSpecial && info.Format == MangaFormat.Epub)
             ? info.Title

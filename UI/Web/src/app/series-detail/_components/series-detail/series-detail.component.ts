@@ -67,6 +67,7 @@ import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
 import {User} from 'src/app/_models/user';
 import {Volume} from 'src/app/_models/volume';
+import {LooseLeafOrSpecialNumber} from 'src/app/_models/chapter';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
@@ -137,8 +138,6 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
-const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.LightNovel];
-
 @Component({
     selector: 'app-series-detail',
     templateUrl: './series-detail.component.html',
@@ -185,6 +184,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
   protected readonly TagBadgeCursor = TagBadgeCursor;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrSpecialNumber;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;

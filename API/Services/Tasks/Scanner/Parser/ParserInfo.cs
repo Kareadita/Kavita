@@ -73,7 +73,7 @@ public class ParserInfo
     /// <returns></returns>
     public bool IsSpecialInfo()
     {
-        return (IsSpecial || (Volumes == Parser.DefaultVolume && Chapters == Parser.DefaultChapter));
+        return (IsSpecial || (Volumes == Parser.LooseLeafVolume && Chapters == Parser.DefaultChapter));
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class ParserInfo
     {
         if (info2 == null) return;
         Chapters = string.IsNullOrEmpty(Chapters) || Chapters == Parser.DefaultChapter ? info2.Chapters: Chapters;
-        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == Parser.DefaultVolume ? info2.Volumes : Volumes;
+        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == Parser.LooseLeafVolume ? info2.Volumes : Volumes;
         Edition = string.IsNullOrEmpty(Edition) ? info2.Edition : Edition;
         Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
         Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;

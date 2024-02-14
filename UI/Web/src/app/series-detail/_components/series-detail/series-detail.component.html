@@ -308,7 +308,7 @@
     <ng-container *ngIf="nextExpectedChapter">
       <ng-container [ngSwitch]="tabId">
         <ng-container *ngSwitchCase="TabID.Volumes">
-          <app-next-expected-card *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === 0"
+          <app-next-expected-card *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber"
                class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
                                   [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
         </ng-container>
@@ -335,7 +335,7 @@
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-card-item *ngIf="item.number !== 0" class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
+  <app-card-item *ngIf="item.number !== LooseLeafOrSpecialNumber" class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                  [imageUrl]="imageService.getVolumeCoverImage(item.id)"
                  [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
                  (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
@@ -367,7 +367,7 @@
 
 <ng-template #nonSpecialVolumeListItem let-item>
   <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
-                 [seriesName]="series.name" [entity]="item" *ngIf="item.number !== 0"
+                 [seriesName]="series.name" [entity]="item" *ngIf="item.number !== LooseLeafOrSpecialNumber"
                  [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                  [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
                  [blur]="user?.preferences?.blurUnreadSummaries || false">

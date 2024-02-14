@@ -19,6 +19,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -1104,12 +1105,12 @@ public class OpdsController : BaseApiController
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType, volumeLabel);
-            if (volume.Name != "0")
+            if (volume.Name != Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
             {
                 title += $" - {volume.Name}";
             }
         }
-        else if (volume.MinNumber != 0)
+        else if (!volume.IsLooseLeaf())
         {
             title = $"{series.Name} - Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }

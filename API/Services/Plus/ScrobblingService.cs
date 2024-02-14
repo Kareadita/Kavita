@@ -274,7 +274,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
-            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite), // TODO: We can get this also from ExternalSeriesMetadata
             MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),

@@ -215,7 +215,7 @@ public class VolumeRepository : IVolumeRepository
 
     private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
     {
-        foreach (var v in volumes.Where(vDto => vDto.MinNumber == 0))
+        foreach (var v in volumes.WhereLooseLeaf())
         {
             v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
         }

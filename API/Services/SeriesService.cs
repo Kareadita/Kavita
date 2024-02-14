@@ -81,10 +81,9 @@ public class SeriesService : ISeriesService
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
         var sortedVolumes = series.Volumes
-            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != 0.0f)
+            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != Parser.LooseLeafVolumeNumber)
             .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
-        var minVolumeNumber = sortedVolumes
-            .MinBy(v => v.Name.AsFloat());
+        var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
 
         var allChapters = series.Volumes
@@ -94,7 +93,7 @@ public class SeriesService : ISeriesService
             .FirstOrDefault();
 
         if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.MinNumber || chapNum == 0))
+            (chapNum >= minVolumeNumber.MinNumber || chapNum == Parser.DefaultChapterNumber))
         {
             return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
@@ -516,7 +515,7 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            if (v.MinNumber == 0) return c;
+            if (v.IsLooseLeaf()) return c;
             c.VolumeTitle = v.Name;
             return c;
         }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
@@ -542,7 +541,7 @@ public class SeriesService : ISeriesService
         }
 
         var storylineChapters = volumes
-            .Where(v => v.MinNumber == 0)
+            .WhereLooseLeaf()
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
             .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
             .ToList();
@@ -575,16 +574,17 @@ public class SeriesService : ISeriesService
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
+        // TODO: Move this into DB
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Parser.DefaultVolume)) return;
+                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
             }
-            else if (volume.Name != "0")
+            else if (volume.Name != Parser.LooseLeafVolume)
             {
                 // If the titleName has Volume inside it, let's just send that back?
                 volume.Name += $" - {firstChapter.TitleName}";

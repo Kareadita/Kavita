@@ -96,7 +96,7 @@ public class ServerSettingDto
     public bool IsEmailSetup()
     {
         return !string.IsNullOrEmpty(SmtpConfig.Host)
-               && !string.IsNullOrEmpty(SmtpConfig.UserName)
+               && !string.IsNullOrEmpty(SmtpConfig.SenderAddress)
                && !string.IsNullOrEmpty(HostName);
     }
 
@@ -107,6 +107,6 @@ public class ServerSettingDto
     public bool IsEmailSetupForSendToDevice()
     {
         return !string.IsNullOrEmpty(SmtpConfig.Host)
-               && !string.IsNullOrEmpty(SmtpConfig.UserName);
+               && !string.IsNullOrEmpty(SmtpConfig.SenderAddress);
     }
 }

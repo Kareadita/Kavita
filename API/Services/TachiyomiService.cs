@@ -69,14 +69,14 @@ public class TachiyomiService : ITachiyomiService
 
             // Else return the max chapter to Tachiyomi so it can consider everything read
             var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToImmutableList();
-            var looseLeafChapterVolume = volumes.Find(v => v.MinNumber == 0);
+            var looseLeafChapterVolume = volumes.GetLooseLeafVolumeOrDefault();
             if (looseLeafChapterVolume == null)
             {
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes
                     [^1].Chapters
                     .OrderBy(c => c.Number.AsFloat(), ChapterSortComparerZeroFirst.Default)
                     .Last());
-                if (volumeChapter.Number == Parser.DefaultVolume)
+                if (volumeChapter.Number == Parser.LooseLeafVolume)
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
                     return new ChapterDto()
@@ -104,7 +104,7 @@ public class TachiyomiService : ITachiyomiService
 
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
         // We only encode for single-file volumes
-        if (volumeWithProgress!.MinNumber != 0 && volumeWithProgress.Chapters.Count == 1)
+        if (!volumeWithProgress!.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
             return new ChapterDto()
