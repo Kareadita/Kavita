@@ -481,35 +481,31 @@ public class SeriesService : ISeriesService
 
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
+        var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => Parser.MinNumberFromRange(v.Name))
+            .OrderBy(v => v.MinNumber)
             .ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
-        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
+        var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
+
+
+        foreach (var volume in volumes)
         {
-            var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
-            foreach (var volume in volumes)
+            volume.Chapters = volume.Chapters
+                .OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default)
+                .ToList();
+
+            if (!bookTreatment && volume.IsLooseLeaf())
             {
-                volume.Chapters = volume.Chapters
-                    .OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default)
-                    .ToList();
-                var firstChapter = volume.Chapters.First();
-                // On Books, skip volumes that are specials, since these will be shown
-                if (firstChapter.IsSpecial) continue;
-                RenameVolumeName(firstChapter, volume, libraryType, volumeLabel);
+                continue;
+            }
+
+            if (RenameVolumeName(volume, libraryType, volumeLabel))
+            {
                 processedVolumes.Add(volume);
             }
-        }
-        else
-        {
-            processedVolumes = volumes.Where(v => v.MinNumber > 0).ToList();
-            processedVolumes.ForEach(v =>
-            {
-                v.Name = $"Volume {v.Name}";
-                v.Chapters = v.Chapters.OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default).ToList();
-            });
         }
 
         var specials = new List<ChapterDto>();
@@ -531,7 +527,7 @@ public class SeriesService : ISeriesService
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;
-        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
+        if (bookTreatment)
         {
             retChapters = Array.Empty<ChapterDto>();
         } else
@@ -547,7 +543,7 @@ public class SeriesService : ISeriesService
             .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
-        if (storylineChapters.Any()) {
+        if (storylineChapters.Count > 0) {
             retChapters = retChapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
         }
 
@@ -572,32 +568,32 @@ public class SeriesService : ISeriesService
         return !chapter.IsSpecial && !chapter.Number.Equals(Parser.DefaultChapter);
     }
 
-    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
+    public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
         // TODO: Move this into DB
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
+            var firstChapter = volume.Chapters.First();
+            // On Books, skip volumes that are specials, since these will be shown
+            if (firstChapter.IsSpecial) return false;
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return;
+                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return false;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
-                if (string.IsNullOrEmpty(title)) return;
+                if (string.IsNullOrEmpty(title)) return false;
                 volume.Name += $" - {title}";
             }
-            else if (volume.Name != Parser.LooseLeafVolume)
+            else if (!volume.IsLooseLeaf()) //volume.Name != Parser.LooseLeafVolume
             {
                 // If the titleName has Volume inside it, let's just send that back?
                 volume.Name += $" - {firstChapter.TitleName}";
             }
-            // else
-            // {
-            //     volume.Name += $"";
-            // }
 
-            return;
+            return true;
         }
 
         volume.Name = $"{volumeLabel} {volume.Name}".Trim();
+        return true;
     }
 
 

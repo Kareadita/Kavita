@@ -1104,8 +1104,8 @@ public class OpdsController : BaseApiController
         if (volume!.Chapters.Count == 1)
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
-            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType, volumeLabel);
-            if (volume.Name != Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+            SeriesService.RenameVolumeName(volume, libraryType, volumeLabel);
+            if (!volume.IsLooseLeaf())
             {
                 title += $" - {volume.Name}";
             }
