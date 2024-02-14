@@ -281,9 +281,9 @@
         "open-filtered-search": "Ouvrez une recherche filtrée pour {{item}}"
     },
     "user-stats-info-cards": {
-        "total-pages-read-label": "Total de pages lues",
+        "total-pages-read-label": "Nombre de Pages lues",
         "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}} : {{value}}",
-        "total-words-read-label": "Nombre Total de Mots Lus",
+        "total-words-read-label": "Nombre de Mots Lus",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "Temps passé à lire",
         "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
@@ -916,7 +916,9 @@
         "manage-collection-tooltip": "Est-ce que Kavita doit créer des collections à partir des tags SeriesGroup trouvés à l'intérieur des fichiers ComicInfo.xml",
         "include-in-dashboard-tooltip": "Les séries de la bibliothèque doivent-elles être incluses sur le tableau de bord. Cela affecte tous les flux, comme On Deck, Récemment mis à jour, Récemment ajouté ou tout ajout personnalisé.",
         "allow-scrobbling-tooltip": "Est-ce que Kavita doit suivre l'activité des événements de lecture, du statut à lire, les notes et les avis des fournisseurs configurés. Cela ne se produira que si le serveur dispose d'un abonnement Kavita+ actif.",
-        "exclude-patterns-tooltip": "Configurez un ensemble de modèles (syntaxe Global) que Kavita fera correspondre lors du scan des répertoires et exclura des résultats du scanner."
+        "exclude-patterns-tooltip": "Configurez un ensemble de modèles (syntaxe Global) que Kavita fera correspondre lors du scan des répertoires et exclura des résultats du scanner.",
+        "kavitaplus-eligible-label": "Eligible à Kavita+",
+        "kavitaplus-eligible-tooltip": "Kavita+ va-t-il extraire des informations ou soutenir le Scrobbling"
     },
     "series-detail": {
         "close": "{{common.close}}",
@@ -1260,11 +1262,11 @@
         "enable-ssl-label": "Utiliser SSL sur le serveur E-mail",
         "size-limit-label": "Taille limite",
         "size-limit-tooltip": "Combien de bytes le serveur E-mail peut supporter pour les pièces jointes",
-        "customized-templates-label": "Thème customisés",
+        "customized-templates-label": "Thèmes personnalisés",
         "sender-displayname-tooltip": "Le nom que le destinataire verra lorsqu'il recevra le courrier électronique",
         "host-tooltip": "Adresse sortante/SMTP de votre serveur de messagerie",
         "password-label": "Mot de passe",
-        "customized-templates-tooltip": "Kavita doit-il utiliser le répertoire \"config/templates\" pour les modèles plutôt que celui par défaut? Vous êtes responsable de tenir à jour les changement des modèles.",
+        "customized-templates-tooltip": "Kavita doit-il utiliser le répertoire \"config/templates\" pour les modèles plutôt que celui par défaut ? Vous êtes responsable de tenir à jour les changement des modèles.",
         "username-tooltip": "Le nom d'utilisateur utilisé pour s'authentifier auprès de l'hôte",
         "gmail-label": "Gmail",
         "outlook-label": "Outlook"
@@ -1841,7 +1843,8 @@
         "delete-review": "Êtes-vous sûr de vouloir supprimer votre avis ?",
         "review-deleted": "Avis supprimé",
         "collection-tag-deleted": "Étiquette de collection supprimée",
-        "force-kavita+-refresh-success": "Les métadonnées externes de Kavita+ ont été invalidées"
+        "force-kavita+-refresh-success": "Les métadonnées externes de Kavita+ ont été invalidées",
+        "confirm-download-size-ios": "iOS a des problèmes pour télécharger des fichiers de plus de 200 Mo, il se peut que le téléchargement n'aboutisse pas."
     },
     "manga-format-stats": {
         "title": "Format",
