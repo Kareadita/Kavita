@@ -50,6 +50,6 @@ public class VolumeDto : IHasReadTimeEstimate
     /// <returns></returns>
     public bool IsLooseLeaf()
     {
-        return Math.Abs(this.MinNumber - Parser.DefaultVolumeNumber) < 0.001f;
+        return Math.Abs(this.MinNumber - Parser.LooseLeafVolumeNumber) < 0.001f;
     }
 }

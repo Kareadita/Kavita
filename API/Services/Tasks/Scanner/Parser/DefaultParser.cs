@@ -86,7 +86,7 @@ public class DefaultParser : IDefaultParser
         var isSpecial = type == LibraryType.Comic ? Parser.IsComicSpecial(fileName) : Parser.IsMangaSpecial(fileName);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-        if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.DefaultVolume && isSpecial)
+        if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && isSpecial)
         {
             ret.IsSpecial = true;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret); // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
@@ -97,7 +97,7 @@ public class DefaultParser : IDefaultParser
         {
             ret.IsSpecial = true;
             ret.Chapters = Parser.DefaultChapter;
-            ret.Volumes = Parser.DefaultVolume;
+            ret.Volumes = Parser.LooseLeafVolume;
 
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
@@ -118,7 +118,7 @@ public class DefaultParser : IDefaultParser
 
     private ParserInfo ParseImage(string filePath, string rootPath, ParserInfo ret)
     {
-        ret.Volumes = Parser.DefaultVolume;
+        ret.Volumes = Parser.LooseLeafVolume;
         ret.Chapters = Parser.DefaultChapter;
         var directoryName = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
         ret.Series = directoryName;
@@ -134,7 +134,7 @@ public class DefaultParser : IDefaultParser
         {
             var parsedVolume = Parser.ParseVolume(ret.Filename);
             var parsedChapter = Parser.ParseChapter(ret.Filename);
-            if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.DefaultVolume))
+            if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.LooseLeafVolume))
             {
                 ret.Volumes = parsedVolume;
             }
@@ -157,7 +157,7 @@ public class DefaultParser : IDefaultParser
     private static bool IsEmptyOrDefault(string volumes, string chapters)
     {
         return (string.IsNullOrEmpty(chapters) || chapters == Parser.DefaultChapter) &&
-               (string.IsNullOrEmpty(volumes) || volumes == Parser.DefaultVolume);
+               (string.IsNullOrEmpty(volumes) || volumes == Parser.LooseLeafVolume);
     }
 
     /// <summary>
@@ -198,9 +198,9 @@ public class DefaultParser : IDefaultParser
             var parsedVolume = type is LibraryType.Manga ? Parser.ParseVolume(folder) : Parser.ParseComicVolume(folder);
             var parsedChapter = type is LibraryType.Manga ? Parser.ParseChapter(folder) : Parser.ParseComicChapter(folder);
 
-            if (!parsedVolume.Equals(Parser.DefaultVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
+            if (!parsedVolume.Equals(Parser.LooseLeafVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
             {
-                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.DefaultVolume)) && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.DefaultVolume))
+                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.LooseLeafVolume)) && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.LooseLeafVolume))
                 {
                     ret.Volumes = parsedVolume;
                 }

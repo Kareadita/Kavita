@@ -128,7 +128,7 @@ public class ReadingListServiceTests
                 .WithMetadata(new SeriesMetadataBuilder().Build())
                 .WithVolumes(new List<Volume>()
                 {
-                    new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                    new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                         .WithChapter(new ChapterBuilder("1")
                             .WithAgeRating(AgeRating.Everyone)
                             .Build()
@@ -177,7 +177,7 @@ public class ReadingListServiceTests
                 .WithSeries(new SeriesBuilder("Test")
                     .WithVolumes(new List<Volume>()
                     {
-                        new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                        new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                             .WithChapter(new ChapterBuilder("1")
                                 .WithAgeRating(AgeRating.Everyone)
                                 .Build()
@@ -236,7 +236,7 @@ public class ReadingListServiceTests
                         .WithMetadata(new SeriesMetadataBuilder().Build())
                         .WithVolumes(new List<Volume>()
                         {
-                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                                 .WithChapter(new ChapterBuilder("1")
                                     .WithAgeRating(AgeRating.Everyone)
                                     .Build()
@@ -296,7 +296,7 @@ public class ReadingListServiceTests
                         .WithMetadata(new SeriesMetadataBuilder().Build())
                         .WithVolumes(new List<Volume>()
                         {
-                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                                 .WithChapter(new ChapterBuilder("1")
                                     .WithAgeRating(AgeRating.Everyone)
                                     .Build()
@@ -375,7 +375,7 @@ public class ReadingListServiceTests
                         .WithMetadata(new SeriesMetadataBuilder().Build())
                         .WithVolumes(new List<Volume>()
                         {
-                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                                 .WithChapter(new ChapterBuilder("1")
                                     .WithAgeRating(AgeRating.Everyone)
                                     .Build()
@@ -432,7 +432,7 @@ public class ReadingListServiceTests
                         .WithMetadata(new SeriesMetadataBuilder().Build())
                         .WithVolumes(new List<Volume>()
                         {
-                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                                 .WithChapter(new ChapterBuilder("1")
                                     .WithAgeRating(AgeRating.Everyone)
                                     .Build()
@@ -497,7 +497,7 @@ public class ReadingListServiceTests
                         .WithMetadata(new SeriesMetadataBuilder().Build())
                         .WithVolumes(new List<Volume>()
                         {
-                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                                 .WithChapter(new ChapterBuilder("1")
                                     .Build()
                                 )
@@ -538,7 +538,7 @@ public class ReadingListServiceTests
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
-                new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1")
                         .Build()
                     )
@@ -593,7 +593,7 @@ public class ReadingListServiceTests
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
-                new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1")
                         .Build()
                     )
@@ -645,7 +645,7 @@ public class ReadingListServiceTests
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
-                new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                     .WithChapter(new ChapterBuilder("1")
                         .WithReleaseDate(new DateTime(2005, 03, 01))
                         .Build()
@@ -736,7 +736,7 @@ public class ReadingListServiceTests
     }
 
     private static ReadingListItemDto CreateListItemDto(MangaFormat seriesFormat, LibraryType libraryType,
-        string volumeNumber = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+        string volumeNumber = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
         string chapterNumber =API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
         string chapterTitleName = "")
     {
@@ -1239,7 +1239,7 @@ public class ReadingListServiceTests
 
         var series2 = new SeriesBuilder("Series 2")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())

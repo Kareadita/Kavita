@@ -71,7 +71,7 @@ public class ReadingListService : IReadingListService
     public static string FormatTitle(ReadingListItemDto item)
     {
         var title = string.Empty;
-        if (item.ChapterNumber == Parser.DefaultChapter && item.VolumeNumber != Parser.DefaultVolume) {
+        if (item.ChapterNumber == Parser.DefaultChapter && item.VolumeNumber != Parser.LooseLeafVolume) {
             title = $"Volume {item.VolumeNumber}";
         }
 
@@ -631,7 +631,7 @@ public class ReadingListService : IReadingListService
             }
             // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
             var bookVolume = string.IsNullOrEmpty(book.Volume)
-                ? Parser.DefaultVolume
+                ? Parser.LooseLeafVolume
                 : book.Volume;
             var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault();
             if (matchingVolume == null)

@@ -418,7 +418,7 @@ public class ReaderService : IReaderService
             else if (firstChapter.Number.AsDouble() == Parser.DefaultChapterNumber) return firstChapter.Id;
 
             // If on last volume AND there are no specials left, then let's return -1
-            var anySpecials = volumes.Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
+            var anySpecials = volumes.Where(v => $"{v.MinNumber}" == Parser.LooseLeafVolume)
                 .SelectMany(v => v.Chapters.Where(c => c.IsSpecial)).Any();
             if (!currentVolume.IsLooseLeaf() && !anySpecials)
             {
@@ -497,7 +497,7 @@ public class ReaderService : IReaderService
             }
             if (next)
             {
-                if (currentVolume.MinNumber - 1 == Parser.DefaultVolumeNumber) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
+                if (currentVolume.MinNumber - 1 == Parser.LooseLeafVolumeNumber) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
                 var lastChapter = volume.Chapters.MaxBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting);
                 if (lastChapter == null) return -1;
                 return lastChapter.Id;

@@ -394,7 +394,7 @@ public class CleanupServiceTests : AbstractDbTest
             .Build();
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithMinNumber(1)
                 .WithChapter(c)
                 .Build())
@@ -537,7 +537,7 @@ public class CleanupServiceTests : AbstractDbTest
         c.UserProgress = new List<AppUserProgress>();
         s.Volumes = new List<Volume>()
         {
-            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume).WithChapter(c).Build()
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume).WithChapter(c).Build()
         };
         _context.Series.Add(s);
 

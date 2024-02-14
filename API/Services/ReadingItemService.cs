@@ -69,12 +69,12 @@ public class ReadingItemService : IReadingItemService
 
 
         // This catches when original library type is Manga/Comic and when parsing with non
-        if (Parser.IsEpub(path) && Parser.ParseVolume(info.Series) != Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+        if (Parser.IsEpub(path) && Parser.ParseVolume(info.Series) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
         {
             var hasVolumeInTitle = !Parser.ParseVolume(info.Title)
-                    .Equals(Parser.DefaultVolume);
+                    .Equals(Parser.LooseLeafVolume);
             var hasVolumeInSeries = !Parser.ParseVolume(info.Series)
-                .Equals(Parser.DefaultVolume);
+                .Equals(Parser.LooseLeafVolume);
 
             if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
             {
@@ -117,7 +117,7 @@ public class ReadingItemService : IReadingItemService
         {
             info.IsSpecial = true;
             info.Chapters = Parser.DefaultChapter;
-            info.Volumes = Parser.DefaultVolume;
+            info.Volumes = Parser.LooseLeafVolume;
         }
 
         if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))

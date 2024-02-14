@@ -38,7 +38,7 @@ public class ChapterListExtensionsTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
 
         var chapterList = new List<Chapter>()
@@ -57,7 +57,7 @@ public class ChapterListExtensionsTests
     {
         var info = new ParserInfo()
         {
-            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/darker than black.cbz",
@@ -65,7 +65,7 @@ public class ChapterListExtensionsTests
             IsSpecial = true,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
 
         var chapterList = new List<Chapter>()
@@ -83,7 +83,7 @@ public class ChapterListExtensionsTests
     {
         var info = new ParserInfo()
         {
-            Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+            Chapters = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
             Edition = "",
             Format = MangaFormat.Archive,
             FullFilePath = "/manga/detective comics #001.cbz",
@@ -91,7 +91,7 @@ public class ChapterListExtensionsTests
             IsSpecial = true,
             Series = "detective comics",
             Title = "detective comics",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
 
         var chapterList = new List<Chapter>()

@@ -76,7 +76,7 @@ public class TachiyomiService : ITachiyomiService
                     [^1].Chapters
                     .OrderBy(c => c.Number.AsFloat(), ChapterSortComparerZeroFirst.Default)
                     .Last());
-                if (volumeChapter.Number == Parser.DefaultVolume)
+                if (volumeChapter.Number == Parser.LooseLeafVolume)
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
                     return new ChapterDto()

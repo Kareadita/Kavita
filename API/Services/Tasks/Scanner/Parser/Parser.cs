@@ -13,9 +13,9 @@ public static class Parser
 {
     // NOTE: If you change this, don't forget to change in the UI (see Series Detail)
     public const string DefaultChapter = "0"; // -2147483648
-    public const string DefaultVolume = "0";
+    public const string LooseLeafVolume = "0";
     public const int DefaultChapterNumber = 0;
-    public const int DefaultVolumeNumber = 0;
+    public const int LooseLeafVolumeNumber = 0;
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
@@ -732,7 +732,7 @@ public static class Parser
             }
         }
 
-        return DefaultVolume;
+        return LooseLeafVolume;
     }
 
     public static string ParseComicVolume(string filename)
@@ -750,7 +750,7 @@ public static class Parser
             }
         }
 
-        return DefaultVolume;
+        return LooseLeafVolume;
     }
 
     private static string FormatValue(string value, bool hasPart)

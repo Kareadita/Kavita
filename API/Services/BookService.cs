@@ -551,7 +551,7 @@ public class BookService : IBookService
             }
 
             // If this is a single book and not a collection, set publication status to Completed
-            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.DefaultVolume))
+            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.LooseLeafVolume))
             {
                 info.Count = 1;
             }
@@ -561,7 +561,7 @@ public class BookService : IBookService
                 epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
 
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
-                .Equals(Parser.DefaultVolume);
+                .Equals(Parser.LooseLeafVolume);
 
             if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
             {
@@ -873,7 +873,7 @@ public class BookService : IBookService
                 FullFilePath = filePath,
                 IsSpecial = false,
                 Series = epubBook.Title.Trim(),
-                Volumes = Parser.DefaultVolume,
+                Volumes = Parser.LooseLeafVolume,
             };
         }
         catch (Exception ex)

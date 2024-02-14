@@ -18,7 +18,7 @@ public class ParserInfoTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
 
         var p2 = new ParserInfo()
@@ -30,7 +30,7 @@ public class ParserInfoTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "Darker Than Black",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
 
         var expected = new ParserInfo()
@@ -42,7 +42,7 @@ public class ParserInfoTests
             IsSpecial = false,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
         p1.Merge(p2);
 
@@ -62,7 +62,7 @@ public class ParserInfoTests
             IsSpecial = true,
             Series = "darker than black",
             Title = "darker than black",
-            Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
         };
 
         var p2 = new ParserInfo()

@@ -34,16 +34,16 @@ public static class SeriesExtensions
         }
 
         // just volumes
-        if (volumes.TrueForAll(v => $"{v.MinNumber}" != Parser.DefaultVolume))
+        if (volumes.TrueForAll(v => $"{v.MinNumber}" != Parser.LooseLeafVolume))
         {
             return firstVolume.CoverImage;
         }
         // If we have loose leaf chapters
 
         // if loose leaf chapters AND volumes, just return first volume
-        if (volumes.Count >= 1 && $"{volumes[0].MinNumber}" != Parser.DefaultVolume)
+        if (volumes.Count >= 1 && $"{volumes[0].MinNumber}" != Parser.LooseLeafVolume)
         {
-            var looseLeafChapters = volumes.Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
+            var looseLeafChapters = volumes.Where(v => $"{v.MinNumber}" == Parser.LooseLeafVolume)
                 .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
                 .ToList();
@@ -55,7 +55,7 @@ public static class SeriesExtensions
         }
 
         var firstLooseLeafChapter = volumes
-            .Where(v => $"{v.MinNumber}" == Parser.DefaultVolume)
+            .Where(v => $"{v.MinNumber}" == Parser.LooseLeafVolume)
             .SelectMany(v => v.Chapters)
             .OrderBy(c => c.Number.AsDouble(), ChapterSortComparerZeroFirst.Default)
             .FirstOrDefault(c => !c.IsSpecial);

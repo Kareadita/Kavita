@@ -125,7 +125,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -170,7 +170,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -221,7 +221,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -271,7 +271,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -371,7 +371,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -424,7 +424,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -467,7 +467,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -517,7 +517,7 @@ public class TachiyomiServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
@@ -565,7 +565,7 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())

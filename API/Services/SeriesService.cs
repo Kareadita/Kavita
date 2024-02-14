@@ -81,7 +81,7 @@ public class SeriesService : ISeriesService
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
         var sortedVolumes = series.Volumes
-            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != Parser.DefaultVolumeNumber)
+            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != Parser.LooseLeafVolumeNumber)
             .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
         var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
@@ -579,12 +579,12 @@ public class SeriesService : ISeriesService
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Parser.DefaultVolume)) return;
+                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
             }
-            else if (volume.Name != Parser.DefaultVolume)
+            else if (volume.Name != Parser.LooseLeafVolume)
             {
                 // If the titleName has Volume inside it, let's just send that back?
                 volume.Name += $" - {firstChapter.TitleName}";

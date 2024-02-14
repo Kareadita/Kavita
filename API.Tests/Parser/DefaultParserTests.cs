@@ -47,12 +47,12 @@ public class DefaultParserTests
     [Theory]
     [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", new [] {"Btooom!", "1", "1"})]
     [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", new [] {"Btooom!", "1", "2"})]
-    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", new [] {"Monster", API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, "1"})]
-    [InlineData("/manga/Hajime no Ippo/Artbook/Hajime no Ippo - Artbook.cbz", new [] {"Hajime no Ippo", API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter})]
+    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", new [] {"Monster", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, "1"})]
+    [InlineData("/manga/Hajime no Ippo/Artbook/Hajime no Ippo - Artbook.cbz", new [] {"Hajime no Ippo", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter})]
     public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string[] expectedParseInfo)
     {
         const string rootDirectory = "/manga/";
-        var actual = new ParserInfo {Series = "", Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume};
+        var actual = new ParserInfo {Series = "", Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume};
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo[0], actual.Series);
         Assert.Equal(expectedParseInfo[1], actual.Volumes);
@@ -134,7 +134,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Beelzebub\Beelzebub_01_[Noodles].zip";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Beelzebub", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+            Series = "Beelzebub", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
             Chapters = "1", Filename = "Beelzebub_01_[Noodles].zip", Format = MangaFormat.Archive,
             FullFilePath = filepath
         });
@@ -174,7 +174,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\APOSIMZ\APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "APOSIMZ", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+            Series = "APOSIMZ", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
             Chapters = "40", Filename = "APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         });
@@ -182,7 +182,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Corpse Party Musume\Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Kedouin Makoto - Corpse Party Musume", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+            Series = "Kedouin Makoto - Corpse Party Musume", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
             Chapters = "9", Filename = "Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         });
@@ -190,7 +190,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Goblin Slayer\Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Goblin Slayer - Brand New Day", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+            Series = "Goblin Slayer - Brand New Day", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
             Chapters = "6.5", Filename = "Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         });
@@ -198,7 +198,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Summer Time Rendering\Specials\Record 014 (between chapter 083 and ch084) SP11.cbr";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Summer Time Rendering", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+            Series = "Summer Time Rendering", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
             Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Filename = "Record 014 (between chapter 083 and ch084) SP11.cbr", Format = MangaFormat.Archive,
             FullFilePath = filepath, IsSpecial = true
         });
@@ -206,7 +206,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Seraph of the End\Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz";
         expected.Add(filepath, new ParserInfo
         {
-          Series = "Seraph of the End - Vampire Reign", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+          Series = "Seraph of the End - Vampire Reign", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
           Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
           FullFilePath = filepath, IsSpecial = false
         });
@@ -234,7 +234,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\The Beginning After the End\Chapter 001.cbz";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "The Beginning After the End", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+            Series = "The Beginning After the End", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
             Chapters = "1", Filename = "Chapter 001.cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath, IsSpecial = false
         });
@@ -292,7 +292,7 @@ public class DefaultParserTests
         var filepath = @"E:\Manga\Monster #8\Ch. 001-016 [MangaPlus] [Digital] [amit34521]\Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]\13.jpg";
         var expectedInfo2 = new ParserInfo
         {
-            Series = "Monster #8", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+            Series = "Monster #8", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
             Chapters = "8", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         };
@@ -414,7 +414,7 @@ public class DefaultParserTests
         filepath = @"E:/Manga/Foo 50/Specials/Foo 50 SP01.cbz";
         expected = new ParserInfo
         {
-            Series = "Foo 50", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, IsSpecial = true,
+            Series = "Foo 50", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, IsSpecial = true,
             Chapters = "50", Filename = "Foo 50 SP01.cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         };
@@ -449,7 +449,7 @@ public class DefaultParserTests
             var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
              expected.Add(filepath, new ParserInfo
              {
-                 Series = "Teen Titans", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+                 Series = "Teen Titans", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
                  Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Filename = "Teen Titans v1 Annual 01 (1967) SP01.cbr", Format = MangaFormat.Archive,
                  FullFilePath = filepath
              });
@@ -458,7 +458,7 @@ public class DefaultParserTests
              filepath = @"E:\Comics\Comics\Babe\Babe Vol.1 #1-4\Babe 01.cbr";
              expected.Add(filepath, new ParserInfo
              {
-                 Series = "Babe", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+                 Series = "Babe", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
                  Chapters = "1", Filename = "Babe 01.cbr", Format = MangaFormat.Archive,
                  FullFilePath = filepath, IsSpecial = false
              });
@@ -474,7 +474,7 @@ public class DefaultParserTests
              filepath = @"E:\Comics\Comics\Batman - The Man Who Laughs #1 (2005)\Batman - The Man Who Laughs #1 (2005).cbr";
              expected.Add(filepath, new ParserInfo
              {
-                 Series = "Batman - The Man Who Laughs", Volumes = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume, Edition = "",
+                 Series = "Batman - The Man Who Laughs", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
                  Chapters = "1", Filename = "Batman - The Man Who Laughs #1 (2005).cbr", Format = MangaFormat.Archive,
                  FullFilePath = filepath, IsSpecial = false
              });
