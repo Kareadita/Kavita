@@ -13724,7 +13724,18 @@
           "number": {
             "type": "string",
             "description": "Smallest number of the Range. Can be a partial like Chapter 4.5",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "Minimum Chapter Number.",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "description": "Maximum Chapter Number",
+            "format": "float"
           },
           "files": {
             "type": "array",
@@ -13933,6 +13944,14 @@
             "type": "string",
             "description": "Smallest number of the Range.",
             "nullable": true
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
           },
           "pages": {
             "type": "integer",
@@ -20472,9 +20491,9 @@
             "nullable": true
           },
           "number": {
-            "type": "number",
+            "type": "integer",
             "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
-            "format": "float",
+            "format": "int32",
             "deprecated": true
           },
           "pages": {

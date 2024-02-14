@@ -16,7 +16,16 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Smallest number of the Range. Can be a partial like Chapter 4.5
     /// </summary>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
     public required string Number { get; set; }
+    /// <summary>
+    /// Minimum Chapter Number.
+    /// </summary>
+    public float MinNumber { get; set; }
+    /// <summary>
+    /// Maximum Chapter Number
+    /// </summary>
+    public float MaxNumber { get; set; }
     /// <summary>
     /// The files that represent this Chapter
     /// </summary>

@@ -20,6 +20,11 @@ public static class MigrateWantToReadExport
     {
         try
         {
+            if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateWantToReadExport"))
+            {
+                return;
+            }
+
             var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
             if (File.Exists(importFile))
             {

@@ -247,10 +247,13 @@ public class Startup
 
                     // v0.7.14
                     await MigrateEmailTemplates.Migrate(directoryService, logger);
-                    await MigrateVolumeNumber.Migrate(unitOfWork, dataContext, logger);
-                    await MigrateWantToReadImport.Migrate(unitOfWork, directoryService, logger);
+                    await MigrateVolumeNumber.Migrate(dataContext, logger);
+                    await MigrateWantToReadImport.Migrate(unitOfWork, dataContext, directoryService, logger);
                     await MigrateManualHistory.Migrate(dataContext, logger);
                     await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
+
+                    // v0.8.0
+                    await MigrateChapterNumber.Migrate(dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

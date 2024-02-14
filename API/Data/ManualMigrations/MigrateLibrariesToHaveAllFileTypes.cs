@@ -15,9 +15,8 @@ public static class MigrateLibrariesToHaveAllFileTypes
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
-        if (await dataContext.Library.AnyAsync(l => l.LibraryFileTypes.Count == 0))
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateLibrariesToHaveAllFileTypes"))
         {
-            logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Completed. This is not an error");
             return;
         }
 

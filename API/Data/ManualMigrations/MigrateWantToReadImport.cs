@@ -6,6 +6,7 @@ using API.Data.Repositories;
 using API.Entities;
 using API.Services;
 using CsvHelper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Data.ManualMigrations;
@@ -15,8 +16,14 @@ namespace API.Data.ManualMigrations;
 /// </summary>
 public static class MigrateWantToReadImport
 {
-    public static async Task Migrate(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, IDirectoryService directoryService, ILogger<Program> logger)
     {
+
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateWantToReadImport"))
+        {
+            return;
+        }
+
         var importFile = Path.Join(directoryService.ConfigDirectory, "want-to-read-migration.csv");
         var outputFile = Path.Join(directoryService.ConfigDirectory, "imported-want-to-read-migration.csv");
 

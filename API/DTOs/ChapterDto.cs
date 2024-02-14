@@ -19,7 +19,10 @@ public class ChapterDto : IHasReadTimeEstimate
     /// <summary>
     /// Smallest number of the Range.
     /// </summary>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
     public string Number { get; init; } = default!;
+    public float MinNumber { get; init; }
+    public float MaxNumber { get; init; }
     /// <summary>
     /// Total number of pages in all MangaFiles
     /// </summary>

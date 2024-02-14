@@ -20,7 +20,7 @@ public class VolumeDto : IHasReadTimeEstimate
     /// This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14
     /// </summary>
     [Obsolete("Use MinNumber")]
-    public float Number { get; set; }
+    public int Number { get; set; }
     public int Pages { get; set; }
     public int PagesRead { get; set; }
     public DateTime LastModifiedUtc { get; set; }
