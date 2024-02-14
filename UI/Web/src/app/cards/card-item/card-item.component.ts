@@ -204,7 +204,7 @@ export class CardItemComponent implements OnInit {
         if (volumeTitle === '' || volumeTitle === null || volumeTitle === undefined) {
           this.tooltipTitle = (this.title).trim();
         } else {
-          this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+          this.tooltipTitle = (volumeTitle + ' ' + this.title).trim();
         }
       } else {
         this.tooltipTitle = chapterTitle;

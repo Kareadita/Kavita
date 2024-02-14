@@ -22,7 +22,7 @@ public interface IVolumeRepository
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
-    Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
+    Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
     Task<Volume?> GetVolumeAsync(int volumeId);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
@@ -177,7 +177,7 @@ public class VolumeRepository : IVolumeRepository
     /// <param name="seriesId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
+    public async Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
     {
         var volumes =  await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
@@ -187,7 +187,6 @@ public class VolumeRepository : IVolumeRepository
             .ThenInclude(c => c.Tags)
             .OrderBy(volume => volume.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-            .AsNoTracking()
             .AsSplitQuery()
             .ToListAsync();
 

@@ -482,15 +482,11 @@ public class SeriesService : ISeriesService
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => v.MinNumber)
-            .ToList();
+        var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
-        var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
-
-
         foreach (var volume in volumes)
         {
             volume.Chapters = volume.Chapters
@@ -509,32 +505,29 @@ public class SeriesService : ISeriesService
         }
 
         var specials = new List<ChapterDto>();
-        var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
-        {
-            if (v.IsLooseLeaf()) return c;
-            c.VolumeTitle = v.Name;
-            return c;
-        }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
+        // Why isn't this doing a check if chapter is not special as it wont get included
+        var chapters = volumes
+            .SelectMany(v => v.Chapters
+                .Select(c =>
+                {
+                    if (v.IsLooseLeaf()) return c;
+                    c.VolumeTitle = v.Name;
+                    return c;
+                })
+                .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default))
+                .ToList();
 
         foreach (var chapter in chapters)
         {
-            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
-            if (!chapter.IsSpecial) continue;
-
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+            else chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
+
+            if (!chapter.IsSpecial) continue;
             specials.Add(chapter);
         }
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-        IEnumerable<ChapterDto> retChapters;
-        if (bookTreatment)
-        {
-            retChapters = Array.Empty<ChapterDto>();
-        } else
-        {
-            retChapters = chapters
-                .Where(ShouldIncludeChapter);
-        }
+        IEnumerable<ChapterDto> retChapters = bookTreatment ? Array.Empty<ChapterDto>() : chapters.Where(ShouldIncludeChapter);
 
         var storylineChapters = volumes
             .WhereLooseLeaf()
