@@ -49,7 +49,7 @@ export class ManageLogsComponent implements OnInit, OnDestroy {
       this.hubConnection.on('SendLogAsObject', resp => {
         const payload = resp.arguments[0] as LogMessage;
         const logMessage = {timestamp: payload.timestamp, level: payload.level, message: payload.message, exception: payload.exception};
-        // TODO: It might be better to just have a queue to show this
+        // NOTE: It might be better to just have a queue to show this
         const values = this.logsSource.getValue();
         values.push(logMessage);
         this.logsSource.next(values);
@@ -60,7 +60,7 @@ export class ManageLogsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // unsubscrbe from signalr connection
+    // unsubscribe from signalr connection
     if (this.hubConnection) {
       this.hubConnection.stop().catch(err => console.error(err));
       console.log('Stoping log connection');

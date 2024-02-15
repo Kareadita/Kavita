@@ -371,7 +371,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // This is a lone chapter
       if (vol.length === 0) {
-        return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range)
+        return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range) and Localize it
       }
 
       if (this.currentlyReadingChapter.minNumber === LooseLeafOrSpecialNumber) {

@@ -167,9 +167,9 @@ public class AppUserProgressRepository : IAppUserProgressRepository
                 (appUserProgresses, chapter) => new {appUserProgresses, chapter})
             .Where(p => p.appUserProgresses.SeriesId == seriesId && p.appUserProgresses.AppUserId == userId &&
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
-            .Select(p => p.chapter.Range)
+            .Select(p => p.chapter.MaxNumber)
             .ToListAsync();
-        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(Parser.MaxNumberFromRange(d)));
+        return list.Count == 0 ? 0 : (int) list.DefaultIfEmpty().Max(d => d);
     }
 
     public async Task<float> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)

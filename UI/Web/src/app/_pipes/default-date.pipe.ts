@@ -8,7 +8,6 @@ import {TranslocoService} from "@ngneat/transloco";
 })
 export class DefaultDatePipe implements PipeTransform {
 
-  // TODO: Figure out how to translate Never
   constructor(private translocoService: TranslocoService) {
   }
   transform(value: any, replacementString = 'default-date-pipe.never'): string {
