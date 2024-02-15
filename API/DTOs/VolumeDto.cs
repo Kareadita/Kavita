@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Interfaces;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.DTOs;
@@ -50,6 +51,6 @@ public class VolumeDto : IHasReadTimeEstimate
     /// <returns></returns>
     public bool IsLooseLeaf()
     {
-        return Math.Abs(this.MinNumber - Parser.LooseLeafVolumeNumber) < 0.001f;
+        return MinNumber.Is(Parser.LooseLeafVolumeNumber);
     }
 }

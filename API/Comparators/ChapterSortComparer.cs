@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Comparators;
@@ -8,7 +9,7 @@ namespace API.Comparators;
 /// <summary>
 /// Sorts chapters based on their Number. Uses natural ordering of doubles. Specials always LAST.
 /// </summary>
-public class ChapterSortComparerSpecialsLast : IComparer<double>
+public class ChapterSortComparerSpecialsLast : IComparer<float>
 {
     /// <summary>
     /// Normal sort for 2 doubles. 0 always comes last
@@ -16,13 +17,13 @@ public class ChapterSortComparerSpecialsLast : IComparer<double>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public int Compare(double x, double y)
+    public int Compare(float x, float y)
     {
-        if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;
+        if (x.Is(Parser.DefaultChapterNumber) && y.Is(Parser.DefaultChapterNumber)) return 0;
         // if x is 0, it comes second
-        if (x == Parser.DefaultChapterNumber) return 1;
+        if (x.Is(Parser.DefaultChapterNumber)) return 1;
         // if y is 0, it comes second
-        if (y == Parser.DefaultChapterNumber) return -1;
+        if (y.Is(Parser.DefaultChapterNumber)) return -1;
 
         return x.CompareTo(y);
     }
@@ -37,16 +38,15 @@ public class ChapterSortComparerSpecialsLast : IComparer<double>
 /// This is represented by Chapter 0, Chapter 81.
 /// </example>
 /// </summary>
-public class ChapterSortComparerSpecialsFirst : IComparer<double>
+public class ChapterSortComparerSpecialsFirst : IComparer<float>
 {
-    // TODO: Refactor this to be ChapterSortSpecialFirst
-    public int Compare(double x, double y)
+    public int Compare(float x, float y)
     {
-        if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;
+        if (x.Is(Parser.DefaultChapterNumber) && y.Is(Parser.DefaultChapterNumber)) return 0;
         // if x is 0, it comes first
-        if (x == Parser.DefaultChapterNumber) return -1;
+        if (x.Is(Parser.DefaultChapterNumber)) return -1;
         // if y is 0, it comes first
-        if (y == Parser.DefaultChapterNumber) return 1;
+        if (y.Is(Parser.DefaultChapterNumber)) return 1;
 
         return x.CompareTo(y);
     }

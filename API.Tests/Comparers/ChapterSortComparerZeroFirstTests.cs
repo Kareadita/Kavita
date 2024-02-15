@@ -16,8 +16,8 @@ public class ChapterSortComparerSpecialsFirstTests
     }
 
     [Theory]
-    [InlineData(new[] {1.0, 0.5, 0.3}, new[] {0.3, 0.5, 1.0})]
-    public void ChapterSortComparerZeroFirstTest_Doubles(double[] input, double[] expected)
+    [InlineData(new [] {1.0f, 0.5f, 0.3f}, new [] {0.3f, 0.5f, 1.0f})]
+    public void ChapterSortComparerZeroFirstTest_Doubles(float[] input, float[] expected)
     {
         Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerSpecialsFirst()).ToArray());
     }

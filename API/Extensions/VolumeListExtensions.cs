@@ -24,7 +24,7 @@ public static class VolumeListExtensions
     {
         if (volumes == null) throw new ArgumentException("Volumes cannot be null");
 
-        if (seriesFormat == MangaFormat.Epub || seriesFormat == MangaFormat.Pdf)
+        if (seriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
         {
             return volumes.MinBy(x => x.MinNumber);
         }
@@ -45,7 +45,7 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static bool HasAnyNonLooseLeafVolumes(this IEnumerable<Volume> volumes)
     {
-        return volumes.Any(x => Math.Abs(x.MinNumber - Parser.DefaultChapterNumber) > 0.001f);
+        return volumes.Any(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 
     /// <summary>
@@ -55,7 +55,8 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static Volume? FirstNonLooseLeafOrDefault(this IEnumerable<Volume> volumes)
     {
-        return volumes.OrderBy(x => x.MinNumber).FirstOrDefault(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) >= 0.001f);
+        return volumes.OrderBy(x => x.MinNumber)
+            .FirstOrDefault(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 
     /// <summary>
@@ -65,16 +66,16 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static Volume? GetLooseLeafVolumeOrDefault(this IEnumerable<Volume> volumes)
     {
-        return volumes.FirstOrDefault(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) < 0.001f);
+        return volumes.FirstOrDefault(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 
     public static IEnumerable<VolumeDto> WhereNotLooseLeaf(this IEnumerable<VolumeDto> volumes)
     {
-        return volumes.Where(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) >= 0.001f);
+        return volumes.Where(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 
     public static IEnumerable<VolumeDto> WhereLooseLeaf(this IEnumerable<VolumeDto> volumes)
     {
-        return volumes.Where(v => Math.Abs(v.MinNumber - Parser.DefaultChapterNumber) < 0.001f);
+        return volumes.Where(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 }

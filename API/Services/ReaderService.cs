@@ -397,7 +397,7 @@ public class ReaderService : IReaderService
             // Handle Chapters within next Volume
             // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
             var chapters = volume.Chapters.OrderBy(x => x.MinNumber, _chapterSortComparerSpecialsLast).ToList();
-            if (currentChapter.MinNumber == Parser.DefaultChapterNumber && chapters[^1].MinNumber == Parser.DefaultChapterNumber)
+            if (currentChapter.MinNumber.Is(Parser.DefaultChapterNumber) && chapters[^1].MinNumber.Is(Parser.DefaultChapterNumber))
             {
                 // We need to handle an extra check if the current chapter is the last special, as we should return -1
                 if (currentChapter.IsSpecial) return -1;
@@ -413,9 +413,9 @@ public class ReaderService : IReaderService
                 var chapterId = GetNextChapterId(volume.Chapters.OrderByNatural(x => x.Number),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
-            } else if (firstChapter.Number.AsDouble() >= currentChapter.Number.AsDouble()) return firstChapter.Id;
+            } else if (firstChapter.MinNumber >= currentChapter.MinNumber) return firstChapter.Id;
             // If we are the last chapter and next volume is there, we should try to use it (unless it's volume 0)
-            else if (firstChapter.Number.AsDouble() == Parser.DefaultChapterNumber) return firstChapter.Id;
+            else if (firstChapter.MinNumber.Is(Parser.DefaultChapterNumber)) return firstChapter.Id;
 
             // If on last volume AND there are no specials left, then let's return -1
             var anySpecials = volumes.Where(v => $"{v.MinNumber}" == Parser.LooseLeafVolume)
@@ -432,7 +432,7 @@ public class ReaderService : IReaderService
         // This has an added problem that it will loop up to the beginning always
         // Should I change this to Max number? volumes.LastOrDefault()?.Number -> volumes.Max(v => v.Number)
 
-        if (!currentVolume.IsLooseLeaf() && currentVolume.MinNumber == volumes.LastOrDefault()?.MinNumber && volumes.Count > 1)
+        if (!currentVolume.IsLooseLeaf() && currentVolume.MinNumber.Is(volumes.LastOrDefault()?.MinNumber) && volumes.Count > 1)
         {
             var chapterVolume = volumes.FirstOrDefault();
             if (chapterVolume == null || !chapterVolume.IsLooseLeaf()) return -1;
@@ -451,7 +451,7 @@ public class ReaderService : IReaderService
             // }
 
 
-            var firstChapter = chapterVolume.Chapters.MinBy(x => x.Number.AsDouble(), _chapterSortComparerSpecialsLast);
+            var firstChapter = chapterVolume.Chapters.MinBy(x => x.MinNumber, _chapterSortComparerSpecialsLast);
             if (firstChapter == null) return -1;
 
 
@@ -487,9 +487,9 @@ public class ReaderService : IReaderService
         var next = false;
         foreach (var volume in volumes)
         {
-            if (volume.MinNumber == currentVolume.MinNumber)
+            if (volume.MinNumber.Is(currentVolume.MinNumber))
             {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting).Reverse(),
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.MinNumber, _chapterSortComparerForInChapterSorting).Reverse(),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
                 next = true; // When the diff between volumes is more than 1, we need to explicitly tell that next volume is our use case
@@ -497,17 +497,18 @@ public class ReaderService : IReaderService
             }
             if (next)
             {
-                if (currentVolume.MinNumber - 1 == Parser.LooseLeafVolumeNumber) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
-                var lastChapter = volume.Chapters.MaxBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting);
+                // If we have walked all the way to chapter volume, then we should break so logic outside can work
+                if ((currentVolume.MinNumber - 1).Is(Parser.LooseLeafVolumeNumber)) break;
+                var lastChapter = volume.Chapters.MaxBy(x => x.MinNumber, _chapterSortComparerForInChapterSorting);
                 if (lastChapter == null) return -1;
                 return lastChapter.Id;
             }
         }
 
         var lastVolume = volumes.MaxBy(v => v.MinNumber);
-        if (currentVolume.IsLooseLeaf() && currentVolume.MinNumber != lastVolume?.MinNumber && lastVolume?.Chapters.Count > 1)
+        if (currentVolume.IsLooseLeaf() && currentVolume.MinNumber.IsNot(lastVolume?.MinNumber) && lastVolume?.Chapters.Count > 1)
         {
-            var lastChapter = lastVolume.Chapters.MaxBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting);
+            var lastChapter = lastVolume.Chapters.MaxBy(x => x.MinNumber, _chapterSortComparerForInChapterSorting);
             if (lastChapter == null) return -1;
             return lastChapter.Id;
         }
@@ -531,13 +532,13 @@ public class ReaderService : IReaderService
          {
              // I think i need a way to sort volumes last
              var chapters = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).First().Chapters
-                 .OrderBy(c => c.Number.AsFloat())
+                 .OrderBy(c => c.MinNumber)
                  .ToList();
 
              // If there are specials, then return the first Non-special
              if (chapters.Exists(c => c.IsSpecial))
              {
-                 var firstChapter = chapters.FirstOrDefault(c => !c.IsSpecial);
+                 var firstChapter = chapters.Find(c => !c.IsSpecial);
                  if (firstChapter == null)
                  {
                      // If there is no non-special chapter, then return first chapter
@@ -559,7 +560,7 @@ public class ReaderService : IReaderService
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => c.Number.AsDouble(), _chapterSortComparerSpecialsLast)
+            .OrderBy(c => c.MinNumber, _chapterSortComparerSpecialsLast)
             .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 

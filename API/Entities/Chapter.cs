@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
@@ -154,11 +155,20 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <returns></returns>
     public string GetNumberTitle()
     {
-        if (Math.Abs(MinNumber - MaxNumber) < 0.001f)
+        if (MinNumber.Is(MaxNumber))
         {
             return $"{MinNumber}";
         }
 
         return $"{MinNumber}-{MaxNumber}";
+    }
+
+    /// <summary>
+    /// Is the Chapter representing a single Volume (volume 1.cbz)?
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSingleVolumeChapter()
+    {
+        return MinNumber.Is(Parser.DefaultChapterNumber) && !IsSpecial;
     }
 }

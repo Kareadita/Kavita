@@ -649,7 +649,7 @@ public class ReadingListService : IReadingListService
             var bookNumber = string.IsNullOrEmpty(book.Number)
                 ? Parser.DefaultChapterNumber
                 : float.Parse(book.Number);
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => Math.Abs(c.MinNumber - bookNumber) < 0.001f);
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.MinNumber.Is(bookNumber));
             if (chapter == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
