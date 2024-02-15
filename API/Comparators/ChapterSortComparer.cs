@@ -39,6 +39,7 @@ public class ChapterSortComparer : IComparer<double>
 /// </summary>
 public class ChapterSortComparerZeroFirst : IComparer<double>
 {
+    // TODO: Refactor this to be ChapterSortSpecialFirst
     public int Compare(double x, double y)
     {
         if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;

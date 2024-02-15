@@ -20,6 +20,8 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             Range = string.IsNullOrEmpty(range) ? number : range,
             Title = string.IsNullOrEmpty(range) ? number : range,
             Number = Parser.MinNumberFromRange(number).ToString(CultureInfo.InvariantCulture),
+            MinNumber = Parser.MinNumberFromRange(number),
+            MaxNumber = Parser.MaxNumberFromRange(number),
             Files = new List<MangaFile>(),
             Pages = 1
         };
@@ -47,6 +49,8 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     public ChapterBuilder WithNumber(string number)
     {
         _chapter.Number = number;
+        _chapter.MinNumber = Parser.MinNumberFromRange(number);
+        _chapter.MaxNumber = Parser.MaxNumberFromRange(number);
         return this;
     }
 

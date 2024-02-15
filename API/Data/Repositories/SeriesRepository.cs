@@ -1891,7 +1891,7 @@ public class SeriesRepository : ISeriesRepository
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
-                ChapterNumber = c.Number,
+                ChapterNumber = c.MinNumber + string.Empty, // TODO: Refactor this
                 ChapterRange = c.Range,
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.MinNumber,

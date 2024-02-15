@@ -644,7 +644,11 @@ public class ProcessSeries : IProcessSeries
             // Add files
             var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
+
+            // TODO: Investigate using the ChapterBuilder here
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
+            chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
+            chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
         }
 

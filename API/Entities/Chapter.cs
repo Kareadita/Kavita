@@ -139,10 +139,26 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
         if (IsSpecial)
         {
             Number = Parser.DefaultChapter;
+            MinNumber = Parser.DefaultChapterNumber;
+            MaxNumber = Parser.DefaultChapterNumber;
         }
         Title = (IsSpecial && info.Format == MangaFormat.Epub)
             ? info.Title
             : Range;
 
+    }
+
+    /// <summary>
+    /// Returns the Chapter Number. If the chapter is a range, returns that, formatted.
+    /// </summary>
+    /// <returns></returns>
+    public string GetNumberTitle()
+    {
+        if (Math.Abs(MinNumber - MaxNumber) < 0.001f)
+        {
+            return $"{MinNumber}";
+        }
+
+        return $"{MinNumber}-{MaxNumber}";
     }
 }

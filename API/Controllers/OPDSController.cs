@@ -857,8 +857,8 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
-        _chapterSortComparer);
+            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id))
+                .OrderBy(x => x.MinNumber, _chapterSortComparer);
 
             foreach (var chapterId in chapters.Select(c => c.Id))
             {
@@ -907,8 +907,8 @@ public class OpdsController : BaseApiController
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapters =
-            (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
-                _chapterSortComparer);
+            (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId))
+            .OrderBy(x => x.MinNumber, _chapterSortComparer);
         var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");

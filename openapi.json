@@ -13943,7 +13943,8 @@
           "number": {
             "type": "string",
             "description": "Smallest number of the Range.",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "minNumber": {
             "type": "number",

@@ -87,15 +87,15 @@ public class SeriesService : ISeriesService
 
 
         var allChapters = series.Volumes
-            .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default))
+            .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber, ChapterSortComparer.Default))
             .ToList();
         var minChapter = allChapters
             .FirstOrDefault();
 
-        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.MinNumber || chapNum == Parser.DefaultChapterNumber))
+        if (minVolumeNumber != null && minChapter != null &&
+            (minChapter.MinNumber >= minVolumeNumber.MinNumber || minChapter.MinNumber == Parser.DefaultChapterNumber))
         {
-            return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
+            return minVolumeNumber.Chapters.MinBy(c => c.MinNumber, ChapterSortComparer.Default);
         }
 
         return minChapter;
@@ -772,9 +772,8 @@ public class SeriesService : ISeriesService
             : (DateTime?)null;
 
         // For number and volume number, we need the highest chapter, not the latest created
-        var lastChapter = chapters.MaxBy(c => c.Number.AsFloat())!;
-        float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
-            out var lastChapterNumber);
+        var lastChapter = chapters.MaxBy(c => c.MaxNumber)!;
+        var lastChapterNumber = lastChapter.MaxNumber;
 
         var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
 

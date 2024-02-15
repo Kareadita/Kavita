@@ -187,6 +187,7 @@ public class ChapterRepository : IChapterRepository
     {
         return await _context.Chapter
             .Where(c => c.VolumeId == volumeId)
+            .OrderBy(c => c.MinNumber)
             .ToListAsync();
     }
 
