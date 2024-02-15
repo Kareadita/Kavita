@@ -265,6 +265,7 @@ public class TachiyomiServiceTests
 
         Assert.Equal("21", latestChapter.Number);
     }
+
     [Fact]
     public async Task GetLatestChapter_ShouldReturnEncodedVolume_Progress()
     {

@@ -17,7 +17,7 @@ namespace API.Services;
 
 public interface ITachiyomiService
 {
-    Task<ChapterDto?> GetLatestChapter(int seriesId, int userId);
+    Task<TachiyomiChapterDto?> GetLatestChapter(int seriesId, int userId);
     Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber);
 }
 
@@ -51,7 +51,7 @@ public class TachiyomiService : ITachiyomiService
     /// If its a chapter, return the chapterDto as is.
     /// If it's a volume, the volume number gets returned in the 'Number' attribute of a chapterDto encoded.
     /// The volume number gets divided by 10,000 because that's how Tachiyomi interprets volumes</returns>
-    public async Task<ChapterDto?> GetLatestChapter(int seriesId, int userId)
+    public async Task<TachiyomiChapterDto?> GetLatestChapter(int seriesId, int userId)
     {
         var currentChapter = await _readerService.GetContinuePoint(seriesId, userId);
 
@@ -79,15 +79,15 @@ public class TachiyomiService : ITachiyomiService
                 if (volumeChapter.Number == Parser.LooseLeafVolume)
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
-                    return new ChapterDto()
+                    return new TachiyomiChapterDto()
                     {
                         // Use R to ensure that localization of underlying system doesn't affect the stringification
                         // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                        Number = (volume.MinNumber / 10_000f).ToString("R", EnglishCulture)
+                        Number = (((int) volume.MinNumber) / 10_000f).ToString("R", EnglishCulture)
                     };
                 }
 
-                return new ChapterDto()
+                return new TachiyomiChapterDto()
                 {
                     Number = (int.Parse(volumeChapter.Number) / 10_000f).ToString("R", EnglishCulture)
                 };
@@ -96,18 +96,18 @@ public class TachiyomiService : ITachiyomiService
             var lastChapter = looseLeafChapterVolume.Chapters
                 .OrderBy(c => c.MinNumber, ChapterSortComparer.Default)
                 .Last();
-            return _mapper.Map<ChapterDto>(lastChapter);
+            return _mapper.Map<TachiyomiChapterDto>(lastChapter);
         }
 
         // There is progress, we now need to figure out the highest volume or chapter and return that.
-        var prevChapter = (await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId))!;
+        var prevChapter = (TachiyomiChapterDto) (await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId))!;
 
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
         // We only encode for single-file volumes
         if (!volumeWithProgress!.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
-            return new ChapterDto()
+            return new TachiyomiChapterDto()
             {
                 // Use R to ensure that localization of underlying system doesn't affect the stringification
                 // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework

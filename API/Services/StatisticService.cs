@@ -336,7 +336,7 @@ public class StatisticService : IStatisticService
                 LibraryId = u.LibraryId,
                 ReadDate = u.LastModified,
                 ChapterId = u.ChapterId,
-                ChapterNumber = _context.Chapter.Single(c => c.Id == u.ChapterId).Number
+                ChapterNumber = _context.Chapter.Single(c => c.Id == u.ChapterId).MinNumber
             })
             .OrderByDescending(d => d.ReadDate)
             .ToListAsync();
