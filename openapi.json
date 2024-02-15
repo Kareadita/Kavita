@@ -16711,8 +16711,8 @@
             "format": "int32"
           },
           "chapterNumber": {
-            "type": "string",
-            "nullable": true
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false,

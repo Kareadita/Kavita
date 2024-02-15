@@ -197,7 +197,7 @@ public class MediaConversionService : IMediaConversionService
         foreach (var volume in nonCustomOrConvertedVolumeCovers)
         {
             if (string.IsNullOrEmpty(volume.CoverImage)) continue;
-            volume.CoverImage = volume.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            volume.CoverImage = volume.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerSpecialsFirst.Default)?.CoverImage;
             _unitOfWork.VolumeRepository.Update(volume);
             await _unitOfWork.CommitAsync();
         }

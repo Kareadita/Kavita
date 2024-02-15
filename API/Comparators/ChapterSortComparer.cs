@@ -6,9 +6,9 @@ namespace API.Comparators;
 #nullable enable
 
 /// <summary>
-/// Sorts chapters based on their Number. Uses natural ordering of doubles.
+/// Sorts chapters based on their Number. Uses natural ordering of doubles. Specials always LAST.
 /// </summary>
-public class ChapterSortComparer : IComparer<double>
+public class ChapterSortComparerSpecialsLast : IComparer<double>
 {
     /// <summary>
     /// Normal sort for 2 doubles. 0 always comes last
@@ -27,7 +27,7 @@ public class ChapterSortComparer : IComparer<double>
         return x.CompareTo(y);
     }
 
-    public static readonly ChapterSortComparer Default = new ChapterSortComparer();
+    public static readonly ChapterSortComparerSpecialsLast Default = new ChapterSortComparerSpecialsLast();
 }
 
 /// <summary>
@@ -37,7 +37,7 @@ public class ChapterSortComparer : IComparer<double>
 /// This is represented by Chapter 0, Chapter 81.
 /// </example>
 /// </summary>
-public class ChapterSortComparerZeroFirst : IComparer<double>
+public class ChapterSortComparerSpecialsFirst : IComparer<double>
 {
     // TODO: Refactor this to be ChapterSortSpecialFirst
     public int Compare(double x, double y)
@@ -51,20 +51,5 @@ public class ChapterSortComparerZeroFirst : IComparer<double>
         return x.CompareTo(y);
     }
 
-    public static readonly ChapterSortComparerZeroFirst Default = new ChapterSortComparerZeroFirst();
-}
-
-public class SortComparerZeroLast : IComparer<double>
-{
-    public int Compare(double x, double y)
-    {
-        if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;
-        // if x is 0, it comes last
-        if (x == Parser.DefaultChapterNumber) return 1;
-        // if y is 0, it comes last
-        if (y == Parser.DefaultChapterNumber) return -1;
-
-        return x.CompareTo(y);
-    }
-    public static readonly SortComparerZeroLast Default = new SortComparerZeroLast();
+    public static readonly ChapterSortComparerSpecialsFirst Default = new ChapterSortComparerSpecialsFirst();
 }

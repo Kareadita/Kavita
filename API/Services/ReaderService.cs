@@ -51,8 +51,8 @@ public class ReaderService : IReaderService
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
     private readonly IScrobblingService _scrobblingService;
-    private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
+    private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
+    private readonly ChapterSortComparerSpecialsFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerSpecialsFirst.Default;
 
     private const float MinWordsPerHour = 10260F;
     private const float MaxWordsPerHour = 30000F;
@@ -379,7 +379,7 @@ public class ReaderService : IReaderService
             {
                 // Handle Chapters within current Volume
                 // In this case, i need 0 first because 0 represents a full volume file.
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Number.AsFloat(), _chapterSortComparer),
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.MinNumber, _chapterSortComparerSpecialsLast),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
                 next = true;
@@ -396,8 +396,8 @@ public class ReaderService : IReaderService
 
             // Handle Chapters within next Volume
             // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
-            var chapters = volume.Chapters.OrderBy(x => x.Number.AsDouble(), _chapterSortComparer).ToList();
-            if (currentChapter.Number.Equals(Parser.DefaultChapter) && chapters[^1].Number.Equals(Parser.DefaultChapter))
+            var chapters = volume.Chapters.OrderBy(x => x.MinNumber, _chapterSortComparerSpecialsLast).ToList();
+            if (currentChapter.MinNumber == Parser.DefaultChapterNumber && chapters[^1].MinNumber == Parser.DefaultChapterNumber)
             {
                 // We need to handle an extra check if the current chapter is the last special, as we should return -1
                 if (currentChapter.IsSpecial) return -1;
@@ -451,7 +451,7 @@ public class ReaderService : IReaderService
             // }
 
 
-            var firstChapter = chapterVolume.Chapters.MinBy(x => x.Number.AsDouble(), _chapterSortComparer);
+            var firstChapter = chapterVolume.Chapters.MinBy(x => x.Number.AsDouble(), _chapterSortComparerSpecialsLast);
             if (firstChapter == null) return -1;
 
 
@@ -530,7 +530,7 @@ public class ReaderService : IReaderService
          if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
          {
              // I think i need a way to sort volumes last
-             var chapters = volumes.OrderBy(v => v.MinNumber, _chapterSortComparer).First().Chapters
+             var chapters = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).First().Chapters
                  .OrderBy(c => c.Number.AsFloat())
                  .ToList();
 
@@ -559,13 +559,13 @@ public class ReaderService : IReaderService
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => c.Number.AsDouble(), _chapterSortComparer)
+            .OrderBy(c => c.Number.AsDouble(), _chapterSortComparerSpecialsLast)
             .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, SortComparerZeroLast.Default)
-                                             .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsDouble()))
+        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, ChapterSortComparerSpecialsLast.Default)
+                                             .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber))
                                              .ToList());
     }
 
