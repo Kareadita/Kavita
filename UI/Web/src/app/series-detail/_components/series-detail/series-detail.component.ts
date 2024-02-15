@@ -241,7 +241,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Track by function for Chapter to tell when to refresh card data
    */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.minNumber}_${item.maxNumber}_${item.volumeId}_${item.pagesRead}`;
   trackByRelatedSeriesIdentify = (index: number, item: RelatedSeriesPair) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
   trackBySeriesIdentify = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
@@ -371,13 +371,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // This is a lone chapter
       if (vol.length === 0) {
-        return 'Ch ' + this.currentlyReadingChapter.number;
+        return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range)
       }
 
-      if (this.currentlyReadingChapter.number === "0") {
+      if (this.currentlyReadingChapter.minNumber === LooseLeafOrSpecialNumber) {
         return 'Vol ' + vol[0].minNumber;
       }
-      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.number;
+      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.minNumber;
     }
 
     return this.currentlyReadingChapter.title;

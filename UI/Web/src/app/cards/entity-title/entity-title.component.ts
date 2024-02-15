@@ -43,7 +43,7 @@ export class EntityTitleComponent implements OnInit {
 
   get Number() {
     if (this.utilityService.isVolume(this.entity)) return (this.entity as Volume).minNumber;
-    return (this.entity as Chapter).number;
+    return (this.entity as Chapter).minNumber;
   }
 
   get LibraryType() {

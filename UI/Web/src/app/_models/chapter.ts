@@ -9,7 +9,12 @@ export const LooseLeafOrSpecialNumber = 0;
 export interface Chapter {
     id: number;
     range: string;
+    /**
+     * @deprecated Use minNumber/maxNumber
+     */
     number: string;
+    minNumber: number;
+    maxNumber: number;
     files: Array<MangaFile>;
     /**
      * This is used in the UI, it is not updated or sent to Backend

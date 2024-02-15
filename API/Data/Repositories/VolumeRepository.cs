@@ -216,6 +216,7 @@ public class VolumeRepository : IVolumeRepository
     {
         foreach (var v in volumes.WhereLooseLeaf())
         {
+            // Note: This can have both loose leaf chapters and Specials
             v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
         }
     }

@@ -20,7 +20,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, of, map, shareReplay } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
+import {Chapter, LooseLeafOrSpecialNumber} from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library/library';
@@ -74,6 +74,7 @@ export class CardDetailDrawerComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
   protected readonly LibraryType = LibraryType;
   protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrSpecialNumber;
 
   @Input() parentName = '';
   @Input() seriesId: number = 0;
@@ -182,10 +183,10 @@ export class CardDetailDrawerComponent implements OnInit {
   }
 
   formatChapterNumber(chapter: Chapter) {
-    if (chapter.number === '0') {
+    if (chapter.minNumber === LooseLeafOrSpecialNumber) {
       return '1';
     }
-    return chapter.number;
+    return chapter.minNumber + '';
   }
 
   performAction(action: ActionItem<any>, chapter: Chapter) {
@@ -281,5 +282,4 @@ export class CardDetailDrawerComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
 }
