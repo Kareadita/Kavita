@@ -464,7 +464,7 @@ public class ReaderService : IReaderService
     /// Tries to find the prev logical Chapter
     /// </summary>
     /// <example>
-    /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← V0 chapter 1 ← V0 chapter 2 ← SP 01 ← SP 02
+    /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← (V0 chapter 1 ← V0 chapter 2 ← SP 01 ← SP 02)
     /// </example>
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
@@ -519,13 +519,14 @@ public class ReaderService : IReaderService
 
     /// <summary>
     /// Finds the chapter to continue reading from. If a chapter has progress and not complete, return that. If not, progress in the
-    /// ordering (Volumes -> Loose Chapters -> Special) to find next chapter. If all are read, return first in order for series.
+    /// ordering (Volumes -> Loose Chapters -> Annuals -> Special) to find next chapter. If all are read, return first in order for series.
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
+        // TODO: This Volume API is very heavy, we can use something more lightweight
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
 
          if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))

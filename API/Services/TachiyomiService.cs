@@ -76,7 +76,8 @@ public class TachiyomiService : ITachiyomiService
                     [^1].Chapters
                     .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsFirst.Default)
                     .Last());
-                if (volumeChapter.Number == Parser.LooseLeafVolume)
+
+                if (volumeChapter.MinNumber.Is(Parser.LooseLeafVolumeNumber))
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
                     return new TachiyomiChapterDto()
@@ -89,7 +90,7 @@ public class TachiyomiService : ITachiyomiService
 
                 return new TachiyomiChapterDto()
                 {
-                    Number = (int.Parse(volumeChapter.Number) / 10_000f).ToString("R", EnglishCulture)
+                    Number = (((int) volumeChapter.MinNumber) / 10_000f).ToString("R", EnglishCulture)
                 };
             }
 
@@ -100,11 +101,11 @@ public class TachiyomiService : ITachiyomiService
         }
 
         // There is progress, we now need to figure out the highest volume or chapter and return that.
-        var prevChapter = (TachiyomiChapterDto) (await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId))!;
+        var prevChapter = (await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId))!;
 
-        var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
+        var volumeWithProgress = (await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId))!;
         // We only encode for single-file volumes
-        if (!volumeWithProgress!.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
+        if (!volumeWithProgress.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
             return new TachiyomiChapterDto()
@@ -117,7 +118,7 @@ public class TachiyomiService : ITachiyomiService
         }
 
         // Progress is just on a chapter, return as is
-        return prevChapter;
+        return _mapper.Map<TachiyomiChapterDto>(prevChapter);
     }
 
     /// <summary>

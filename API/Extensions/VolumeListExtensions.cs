@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -45,7 +46,7 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static bool HasAnyNonLooseLeafVolumes(this IEnumerable<Volume> volumes)
     {
-        return volumes.Any(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
+        return volumes.Any(v => v.MinNumber.IsNot(Parser.DefaultChapterNumber));
     }
 
     /// <summary>
@@ -55,8 +56,8 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static Volume? FirstNonLooseLeafOrDefault(this IEnumerable<Volume> volumes)
     {
-        return volumes.OrderBy(x => x.MinNumber)
-            .FirstOrDefault(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
+        return volumes.OrderBy(x => x.MinNumber, ChapterSortComparerSpecialsLast.Default)
+            .FirstOrDefault(v => v.MinNumber.IsNot(Parser.DefaultChapterNumber));
     }
 
     /// <summary>

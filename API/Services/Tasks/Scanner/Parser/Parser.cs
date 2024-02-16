@@ -16,6 +16,10 @@ public static class Parser
     public const string LooseLeafVolume = "0";
     public const int DefaultChapterNumber = 0;
     public const int LooseLeafVolumeNumber = 0;
+    /// <summary>
+    /// The Volume Number of Specials to reside in
+    /// </summary>
+    public const int SpecialVolumeNumber = 100_000;
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser

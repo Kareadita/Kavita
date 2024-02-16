@@ -53,4 +53,13 @@ public class VolumeDto : IHasReadTimeEstimate
     {
         return MinNumber.Is(Parser.LooseLeafVolumeNumber);
     }
+
+    /// <summary>
+    /// Does this volume hold only specials?
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSpecial()
+    {
+        return MinNumber.Is(Parser.SpecialVolumeNumber);
+    }
 }

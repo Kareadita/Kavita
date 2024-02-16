@@ -16183,6 +16183,11 @@
             "type": "integer",
             "format": "int32"
           },
+          "fileName": {
+            "type": "string",
+            "description": "The filename without extension",
+            "nullable": true
+          },
           "filePath": {
             "type": "string",
             "description": "Absolute path to the archive file",

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -13,6 +15,15 @@ using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+
+[Flags]
+public enum VolumeIncludes
+{
+    None = 1,
+    Chapters = 2,
+    People = 4,
+    Tags = 8,
+}
 
 public interface IVolumeRepository
 {
@@ -22,7 +33,7 @@ public interface IVolumeRepository
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
-    Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
+    Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters);
     Task<Volume?> GetVolumeAsync(int volumeId);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
@@ -177,14 +188,11 @@ public class VolumeRepository : IVolumeRepository
     /// <param name="seriesId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
+    public async Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters)
     {
         var volumes =  await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.People)
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.Tags)
+            .Includes(includes)
             .OrderBy(volume => volume.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()

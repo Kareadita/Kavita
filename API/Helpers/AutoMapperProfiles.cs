@@ -200,6 +200,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<ReadingList, ReadingListDto>();
         CreateMap<ReadingListItem, ReadingListItemDto>();
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
+        CreateMap<ChapterDto, TachiyomiChapterDto>();
 
         CreateMap<Series, SearchResultDto>()
             .ForMember(dest => dest.SeriesId,
