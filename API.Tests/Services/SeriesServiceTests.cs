@@ -108,7 +108,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                     .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithTitle("Omake").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithTitle("Something").WithPages(1).Build())
                     .Build())
@@ -280,7 +280,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                     .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub").WithIsSpecial(true).WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")

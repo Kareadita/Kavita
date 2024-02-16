@@ -489,16 +489,16 @@ public class SeriesService : ISeriesService
         var processedVolumes = new List<VolumeDto>();
         foreach (var volume in volumes)
         {
-            volume.Chapters = volume.Chapters
-                .OrderBy(d => d.MinNumber, ChapterSortComparerSpecialsLast.Default)
-                .ToList();
-
-            if (!bookTreatment && volume.IsLooseLeaf())
+            if (volume.IsLooseLeaf())
             {
                 continue;
             }
 
-            if (RenameVolumeName(volume, libraryType, volumeLabel))
+            volume.Chapters = volume.Chapters
+                .OrderBy(d => d.MinNumber, ChapterSortComparerSpecialsLast.Default)
+                .ToList();
+
+            if (RenameVolumeName(volume, libraryType, volumeLabel) || (bookTreatment && !volume.IsSpecial()))
             {
                 processedVolumes.Add(volume);
             }
@@ -558,7 +558,7 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.DefaultChapter);
+        return !chapter.IsSpecial && !chapter.MinNumber.Is(Parser.DefaultChapterNumber);
     }
 
     public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
@@ -585,7 +585,7 @@ public class SeriesService : ISeriesService
             return true;
         }
 
-        volume.Name = $"{volumeLabel} {volume.Name}".Trim();
+        volume.Name = $"{volumeLabel.Trim()} {volume.Name}".Trim();
         return true;
     }
 
