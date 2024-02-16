@@ -14,6 +14,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
+#nullable enable
 
 public interface ITachiyomiService
 {
@@ -80,23 +81,16 @@ public class TachiyomiService : ITachiyomiService
                 if (volumeChapter.MinNumber.Is(Parser.LooseLeafVolumeNumber))
                 {
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
-                    return new TachiyomiChapterDto()
-                    {
-                        // Use R to ensure that localization of underlying system doesn't affect the stringification
-                        // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                        Number = (((int) volume.MinNumber) / 10_000f).ToString("R", EnglishCulture)
-                    };
+                    return CreateTachiyomiChapterDto(volume.MinNumber);
                 }
 
-                return new TachiyomiChapterDto()
-                {
-                    Number = (((int) volumeChapter.MinNumber) / 10_000f).ToString("R", EnglishCulture)
-                };
+                return CreateTachiyomiChapterDto(volumeChapter.MinNumber);
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters
                 .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
                 .Last();
+
             return _mapper.Map<TachiyomiChapterDto>(lastChapter);
         }
 
@@ -108,17 +102,21 @@ public class TachiyomiService : ITachiyomiService
         if (!volumeWithProgress.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
-            return new TachiyomiChapterDto()
-            {
-                // Use R to ensure that localization of underlying system doesn't affect the stringification
-                // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                Number = (volumeWithProgress.MinNumber / 10_000f).ToString("R", EnglishCulture)
-
-            };
+            return CreateTachiyomiChapterDto(volumeWithProgress.MinNumber);
         }
 
         // Progress is just on a chapter, return as is
         return _mapper.Map<TachiyomiChapterDto>(prevChapter);
+    }
+
+    private static TachiyomiChapterDto CreateTachiyomiChapterDto(float number)
+    {
+        return new TachiyomiChapterDto()
+        {
+            // Use R to ensure that localization of underlying system doesn't affect the stringification
+            // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
+            Number = (number / 10_000f).ToString("R", EnglishCulture)
+        };
     }
 
     /// <summary>
