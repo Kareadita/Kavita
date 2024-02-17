@@ -25,7 +25,7 @@ public static class SeriesExtensions
         if (firstVolume == null) return null;
 
         var chapters = firstVolume.Chapters
-            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsFirst.Default)
+            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
             .ToList();
 
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
@@ -41,25 +41,36 @@ public static class SeriesExtensions
         // If we have loose leaf chapters
 
         // if loose leaf chapters AND volumes, just return first volume
-        if (volumes.Count >= 1 && $"{volumes[0].MinNumber}" != Parser.LooseLeafVolume)
+        if (volumes.Count >= 1 && volumes[0].MinNumber.IsNot(Parser.LooseLeafVolumeNumber))
         {
-            var looseLeafChapters = volumes.Where(v => $"{v.MinNumber}" == Parser.LooseLeafVolume)
-                .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
+            var looseLeafChapters = volumes.Where(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
+                .SelectMany(c => c.Chapters.Where(c2 => !c2.IsSpecial))
                 .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsFirst.Default)
                 .ToList();
-            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].MinNumber) > looseLeafChapters[0].MinNumber)
+
+            if (looseLeafChapters.Count > 0 && volumes[0].MinNumber > looseLeafChapters[0].MinNumber)
             {
                 return looseLeafChapters[0].CoverImage;
             }
             return firstVolume.CoverImage;
         }
 
-        var firstLooseLeafChapter = volumes
-            .Where(v => $"{v.MinNumber}" == Parser.LooseLeafVolume)
-            .SelectMany(v => v.Chapters)
-            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsFirst.Default)
-            .FirstOrDefault(c => !c.IsSpecial);
+        var chpts = volumes
+            .First(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
+            .Chapters
+            //.Where(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
+            //.SelectMany(v => v.Chapters)
 
-        return firstLooseLeafChapter?.CoverImage ?? firstVolume.CoverImage;
+            .Where(c => !c.IsSpecial)
+            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
+            .ToList();
+
+        var exactlyChapter1 = chpts.FirstOrDefault(c => c.MinNumber.Is(1f));
+        if (exactlyChapter1 != null)
+        {
+            return exactlyChapter1.CoverImage;
+        }
+
+        return chpts.FirstOrDefault()?.CoverImage ?? firstVolume.CoverImage;
     }
 }

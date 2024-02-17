@@ -17,8 +17,7 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithCoverImage("Special 1")
                     .WithIsSpecial(true)
@@ -71,6 +70,30 @@ public class SeriesExtensionsTests
         }
 
         Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
+    }
+
+    [Fact]
+    public void GetCoverImage_LooseChapters_WithSub1_Chapter()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("0.5")
+                    .WithCoverImage("Chapter 0.5")
+                    .Build())
+                .WithChapter(new ChapterBuilder("2")
+                    .WithCoverImage("Chapter 2")
+                    .Build())
+                .WithChapter(new ChapterBuilder("1")
+                    .WithCoverImage("Chapter 1")
+                    .Build())
+                .Build())
+
+            .Build();
+
+
+        Assert.Equal("Chapter 1", series.GetCoverImage());
     }
 
     [Fact]
@@ -156,11 +179,13 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 1")
                     .Build())
-                .Build())
+            .Build())
             .Build();
 
         foreach (var vol in series.Volumes)
@@ -186,6 +211,8 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 3")
@@ -223,6 +250,8 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 1")
@@ -260,9 +289,11 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 1425")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
-                    .WithCoverImage("Special 1")
+                    .WithCoverImage("Special 3")
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
