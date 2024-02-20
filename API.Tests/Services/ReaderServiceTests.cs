@@ -1033,7 +1033,7 @@ public class ReaderServiceTests
 
 
         // prevChapter should be id from ch.21 from volume 2001
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 4, 7, 1);
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 5, 7, 1);
 
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
@@ -1199,10 +1199,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
-
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1219,13 +1216,13 @@ public class ReaderServiceTests
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("2").WithIsSpecial(true).Build())
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithChapter(new ChapterBuilder("3").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("4").WithIsSpecial(true).Build())
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
