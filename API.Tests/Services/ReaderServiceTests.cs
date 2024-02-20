@@ -2515,14 +2515,14 @@ public class ReaderServiceTests
     public async Task MarkSeriesAsReadTest()
     {
         await ResetDb();
-        // TODO: Validate this is correct, shouldn't be possible to have 2 Volume 0's in a series
+
         var series = new SeriesBuilder("Test")
 
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())

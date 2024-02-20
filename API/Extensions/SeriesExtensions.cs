@@ -19,13 +19,13 @@ public static class SeriesExtensions
     public static string? GetCoverImage(this Series series)
     {
         var volumes = (series.Volumes ?? [])
-            .OrderBy(v => v.MinNumber, ChapterSortComparerSpecialsLast.Default)
+            .OrderBy(v => v.MinNumber, ChapterSortComparerDefaultLast.Default)
             .ToList();
         var firstVolume = volumes.GetCoverImage(series.Format);
         if (firstVolume == null) return null;
 
         var chapters = firstVolume.Chapters
-            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
+            .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
             .ToList();
 
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
@@ -45,7 +45,7 @@ public static class SeriesExtensions
         {
             var looseLeafChapters = volumes.Where(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
                 .SelectMany(c => c.Chapters.Where(c2 => !c2.IsSpecial))
-                .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsFirst.Default)
+                .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultFirst.Default)
                 .ToList();
 
             if (looseLeafChapters.Count > 0 && volumes[0].MinNumber > looseLeafChapters[0].MinNumber)
@@ -62,7 +62,7 @@ public static class SeriesExtensions
             //.SelectMany(v => v.Chapters)
 
             .Where(c => !c.IsSpecial)
-            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
+            .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
             .ToList();
 
         var exactlyChapter1 = chpts.FirstOrDefault(c => c.MinNumber.Is(1f));

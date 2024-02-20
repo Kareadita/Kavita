@@ -87,7 +87,7 @@ public class SeriesService : ISeriesService
 
 
         var allChapters = series.Volumes
-            .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default))
+            .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default))
             .ToList();
         var minChapter = allChapters
             .FirstOrDefault();
@@ -95,7 +95,7 @@ public class SeriesService : ISeriesService
         if (minVolumeNumber != null && minChapter != null &&
             (minChapter.MinNumber >= minVolumeNumber.MinNumber || minChapter.MinNumber.Is(Parser.DefaultChapterNumber)))
         {
-            return minVolumeNumber.Chapters.MinBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default);
+            return minVolumeNumber.Chapters.MinBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default);
         }
 
         return minChapter;
@@ -495,7 +495,7 @@ public class SeriesService : ISeriesService
             }
 
             volume.Chapters = volume.Chapters
-                .OrderBy(d => d.MinNumber, ChapterSortComparerSpecialsLast.Default)
+                .OrderBy(d => d.MinNumber, ChapterSortComparerDefaultLast.Default)
                 .ToList();
 
             if (RenameVolumeName(volume, libraryType, volumeLabel) || (bookTreatment && !volume.IsSpecial()))
@@ -514,7 +514,7 @@ public class SeriesService : ISeriesService
                     c.VolumeTitle = v.Name;
                     return c;
                 })
-                .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default))
+                .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default))
                 .ToList();
 
         foreach (var chapter in chapters)
@@ -532,12 +532,12 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .WhereLooseLeaf()
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
+            .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
             .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
         if (storylineChapters.Count > 0) {
-            retChapters = retChapters.OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default);
+            retChapters = retChapters.OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default);
         }
 
         return new SeriesDetailDto

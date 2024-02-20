@@ -70,7 +70,7 @@ public class OpdsController : BaseApiController
     };
 
     private readonly FilterV2Dto _filterV2Dto = new FilterV2Dto();
-    private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
+    private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
     private const int PageSize = 20;
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
@@ -858,7 +858,7 @@ public class OpdsController : BaseApiController
         foreach (var volume in seriesDetail.Volumes)
         {
             var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id))
-                .OrderBy(x => x.MinNumber, _chapterSortComparerSpecialsLast);
+                .OrderBy(x => x.MinNumber, _chapterSortComparerDefaultLast);
 
             foreach (var chapterId in chapters.Select(c => c.Id))
             {
@@ -908,7 +908,7 @@ public class OpdsController : BaseApiController
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapters =
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId))
-            .OrderBy(x => x.MinNumber, _chapterSortComparerSpecialsLast);
+            .OrderBy(x => x.MinNumber, _chapterSortComparerDefaultLast);
         var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");

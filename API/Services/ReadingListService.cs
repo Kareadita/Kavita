@@ -57,7 +57,7 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly ChapterSortComparerSpecialsFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerSpecialsFirst.Default;
+    private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 

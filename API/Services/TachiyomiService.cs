@@ -75,7 +75,7 @@ public class TachiyomiService : ITachiyomiService
             {
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes
                     [^1].Chapters
-                    .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsFirst.Default)
+                    .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultFirst.Default)
                     .Last());
 
                 if (volumeChapter.MinNumber.Is(Parser.LooseLeafVolumeNumber))
@@ -88,7 +88,7 @@ public class TachiyomiService : ITachiyomiService
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters
-                .OrderBy(c => c.MinNumber, ChapterSortComparerSpecialsLast.Default)
+                .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
                 .Last();
 
             return _mapper.Map<TachiyomiChapterDto>(lastChapter);

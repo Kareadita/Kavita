@@ -9,10 +9,10 @@ namespace API.Comparators;
 /// <summary>
 /// Sorts chapters based on their Number. Uses natural ordering of doubles. Specials always LAST.
 /// </summary>
-public class ChapterSortComparerSpecialsLast : IComparer<float>
+public class ChapterSortComparerDefaultLast : IComparer<float>
 {
     /// <summary>
-    /// Normal sort for 2 doubles. 0 always comes last
+    /// Normal sort for 2 doubles. DefaultChapterNumber always comes last
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -28,7 +28,7 @@ public class ChapterSortComparerSpecialsLast : IComparer<float>
         return x.CompareTo(y);
     }
 
-    public static readonly ChapterSortComparerSpecialsLast Default = new ChapterSortComparerSpecialsLast();
+    public static readonly ChapterSortComparerDefaultLast Default = new ChapterSortComparerDefaultLast();
 }
 
 /// <summary>
@@ -38,7 +38,7 @@ public class ChapterSortComparerSpecialsLast : IComparer<float>
 /// This is represented by Chapter 0, Chapter 81.
 /// </example>
 /// </summary>
-public class ChapterSortComparerSpecialsFirst : IComparer<float>
+public class ChapterSortComparerDefaultFirst : IComparer<float>
 {
     public int Compare(float x, float y)
     {
@@ -51,5 +51,30 @@ public class ChapterSortComparerSpecialsFirst : IComparer<float>
         return x.CompareTo(y);
     }
 
-    public static readonly ChapterSortComparerSpecialsFirst Default = new ChapterSortComparerSpecialsFirst();
+    public static readonly ChapterSortComparerDefaultFirst Default = new ChapterSortComparerDefaultFirst();
+}
+
+/// <summary>
+/// Sorts chapters based on their Number. Uses natural ordering of doubles. Specials always LAST.
+/// </summary>
+public class ChapterSortComparerSpecialsLast : IComparer<float>
+{
+    /// <summary>
+    /// Normal sort for 2 doubles. DefaultSpecialNumber always comes last
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public int Compare(float x, float y)
+    {
+        if (x.Is(Parser.SpecialVolumeNumber) && y.Is(Parser.SpecialVolumeNumber)) return 0;
+        // if x is 0, it comes second
+        if (x.Is(Parser.SpecialVolumeNumber)) return 1;
+        // if y is 0, it comes second
+        if (y.Is(Parser.SpecialVolumeNumber)) return -1;
+
+        return x.CompareTo(y);
+    }
+
+    public static readonly ChapterSortComparerSpecialsLast Default = new ChapterSortComparerSpecialsLast();
 }

@@ -51,8 +51,9 @@ public class ReaderService : IReaderService
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
+    private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
-    private readonly ChapterSortComparerSpecialsFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerSpecialsFirst.Default;
 
     private const float MinWordsPerHour = 10260F;
     private const float MaxWordsPerHour = 30000F;
@@ -668,7 +669,18 @@ public class ReaderService : IReaderService
          if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
          {
              // I think i need a way to sort volumes last
-             var chapters = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).First().Chapters
+             volumes = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).ToList();
+
+             // Check if we have a non-loose leaf volume
+             var nonLooseLeafNonSpecialVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
+             if (nonLooseLeafNonSpecialVolume != null)
+             {
+                 return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.MinNumber);
+             }
+
+             // We only have a loose leaf or Special left
+
+             var chapters = volumes.First(v => v.IsLooseLeaf() || v.IsSpecial()).Chapters
                  .OrderBy(c => c.MinNumber)
                  .ToList();
 
@@ -697,12 +709,12 @@ public class ReaderService : IReaderService
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => c.MinNumber, _chapterSortComparerSpecialsLast)
+            .OrderBy(c => c.MinNumber, _chapterSortComparerDefaultLast)
             .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, ChapterSortComparerSpecialsLast.Default)
+        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
                                              .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber))
                                              .ToList());
     }

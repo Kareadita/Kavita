@@ -56,7 +56,7 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static Volume? FirstNonLooseLeafOrDefault(this IEnumerable<Volume> volumes)
     {
-        return volumes.OrderBy(x => x.MinNumber, ChapterSortComparerSpecialsLast.Default)
+        return volumes.OrderBy(x => x.MinNumber, ChapterSortComparerDefaultLast.Default)
             .FirstOrDefault(v => v.MinNumber.IsNot(Parser.DefaultChapterNumber));
     }
 

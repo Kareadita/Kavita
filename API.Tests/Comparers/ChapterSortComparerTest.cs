@@ -4,7 +4,7 @@ using Xunit;
 
 namespace API.Tests.Comparers;
 
-public class ChapterSortComparerSpecialsLastTest
+public class ChapterSortComparerDefaultLastTest
 {
     [Theory]
     [InlineData(new[] {1, 2, 0}, new[] {1, 2, 0})]
@@ -12,7 +12,7 @@ public class ChapterSortComparerSpecialsLastTest
     [InlineData(new[] {1, 0, 0}, new[] {1, 0, 0})]
     public void ChapterSortTest(int[] input, int[] expected)
     {
-        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerSpecialsLast()).ToArray());
+        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerDefaultLast()).ToArray());
     }
 
 }
