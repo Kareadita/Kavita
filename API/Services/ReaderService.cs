@@ -666,39 +666,42 @@ public class ReaderService : IReaderService
     {
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
 
-         if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
-         {
-             // I think i need a way to sort volumes last
-             volumes = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).ToList();
+        var anyUserProgress =
+            await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
 
-             // Check if we have a non-loose leaf volume
-             var nonLooseLeafNonSpecialVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
-             if (nonLooseLeafNonSpecialVolume != null)
-             {
-                 return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.MinNumber);
-             }
+        if (!anyUserProgress)
+        {
+            // I think i need a way to sort volumes last
+            volumes = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).ToList();
 
-             // We only have a loose leaf or Special left
+            // Check if we have a non-loose leaf volume
+            var nonLooseLeafNonSpecialVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
+            if (nonLooseLeafNonSpecialVolume != null)
+            {
+                return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.MinNumber);
+            }
 
-             var chapters = volumes.First(v => v.IsLooseLeaf() || v.IsSpecial()).Chapters
-                 .OrderBy(c => c.MinNumber)
-                 .ToList();
+            // We only have a loose leaf or Special left
 
-             // If there are specials, then return the first Non-special
-             if (chapters.Exists(c => c.IsSpecial))
-             {
-                 var firstChapter = chapters.Find(c => !c.IsSpecial);
-                 if (firstChapter == null)
-                 {
-                     // If there is no non-special chapter, then return first chapter
-                     return chapters[0];
-                 }
+            var chapters = volumes.First(v => v.IsLooseLeaf() || v.IsSpecial()).Chapters
+                .OrderBy(c => c.MinNumber)
+                .ToList();
 
-                 return firstChapter;
-             }
-             // Else use normal logic
-             return chapters[0];
-         }
+            // If there are specials, then return the first Non-special
+            if (chapters.Exists(c => c.IsSpecial))
+            {
+                var firstChapter = chapters.Find(c => !c.IsSpecial);
+                if (firstChapter == null)
+                {
+                    // If there is no non-special chapter, then return first chapter
+                    return chapters[0];
+                }
+
+                return firstChapter;
+            }
+            // Else use normal logic
+            return chapters[0];
+        }
 
         // Loop through all chapters that are not in volume 0
         var volumeChapters = volumes

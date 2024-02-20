@@ -779,6 +779,8 @@ public class SeriesServiceTests : AbstractDbTest
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).WithFile(file).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).WithFile(file).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder("A Special Case").WithIsSpecial(true).WithFile(file).WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
@@ -849,7 +851,7 @@ public class SeriesServiceTests : AbstractDbTest
         {
             new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build()
         };
-        series.Volumes[1].Chapters = new List<Chapter>()
+        series.Volumes[2].Chapters = new List<Chapter>()
         {
             new ChapterBuilder("2").WithFiles(files).WithPages(1).Build(),
             new ChapterBuilder("1.1").WithFiles(files).WithPages(1).Build(),

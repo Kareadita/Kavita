@@ -558,7 +558,7 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !chapter.IsSpecial && !chapter.MinNumber.Is(Parser.DefaultChapterNumber);
+        return !chapter.IsSpecial && chapter.MinNumber.IsNot(Parser.DefaultChapterNumber);
     }
 
     public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
