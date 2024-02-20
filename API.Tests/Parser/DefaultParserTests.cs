@@ -198,7 +198,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Summer Time Rendering\Specials\Record 014 (between chapter 083 and ch084) SP11.cbr";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Summer Time Rendering", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, Edition = "",
+            Series = "Summer Time Rendering", Volumes = API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume, Edition = "",
             Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Filename = "Record 014 (between chapter 083 and ch084) SP11.cbr", Format = MangaFormat.Archive,
             FullFilePath = filepath, IsSpecial = true
         });
@@ -414,7 +414,7 @@ public class DefaultParserTests
         filepath = @"E:/Manga/Foo 50/Specials/Foo 50 SP01.cbz";
         expected = new ParserInfo
         {
-            Series = "Foo 50", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume, IsSpecial = true,
+            Series = "Foo 50", Volumes = API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume, IsSpecial = true,
             Chapters = "50", Filename = "Foo 50 SP01.cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         };
@@ -449,7 +449,7 @@ public class DefaultParserTests
             var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
              expected.Add(filepath, new ParserInfo
              {
-                 Series = "Teen Titans", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
+                 Series = "Teen Titans", Volumes = API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume,
                  Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Filename = "Teen Titans v1 Annual 01 (1967) SP01.cbr", Format = MangaFormat.Archive,
                  FullFilePath = filepath
              });
