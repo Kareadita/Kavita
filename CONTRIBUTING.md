@@ -9,12 +9,12 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 
 ### Tools required ###
 - Visual Studio 2019 or higher (https://www.visualstudio.com/vs/).  The community version is free and works fine. [Download it here](https://www.visualstudio.com/downloads/).
-- Rider (optional to Visual Studio) (https://www.jetbrains.com/rider/)  
+- Rider (optional to Visual Studio, preferred editor) (https://www.jetbrains.com/rider/)  
 - HTML/Javascript editor of choice (VS Code/Sublime Text/Webstorm/Atom/etc)
 - [Git](https://git-scm.com/downloads)
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
-- .NET 7.0+
-- dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+- .NET 8.0+
+- dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
 
 ### Getting started ###
 
@@ -24,6 +24,7 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
     - cd Kavita/UI/Web
     - `npm install`
     - `npm install -g @angular/cli`
+    - `npm run cache-locale-prime` (only do this once to generate the locale file)
 4. Start angular server `ng serve`
 5. Build the project in Visual Studio/Rider, Setting startup project to `API`
 6. Debug the project in Visual Studio/Rider
