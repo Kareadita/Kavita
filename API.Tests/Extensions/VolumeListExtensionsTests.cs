@@ -30,6 +30,7 @@ public class VolumeListExtensionsTests
                 .Build(),
         };
 
+        var v = volumes.GetCoverImage(MangaFormat.Archive);
         Assert.Equal(volumes[0].MinNumber, volumes.GetCoverImage(MangaFormat.Archive).MinNumber);
     }
 

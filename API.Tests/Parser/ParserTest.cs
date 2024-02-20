@@ -155,6 +155,7 @@ public class ParserTests
     [InlineData("3.5", 3.5)]
     [InlineData("3.5-4.0", 3.5)]
     [InlineData("asdfasdf", 0.0)]
+    [InlineData("-10", -10.0)]
     public void MinimumNumberFromRangeTest(string input, float expected)
     {
         Assert.Equal(expected, MinNumberFromRange(input));
@@ -171,6 +172,7 @@ public class ParserTests
     [InlineData("3.5", 3.5)]
     [InlineData("3.5-4.0", 4.0)]
     [InlineData("asdfasdf", 0.0)]
+    [InlineData("-10", -10.0)]
     public void MaximumNumberFromRangeTest(string input, float expected)
     {
         Assert.Equal(expected, MaxNumberFromRange(input));

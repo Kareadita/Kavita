@@ -1,7 +1,7 @@
 import { MangaFile } from './manga-file';
 import { AgeRating } from './metadata/age-rating';
 
-export const LooseLeafOrSpecialNumber = 0;
+export const LooseLeafOrSpecialNumber = -100000;
 
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
