@@ -489,7 +489,7 @@ public class SeriesService : ISeriesService
         var processedVolumes = new List<VolumeDto>();
         foreach (var volume in volumes)
         {
-            if (volume.IsLooseLeaf())
+            if (volume.IsLooseLeaf() || volume.IsSpecial())
             {
                 continue;
             }
