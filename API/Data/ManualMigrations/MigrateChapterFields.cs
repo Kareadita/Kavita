@@ -34,6 +34,7 @@ public static class MigrateChapterFields
             .ToList();
         foreach (var volume in volumes)
         {
+
             volume.Number = Parser.SpecialVolumeNumber;
             volume.MinNumber = Parser.SpecialVolumeNumber;
             volume.MaxNumber = Parser.SpecialVolumeNumber;

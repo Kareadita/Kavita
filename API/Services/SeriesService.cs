@@ -81,8 +81,8 @@ public class SeriesService : ISeriesService
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
         var sortedVolumes = series.Volumes
-            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue.IsNot(Parser.LooseLeafVolumeNumber))
-            .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
+            .Where(v => v.MinNumber.IsNot(Parser.LooseLeafVolumeNumber))
+            .OrderBy(v => v.MinNumber);
         var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
 

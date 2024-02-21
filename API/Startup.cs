@@ -255,6 +255,7 @@ public class Startup
                     // v0.8.0
                     await MigrateChapterNumber.Migrate(dataContext, logger);
                     await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
+                    await ManualMigrateMixedSpecials.Migrate(dataContext, unitOfWork, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

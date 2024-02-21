@@ -2,6 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Entities;
+using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +26,7 @@ public class UserProgressCsvRecord
 /// <summary>
 /// v0.8.0 migration to move Specials into their own volume and retain user progress.
 /// </summary>
-public class ManualMigrateMixedSpecials
+public static class ManualMigrateMixedSpecials
 {
     public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
     {
@@ -34,9 +38,14 @@ public class ManualMigrateMixedSpecials
         logger.LogCritical(
             "Running ManualMigrateMixedSpecials migration - Please be patient, this may take some time. This is not an error");
 
-        // Get all chapters that are specials with progress
-        // Store them in an csv
-        // Recreate the special volumes
+        // First, group all the progresses into different series
+
+        // Get each series and move the specials from old volume to the new Volume()
+
+        // Create a new progress event from existing and store the Id of existing progress event to delete it
+
+        // Save per series
+
         var progress = await dataContext.AppUserProgresses
             .Join(dataContext.Chapter, p => p.ChapterId, c => c.Id, (p, c) => new UserProgressCsvRecord
             {
@@ -50,15 +59,78 @@ public class ManualMigrateMixedSpecials
                 VolumeId = p.VolumeId
             })
             .Where(d => d.IsSpecial || d.Number == "0")
+            .Join(dataContext.Volume, d => d.VolumeId, v => v.Id, (d, v) => new
+            {
+                ProgressRecord = d,
+                Volume = v
+            })
+            .Where(d => d.Volume.Name == "0")
             .ToListAsync();
 
+    // First, group all the progresses into different series
+    logger.LogCritical("Migrating {Count} progress events to new Volume structure - This may take over 10 minutes depending on size of DB. Please wait", progress.Count);
+    var progressesGroupedBySeries = progress.GroupBy(p => p.ProgressRecord.SeriesId);
 
-        // dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
-        // {
-        //     Name = "ManualMigrateMixedSpecials",
-        //     ProductVersion = BuildInfo.Version.ToString(),
-        //     RanAt = DateTime.UtcNow
-        // });
+    foreach (var seriesGroup in progressesGroupedBySeries)
+    {
+        // Get each series and move the specials from the old volume to the new Volume
+        var seriesId = seriesGroup.Key;
+        var specialsInSeries = seriesGroup
+            .Where(p => p.ProgressRecord.IsSpecial)
+            .ToList();
+
+        foreach (var special in specialsInSeries)
+        {
+            // Create a new volume for each series with the appropriate number (-100000)
+            var newVolume = new VolumeBuilder(Parser.SpecialVolume)
+                .WithSeriesId(seriesId)
+                .Build();
+            dataContext.Volume.Add(newVolume);
+            await dataContext.SaveChangesAsync(); // Save changes to generate the newVolumeId
+
+            // Move the special chapters from the old volume to the new Volume
+            var specialChapters = await dataContext.Chapter
+                .Where(c => c.VolumeId == special.ProgressRecord.VolumeId && c.IsSpecial)
+                .ToListAsync();
+
+            foreach (var specialChapter in specialChapters)
+            {
+                // Create a new progress event from the existing and store the ID of the existing progress event to delete it
+                var newProgress = new AppUserProgress
+                {
+                    AppUserId = special.ProgressRecord.AppUserId,
+                    VolumeId = newVolume.Id,
+                    SeriesId = seriesId,
+                    ChapterId = specialChapter.Id,
+                    PagesRead = special.ProgressRecord.PagesRead
+                };
+                dataContext.AppUserProgresses.Add(newProgress);
+
+                // Update the VolumeId on the existing progress event
+                special.ProgressRecord.VolumeId = newVolume.Id;
+            }
+        }
+    }
+
+    // Save changes after processing all series
+    await dataContext.SaveChangesAsync();
+
+    // Update all Volumes with Name as "0" -> Special
+    logger.LogCritical("Updating all Volumes with Name 0 to SpecialNumber");
+    // foreach (var volume in dataContext.Volume.Where(v => v.Name == "0"))
+    // {
+    //     volume.Name
+    // }
+
+
+
+
+        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
+        {
+            Name = "ManualMigrateMixedSpecials",
+            ProductVersion = BuildInfo.Version.ToString(),
+            RanAt = DateTime.UtcNow
+        });
 
         await dataContext.SaveChangesAsync();
         logger.LogCritical(
