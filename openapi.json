@@ -13737,6 +13737,11 @@
             "description": "Maximum Chapter Number",
             "format": "float"
           },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
+          },
           "files": {
             "type": "array",
             "items": {
@@ -13951,6 +13956,10 @@
             "format": "float"
           },
           "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
             "type": "number",
             "format": "float"
           },

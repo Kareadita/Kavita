@@ -28,6 +28,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public float MaxNumber { get; set; }
     /// <summary>
+    /// The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.
+    /// </summary>
+    public float SortOrder { get; set; }
+    /// <summary>
     /// The files that represent this Chapter
     /// </summary>
     public ICollection<MangaFile> Files { get; set; } = null!;

@@ -651,6 +651,7 @@ public class ProcessSeries : IProcessSeries
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
+            chapter.SortOrder = info.IssueOrder;
         }
 
 

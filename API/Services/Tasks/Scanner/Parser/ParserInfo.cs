@@ -68,6 +68,12 @@ public class ParserInfo
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
+    /// This can be filled in from ComicInfo.xml during scanning. Will update the SortOrder field on <see cref="Entities.Chapter"/>.
+    /// Falls back to Parsed Chapter number
+    /// </summary>
+    public float IssueOrder { get; set; }
+
+    /// <summary>
     /// If the ParserInfo has the IsSpecial tag or both volumes and chapters are default aka 0
     /// </summary>
     /// <returns></returns>

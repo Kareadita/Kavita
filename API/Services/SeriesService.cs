@@ -537,7 +537,7 @@ public class SeriesService : ISeriesService
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
         if (storylineChapters.Count > 0) {
-            retChapters = retChapters.OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default);
+            retChapters = retChapters.OrderBy(c => c.SortOrder, ChapterSortComparerDefaultLast.Default);
         }
 
         return new SeriesDetailDto
