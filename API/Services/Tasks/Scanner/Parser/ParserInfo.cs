@@ -60,6 +60,10 @@ public class ParserInfo
     /// If the file contains no volume/chapter information or contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
     /// </summary>
     public bool IsSpecial { get; set; }
+    /// <summary>
+    /// If the file has a Special Marker explicitly, this will contain the index
+    /// </summary>
+    public int SpecialIndex { get; set; } = 0;
 
     /// <summary>
     /// Used for specials or books, stores what the UI should show.

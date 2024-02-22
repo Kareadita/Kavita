@@ -96,6 +96,7 @@ public class DefaultParser : IDefaultParser
         if (Parser.HasSpecialMarker(fileName))
         {
             ret.IsSpecial = true;
+            ret.SpecialIndex = Parser.ParseSpecialIndex(fileName);
             ret.Chapters = Parser.DefaultChapter;
             ret.Volumes = Parser.LooseLeafVolume;
 

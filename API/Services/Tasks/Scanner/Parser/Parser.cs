@@ -685,6 +685,13 @@ public static class Parser
         return SpecialMarkerRegex.IsMatch(filePath);
     }
 
+    public static int ParseSpecialIndex(string filePath)
+    {
+        var match = SpecialMarkerRegex.Match(filePath).Value.Replace("SP", string.Empty);
+        if (string.IsNullOrEmpty(match)) return 0;
+        return int.Parse(match);
+    }
+
     public static bool IsMangaSpecial(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);

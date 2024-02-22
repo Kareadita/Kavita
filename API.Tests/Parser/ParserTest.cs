@@ -46,6 +46,18 @@ public class ParserTests
     }
 
     [Theory]
+    [InlineData("Beastars - SP01", 1)]
+    [InlineData("Beastars SP01", 1)]
+    [InlineData("Beastars Special 01", 0)]
+    [InlineData("Beastars Extra 01", 0)]
+    [InlineData("Batman Beyond - Return of the Joker (2001) SP01", 1)]
+    [InlineData("Batman Beyond - Return of the Joker (2001)", 0)]
+    public void ParseSpecialIndexTest(string input, int expected)
+    {
+        Assert.Equal(expected,  ParseSpecialIndex(input));
+    }
+
+    [Theory]
     [InlineData("0001", "1")]
     [InlineData("1", "1")]
     [InlineData("0013", "13")]

@@ -514,7 +514,7 @@ public class SeriesService : ISeriesService
                     c.VolumeTitle = v.Name;
                     return c;
                 })
-                .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default))
+                .OrderBy(c => c.SortOrder))
                 .ToList();
 
         foreach (var chapter in chapters)
@@ -532,7 +532,7 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .WhereLooseLeaf()
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
+            .OrderBy(c => c.SortOrder)
             .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter

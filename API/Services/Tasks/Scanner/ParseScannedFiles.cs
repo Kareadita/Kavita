@@ -381,9 +381,24 @@ public class ParseScannedFiles
             var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
             foreach (var volume in volumes)
             {
-                var chapters = scannedSeries[series].Where(info => info.Volumes == volume.Key)
-                    .OrderByNatural(info => info.Chapters)
-                    .ToList();
+                var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
+                IList<ParserInfo> chapters;
+                var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
+
+                if (specialTreatment)
+                {
+                    chapters = infos
+                        .OrderBy(info => info.SpecialIndex)
+                        .ToList();
+                }
+                else
+                {
+                    chapters = infos
+                        .OrderByNatural(info => info.Chapters)
+                        .ToList();
+                }
+
+
                 var counter = 0f;
                 var prevIssue = string.Empty;
                 foreach (var chapter in chapters)

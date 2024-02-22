@@ -199,7 +199,7 @@ public class VolumeRepository : IVolumeRepository
             .ToListAsync();
 
         await AddVolumeModifiers(userId, volumes);
-        SortSpecialChapters(volumes);
+        //SortSpecialChapters(volumes);
 
         return volumes;
     }
