@@ -552,13 +552,13 @@ public class ReaderService : IReaderService
             var nonLooseLeafNonSpecialVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
             if (nonLooseLeafNonSpecialVolume != null)
             {
-                return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.MinNumber);
+                return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.SortOrder);
             }
 
             // We only have a loose leaf or Special left
 
             var chapters = volumes.First(v => v.IsLooseLeaf() || v.IsSpecial()).Chapters
-                .OrderBy(c => c.MinNumber)
+                .OrderBy(c => c.SortOrder)
                 .ToList();
 
             // If there are specials, then return the first Non-special
@@ -592,7 +592,7 @@ public class ReaderService : IReaderService
 
         // Order with volume 0 last so we prefer the natural order
         return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
-                                             .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber))
+                                             .SelectMany(v => v.Chapters.OrderBy(c => c.SortOrder))
                                              .ToList());
     }
 

@@ -175,6 +175,7 @@ public class ChapterRepository : IChapterRepository
     {
         return await _context.Chapter
             .Includes(includes)
+            .OrderBy(c => c.SortOrder)
             .FirstOrDefaultAsync(c => c.Id == chapterId);
     }
 
@@ -272,6 +273,7 @@ public class ChapterRepository : IChapterRepository
     {
         return _context.Chapter
             .Where(c => c.Volume.SeriesId == seriesId)
+            .OrderBy(c => c.SortOrder)
             .Include(c => c.Volume)
             .AsEnumerable();
     }
