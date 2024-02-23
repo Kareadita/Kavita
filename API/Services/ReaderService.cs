@@ -352,7 +352,7 @@ public class ReaderService : IReaderService
         if (volume.IsSpecial())
         {
             // Handle specials by sorting on their Filename aka Range
-            return GetNextChapterId(volume.Chapters.OrderByNatural(x => x.Range), currentChapter.Range, dto => dto.Range);
+            return GetNextChapterId(volume.Chapters.OrderBy(x => x.SortOrder), currentChapter.SortOrder, dto => dto.SortOrder);
         }
 
         return -1;
@@ -401,7 +401,9 @@ public class ReaderService : IReaderService
         if (currentVolume.IsLooseLeaf())
         {
             // Handle loose-leaf chapters
-            chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.MinNumber), currentChapter.MinNumber.ToString(), dto => dto.MinNumber.ToString());
+            chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.SortOrder),
+                currentChapter.SortOrder,
+                dto => dto.SortOrder);
             if (chapterId > 0) return chapterId;
 
             // Check specials next, as that is the order
@@ -421,7 +423,7 @@ public class ReaderService : IReaderService
         }
 
         // Check within the current Volume
-        chapterId = GetNextChapterId(chapters, currentChapter.MinNumber.ToString(), dto => dto.MinNumber.ToString());
+        chapterId = GetNextChapterId(chapters, currentChapter.SortOrder, dto => dto.SortOrder);
         if (chapterId > 0) return chapterId;
 
         // Now check the next volume
@@ -469,9 +471,9 @@ public class ReaderService : IReaderService
         if (currentVolume.IsSpecial())
         {
             // Check within Specials, if not set the currentVolume to Loose Leaf
-            chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(),
-                currentChapter.Range,
-                dto => dto.Range);
+            chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.SortOrder).Reverse(),
+                currentChapter.SortOrder,
+                dto => dto.SortOrder);
             if (chapterId > 0) return chapterId;
             currentVolume = volumes.FirstOrDefault(v => v.IsLooseLeaf());
         }
@@ -479,11 +481,12 @@ public class ReaderService : IReaderService
         if (currentVolume != null && currentVolume.IsLooseLeaf())
         {
             // If loose leaf, handle within the loose leaf. If not there, then set currentVolume to volumes.Last() where not LooseLeaf or Special
-            chapterId = GetPrevChapterId(currentVolume.Chapters.OrderBy(x => x.MinNumber),
-                currentChapter.MinNumber.ToString(), dto => dto.MinNumber.ToString(), c => c.Id);
+            var currentVolumeChapters = currentVolume.Chapters.OrderBy(x => x.SortOrder).ToList();
+            chapterId = GetPrevChapterId(currentVolumeChapters,
+                currentChapter.SortOrder, dto => dto.SortOrder, c => c.Id);
             if (chapterId > 0) return chapterId;
             currentVolume = volumes.FindLast(v => !v.IsLooseLeaf() && !v.IsSpecial());
-            if (currentVolume != null) return currentVolume.Chapters.OrderBy(x => x.MinNumber).Last()?.Id ?? -1;
+            if (currentVolume != null) return currentVolume.Chapters.OrderBy(x => x.SortOrder).Last()?.Id ?? -1;
         }
 
         // When we started as a special and there was no loose leafs, reset the currentVolume
@@ -491,14 +494,14 @@ public class ReaderService : IReaderService
         {
             currentVolume = volumes.FirstOrDefault(v => !v.IsLooseLeaf() && !v.IsSpecial());
             if (currentVolume == null) return -1;
-            return currentVolume.Chapters.OrderBy(x => x.MinNumber).Last()?.Id ?? -1;
+            return currentVolume.Chapters.OrderBy(x => x.SortOrder).Last()?.Id ?? -1;
         }
 
         // At this point, only need to check within the current Volume else move 1 level back
 
         // Check current volume
-        chapterId = GetPrevChapterId(currentVolume.Chapters.OrderBy(x => x.MinNumber),
-            currentChapter.MinNumber.ToString(), dto => dto.MinNumber.ToString(), c => c.Id);
+        chapterId = GetPrevChapterId(currentVolume.Chapters.OrderBy(x => x.SortOrder),
+            currentChapter.SortOrder, dto => dto.SortOrder, c => c.Id);
         if (chapterId > 0) return chapterId;
 
 
@@ -506,16 +509,16 @@ public class ReaderService : IReaderService
         if (currentVolumeIndex == 0) return -1;
         currentVolume = volumes[currentVolumeIndex - 1];
         if (currentVolume.IsLooseLeaf() || currentVolume.IsSpecial()) return -1;
-        chapterId = currentVolume.Chapters.OrderBy(x => x.MinNumber).Last().Id;
+        chapterId = currentVolume.Chapters.OrderBy(x => x.SortOrder).Last().Id;
         if (chapterId > 0) return chapterId;
 
         return -1;
     }
 
-    private static int GetPrevChapterId<T>(IEnumerable<T> source, string currentValue, Func<T, string> selector, Func<T, int> idSelector)
+    private static int GetPrevChapterId<T>(IEnumerable<T> source, float currentValue, Func<T, float> selector, Func<T, int> idSelector)
     {
         var sortedSource = source.OrderBy(selector).ToList();
-        var currentChapterIndex = sortedSource.FindIndex(x => selector(x) == currentValue);
+        var currentChapterIndex = sortedSource.FindIndex(x => selector(x).Is(currentValue));
 
         if (currentChapterIndex > 0)
         {
@@ -630,7 +633,7 @@ public class ReaderService : IReaderService
     }
 
 
-    private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber, Func<ChapterDto, string> accessor)
+    private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, float currentChapterNumber, Func<ChapterDto, float> accessor)
     {
         var next = false;
         var chaptersList = chapters.ToList();

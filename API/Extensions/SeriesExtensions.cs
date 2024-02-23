@@ -25,7 +25,7 @@ public static class SeriesExtensions
         if (firstVolume == null) return null;
 
         var chapters = firstVolume.Chapters
-            .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
+            .OrderBy(c => c.SortOrder, ChapterSortComparerDefaultLast.Default)
             .ToList();
 
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))

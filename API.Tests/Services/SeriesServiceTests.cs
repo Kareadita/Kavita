@@ -109,8 +109,8 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test")
 
                 .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                    .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithTitle("Omake").WithPages(1).Build())
-                    .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithTitle("Something").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithTitle("Omake").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2).WithTitle("Something").WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
                     .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
@@ -281,10 +281,12 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test")
 
                 .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub").WithIsSpecial(true).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub")
+                        .WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
-                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub")
+                        .WithPages(1).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build())
                     .Build())
                 .Build())
             .Build());
@@ -781,7 +783,7 @@ public class SeriesServiceTests : AbstractDbTest
                 .WithChapter(new ChapterBuilder("96").WithPages(1).WithFile(file).Build())
                 .Build())
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                .WithChapter(new ChapterBuilder("A Special Case").WithIsSpecial(true).WithFile(file).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("A Special Case").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithFile(file).WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).WithFile(file).Build())
@@ -1293,7 +1295,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
     }
 
@@ -1325,7 +1327,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
     }
 
@@ -1357,7 +1359,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, true));
     }
 
@@ -1389,7 +1391,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
     }
 

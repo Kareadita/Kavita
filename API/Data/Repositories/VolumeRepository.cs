@@ -199,7 +199,11 @@ public class VolumeRepository : IVolumeRepository
             .ToListAsync();
 
         await AddVolumeModifiers(userId, volumes);
-        //SortSpecialChapters(volumes);
+
+        foreach (var volume in volumes)
+        {
+            volume.Chapters = volume.Chapters.OrderBy(c => c.SortOrder).ToList();
+        }
 
         return volumes;
     }
@@ -217,16 +221,6 @@ public class VolumeRepository : IVolumeRepository
             .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .AsSplitQuery()
             .ToListAsync();
-    }
-
-
-    private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
-    {
-        foreach (var v in volumes.WhereLooseLeaf())
-        {
-            // Note: This can have both loose leaf chapters and Specials
-            v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
-        }
     }
 
 

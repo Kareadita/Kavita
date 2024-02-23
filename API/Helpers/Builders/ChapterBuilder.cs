@@ -22,6 +22,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             Number = Parser.MinNumberFromRange(number).ToString(CultureInfo.InvariantCulture),
             MinNumber = Parser.MinNumberFromRange(number),
             MaxNumber = Parser.MaxNumberFromRange(number),
+            SortOrder = Parser.MinNumberFromRange(number),
             Files = new List<MangaFile>(),
             Pages = 1
         };
@@ -51,6 +52,12 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         _chapter.Number = number;
         _chapter.MinNumber = Parser.MinNumberFromRange(number);
         _chapter.MaxNumber = Parser.MaxNumberFromRange(number);
+        return this;
+    }
+
+    public ChapterBuilder WithSortOrder(float order)
+    {
+        _chapter.SortOrder = order;
         return this;
     }
 
