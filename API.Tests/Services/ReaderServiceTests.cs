@@ -371,6 +371,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
 
@@ -402,6 +403,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("3-4", actualChapter.Volume.Name);
         Assert.Equal("1", actualChapter.Range);
     }
@@ -446,6 +448,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("31", actualChapter.Range);
     }
 
@@ -484,6 +487,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
 
@@ -523,6 +527,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
 
@@ -556,6 +561,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
 
@@ -595,6 +601,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, actualChapter.Range);
     }
 
@@ -782,6 +789,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
@@ -819,6 +827,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
@@ -897,6 +906,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("B.cbz", actualChapter.Range);
     }
 
@@ -975,6 +985,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("1", actualChapter.Range);
     }
 
@@ -1013,6 +1024,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 3, 5, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("22", actualChapter.Range);
     }
 
@@ -1104,6 +1116,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
 
@@ -1140,6 +1153,7 @@ public class ReaderServiceTests
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(2, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
 
@@ -1343,6 +1357,7 @@ public class ReaderServiceTests
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
@@ -1376,6 +1391,7 @@ public class ReaderServiceTests
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.NotEqual(-1, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("22", actualChapter.Range);
     }
 

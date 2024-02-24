@@ -13718,7 +13718,7 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of numbers. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\".",
+            "description": "Range of numbers. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If the chapter is a special, will return the Special Name",
             "nullable": true
           },
           "number": {
@@ -13942,7 +13942,7 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\".",
+            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {

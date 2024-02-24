@@ -663,7 +663,7 @@ public class ReaderService : IReaderService
         foreach (var volume in volumes.OrderBy(v => v.MinNumber))
         {
             var chapters = volume.Chapters
-                .Where(c => !c.IsSpecial && Parser.MaxNumberFromRange(c.Range) <= chapterNumber)
+                .Where(c => !c.IsSpecial && c.MaxNumber <= chapterNumber)
                 .OrderBy(c => c.MinNumber);
             await MarkChaptersAsRead(user, volume.SeriesId, chapters.ToList());
         }

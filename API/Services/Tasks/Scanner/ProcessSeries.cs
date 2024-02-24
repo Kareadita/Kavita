@@ -307,8 +307,8 @@ public class ProcessSeries : IProcessSeries
         // The actual number of count's defined across all chapter's metadata
         series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
 
-        var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
-        var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
+        var maxVolume = (int) series.Volumes.Max(v =>  v.MaxNumber);
+        var maxChapter = (int) chapters.Max(c => c.MaxNumber);
 
         // Single books usually don't have a number in their Range (filename)
         if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
@@ -636,15 +636,14 @@ public class ProcessSeries : IProcessSeries
 
             if (chapter == null) continue;
             // Add files
-            var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
 
             // TODO: Investigate using the ChapterBuilder here
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
-            chapter.Range = specialTreatment ? info.Filename : info.Chapters;
             chapter.SortOrder = info.IssueOrder;
+            chapter.Range = chapter.GetNumberTitle();
         }
 
 
@@ -654,7 +653,7 @@ public class ProcessSeries : IProcessSeries
         {
             if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
             {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.GetNumberTitle(), volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
@@ -11,7 +12,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
 {
     public int Id { get; set; }
     /// <summary>
-    /// Range of numbers. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
+    /// Range of numbers. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If the chapter is a special, will return the Special Name
     /// </summary>
     public required string Range { get; set; }
     /// <summary>
@@ -58,6 +59,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
     /// </summary>
     public string? Title { get; set; }
+
     /// <summary>
     /// Age Rating for the issue/chapter
     /// </summary>
@@ -149,7 +151,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
         }
         Title = (IsSpecial && info.Format == MangaFormat.Epub)
             ? info.Title
-            : Range;
+            : Path.GetFileNameWithoutExtension(Range);
 
     }
 
@@ -161,9 +163,38 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     {
         if (MinNumber.Is(MaxNumber))
         {
-            return $"{MinNumber}";
-        }
+            if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+            {
+                return Title;
+            }
+            else
+            {
+                return $"{MinNumber}";
+            }
 
+        }
+        return $"{MinNumber}-{MaxNumber}";
+    }
+
+    /// <summary>
+    /// The title that the UI should display
+    /// </summary>
+    /// NOTE: This requires updating the code to not have the file extension stored in Title
+    /// <returns></returns>
+    public string GetFullTitle()
+    {
+        if (MinNumber.Is(MaxNumber))
+        {
+            if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+            {
+                return Title;
+            }
+            else
+            {
+                return $"{MinNumber}";
+            }
+
+        }
         return $"{MinNumber}-{MaxNumber}";
     }
 

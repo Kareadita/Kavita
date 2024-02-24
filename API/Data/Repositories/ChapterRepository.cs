@@ -78,7 +78,7 @@ public class ChapterRepository : IChapterRepository
             .Where(c => c.Id == chapterId)
             .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
             {
-                ChapterNumber = chapter.Range,
+                ChapterNumber = chapter.MinNumber,
                 VolumeNumber = volume.Name,
                 VolumeId = volume.Id,
                 chapter.IsSpecial,
@@ -102,8 +102,8 @@ public class ChapterRepository : IChapterRepository
             })
             .Select(data => new ChapterInfoDto()
             {
-                ChapterNumber = data.ChapterNumber,
-                VolumeNumber = data.VolumeNumber + string.Empty,
+                ChapterNumber = data.ChapterNumber + string.Empty, // TODO: Fix this
+                VolumeNumber = data.VolumeNumber + string.Empty, // TODO: Fix this
                 VolumeId = data.VolumeId,
                 IsSpecial = data.IsSpecial,
                 SeriesId = data.SeriesId,

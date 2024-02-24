@@ -34,11 +34,15 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         var specialTreatment = info.IsSpecialInfo();
         var specialTitle = specialTreatment ? info.Filename : info.Chapters;
         var builder = new ChapterBuilder(Parser.DefaultChapter);
+        // TODO: Come back here and remove this side effect
         return builder.WithNumber(specialTreatment ? Parser.DefaultChapter : Parser.MinNumberFromRange(info.Chapters) + string.Empty)
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
             .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
             ? info.Title
             : specialTitle)
+            // NEW
+            //.WithTitle(string.IsNullOrEmpty(info.Filename) ? specialTitle : info.Filename)
+            .WithTitle(info.Filename)
             .WithIsSpecial(specialTreatment);
     }
 
@@ -78,6 +82,8 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     private ChapterBuilder WithRange(string range)
     {
         _chapter.Range = range;
+        // TODO: HACK: Overriding range
+        _chapter.Range = _chapter.GetNumberTitle();
         return this;
     }
 

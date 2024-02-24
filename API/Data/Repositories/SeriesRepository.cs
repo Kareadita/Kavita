@@ -1892,7 +1892,7 @@ public class SeriesRepository : ISeriesRepository
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
                 ChapterNumber = c.MinNumber + string.Empty, // TODO: Refactor this
-                ChapterRange = c.Range,
+                ChapterRange = c.Range, // TODO: Refactor this
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.MinNumber,
                 ChapterTitle = c.Title,

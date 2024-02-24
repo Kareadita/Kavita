@@ -13,7 +13,7 @@ public class ChapterDto : IHasReadTimeEstimate
 {
     public int Id { get; init; }
     /// <summary>
-    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
+    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If special, will be special name.
     /// </summary>
     public string Range { get; init; } = default!;
     /// <summary>

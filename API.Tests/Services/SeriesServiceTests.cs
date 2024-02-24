@@ -833,6 +833,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
         Assert.NotNull(firstChapter);
+        Assert.NotNull(firstChapter);
         Assert.Same("1", firstChapter.Range);
     }
 
@@ -842,7 +843,8 @@ public class SeriesServiceTests : AbstractDbTest
         var series = CreateSeriesMock();
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
-        Assert.Same("1", firstChapter.Range);
+        Assert.NotNull(firstChapter);
+        Assert.Equal(1, firstChapter.MinNumber);
     }
 
     [Fact]
@@ -861,7 +863,8 @@ public class SeriesServiceTests : AbstractDbTest
         };
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
-        Assert.Same("1.1", firstChapter.Range);
+        Assert.NotNull(firstChapter);
+        Assert.Equal(1.1, firstChapter.MinNumber);
     }
 
     [Fact]
@@ -886,7 +889,8 @@ public class SeriesServiceTests : AbstractDbTest
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
-        Assert.Same("1", firstChapter.Range);
+        Assert.NotNull(firstChapter);
+        Assert.Equal(1, firstChapter.MinNumber);
     }
 
     #endregion
