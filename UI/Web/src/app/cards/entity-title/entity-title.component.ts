@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter, LooseLeafOrSpecialNumber } from 'src/app/_models/chapter';
+import { Chapter, LooseLeafOrDefaultNumber } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library/library';
 import { Volume } from 'src/app/_models/volume';
 import {CommonModule, NgSwitch} from "@angular/common";
@@ -20,7 +20,7 @@ import {TranslocoModule} from "@ngneat/transloco";
 })
 export class EntityTitleComponent implements OnInit {
 
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrSpecialNumber;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
 
   /**
    * Library type for which the entity belongs
