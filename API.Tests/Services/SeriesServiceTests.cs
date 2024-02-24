@@ -1488,4 +1488,116 @@ public class SeriesServiceTests : AbstractDbTest
     }
 
     #endregion
+
+    #region GetEstimatedChapterCreationDate
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NoNextChapter_InvalidType()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(0, nextChapter.ChapterNumber);
+    }
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NoNextChapter_InvalidPublicationStatus()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+                .WithPublicationStatus(PublicationStatus.Completed)
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(0, nextChapter.ChapterNumber);
+    }
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NoNextChapter_Only2Chapters()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.NotNull(nextChapter);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(0, nextChapter.ChapterNumber);
+    }
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NextChapter_ChaptersMonthApart()
+    {
+        await ResetDb();
+        var now = DateTime.UtcNow;
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+                .WithPublicationStatus(PublicationStatus.OnGoing)
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithCreated(now).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithCreated(now.AddMonths(1)).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("3").WithCreated(now.AddMonths(2)).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("4").WithCreated(now.AddMonths(3)).WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.NotNull(nextChapter);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(5, nextChapter.ChapterNumber);
+        Assert.NotNull(nextChapter.ExpectedDate);
+        var expected = now.AddMonths(4);
+        Assert.Equal(expected.Month, nextChapter.ExpectedDate.Value.Month);
+        Assert.True(nextChapter.ExpectedDate.Value.Day >= expected.Day - 1 || nextChapter.ExpectedDate.Value.Day <= expected.Day + 1);
+    }
+
+    #endregion
+
 }

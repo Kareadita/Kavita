@@ -24,7 +24,8 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             MaxNumber = Parser.MaxNumberFromRange(number),
             SortOrder = Parser.MinNumberFromRange(number),
             Files = new List<MangaFile>(),
-            Pages = 1
+            Pages = 1,
+            CreatedUtc = DateTime.UtcNow
         };
     }
 
@@ -46,6 +47,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         _chapter.Id = Math.Max(id, 0);
         return this;
     }
+
 
     public ChapterBuilder WithNumber(string number)
     {

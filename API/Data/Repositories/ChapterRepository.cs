@@ -269,6 +269,11 @@ public class ChapterRepository : IChapterRepository
         return chapter;
     }
 
+    /// <summary>
+    /// Includes Volumes
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     public IEnumerable<Chapter> GetChaptersForSeries(int seriesId)
     {
         return _context.Chapter

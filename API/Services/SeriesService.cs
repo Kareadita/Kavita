@@ -59,7 +59,7 @@ public class SeriesService : ISeriesService
     {
         ExpectedDate = null,
         ChapterNumber = 0,
-        VolumeNumber = 0
+        VolumeNumber = Parser.LooseLeafVolumeNumber
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
@@ -780,7 +780,7 @@ public class SeriesService : ISeriesService
         var result = new NextExpectedChapterDto
         {
             ChapterNumber = 0,
-            VolumeNumber = 0,
+            VolumeNumber = Parser.LooseLeafVolumeNumber,
             ExpectedDate = nextChapterExpected,
             Title = string.Empty
         };
