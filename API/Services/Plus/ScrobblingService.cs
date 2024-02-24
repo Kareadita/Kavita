@@ -809,7 +809,7 @@ public class ScrobblingService : IScrobblingService
                     SeriesId = evt.SeriesId
                 });
                 evt.IsErrored = true;
-                evt.ErrorDetails = "Series cannot be matched for Scrobbling";
+                evt.ErrorDetails = UnknownSeriesErrorMessage;
                 evt.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(evt);
                 await _unitOfWork.CommitAsync();

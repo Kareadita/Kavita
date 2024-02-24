@@ -220,14 +220,6 @@ public class ProcessSeries : IProcessSeries
                     _logger.LogCritical(ex,
                         "[ScannerService] There was an issue writing to the database for series {SeriesName}",
                         series.Name);
-                    _logger.LogTrace("[ScannerService] Series Metadata Dump: {@Series}", series.Metadata);
-                    _logger.LogTrace("[ScannerService] People Dump: {@People}", _people
-                        .Select(p =>
-                            new {p.Id, p.Name, SeriesMetadataIds =
-                                p.SeriesMetadatas?.Select(m => m.Id),
-                                ChapterMetadataIds =
-                                    p.ChapterMetadatas?.Select(m => m.Id)
-                                    .ToList()}));
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
@@ -598,6 +590,7 @@ public class ProcessSeries : IProcessSeries
                 var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
                 if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
                 {
+                    // This can happen when file is renamed and volume is removed
                     _logger.LogInformation(
                         "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
                         file);

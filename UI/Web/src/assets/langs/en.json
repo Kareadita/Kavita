@@ -42,6 +42,8 @@
         "is-processed-header": "Is Processed",
         "no-data": "No Data",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
+        "volume-num": "Volume {{num}}",
+        "chapter-num": "Chapter {{num}}",
         "rating": "Rating {{r}}",
         "not-applicable": "Not Applicable",
         "processed": "Processed",
