@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities.Interfaces;
+using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
@@ -54,5 +56,18 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     // Relationships
     public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
+
+    /// <summary>
+    /// Returns the Chapter Number. If the chapter is a range, returns that, formatted.
+    /// </summary>
+    /// <returns></returns>
+    public string GetNumberTitle()
+    {
+        if (MinNumber.Is(MaxNumber))
+        {
+            return $"{MinNumber}";
+        }
+        return $"{MinNumber}-{MaxNumber}";
+    }
 
 }

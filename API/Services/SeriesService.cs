@@ -576,7 +576,7 @@ public class SeriesService : ISeriesService
                 if (string.IsNullOrEmpty(title)) return false;
                 volume.Name += $" - {title}";
             }
-            else if (!volume.IsLooseLeaf()) //volume.Name != Parser.LooseLeafVolume
+            else if (!volume.IsLooseLeaf())
             {
                 // If the titleName has Volume inside it, let's just send that back?
                 volume.Name = firstChapter.TitleName;

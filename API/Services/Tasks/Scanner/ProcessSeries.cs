@@ -556,7 +556,7 @@ public class ProcessSeries : IProcessSeries
                 series.Volumes.Add(volume);
             }
 
-            volume.Name = volumeNumber;
+            volume.Name = volume.GetNumberTitle();
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();

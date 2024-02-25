@@ -177,28 +177,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     }
 
     /// <summary>
-    /// The title that the UI should display
-    /// </summary>
-    /// NOTE: This requires updating the code to not have the file extension stored in Title
-    /// <returns></returns>
-    public string GetFullTitle()
-    {
-        if (MinNumber.Is(MaxNumber))
-        {
-            if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
-            {
-                return Title;
-            }
-            else
-            {
-                return $"{MinNumber}";
-            }
-
-        }
-        return $"{MinNumber}-{MaxNumber}";
-    }
-
-    /// <summary>
     /// Is the Chapter representing a single Volume (volume 1.cbz). If so, Min/Max will be Default and will not be special
     /// </summary>
     /// <returns></returns>

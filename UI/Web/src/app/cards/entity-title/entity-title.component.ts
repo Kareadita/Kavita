@@ -6,6 +6,9 @@ import { Volume } from 'src/app/_models/volume';
 import {CommonModule, NgSwitch} from "@angular/common";
 import {TranslocoModule} from "@ngneat/transloco";
 
+/**
+ * This is primarily used for list item
+ */
 @Component({
   selector: 'app-entity-title',
   standalone: true,
@@ -21,6 +24,7 @@ import {TranslocoModule} from "@ngneat/transloco";
 export class EntityTitleComponent implements OnInit {
 
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly LooseLeafOrSpecial = LooseLeafOrDefaultNumber + "";
   protected readonly LibraryType = LibraryType;
 
   /**
@@ -43,8 +47,8 @@ export class EntityTitleComponent implements OnInit {
   volumeTitle: string = '';
 
   get Number() {
-    if (this.utilityService.isVolume(this.entity)) return (this.entity as Volume).minNumber;
-    return (this.entity as Chapter).range;
+    if (this.isChapter) return (this.entity as Chapter).range;
+    return (this.entity as Volume).name;
   }
 
 
@@ -52,6 +56,8 @@ export class EntityTitleComponent implements OnInit {
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
+
+
 
     if (this.isChapter) {
       const c = (this.entity as Chapter);
