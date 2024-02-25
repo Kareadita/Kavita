@@ -21,6 +21,7 @@ import {TranslocoModule} from "@ngneat/transloco";
 export class EntityTitleComponent implements OnInit {
 
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly LibraryType = LibraryType;
 
   /**
    * Library type for which the entity belongs
@@ -46,9 +47,6 @@ export class EntityTitleComponent implements OnInit {
     return (this.entity as Chapter).range;
   }
 
-  get LibraryType() {
-    return LibraryType;
-  }
 
   constructor(private utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) {}
 

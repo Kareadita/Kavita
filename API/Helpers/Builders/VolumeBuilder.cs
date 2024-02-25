@@ -49,7 +49,7 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         return this;
     }
 
-    public VolumeBuilder WithChapters(List<Chapter> chapters)
+    public VolumeBuilder WithChapters(IList<Chapter> chapters)
     {
         _volume.Chapters = chapters;
         return this;

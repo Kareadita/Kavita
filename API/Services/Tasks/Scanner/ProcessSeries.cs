@@ -541,6 +541,8 @@ public class ProcessSeries : IProcessSeries
             }
             catch (Exception ex)
             {
+                // TODO: Put this to UI in some way
+
                 if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
                 _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
                 throw new KavitaException(

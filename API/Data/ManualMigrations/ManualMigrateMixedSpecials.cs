@@ -67,61 +67,69 @@ public static class ManualMigrateMixedSpecials
             .Where(d => d.Volume.Name == "0")
             .ToListAsync();
 
-    // First, group all the progresses into different series
-    logger.LogCritical("Migrating {Count} progress events to new Volume structure - This may take over 10 minutes depending on size of DB. Please wait", progress.Count);
-    var progressesGroupedBySeries = progress.GroupBy(p => p.ProgressRecord.SeriesId);
+        // First, group all the progresses into different series
+        logger.LogCritical("Migrating {Count} progress events to new Volume structure - This may take over 10 minutes depending on size of DB. Please wait", progress.Count);
+        var progressesGroupedBySeries = progress.GroupBy(p => p.ProgressRecord.SeriesId);
 
-    foreach (var seriesGroup in progressesGroupedBySeries)
-    {
-        // Get each series and move the specials from the old volume to the new Volume
-        var seriesId = seriesGroup.Key;
-        var specialsInSeries = seriesGroup
-            .Where(p => p.ProgressRecord.IsSpecial)
-            .ToList();
-
-        foreach (var special in specialsInSeries)
+        foreach (var seriesGroup in progressesGroupedBySeries)
         {
-            // Create a new volume for each series with the appropriate number (-100000)
-            var newVolume = new VolumeBuilder(Parser.SpecialVolume)
-                .WithSeriesId(seriesId)
-                .Build();
-            dataContext.Volume.Add(newVolume);
-            await dataContext.SaveChangesAsync(); // Save changes to generate the newVolumeId
+            // Get each series and move the specials from the old volume to the new Volume
+            var seriesId = seriesGroup.Key;
+            var specialsInSeries = seriesGroup
+                .Where(p => p.ProgressRecord.IsSpecial)
+                .ToList();
 
-            // Move the special chapters from the old volume to the new Volume
-            var specialChapters = await dataContext.Chapter
-                .Where(c => c.VolumeId == special.ProgressRecord.VolumeId && c.IsSpecial)
-                .ToListAsync();
 
-            foreach (var specialChapter in specialChapters)
+            // Get distinct Volumes by Id. For each one, create it then create the progress events
+            var distinctVolumes = specialsInSeries.DistinctBy(d => d.Volume.Id);
+            foreach (var distinctVolume in distinctVolumes)
             {
-                // Create a new progress event from the existing and store the ID of the existing progress event to delete it
-                var newProgress = new AppUserProgress
-                {
-                    AppUserId = special.ProgressRecord.AppUserId,
-                    VolumeId = newVolume.Id,
-                    SeriesId = seriesId,
-                    ChapterId = specialChapter.Id,
-                    PagesRead = special.ProgressRecord.PagesRead
-                };
-                dataContext.AppUserProgresses.Add(newProgress);
+                // Create a new volume for each series with the appropriate number (-100000)
+                var chapters = await dataContext.Chapter
+                    .Where(c => c.VolumeId == distinctVolume.Volume.Id && c.IsSpecial).ToListAsync();
 
-                // Update the VolumeId on the existing progress event
-                special.ProgressRecord.VolumeId = newVolume.Id;
+                var newVolume = new VolumeBuilder(Parser.SpecialVolume)
+                    .WithSeriesId(seriesId)
+                    .WithChapters(chapters)
+                    .Build();
+                dataContext.Volume.Add(newVolume);
+                await dataContext.SaveChangesAsync(); // Save changes to generate the newVolumeId
+
+                logger.LogInformation("Moving {Count} chapters from Volume Id {OldVolumeId} to New Volume {NewVolumeId}",
+                    chapters.Count, distinctVolume.Volume.Id, newVolume.Id);
+                // Move the special chapters from the old volume to the new Volume
+                var specialChapters = await dataContext.Chapter
+                    .Where(c => c.VolumeId == distinctVolume.ProgressRecord.VolumeId && c.IsSpecial)
+                    .ToListAsync();
+
+                foreach (var specialChapter in specialChapters)
+                {
+                    // Create a new progress event from the existing and store the ID of the existing progress event to delete it
+                    var newProgress = new AppUserProgress
+                    {
+                        AppUserId = distinctVolume.ProgressRecord.AppUserId,
+                        VolumeId = newVolume.Id,
+                        SeriesId = seriesId,
+                        ChapterId = specialChapter.Id,
+                        PagesRead = distinctVolume.ProgressRecord.PagesRead
+                    };
+                    dataContext.AppUserProgresses.Add(newProgress);
+
+                    // Update the VolumeId on the existing progress event
+                    distinctVolume.ProgressRecord.VolumeId = newVolume.Id;
+                }
+                await dataContext.SaveChangesAsync();
             }
         }
-    }
 
-    // Save changes after processing all series
-    await dataContext.SaveChangesAsync();
+        // Save changes after processing all series
+        if (dataContext.ChangeTracker.HasChanges())
+        {
+            await dataContext.SaveChangesAsync();
+        }
 
-    // Update all Volumes with Name as "0" -> Special
-    logger.LogCritical("Updating all Volumes with Name 0 to SpecialNumber");
-    // foreach (var volume in dataContext.Volume.Where(v => v.Name == "0"))
-    // {
-    //     volume.Name
-    // }
-
+        // Update all Volumes with Name as "0" -> Special
+        logger.LogCritical("Updating all Volumes with Name 0 to SpecialNumber");
 
 
 

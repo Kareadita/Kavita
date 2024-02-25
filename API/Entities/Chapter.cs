@@ -199,7 +199,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     }
 
     /// <summary>
-    /// Is the Chapter representing a single Volume (volume 1.cbz)?
+    /// Is the Chapter representing a single Volume (volume 1.cbz). If so, Min/Max will be Default and will not be special
     /// </summary>
     /// <returns></returns>
     public bool IsSingleVolumeChapter()

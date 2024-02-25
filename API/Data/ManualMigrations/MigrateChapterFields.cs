@@ -28,25 +28,46 @@ public static class MigrateChapterFields
             "Running MigrateChapterFields migration - Please be patient, this may take some time. This is not an error");
 
         // Update all volumes only have specials in them (rare)
-        var volumes = dataContext.Volume
+        var volumesWithJustSpecials = dataContext.Volume
             .Include(v => v.Chapters)
             .Where(v => v.Name == "0" && v.Chapters.All(c => c.IsSpecial))
             .ToList();
-        foreach (var volume in volumes)
+        logger.LogCritical(
+            "Running MigrateChapterFields migration - Updating {Count} volumes that only have specials in them", volumesWithJustSpecials.Count);
+        foreach (var volume in volumesWithJustSpecials)
         {
-
             volume.Number = Parser.SpecialVolumeNumber;
             volume.MinNumber = Parser.SpecialVolumeNumber;
             volume.MaxNumber = Parser.SpecialVolumeNumber;
         }
 
+        // Update all volumes that only have loose leafs in them
+        var looseLeafVolumes = dataContext.Volume
+            .Include(v => v.Chapters)
+            .Where(v => v.Name == "0" && v.Chapters.All(c => !c.IsSpecial))
+            .ToList();
+        logger.LogCritical(
+            "Running MigrateChapterFields migration - Updating {Count} volumes that only have loose leaf chapters in them", looseLeafVolumes.Count);
+        foreach (var volume in looseLeafVolumes)
+        {
+            volume.Number = Parser.SpecialVolumeNumber;
+            volume.MinNumber = Parser.DefaultChapterNumber;
+            volume.MaxNumber = Parser.DefaultChapterNumber;
+        }
+
+
         // Update all MangaFile
+        logger.LogCritical(
+            "Running MigrateChapterFields migration - Updating all MangaFiles");
         foreach (var mangaFile in dataContext.MangaFile)
         {
             mangaFile.FileName = Path.GetFileNameWithoutExtension(mangaFile.FilePath);
         }
 
-        foreach (var chapter in dataContext.Chapter.Where(c => c.Number == "0"))
+        var looseLeafChapters = await dataContext.Chapter.Where(c => c.Number == "0").ToListAsync();
+        logger.LogCritical(
+            "Running MigrateChapterFields migration - Updating {Count} loose leaf chapters", looseLeafChapters.Count);
+        foreach (var chapter in looseLeafChapters)
         {
             chapter.Number = Parser.DefaultChapter;
             chapter.MinNumber = Parser.DefaultChapterNumber;
