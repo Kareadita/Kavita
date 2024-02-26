@@ -574,7 +574,7 @@ public class SeriesService : ISeriesService
                 if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return false;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (string.IsNullOrEmpty(title)) return false;
-                volume.Name += $" - {title}";
+                volume.Name += $" - {title}"; // OPDS smart list 7 (just pdfs) triggered this
             }
             else if (!volume.IsLooseLeaf())
             {

@@ -597,7 +597,7 @@ public class ProcessSeries : IProcessSeries
                 {
                     // This can happen when file is renamed and volume is removed
                     _logger.LogInformation(
-                        "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
+                        "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
                         file);
                 }
 
@@ -639,7 +639,10 @@ public class ProcessSeries : IProcessSeries
                 chapter.UpdateFrom(info);
             }
 
-            if (chapter == null) continue;
+            if (chapter == null)
+            {
+                continue;
+            }
             // Add files
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
 

@@ -50,7 +50,7 @@ public static class MigrateChapterFields
             "Running MigrateChapterFields migration - Updating {Count} volumes that only have loose leaf chapters in them", looseLeafVolumes.Count);
         foreach (var volume in looseLeafVolumes)
         {
-            volume.Number = Parser.SpecialVolumeNumber;
+            volume.Number = Parser.DefaultChapterNumber;
             volume.MinNumber = Parser.DefaultChapterNumber;
             volume.MaxNumber = Parser.DefaultChapterNumber;
         }
