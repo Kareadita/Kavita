@@ -864,7 +864,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
         Assert.NotNull(firstChapter);
-        Assert.Equal(1.1, firstChapter.MinNumber);
+        Assert.True(firstChapter.MinNumber.Is(1.1f));
     }
 
     [Fact]
@@ -927,6 +927,7 @@ public class SeriesServiceTests : AbstractDbTest
         addRelationDto.Adaptations.Add(2);
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
         Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
     }
