@@ -253,10 +253,10 @@ public class Startup
                     await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
 
                     // v0.8.0
+                    await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterNumber.Migrate(dataContext, logger);
                     await MigrateMixedSpecials.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

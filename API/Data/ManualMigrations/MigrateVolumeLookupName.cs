@@ -21,9 +21,8 @@ public static class MigrateVolumeLookupName
             "Running MigrateVolumeLookupName migration - Please be patient, this may take some time. This is not an error");
 
         // Update all volumes to have LookupName as after this migration, name isn't used for lookup
-        var volumesWithJustSpecials = dataContext.Volume
-            .ToList();
-        foreach (var volume in volumesWithJustSpecials)
+        var volumes = dataContext.Volume.ToList();
+        foreach (var volume in volumes)
         {
             volume.LookupName = volume.Name;
         }

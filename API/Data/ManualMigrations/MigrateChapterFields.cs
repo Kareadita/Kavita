@@ -36,7 +36,7 @@ public static class MigrateChapterFields
             "Running MigrateChapterFields migration - Updating {Count} volumes that only have specials in them", volumesWithJustSpecials.Count);
         foreach (var volume in volumesWithJustSpecials)
         {
-            volume.Number = Parser.SpecialVolumeNumber;
+            volume.Name = $"{Parser.SpecialVolumeNumber}";
             volume.MinNumber = Parser.SpecialVolumeNumber;
             volume.MaxNumber = Parser.SpecialVolumeNumber;
         }
@@ -50,11 +50,10 @@ public static class MigrateChapterFields
             "Running MigrateChapterFields migration - Updating {Count} volumes that only have loose leaf chapters in them", looseLeafVolumes.Count);
         foreach (var volume in looseLeafVolumes)
         {
-            volume.Number = Parser.DefaultChapterNumber;
+            volume.Name = $"{Parser.DefaultChapterNumber}";
             volume.MinNumber = Parser.DefaultChapterNumber;
             volume.MaxNumber = Parser.DefaultChapterNumber;
         }
-
 
         // Update all MangaFile
         logger.LogCritical(
@@ -82,6 +81,8 @@ public static class MigrateChapterFields
         });
 
         await dataContext.SaveChangesAsync();
+
+
         logger.LogCritical(
             "Running MigrateChapterFields migration - Completed. This is not an error");
     }

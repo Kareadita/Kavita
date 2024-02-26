@@ -95,6 +95,10 @@ public static class MigrateMixedSpecials
                 dataContext.Volume.Add(newVolume);
                 await dataContext.SaveChangesAsync(); // Save changes to generate the newVolumeId
 
+                // Migrate the progress event to the new volume
+                distinctVolume.ProgressRecord.VolumeId = newVolume.Id;
+
+
                 logger.LogInformation("Moving {Count} chapters from Volume Id {OldVolumeId} to New Volume {NewVolumeId}",
                     chapters.Count, distinctVolume.Volume.Id, newVolume.Id);
                 // Move the special chapters from the old volume to the new Volume
@@ -104,19 +108,8 @@ public static class MigrateMixedSpecials
 
                 foreach (var specialChapter in specialChapters)
                 {
-                    // Create a new progress event from the existing and store the ID of the existing progress event to delete it
-                    var newProgress = new AppUserProgress
-                    {
-                        AppUserId = distinctVolume.ProgressRecord.AppUserId,
-                        VolumeId = newVolume.Id,
-                        SeriesId = seriesId,
-                        ChapterId = specialChapter.Id,
-                        PagesRead = distinctVolume.ProgressRecord.PagesRead
-                    };
-                    dataContext.AppUserProgresses.Add(newProgress);
-
                     // Update the VolumeId on the existing progress event
-                    distinctVolume.ProgressRecord.VolumeId = newVolume.Id;
+                    specialChapter.VolumeId = newVolume.Id;
                 }
                 await dataContext.SaveChangesAsync();
             }

@@ -140,6 +140,7 @@ public class VolumeRepository : IVolumeRepository
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
+            .OrderBy(v => v.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(vol => vol.Id == volumeId);
 

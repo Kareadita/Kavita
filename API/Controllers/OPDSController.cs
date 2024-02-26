@@ -1101,7 +1101,7 @@ public class OpdsController : BaseApiController
 
         var title = $"{series.Name}";
 
-        if (volume!.Chapters.Count == 1)
+        if (volume!.Chapters.Count == 1 && !volume.IsSpecial())
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             SeriesService.RenameVolumeName(volume, libraryType, volumeLabel);
@@ -1110,9 +1110,9 @@ public class OpdsController : BaseApiController
                 title += $" - {volume.Name}";
             }
         }
-        else if (!volume.IsLooseLeaf())
+        else if (!volume.IsLooseLeaf() && !volume.IsSpecial())
         {
-            title = $"{series.Name} - Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
+            title = $"{series.Name} -  Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }
         else
         {
