@@ -59,7 +59,7 @@ public class SeriesService : ISeriesService
     {
         ExpectedDate = null,
         ChapterNumber = 0,
-        VolumeNumber = 0
+        VolumeNumber = Parser.LooseLeafVolumeNumber
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
@@ -81,21 +81,21 @@ public class SeriesService : ISeriesService
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
         var sortedVolumes = series.Volumes
-            .Where(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) && parsedValue != Parser.LooseLeafVolumeNumber)
-            .OrderBy(v => float.TryParse(v.Name, CultureInfo.InvariantCulture, out var parsedValue) ? parsedValue : float.MaxValue);
+            .Where(v => v.MinNumber.IsNot(Parser.LooseLeafVolumeNumber))
+            .OrderBy(v => v.MinNumber);
         var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
 
         var allChapters = series.Volumes
-            .SelectMany(v => v.Chapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default))
+            .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default))
             .ToList();
         var minChapter = allChapters
             .FirstOrDefault();
 
-        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, CultureInfo.InvariantCulture, out var chapNum) &&
-            (chapNum >= minVolumeNumber.MinNumber || chapNum == Parser.DefaultChapterNumber))
+        if (minVolumeNumber != null && minChapter != null &&
+            (minChapter.MinNumber >= minVolumeNumber.MinNumber || minChapter.MinNumber.Is(Parser.DefaultChapterNumber)))
         {
-            return minVolumeNumber.Chapters.MinBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
+            return minVolumeNumber.Chapters.MinBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default);
         }
 
         return minChapter;
@@ -481,74 +481,63 @@ public class SeriesService : ISeriesService
 
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => Parser.MinNumberFromRange(v.Name))
-            .ToList();
+        var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
+        var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
-        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
+        foreach (var volume in volumes)
         {
-            var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
-            foreach (var volume in volumes)
+            if (volume.IsLooseLeaf() || volume.IsSpecial())
             {
-                volume.Chapters = volume.Chapters
-                    .OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default)
-                    .ToList();
-                var firstChapter = volume.Chapters.First();
-                // On Books, skip volumes that are specials, since these will be shown
-                if (firstChapter.IsSpecial) continue;
-                RenameVolumeName(firstChapter, volume, libraryType, volumeLabel);
+                continue;
+            }
+
+            volume.Chapters = volume.Chapters
+                .OrderBy(d => d.MinNumber, ChapterSortComparerDefaultLast.Default)
+                .ToList();
+
+            if (RenameVolumeName(volume, libraryType, volumeLabel) || (bookTreatment && !volume.IsSpecial()))
+            {
                 processedVolumes.Add(volume);
             }
         }
-        else
-        {
-            processedVolumes = volumes.Where(v => v.MinNumber > 0).ToList();
-            processedVolumes.ForEach(v =>
-            {
-                v.Name = $"Volume {v.Name}";
-                v.Chapters = v.Chapters.OrderBy(d => d.Number.AsDouble(), ChapterSortComparer.Default).ToList();
-            });
-        }
 
         var specials = new List<ChapterDto>();
-        var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
-        {
-            if (v.IsLooseLeaf()) return c;
-            c.VolumeTitle = v.Name;
-            return c;
-        }).OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)).ToList();
+        // Why isn't this doing a check if chapter is not special as it wont get included
+        var chapters = volumes
+            .SelectMany(v => v.Chapters
+                .Select(c =>
+                {
+                    if (v.IsLooseLeaf()) return c;
+                    c.VolumeTitle = v.Name;
+                    return c;
+                })
+                .OrderBy(c => c.SortOrder))
+                .ToList();
 
         foreach (var chapter in chapters)
         {
-            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
-            if (!chapter.IsSpecial) continue;
-
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+            else chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
+
+            if (!chapter.IsSpecial) continue;
             specials.Add(chapter);
         }
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-        IEnumerable<ChapterDto> retChapters;
-        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
-        {
-            retChapters = Array.Empty<ChapterDto>();
-        } else
-        {
-            retChapters = chapters
-                .Where(ShouldIncludeChapter);
-        }
+        IEnumerable<ChapterDto> retChapters = bookTreatment ? Array.Empty<ChapterDto>() : chapters.Where(ShouldIncludeChapter);
 
         var storylineChapters = volumes
             .WhereLooseLeaf()
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default)
+            .OrderBy(c => c.SortOrder)
             .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
-        if (storylineChapters.Any()) {
-            retChapters = retChapters.OrderBy(c => c.Number.AsFloat(), ChapterSortComparer.Default);
+        if (storylineChapters.Count > 0) {
+            retChapters = retChapters.OrderBy(c => c.SortOrder, ChapterSortComparerDefaultLast.Default);
         }
 
         return new SeriesDetailDto
@@ -569,35 +558,35 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.DefaultChapter);
+        return !chapter.IsSpecial && chapter.MinNumber.IsNot(Parser.DefaultChapterNumber);
     }
 
-    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
+    public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
-        // TODO: Move this into DB
+        // TODO: Move this into DB (not sure how because of localization and lookups)
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
+            var firstChapter = volume.Chapters.First();
+            // On Books, skip volumes that are specials, since these will be shown
+            if (firstChapter.IsSpecial) return false;
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return;
+                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return false;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
-                if (string.IsNullOrEmpty(title)) return;
-                volume.Name += $" - {title}";
+                if (string.IsNullOrEmpty(title)) return false;
+                volume.Name += $" - {title}"; // OPDS smart list 7 (just pdfs) triggered this
             }
-            else if (volume.Name != Parser.LooseLeafVolume)
+            else if (!volume.IsLooseLeaf())
             {
                 // If the titleName has Volume inside it, let's just send that back?
-                volume.Name += $" - {firstChapter.TitleName}";
+                volume.Name = firstChapter.TitleName;
             }
-            // else
-            // {
-            //     volume.Name += $"";
-            // }
 
-            return;
+            return true;
         }
 
-        volume.Name = $"{volumeLabel} {volume.Name}".Trim();
+        volume.Name = $"{volumeLabel.Trim()} {volume.Name}".Trim();
+        return true;
     }
 
 
@@ -783,16 +772,15 @@ public class SeriesService : ISeriesService
             : (DateTime?)null;
 
         // For number and volume number, we need the highest chapter, not the latest created
-        var lastChapter = chapters.MaxBy(c => c.Number.AsFloat())!;
-        float.TryParse(lastChapter.Number, NumberStyles.Number, CultureInfo.InvariantCulture,
-            out var lastChapterNumber);
+        var lastChapter = chapters.MaxBy(c => c.MaxNumber)!;
+        var lastChapterNumber = lastChapter.MaxNumber;
 
         var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
 
         var result = new NextExpectedChapterDto
         {
             ChapterNumber = 0,
-            VolumeNumber = 0,
+            VolumeNumber = Parser.LooseLeafVolumeNumber,
             ExpectedDate = nextChapterExpected,
             Title = string.Empty
         };

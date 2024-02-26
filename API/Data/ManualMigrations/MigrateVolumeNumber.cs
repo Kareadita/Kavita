@@ -13,8 +13,13 @@ namespace API.Data.ManualMigrations;
 /// </summary>
 public static class MigrateVolumeNumber
 {
-    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateVolumeNumber"))
+        {
+            return;
+        }
+
         if (await dataContext.Volume.AnyAsync(v => v.MaxNumber > 0))
         {
             logger.LogCritical(

@@ -13,13 +13,17 @@ public class ChapterDto : IHasReadTimeEstimate
 {
     public int Id { get; init; }
     /// <summary>
-    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
+    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If special, will be special name.
     /// </summary>
     public string Range { get; init; } = default!;
     /// <summary>
     /// Smallest number of the Range.
     /// </summary>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
     public string Number { get; init; } = default!;
+    public float MinNumber { get; init; }
+    public float MaxNumber { get; init; }
+    public float SortOrder { get; init; }
     /// <summary>
     /// Total number of pages in all MangaFiles
     /// </summary>

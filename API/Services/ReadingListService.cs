@@ -57,7 +57,7 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
+    private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 
@@ -391,8 +391,8 @@ public class ReadingListService : IReadingListService
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
         var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ChapterIncludes.Volumes))
-            .OrderBy(c => Parser.MinNumberFromRange(c.Volume.Name))
-            .ThenBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting)
+            .OrderBy(c => c.Volume.MinNumber)
+            .ThenBy(x => x.MinNumber, _chapterSortComparerForInChapterSorting)
             .ToList();
 
         var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;
@@ -647,9 +647,9 @@ public class ReadingListService : IReadingListService
 
             // We need to handle chapter 0 or empty string when it's just a volume
             var bookNumber = string.IsNullOrEmpty(book.Number)
-                ? Parser.DefaultChapter
-                : book.Number;
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == bookNumber);
+                ? Parser.DefaultChapterNumber
+                : float.Parse(book.Number);
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.MinNumber.Is(bookNumber));
             if (chapter == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)

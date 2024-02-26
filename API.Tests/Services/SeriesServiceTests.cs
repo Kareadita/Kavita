@@ -108,9 +108,9 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                    .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithTitle("Omake").WithPages(1).Build())
-                    .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithTitle("Something").WithPages(1).Build())
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                    .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithTitle("Omake").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2).WithTitle("Something").WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
                     .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
@@ -280,11 +280,13 @@ public class SeriesServiceTests : AbstractDbTest
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
-                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub").WithIsSpecial(true).WithPages(1).Build())
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub")
+                        .WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                     .Build())
                 .WithVolume(new VolumeBuilder("2")
-                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub")
+                        .WithPages(1).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build())
                     .Build())
                 .Build())
             .Build());
@@ -779,7 +781,9 @@ public class SeriesServiceTests : AbstractDbTest
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).WithFile(file).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).WithFile(file).Build())
-                .WithChapter(new ChapterBuilder("A Special Case").WithIsSpecial(true).WithFile(file).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A Special Case").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithFile(file).WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).WithFile(file).Build())
@@ -829,6 +833,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
         Assert.NotNull(firstChapter);
+        Assert.NotNull(firstChapter);
         Assert.Same("1", firstChapter.Range);
     }
 
@@ -838,7 +843,8 @@ public class SeriesServiceTests : AbstractDbTest
         var series = CreateSeriesMock();
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
-        Assert.Same("1", firstChapter.Range);
+        Assert.NotNull(firstChapter);
+        Assert.Equal(1, firstChapter.MinNumber);
     }
 
     [Fact]
@@ -849,7 +855,7 @@ public class SeriesServiceTests : AbstractDbTest
         {
             new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build()
         };
-        series.Volumes[1].Chapters = new List<Chapter>()
+        series.Volumes[2].Chapters = new List<Chapter>()
         {
             new ChapterBuilder("2").WithFiles(files).WithPages(1).Build(),
             new ChapterBuilder("1.1").WithFiles(files).WithPages(1).Build(),
@@ -857,7 +863,8 @@ public class SeriesServiceTests : AbstractDbTest
         };
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
-        Assert.Same("1.1", firstChapter.Range);
+        Assert.NotNull(firstChapter);
+        Assert.True(firstChapter.MinNumber.Is(1.1f));
     }
 
     [Fact]
@@ -882,7 +889,8 @@ public class SeriesServiceTests : AbstractDbTest
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
-        Assert.Same("1", firstChapter.Range);
+        Assert.NotNull(firstChapter);
+        Assert.Equal(1, firstChapter.MinNumber);
     }
 
     #endregion
@@ -919,6 +927,7 @@ public class SeriesServiceTests : AbstractDbTest
         addRelationDto.Adaptations.Add(2);
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
         Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
     }
@@ -1291,7 +1300,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
     }
 
@@ -1323,7 +1332,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
     }
 
@@ -1355,7 +1364,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, true));
     }
 
@@ -1387,7 +1396,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
         await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build();
         Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
     }
 
@@ -1484,4 +1493,116 @@ public class SeriesServiceTests : AbstractDbTest
     }
 
     #endregion
+
+    #region GetEstimatedChapterCreationDate
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NoNextChapter_InvalidType()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(0, nextChapter.ChapterNumber);
+    }
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NoNextChapter_InvalidPublicationStatus()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+                .WithPublicationStatus(PublicationStatus.Completed)
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(0, nextChapter.ChapterNumber);
+    }
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NoNextChapter_Only2Chapters()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.NotNull(nextChapter);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(0, nextChapter.ChapterNumber);
+    }
+
+    [Fact]
+    public async Task GetEstimatedChapterCreationDate_NextChapter_ChaptersMonthApart()
+    {
+        await ResetDb();
+        var now = DateTime.UtcNow;
+
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
+            .WithSeries(new SeriesBuilder("Test")
+                .WithPublicationStatus(PublicationStatus.OnGoing)
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                    .WithChapter(new ChapterBuilder("1").WithCreated(now).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("2").WithCreated(now.AddMonths(1)).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("3").WithCreated(now.AddMonths(2)).WithPages(1).Build())
+                    .WithChapter(new ChapterBuilder("4").WithCreated(now.AddMonths(3)).WithPages(1).Build())
+                    .Build())
+                .Build())
+            .Build());
+
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
+        Assert.NotNull(nextChapter);
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
+        Assert.Equal(5, nextChapter.ChapterNumber);
+        Assert.NotNull(nextChapter.ExpectedDate);
+        var expected = now.AddMonths(4);
+        Assert.Equal(expected.Month, nextChapter.ExpectedDate.Value.Month);
+        Assert.True(nextChapter.ExpectedDate.Value.Day >= expected.Day - 1 || nextChapter.ExpectedDate.Value.Day <= expected.Day + 1);
+    }
+
+    #endregion
+
 }

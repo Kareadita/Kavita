@@ -657,7 +657,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null)
     {
-        _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
+        _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
         if (!Exists(folderPath)) return files;
 

@@ -47,7 +47,7 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series));
         CreateMap<LibraryDto, Library>();
         CreateMap<Volume, VolumeDto>()
-            .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.MinNumber));
+            .ForMember(dest => dest.Number, opt => opt.MapFrom(src => (int) src.MinNumber));
         CreateMap<MangaFile, MangaFileDto>();
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
@@ -200,6 +200,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<ReadingList, ReadingListDto>();
         CreateMap<ReadingListItem, ReadingListItemDto>();
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
+        CreateMap<ChapterDto, TachiyomiChapterDto>();
+        CreateMap<Chapter, TachiyomiChapterDto>();
 
         CreateMap<Series, SearchResultDto>()
             .ForMember(dest => dest.SeriesId,

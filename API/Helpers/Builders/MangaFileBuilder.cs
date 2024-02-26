@@ -19,6 +19,7 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
             Pages = pages,
             LastModified = File.GetLastWriteTime(filePath),
             LastModifiedUtc = File.GetLastWriteTimeUtc(filePath),
+            FileName = Path.GetFileNameWithoutExtension(filePath)
         };
     }
 

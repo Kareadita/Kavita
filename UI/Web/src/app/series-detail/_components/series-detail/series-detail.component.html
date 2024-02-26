@@ -308,7 +308,7 @@
     <ng-container *ngIf="nextExpectedChapter">
       <ng-container [ngSwitch]="tabId">
         <ng-container *ngSwitchCase="TabID.Volumes">
-          <app-next-expected-card *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber"
+          <app-next-expected-card *ngIf="nextExpectedChapter.volumeNumber !== SpecialVolumeNumber && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber"
                class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
                                   [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
         </ng-container>

@@ -96,6 +96,7 @@ public class DefaultParser : IDefaultParser
         if (Parser.HasSpecialMarker(fileName))
         {
             ret.IsSpecial = true;
+            ret.SpecialIndex = Parser.ParseSpecialIndex(fileName);
             ret.Chapters = Parser.DefaultChapter;
             ret.Volumes = Parser.LooseLeafVolume;
 
@@ -111,6 +112,12 @@ public class DefaultParser : IDefaultParser
         if (Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
         {
             ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
+        }
+
+        // v0.8.x: Introducing a change where Specials will go in a separate Volume with a reserved number
+        if (ret.IsSpecial)
+        {
+            ret.Volumes = $"{Parser.SpecialVolumeNumber}";
         }
 
         return ret.Series == string.Empty ? null : ret;

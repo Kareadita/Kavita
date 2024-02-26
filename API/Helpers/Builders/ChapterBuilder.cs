@@ -20,8 +20,12 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             Range = string.IsNullOrEmpty(range) ? number : range,
             Title = string.IsNullOrEmpty(range) ? number : range,
             Number = Parser.MinNumberFromRange(number).ToString(CultureInfo.InvariantCulture),
+            MinNumber = Parser.MinNumberFromRange(number),
+            MaxNumber = Parser.MaxNumberFromRange(number),
+            SortOrder = Parser.MinNumberFromRange(number),
             Files = new List<MangaFile>(),
-            Pages = 1
+            Pages = 1,
+            CreatedUtc = DateTime.UtcNow
         };
     }
 
@@ -30,11 +34,15 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         var specialTreatment = info.IsSpecialInfo();
         var specialTitle = specialTreatment ? info.Filename : info.Chapters;
         var builder = new ChapterBuilder(Parser.DefaultChapter);
+        // TODO: Come back here and remove this side effect
         return builder.WithNumber(specialTreatment ? Parser.DefaultChapter : Parser.MinNumberFromRange(info.Chapters) + string.Empty)
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
             .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
             ? info.Title
             : specialTitle)
+            // NEW
+            //.WithTitle(string.IsNullOrEmpty(info.Filename) ? specialTitle : info.Filename)
+            .WithTitle(info.Filename)
             .WithIsSpecial(specialTreatment);
     }
 
@@ -44,9 +52,18 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         return this;
     }
 
+
     public ChapterBuilder WithNumber(string number)
     {
         _chapter.Number = number;
+        _chapter.MinNumber = Parser.MinNumberFromRange(number);
+        _chapter.MaxNumber = Parser.MaxNumberFromRange(number);
+        return this;
+    }
+
+    public ChapterBuilder WithSortOrder(float order)
+    {
+        _chapter.SortOrder = order;
         return this;
     }
 
@@ -65,6 +82,8 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     private ChapterBuilder WithRange(string range)
     {
         _chapter.Range = range;
+        // TODO: HACK: Overriding range
+        _chapter.Range = _chapter.GetNumberTitle();
         return this;
     }
 

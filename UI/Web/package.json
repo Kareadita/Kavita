@@ -8,7 +8,7 @@
     "minify-langs": "node minify-json.js",
     "cache-locale": "node hash-localization.js",
     "cache-locale-prime": "node hash-localization-prime.js",
-    "prod": "npm run cache-locale-prime && ng build --configuration production &&  npm run minify-langs && npm run cache-locale",
+    "prod": "npm run cache-locale-prime && ng build --configuration production && npm run minify-langs && npm run cache-locale",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
     "e2e": "ng e2e"

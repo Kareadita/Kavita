@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using API.Entities;
 using API.Helpers;
@@ -30,7 +31,7 @@ public static class ChapterListExtensions
     {
         var specialTreatment = info.IsSpecialInfo();
         return specialTreatment
-            ? chapters.FirstOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath)))
+            ? chapters.FirstOrDefault(c => c.Range == Path.GetFileNameWithoutExtension(info.Filename) || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath)))
             : chapters.FirstOrDefault(c => c.Range == info.Chapters);
     }
 

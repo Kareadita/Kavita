@@ -16,8 +16,6 @@ public static class MigrateManualHistory
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync())
         {
-            logger.LogCritical(
-                "Running MigrateManualHistory migration - Completed. This is not an error");
             return;
         }
 

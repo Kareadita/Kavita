@@ -78,7 +78,7 @@ public class ChapterRepository : IChapterRepository
             .Where(c => c.Id == chapterId)
             .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
             {
-                ChapterNumber = chapter.Range,
+                ChapterNumber = chapter.MinNumber,
                 VolumeNumber = volume.Name,
                 VolumeId = volume.Id,
                 chapter.IsSpecial,
@@ -102,8 +102,8 @@ public class ChapterRepository : IChapterRepository
             })
             .Select(data => new ChapterInfoDto()
             {
-                ChapterNumber = data.ChapterNumber,
-                VolumeNumber = data.VolumeNumber + string.Empty,
+                ChapterNumber = data.ChapterNumber + string.Empty, // TODO: Fix this
+                VolumeNumber = data.VolumeNumber + string.Empty, // TODO: Fix this
                 VolumeId = data.VolumeId,
                 IsSpecial = data.IsSpecial,
                 SeriesId = data.SeriesId,
@@ -175,6 +175,7 @@ public class ChapterRepository : IChapterRepository
     {
         return await _context.Chapter
             .Includes(includes)
+            .OrderBy(c => c.SortOrder)
             .FirstOrDefaultAsync(c => c.Id == chapterId);
     }
 
@@ -187,6 +188,7 @@ public class ChapterRepository : IChapterRepository
     {
         return await _context.Chapter
             .Where(c => c.VolumeId == volumeId)
+            .OrderBy(c => c.SortOrder)
             .ToListAsync();
     }
 
@@ -267,10 +269,16 @@ public class ChapterRepository : IChapterRepository
         return chapter;
     }
 
+    /// <summary>
+    /// Includes Volumes
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     public IEnumerable<Chapter> GetChaptersForSeries(int seriesId)
     {
         return _context.Chapter
             .Where(c => c.Volume.SeriesId == seriesId)
+            .OrderBy(c => c.SortOrder)
             .Include(c => c.Volume)
             .AsEnumerable();
     }

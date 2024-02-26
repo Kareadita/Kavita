@@ -140,7 +140,7 @@ public class DownloadController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series!.Name} - Chapter {chapter.Number}.zip");
+            return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.zip");
         }
         catch (KavitaException ex)
         {

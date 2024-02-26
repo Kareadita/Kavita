@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
@@ -10,13 +12,26 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
 {
     public int Id { get; set; }
     /// <summary>
-    /// Range of numbers. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
+    /// Range of numbers. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If the chapter is a special, will return the Special Name
     /// </summary>
     public required string Range { get; set; }
     /// <summary>
     /// Smallest number of the Range. Can be a partial like Chapter 4.5
     /// </summary>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
     public required string Number { get; set; }
+    /// <summary>
+    /// Minimum Chapter Number.
+    /// </summary>
+    public float MinNumber { get; set; }
+    /// <summary>
+    /// Maximum Chapter Number
+    /// </summary>
+    public float MaxNumber { get; set; }
+    /// <summary>
+    /// The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.
+    /// </summary>
+    public float SortOrder { get; set; }
     /// <summary>
     /// The files that represent this Chapter
     /// </summary>
@@ -44,6 +59,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
     /// </summary>
     public string? Title { get; set; }
+
     /// <summary>
     /// Age Rating for the issue/chapter
     /// </summary>
@@ -130,10 +146,42 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
         if (IsSpecial)
         {
             Number = Parser.DefaultChapter;
+            MinNumber = Parser.DefaultChapterNumber;
+            MaxNumber = Parser.DefaultChapterNumber;
         }
         Title = (IsSpecial && info.Format == MangaFormat.Epub)
             ? info.Title
-            : Range;
+            : Path.GetFileNameWithoutExtension(Range);
 
+    }
+
+    /// <summary>
+    /// Returns the Chapter Number. If the chapter is a range, returns that, formatted.
+    /// </summary>
+    /// <returns></returns>
+    public string GetNumberTitle()
+    {
+        if (MinNumber.Is(MaxNumber))
+        {
+            if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+            {
+                return Title;
+            }
+            else
+            {
+                return $"{MinNumber}";
+            }
+
+        }
+        return $"{MinNumber}-{MaxNumber}";
+    }
+
+    /// <summary>
+    /// Is the Chapter representing a single Volume (volume 1.cbz). If so, Min/Max will be Default and will not be special
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSingleVolumeChapter()
+    {
+        return MinNumber.Is(Parser.DefaultChapterNumber) && !IsSpecial;
     }
 }

@@ -136,7 +136,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
@@ -166,7 +165,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
@@ -205,7 +203,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
@@ -260,7 +257,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
@@ -299,7 +295,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
@@ -347,19 +342,16 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -379,6 +371,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
 
@@ -390,12 +383,10 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1-2")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3-4")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
             .Build();
@@ -412,6 +403,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("3-4", actualChapter.Volume.Name);
         Assert.Equal("1", actualChapter.Range);
     }
@@ -456,6 +448,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("31", actualChapter.Range);
     }
 
@@ -466,19 +459,16 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -497,6 +487,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
 
@@ -507,19 +498,16 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1.5")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -539,6 +527,7 @@ public class ReaderServiceTests
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
 
@@ -549,15 +538,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
-                .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder("2").Build())
+                .WithChapter(new ChapterBuilder("21").Build())
+                .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder("21").Build())
-                .WithChapter(new ChapterBuilder("22").Build())
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -574,7 +561,8 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
-        Assert.Equal("1", actualChapter.Range);
+        Assert.NotNull(actualChapter);
+        Assert.Equal("21", actualChapter.Range);
     }
 
     [Fact]
@@ -584,18 +572,15 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("66").Build())
                 .WithChapter(new ChapterBuilder("67").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
             .Build();
@@ -616,6 +601,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, actualChapter.Range);
     }
 
@@ -626,15 +612,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber).Build())
+                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -658,7 +642,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -684,7 +667,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -704,68 +686,69 @@ public class ReaderServiceTests
     }
 
     // This is commented out because, while valid, I can't solve how to make this pass (https://github.com/Kareadita/Kavita/issues/2099)
-    // [Fact]
-    // public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials_FirstIsVolume()
-    // {
-    //     await ResetDb();
-    //
-    //     var series = new SeriesBuilder("Test")
-    //         .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
-    //             .WithMinNumber(0)
-    //             .WithChapter(new ChapterBuilder("1").Build())
-    //             .WithChapter(new ChapterBuilder("2").Build())
-    //             .Build())
-    //         .WithVolume(new VolumeBuilder("1")
-    //             .WithMinNumber(1)
-    //             .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
-    //             .Build())
-    //         .Build();
-    //     series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
-    //
-    //     _context.Series.Add(series);
-    //     _context.AppUser.Add(new AppUser()
-    //     {
-    //         UserName = "majora2007"
-    //     });
-    //
-    //     await _context.SaveChangesAsync();
-    //
-    //     var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
-    //     Assert.Equal(-1, nextChapter);
-    // }
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials_FirstIsVolume()
+    {
+        await ResetDb();
 
-    // This is commented out because, while valid, I can't solve how to make this pass
-    // [Fact]
-    // public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_WithSpecials()
-    // {
-    //     await ResetDb();
-    //
-    //     var series = new SeriesBuilder("Test")
-    //         .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
-    //             .WithMinNumber(0)
-    //             .WithChapter(new ChapterBuilder("1").Build())
-    //             .WithChapter(new ChapterBuilder("2").Build())
-    //             .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
-    //             .Build())
-    //
-    //         .WithVolume(new VolumeBuilder("1")
-    //             .WithMinNumber(1)
-    //             .WithChapter(new ChapterBuilder("2").Build())
-    //             .Build())
-    //         .Build();
-    //     series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
-    //
-    //     _context.Series.Add(series);
-    //     _context.AppUser.Add(new AppUser()
-    //     {
-    //         UserName = "majora2007"
-    //     });
-    //
-    //     await _context.SaveChangesAsync();
-    //
-    //     var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
-    //     Assert.Equal(-1, nextChapter);
-    // }
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        Assert.Equal(-1, nextChapter);
+    }
+
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_WithSpecials()
+    {
+        await ResetDb();
+
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+        Assert.Equal(-1, nextChapter);
+    }
 
 
 
@@ -776,15 +759,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
+                .WithChapter(new ChapterBuilder("B.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2)
+                    .Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -802,6 +789,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
@@ -812,10 +800,16 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithPages(1)
+                    .Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -833,6 +827,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
@@ -843,14 +838,20 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .Build())
+
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithPages(1)
+                    .Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -864,7 +865,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 3, 1);
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 3, 4, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -876,14 +877,18 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
+                .WithChapter(new ChapterBuilder("B.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2)
+                    .Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -901,6 +906,7 @@ public class ReaderServiceTests
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("B.cbz", actualChapter.Range);
     }
 
@@ -911,12 +917,10 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
             .Build();
@@ -952,19 +956,16 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -984,6 +985,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("1", actualChapter.Range);
     }
 
@@ -995,19 +997,16 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1.5")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("3")
-                .WithMinNumber(3)
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
@@ -1025,6 +1024,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 3, 5, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("22", actualChapter.Range);
     }
 
@@ -1038,7 +1038,14 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("40").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("50").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("60").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithPages(1).WithIsSpecial(true).Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithPages(1)
+                    .Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1997")
@@ -1065,7 +1072,7 @@ public class ReaderServiceTests
 
 
         // prevChapter should be id from ch.21 from volume 2001
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 4, 7, 1);
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 5, 7, 1);
 
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
@@ -1109,6 +1116,7 @@ public class ReaderServiceTests
 
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
 
@@ -1119,15 +1127,13 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build())
+                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -1147,6 +1153,7 @@ public class ReaderServiceTests
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(2, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
 
@@ -1157,7 +1164,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -1187,7 +1193,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
             .Build();
@@ -1216,13 +1221,11 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
             .Build();
@@ -1237,10 +1240,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
-
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1251,22 +1251,19 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("5").Build())
                 .WithChapter(new ChapterBuilder("6").Build())
                 .WithChapter(new ChapterBuilder("7").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("2").WithIsSpecial(true).Build())
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
-                .WithChapter(new ChapterBuilder("3").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("4").WithIsSpecial(true).Build())
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -1299,7 +1296,6 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
@@ -1329,14 +1325,18 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
-                .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
-                .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("A.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
+                .WithChapter(new ChapterBuilder("B.cbz")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2)
+                    .Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -1357,6 +1357,7 @@ public class ReaderServiceTests
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
@@ -1367,12 +1368,10 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithMinNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
@@ -1389,12 +1388,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
-
         var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.NotEqual(-1, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
         Assert.Equal("22", actualChapter.Range);
     }
 
@@ -1405,12 +1402,10 @@ public class ReaderServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
-                .WithMinNumber(2)
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
             .Build();
@@ -1630,7 +1625,12 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("46").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("47").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("48").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title")
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithIsSpecial(true).WithPages(1)
+                    .Build())
                 .Build())
             // One file volume
             .WithVolume(new VolumeBuilder("1")
@@ -1697,7 +1697,9 @@ public class ReaderServiceTests
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Prologue").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Prologue").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -1821,7 +1823,9 @@ public class ReaderServiceTests
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("101").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Christmas Eve").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Christmas Eve").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
@@ -2031,7 +2035,9 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -2211,7 +2217,9 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("51").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("52").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("91").WithPages(2).Build())
-                .WithChapter(new ChapterBuilder("Special").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Special").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -2380,7 +2388,9 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
@@ -2418,8 +2428,10 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2.5").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
                 .Build())
+                .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                    .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(1).Build())
+                    .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
@@ -2493,7 +2505,9 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("48").WithPages(48).Build())
                 .WithChapter(new ChapterBuilder("49").WithPages(49).Build())
                 .WithChapter(new ChapterBuilder("50").WithPages(50).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(10).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(10).Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("1")
@@ -2550,14 +2564,14 @@ public class ReaderServiceTests
     public async Task MarkSeriesAsReadTest()
     {
         await ResetDb();
-        // TODO: Validate this is correct, shouldn't be possible to have 2 Volume 0's in a series
+
         var series = new SeriesBuilder("Test")
 
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
@@ -2669,7 +2683,9 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("30").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1997")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
@@ -2722,7 +2738,9 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("30").WithPages(1).Build())
-                .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1997")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())

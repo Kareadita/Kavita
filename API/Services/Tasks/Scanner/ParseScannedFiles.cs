@@ -365,11 +365,67 @@ public class ParseScannedFiles
 
             foreach (var series in scannedSeries.Keys)
             {
-                if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
+                if (scannedSeries[series].Count <= 0 || processSeriesInfos == null) continue;
+
+                UpdateSortOrder(scannedSeries, series);
+                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
+            }
+        }
+    }
+
+    private void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
+    {
+        try
+        {
+            // Set the Sort order per Volume
+            var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
+            foreach (var volume in volumes)
+            {
+                var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
+                IList<ParserInfo> chapters;
+                var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
+
+                if (specialTreatment)
                 {
-                    await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
+                    chapters = infos
+                        .OrderBy(info => info.SpecialIndex)
+                        .ToList();
+                }
+                else
+                {
+                    chapters = infos
+                        .OrderByNatural(info => info.Chapters)
+                        .ToList();
+                }
+
+
+                var counter = 0f;
+                var prevIssue = string.Empty;
+                foreach (var chapter in chapters)
+                {
+                    if (float.TryParse(chapter.Chapters, out var parsedChapter))
+                    {
+                        counter = parsedChapter;
+                        if (!string.IsNullOrEmpty(prevIssue) && parsedChapter.Is(float.Parse(prevIssue)))
+                        {
+                            // Bump by 0.1
+                            counter += 0.1f;
+                        }
+                        chapter.IssueOrder = counter;
+                        prevIssue = $"{parsedChapter}";
+                    }
+                    else
+                    {
+                        chapter.IssueOrder = counter;
+                        counter++;
+                        prevIssue = chapter.Chapters;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue setting IssueOrder");
         }
     }
 

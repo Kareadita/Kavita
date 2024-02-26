@@ -43,7 +43,7 @@ export class UtilityService {
 
 
   sortChapters = (a: Chapter, b: Chapter) => {
-    return parseFloat(a.number) - parseFloat(b.number);
+    return a.minNumber - b.minNumber;
   }
 
   mangaFormatToText(format: MangaFormat): string {

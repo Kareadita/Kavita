@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Interfaces;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.DTOs;
@@ -20,7 +21,7 @@ public class VolumeDto : IHasReadTimeEstimate
     /// This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14
     /// </summary>
     [Obsolete("Use MinNumber")]
-    public float Number { get; set; }
+    public int Number { get; set; }
     public int Pages { get; set; }
     public int PagesRead { get; set; }
     public DateTime LastModifiedUtc { get; set; }
@@ -50,6 +51,15 @@ public class VolumeDto : IHasReadTimeEstimate
     /// <returns></returns>
     public bool IsLooseLeaf()
     {
-        return Math.Abs(this.MinNumber - Parser.LooseLeafVolumeNumber) < 0.001f;
+        return MinNumber.Is(Parser.LooseLeafVolumeNumber);
+    }
+
+    /// <summary>
+    /// Does this volume hold only specials?
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSpecial()
+    {
+        return MinNumber.Is(Parser.SpecialVolumeNumber);
     }
 }

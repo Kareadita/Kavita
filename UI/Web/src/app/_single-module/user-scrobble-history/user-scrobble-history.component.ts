@@ -16,6 +16,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ToastrService} from "ngx-toastr";
+import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 
 @Component({
   selector: 'app-user-scrobble-history',
@@ -101,4 +102,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
   }
 
 
+    protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
 }

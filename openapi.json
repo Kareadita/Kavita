@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.2"
+    "version": "0.7.14.3"
   },
   "servers": [
     {
@@ -13718,13 +13718,29 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of numbers. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\".",
+            "description": "Range of numbers. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If the chapter is a special, will return the Special Name",
             "nullable": true
           },
           "number": {
             "type": "string",
             "description": "Smallest number of the Range. Can be a partial like Chapter 4.5",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "Minimum Chapter Number.",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "description": "Maximum Chapter Number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
           },
           "files": {
             "type": "array",
@@ -13926,13 +13942,26 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\".",
+            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {
             "type": "string",
             "description": "Smallest number of the Range.",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "format": "float"
           },
           "pages": {
             "type": "integer",
@@ -16163,6 +16192,11 @@
             "type": "integer",
             "format": "int32"
           },
+          "fileName": {
+            "type": "string",
+            "description": "The filename without extension",
+            "nullable": true
+          },
           "filePath": {
             "type": "string",
             "description": "Absolute path to the archive file",
@@ -16691,8 +16725,8 @@
             "format": "int32"
           },
           "chapterNumber": {
-            "type": "string",
-            "nullable": true
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false,
@@ -20376,6 +20410,11 @@
             "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
             "nullable": true
           },
+          "lookupName": {
+            "type": "string",
+            "description": "This is just the original Parsed volume number for lookups",
+            "nullable": true
+          },
           "number": {
             "type": "integer",
             "description": "The minimum number in the Name field in Int form",
@@ -20472,9 +20511,9 @@
             "nullable": true
           },
           "number": {
-            "type": "number",
+            "type": "integer",
             "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
-            "format": "float",
+            "format": "int32",
             "deprecated": true
           },
           "pages": {

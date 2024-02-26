@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter, LooseLeafOrSpecialNumber } from 'src/app/_models/chapter';
+import { Chapter, LooseLeafOrDefaultNumber } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library/library';
 import { Volume } from 'src/app/_models/volume';
 import {CommonModule, NgSwitch} from "@angular/common";
 import {TranslocoModule} from "@ngneat/transloco";
 
+/**
+ * This is primarily used for list item
+ */
 @Component({
   selector: 'app-entity-title',
   standalone: true,
@@ -20,7 +23,9 @@ import {TranslocoModule} from "@ngneat/transloco";
 })
 export class EntityTitleComponent implements OnInit {
 
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrSpecialNumber;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly LooseLeafOrSpecial = LooseLeafOrDefaultNumber + "";
+  protected readonly LibraryType = LibraryType;
 
   /**
    * Library type for which the entity belongs
@@ -42,18 +47,17 @@ export class EntityTitleComponent implements OnInit {
   volumeTitle: string = '';
 
   get Number() {
-    if (this.utilityService.isVolume(this.entity)) return (this.entity as Volume).minNumber;
-    return (this.entity as Chapter).number;
+    if (this.isChapter) return (this.entity as Chapter).range;
+    return (this.entity as Volume).name;
   }
 
-  get LibraryType() {
-    return LibraryType;
-  }
 
   constructor(private utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
+
+
 
     if (this.isChapter) {
       const c = (this.entity as Chapter);

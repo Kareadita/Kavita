@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -219,14 +220,6 @@ public class ProcessSeries : IProcessSeries
                     _logger.LogCritical(ex,
                         "[ScannerService] There was an issue writing to the database for series {SeriesName}",
                         series.Name);
-                    _logger.LogTrace("[ScannerService] Series Metadata Dump: {@Series}", series.Metadata);
-                    _logger.LogTrace("[ScannerService] People Dump: {@People}", _people
-                        .Select(p =>
-                            new {p.Id, p.Name, SeriesMetadataIds =
-                                p.SeriesMetadatas?.Select(m => m.Id),
-                                ChapterMetadataIds =
-                                    p.ChapterMetadatas?.Select(m => m.Id)
-                                    .ToList()}));
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
@@ -314,8 +307,8 @@ public class ProcessSeries : IProcessSeries
         // The actual number of count's defined across all chapter's metadata
         series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
 
-        var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
-        var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
+        var maxVolume = (int) series.Volumes.Max(v =>  v.MaxNumber);
+        var maxChapter = (int) chapters.Max(c => c.MaxNumber);
 
         // Single books usually don't have a number in their Range (filename)
         if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
@@ -544,10 +537,12 @@ public class ProcessSeries : IProcessSeries
             Volume? volume;
             try
             {
-                volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+                // With the Name change to be formatted, Name no longer working because Name returns "1" and volumeNumber is "1.0", so we use LookupName as the original
+                volume = series.Volumes.SingleOrDefault(s => s.LookupName == volumeNumber);
             }
             catch (Exception ex)
             {
+                // TODO: Push this to UI in some way
                 if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
                 _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
                 throw new KavitaException(
@@ -561,7 +556,8 @@ public class ProcessSeries : IProcessSeries
                 series.Volumes.Add(volume);
             }
 
-            volume.Name = volumeNumber;
+            volume.LookupName = volumeNumber;
+            volume.Name = volume.GetNumberTitle();
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
@@ -586,7 +582,9 @@ public class ProcessSeries : IProcessSeries
         }
 
         // Remove existing volumes that aren't in parsedInfos
-        var nonDeletedVolumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
+        var nonDeletedVolumes = series.Volumes
+            .Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.LookupName))
+            .ToList();
         if (series.Volumes.Count != nonDeletedVolumes.Count)
         {
             _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
@@ -597,8 +595,9 @@ public class ProcessSeries : IProcessSeries
                 var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
                 if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
                 {
+                    // This can happen when file is renamed and volume is removed
                     _logger.LogInformation(
-                        "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
+                        "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
                         file);
                 }
 
@@ -640,12 +639,19 @@ public class ProcessSeries : IProcessSeries
                 chapter.UpdateFrom(info);
             }
 
-            if (chapter == null) continue;
+            if (chapter == null)
+            {
+                continue;
+            }
             // Add files
-            var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
+
+            // TODO: Investigate using the ChapterBuilder here
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
-            chapter.Range = specialTreatment ? info.Filename : info.Chapters;
+            chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
+            chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
+            chapter.SortOrder = info.IssueOrder;
+            chapter.Range = chapter.GetNumberTitle();
         }
 
 
@@ -655,7 +661,7 @@ public class ProcessSeries : IProcessSeries
         {
             if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
             {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.GetNumberTitle(), volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else
@@ -680,6 +686,7 @@ public class ProcessSeries : IProcessSeries
             if (!forceUpdate && !_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
             existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
+            existingFile.FileName = Path.GetFileNameWithoutExtension(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }

@@ -55,7 +55,7 @@ import {
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Chapter} from 'src/app/_models/chapter';
+import {Chapter, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
@@ -67,7 +67,7 @@ import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
 import {User} from 'src/app/_models/user';
 import {Volume} from 'src/app/_models/volume';
-import {LooseLeafOrSpecialNumber} from 'src/app/_models/chapter';
+import {LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
@@ -184,7 +184,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
   protected readonly TagBadgeCursor = TagBadgeCursor;
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrSpecialNumber;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -241,7 +242,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Track by function for Chapter to tell when to refresh card data
    */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.minNumber}_${item.maxNumber}_${item.volumeId}_${item.pagesRead}`;
   trackByRelatedSeriesIdentify = (index: number, item: RelatedSeriesPair) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
   trackBySeriesIdentify = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
@@ -371,13 +372,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // This is a lone chapter
       if (vol.length === 0) {
-        return 'Ch ' + this.currentlyReadingChapter.number;
+        return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range) and Localize it
       }
 
-      if (this.currentlyReadingChapter.number === "0") {
+      if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
         return 'Vol ' + vol[0].minNumber;
       }
-      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.number;
+      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.minNumber;
     }
 
     return this.currentlyReadingChapter.title;

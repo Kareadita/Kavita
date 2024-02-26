@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Comparators;
@@ -6,28 +7,28 @@ namespace API.Comparators;
 #nullable enable
 
 /// <summary>
-/// Sorts chapters based on their Number. Uses natural ordering of doubles.
+/// Sorts chapters based on their Number. Uses natural ordering of doubles. Specials always LAST.
 /// </summary>
-public class ChapterSortComparer : IComparer<double>
+public class ChapterSortComparerDefaultLast : IComparer<float>
 {
     /// <summary>
-    /// Normal sort for 2 doubles. 0 always comes last
+    /// Normal sort for 2 doubles. DefaultChapterNumber always comes last
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public int Compare(double x, double y)
+    public int Compare(float x, float y)
     {
-        if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;
+        if (x.Is(Parser.DefaultChapterNumber) && y.Is(Parser.DefaultChapterNumber)) return 0;
         // if x is 0, it comes second
-        if (x == Parser.DefaultChapterNumber) return 1;
+        if (x.Is(Parser.DefaultChapterNumber)) return 1;
         // if y is 0, it comes second
-        if (y == Parser.DefaultChapterNumber) return -1;
+        if (y.Is(Parser.DefaultChapterNumber)) return -1;
 
         return x.CompareTo(y);
     }
 
-    public static readonly ChapterSortComparer Default = new ChapterSortComparer();
+    public static readonly ChapterSortComparerDefaultLast Default = new ChapterSortComparerDefaultLast();
 }
 
 /// <summary>
@@ -37,33 +38,43 @@ public class ChapterSortComparer : IComparer<double>
 /// This is represented by Chapter 0, Chapter 81.
 /// </example>
 /// </summary>
-public class ChapterSortComparerZeroFirst : IComparer<double>
+public class ChapterSortComparerDefaultFirst : IComparer<float>
 {
-    public int Compare(double x, double y)
+    public int Compare(float x, float y)
     {
-        if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;
+        if (x.Is(Parser.DefaultChapterNumber) && y.Is(Parser.DefaultChapterNumber)) return 0;
         // if x is 0, it comes first
-        if (x == Parser.DefaultChapterNumber) return -1;
+        if (x.Is(Parser.DefaultChapterNumber)) return -1;
         // if y is 0, it comes first
-        if (y == Parser.DefaultChapterNumber) return 1;
+        if (y.Is(Parser.DefaultChapterNumber)) return 1;
 
         return x.CompareTo(y);
     }
 
-    public static readonly ChapterSortComparerZeroFirst Default = new ChapterSortComparerZeroFirst();
+    public static readonly ChapterSortComparerDefaultFirst Default = new ChapterSortComparerDefaultFirst();
 }
 
-public class SortComparerZeroLast : IComparer<double>
+/// <summary>
+/// Sorts chapters based on their Number. Uses natural ordering of doubles. Specials always LAST.
+/// </summary>
+public class ChapterSortComparerSpecialsLast : IComparer<float>
 {
-    public int Compare(double x, double y)
+    /// <summary>
+    /// Normal sort for 2 doubles. DefaultSpecialNumber always comes last
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public int Compare(float x, float y)
     {
-        if (x == Parser.DefaultChapterNumber && y == Parser.DefaultChapterNumber) return 0;
-        // if x is 0, it comes last
-        if (x == Parser.DefaultChapterNumber) return 1;
-        // if y is 0, it comes last
-        if (y == Parser.DefaultChapterNumber) return -1;
+        if (x.Is(Parser.SpecialVolumeNumber) && y.Is(Parser.SpecialVolumeNumber)) return 0;
+        // if x is 0, it comes second
+        if (x.Is(Parser.SpecialVolumeNumber)) return 1;
+        // if y is 0, it comes second
+        if (y.Is(Parser.SpecialVolumeNumber)) return -1;
 
         return x.CompareTo(y);
     }
-    public static readonly SortComparerZeroLast Default = new SortComparerZeroLast();
+
+    public static readonly ChapterSortComparerSpecialsLast Default = new ChapterSortComparerSpecialsLast();
 }

@@ -17,22 +17,23 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithCoverImage("Special 1")
                     .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithCoverImage("Special 2")
                     .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2)
                     .Build())
                 .Build())
             .Build();
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Special 1", series.GetCoverImage());
@@ -67,10 +68,34 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
+    }
+
+    [Fact]
+    public void GetCoverImage_LooseChapters_WithSub1_Chapter()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("0.5")
+                    .WithCoverImage("Chapter 0.5")
+                    .Build())
+                .WithChapter(new ChapterBuilder("2")
+                    .WithCoverImage("Chapter 2")
+                    .Build())
+                .WithChapter(new ChapterBuilder("1")
+                    .WithCoverImage("Chapter 1")
+                    .Build())
+                .Build())
+
+            .Build();
+
+
+        Assert.Equal("Chapter 1", series.GetCoverImage());
     }
 
     [Fact]
@@ -109,7 +134,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
@@ -135,7 +160,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Special 2", series.GetCoverImage());
@@ -156,16 +181,19 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 1")
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
                     .Build())
-                .Build())
+            .Build())
             .Build();
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Chapter 2", series.GetCoverImage());
@@ -186,9 +214,12 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 3")
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
@@ -202,7 +233,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
@@ -223,9 +254,12 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 1")
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
@@ -239,7 +273,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
@@ -260,9 +294,12 @@ public class SeriesExtensionsTests
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 1425")
                     .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithIsSpecial(true)
-                    .WithCoverImage("Special 1")
+                    .WithCoverImage("Special 3")
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
@@ -283,7 +320,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
@@ -316,7 +353,7 @@ public class SeriesExtensionsTests
 
         foreach (var vol in series.Volumes)
         {
-            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+            vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
         Assert.Equal("Chapter 2", series.GetCoverImage());
