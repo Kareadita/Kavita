@@ -15,6 +15,7 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         _volume = new Volume()
         {
             Name = volumeNumber,
+            LookupName = volumeNumber,
             MinNumber = Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
             MaxNumber = Services.Tasks.Scanner.Parser.Parser.MaxNumberFromRange(volumeNumber),
             Chapters = new List<Chapter>()

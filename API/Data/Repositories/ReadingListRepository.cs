@@ -219,7 +219,7 @@ public class ReadingListRepository : IReadingListRepository
             .Join(_context.Chapter, s => s.ChapterId, chapter => chapter.Id, (data, chapter) => new
             {
                 TotalPages = chapter.Pages,
-                ChapterNumber = chapter.MinNumber + string.Empty, // TODO: Fix this
+                ChapterNumber = chapter.Range,
                 chapter.ReleaseDate,
                 ReadingListItem = data,
                 ChapterTitleName = chapter.TitleName,

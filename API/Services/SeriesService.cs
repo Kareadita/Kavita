@@ -563,7 +563,7 @@ public class SeriesService : ISeriesService
 
     public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
-        // TODO: Move this into DB
+        // TODO: Move this into DB (not sure how because of localization and lookups)
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             var firstChapter = volume.Chapters.First();

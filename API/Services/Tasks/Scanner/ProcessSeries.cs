@@ -537,12 +537,12 @@ public class ProcessSeries : IProcessSeries
             Volume? volume;
             try
             {
-                volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+                // With the Name change to be formatted, Name no longer working because Name returns "1" and volumeNumber is "1.0", so we use LookupName as the original
+                volume = series.Volumes.SingleOrDefault(s => s.LookupName == volumeNumber);
             }
             catch (Exception ex)
             {
-                // TODO: Put this to UI in some way
-
+                // TODO: Push this to UI in some way
                 if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
                 _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
                 throw new KavitaException(
@@ -556,6 +556,7 @@ public class ProcessSeries : IProcessSeries
                 series.Volumes.Add(volume);
             }
 
+            volume.LookupName = volumeNumber;
             volume.Name = volume.GetNumberTitle();
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
@@ -581,7 +582,9 @@ public class ProcessSeries : IProcessSeries
         }
 
         // Remove existing volumes that aren't in parsedInfos
-        var nonDeletedVolumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
+        var nonDeletedVolumes = series.Volumes
+            .Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.LookupName))
+            .ToList();
         if (series.Volumes.Count != nonDeletedVolumes.Count)
         {
             _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",

@@ -26,7 +26,7 @@ public class UserProgressCsvRecord
 /// <summary>
 /// v0.8.0 migration to move Specials into their own volume and retain user progress.
 /// </summary>
-public static class ManualMigrateMixedSpecials
+public static class MigrateMixedSpecials
 {
     public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
     {

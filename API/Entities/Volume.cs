@@ -15,6 +15,10 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     /// <remarks>For Books with Series_index, this will map to the Series Index.</remarks>
     public required string Name { get; set; }
     /// <summary>
+    /// This is just the original Parsed volume number for lookups
+    /// </summary>
+    public string LookupName { get; set; }
+    /// <summary>
     /// The minimum number in the Name field in Int form
     /// </summary>
     /// <remarks>Removed in v0.7.13.8, this was an int and we need the ability to have 0.5 volumes render on the UI</remarks>

@@ -20410,6 +20410,11 @@
             "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
             "nullable": true
           },
+          "lookupName": {
+            "type": "string",
+            "description": "This is just the original Parsed volume number for lookups",
+            "nullable": true
+          },
           "number": {
             "type": "integer",
             "description": "The minimum number in the Name field in Int form",
