@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using API.Entities;
 using API.Services.Tasks.Scanner.Parser;
@@ -27,7 +28,7 @@ public static class ParserInfoListExtensions
     /// <returns></returns>
     public static bool HasInfo(this IList<ParserInfo> infos, Chapter chapter)
     {
-        return chapter.IsSpecial ? infos.Any(v => v.Filename == chapter.Range)
+        return chapter.IsSpecial ? infos.Any(v => Path.GetFileNameWithoutExtension(v.Filename) == Path.GetFileNameWithoutExtension(chapter.Range))
             : infos.Any(v => v.Chapters == chapter.Range);
     }
 }

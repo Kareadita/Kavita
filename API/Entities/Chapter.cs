@@ -165,7 +165,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
         {
             if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
             {
-                return Title;
+                return Path.GetFileNameWithoutExtension(Title);
             }
             else
             {

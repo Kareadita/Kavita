@@ -42,7 +42,7 @@ public class ParserInfoListExtensions
         {
             infos.Add(_defaultParser.Parse(
                 filename,
-                string.Empty));
+                "E:/Manga/"));
         }
 
         var files = inputChapters.Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build()).ToList();
@@ -51,5 +51,27 @@ public class ParserInfoListExtensions
             .Build();
 
         Assert.Equal(expectedHasInfo, infos.HasInfo(chapter));
+    }
+
+    [Fact]
+    public void HasInfoTest_SuccessWhenSpecial()
+    {
+        var infos = new[]
+        {
+            _defaultParser.Parse(
+                "E:/Manga/Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip",
+                "E:/Manga/")
+        };
+
+    var files = new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip"}
+            .Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build())
+            .ToList();
+        var chapter = new ChapterBuilder("Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip")
+            .WithRange("Cynthia The Mission The Special SP01 [Desudesu&Brolen]")
+            .WithFiles(files)
+            .WithIsSpecial(true)
+            .Build();
+
+        Assert.True(infos.HasInfo(chapter));
     }
 }
