@@ -1609,7 +1609,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleReaderClick(event: MouseEvent) {
-    if (!this.clickToPaginate) {
+    if (this.immersiveMode) {
       event.preventDefault();
       event.stopPropagation();
       this.toggleMenu(event);
