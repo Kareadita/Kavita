@@ -312,7 +312,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   mousePosition = {
     x: 0,
-    y: 0
+    y: 0,
+    swipeStart: 0,
   };
 
   /**
@@ -1633,7 +1634,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Don't do anything, it's actionable
       return;
     }
-
     if (
       Math.abs(this.mousePosition.x - event.clientX) <= mouseOffset &&
       Math.abs(this.mousePosition.y - event.clientY) <= mouseOffset
@@ -1649,24 +1649,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   onSwipeStart($event: MouseEvent | TouchEvent) {
     this.mousePosition.x = ($event as MouseEvent).clientX || ($event as TouchEvent).touches[0].clientX;
     this.mousePosition.y = ($event as MouseEvent).clientY || ($event as TouchEvent).touches[0].clientY;
+    this.mousePosition.swipeStart = Date.now();
   }
 
   //Swipe end event handler
   @HostListener('window:mouseup', ['$event'])
-  @HostListener('window:touchend', ['event'])
+  @HostListener('window:touchend', ['$event'])
   onSwipeEnd($event: MouseEvent | TouchEvent) {
     const endPos = {
-      x: ($event as MouseEvent).clientX || ($event as TouchEvent).touches[0].clientX,
-      y: ($event as MouseEvent).clientY || ($event as TouchEvent).touches[0].clientY
+      x: ($event as MouseEvent).clientX || ($event as TouchEvent).changedTouches[0].clientX,
+      y: ($event as MouseEvent).clientY || ($event as TouchEvent).changedTouches[0].clientY,
+      swipeEnd: Date.now(),
     }
     // Calculate distance based on writingStyle: use height and y axis for verticle
     const distance = this.writingStyle === WritingStyle.Vertical ? (this.mousePosition.y - endPos.y) / window.innerHeight : (this.mousePosition.x - endPos.x) / window.innerWidth;
+    //Calculate speed as pixels over speed
+    const speed = distance / Math.floor((this.mousePosition.swipeStart - endPos.swipeEnd) / 1000);
     // If action bar is hidden and swipe to paginate is enabled
     if(!this.actionBarVisible && this.swipeToPaginate) {
-      //TODO: Calculate and test speed in addition to distance
       //TODO: Have user configure swipe thresholds
-      //If the swipe was longer than 30% of screen
-      if (Math.abs(distance) > 0.3) {
+      //If the swipe was longer or faster than the threshold, move page based on reading direction
+      if (Math.abs(distance) > 0.3 || Math.abs(speed) > 0.3) {
         if (distance > 0) {
           this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
         } else {
