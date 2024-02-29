@@ -273,6 +273,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
   clickToPaginate = false;
+  swipeToPaginate = false;
   /**
    * Used solely for fullscreen to apply a hack
    */
@@ -513,7 +514,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         tap((e) => {
           const selection = window.getSelection();
           this.hidePagination = selection !== null && selection.toString().trim() !== '';
-          console.log('hide pagination: ', this.hidePagination);
           this.cdRef.markForCheck();
         })
       )
@@ -525,7 +525,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         distinctUntilChanged(),
         tap((e) => {
           this.hidePagination = false;
-          console.log('hide pagination: ', this.hidePagination);
           this.cdRef.markForCheck();
         })
       )
@@ -1564,6 +1563,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
       this.showClickToPaginateVisualOverlay();
     }, 200);
+  }
+
+  toggleSwipeToPaginate(swipeToPaginate: boolean){
+    this.swipeToPaginate = swipeToPaginate;
   }
 
   clearTimeout(timeoutId: number | undefined) {

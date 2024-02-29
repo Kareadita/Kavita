@@ -63,6 +63,7 @@
                     (colorThemeUpdate)="updateColorTheme($event)"
                     (styleUpdate)="updateReaderStyles($event)"
                     (clickToPaginateChanged)="showPaginationOverlay($event)"
+                    (swipeToPaginateChanged)="toggleSwipeToPaginate($event)"
                     (fullscreen)="toggleFullscreen()"
                     (bookReaderWritingStyle)="updateWritingStyle($event)"
                     (layoutModeUpdate)="updateLayoutMode($event)"
@@ -123,7 +124,7 @@
         <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
              [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
              [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
-             [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
+             [innerHtml]="page" *ngIf="page !== undefined" (click)="!swipeToPaginate && toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
         <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
              (click)="$event.stopPropagation();"
              [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
