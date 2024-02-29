@@ -216,6 +216,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
       this.settingsForm.addControl('bookReaderWritingStyle', new FormControl(this.user.preferences.bookReaderWritingStyle, []))
       this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
+      this.settingsForm.addControl('bookReaderSwipeToPaginate', new FormControl(!!this.user.preferences.bookReaderSwipeToPaginate, []));
       this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
       this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
       this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
@@ -236,12 +237,27 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(mode => {
-      if (mode) {
+    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((immersiveMode: boolean) => {
+      if (immersiveMode) {
         this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
         this.cdRef.markForCheck();
       }
     });
+
+    this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((tapToPaginate: boolean) => {
+      if (tapToPaginate) {
+        this.settingsForm.get('bookReaderSwipeToPaginate')?.setValue(false);
+        this.cdRef.markForCheck();
+      }
+    });
+
+    this.settingsForm.get('bookReaderSwipeToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((swipeToPaginate: boolean) => {
+      if (swipeToPaginate) {
+        this.settingsForm.get('bookReaderTapToPaginate')?.setValue(false);
+        this.cdRef.markForCheck();
+      }
+    });
+
     this.cdRef.markForCheck();
   }
 
@@ -264,6 +280,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
+    this.settingsForm.get('bookReaderSwipeToPaginate')?.setValue(this.user.preferences.bookReaderSwipeToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
     this.settingsForm.get('bookReaderWritingStyle')?.setValue(this.user.preferences.bookReaderWritingStyle);
     this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
@@ -300,6 +317,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderFontSize: modelSettings.bookReaderFontSize,
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
+      bookReaderSwipeToPaginate: modelSettings.bookReaderSwipeToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
       bookReaderWritingStyle: parseInt(modelSettings.bookReaderWritingStyle, 10),
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),

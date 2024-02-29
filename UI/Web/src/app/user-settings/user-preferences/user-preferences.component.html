@@ -276,32 +276,45 @@
           <ng-template>
             <div class="row g-0">
               <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                <label id="immersivemode-label" class="form-label"></label>
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" role="switch" id="immersivemode" formControlName="bookReaderImmersiveMode" class="form-check-input" [value]="true" aria-labelledby="immersivemode-label">
+                    <label for="immersivemode" class="form-check-label">{{t('immersive-mode-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
+                    <ng-template #immersivemodeOptionTooltip>{{t('immersive-mode-label')}}</ng-template>
+                    <span class="visually-hidden" id="settings-immersivemode-option-help">
+                      <ng-container [ngTemplateOutlet]="immersivemodeOptionTooltip"></ng-container>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-12 pe-2 mb-3">
                 <label id="taptopaginate-label" class="form-label"></label>
                 <div class="mb-3">
                   <div class="form-check form-switch">
                     <input type="checkbox" role="switch" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="taptopaginate-label">
                     <label for="taptopaginate" class="form-check-label">{{t('tap-to-paginate-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
-                                <ng-template #tapToPaginateOptionTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
-                                <span class="visually-hidden" id="settings-taptopaginate-option-help">
-                                  <ng-container [ngTemplateOutlet]="tapToPaginateOptionTooltip"></ng-container>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                            <label id="immersivemode-label" class="form-label"></label>
-                            <div class="mb-3">
-                              <div class="form-check form-switch">
-                                <input type="checkbox" role="switch" id="immersivemode" formControlName="bookReaderImmersiveMode" class="form-check-input" [value]="true" aria-labelledby="immersivemode-label">
-                                <label for="immersivemode" class="form-check-label">{{t('immersive-mode-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
-                                <ng-template #immersivemodeOptionTooltip>{{t('immersive-mode-label')}}</ng-template>
-                                <span class="visually-hidden" id="settings-immersivemode-option-help">
-                                  <ng-container [ngTemplateOutlet]="immersivemodeOptionTooltip"></ng-container>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                    <ng-template #tapToPaginateOptionTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
+                    <span class="visually-hidden" id="settings-taptopaginate-option-help">
+                      <ng-container [ngTemplateOutlet]="tapToPaginateOptionTooltip"></ng-container>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                <label id="taptopaginate-label" class="form-label"></label>
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" role="switch" id="swipetopaginate" formControlName="bookReaderSwipeToPaginate" class="form-check-input" [value]="true" aria-labelledby="swipetopaginate-label">
+                    <label for="swipetopaginate" class="form-check-label">{{t('swipe-to-paginate-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="swipeToPaginateOptionTooltip" role="button" tabindex="0"></i>
+                    <ng-template #swipeToPaginateOptionTooltip>{{t('swipe-to-paginate-tooltip')}}</ng-template>
+                    <span class="visually-hidden" id="settings-swipetopaginate-option-help">
+                      <ng-container [ngTemplateOutlet]="swipeToPaginateOptionTooltip"></ng-container>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
                         <div class="row g-0">
                           <div class="col-md-6 col-sm-12 pe-2 mb-3">
