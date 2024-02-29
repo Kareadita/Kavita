@@ -1643,9 +1643,37 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  mouseDown($event: MouseEvent) {
-    this.mousePosition.x = $event.clientX;
-    this.mousePosition.y = $event.clientY;
+  //Swipe start event handler
+  @HostListener('window:mousedown', ['$event'])
+  @HostListener('window:touchstart', ['$event'])
+  onSwipeStart($event: MouseEvent | TouchEvent) {
+    this.mousePosition.x = ($event as MouseEvent).clientX || ($event as TouchEvent).touches[0].clientX;
+    this.mousePosition.y = ($event as MouseEvent).clientY || ($event as TouchEvent).touches[0].clientY;
+  }
+
+  //Swipe end event handler
+  @HostListener('window:mouseup', ['$event'])
+  @HostListener('window:touchend', ['event'])
+  onSwipeEnd($event: MouseEvent | TouchEvent) {
+    const endPos = {
+      x: ($event as MouseEvent).clientX || ($event as TouchEvent).touches[0].clientX,
+      y: ($event as MouseEvent).clientY || ($event as TouchEvent).touches[0].clientY
+    }
+    // Calculate distance based on writingStyle: use height and y axis for verticle
+    const distance = this.writingStyle === WritingStyle.Vertical ? (this.mousePosition.y - endPos.y) / window.innerHeight : (this.mousePosition.x - endPos.x) / window.innerWidth;
+    // If action bar is hidden and swipe to paginate is enabled
+    if(!this.actionBarVisible && this.swipeToPaginate) {
+      //TODO: Calculate and test speed in addition to distance
+      //TODO: Have user configure swipe thresholds
+      //If the swipe was longer than 30% of screen
+      if (Math.abs(distance) > 0.3) {
+        if (distance > 0) {
+          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+        } else {
+          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+        }
+      }
+    }
   }
 
   refreshPersonalToC() {

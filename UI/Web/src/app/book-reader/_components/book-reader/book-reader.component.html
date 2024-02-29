@@ -118,13 +118,12 @@
              [ngStyle]="{height: PageHeightForPagination}"></div>
       </ng-container>
         <div #bookContainer class="book-container {{WritingStyleClass}}"
-          [ngClass]="{'immersive' : immersiveMode}"
-             (mousedown)="mouseDown($event)" >
+          [ngClass]="{'immersive' : immersiveMode}" >
 
         <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
              [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
              [ngClass]="{'immersive': immersiveMode && actionBarVisible, 'preventHighlight': !actionBarVisible && swipeToPaginate}"
-             [innerHtml]="page" *ngIf="page !== undefined" (click)="!swipeToPaginate && toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
+             [innerHtml]="page" *ngIf="page !== undefined" (click)="!swipeToPaginate && toggleMenu($event)" (wheel)="onWheel($event)"></div>
         <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
              (click)="$event.stopPropagation();"
              [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
