@@ -105,7 +105,7 @@
     <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}"
          [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading" (click)="handleReaderClick($event)">
 
-      <ng-container *ngIf="clickToPaginate && !hidePagination">
+      <ng-container *ngIf="clickToPaginate && !hidePagination && !actionBarVisible">
         <div class="left {{clickOverlayClass('left')}} no-observe"
              (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
              [ngClass]="{'immersive' : immersiveMode}"
