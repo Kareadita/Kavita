@@ -123,7 +123,7 @@
 
         <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
              [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
-             [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
+             [ngClass]="{'immersive': immersiveMode && actionBarVisible, 'preventHighlight': !actionBarVisible && swipeToPaginate}"
              [innerHtml]="page" *ngIf="page !== undefined" (click)="!swipeToPaginate && toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
         <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
              (click)="$event.stopPropagation();"
