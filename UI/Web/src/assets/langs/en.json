@@ -135,6 +135,7 @@
         "show-screen-hints-label": "Show Screen Hints",
         "emulate-comic-book-label": "Emulate comic book",
         "swipe-to-paginate-label": "Swipe to Paginate",
+        "swipe-to-paginate-tooltip": "Should the sides of the book reader screen allow swiping on it to move to prev/next page",
 
         "book-reader-settings-title": "Book Reader",
         "tap-to-paginate-label": "Tap to Paginate",
