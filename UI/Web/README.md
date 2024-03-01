@@ -27,7 +27,8 @@ Run `npx playwright test --reporter=line` or `npx playwright test` to run e2e te
 
 ## Connecting to your dev server via your phone or any other compatible client on local network
 
-Update 'localhost' apiUrl and hubUrl in Kavita/UI/Web/src/environments/environment.ts to your dev machines ip.
+Update keys: `apiUrl` and `hubUrl` in Kavita/UI/Web/src/environments/environment.ts to your dev machines ip instead of `localhost`.
+
 Run `npm run start`
 
 ## Notes:
