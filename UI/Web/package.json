@@ -3,7 +3,7 @@
   "version": "0.7.12.1",
   "scripts": {
     "ng": "ng",
-    "start": "npm run cache-locale && ng serve",
+    "start": "npm run cache-locale && ng serve --host 0.0.0.0",
     "build": "npm run cache-locale && ng build",
     "minify-langs": "node minify-json.js",
     "cache-locale": "node hash-localization.js",
