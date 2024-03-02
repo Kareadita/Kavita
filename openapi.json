@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.0.0"
+    "version": "0.8.0.1"
   },
   "servers": [
     {
@@ -12969,6 +12969,10 @@
             "type": "boolean",
             "description": "Book Reader Option: Allows tapping on side of screens to paginate"
           },
+          "bookReaderSwipeToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows swiping across the screen to paginate"
+          },
           "bookReaderReadingDirection": {
             "enum": [
               0,
@@ -20060,6 +20064,7 @@
           "bookReaderLineSpacing",
           "bookReaderMargin",
           "bookReaderReadingDirection",
+          "bookReaderSwipeToPaginate",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
           "bookReaderWritingStyle",
@@ -20176,6 +20181,10 @@
           "bookReaderTapToPaginate": {
             "type": "boolean",
             "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+          },
+          "bookReaderSwipeToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows swiping across the screen to paginate"
           },
           "bookReaderReadingDirection": {
             "enum": [
