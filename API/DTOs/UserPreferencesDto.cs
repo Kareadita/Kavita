@@ -87,6 +87,12 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool BookReaderTapToPaginate { get; set; }
+
+    /// <summary>
+    /// Book Reader Option: Allows swiping across the screen to paginate
+    /// </summary>
+    [Required]
+    public bool BookReaderSwipeToPaginate { get; set; }
     /// <summary>
     /// Book Reader Option: What direction should the next/prev page buttons go
     /// </summary>

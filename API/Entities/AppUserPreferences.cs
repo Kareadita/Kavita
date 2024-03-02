@@ -72,6 +72,10 @@ public class AppUserPreferences
     /// </summary>
     public bool BookReaderTapToPaginate { get; set; } = false;
     /// <summary>
+    /// Book Reader Option: Allows swiping across the screen to paginate
+    /// </summary>
+    public bool BookReaderSwipeToPaginate { get; set; } = false;
+    /// <summary>
     /// Book Reader Option: What direction should the next/prev page buttons go
     /// </summary>
     public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;
