@@ -43,6 +43,12 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to my knowledge)
     - Use 2 spaces for UI files
 
+### Migrating Database ###
+- After you have made a change that requires a db migration, for example: if you need to update the user preferences with a new setting, you will need to run the following commands and include the resulting files in your PR: 
+    - `cd Kavita/API`
+    - `dotnet ef migrations add FeatureName`
+- This is a requirement if you update the database structure as all old installations of Kavita will use these migration files to keep the database and api in sync.
+
 ### Pull Requesting ###
 - Only make pull requests to develop, never main, if you make a PR to main we'll comment on it and close it
 - You're probably going to get some comments or questions from us, they will be to ensure consistency and maintainability
