@@ -265,12 +265,6 @@ export class ReaderSettingsComponent implements OnInit {
         });
 
         this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
-        this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((immersiveMode: boolean) => {
-          if (immersiveMode) {
-            this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
-          }
-          this.immersiveMode.emit(immersiveMode);
-        });
 
 
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
