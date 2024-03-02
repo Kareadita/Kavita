@@ -131,6 +131,38 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   hasActiveLicense = false;
   canEdit = true;
 
+  //Initialize form controls
+  readingDirectionControl = new FormControl();
+  scalingOptionControl = new FormControl();
+  pageSplitOptionControl = new FormControl();
+  autoCloseMenuControl = new FormControl();
+  showScreenHintsControl = new FormControl();
+  readerModeControl = new FormControl();
+  layoutModeControl = new FormControl();
+  emulateBookControl = new FormControl();
+  swipeToPaginateControl = new FormControl();
+
+  bookReaderFontFamilyControl = new FormControl();
+  bookReaderFontSizeControl = new FormControl();
+  bookReaderLineSpacingControl = new FormControl();
+  bookReaderMarginControl = new FormControl();
+  bookReaderReadingDirectionControl = new FormControl();
+  bookReaderWritingStyleControl = new FormControl();
+  bookReaderTapToPaginateControl = new FormControl();
+  bookReaderSwipeToPaginateControl = new FormControl();
+  bookReaderLayoutModeControl = new FormControl();
+  bookReaderThemeNameControl = new FormControl();
+  bookReaderImmersiveModeControl = new FormControl();
+
+  themeControl = new FormControl();
+  globalPageLayoutModeControl = new FormControl();
+  blurUnreadSummariesControl = new FormControl();
+  promptForDownloadSizeControl = new FormControl();
+  noTransitionsControl = new FormControl();
+  collapseSeriesRelationshipsControl = new FormControl();
+  shareReviewsControl = new FormControl()
+  localeControl = new FormControl();
+
 
 
   constructor() {
@@ -199,63 +231,89 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.user.preferences.bookReaderFontFamily = 'default';
       }
 
-      this.settingsForm.addControl('readingDirection', new FormControl(this.user.preferences.readingDirection, []));
-      this.settingsForm.addControl('scalingOption', new FormControl(this.user.preferences.scalingOption, []));
-      this.settingsForm.addControl('pageSplitOption', new FormControl(this.user.preferences.pageSplitOption, []));
-      this.settingsForm.addControl('autoCloseMenu', new FormControl(this.user.preferences.autoCloseMenu, []));
-      this.settingsForm.addControl('showScreenHints', new FormControl(this.user.preferences.showScreenHints, []));
-      this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
-      this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
-      this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
-      this.settingsForm.addControl('swipeToPaginate', new FormControl(this.user.preferences.swipeToPaginate, []));
+      //Add form controls to form group
+      this.settingsForm.addControl('readingDirection', this.readingDirectionControl);
+      this.settingsForm.addControl('scalingOption', this.scalingOptionControl);
+      this.settingsForm.addControl('pageSplitOption', this.pageSplitOptionControl);
+      this.settingsForm.addControl('autoCloseMenu', this.autoCloseMenuControl);
+      this.settingsForm.addControl('showScreenHints', this.showScreenHintsControl);
+      this.settingsForm.addControl('readerMode', this.readerModeControl);
+      this.settingsForm.addControl('layoutMode', this.layoutModeControl);
+      this.settingsForm.addControl('emulateBook', this.emulateBookControl);
+      this.settingsForm.addControl('swipeToPaginate', this.swipeToPaginateControl);
 
-      this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
-      this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
-      this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
-      this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
-      this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
-      this.settingsForm.addControl('bookReaderWritingStyle', new FormControl(this.user.preferences.bookReaderWritingStyle, []))
-      this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
-      this.settingsForm.addControl('bookReaderSwipeToPaginate', new FormControl(!!this.user.preferences.bookReaderSwipeToPaginate, []));
-      this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
-      this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
-      this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
+      this.settingsForm.addControl('bookReaderFontFamily', this.bookReaderFontFamilyControl);
+      this.settingsForm.addControl('bookReaderFontSize', this.bookReaderFontSizeControl);
+      this.settingsForm.addControl('bookReaderLineSpacing', this.bookReaderLineSpacingControl);
+      this.settingsForm.addControl('bookReaderMargin', this.bookReaderMarginControl);
+      this.settingsForm.addControl('bookReaderReadingDirection', this.bookReaderReadingDirectionControl);
+      this.settingsForm.addControl('bookReaderWritingStyle', this.bookReaderWritingStyleControl);
+      this.settingsForm.addControl('bookReaderTapToPaginate', this.bookReaderTapToPaginateControl);
+      this.settingsForm.addControl('bookReaderSwipeToPaginate', this.bookReaderSwipeToPaginateControl);
+      this.settingsForm.addControl('bookReaderLayoutMode', this.bookReaderLayoutModeControl);
+      this.settingsForm.addControl('bookReaderThemeName', this.bookReaderThemeNameControl);
+      this.settingsForm.addControl('bookReaderImmersiveMode', this.bookReaderImmersiveModeControl);
 
-      this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
-      this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
-      this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
-      this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
-      this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
-      this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
-      this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
-      this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale || 'en', []));
+      this.settingsForm.addControl('theme', this.themeControl);
+      this.settingsForm.addControl('globalPageLayoutMode', this.globalPageLayoutModeControl);
+      this.settingsForm.addControl('blurUnreadSummaries', this.blurUnreadSummariesControl);
+      this.settingsForm.addControl('promptForDownloadSize', this.promptForDownloadSizeControl);
+      this.settingsForm.addControl('noTransitions', this.noTransitionsControl);
+      this.settingsForm.addControl('collapseSeriesRelationships', this.collapseSeriesRelationshipsControl);
+      this.settingsForm.addControl('shareReviews', this.shareReviewsControl);
+      this.settingsForm.addControl('locale', this.localeControl);
+
+      //Set initial values here because they're retrieved from the account service
+      this.readingDirectionControl.setValue(this.user?.preferences.readingDirection);
+      this.scalingOptionControl.setValue(this.user?.preferences.scalingOption);
+      this.pageSplitOptionControl.setValue(this.user?.preferences.pageSplitOption);
+      this.autoCloseMenuControl.setValue(this.user?.preferences.autoCloseMenu);
+      this.showScreenHintsControl.setValue(this.user?.preferences.showScreenHints);
+      this.readerModeControl.setValue(this.user?.preferences.readerMode);
+      this.layoutModeControl.setValue(this.user?.preferences.layoutMode);
+      this.emulateBookControl.setValue(this.user?.preferences.emulateBook);
+      this.swipeToPaginateControl.setValue(this.user?.preferences.swipeToPaginate);
+
+      this.bookReaderFontFamilyControl.setValue(this.user?.preferences.bookReaderFontFamily);
+      this.bookReaderFontSizeControl.setValue(this.user?.preferences.bookReaderFontSize);
+      this.bookReaderLineSpacingControl.setValue(this.user?.preferences.bookReaderLineSpacing);
+      this.bookReaderMarginControl.setValue(this.user?.preferences.bookReaderMargin);
+      this.bookReaderReadingDirectionControl.setValue(this.user?.preferences.bookReaderReadingDirection);
+      this.bookReaderWritingStyleControl.setValue(this.user?.preferences.bookReaderWritingStyle);
+      this.bookReaderTapToPaginateControl.setValue(!!this.user?.preferences.bookReaderTapToPaginate);
+      this.bookReaderSwipeToPaginateControl.setValue(!!this.user?.preferences.bookReaderSwipeToPaginate);
+      this.bookReaderLayoutModeControl.setValue(this.user?.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
+      this.bookReaderThemeNameControl.setValue(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name);
+      this.bookReaderImmersiveModeControl.setValue(this.user?.preferences.bookReaderImmersiveMode);
+
+      this.themeControl.setValue(this.user?.preferences.theme);
+      this.globalPageLayoutModeControl.setValue(this.user?.preferences.globalPageLayoutMode);
+      this.blurUnreadSummariesControl.setValue(this.user?.preferences.blurUnreadSummaries);
+      this.promptForDownloadSizeControl.setValue(this.user?.preferences.promptForDownloadSize);
+      this.noTransitionsControl.setValue(this.user?.preferences.noTransitions);
+      this.collapseSeriesRelationshipsControl.setValue(this.user?.preferences.collapseSeriesRelationships);
+      this.shareReviewsControl.setValue(this.user?.preferences.shareReviews);
+      this.localeControl.setValue(this.user?.preferences.locale);
 
       if (this.locales.length === 1) {
-        this.settingsForm.get('locale')?.disable();
+        this.localeControl.disable();
       }
+
+      //When Tap to Paginate is enabled, force disable swipe to paginate
+      this.bookReaderTapToPaginateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((tapToPaginate: any) => {
+        if (tapToPaginate) {
+          this.bookReaderSwipeToPaginateControl.setValue(false);
+        }
+      });
+
+      //When Swipe to Paginate is enabled, force disable tap to paginate
+      this.bookReaderSwipeToPaginateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((swipeToPaginate: any) => {
+        if (swipeToPaginate) {
+          this.bookReaderTapToPaginateControl.setValue(false);
+        }
+      });
 
       this.cdRef.markForCheck();
-    });
-
-    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((immersiveMode: boolean) => {
-      if (immersiveMode) {
-        this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
-        this.cdRef.markForCheck();
-      }
-    });
-
-    this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((tapToPaginate: boolean) => {
-      if (tapToPaginate) {
-        this.settingsForm.get('bookReaderSwipeToPaginate')?.setValue(false);
-        this.cdRef.markForCheck();
-      }
-    });
-
-    this.settingsForm.get('bookReaderSwipeToPaginate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((swipeToPaginate: boolean) => {
-      if (swipeToPaginate) {
-        this.settingsForm.get('bookReaderTapToPaginate')?.setValue(false);
-        this.cdRef.markForCheck();
-      }
     });
 
     this.cdRef.markForCheck();
@@ -268,34 +326,34 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   resetForm() {
     if (this.user === undefined) { return; }
-    this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection);
-    this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption);
-    this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu);
-    this.settingsForm.get('showScreenHints')?.setValue(this.user.preferences.showScreenHints);
-    this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode);
-    this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode);
-    this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
-    this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
-    this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize);
-    this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
-    this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
-    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
-    this.settingsForm.get('bookReaderSwipeToPaginate')?.setValue(this.user.preferences.bookReaderSwipeToPaginate);
-    this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
-    this.settingsForm.get('bookReaderWritingStyle')?.setValue(this.user.preferences.bookReaderWritingStyle);
-    this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
-    this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
-    this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
-    this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
-    this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
-    this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
-    this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
-    this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions);
-    this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
-    this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate);
-    this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
-    this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews);
-    this.settingsForm.get('locale')?.setValue(this.user.preferences.locale);
+    this.readingDirectionControl.setValue(this.user.preferences.readingDirection);
+    this.scalingOptionControl.setValue(this.user.preferences.scalingOption);
+    this.autoCloseMenuControl.setValue(this.user.preferences.autoCloseMenu);
+    this.showScreenHintsControl.setValue(this.user.preferences.showScreenHints);
+    this.readerModeControl.setValue(this.user.preferences.readerMode);
+    this.layoutModeControl.setValue(this.user.preferences.layoutMode);
+    this.pageSplitOptionControl.setValue(this.user.preferences.pageSplitOption);
+    this.bookReaderFontFamilyControl.setValue(this.user.preferences.bookReaderFontFamily);
+    this.bookReaderFontSizeControl.setValue(this.user.preferences.bookReaderFontSize);
+    this.bookReaderLineSpacingControl.setValue(this.user.preferences.bookReaderLineSpacing);
+    this.bookReaderMarginControl.setValue(this.user.preferences.bookReaderMargin);
+    this.bookReaderTapToPaginateControl.setValue(this.user.preferences.bookReaderTapToPaginate);
+    this.bookReaderSwipeToPaginateControl.setValue(this.user.preferences.bookReaderSwipeToPaginate);
+    this.bookReaderReadingDirectionControl.setValue(this.user.preferences.bookReaderReadingDirection);
+    this.bookReaderWritingStyleControl.setValue(this.user.preferences.bookReaderWritingStyle);
+    this.bookReaderLayoutModeControl.setValue(this.user.preferences.bookReaderLayoutMode);
+    this.bookReaderThemeNameControl.setValue(this.user.preferences.bookReaderThemeName);
+    this.themeControl.setValue(this.user.preferences.theme);
+    this.bookReaderImmersiveModeControl.setValue(this.user.preferences.bookReaderImmersiveMode);
+    this.globalPageLayoutModeControl.setValue(this.user.preferences.globalPageLayoutMode);
+    this.blurUnreadSummariesControl.setValue(this.user.preferences.blurUnreadSummaries);
+    this.promptForDownloadSizeControl.setValue(this.user.preferences.promptForDownloadSize);
+    this.noTransitionsControl.setValue(this.user.preferences.noTransitions);
+    this.emulateBookControl.setValue(this.user.preferences.emulateBook);
+    this.swipeToPaginateControl.setValue(this.user.preferences.swipeToPaginate);
+    this.collapseSeriesRelationshipsControl.setValue(this.user.preferences.collapseSeriesRelationships);
+    this.shareReviewsControl.setValue(this.user.preferences.shareReviews);
+    this.localeControl.setValue(this.user.preferences.locale);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -335,7 +393,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       locale: modelSettings.locale
     };
 
-    this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+    this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs: any) => {
       this.toastr.success(translate('user-preferences.success-toast'));
       if (this.user) {
         this.user.preferences = updatedPrefs;
