@@ -21,14 +21,16 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 1. Fork Kavita
 2. Clone the repository into your development machine. [*info*](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github)
 3. Install the required Node Packages
-    - cd Kavita/UI/Web
+    - `cd Kavita/UI/Web`
     - `npm install`
     - `npm install -g @angular/cli`
-4. Start angular server `ng serve`
-5. Build the project in Visual Studio/Rider, Setting startup project to `API`
-6. Debug the project in Visual Studio/Rider
-7. Open http://localhost:4200
-8. (Deployment only) Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
+4. Update the `IP` constant in `UI\Web\src\environments\environment.ts` with your machines ip address
+5. Start the frontend 
+    - `npm run start`
+6. Build the project in Visual Studio/Rider, Setting startup project to `API`
+7. Debug the project in Visual Studio/Rider
+8. Open http://localhost:4200
+9. (Deployment only) Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
 
 ### Contributing Code ###
