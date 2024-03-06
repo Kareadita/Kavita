@@ -416,6 +416,12 @@ public class ParseScannedFiles
                     }
                     else
                     {
+                        // TODO: I think I need to bump by 0.1f as if the prevIssue matches counter
+                        if (!string.IsNullOrEmpty(prevIssue) && prevIssue == counter + "")
+                        {
+                            // Bump by 0.1
+                            counter += 0.1f;
+                        }
                         chapter.IssueOrder = counter;
                         counter++;
                         prevIssue = chapter.Chapters;

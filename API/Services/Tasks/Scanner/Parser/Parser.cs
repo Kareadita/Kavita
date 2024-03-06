@@ -1130,4 +1130,15 @@ public static class Parser
 
         return null;
     }
+
+    public static string RemoveExtensionIfSupported(string? filename)
+    {
+        if (string.IsNullOrEmpty(filename)) return filename;
+
+        if (Regex.IsMatch(filename, SupportedExtensions))
+        {
+            return Regex.Replace(filename, SupportedExtensions, string.Empty);
+        }
+        return filename;
+    }
 }

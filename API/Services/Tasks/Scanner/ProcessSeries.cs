@@ -246,6 +246,7 @@ public class ProcessSeries : IProcessSeries
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
+            return;
         }
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
