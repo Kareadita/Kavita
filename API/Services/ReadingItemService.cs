@@ -90,48 +90,6 @@ public class ReadingItemService : IReadingItemService
 
         }
 
-        // TODO: NOTE: Potential Bug. If the series can't be parsed from the default parser but it's in comicinfo, then we aren't getting the information.
-        // This should be moved into Parse
-        // This is first time ComicInfo is called
-        // info.ComicInfo = GetComicInfo(path);
-        // if (info.ComicInfo == null) return info;
-        //
-        // if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-        // {
-        //     info.Volumes = info.ComicInfo.Volume;
-        // }
-        // if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-        // {
-        //     info.Series = info.ComicInfo.Series.Trim();
-        // }
-        // if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-        // {
-        //     info.Chapters = info.ComicInfo.Number;
-        // }
-        //
-        // // Patch is SeriesSort from ComicInfo
-        // if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-        // {
-        //     info.SeriesSort = info.ComicInfo.TitleSort.Trim();
-        // }
-        //
-        // if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
-        // {
-        //     info.IsSpecial = true;
-        //     info.Chapters = Parser.DefaultChapter;
-        //     info.Volumes = Parser.LooseLeafVolume;
-        // }
-        //
-        // if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
-        // {
-        //     info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
-        // }
-        //
-        // if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
-        // {
-        //     info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
-        // }
-
         return info;
     }
 
