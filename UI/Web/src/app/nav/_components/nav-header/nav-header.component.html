@@ -129,7 +129,8 @@
                     <ng-container *ngIf="item.files.length > 0">
                       <app-series-format [format]="item.files?.[0].format"></app-series-format>
                     </ng-container>
-                    <span>{{item.titleName}}</span>
+                    <!-- TODO: this needs the series name before the chapter issue -->
+                    <span>{{item.titleName || item.range}}</span>
                   </div>
                 </div>
               </ng-template>
