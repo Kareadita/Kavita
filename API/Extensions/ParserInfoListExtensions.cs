@@ -28,7 +28,8 @@ public static class ParserInfoListExtensions
     /// <returns></returns>
     public static bool HasInfo(this IList<ParserInfo> infos, Chapter chapter)
     {
-        return chapter.IsSpecial ? infos.Any(v => Path.GetFileNameWithoutExtension(v.Filename) == Path.GetFileNameWithoutExtension(chapter.Range))
-            : infos.Any(v => v.Chapters == chapter.Range);
+        var chapterFiles = chapter.Files.Select(x => Parser.NormalizePath(x.FilePath)).ToList();
+        var infoFiles = infos.Select(x => Parser.NormalizePath(x.FullFilePath)).ToList();
+        return infoFiles.Intersect(chapterFiles).Any();
     }
 }
