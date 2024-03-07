@@ -15,15 +15,22 @@ public class ChapterDto : IHasReadTimeEstimate
     /// <summary>
     /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If special, will be special name.
     /// </summary>
+    /// <remarks>This can be something like 19.HU or Alpha as some comics are like this</remarks>
     public string Range { get; init; } = default!;
     /// <summary>
     /// Smallest number of the Range.
     /// </summary>
     [Obsolete("Use MinNumber and MaxNumber instead")]
     public string Number { get; init; } = default!;
+    /// <summary>
+    /// This may be 0 under the circumstance that the Issue is "Alpha" or other non-standard numbers.
+    /// </summary>
     public float MinNumber { get; init; }
     public float MaxNumber { get; init; }
-    public float SortOrder { get; init; }
+    /// <summary>
+    /// The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.
+    /// </summary>
+    public float SortOrder { get; set; }
     /// <summary>
     /// Total number of pages in all MangaFiles
     /// </summary>

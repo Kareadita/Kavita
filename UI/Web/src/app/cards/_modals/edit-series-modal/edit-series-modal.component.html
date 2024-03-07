@@ -408,7 +408,7 @@
                 <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
                   <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
                   <div class="flex-grow-1">
-                    <h5 class="mt-0 mb-1">{{t('volume-num')}} {{volume.name}}</h5>
+                    <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
                     <div>
                       <div class="row g-0">
                         <div class="col">
@@ -432,7 +432,7 @@
 
                       <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
                         <ul class="list-group mt-2">
-                          <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
+                          <li *ngFor="let file of volume.volumeFiles" class="list-group-item">
                             <span>{{file.filePath}}</span>
                             <div class="row g-0">
                               <div class="col">

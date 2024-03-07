@@ -186,7 +186,7 @@ export class CardDetailDrawerComponent implements OnInit {
     if (chapter.minNumber === LooseLeafOrDefaultNumber) {
       return '1';
     }
-    return chapter.minNumber + '';
+    return chapter.range + '';
   }
 
   performAction(action: ActionItem<any>, chapter: Chapter) {
