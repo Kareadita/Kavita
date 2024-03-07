@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.5"
+    "version": "0.7.14.6"
   },
   "servers": [
     {
@@ -2909,7 +2909,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2922,7 +2923,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2935,7 +2937,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -3619,7 +3622,8 @@
                 1,
                 2,
                 3,
-                4
+                4,
+                5
               ],
               "type": "integer",
               "format": "int32"
@@ -13526,7 +13530,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -14150,7 +14155,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "description": "Library type",
@@ -15916,7 +15922,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -16030,7 +16037,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -17025,7 +17033,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -17078,7 +17087,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -19417,7 +19427,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"

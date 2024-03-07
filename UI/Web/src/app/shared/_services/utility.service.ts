@@ -67,6 +67,7 @@ export class UtilityService {
       case LibraryType.LightNovel:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
+      case LibraryType.ComicVine:
         if (includeHash) {
           return this.translocoService.translate('common.issue-hash-num');
         }

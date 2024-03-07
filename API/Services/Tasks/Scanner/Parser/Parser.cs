@@ -107,6 +107,12 @@ public static class Parser
         MatchOptions, RegexTimeout);
 
     /// <summary>
+    /// Supports Batman (2020) or Batman (2)
+    /// </summary>
+    private static readonly Regex SeriesAndYearRegex = new Regex(@"^\D+\s\(\d+\)$",
+        MatchOptions, RegexTimeout);
+
+    /// <summary>
     /// Recognizes the Special token only
     /// </summary>
     private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
@@ -698,8 +704,9 @@ public static class Parser
         return  MangaSpecialRegex.IsMatch(filePath);
     }
 
-    public static bool IsComicSpecial(string filePath)
+    public static bool IsComicSpecial(string? filePath)
     {
+        if (string.IsNullOrEmpty(filePath)) return false;
         filePath = ReplaceUnderscores(filePath);
         return ComicSpecialRegex.IsMatch(filePath);
     }
@@ -1125,10 +1132,20 @@ public static class Parser
 
             // NOTE: This is failing for //localhost:5000/api/book/29919/book-resources?file=OPS/images/tick1.jpg
             var importFile = match.Groups["Filename"].Value;
-            if (!importFile.Contains("?")) return importFile;
+            if (!importFile.Contains('?')) return importFile;
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// If the name matches exactly Series (Volume digits)
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static bool IsSeriesAndYear(string? name)
+    {
+        return !string.IsNullOrEmpty(name) && SeriesAndYearRegex.IsMatch(name);
     }
 
     public static string RemoveExtensionIfSupported(string? filename)
