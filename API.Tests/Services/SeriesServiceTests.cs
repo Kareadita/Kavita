@@ -300,7 +300,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.Equal("2 - Ano Orokamono ni mo Kyakkou wo! - Volume 2", detail.Volumes.ElementAt(0).Name);
 
         Assert.NotEmpty(detail.Specials);
-        Assert.Equal("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", detail.Specials.ElementAt(0).Range);
+        Assert.Equal("Ano Orokamono ni mo Kyakkou wo! - Volume 1", detail.Specials.ElementAt(0).Range);
 
         // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
         Assert.Empty(detail.Chapters);

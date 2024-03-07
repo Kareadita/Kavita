@@ -246,6 +246,7 @@ public class ProcessSeries : IProcessSeries
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
+            return;
         }
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -661,7 +662,7 @@ public class ProcessSeries : IProcessSeries
         {
             if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
             {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.GetNumberTitle(), volume.Name, parsedInfos[0].Series);
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else

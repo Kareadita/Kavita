@@ -510,7 +510,7 @@ public class SeriesService : ISeriesService
             .SelectMany(v => v.Chapters
                 .Select(c =>
                 {
-                    if (v.IsLooseLeaf()) return c;
+                    if (v.IsLooseLeaf() || v.IsSpecial()) return c;
                     c.VolumeTitle = v.Name;
                     return c;
                 })

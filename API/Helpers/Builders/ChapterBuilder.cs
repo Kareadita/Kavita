@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
@@ -17,7 +18,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     {
         _chapter = new Chapter()
         {
-            Range = string.IsNullOrEmpty(range) ? number : range,
+            Range = string.IsNullOrEmpty(range) ? number : Parser.RemoveExtensionIfSupported(range),
             Title = string.IsNullOrEmpty(range) ? number : range,
             Number = Parser.MinNumberFromRange(number).ToString(CultureInfo.InvariantCulture),
             MinNumber = Parser.MinNumberFromRange(number),
@@ -32,17 +33,14 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     public static ChapterBuilder FromParserInfo(ParserInfo info)
     {
         var specialTreatment = info.IsSpecialInfo();
-        var specialTitle = specialTreatment ? info.Filename : info.Chapters;
+        var specialTitle = specialTreatment ? Parser.RemoveExtensionIfSupported(info.Filename) : info.Chapters;
         var builder = new ChapterBuilder(Parser.DefaultChapter);
-        // TODO: Come back here and remove this side effect
-        return builder.WithNumber(specialTreatment ? Parser.DefaultChapter : Parser.MinNumberFromRange(info.Chapters) + string.Empty)
+
+        return builder.WithNumber(Parser.RemoveExtensionIfSupported(info.Chapters))
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
             .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
             ? info.Title
             : specialTitle)
-            // NEW
-            //.WithTitle(string.IsNullOrEmpty(info.Filename) ? specialTitle : info.Filename)
-            .WithTitle(info.Filename)
             .WithIsSpecial(specialTreatment);
     }
 
@@ -53,7 +51,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     }
 
 
-    public ChapterBuilder WithNumber(string number)
+    private ChapterBuilder WithNumber(string number)
     {
         _chapter.Number = number;
         _chapter.MinNumber = Parser.MinNumberFromRange(number);
@@ -79,11 +77,9 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         return this;
     }
 
-    private ChapterBuilder WithRange(string range)
+    public ChapterBuilder WithRange(string range)
     {
-        _chapter.Range = range;
-        // TODO: HACK: Overriding range
-        _chapter.Range = _chapter.GetNumberTitle();
+        _chapter.Range = Parser.RemoveExtensionIfSupported(range);
         return this;
     }
 

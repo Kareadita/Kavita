@@ -105,6 +105,32 @@ public class ChapterListExtensionsTests
         Assert.Equal(chapterList[0], actualChapter);
     }
 
+    [Fact]
+    public void GetChapterByRange_On_FilenameChange_ShouldGetChapter()
+    {
+        var info = new ParserInfo()
+        {
+            Chapters = "1",
+            Edition = "",
+            Format = MangaFormat.Archive,
+            FullFilePath = "/manga/detective comics  #001.cbz",
+            Filename = "detective comics  #001.cbz",
+            IsSpecial = false,
+            Series = "detective comics",
+            Title = "detective comics",
+            Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume
+        };
+
+        var chapterList = new List<Chapter>()
+        {
+            CreateChapter("1", "1", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), false),
+        };
+
+        var actualChapter = chapterList.GetChapterByRange(info);
+
+        Assert.Equal(chapterList[0], actualChapter);
+    }
+
     #region GetFirstChapterWithFiles
 
     [Fact]

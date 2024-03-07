@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.3"
+    "version": "0.7.14.5"
   },
   "servers": [
     {
@@ -13953,6 +13953,7 @@
           },
           "minNumber": {
             "type": "number",
+            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
             "format": "float"
           },
           "maxNumber": {
@@ -13961,6 +13962,7 @@
           },
           "sortOrder": {
             "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
           "pages": {

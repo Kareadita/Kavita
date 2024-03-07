@@ -114,7 +114,7 @@
             <ul class="list-unstyled">
               <li class="d-flex my-4" *ngFor="let chapter of chapters">
                 <!-- TODO: Localize title -->
-                <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{utilityService.formatChapterName(libraryType, true, false)}} {{formatChapterNumber(chapter)}}">
+                <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read">
                   <app-image class="me-2" width="74px" [imageUrl]="imageService.getChapterCoverImage(chapter.id)"></app-image>
                 </a>
                 <div class="flex-grow-1">

@@ -90,46 +90,6 @@ public class ReadingItemService : IReadingItemService
 
         }
 
-        // This is first time ComicInfo is called
-        info.ComicInfo = GetComicInfo(path);
-        if (info.ComicInfo == null) return info;
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-        {
-            info.Volumes = info.ComicInfo.Volume;
-        }
-        if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-        {
-            info.Series = info.ComicInfo.Series.Trim();
-        }
-        if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-        {
-            info.Chapters = info.ComicInfo.Number;
-        }
-
-        // Patch is SeriesSort from ComicInfo
-        if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-        {
-            info.SeriesSort = info.ComicInfo.TitleSort.Trim();
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
-        {
-            info.IsSpecial = true;
-            info.Chapters = Parser.DefaultChapter;
-            info.Volumes = Parser.LooseLeafVolume;
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
-        {
-            info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
-        {
-            info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
-        }
-
         return info;
     }
 
@@ -218,6 +178,53 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     private ParserInfo? Parse(string path, string rootPath, LibraryType type)
     {
-        return Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
+        var info = Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
+
+        if (info == null) return null;
+
+        info.ComicInfo = GetComicInfo(path);
+        if (info.ComicInfo == null) return info;
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+        {
+            info.Volumes = info.ComicInfo.Volume;
+        }
+        if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+        {
+            info.Series = info.ComicInfo.Series.Trim();
+        }
+        if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+        {
+            info.Chapters = info.ComicInfo.Number;
+            if (info.IsSpecial && Parser.DefaultChapter != info.Chapters)
+            {
+                info.IsSpecial = false;
+            }
+        }
+
+        // Patch is SeriesSort from ComicInfo
+        if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+        {
+            info.SeriesSort = info.ComicInfo.TitleSort.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+        {
+            info.IsSpecial = true;
+            info.Chapters = Parser.DefaultChapter;
+            info.Volumes = Parser.LooseLeafVolume;
+        }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
+        {
+            info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+        {
+            info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+        }
+
+        return info;
     }
 }

@@ -82,6 +82,7 @@ public class MetadataService : IMetadataService
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath,
             ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat, coverImageSize);
         _unitOfWork.ChapterRepository.Update(chapter);
+
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return Task.FromResult(true);
     }

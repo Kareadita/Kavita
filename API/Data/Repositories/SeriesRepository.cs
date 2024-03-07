@@ -498,6 +498,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(c => c.Files)
             .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
                         || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
+                        || EF.Functions.Like(c.Range, $"%{searchQuery}%")
                 )
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()

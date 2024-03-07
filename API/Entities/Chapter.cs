@@ -149,10 +149,13 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
             MinNumber = Parser.DefaultChapterNumber;
             MaxNumber = Parser.DefaultChapterNumber;
         }
+        // NOTE: This doesn't work well for all because Pdf usually should use into.Title or even filename
         Title = (IsSpecial && info.Format == MangaFormat.Epub)
             ? info.Title
-            : Path.GetFileNameWithoutExtension(Range);
+            : Parser.RemoveExtensionIfSupported(Range);
 
+        var specialTreatment = info.IsSpecialInfo();
+        Range = specialTreatment ? info.Filename : info.Chapters;
     }
 
     /// <summary>
@@ -165,12 +168,15 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
         {
             if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
             {
-                return Title;
+                return Parser.RemoveExtensionIfSupported(Title);
             }
-            else
+
+            if (MinNumber.Is(0) && !float.TryParse(Range, out _))
             {
-                return $"{MinNumber}";
+                return $"{Range}";
             }
+
+            return $"{MinNumber}";
 
         }
         return $"{MinNumber}-{MaxNumber}";

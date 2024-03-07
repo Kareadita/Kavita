@@ -1728,7 +1728,9 @@
         "highest-count-tooltip": "Highest Count found across all ComicInfo in the Series",
         "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series",
         "force-refresh": "Force Refresh",
-        "force-refresh-tooltip": "Force refresh external metadata from Kavita+"
+        "force-refresh-tooltip": "Force refresh external metadata from Kavita+",
+        "loose-leaf-volume": "Loose Leaf Chapters",
+        "specials-volume": "Specials"
     },
 
     "day-breakdown": {

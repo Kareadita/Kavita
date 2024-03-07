@@ -50,4 +50,5 @@ export interface Chapter {
     webLinks: string;
     isbn: string;
     lastReadingProgress: string;
+    sortOrder: number;
 }
