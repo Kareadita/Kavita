@@ -10,7 +10,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 /// Responsible for Parsing ComicVine Comics.
 /// </summary>
 /// <param name="directoryService"></param>
-public class ComicVineParser(IDirectoryService directoryService) : IDefaultParser
+public class ComicVineParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
     /// <summary>
     /// This Parser generates Series name to be defined as Series + first Issue Volume, so "Batman (2020)".
@@ -19,7 +19,7 @@ public class ComicVineParser(IDirectoryService directoryService) : IDefaultParse
     /// <param name="rootPath"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
     {
         if (type != LibraryType.ComicVine) return null;
 
@@ -73,12 +73,7 @@ public class ComicVineParser(IDirectoryService directoryService) : IDefaultParse
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }
 
-    public void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public bool IsApplicable(string filePath, LibraryType type)
+    public override bool IsApplicable(string filePath, LibraryType type)
     {
         return type == LibraryType.ComicVine;
     }

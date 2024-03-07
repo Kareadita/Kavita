@@ -26,6 +26,7 @@ public class ReadingItemService : IReadingItemService
     private readonly IDefaultParser _basicParser;
     private readonly IDefaultParser _comicVineParser;
     private readonly IDefaultParser _imageParser;
+    private readonly IDefaultParser _bookParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
         IDirectoryService directoryService, ILogger<ReadingItemService> logger)
@@ -39,6 +40,7 @@ public class ReadingItemService : IReadingItemService
         _basicParser = new BasicParser(directoryService);
         _comicVineParser = new ComicVineParser(directoryService);
         _imageParser = new ImageParser(directoryService);
+        _bookParser = new BookParser(directoryService, bookService, _basicParser);
     }
 
     /// <summary>
@@ -172,31 +174,9 @@ public class ReadingItemService : IReadingItemService
         {
             return _imageParser.Parse(path, rootPath, type, GetComicInfo(path));
         }
-        if (Parser.IsEpub(path))
+        if (_bookParser.IsApplicable(path, type))
         {
-            var info = _bookService.ParseInfo(path);
-            if (info == null) return null;
-
-            // This catches when original library type is Manga/Comic and when parsing with non
-            if (Parser.ParseVolume(info.Series) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
-            {
-                var hasVolumeInTitle = !Parser.ParseVolume(info.Title)
-                    .Equals(Parser.LooseLeafVolume);
-                var hasVolumeInSeries = !Parser.ParseVolume(info.Series)
-                    .Equals(Parser.LooseLeafVolume);
-
-                if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
-                {
-                    // This is likely a light novel for which we can set series from parsed title
-                    info.Series = Parser.ParseSeries(info.Title);
-                    info.Volumes = Parser.ParseVolume(info.Title);
-                }
-                else
-                {
-                    var info2 = _basicParser.Parse(path, rootPath, LibraryType.Book, GetComicInfo(path));
-                    info.Merge(info2);
-                }
-            }
+            return _bookParser.Parse(path, rootPath, type, GetComicInfo(path));
         }
         if (_basicParser.IsApplicable(path, type))
         {

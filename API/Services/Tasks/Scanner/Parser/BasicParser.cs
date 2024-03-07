@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Linq;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -10,13 +9,13 @@ namespace API.Services.Tasks.Scanner.Parser;
 /// This is the basic parser for handling Manga/Comic/Book libraries. This was previously DefaultParser before splitting each parser
 /// into their own classes.
 /// </summary>
-public class BasicParser(IDirectoryService directoryService) : IDefaultParser
+public class BasicParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
-        if (type != LibraryType.Image && Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
+        if (Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
 
         var ret = new ParserInfo()
         {
@@ -27,14 +26,6 @@ public class BasicParser(IDirectoryService directoryService) : IDefaultParser
             Series = string.Empty,
             ComicInfo = comicInfo
         };
-
-        // If library type is Image or this is not a cover image in a non-image library, then use dedicated parsing mechanism
-        // if (Parser.IsImage(filePath))
-        // {
-        //     // TODO: We can move this up one level
-        //     return ParseImage(filePath, rootPath, ret);
-        // }
-
 
         // This will be called if the epub is already parsed once then we call and merge the information, if the
         if (Parser.IsEpub(filePath))
@@ -105,70 +96,7 @@ public class BasicParser(IDirectoryService directoryService) : IDefaultParser
         return ret.Series == string.Empty ? null : ret;
     }
 
-    public void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
-    {
-        var fallbackFolders = directoryService.GetFoldersTillRoot(rootPath, filePath)
-            .Where(f => !Parser.IsMangaSpecial(f))
-            .ToList();
-
-        if (fallbackFolders.Count == 0)
-        {
-            var rootFolderName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
-            var series = Parser.ParseSeries(rootFolderName);
-
-            if (string.IsNullOrEmpty(series))
-            {
-                ret.Series = Parser.CleanTitle(rootFolderName, type is LibraryType.Comic);
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(series) && (string.IsNullOrEmpty(ret.Series) || !rootFolderName.Contains(ret.Series)))
-            {
-                ret.Series = series;
-                return;
-            }
-        }
-
-        for (var i = 0; i < fallbackFolders.Count; i++)
-        {
-            var folder = fallbackFolders[i];
-
-            var parsedVolume = type is LibraryType.Manga ? Parser.ParseVolume(folder) : Parser.ParseComicVolume(folder);
-            var parsedChapter = type is LibraryType.Manga ? Parser.ParseChapter(folder) : Parser.ParseComicChapter(folder);
-
-            if (!parsedVolume.Equals(Parser.LooseLeafVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
-            {
-                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.LooseLeafVolume)) && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.LooseLeafVolume))
-                {
-                    ret.Volumes = parsedVolume;
-                }
-                if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter)) && !string.IsNullOrEmpty(parsedChapter) && !parsedChapter.Equals(Parser.DefaultChapter))
-                {
-                    ret.Chapters = parsedChapter;
-                }
-            }
-
-            // Generally users group in series folders. Let's try to parse series from the top folder
-            if (!folder.Equals(ret.Series) && i == fallbackFolders.Count - 1)
-            {
-                var series = Parser.ParseSeries(folder);
-
-                if (string.IsNullOrEmpty(series))
-                {
-                    ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
-                    break;
-                }
-
-                if (!string.IsNullOrEmpty(series) && (string.IsNullOrEmpty(ret.Series) && !folder.Contains(ret.Series)))
-                {
-                    ret.Series = series;
-                    break;
-                }
-            }
-        }
-    }
-
-    public bool IsApplicable(string filePath, LibraryType type)
+    public override bool IsApplicable(string filePath, LibraryType type)
     {
         return true;
     }
