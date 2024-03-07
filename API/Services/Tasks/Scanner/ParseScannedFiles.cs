@@ -336,7 +336,7 @@ public class ParseScannedFiles
                 MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
             if (files.Count == 0)
             {
-                _logger.LogInformation("[ScannerService] {Folder} is empty or is no longer in this location", folder);
+                _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", folder);
                 return;
             }
 
