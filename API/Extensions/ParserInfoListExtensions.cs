@@ -32,4 +32,5 @@ public static class ParserInfoListExtensions
         var infoFiles = infos.Select(x => Parser.NormalizePath(x.FullFilePath)).ToList();
         return infoFiles.Intersect(chapterFiles).Any();
     }
+
 }

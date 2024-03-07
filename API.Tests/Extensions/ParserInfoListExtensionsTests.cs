@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using API.Entities.Enums;
@@ -33,7 +34,7 @@ public class ParserInfoListExtensions
 
     [Theory]
     [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
-    [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
+    [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
     [InlineData(new[] {@"Cynthia The Mission v20 c12-20 [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
     public void HasInfoTest(string[] inputInfos, string[] inputChapters, bool expectedHasInfo)
     {
@@ -41,7 +42,7 @@ public class ParserInfoListExtensions
         foreach (var filename in inputInfos)
         {
             infos.Add(_defaultParser.Parse(
-                filename,
+                Path.Join("E:/Manga/Cynthia the Mission/", filename),
                 "E:/Manga/"));
         }
 
@@ -59,7 +60,7 @@ public class ParserInfoListExtensions
         var infos = new[]
         {
             _defaultParser.Parse(
-                "E:/Manga/Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip",
+                "E:/Manga/Cynthia the Mission/Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip",
                 "E:/Manga/")
         };
 
