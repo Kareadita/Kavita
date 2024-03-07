@@ -3,9 +3,9 @@ using System.Linq;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class ParserTests
+public class ParsingTests
 {
     [Fact]
     public void ShouldWork()

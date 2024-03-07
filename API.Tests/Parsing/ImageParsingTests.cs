@@ -7,14 +7,14 @@ using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class ImageParserTests
+public class ImageParsingTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly ImageParser _parser;
 
-    public ImageParserTests(ITestOutputHelper testOutputHelper)
+    public ImageParsingTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
@@ -60,7 +60,7 @@ public class ImageParserTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", LibraryType.Manga, null);
+        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", LibraryType.Image, null);
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -86,7 +86,7 @@ public class ImageParserTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", LibraryType.Manga, null);
+        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", LibraryType.Image, null);
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);

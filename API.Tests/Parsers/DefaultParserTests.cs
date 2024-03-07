@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
 using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
@@ -9,9 +7,8 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
-using API.Services.Tasks.Scanner.Parser;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsers;
 
 public class DefaultParserTests
 {
@@ -22,7 +19,7 @@ public class DefaultParserTests
     {
         _testOutputHelper = testOutputHelper;
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
-        _defaultParser = new DefaultParser(directoryService);
+        _defaultParser = new BasicParser(directoryService, new ImageParser(directoryService));
     }
 
 
@@ -74,7 +71,7 @@ public class DefaultParserTests
         fs.AddDirectory(rootDirectory);
         fs.AddFile(inputFile, new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
-        var parser = new DefaultParser(ds);
+        var parser = new BasicParser(ds, new ImageParser(ds));
         var actual = parser.Parse(inputFile, rootDirectory, LibraryType.Manga, null);
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo, actual.Series);
@@ -90,7 +87,7 @@ public class DefaultParserTests
         fs.AddDirectory(rootDirectory);
         fs.AddFile(inputFile, new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
-        var parser = new DefaultParser(ds);
+        var parser = new BasicParser(ds, new ImageParser(ds));
         var actual = parser.Parse(inputFile, rootDirectory, LibraryType.Manga, null);
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo, actual.Series);
@@ -379,7 +376,7 @@ public class DefaultParserTests
         filesystem.AddFile(@"E:/Manga/Foo 50/Specials/Foo 50 SP01.cbz", new MockFileData(""));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var parser = new DefaultParser(ds);
+        var parser = new BasicParser(ds, new ImageParser(ds));
 
         var filepath = @"E:/Manga/Foo 50/Foo 50 v1.cbz";
         // There is a bad parse for series like "Foo 50", so we have parsed chapter as 50

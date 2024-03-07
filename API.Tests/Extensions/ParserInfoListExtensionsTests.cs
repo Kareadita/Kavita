@@ -19,9 +19,8 @@ public class ParserInfoListExtensions
     private readonly IDefaultParser _defaultParser;
     public ParserInfoListExtensions()
     {
-        _defaultParser =
-            new BasicParser(new DirectoryService(Substitute.For<ILogger<DirectoryService>>(),
-                new MockFileSystem()));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
+        _defaultParser = new BasicParser(ds, new ImageParser(ds));
     }
 
     [Theory]

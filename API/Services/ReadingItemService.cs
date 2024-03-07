@@ -37,10 +37,10 @@ public class ReadingItemService : IReadingItemService
         _directoryService = directoryService;
         _logger = logger;
 
-        _basicParser = new BasicParser(directoryService);
         _comicVineParser = new ComicVineParser(directoryService);
         _imageParser = new ImageParser(directoryService);
         _bookParser = new BookParser(directoryService, bookService, _basicParser);
+        _basicParser = new BasicParser(directoryService, _imageParser);
     }
 
     /// <summary>

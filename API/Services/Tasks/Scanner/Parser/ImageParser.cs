@@ -1,4 +1,5 @@
-﻿using API.Data.Metadata;
+﻿using System.IO;
+using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
@@ -11,14 +12,18 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         if (type != LibraryType.Image || !Parser.IsImage(filePath)) return null;
 
         var directoryName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
+        var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         var ret = new ParserInfo
         {
             Series = directoryName,
             Volumes = Parser.LooseLeafVolume,
             Chapters = Parser.DefaultChapter,
-            ComicInfo = comicInfo
+            ComicInfo = comicInfo,
+            Format = MangaFormat.Image,
+            Filename = Path.GetFileName(filePath),
+            FullFilePath = filePath,
+            Title = Parser.RemoveExtensionIfSupported(fileName),
         };
-
         ParseFromFallbackFolders(filePath, rootPath, LibraryType.Image, ref ret);
 
 

@@ -9,19 +9,24 @@ namespace API.Services.Tasks.Scanner.Parser;
 /// This is the basic parser for handling Manga/Comic/Book libraries. This was previously DefaultParser before splitting each parser
 /// into their own classes.
 /// </summary>
-public class BasicParser(IDirectoryService directoryService) : DefaultParser(directoryService)
+public class BasicParser(IDirectoryService directoryService, IDefaultParser imageParser) : DefaultParser(directoryService)
 {
     public override ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
-        if (Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
+        if (type != LibraryType.Image && Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
+
+        if (Parser.IsImage(filePath))
+        {
+            return imageParser.Parse(filePath, rootPath, LibraryType.Image, comicInfo);
+        }
 
         var ret = new ParserInfo()
         {
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
-            Title = Scanner.Parser.Parser.RemoveExtensionIfSupported(fileName),
+            Title = Parser.RemoveExtensionIfSupported(fileName),
             FullFilePath = filePath,
             Series = string.Empty,
             ComicInfo = comicInfo
@@ -98,6 +103,6 @@ public class BasicParser(IDirectoryService directoryService) : DefaultParser(dir
 
     public override bool IsApplicable(string filePath, LibraryType type)
     {
-        return true;
+        return type != LibraryType.ComicVine && type != LibraryType.Image;
     }
 }

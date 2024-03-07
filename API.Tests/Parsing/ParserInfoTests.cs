@@ -2,7 +2,7 @@
 using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
 public class ParserInfoTests
 {
