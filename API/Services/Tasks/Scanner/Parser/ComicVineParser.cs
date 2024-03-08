@@ -51,7 +51,14 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
                 {
                     if (!Parser.IsSeriesAndYear(directory)) continue;
                     info.Series = directory;
+                    info.Volumes = Parser.ParseYear(directory);
                     break;
+                }
+
+                // When there was at least one directory and we failed to parse the series, this is the final fallback
+                if (string.IsNullOrEmpty(info.Series))
+                {
+                    info.Series = Parser.CleanTitle(directories[0], true, true);
                 }
             }
             else
@@ -59,6 +66,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
                 if (Parser.IsSeriesAndYear(directoryName))
                 {
                     info.Series = directoryName;
+                    info.Volumes = Parser.ParseYear(directoryName);
                 }
             }
         }

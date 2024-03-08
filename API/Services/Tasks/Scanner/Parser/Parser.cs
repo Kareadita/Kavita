@@ -109,7 +109,7 @@ public static class Parser
     /// <summary>
     /// Supports Batman (2020) or Batman (2)
     /// </summary>
-    private static readonly Regex SeriesAndYearRegex = new Regex(@"^\D+\s\(\d+\)$",
+    private static readonly Regex SeriesAndYearRegex = new Regex(@"^\D+\s\((?<Year>\d+)\)$",
         MatchOptions, RegexTimeout);
 
     /// <summary>
@@ -1148,7 +1148,16 @@ public static class Parser
         return !string.IsNullOrEmpty(name) && SeriesAndYearRegex.IsMatch(name);
     }
 
-    public static string RemoveExtensionIfSupported(string? filename)
+    public static string ParseYear(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return string.Empty;
+        var match = SeriesAndYearRegex.Match(name);
+        if (!match.Success) return string.Empty;
+
+        return match.Groups["Year"].Value;
+    }
+
+    public static string? RemoveExtensionIfSupported(string? filename)
     {
         if (string.IsNullOrEmpty(filename)) return filename;
 
