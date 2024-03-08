@@ -26,19 +26,6 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         };
         ParseFromFallbackFolders(filePath, libraryRoot, LibraryType.Image, ref ret);
 
-        // Check if we can parse anything out of the filename
-        // var parsedVolume = Parser.ParseVolume(ret.Filename);
-        // var parsedChapter = Parser.ParseChapter(ret.Filename);
-        // if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.LooseLeafVolume))
-        // {
-        //     ret.Volumes = parsedVolume;
-        // }
-        //
-        // if (IsEmptyOrDefault(string.Empty, ret.Chapters) && !parsedChapter.Equals(Parser.DefaultChapter))
-        // {
-        //     ret.Chapters = parsedChapter;
-        // }
-
         if (IsEmptyOrDefault(ret.Volumes, ret.Chapters))
         {
             ret.IsSpecial = true;
