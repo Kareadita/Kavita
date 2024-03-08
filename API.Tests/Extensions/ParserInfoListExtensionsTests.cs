@@ -42,7 +42,7 @@ public class ParserInfoListExtensions
         {
             infos.Add(_defaultParser.Parse(
                 Path.Join("E:/Manga/Cynthia the Mission/", filename),
-                "E:/Manga/", LibraryType.Manga));
+                "E:/Manga/", "E:/Manga/", LibraryType.Manga));
         }
 
         var files = inputChapters.Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build()).ToList();
@@ -60,7 +60,7 @@ public class ParserInfoListExtensions
         {
             _defaultParser.Parse(
                 "E:/Manga/Cynthia the Mission/Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip",
-                "E:/Manga/", LibraryType.Manga)
+                "E:/Manga/", "E:/Manga/", LibraryType.Manga)
         };
 
     var files = new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip"}

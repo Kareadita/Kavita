@@ -19,7 +19,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
     /// <param name="rootPath"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public override ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
     {
         if (type != LibraryType.ComicVine) return null;
 

@@ -31,7 +31,7 @@ public class DefaultParserTests
     [InlineData("C:/", "C:/Something Random/Mujaki no Rakuen SP01.cbz", "Something Random")]
     public void ParseFromFallbackFolders_FallbackShouldParseSeries(string rootDir, string inputPath, string expectedSeries)
     {
-        var actual = _defaultParser.Parse(inputPath, rootDir, LibraryType.Manga, null);
+        var actual = _defaultParser.Parse(inputPath, rootDir, rootDir, LibraryType.Manga, null);
         if (actual == null)
         {
             Assert.NotNull(actual);
@@ -49,7 +49,7 @@ public class DefaultParserTests
     public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string[] expectedParseInfo)
     {
         const string rootDirectory = "/manga/";
-        var actual = new ParserInfo {Series = "", Chapters = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume};
+        var actual = new ParserInfo {Series = "", Chapters = Parser.DefaultChapter, Volumes = Parser.LooseLeafVolume};
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo[0], actual.Series);
         Assert.Equal(expectedParseInfo[1], actual.Volumes);
@@ -72,7 +72,7 @@ public class DefaultParserTests
         fs.AddFile(inputFile, new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var parser = new BasicParser(ds, new ImageParser(ds));
-        var actual = parser.Parse(inputFile, rootDirectory, LibraryType.Manga, null);
+        var actual = parser.Parse(inputFile, rootDirectory, rootDirectory, LibraryType.Manga, null);
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo, actual.Series);
     }
@@ -88,7 +88,7 @@ public class DefaultParserTests
         fs.AddFile(inputFile, new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var parser = new BasicParser(ds, new ImageParser(ds));
-        var actual = parser.Parse(inputFile, rootDirectory, LibraryType.Manga, null);
+        var actual = parser.Parse(inputFile, rootDirectory, rootDirectory, LibraryType.Manga, null);
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo, actual.Series);
     }
@@ -102,7 +102,7 @@ public class DefaultParserTests
     public void Parse_MangaLibrary_JustCover_ShouldReturnNull()
     {
         const string rootPath = @"E:/Manga/";
-        var actual = _defaultParser.Parse(@"E:/Manga/Accel World/cover.png", rootPath, LibraryType.Manga, null);
+        var actual = _defaultParser.Parse(@"E:/Manga/Accel World/cover.png", rootPath, rootPath, LibraryType.Manga, null);
         Assert.Null(actual);
     }
 
@@ -255,7 +255,7 @@ public class DefaultParserTests
         foreach (var file in expected.Keys)
         {
             var expectedInfo = expected[file];
-            var actual = _defaultParser.Parse(file, rootPath, LibraryType.Manga, null);
+            var actual = _defaultParser.Parse(file, rootPath, rootPath, LibraryType.Manga, null);
             if (expectedInfo == null)
             {
                 Assert.Null(actual);
@@ -293,7 +293,7 @@ public class DefaultParserTests
             Chapters = "8", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         };
-        var actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Monster #8", LibraryType.Manga, null);
+        var actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Monster #8", "E:/Manga", LibraryType.Manga, null);
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -319,7 +319,7 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", LibraryType.Manga, null);
+        actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", "E:/Manga",LibraryType.Manga, null);
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -345,7 +345,7 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", LibraryType.Manga, null);
+        actual2 = _defaultParser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", "E:/Manga", LibraryType.Manga, null);
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -387,7 +387,7 @@ public class DefaultParserTests
             FullFilePath = filepath
         };
 
-        var actual = parser.Parse(filepath, rootPath, LibraryType.Manga, null);
+        var actual = parser.Parse(filepath, rootPath, rootPath, LibraryType.Manga, null);
 
         Assert.NotNull(actual);
         _testOutputHelper.WriteLine($"Validating {filepath}");
@@ -416,7 +416,7 @@ public class DefaultParserTests
             FullFilePath = filepath
         };
 
-        actual = parser.Parse(filepath, rootPath, LibraryType.Manga, null);
+        actual = parser.Parse(filepath, rootPath, rootPath, LibraryType.Manga, null);
         Assert.NotNull(actual);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expected.Format, actual.Format);
@@ -441,7 +441,7 @@ public class DefaultParserTests
     [Fact]
     public void Parse_ParseInfo_Comic()
         {
-            const string rootPath = @"E:/Comics/";
+            const string rootPath = "E:/Comics/";
             var expected = new Dictionary<string, ParserInfo>();
             var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
              expected.Add(filepath, new ParserInfo
@@ -479,7 +479,7 @@ public class DefaultParserTests
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
-                var actual = _defaultParser.Parse(file, rootPath, LibraryType.Comic, null);
+                var actual = _defaultParser.Parse(file, rootPath, rootPath, LibraryType.Comic, null);
                 if (expectedInfo == null)
                 {
                     Assert.Null(actual);

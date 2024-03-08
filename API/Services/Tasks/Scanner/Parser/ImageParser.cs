@@ -7,7 +7,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public class ImageParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
     {
         if (type != LibraryType.Image || !Parser.IsImage(filePath)) return null;
 
@@ -22,29 +22,27 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
             Format = MangaFormat.Image,
             Filename = Path.GetFileName(filePath),
             FullFilePath = filePath,
-            Title = Parser.RemoveExtensionIfSupported(fileName),
+            Title = fileName,
         };
-        ParseFromFallbackFolders(filePath, rootPath, LibraryType.Image, ref ret);
+        ParseFromFallbackFolders(filePath, libraryRoot, LibraryType.Image, ref ret);
 
+        // Check if we can parse anything out of the filename
+        // var parsedVolume = Parser.ParseVolume(ret.Filename);
+        // var parsedChapter = Parser.ParseChapter(ret.Filename);
+        // if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.LooseLeafVolume))
+        // {
+        //     ret.Volumes = parsedVolume;
+        // }
+        //
+        // if (IsEmptyOrDefault(string.Empty, ret.Chapters) && !parsedChapter.Equals(Parser.DefaultChapter))
+        // {
+        //     ret.Chapters = parsedChapter;
+        // }
 
         if (IsEmptyOrDefault(ret.Volumes, ret.Chapters))
         {
             ret.IsSpecial = true;
         }
-        else
-        {
-            var parsedVolume = Parser.ParseVolume(ret.Filename);
-            var parsedChapter = Parser.ParseChapter(ret.Filename);
-            if (IsEmptyOrDefault(ret.Volumes, string.Empty) && !parsedVolume.Equals(Parser.LooseLeafVolume))
-            {
-                ret.Volumes = parsedVolume;
-            }
-            if (IsEmptyOrDefault(string.Empty, ret.Chapters) && !parsedChapter.Equals(Parser.DefaultChapter))
-            {
-                ret.Chapters = parsedChapter;
-            }
-        }
-
 
         // Override the series name, as fallback folders needs it to try and parse folder name
         if (string.IsNullOrEmpty(ret.Series) || ret.Series.Equals(directoryName))
@@ -57,6 +55,6 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
 
     public override bool IsApplicable(string filePath, LibraryType type)
     {
-        return type == LibraryType.Image || Parser.IsImage(filePath);
+        return type == LibraryType.Image && Parser.IsImage(filePath);
     }
 }

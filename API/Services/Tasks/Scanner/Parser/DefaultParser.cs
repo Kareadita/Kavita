@@ -8,7 +8,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public interface IDefaultParser
 {
-    ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null);
+    ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null);
     void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret);
     bool IsApplicable(string filePath, LibraryType type);
 }
@@ -27,7 +27,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
     /// <param name="rootPath">Root folder</param>
     /// <param name="type">Allows different Regex to be used for parsing.</param>
     /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-    public abstract ParserInfo? Parse(string filePath, string rootPath, LibraryType type, ComicInfo? comicInfo = null);
+    public abstract ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null);
 
     /// <summary>
     /// Fills out <see cref="ParserInfo"/> by trying to parse volume, chapters, and series from folders
