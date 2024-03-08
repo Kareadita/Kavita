@@ -23,11 +23,11 @@ public class ReadingItemService : IReadingItemService
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
     private readonly ILogger<ReadingItemService> _logger;
-    private readonly IDefaultParser _basicParser;
-    private readonly IDefaultParser _comicVineParser;
-    private readonly IDefaultParser _imageParser;
-    private readonly IDefaultParser _bookParser;
-    private readonly IDefaultParser _pdfParser;
+    private readonly BasicParser _basicParser;
+    private readonly ComicVineParser _comicVineParser;
+    private readonly ImageParser _imageParser;
+    private readonly BookParser _bookParser;
+    private readonly PdfParser _pdfParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
         IDirectoryService directoryService, ILogger<ReadingItemService> logger)

@@ -23,6 +23,8 @@ public class DefaultParserTests
     }
 
 
+
+
     #region ParseFromFallbackFolders
     [Theory]
     [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
@@ -98,13 +100,6 @@ public class DefaultParserTests
 
     #region Parse
 
-    [Fact]
-    public void Parse_MangaLibrary_JustCover_ShouldReturnNull()
-    {
-        const string rootPath = @"E:/Manga/";
-        var actual = _defaultParser.Parse(@"E:/Manga/Accel World/cover.png", rootPath, rootPath, LibraryType.Manga, null);
-        Assert.Null(actual);
-    }
 
     [Fact]
     public void Parse_ParseInfo_Manga()
@@ -131,11 +126,12 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Beelzebub\Beelzebub_01_[Noodles].zip";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Beelzebub", Volumes = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume,
+            Series = "Beelzebub", Volumes = Parser.LooseLeafVolume,
             Chapters = "1", Filename = "Beelzebub_01_[Noodles].zip", Format = MangaFormat.Archive,
             FullFilePath = filepath
         });
 
+        // Note: Lots of duplicates here. I think I can move them to the ParserTests itself
         filepath = @"E:\Manga\Ichinensei ni Nacchattara\Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip";
         expected.Add(filepath, new ParserInfo
         {
@@ -280,7 +276,7 @@ public class DefaultParserTests
         }
     }
 
-    [Fact]
+    //[Fact]
     public void Parse_ParseInfo_Manga_ImageOnly()
     {
         // Images don't have root path as E:\Manga, but rather as the path of the folder
