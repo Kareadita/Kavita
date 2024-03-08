@@ -34,6 +34,12 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }
 
+    /// <summary>
+    /// Only applicable for Epub files
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
         return Parser.IsEpub(filePath);

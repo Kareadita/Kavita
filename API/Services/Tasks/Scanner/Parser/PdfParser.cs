@@ -3,52 +3,29 @@ using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
-#nullable enable
 
-/// <summary>
-/// This is the basic parser for handling Manga/Comic/Book libraries. This was previously DefaultParser before splitting each parser
-/// into their own classes.
-/// </summary>
-public class BasicParser(IDirectoryService directoryService, IDefaultParser imageParser) : DefaultParser(directoryService)
+public class PdfParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
-        // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
-        if (type != LibraryType.Image && Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
-
-        if (Parser.IsImage(filePath))
-        {
-            return imageParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Image, comicInfo);
-        }
-
-        var ret = new ParserInfo()
+        var ret = new ParserInfo
         {
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
-            Title = Parser.RemoveExtensionIfSupported(fileName),
+            Title = Parser.RemoveExtensionIfSupported(fileName)!,
             FullFilePath = filePath,
             Series = string.Empty,
-            ComicInfo = comicInfo
+            ComicInfo = comicInfo,
+            Chapters = type == LibraryType.Comic
+                ? Parser.ParseComicChapter(fileName)
+                : Parser.ParseChapter(fileName)
         };
 
-        // This will be called if the epub is already parsed once then we call and merge the information, if the
-        if (Parser.IsEpub(filePath))
-        {
-            ret.Chapters = Parser.ParseChapter(fileName);
-            ret.Series = Parser.ParseSeries(fileName);
-            ret.Volumes = Parser.ParseVolume(fileName);
-        }
-        else
-        {
-            ret.Chapters = type == LibraryType.Comic
-                ? Parser.ParseComicChapter(fileName)
-                : Parser.ParseChapter(fileName);
-            ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
-            ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
-        }
+        ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
+        ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
 
-        if (ret.Series == string.Empty || Parser.IsImage(filePath))
+        if (ret.Series == string.Empty)
         {
             // Try to parse information out of each folder all the way to rootPath
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
@@ -67,7 +44,8 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && isSpecial)
         {
             ret.IsSpecial = true;
-            ParseFromFallbackFolders(filePath, rootPath, type, ref ret); // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
+            // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
+            ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 
         // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
@@ -98,17 +76,17 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             ret.Volumes = $"{Parser.SpecialVolumeNumber}";
         }
 
-        return ret.Series == string.Empty ? null : ret;
+        return string.IsNullOrEmpty(ret.Series) ? null : ret;
     }
 
     /// <summary>
-    /// Applicable for everything but ComicVine and Image library types
+    /// Only applicable for PDF files
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="type"></param>
     /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
-        return type != LibraryType.ComicVine && type != LibraryType.Image;
+        return Parser.IsPdf(filePath);
     }
 }

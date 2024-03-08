@@ -29,6 +29,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         if (IsEmptyOrDefault(ret.Volumes, ret.Chapters))
         {
             ret.IsSpecial = true;
+            ret.Volumes = $"{Parser.SpecialVolumeNumber}";
         }
 
         // Override the series name, as fallback folders needs it to try and parse folder name
@@ -40,6 +41,12 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         return string.IsNullOrEmpty(ret.Series) ? null : ret;
     }
 
+    /// <summary>
+    /// Only applicable for Image files and Image library type
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
         return type == LibraryType.Image && Parser.IsImage(filePath);

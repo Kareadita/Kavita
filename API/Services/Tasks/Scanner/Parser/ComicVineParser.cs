@@ -86,6 +86,12 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }
 
+    /// <summary>
+    /// Only applicable for ComicVine library type
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
         return type == LibraryType.ComicVine;
@@ -109,6 +115,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             if (info.IsSpecial && Parser.DefaultChapter != info.Chapters)
             {
                 info.IsSpecial = false;
+                info.Volumes = $"{Parser.SpecialVolumeNumber}";
             }
         }
 
