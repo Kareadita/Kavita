@@ -338,13 +338,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   get ShowStorylineTab() {
+    if (this.libraryType === LibraryType.ComicVine) return false;
     return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
       && (this.volumes.length > 0 || this.chapters.length > 0);
   }
 
   get ShowVolumeTab() {
-    return this.volumes.length > 0;
+    return (this.libraryType !== LibraryType.ComicVine && this.volumes.length > 0) || (this.libraryType === LibraryType.ComicVine && this.volumes.length > 1);
   }
+
   get ShowChaptersTab() {
     return this.chapters.length > 0;
   }
@@ -662,6 +664,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
           ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
           ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
+          ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
         ];
         if (this.relations.length > 0) {
           this.hasRelations = true;

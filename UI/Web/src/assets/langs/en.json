@@ -459,7 +459,8 @@
         "side-story": "Side Story",
         "spin-off": "Spin Off",
         "parent": "Parent",
-        "edition": "Edition"
+        "edition": "Edition",
+        "annual": "Annual"
     },
 
     "publication-status-pipe": {

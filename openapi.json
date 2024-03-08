@@ -9195,7 +9195,8 @@
                 10,
                 11,
                 12,
-                13
+                13,
+                14
               ],
               "type": "integer",
               "description": "Represents a relationship between Series",
@@ -17296,6 +17297,13 @@
               "$ref": "#/components/schemas/SeriesDto"
             },
             "nullable": true
+          },
+          "annuals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -18506,7 +18514,8 @@
               10,
               11,
               12,
-              13
+              13,
+              14
             ],
             "type": "integer",
             "description": "Represents a relationship between Series",
@@ -19846,6 +19855,14 @@
             "nullable": true
           },
           "editions": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "annuals": {
             "type": "array",
             "items": {
               "type": "integer",
