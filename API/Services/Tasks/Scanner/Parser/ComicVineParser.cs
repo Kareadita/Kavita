@@ -24,6 +24,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
         if (type != LibraryType.ComicVine) return null;
 
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+        var directoryName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
         var info = new ParserInfo()
         {
             Filename = Path.GetFileName(filePath),
@@ -55,7 +56,6 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             }
             else
             {
-                var directoryName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
                 if (Parser.IsSeriesAndYear(directoryName))
                 {
                     info.Series = directoryName;
@@ -68,6 +68,11 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
 
         // Patch in other information from ComicInfo
         UpdateFromComicInfo(info);
+
+        if (string.IsNullOrEmpty(info.Series))
+        {
+            info.Series = Parser.CleanTitle(directoryName, true, true);
+        }
 
 
         return string.IsNullOrEmpty(info.Series) ? null : info;
