@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
 using API.Comparators;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Extensions;
@@ -17,16 +15,16 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithCoverImage("Special 1")
                     .WithIsSpecial(true)
-                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithSortOrder(Parser.SpecialVolumeNumber + 1)
                     .Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithCoverImage("Special 2")
                     .WithIsSpecial(true)
-                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2)
+                    .WithSortOrder(Parser.SpecialVolumeNumber + 2)
                     .Build())
                 .Build())
             .Build();
@@ -44,8 +42,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("13")
                     .WithCoverImage("Chapter 13")
                     .Build())
@@ -60,7 +58,7 @@ public class SeriesExtensionsTests
 
             .WithVolume(new VolumeBuilder("2")
                 .WithName("Volume 2")
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithCoverImage("Volume 2")
                     .Build())
                 .Build())
@@ -79,8 +77,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("0.5")
                     .WithCoverImage("Chapter 0.5")
                     .Build())
@@ -106,14 +104,14 @@ public class SeriesExtensionsTests
 
             .WithVolume(new VolumeBuilder("1")
                 .WithName("Volume 1")
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithCoverImage("Volume 1 Chapter 1")
                     .Build())
                 .Build())
 
             .WithVolume(new VolumeBuilder("2")
                 .WithName("Volume 2")
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithCoverImage("Volume 2")
                     .Build())
                 .Build())
@@ -145,8 +143,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
                     .WithCoverImage("Special 1")
@@ -171,8 +169,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2.5")
@@ -182,11 +180,11 @@ public class SeriesExtensionsTests
                     .WithCoverImage("Chapter 2")
                     .Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 1")
-                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithSortOrder(Parser.SpecialVolumeNumber + 1)
                     .Build())
             .Build())
             .Build();
@@ -204,8 +202,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2.5")
@@ -215,16 +213,16 @@ public class SeriesExtensionsTests
                     .WithCoverImage("Chapter 2")
                     .Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 3")
-                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithSortOrder(Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
                 .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(false)
                     .WithCoverImage("Volume 1")
                     .Build())
@@ -244,8 +242,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2.5")
@@ -255,16 +253,16 @@ public class SeriesExtensionsTests
                     .WithCoverImage("Chapter 2")
                     .Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 1")
-                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithSortOrder(Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
                 .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(false)
                     .WithCoverImage("Volume 1")
                     .Build())
@@ -284,8 +282,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Ippo")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1426")
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 1426")
@@ -295,23 +293,23 @@ public class SeriesExtensionsTests
                     .WithCoverImage("Chapter 1425")
                     .Build())
                 .Build())
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(true)
                     .WithCoverImage("Special 3")
-                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .WithSortOrder(Parser.SpecialVolumeNumber + 1)
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
                 .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(false)
                     .WithCoverImage("Volume 1")
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("137")
                 .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(false)
                     .WithCoverImage("Volume 137")
                     .Build())
@@ -331,8 +329,8 @@ public class SeriesExtensionsTests
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
-                .WithName(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
                     .WithCoverImage("Chapter 2.5")
@@ -344,7 +342,7 @@ public class SeriesExtensionsTests
                 .Build())
             .WithVolume(new VolumeBuilder("4")
                 .WithMinNumber(4)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
                     .WithIsSpecial(false)
                     .WithCoverImage("Volume 4")
                     .Build())
@@ -357,6 +355,72 @@ public class SeriesExtensionsTests
         }
 
         Assert.Equal("Chapter 2", series.GetCoverImage());
+    }
+
+    /// <summary>
+    /// Ensure that Series cover is issue 1, when there are less than 1 entities and specials
+    /// </summary>
+    [Fact]
+    public void GetCoverImage_LessThanIssue1()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 0")
+                    .Build())
+                .WithChapter(new ChapterBuilder("1")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 1")
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithMinNumber(4)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Volume 4")
+                    .Build())
+                .Build())
+            .Build();
+
+        Assert.Equal("Chapter 1", series.GetCoverImage());
+    }
+
+    /// <summary>
+    /// Ensure that Series cover is issue 1, when there are less than 1 entities and specials
+    /// </summary>
+    [Fact]
+    public void GetCoverImage_LessThanIssue1_WithNegative()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("-1")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter -1")
+                    .Build())
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 0")
+                    .Build())
+                .WithChapter(new ChapterBuilder("1")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 1")
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithMinNumber(4)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Volume 4")
+                    .Build())
+                .Build())
+            .Build();
+
+        Assert.Equal("Chapter 1", series.GetCoverImage());
     }
 
 

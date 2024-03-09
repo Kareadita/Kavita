@@ -218,7 +218,7 @@ public class ArchiveService : IArchiveService
     /// <returns></returns>
     public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format, CoverImageSize size = CoverImageSize.Default)
     {
-        if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
+        if (string.IsNullOrEmpty(archivePath) || !IsValidArchive(archivePath)) return string.Empty;
         try
         {
             var libraryHandler = CanOpen(archivePath);

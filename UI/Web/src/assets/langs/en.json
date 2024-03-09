@@ -497,7 +497,9 @@
     "library-type-pipe": {
         "book": "Book",
         "comic": "Comic",
-        "manga": "Manga"
+        "manga": "Manga",
+        "comicVine": "ComicVine",
+        "image": "Image"
     },
 
     "age-rating-pipe": {
