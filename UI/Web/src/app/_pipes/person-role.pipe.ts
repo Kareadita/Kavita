@@ -29,6 +29,8 @@ export class PersonRolePipe implements PipeTransform {
         return this.translocoService.translate('person-role-pipe.penciller');
       case PersonRole.Publisher:
         return this.translocoService.translate('person-role-pipe.publisher');
+      case PersonRole.Imprint:
+        return this.translocoService.translate('person-role-pipe.imprint');
       case PersonRole.Writer:
         return this.translocoService.translate('person-role-pipe.writer');
       case PersonRole.Other:

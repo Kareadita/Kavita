@@ -482,7 +482,8 @@
         "penciller": "Penciller",
         "publisher": "Publisher",
         "writer": "Writer",
-        "other": "Other"
+        "other": "Other",
+        "imprint": "Imprint"
     },
 
     "manga-format-pipe": {
@@ -756,6 +757,7 @@
         "translators-title": "Translators",
         "pencillers-title": "Pencillers",
         "publishers-title": "Publishers",
+        "imprints-title": "Imprints",
 
         "promoted": "{{common.promoted}}",
         "see-more": "See More",
@@ -931,6 +933,7 @@
         "writers-title": "{{series-metadata-detail.writers-title}}",
         "genres-title": "{{series-metadata-detail.genres-title}}",
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "imprints-title": "{{series-metadata-detail.imprints-title}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
         "not-defined": "Not defined",
         "read": "{{common.read}}",
@@ -1684,6 +1687,7 @@
         "cover-artist-label": "Cover Artist",
         "writer-label": "Writer",
         "publisher-label": "Publisher",
+        "imprint-label": "Imprint",
         "penciller-label": "Penciller",
         "letterer-label": "Letterer",
         "inker-label": "Inker",
@@ -1945,6 +1949,7 @@
         "letterer": "Letterer",
         "publication-status": "Publication Status",
         "penciller": "Penciller",
+        "imprint": "Imprint",
         "publisher": "Publisher",
         "read-progress": "Read Progress",
         "read-time": "Read Time",

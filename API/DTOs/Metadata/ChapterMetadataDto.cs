@@ -18,6 +18,7 @@ public class ChapterMetadataDto
     public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Inkers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Imprints { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();

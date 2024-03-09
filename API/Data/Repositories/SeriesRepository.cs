@@ -1184,6 +1184,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Letterer => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),

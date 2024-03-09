@@ -3203,7 +3203,8 @@
                 9,
                 10,
                 11,
-                12
+                12,
+                13
               ],
               "type": "integer",
               "format": "int32"
@@ -15606,7 +15607,8 @@
               25,
               26,
               27,
-              28
+              28,
+              29
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",
@@ -16538,7 +16540,8 @@
               9,
               10,
               11,
-              12
+              12,
+              13
             ],
             "type": "integer",
             "format": "int32"
@@ -16583,7 +16586,8 @@
               9,
               10,
               11,
-              12
+              12,
+              13
             ],
             "type": "integer",
             "format": "int32"
@@ -18235,6 +18239,9 @@
           "inkerLocked": {
             "type": "boolean"
           },
+          "imprintLocked": {
+            "type": "boolean"
+          },
           "lettererLocked": {
             "type": "boolean"
           },
@@ -18339,6 +18346,13 @@
             "nullable": true
           },
           "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PersonDto"
@@ -18466,6 +18480,9 @@
             "type": "boolean"
           },
           "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
             "type": "boolean"
           },
           "lettererLocked": {
