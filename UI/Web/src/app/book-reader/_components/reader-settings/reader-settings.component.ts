@@ -101,6 +101,18 @@ export class ReaderSettingsComponent implements OnInit {
    * Outputs when swipeToPaginate is changed
    */
   @Output() swipeToPaginateChanged: EventEmitter<boolean> = new EventEmitter();
+  /***
+   * Outputs when min scroll threshold is changed
+   */
+  @Output() scrollThresholdChanged: EventEmitter<number> = new EventEmitter();
+  /***
+   * Outputs when min distance threshold is changed
+   */
+  @Output() distanceThresholdChanged: EventEmitter<number> = new EventEmitter();
+  /***
+   * Outputs when min speed threshold is changed
+   */
+  @Output() speedThresholdChanged: EventEmitter<number> = new EventEmitter();
   /**
    * Outputs when a style is updated and the reader needs to render it
    */
@@ -266,6 +278,18 @@ export class ReaderSettingsComponent implements OnInit {
 
         this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
 
+        this.settingsForm.addControl('bookReaderScrollThreshold', new FormControl(this.user.preferences.bookReaderScrollThreshold, []));
+        this.settingsForm.get('bookReaderScrollThreshold')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: number) => {
+          this.scrollThresholdChanged.emit(value);
+        });
+        this.settingsForm.addControl('bookReaderDistanceThreshold', new FormControl(this.user.preferences.bookReaderDistanceThreshold, []));
+        this.settingsForm.get('bookReaderDistanceThreshold')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: number) => {
+          this.distanceThresholdChanged.emit(value);
+        });
+        this.settingsForm.addControl('bookReaderSpeedThreshold', new FormControl(this.user.preferences.bookReaderSpeedThreshold, []));
+        this.settingsForm.get('bookReaderSpeedThreshold')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: number) => {
+          this.speedThresholdChanged.emit(value);
+        });
 
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
         this.cdRef.markForCheck();
