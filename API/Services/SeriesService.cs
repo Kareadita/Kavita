@@ -598,17 +598,17 @@ public class SeriesService : ISeriesService
 
     public async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle, bool withHash)
     {
-        if (string.IsNullOrEmpty(chapterTitle)) throw new ArgumentException("Chapter Title cannot be null");
+        if (string.IsNullOrEmpty(chapterTitle) && (isSpecial || libraryType == LibraryType.Book)) throw new ArgumentException("Chapter Title cannot be null");
 
         if (isSpecial)
         {
-            return Parser.CleanSpecialTitle(chapterTitle);
+            return Parser.CleanSpecialTitle(chapterTitle!);
         }
 
         var hashSpot = withHash ? "#" : string.Empty;
         var baseChapter = libraryType switch
         {
-            LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
+            LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle!),
             LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterRange),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
             LibraryType.ComicVine => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),

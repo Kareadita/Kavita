@@ -344,7 +344,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   get ShowVolumeTab() {
-    return (this.libraryType !== LibraryType.ComicVine && this.volumes.length > 0) || (this.libraryType === LibraryType.ComicVine && this.volumes.length > 1);
+    if (this.libraryType === LibraryType.ComicVine) {
+      if (this.volumes.length > 1) return true;
+      if (this.specials.length === 0 && this.chapters.length === 0) return true;
+      return false;
+    }
+    return this.volumes.length > 0;
   }
 
   get ShowChaptersTab() {
@@ -734,7 +739,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.activeTabId = TabID.Specials;
     } else {
       if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
-        this.activeTabId = TabID.Chapters;
+        if (this.chapters.length === 0) {
+          this.activeTabId = TabID.Specials;
+        } else {
+          this.activeTabId = TabID.Chapters;
+        }
       } else {
         this.activeTabId = TabID.Storyline;
       }

@@ -59,6 +59,7 @@ public class ComicVineParserTests
         Assert.NotNull(actual);
         Assert.Equal("Birds of Prey (2002)", actual.Series);
         Assert.Equal("2002", actual.Volumes);
+        Assert.Equal("1", actual.Chapters);
     }
 
     /// <summary>
@@ -73,6 +74,7 @@ public class ComicVineParserTests
         Assert.NotNull(actual);
         Assert.Equal("Birds of Prey (1999)", actual.Series);
         Assert.Equal("1999", actual.Volumes);
+        Assert.Equal("1", actual.Chapters);
     }
 
     /// <summary>
@@ -86,7 +88,8 @@ public class ComicVineParserTests
 
         Assert.NotNull(actual);
         Assert.Equal("Blood Syndicate", actual.Series);
-        Assert.Equal("", actual.Volumes);
+        Assert.Equal(Parser.LooseLeafVolume, actual.Volumes);
+        Assert.Equal("1", actual.Chapters);
     }
     #endregion
 
