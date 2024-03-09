@@ -519,8 +519,10 @@ public class SeriesService : ISeriesService
 
         foreach (var chapter in chapters)
         {
-            if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
-            else chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
+            // if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+            // else chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
+
+            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
 
             if (!chapter.IsSpecial) continue;
             specials.Add(chapter);
@@ -563,7 +565,6 @@ public class SeriesService : ISeriesService
 
     public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
-        // TODO: Move this into DB (not sure how because of localization and lookups)
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
             var firstChapter = volume.Chapters.First();
@@ -607,6 +608,7 @@ public class SeriesService : ISeriesService
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
             LibraryType.ComicVine => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterRange),
+            LibraryType.Image => await _localizationService.Translate(userId, "chapter-num", chapterRange),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         };
 
