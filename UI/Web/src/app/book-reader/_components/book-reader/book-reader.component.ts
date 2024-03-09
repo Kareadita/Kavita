@@ -274,6 +274,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
   clickToPaginate = false;
   swipeToPaginate = false;
+  scrollThreshold = 10; //10% of screen
+  distanceThreshold = 50; //50% of screen
+  speedThreshold = 50; //50 pixels per second
   /**
    * Used solely for fullscreen to apply a hack
    */
@@ -1037,7 +1040,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Find all the part ids and their top offset
     this.setupPageAnchors();
 
-
     if (part !== undefined && part !== '') {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
@@ -1045,7 +1047,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if ((this.writingStyle === WritingStyle.Vertical) && (this.layoutMode === BookPageLayoutMode.Default)) {
        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
     } else {
-
       if (this.layoutMode === BookPageLayoutMode.Default) {
         this.scrollService.scrollTo(0, this.reader.nativeElement);
       } else if (this.writingStyle === WritingStyle.Vertical) {
@@ -1054,8 +1055,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
             setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
         }
-      }
-      else {
+      } else {
         // We need to check if we are paging back, because we need to adjust the scroll
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
           setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
@@ -1115,7 +1115,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Given a direction, calls the next or prev page method
    * @param direction Direction to move
    */
-  movePage(direction: PAGING_DIRECTION, $event: any) {
+  movePage(direction: PAGING_DIRECTION, $event: MouseEvent | false) {
     if ($event) {
       $event.stopPropagation();
       $event.preventDefault();
@@ -1375,7 +1375,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleDrawer() {
     this.drawerOpen = !this.drawerOpen;
-
     if (this.immersiveMode) {
       this.actionBarVisible = false;
     }
@@ -1570,8 +1569,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 200);
   }
 
-  toggleSwipeToPaginate(swipeToPaginate: boolean){
+  toggleSwipeToPaginate(swipeToPaginate: boolean) {
     this.swipeToPaginate = swipeToPaginate;
+  }
+
+  updateScrollThreshold(scrollThreshold: number) {
+    this.scrollThreshold = scrollThreshold;
+  }
+
+  updateSpeedThreshold(speedThreshold: number) {
+    this.speedThreshold = speedThreshold;
+  }
+
+  updateDistanceThreshold(distanceThreshold: number) {
+    this.distanceThreshold = distanceThreshold;
   }
 
   clearTimeout(timeoutId: number | undefined) {
@@ -1665,15 +1676,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       y: ($event as MouseEvent).clientY || ($event as TouchEvent).changedTouches[0].clientY,
       swipeEnd: Date.now(),
     }
-    // Calculate distance based on writingStyle: use height and y axis for verticle
-    const distance = this.writingStyle === WritingStyle.Vertical ? (this.mousePosition.y - endPos.y) / window.innerHeight : (this.mousePosition.x - endPos.x) / window.innerWidth;
-    //Calculate speed as pixels over speed
-    const speed = distance / Math.floor((this.mousePosition.swipeStart - endPos.swipeEnd) / 1000);
-    // If action bar is hidden and swipe to paginate is enabled
-    if(!this.actionBarVisible && this.swipeToPaginate) {
-      //TODO: Have user configure swipe thresholds
+
+    // True if the layout is in scroll mode
+    const checkForScroll = this.layoutMode === BookPageLayoutMode.Default;
+
+    // Get scroll distance in perpendicular axis as percent of screen
+    const scrollDistance = this.writingStyle === WritingStyle.Vertical ? ((this.mousePosition.x - endPos.x) / window.innerWidth) * 100 : ((this.mousePosition.y - endPos.y) / window.innerHeight) * 100;
+
+    // Calculate delta swipe distance as percent of screen based on writingStyle: use x axis for horizontal and y axis for verticle
+    const distance = this.writingStyle === WritingStyle.Vertical ? ((this.mousePosition.y - endPos.y) / window.innerHeight) * 100 : ((this.mousePosition.x - endPos.x) / window.innerWidth) * 100;
+
+    // Calculate delta time in seconds * 1000
+    const time = endPos.swipeEnd - this.mousePosition.swipeStart;
+
+    //Calculate speed as distance over time in seconds (pixels per second)
+    const speed = distance / (time / 1000);
+    // Prevent accidental page turn when user is trying to scroll the page.
+    if (checkForScroll && Math.abs(scrollDistance) > this.scrollThreshold) return;
+
+    // When the opposite of either actionbarVisible or drawerOpen are true and also swipe to paginate is enabled
+    if(!(this.actionBarVisible || this.drawerOpen) && this.swipeToPaginate) {
       //If the swipe was longer or faster than the threshold, move page based on reading direction
-      if (Math.abs(distance) > 0.3 || Math.abs(speed) > 0.3) {
+      if (Math.abs(distance) > this.distanceThreshold || Math.abs(speed) > this.speedThreshold) {
+        //If swipe is forward (ie. positive)
         if (distance > 0) {
           this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, false);
         } else {

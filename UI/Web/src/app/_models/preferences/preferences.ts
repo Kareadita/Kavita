@@ -29,6 +29,9 @@ export interface Preferences {
     bookReaderFontFamily: string;
     bookReaderTapToPaginate: boolean;
     bookReaderSwipeToPaginate: boolean;
+    bookReaderScrollThreshold: number;
+    bookReaderDistanceThreshold: number;
+    bookReaderSpeedThreshold: number;
     bookReaderReadingDirection: ReadingDirection;
     bookReaderWritingStyle: WritingStyle;
     bookReaderThemeName: string;

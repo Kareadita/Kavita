@@ -64,6 +64,9 @@
                     (styleUpdate)="updateReaderStyles($event)"
                     (clickToPaginateChanged)="showPaginationOverlay($event)"
                     (swipeToPaginateChanged)="toggleSwipeToPaginate($event)"
+                    (scrollThresholdChanged)="updateScrollThreshold($event)"
+                    (distanceThresholdChanged)="updateDistanceThreshold($event)"
+                    (speedThresholdChanged)="updateSpeedThreshold($event)"
                     (fullscreen)="toggleFullscreen()"
                     (bookReaderWritingStyle)="updateWritingStyle($event)"
                     (layoutModeUpdate)="updateLayoutMode($event)"
@@ -134,7 +137,7 @@
     <ng-template #actionBar let-isTop>
       <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
         <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
-                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD, $event)"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? t('previous') : t('next')}} Page">
           <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
@@ -158,7 +161,7 @@
         <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
         <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
-                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, $event)"
                  title="{{readingDirection === ReadingDirection.LeftToRight ? t('next') : t('previous')}} Page">
           <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
         </button>
