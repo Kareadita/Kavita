@@ -107,12 +107,12 @@
 
       <ng-container *ngIf="clickToPaginate && !hidePagination && !actionBarVisible">
         <div class="left {{clickOverlayClass('left')}} no-observe"
-             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD, $event)"
              [ngClass]="{'immersive' : immersiveMode}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
         <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
-             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, $event)"
              [ngClass]="{'immersive' : immersiveMode}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
