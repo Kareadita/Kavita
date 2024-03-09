@@ -40,7 +40,7 @@ public interface ISeriesService
     Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
     Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
 
-    Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle,
+    Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle,
         bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
@@ -590,7 +590,7 @@ public class SeriesService : ISeriesService
     }
 
 
-    public async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
+    public async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle, bool withHash)
     {
         if (string.IsNullOrEmpty(chapterTitle)) throw new ArgumentException("Chapter Title cannot be null");
 
@@ -600,26 +600,36 @@ public class SeriesService : ISeriesService
         }
 
         var hashSpot = withHash ? "#" : string.Empty;
-        return libraryType switch
+        var baseChapter = libraryType switch
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
-            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterTitle),
-            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
-            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
+            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterRange),
+            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
+            LibraryType.ComicVine => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
+            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterRange),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         };
+
+        if (!string.IsNullOrEmpty(chapterTitle) && libraryType != LibraryType.Book && chapterTitle != chapterRange)
+        {
+            baseChapter += " - " + chapterTitle;
+        }
+
+
+        return baseChapter;
     }
 
     public async Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true)
     {
-        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
+        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Range, chapter.Title, withHash);
     }
 
     public async Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true)
     {
-        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
+        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Range, chapter.Title, withHash);
     }
 
+    // TODO: Refactor this out and use FormatChapterTitle instead across library
     public async Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
     {
         var hashSpot = withHash ? "#" : string.Empty;
@@ -628,6 +638,7 @@ public class SeriesService : ISeriesService
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
             LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", string.Empty),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
+            LibraryType.ComicVine => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         }).Trim();
