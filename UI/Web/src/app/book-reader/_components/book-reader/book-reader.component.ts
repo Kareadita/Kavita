@@ -722,9 +722,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (isInputFocused) return;
 
     if (event.key === KEY_CODES.RIGHT_ARROW) {
-      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, false);
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
-      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD, false);
     } else if (event.key === KEY_CODES.ESC_KEY) {
       const isHighlighting = window.getSelection()?.toString() != '';
       if (isHighlighting) return;
@@ -1115,7 +1115,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Given a direction, calls the next or prev page method
    * @param direction Direction to move
    */
-  movePage(direction: PAGING_DIRECTION) {
+  movePage(direction: PAGING_DIRECTION, $event: any) {
+    if ($event) {
+      $event.stopPropagation();
+      $event.preventDefault();
+    }
     if (direction === PAGING_DIRECTION.BACKWARDS) {
       this.prevPage();
       return;
@@ -1671,9 +1675,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       //If the swipe was longer or faster than the threshold, move page based on reading direction
       if (Math.abs(distance) > 0.3 || Math.abs(speed) > 0.3) {
         if (distance > 0) {
-          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, false);
         } else {
-          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD, false);
         }
       }
     }
