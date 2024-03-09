@@ -154,6 +154,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Inkers,
                 opt =>
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Inker).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Imprints,
+                opt =>
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Imprint).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Letterers,
                 opt =>
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Letterer).OrderBy(p => p.NormalizedName)))

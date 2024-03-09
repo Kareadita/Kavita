@@ -1184,6 +1184,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Letterer => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
@@ -1818,19 +1819,7 @@ public class SeriesRepository : ISeriesRepository
             AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating),
             AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating),
             Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating),
-            // Parent = await _context.Series
-            //     .SelectMany(s =>
-            //         s.TargetSeries.Where(r => r.TargetSeriesId == seriesId
-            //                                  && usersSeriesIds.Contains(r.TargetSeriesId)
-            //                                  && r.RelationKind != RelationKind.Prequel
-            //                                  && r.RelationKind != RelationKind.Sequel
-            //                                  && r.RelationKind != RelationKind.Edition)
-            //             .Select(sr => sr.Series))
-            //     .RestrictAgainstAgeRestriction(userRating)
-            //     .AsSplitQuery()
-            //     .AsNoTracking()
-            //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //     .ToListAsync(),
+            Annuals = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Annual, userRating),
             Parent = await _context.SeriesRelation
                 .Where(r => r.TargetSeriesId == seriesId
                                               && usersSeriesIds.Contains(r.TargetSeriesId)

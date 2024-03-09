@@ -55,7 +55,7 @@ import {
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Chapter, SpecialVolumeNumber} from 'src/app/_models/chapter';
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
@@ -67,7 +67,6 @@ import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
 import {User} from 'src/app/_models/user';
 import {Volume} from 'src/app/_models/volume';
-import {LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
@@ -339,12 +338,20 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   get ShowStorylineTab() {
-    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel) && (this.volumes.length > 0 || this.chapters.length > 0);
+    if (this.libraryType === LibraryType.ComicVine) return false;
+    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
+      && (this.volumes.length > 0 || this.chapters.length > 0);
   }
 
   get ShowVolumeTab() {
+    if (this.libraryType === LibraryType.ComicVine) {
+      if (this.volumes.length > 1) return true;
+      if (this.specials.length === 0 && this.chapters.length === 0) return true;
+      return false;
+    }
     return this.volumes.length > 0;
   }
+
   get ShowChaptersTab() {
     return this.chapters.length > 0;
   }
@@ -662,6 +669,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
           ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
           ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
+          ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
         ];
         if (this.relations.length > 0) {
           this.hasRelations = true;
@@ -730,7 +738,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (this.volumes.length === 0 && this.chapters.length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
-      this.activeTabId = TabID.Storyline;
+      if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
+        if (this.chapters.length === 0) {
+          this.activeTabId = TabID.Specials;
+        } else {
+          this.activeTabId = TabID.Chapters;
+        }
+      } else {
+        this.activeTabId = TabID.Storyline;
+      }
+
     }
     this.cdRef.markForCheck();
   }

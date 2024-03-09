@@ -29,4 +29,10 @@ public enum LibraryType
     /// </summary>
     [Description("Light Novel")]
     LightNovel = 4,
+    /// <summary>
+    /// Uses Comic regex for filename parsing, uses ComicVine type of Parsing. Will replace Comic type in future
+    /// </summary>
+    [Description("Comic (ComicVine)")]
+    ComicVine = 5,
+
 }

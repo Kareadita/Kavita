@@ -1,8 +1,8 @@
 ﻿using Xunit;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class BookParserTests
+public class BookParsingTests
 {
     [Theory]
     [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", "Gifting The Wonderful World With Blessings!")]

@@ -229,6 +229,23 @@
                   </app-typeahead>
                 </div>
               </div>
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="imprint" class="form-label">{{t('imprint-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="getPersonsSettings(PersonRole.Imprint)"
+                                 [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
+                                 (newItemAdded)="metadata.imprintLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="penciller" class="form-label">{{t('penciller-label')}}</label>

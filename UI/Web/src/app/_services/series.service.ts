@@ -199,10 +199,11 @@ export class SeriesService {
   updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>,
     contains: Array<number>, others: Array<number>, prequels: Array<number>,
     sequels: Array<number>, sideStories: Array<number>, spinOffs: Array<number>,
-    alternativeSettings: Array<number>, alternativeVersions: Array<number>, doujinshis: Array<number>, editions: Array<number>) {
+    alternativeSettings: Array<number>, alternativeVersions: Array<number>,
+    doujinshis: Array<number>, editions: Array<number>, annuals: Array<number>) {
     return this.httpClient.post(this.baseUrl + 'series/update-related?seriesId=' + seriesId,
     {seriesId, adaptations, characters, sequels, prequels, contains, others, sideStories, spinOffs,
-     alternativeSettings, alternativeVersions, doujinshis, editions});
+     alternativeSettings, alternativeVersions, doujinshis, editions, annuals});
   }
 
   getSeriesDetail(seriesId: number) {

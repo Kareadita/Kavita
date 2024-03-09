@@ -127,7 +127,9 @@ public class ComicInfo
     public string CoverArtist { get; set; } = string.Empty;
     public string Editor { get; set; } = string.Empty;
     public string Publisher { get; set; } = string.Empty;
+    public string Imprint { get; set; } = string.Empty;
     public string Characters { get; set; } = string.Empty;
+
 
     public static AgeRating ConvertAgeRatingToEnum(string value)
     {
@@ -151,6 +153,7 @@ public class ComicInfo
         info.Letterer = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Letterer);
         info.Penciller = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Penciller);
         info.Publisher = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Publisher);
+        info.Imprint = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Imprint);
         info.Characters = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Characters);
         info.Translator = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Translator);
         info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);

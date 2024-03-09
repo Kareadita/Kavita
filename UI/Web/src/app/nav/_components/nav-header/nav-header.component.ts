@@ -178,6 +178,9 @@ export class NavHeaderComponent implements OnInit {
       case PersonRole.Publisher:
         this.goTo({field: FilterField.Publisher, comparison: FilterComparison.Equal, value: filter});
         break;
+        case PersonRole.Imprint:
+        this.goTo({field: FilterField.Imprint, comparison: FilterComparison.Equal, value: filter});
+        break;
       case PersonRole.Translator:
         this.goTo({field: FilterField.Translators, comparison: FilterComparison.Equal, value: filter});
         break;

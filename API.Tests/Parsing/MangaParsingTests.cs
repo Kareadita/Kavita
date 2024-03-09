@@ -2,13 +2,13 @@ using API.Entities.Enums;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class MangaParserTests
+public class MangaParsingTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public MangaParserTests(ITestOutputHelper testOutputHelper)
+    public MangaParsingTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }

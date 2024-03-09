@@ -17,4 +17,5 @@ public class UpdateRelatedSeriesDto
     public IList<int> AlternativeVersions { get; set; } = default!;
     public IList<int> Doujinshis { get; set; } = default!;
     public IList<int> Editions { get; set; } = default!;
+    public IList<int> Annuals { get; set; } = default!;
 }

@@ -188,6 +188,7 @@ export class SideNavComponent implements OnInit {
       case LibraryType.LightNovel:
         return 'fa-book';
       case LibraryType.Comic:
+      case LibraryType.ComicVine:
       case LibraryType.Manga:
         return 'fa-book-open';
       case LibraryType.Images:

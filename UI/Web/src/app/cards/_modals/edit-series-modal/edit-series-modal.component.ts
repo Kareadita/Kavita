@@ -487,6 +487,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.updateFromPreset('letterer', this.metadata.letterers, PersonRole.Letterer),
       this.updateFromPreset('penciller', this.metadata.pencillers, PersonRole.Penciller),
       this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
+      this.updateFromPreset('imprint', this.metadata.imprints, PersonRole.Imprint),
       this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator)
     ]).pipe(map(results => {
       return of(true);
@@ -633,6 +634,9 @@ export class EditSeriesModalComponent implements OnInit {
         break;
       case PersonRole.Publisher:
         this.metadata.publishers = persons;
+        break;
+        case PersonRole.Imprint:
+        this.metadata.imprints = persons;
         break;
       case PersonRole.Writer:
         this.metadata.writers = persons;

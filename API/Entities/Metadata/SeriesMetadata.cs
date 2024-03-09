@@ -68,6 +68,7 @@ public class SeriesMetadata : IHasConcurrencyToken
     public bool ColoristLocked { get; set; }
     public bool EditorLocked { get; set; }
     public bool InkerLocked { get; set; }
+    public bool ImprintLocked { get; set; }
     public bool LettererLocked { get; set; }
     public bool PencillerLocked { get; set; }
     public bool PublisherLocked { get; set; }

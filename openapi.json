@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.5"
+    "version": "0.7.14.6"
   },
   "servers": [
     {
@@ -2909,7 +2909,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2922,7 +2923,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2935,7 +2937,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -3200,7 +3203,8 @@
                 9,
                 10,
                 11,
-                12
+                12,
+                13
               ],
               "type": "integer",
               "format": "int32"
@@ -3619,7 +3623,8 @@
                 1,
                 2,
                 3,
-                4
+                4,
+                5
               ],
               "type": "integer",
               "format": "int32"
@@ -9191,7 +9196,8 @@
                 10,
                 11,
                 12,
-                13
+                13,
+                14
               ],
               "type": "integer",
               "description": "Represents a relationship between Series",
@@ -13526,7 +13532,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -14150,7 +14157,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "description": "Library type",
@@ -14267,6 +14275,13 @@
             "nullable": true
           },
           "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PersonDto"
@@ -15599,7 +15614,8 @@
               25,
               26,
               27,
-              28
+              28,
+              29
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",
@@ -15916,7 +15932,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -16030,7 +16047,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -16529,7 +16547,8 @@
               9,
               10,
               11,
-              12
+              12,
+              13
             ],
             "type": "integer",
             "format": "int32"
@@ -16574,7 +16593,8 @@
               9,
               10,
               11,
-              12
+              12,
+              13
             ],
             "type": "integer",
             "format": "int32"
@@ -17025,7 +17045,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -17078,7 +17099,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -17281,6 +17303,13 @@
             "nullable": true
           },
           "editions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
+          },
+          "annuals": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SeriesDto"
@@ -18217,6 +18246,9 @@
           "inkerLocked": {
             "type": "boolean"
           },
+          "imprintLocked": {
+            "type": "boolean"
+          },
           "lettererLocked": {
             "type": "boolean"
           },
@@ -18321,6 +18353,13 @@
             "nullable": true
           },
           "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PersonDto"
@@ -18450,6 +18489,9 @@
           "inkerLocked": {
             "type": "boolean"
           },
+          "imprintLocked": {
+            "type": "boolean"
+          },
           "lettererLocked": {
             "type": "boolean"
           },
@@ -18496,7 +18538,8 @@
               10,
               11,
               12,
-              13
+              13,
+              14
             ],
             "type": "integer",
             "description": "Represents a relationship between Series",
@@ -19417,7 +19460,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -19835,6 +19879,14 @@
             "nullable": true
           },
           "editions": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "annuals": {
             "type": "array",
             "items": {
               "type": "integer",

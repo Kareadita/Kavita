@@ -21,6 +21,7 @@ export interface SeriesMetadata {
     characters: Array<Person>;
     pencillers: Array<Person>;
     inkers: Array<Person>;
+    imprints: Array<Person>;
     colorists: Array<Person>;
     letterers: Array<Person>;
     editors: Array<Person>;
@@ -40,6 +41,7 @@ export interface SeriesMetadata {
     characterLocked: boolean;
     pencillerLocked: boolean;
     inkerLocked: boolean;
+    imprintLocked: boolean;
     coloristLocked: boolean;
     lettererLocked: boolean;
     editorLocked: boolean;

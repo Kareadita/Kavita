@@ -154,6 +154,12 @@
         </ng-template>
       </app-metadata-detail>
 
+      <app-metadata-detail [tags]="seriesMetadata.imprints" [libraryId]="series.libraryId" [queryParam]="FilterField.Imprint" [heading]="t('imprints-title')">
+        <ng-template #itemTemplate let-item>
+          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+        </ng-template>
+      </app-metadata-detail>
+
   </div>
 
     <div class="row g-0">

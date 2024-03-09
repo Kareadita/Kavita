@@ -28,6 +28,8 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.genres');
       case FilterField.Inker:
         return translate('filter-field-pipe.inker');
+        case FilterField.Imprint:
+        return translate('filter-field-pipe.imprint');
       case FilterField.Languages:
         return translate('filter-field-pipe.languages');
       case FilterField.Libraries:
