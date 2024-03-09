@@ -54,8 +54,16 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ret.IsSpecial = true;
             ret.SpecialIndex = Parser.ParseSpecialIndex(fileName);
             ret.Chapters = Parser.DefaultChapter;
-            ret.Volumes = Parser.LooseLeafVolume;
+            ret.Volumes = Parser.SpecialVolume;
 
+            ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
+        }
+
+        if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && type == LibraryType.Book)
+        {
+            ret.IsSpecial = true;
+            ret.Chapters = Parser.DefaultChapter;
+            ret.Volumes = Parser.SpecialVolume;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 

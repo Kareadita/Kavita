@@ -89,7 +89,8 @@ public class SeriesServiceTests : AbstractDbTest
             AlternativeVersions = new List<int>(),
             SideStories = new List<int>(),
             SpinOffs = new List<int>(),
-            Editions = new List<int>()
+            Editions = new List<int>(),
+            Annuals = new List<int>()
         };
     }
 
@@ -1211,6 +1212,7 @@ public class SeriesServiceTests : AbstractDbTest
         addRelationDto.Adaptations.Add(2);
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
         Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
 
@@ -1296,9 +1298,12 @@ public class SeriesServiceTests : AbstractDbTest
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
 
-        _context.Series.Remove(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1));
+        var seriesToRemove = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(seriesToRemove);
+        _context.Series.Remove(seriesToRemove);
         try
         {
             await _context.SaveChangesAsync();
@@ -1457,7 +1462,7 @@ public class SeriesServiceTests : AbstractDbTest
         var lib2 = new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test Series 2").Build())
             .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())
-            .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())// TODO: Is this a bug
+            .WithSeries(new SeriesBuilder("Test Series Prequels 3").Build())// TODO: Is this a bug
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
         _context.Library.Add(lib2);
@@ -1517,138 +1522,139 @@ public class SeriesServiceTests : AbstractDbTest
 
     #endregion
 
-    #region FormatChapterTitle
-
-    [Fact]
-    public async Task FormatChapterTitle_Manga_NonSpecial()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Chapter Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Manga_Special()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
-        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Comic_NonSpecial_WithoutHash()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Issue Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Comic_Special_WithoutHash()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
-        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Comic_NonSpecial_WithHash()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Issue #Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Comic_Special_WithHash()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
-        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Book_NonSpecial()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Book Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
-    }
-
-    [Fact]
-    public async Task FormatChapterTitle_Book_Special()
-    {
-        await ResetDb();
-
-        _context.Library.Add(new LibraryBuilder("Test LIb")
-            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
-                .WithLocale("en")
-                .Build())
-            .Build());
-
-        await _context.SaveChangesAsync();
-        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
-        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
-    }
-
-    #endregion
+    // This is now handled in SeriesDetail Tests
+    // #region FormatChapterTitle
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Manga_NonSpecial()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+    //     Assert.Equal("Chapter Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Manga_Special()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
+    //     Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Comic_NonSpecial_WithoutHash()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+    //     Assert.Equal("Issue Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Comic_Special_WithoutHash()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
+    //     Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Comic_NonSpecial_WithHash()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+    //     Assert.Equal("Issue #Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Comic_Special_WithHash()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
+    //     Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Book_NonSpecial()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+    //     Assert.Equal("Book Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
+    // }
+    //
+    // [Fact]
+    // public async Task FormatChapterTitle_Book_Special()
+    // {
+    //     await ResetDb();
+    //
+    //     _context.Library.Add(new LibraryBuilder("Test LIb")
+    //         .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+    //             .WithLocale("en")
+    //             .Build())
+    //         .Build());
+    //
+    //     await _context.SaveChangesAsync();
+    //     var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).WithSortOrder(Parser.SpecialVolumeNumber + 1).Build();
+    //     Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
+    // }
+    //
+    // #endregion
 
     #region DeleteMultipleSeries
 
@@ -1679,7 +1685,6 @@ public class SeriesServiceTests : AbstractDbTest
         var lib2 = new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test Series 2").Build())
             .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())
-            .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())// TODO: Is this a bug
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
         _context.Library.Add(lib2);

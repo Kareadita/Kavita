@@ -14281,6 +14281,13 @@
             },
             "nullable": true
           },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "colorists": {
             "type": "array",
             "items": {

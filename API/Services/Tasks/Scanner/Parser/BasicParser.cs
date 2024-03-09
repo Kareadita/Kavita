@@ -76,7 +76,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             ret.IsSpecial = true;
             ret.SpecialIndex = Parser.ParseSpecialIndex(fileName);
             ret.Chapters = Parser.DefaultChapter;
-            ret.Volumes = Parser.LooseLeafVolume;
+            ret.Volumes = Parser.SpecialVolume;
 
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
@@ -95,7 +95,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         // v0.8.x: Introducing a change where Specials will go in a separate Volume with a reserved number
         if (ret.IsSpecial)
         {
-            ret.Volumes = $"{Parser.SpecialVolumeNumber}";
+            ret.Volumes = Parser.SpecialVolume;
         }
 
         return ret.Series == string.Empty ? null : ret;

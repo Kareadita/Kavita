@@ -131,6 +131,25 @@ public class BasicParserTests
         Assert.True(actual.IsSpecial);
     }
 
+
+    /// <summary>
+    /// Tests that when the filename parses as a speical, it appropriately parses
+    /// </summary>
+    [Fact]
+    public void Parse_MangaLibrary_SpecialInFilename()
+    {
+        var actual = _parser.Parse("C:/Books/Summer Time Rendering/Specials/Volume Omake.cbr",
+            "C:/Books/Summer Time Rendering/",
+            RootDirectory, LibraryType.Manga, null);
+        Assert.NotNull(actual);
+
+        Assert.Equal("Summer Time Rendering", actual.Series);
+        Assert.Equal("Volume Omake", actual.Title);
+        Assert.Equal(Parser.SpecialVolume, actual.Volumes);
+        Assert.Equal(Parser.DefaultChapter, actual.Chapters);
+        Assert.True(actual.IsSpecial);
+    }
+
     /// <summary>
     /// Tests that when there is an edition in filename, it appropriately parses
     /// </summary>
