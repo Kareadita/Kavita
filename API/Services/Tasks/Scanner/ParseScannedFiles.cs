@@ -31,6 +31,13 @@ public class ParsedSeries
     public required MangaFormat Format { get; init; }
 }
 
+public class ScanResult
+{
+    public IList<string> Files { get; set; }
+    public string Folder { get; set; }
+    public string LibraryRoot { get; set; }
+}
+
 public class SeriesModified
 {
     public required string FolderPath { get; set; }
@@ -77,61 +84,75 @@ public class ParseScannedFiles
     /// <param name="folderPath">A library folder or series folder</param>
     /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
     /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
-    public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
-        IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string, string, Task> folderAction, Library library, bool forceCheck = false)
+    public IList<ScanResult> ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
+        IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false)
     {
         string normalizedPath;
+        var result = new List<ScanResult>();
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
         if (scanDirectoryByDirectory)
         {
             // This is used in library scan, so we should check first for a ignore file and use that here as well
-            var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
-            var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
-            if (matcher != null)
+            var matcher = new GlobMatcher();
+            foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
             {
-                _logger.LogWarning(".kavitaignore found! Ignore files is deprecated in favor of Library Settings. Please update and remove file at {Path}", potentialIgnoreFile);
+                matcher.AddExclude(pattern.Pattern);
             }
-
-            if (library.LibraryExcludePatterns.Count != 0)
-            {
-                matcher ??= new GlobMatcher();
-                foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
-                {
-
-                    matcher.AddExclude(pattern.Pattern);
-                }
-            }
-
 
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
-
             foreach (var directory in directories)
             {
+                // Since this is a loop, we need a list return
                 normalizedPath = Parser.Parser.NormalizePath(directory);
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
                 {
-                    await folderAction(new List<string>(), directory, folderPath);
+                    result.Add(new ScanResult()
+                    {
+                        Files = ArraySegment<string>.Empty,
+                        Folder = directory,
+                        LibraryRoot = folderPath
+                    });
+
+                    //await folderAction(new List<string>(), directory, folderPath);
                 }
                 else
                 {
                     // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
-                    await folderAction(_directoryService.ScanFiles(directory, fileExtensions, matcher), directory, folderPath);
+                    //await folderAction(_directoryService.ScanFiles(directory, fileExtensions, matcher), directory, folderPath);
+                    result.Add(new ScanResult()
+                    {
+                        Files = _directoryService.ScanFiles(directory, fileExtensions, matcher),
+                        Folder = directory,
+                        LibraryRoot = folderPath
+                    });
                 }
             }
 
-            return;
+            return result;
         }
 
         normalizedPath = Parser.Parser.NormalizePath(folderPath);
         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
         {
-            await folderAction(new List<string>(), folderPath, folderPath);
-            return;
+            // await folderAction(new List<string>(), folderPath, folderPath);
+            // return;
+            result.Add(new ScanResult()
+            {
+                Files = ArraySegment<string>.Empty,
+                Folder = folderPath,
+                LibraryRoot = folderPath
+            });
         }
-        // We need to calculate all folders till library root and see if any kavitaignores
-        var seriesMatcher = BuildIgnoreFromLibraryRoot(folderPath, seriesPaths);
 
-        await folderAction(_directoryService.ScanFiles(folderPath, fileExtensions, seriesMatcher), folderPath, folderPath);
+        //await folderAction(_directoryService.ScanFiles(folderPath, fileExtensions), folderPath, folderPath);
+        result.Add(new ScanResult()
+        {
+            Files = _directoryService.ScanFiles(folderPath, fileExtensions),
+            Folder = folderPath,
+            LibraryRoot = folderPath
+        });
+
+        return result;
     }
 
     /// <summary>
@@ -303,7 +324,14 @@ public class ParseScannedFiles
         {
             try
             {
-                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, library, forceCheck);
+                // TODO: This should return an object with the information IList<string> files, string folder, string libraryRoot
+                //await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, library, forceCheck);
+                var scanResults = ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
+                foreach (var scanResult in scanResults)
+                {
+                    await ProcessScanResult(scanResult);
+                }
+
             }
             catch (ArgumentException ex)
             {
@@ -312,6 +340,11 @@ public class ParseScannedFiles
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
+
+        async Task ProcessScanResult(ScanResult result)
+        {
+            await ProcessFolder(result.Files, result.Folder, result.LibraryRoot);
+        }
 
         async Task ProcessFolder(IList<string> files, string folder, string libraryRoot)
         {
@@ -368,6 +401,8 @@ public class ParseScannedFiles
                 if (scannedSeries[series].Count <= 0 || processSeriesInfos == null) continue;
 
                 UpdateSortOrder(scannedSeries, series);
+
+                // This should be a return statement I think and we should invoke the actual series work on a background thread
                 await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
             }
         }

@@ -292,15 +292,13 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
-        var library =
-            await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
-        await psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, directoryPath, libraryFolder) =>
+        var scanResults = psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        foreach (var scanResult in scanResults)
         {
-            directoriesSeen.Add(directoryPath);
-            return Task.CompletedTask;
-        }, library);
+            directoriesSeen.Add(scanResult.Folder);
+        }
 
         Assert.Equal(2, directoriesSeen.Count);
     }
@@ -313,14 +311,18 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+
         var directoriesSeen = new HashSet<string>();
-        await psf.ProcessFiles("C:/Data/", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, directoryPath, libraryFolder) =>
+        var scanResults = psf.ProcessFiles("C:/Data/", false,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+
+        foreach (var scanResult in scanResults)
         {
-            directoriesSeen.Add(directoryPath);
-            return Task.CompletedTask;
-        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
-                LibraryIncludes.Folders | LibraryIncludes.FileTypes));
+            directoriesSeen.Add(scanResult.Folder);
+        }
 
         Assert.Single(directoriesSeen);
         directoriesSeen.TryGetValue("C:/Data/", out var actual);
@@ -344,17 +346,12 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
-        var callCount = 0;
-        await psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, folderPath, libraryFolder) =>
-        {
-            callCount++;
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+        var scanResults = psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
-            return Task.CompletedTask;
-        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
-            LibraryIncludes.Folders | LibraryIncludes.FileTypes));
-
-        Assert.Equal(2, callCount);
+        Assert.Equal(2, scanResults.Count);
     }
 
 
@@ -378,16 +375,13 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
-        var callCount = 0;
-        await psf.ProcessFiles("C:/Data", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, folderPath, libraryFolder) =>
-        {
-            callCount++;
-            return Task.CompletedTask;
-        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
-            LibraryIncludes.Folders | LibraryIncludes.FileTypes));
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+        var scanResults = psf.ProcessFiles("C:/Data", false,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, scanResults.Count);
     }
 
     #endregion
