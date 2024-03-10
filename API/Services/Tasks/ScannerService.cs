@@ -251,6 +251,13 @@ public class ScannerService : IScannerService
         var scanElapsedTime = await ScanFiles(library, new []{ folderPath }, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
+        //Refactor:  We now technically have all scannedSeries, we could invoke each Series to be scanned
+        foreach (var pSeries in parsedSeries.Keys)
+        {
+            // Process Series
+            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
+        }
+
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
 
@@ -302,12 +309,11 @@ public class ScannerService : IScannerService
         //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        return;
 
-        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -319,11 +325,13 @@ public class ScannerService : IScannerService
             // For Scan Series, we need to filter out anything that isn't our Series
             if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            await _processSeries.ProcessSeriesAsync(parsedFiles, library, bypassFolderOptimizationChecks);
             parsedSeries.Add(foundParsedSeries, parsedFiles);
+            // TODO: In order to allow ProcessSeriesAsync to be on it's own task, I need this Track files to be handled elsewhere
+            //await _processSeries.ProcessSeriesAsync(parsedFiles, library, bypassFolderOptimizationChecks);
+            return Task.CompletedTask;
         }
     }
 

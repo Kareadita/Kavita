@@ -33,9 +33,26 @@ public class ParsedSeries
 
 public class ScanResult
 {
+    /// <summary>
+    /// A list of files in the Folder. Empty if HasChanged = false
+    /// </summary>
     public IList<string> Files { get; set; }
+    /// <summary>
+    /// A nested folder from Library Root (at any level)
+    /// </summary>
     public string Folder { get; set; }
+    /// <summary>
+    /// The library root
+    /// </summary>
     public string LibraryRoot { get; set; }
+    /// <summary>
+    /// Was the Folder scanned or not. If not modified since last scan, this will be false and Files empty
+    /// </summary>
+    public bool HasChanged { get; set; }
+    /// <summary>
+    /// Set in Stage 2: Parsed Info from the Files
+    /// </summary>
+    public IList<ParserInfo> ParserInfos { get; set; }
 }
 
 public class SeriesModified
@@ -110,7 +127,8 @@ public class ParseScannedFiles
                     {
                         Files = ArraySegment<string>.Empty,
                         Folder = directory,
-                        LibraryRoot = folderPath
+                        LibraryRoot = folderPath,
+                        HasChanged = false
                     });
 
                     //await folderAction(new List<string>(), directory, folderPath);
@@ -123,7 +141,8 @@ public class ParseScannedFiles
                     {
                         Files = _directoryService.ScanFiles(directory, fileExtensions, matcher),
                         Folder = directory,
-                        LibraryRoot = folderPath
+                        LibraryRoot = folderPath,
+                        HasChanged = true
                     });
                 }
             }
@@ -140,7 +159,8 @@ public class ParseScannedFiles
             {
                 Files = ArraySegment<string>.Empty,
                 Folder = folderPath,
-                LibraryRoot = folderPath
+                LibraryRoot = folderPath,
+                HasChanged = false
             });
         }
 
@@ -149,7 +169,8 @@ public class ParseScannedFiles
         {
             Files = _directoryService.ScanFiles(folderPath, fileExtensions),
             Folder = folderPath,
-            LibraryRoot = folderPath
+            LibraryRoot = folderPath,
+            HasChanged = true
         });
 
         return result;
@@ -201,7 +222,7 @@ public class ParseScannedFiles
 
 
     /// <summary>
-    /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
+    /// Attempts to either add a new instance of a series mapping to the _scannedSeries bag or adds to an existing.
     /// This will check if the name matches an existing series name (multiple fields) <see cref="MergeName"/>
     /// </summary>
     /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
@@ -320,6 +341,7 @@ public class ParseScannedFiles
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
+        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
         foreach (var folderPath in folders)
         {
             try
@@ -327,9 +349,50 @@ public class ParseScannedFiles
                 // TODO: This should return an object with the information IList<string> files, string folder, string libraryRoot
                 //await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, library, forceCheck);
                 var scanResults = ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
+
                 foreach (var scanResult in scanResults)
                 {
-                    await ProcessScanResult(scanResult);
+                    await ProcessScanResult(scanResult); // scanResult is updated
+
+                    // We now have all the parsed infos from the scan result, perform any merging that is necessary and post processing steps
+
+                    MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
+
+                    foreach (var info in scanResult.ParserInfos)
+                    {
+                        try
+                        {
+                            TrackSeries(scannedSeries, info);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex,
+                                "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
+                                info?.FullFilePath);
+                        }
+                    }
+
+                    // I think we can do a bit of work here and streamline this to still use scanResult
+                    foreach (var series in scannedSeries.Keys)
+                    {
+                        if (scannedSeries[series].Count <= 0 || processSeriesInfos == null) continue;
+
+                        UpdateSortOrder(scannedSeries, series);
+
+                        // This should be a return statement I think and we should invoke the actual series work on a background thread
+                        await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(!scanResult.HasChanged, scannedSeries[series]));
+                    }
+
+
+                    // if (isLibraryScan)
+                    // {
+                    //     TrackSeriesFilesForLibraryScan(scanResult);
+                    // }
+                    // else
+                    // {
+                    //     TrackSeriesFilesForSeriesScan(scanResult);
+                    // }
+
                 }
 
             }
@@ -343,7 +406,84 @@ public class ParseScannedFiles
 
         async Task ProcessScanResult(ScanResult result)
         {
-            await ProcessFolder(result.Files, result.Folder, result.LibraryRoot);
+            // If the folder hasn't changed, generate fake ParserInfos for the Series that were in that folder.
+            if (!result.HasChanged)
+            {
+                var normalizedFolder = Parser.Parser.NormalizePath(result.Folder);
+                result.ParserInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
+                {
+                    Series = fp.SeriesName,
+                    Format = fp.Format,
+                }).ToList();
+
+
+                // ScannerService.TrackFiles is called, it tracks information about the Series like that we've visited it so it doesn't get removed, then the processing occurs
+
+
+                // if (processSeriesInfos != null)
+                //     await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", normalizedFolder);
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, library.Name, ProgressEventType.Updated));
+                return;
+            }
+
+            var files = result.Files;
+            var folder = result.Folder;
+            var libraryRoot = result.LibraryRoot;
+
+            // When processing files for a folder and we do enter, we need to parse the information and combine parser infos
+            // NOTE: We might want to move the merge step later in the process, like return and combine.
+            _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
+            if (files.Count == 0)
+            {
+                _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", folder);
+                result.ParserInfos = ArraySegment<ParserInfo>.Empty;
+                return;
+            }
+
+            // Multiple Series can exist within a folder. We should instead put these infos on the result and perform merging above
+            //var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+            IList<ParserInfo> infos = files
+                .Select(file => _readingItemService.ParseFile(file, folder, libraryRoot, library.Type))
+                .Where(info => info != null)
+                .ToList()!;
+
+            result.ParserInfos = infos;
+            return;
+
+
+            // MergeLocalizedSeriesWithSeries(infos);
+            //
+            // foreach (var info in infos)
+            // {
+            //     try
+            //     {
+            //         TrackSeries(scannedSeries, info);
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         _logger.LogError(ex,
+            //             "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
+            //             info?.FullFilePath);
+            //     }
+            // }
+            //
+            // foreach (var series in scannedSeries.Keys)
+            // {
+            //     if (scannedSeries[series].Count <= 0 || processSeriesInfos == null) continue;
+            //
+            //     UpdateSortOrder(scannedSeries, series);
+            //
+            //     // This should be a return statement I think and we should invoke the actual series work on a background thread
+            //     await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
+            // }
+
+
+
+
         }
 
         async Task ProcessFolder(IList<string> files, string folder, string libraryRoot)
@@ -407,6 +547,29 @@ public class ParseScannedFiles
             }
         }
     }
+
+    // private void TrackSeriesFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+    // {
+    //     // TODO: Make this a record
+    //     var skippedScan = parsedInfo.Item1;
+    //     var parsedFiles = parsedInfo.Item2;
+    //     if (parsedFiles.Count == 0) return;
+    //
+    //     var foundParsedSeries = new ParsedSeries()
+    //     {
+    //         Name = parsedFiles[0].Series,
+    //         NormalizedName = parsedFiles[0].Series.ToNormalized(),
+    //         Format = parsedFiles[0].Format
+    //     };
+    //
+    //     // For Scan Series, we need to filter out anything that isn't our Series
+    //     if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
+    //     {
+    //         return;
+    //     }
+    //
+    //     parsedSeries.Add(foundParsedSeries, parsedFiles);
+    // }
 
     private void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
@@ -496,7 +659,7 @@ public class ParseScannedFiles
     /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
     /// </example>
     /// <param name="infos">A collection of ParserInfos</param>
-    private void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo?> infos)
+    private void MergeLocalizedSeriesWithSeries(IList<ParserInfo> infos)
     {
         var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
         if (!hasLocalizedSeries) return;
