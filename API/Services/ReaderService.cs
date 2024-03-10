@@ -797,6 +797,7 @@ public class ReaderService : IReaderService
             case LibraryType.Manga:
                 return "Chapter" + (includeSpace ? " " : string.Empty);
             case LibraryType.Comic:
+            case LibraryType.ComicVine:
                 if (includeHash) {
                     return "Issue #";
                 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
 using API.Comparators;
 using API.Entities;
 using API.Services.Tasks.Scanner.Parser;
@@ -25,7 +23,7 @@ public static class SeriesExtensions
         if (firstVolume == null) return null;
 
         var chapters = firstVolume.Chapters
-            .OrderBy(c => c.SortOrder, ChapterSortComparerDefaultLast.Default)
+            .OrderBy(c => c.SortOrder)
             .ToList();
 
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
@@ -34,7 +32,7 @@ public static class SeriesExtensions
         }
 
         // just volumes
-        if (volumes.TrueForAll(v => $"{v.MinNumber}" != Parser.LooseLeafVolume))
+        if (volumes.TrueForAll(v => v.MinNumber.IsNot(Parser.LooseLeafVolumeNumber)))
         {
             return firstVolume.CoverImage;
         }
@@ -45,11 +43,13 @@ public static class SeriesExtensions
         {
             var looseLeafChapters = volumes.Where(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
                 .SelectMany(c => c.Chapters.Where(c2 => !c2.IsSpecial))
-                .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultFirst.Default)
+                .OrderBy(c => c.SortOrder)
                 .ToList();
 
             if (looseLeafChapters.Count > 0 && volumes[0].MinNumber > looseLeafChapters[0].MinNumber)
             {
+                var first = looseLeafChapters.Find(c => c.SortOrder.Is(1f));
+                if (first != null) return first.CoverImage;
                 return looseLeafChapters[0].CoverImage;
             }
             return firstVolume.CoverImage;
@@ -58,14 +58,11 @@ public static class SeriesExtensions
         var chpts = volumes
             .First(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
             .Chapters
-            //.Where(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber))
-            //.SelectMany(v => v.Chapters)
-
             .Where(c => !c.IsSpecial)
             .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
             .ToList();
 
-        var exactlyChapter1 = chpts.FirstOrDefault(c => c.MinNumber.Is(1f));
+        var exactlyChapter1 = chpts.Find(c => c.MinNumber.Is(1f));
         if (exactlyChapter1 != null)
         {
             return exactlyChapter1.CoverImage;

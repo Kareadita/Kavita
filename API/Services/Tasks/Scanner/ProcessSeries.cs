@@ -113,13 +113,15 @@ public class ProcessSeries : IProcessSeries
         var seriesName = parsedInfos[0].Series;
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName));
-        _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}", seriesName);
+        _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}, Forced: {ForceUpdate}", seriesName, forceUpdate);
 
         // Check if there is a Series
         var firstInfo = parsedInfos[0];
         Series? series;
         try
         {
+            // There is an opportunity to allow duplicate series here. Like if One is in root/marvel/batman and another is root/dc/batman
+            // by changing to a ToList() and if multiple, doing a firstInfo.FirstFolder/RootFolder type check
             series =
                 await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(firstInfo.Series, firstInfo.LocalizedSeries,
                     library.Id, firstInfo.Format);

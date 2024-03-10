@@ -258,41 +258,41 @@ public class ScannerService : IScannerService
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);
 
-         // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
-         if (parsedSeries.Count == 0)
+        // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
+        if (parsedSeries.Count == 0)
+        {
+         var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
+         if (!string.IsNullOrEmpty(series.FolderPath) && !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
          {
-             var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
-             if (!string.IsNullOrEmpty(series.FolderPath) && !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
+             try
              {
-                 try
-                 {
-                     _unitOfWork.SeriesRepository.Remove(series);
-                     await CommitAndSend(1, sw, scanElapsedTime, series);
-                     await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                         MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, series.LibraryId), false);
-                 }
-                 catch (Exception ex)
-                 {
-                     _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series as no files could be found. Aborting scan");
-                     await _unitOfWork.RollbackAsync();
-                     return;
-                 }
+                 _unitOfWork.SeriesRepository.Remove(series);
+                 await CommitAndSend(1, sw, scanElapsedTime, series);
+                 await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                     MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, series.LibraryId), false);
              }
-             else
+             catch (Exception ex)
              {
-                 // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
-                 _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
-                 await _eventHub.SendMessageAsync(MessageFactory.Error,
-                     MessageFactory.ErrorEvent($"Error scanning {series.Name}", "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan"));
+                 _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series as no files could be found. Aborting scan");
                  await _unitOfWork.RollbackAsync();
                  return;
              }
-             // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
-             if (parsedSeries.Count == 0) return;
          }
+         else
+         {
+             // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
+             _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
+             await _eventHub.SendMessageAsync(MessageFactory.Error,
+                 MessageFactory.ErrorEvent($"Error scanning {series.Name}", "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan"));
+             await _unitOfWork.RollbackAsync();
+             return;
+         }
+         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
+         if (parsedSeries.Count == 0) return;
+        }
 
 
-         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
@@ -598,6 +598,8 @@ public class ScannerService : IScannerService
 
 
             seenSeries.Add(foundParsedSeries);
+            // TODO: This is extremely expensive to lock the thread on this. We should instead move this onto Hangfire
+            // or in a queue to be processed.
             await _seriesProcessingSemaphore.WaitAsync();
             try
             {
