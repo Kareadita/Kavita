@@ -181,6 +181,11 @@ public class LicenseService(
         return false;
     }
 
+    /// <summary>
+    /// Checks if the sub is active and caches the result. This should not be used too much over cache as it will skip backend caching.
+    /// </summary>
+    /// <param name="license"></param>
+    /// <returns></returns>
     public async Task<bool> HasActiveSubscription(string? license)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
