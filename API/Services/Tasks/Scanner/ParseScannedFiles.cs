@@ -300,12 +300,11 @@ public class ParseScannedFiles
     /// <param name="folders"></param>
     /// <param name="isLibraryScan">If true, does a directory scan first (resulting in folders being tackled in parallel), else does an immediate scan files</param>
     /// <param name="seriesPaths">A map of Series names -> existing folder paths to handle skipping folders</param>
-    /// <param name="processSeriesInfos">Action which returns if the folder was skipped and the infos from said folder</param>
     /// <param name="forceCheck">Defaults to false</param>
     /// <returns></returns>
     public async Task<IList<ScannedSeriesResult>> ScanLibrariesForSeries(Library library,
         IEnumerable<string> folders, bool isLibraryScan,
-        IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos, bool forceCheck = false)
+        IDictionary<string, IList<SeriesModified>> seriesPaths, bool forceCheck = false)
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
@@ -347,13 +346,10 @@ public class ParseScannedFiles
 
                     foreach (var series in scannedSeries.Keys)
                     {
-                        if (scannedSeries[series].Count <= 0 || processSeriesInfos == null) continue;
+                        if (scannedSeries[series].Count <= 0) continue;
 
                         UpdateSortOrder(scannedSeries, series);
 
-                        // This should be a return statement I think and we should invoke the actual series work on a background thread
-                        // Refactor: Create a ParsedSeries with the ParserInfo (or just return scanResult with a bit more information)
-                        //await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(!scanResult.HasChanged, scannedSeries[series]));
                         processedScannedSeries.Add(new ScannedSeriesResult()
                         {
                             HasChanged = scanResult.HasChanged,

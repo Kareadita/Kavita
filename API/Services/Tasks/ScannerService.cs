@@ -249,7 +249,7 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, new []{ folderPath },
-            false, TrackFiles, true);
+            false, true);
 
         // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
@@ -319,28 +319,6 @@ public class ScannerService : IScannerService
         //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        {
-            var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
-
-            var foundParsedSeries = new ParsedSeries()
-            {
-                Name = parsedFiles[0].Series,
-                NormalizedName = parsedFiles[0].Series.ToNormalized(),
-                Format = parsedFiles[0].Format
-            };
-
-            // For Scan Series, we need to filter out anything that isn't our Series
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
-            {
-                return Task.CompletedTask;
-            }
-
-            parsedSeries.Add(foundParsedSeries, parsedFiles);
-            return Task.CompletedTask;
-        }
     }
 
     private void TrackFoundSeriesAndFiles(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, IList<ScannedSeriesResult> seenSeries)
@@ -518,7 +496,7 @@ public class ScannerService : IScannerService
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, libraryFolderPaths,
-            shouldUseLibraryScan, TrackFiles, forceUpdate);
+            shouldUseLibraryScan, forceUpdate);
 
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
 
@@ -604,40 +582,16 @@ public class ScannerService : IScannerService
         await _metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        return;
-
-        // Responsible for transforming parsedInfo into an actual ParsedSeries then calling the actual processing of the series
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        {
-            // Refactor: this essentially just needs parsedSeries to be generated then in the parent, we can actual calculate total files
-            var skippedScan = parsedInfo.Item1;
-            var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
-
-            var foundParsedSeries = new ParsedSeries()
-            {
-                Name = parsedFiles[0].Series,
-                NormalizedName = Parser.Normalize(parsedFiles[0].Series),
-                Format = parsedFiles[0].Format,
-            };
-            if (!skippedScan)
-            {
-                totalFiles += parsedFiles.Count;
-            }
-
-            parsedSeries.Add(foundParsedSeries, parsedFiles);
-            return Task.CompletedTask;
-        }
     }
 
     private async Task<Tuple<long, IList<ScannedSeriesResult>>> ScanFiles(Library library, IEnumerable<string> dirs,
-        bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos = null, bool forceChecks = false)
+        bool isLibraryScan, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();
 
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
-            isLibraryScan, await _unitOfWork.SeriesRepository.GetFolderPathMap(library.Id), processSeriesInfos, forceChecks);
+            isLibraryScan, await _unitOfWork.SeriesRepository.GetFolderPathMap(library.Id), forceChecks);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 

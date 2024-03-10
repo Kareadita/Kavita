@@ -234,34 +234,40 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        {
-            var skippedScan = parsedInfo.Item1;
-            var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
-
-            var foundParsedSeries = new ParsedSeries()
-            {
-                Name = parsedFiles.First().Series,
-                NormalizedName = parsedFiles.First().Series.ToNormalized(),
-                Format = parsedFiles.First().Format
-            };
-
-            parsedSeries.Add(foundParsedSeries, parsedFiles);
-            return Task.CompletedTask;
-        }
+        // var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        //
+        // Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        // {
+        //     var skippedScan = parsedInfo.Item1;
+        //     var parsedFiles = parsedInfo.Item2;
+        //     if (parsedFiles.Count == 0) return Task.CompletedTask;
+        //
+        //     var foundParsedSeries = new ParsedSeries()
+        //     {
+        //         Name = parsedFiles.First().Series,
+        //         NormalizedName = parsedFiles.First().Series.ToNormalized(),
+        //         Format = parsedFiles.First().Format
+        //     };
+        //
+        //     parsedSeries.Add(foundParsedSeries, parsedFiles);
+        //     return Task.CompletedTask;
+        // }
 
         var library =
             await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+
         library.Type = LibraryType.Manga;
-        await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
+        var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(1));
 
 
-        Assert.Equal(3, parsedSeries.Values.Count);
-        Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
+        // Assert.Equal(3, parsedSeries.Values.Count);
+        // Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
+
+        Assert.Equal(3, parsedSeries.Count);
+        Assert.NotEmpty(parsedSeries.Select(p => p.ParsedSeries).Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
     }
 
     #endregion
