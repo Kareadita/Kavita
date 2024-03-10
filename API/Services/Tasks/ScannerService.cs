@@ -251,7 +251,7 @@ public class ScannerService : IScannerService
         var scanElapsedTime = await ScanFiles(library, new []{ folderPath }, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
-        //Refactor:  We now technically have all scannedSeries, we could invoke each Series to be scanned
+        // We now technically have all scannedSeries, we could invoke each Series to be scanned
         foreach (var pSeries in parsedSeries.Keys)
         {
             // Process Series
@@ -498,19 +498,25 @@ public class ScannerService : IScannerService
 
 
         var totalFiles = 0;
-        var seenSeries = new List<ParsedSeries>();
-
-
-        await _processSeries.Prime();
-        //var processTasks = new List<Func<Task>>();
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
-        // NOTE: This runs sync after every file is scanned
-        // foreach (var task in processTasks)
-        // {
-        //     await task();
-        // }
+        // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
+        await _processSeries.Prime();
+        foreach (var pSeries in parsedSeries.Keys)
+        {
+            await _seriesProcessingSemaphore.WaitAsync();
+            try
+            {
+                await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate);
+            }
+            finally
+            {
+                _seriesProcessingSemaphore.Release();
+            }
+        }
+
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
@@ -533,13 +539,13 @@ public class ScannerService : IScannerService
             {
                 _logger.LogInformation(
                     "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
-                    seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+                    parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
             else
             {
                 _logger.LogInformation(
                     "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                    totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+                    totalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
 
             try
@@ -547,7 +553,7 @@ public class ScannerService : IScannerService
                 // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
                 // NOTE: This implementation is expensive
                 _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan");
-                var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
+                var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(parsedSeries.Keys.ToList(), library.Id);
                 _logger.LogDebug("[ScannerService] Found {Count} series that needs to be removed: {SeriesList}",
                     removedSeries.Count, removedSeries.Select(s => s.Name));
                 _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan - complete");
@@ -578,11 +584,12 @@ public class ScannerService : IScannerService
         return;
 
         // Responsible for transforming parsedInfo into an actual ParsedSeries then calling the actual processing of the series
-        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
+            // Refactor: this essentially just needs parsedSeries to be generated then in the parent, we can actual calculate total files
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -593,30 +600,14 @@ public class ScannerService : IScannerService
 
             if (skippedScan)
             {
-                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
-                {
-                    Name = pf.Series,
-                    NormalizedName = Parser.Normalize(pf.Series),
-                    Format = pf.Format
-                }));
-                return;
+                parsedSeries.Add(foundParsedSeries, parsedFiles);
+                return Task.CompletedTask;
             }
 
             totalFiles += parsedFiles.Count;
 
-
-            seenSeries.Add(foundParsedSeries);
-            // TODO: This is extremely expensive to lock the thread on this. We should instead move this onto Hangfire
-            // or in a queue to be processed.
-            await _seriesProcessingSemaphore.WaitAsync();
-            try
-            {
-                await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate);
-            }
-            finally
-            {
-                _seriesProcessingSemaphore.Release();
-            }
+            parsedSeries.Add(foundParsedSeries, parsedFiles);
+            return Task.CompletedTask;
         }
     }
 
