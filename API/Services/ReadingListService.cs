@@ -46,6 +46,8 @@ public interface IReadingListService
     /// <param name="library"></param>
     /// <returns></returns>
     Task CreateReadingListsFromSeries(Series series, Library library);
+
+    Task CreateReadingListsFromSeries(int libraryId, int seriesId);
 }
 
 /// <summary>
@@ -405,6 +407,20 @@ public class ReadingListService : IReadingListService
         await CalculateReadingListAgeRating(readingList, new []{ seriesId });
 
         return index > lastOrder + 1;
+    }
+
+    /// <summary>
+    /// Create Reading lists from a Series
+    /// </summary>
+    /// <remarks>Execute this from Hangfire</remarks>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    public async Task CreateReadingListsFromSeries(int libraryId, int seriesId)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (series == null || library == null) return;
+        await CreateReadingListsFromSeries(series, library);
     }
 
     public async Task CreateReadingListsFromSeries(Series series, Library library)

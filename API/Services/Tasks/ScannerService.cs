@@ -248,8 +248,6 @@ public class ScannerService : IScannerService
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
 
-        await _processSeries.Prime();
-
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, new []{ folderPath },
             false, true);
@@ -260,13 +258,20 @@ public class ScannerService : IScannerService
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         // We now technically have all scannedSeries, we could invoke each Series to be scanned
-        foreach (var pSeries in parsedSeries.Keys)
+
+        // Don't allow any processing on files that aren't part of this series
+        var toProcess = parsedSeries.Keys.Where(key =>
+            key.NormalizedName.Equals(series.NormalizedName) ||
+            key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
+            .ToList();
+
+        if (toProcess.Count > 0)
         {
-            // Don't allow any processing on files that aren't part of this series
-            if (!pSeries.NormalizedName.Equals(series.NormalizedName) && !pSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
-            {
-                continue;
-            }
+            await _processSeries.Prime();
+        }
+
+        foreach (var pSeries in toProcess)
+        {
             // Process Series
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
         }

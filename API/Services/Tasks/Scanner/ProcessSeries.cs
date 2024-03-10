@@ -128,29 +128,7 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
-            var seriesCollisions = await _unitOfWork.SeriesRepository.GetAllSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
-
-            seriesCollisions = seriesCollisions.Where(collision =>
-                collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
-
-            if (seriesCollisions.Count > 1)
-            {
-                var firstCollision = seriesCollisions[0];
-                var secondCollision = seriesCollisions[1];
-
-                var tableRows = $"<tr><td>Name: {firstCollision.Name}</td><td>Name: {secondCollision.Name}</td></tr>" +
-                                $"<tr><td>Localized: {firstCollision.LocalizedName}</td><td>Localized: {secondCollision.LocalizedName}</td></tr>" +
-                                $"<tr><td>Filename: {Parser.Parser.NormalizePath(firstCollision.FolderPath)}</td><td>Filename: {Parser.Parser.NormalizePath(secondCollision.FolderPath)}</td></tr>";
-
-                var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
-
-                _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
-                    firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
-
-                await _eventHub.SendMessageAsync(MessageFactory.Error,
-                    MessageFactory.ErrorEvent($"Library {library.Name} Series collision on {firstInfo.Series}",
-                        htmlTable));
-            }
+            await ReportDuplicateSeriesLookup(library, firstInfo, ex);
             return;
         }
 
@@ -229,14 +207,21 @@ public class ProcessSeries : IProcessSeries
                     return;
                 }
 
+                // TODO: put this on the background thread
+
                 // Process reading list after commit as we need to commit per list
-                await _readingListService.CreateReadingListsFromSeries(series, library);
+                //await _readingListService.CreateReadingListsFromSeries(series, library);
+                BackgroundJob.Enqueue(() => _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
 
                 if (seriesAdded)
                 {
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
-                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
+
+                    BackgroundJob.Enqueue(() => _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
+                    //await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
+
+                    //BackgroundJob.Enqueue(() => _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series.Id));
                     await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
@@ -254,6 +239,33 @@ public class ProcessSeries : IProcessSeries
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
+    }
+
+    private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
+    {
+        var seriesCollisions = await _unitOfWork.SeriesRepository.GetAllSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
+
+        seriesCollisions = seriesCollisions.Where(collision =>
+            collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
+
+        if (seriesCollisions.Count > 1)
+        {
+            var firstCollision = seriesCollisions[0];
+            var secondCollision = seriesCollisions[1];
+
+            var tableRows = $"<tr><td>Name: {firstCollision.Name}</td><td>Name: {secondCollision.Name}</td></tr>" +
+                            $"<tr><td>Localized: {firstCollision.LocalizedName}</td><td>Localized: {secondCollision.LocalizedName}</td></tr>" +
+                            $"<tr><td>Filename: {Parser.Parser.NormalizePath(firstCollision.FolderPath)}</td><td>Filename: {Parser.Parser.NormalizePath(secondCollision.FolderPath)}</td></tr>";
+
+            var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
+
+            _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
+                firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
+
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent($"Library {library.Name} Series collision on {firstInfo.Series}",
+                    htmlTable));
+        }
     }
 
 
