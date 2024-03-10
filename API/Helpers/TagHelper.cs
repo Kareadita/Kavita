@@ -21,6 +21,7 @@ public static class TagHelper
     /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
     public static void UpdateTag(ICollection<Tag> allTags, IEnumerable<string> names, Action<Tag, bool> action)
     {
+
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
@@ -28,16 +29,16 @@ public static class TagHelper
             var added = false;
             var normalizedName = name.ToNormalized();
 
-            var genre = allTags.FirstOrDefault(p =>
+            var tag = allTags.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName));
-            if (genre == null)
+            if (tag == null)
             {
                 added = true;
-                genre = new TagBuilder(name).Build();
-                allTags.Add(genre);
+                tag = new TagBuilder(name).Build();
+                allTags.Add(tag);
             }
 
-            action(genre, added);
+            action(tag, added);
         }
     }
 

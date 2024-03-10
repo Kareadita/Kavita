@@ -16,9 +16,9 @@ public static class GenreHelper
     {
         foreach (var name in names)
         {
-            if (string.IsNullOrEmpty(name.Trim())) continue;
-
             var normalizedName = name.ToNormalized();
+            if (string.IsNullOrEmpty(normalizedName)) continue;
+
             var genre = allGenres.FirstOrDefault(p => p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName));
             if (genre == null)
             {

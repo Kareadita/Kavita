@@ -36,11 +36,11 @@ public interface IProcessSeries
     void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false);
 
     // These exists only for Unit testing
-    void UpdateSeriesMetadata(Series series, Library library);
-    void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
-    void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
-    void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false);
+    //void UpdateSeriesMetadata(Series series, Library library);
+    //void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
+    //void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
+    //void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
+    //void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -553,7 +553,7 @@ public class ProcessSeries : IProcessSeries
 
     }
 
-    public void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
@@ -634,7 +634,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -701,7 +701,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
@@ -727,7 +727,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
+    private void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
     {
         if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
@@ -960,6 +960,7 @@ public class ProcessSeries : IProcessSeries
     /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
     private void UpdateTag(IEnumerable<string> names, Action<Tag, bool> action)
     {
+        // TODO: Use TagHelper.UpdateTag instead
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
