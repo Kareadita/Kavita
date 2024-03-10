@@ -1205,6 +1205,64 @@ public class ReadingListServiceTests
         Assert.Equal(2, createdList.Items.First(item => item.Order == 2).ChapterId);
         Assert.Equal(4, createdList.Items.First(item => item.Order == 3).ChapterId);
     }
+
+    /// <summary>
+    /// This test is about ensuring Annuals that are a separate series can be linked up properly (ComicVine)
+    /// </summary>
+    [Fact]
+    public async Task CreateReadingListFromCBL_ShouldCreateList_WithAnnuals()
+    {
+        await ResetDb();
+        var cblReadingList = LoadCblFromPath("Annual.cbl");
+
+        // Mock up our series
+        var fablesSeries = new SeriesBuilder("Fables")
+            .WithVolume(new VolumeBuilder("2002")
+                .WithMinNumber(1)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .WithChapter(new ChapterBuilder("3").Build())
+                .Build())
+            .Build();
+
+        var fables2Series = new SeriesBuilder("Fables Annual")
+            .WithVolume(new VolumeBuilder("2003")
+                .WithMinNumber(1)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .WithSeries(fables2Series)
+                    .Build()
+            },
+        });
+        await _unitOfWork.CommitAsync();
+
+        var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+
+        Assert.Equal(CblImportResult.Success, importSummary.Success);
+        Assert.NotEmpty(importSummary.Results);
+
+        var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+
+        Assert.NotNull(createdList);
+        Assert.Equal("Annual", createdList.Title);
+
+        Assert.Equal(4, createdList.Items.Count);
+        Assert.Equal(1, createdList.Items.First(item => item.Order == 0).ChapterId);
+        Assert.Equal(2, createdList.Items.First(item => item.Order == 1).ChapterId);
+        Assert.Equal(4, createdList.Items.First(item => item.Order == 2).ChapterId);
+        Assert.Equal(3, createdList.Items.First(item => item.Order == 3).ChapterId);
+    }
+
     #endregion
 
     #region CreateReadingListsFromSeries

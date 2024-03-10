@@ -619,6 +619,26 @@ public class ReadingListService : IReadingListService
         readingList.Items ??= new List<ReadingListItem>();
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
+
+            // I want to refactor this so that we move the matching logic into a method.
+            // But when I looked, we are returning statuses on different conditions, hard to keep it single responsibility
+            // Either refactor to return an enum for the state, make it return the BookResult, or refactor the reasoning so it's more straightforward
+
+            // var match = FindMatchingCblBookSeries(book);
+            // if (match == null)
+            // {
+            //     importSummary.Results.Add(new CblBookResult(book)
+            //     {
+            //         Reason = CblImportReason.SeriesMissing,
+            //         Order = i
+            //     });
+            //     continue;
+            // }
+
+
+            // TODO: I need a dedicated db query to get Series name's processed if they are ComicVine.
+            // In comicvine, series names are Series(Volume), but the spec just has Series="Series" Volume="Volume"
+            // So we need to combine them for comics that are in ComicVine libraries.
             var normalizedSeries = Parser.Normalize(book.Series);
             if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
             {
@@ -645,7 +665,7 @@ public class ReadingListService : IReadingListService
                 continue;
             }
 
-            // We need to handle chapter 0 or empty string when it's just a volume
+            // We need to handle default chapter or empty string when it's just a volume
             var bookNumber = string.IsNullOrEmpty(book.Number)
                 ? Parser.DefaultChapterNumber
                 : float.Parse(book.Number);
