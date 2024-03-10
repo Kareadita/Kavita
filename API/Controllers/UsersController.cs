@@ -105,6 +105,9 @@ public class UsersController : BaseApiController
         existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
         existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
         existingPreferences.BookReaderSwipeToPaginate = preferencesDto.BookReaderSwipeToPaginate;
+        existingPreferences.BookReaderScrollThreshold = preferencesDto.BookReaderScrollThreshold;
+        existingPreferences.BookReaderDistanceThreshold = preferencesDto.BookReaderDistanceThreshold;
+        existingPreferences.BookReaderSpeedThreshold = preferencesDto.BookReaderSpeedThreshold;
         existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
         existingPreferences.BookReaderWritingStyle = preferencesDto.BookReaderWritingStyle;
         existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;

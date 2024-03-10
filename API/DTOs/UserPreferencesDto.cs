@@ -94,6 +94,18 @@ public class UserPreferencesDto
     [Required]
     public bool BookReaderSwipeToPaginate { get; set; }
     /// <summary>
+    /// Book Reader Option: Sets scroll threshold for swipe pagination
+    /// </summary>
+    public int BookReaderScrollThreshold { get; set; } = 30;
+    /// <summary>
+    /// Book Reader Option: Sets distance threshold for swipe pagination
+    /// </summary>
+    public int BookReaderDistanceThreshold { get; set; } = 30;
+    /// <summary>
+    /// Book Reader Option: Sets speed threshold for swipe pagination
+    /// </summary>
+    public double BookReaderSpeedThreshold { get; set; } = 50;
+    /// <summary>
     /// Book Reader Option: What direction should the next/prev page buttons go
     /// </summary>
     [Required]

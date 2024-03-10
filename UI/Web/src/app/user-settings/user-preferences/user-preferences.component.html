@@ -288,7 +288,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 col-sm-12 pe-2 mb-3">
+              <div *ngIf="!!settingsForm.get('bookReaderImmersiveMode')?.value" class="col-md-4 col-sm-12 pe-2 mb-3">
                 <label id="taptopaginate-label" class="form-label"></label>
                 <div class="mb-3">
                   <div class="form-check form-switch">
@@ -301,7 +301,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 col-sm-12 pe-2 mb-3">
+              <div *ngIf="!!settingsForm.get('bookReaderImmersiveMode')?.value" class="col-md-4 col-sm-12 pe-2 mb-3">
                 <label id="taptopaginate-label" class="form-label"></label>
                 <div class="mb-3">
                   <div class="form-check form-switch">
@@ -313,6 +313,60 @@
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div *ngIf="!!settingsForm.get('bookReaderImmersiveMode')?.value && !!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0">
+              <div class="col-md-12 pe-2 mb-3">
+                <label for="settings-swipe-thresholds" class="form-label">{{t('swipe-thresholds-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookSwipeThresholdsTooltip" role="button" tabindex="0"></i>
+                <ng-template #bookSwipeThresholdsTooltip>{{t('swipe-thresholds-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="settings-book-swipe-thresholds-help">
+                  <ng-container [ngTemplateOutlet]="bookSwipeThresholdsTooltip"></ng-container>
+                </span>
+              </div>
+              <div class="col-md-4 pe-2 mb-3">
+                <div class="row">
+                  <div class="col-md-8">
+                    <label for="scrollThreshold" class="form-label range-label" style="width: fit-content;">{{t('scroll-threshold-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookScrollThresholdTooltip" role="button" tabindex="0"></i>
+                    <ng-template #bookScrollThresholdTooltip>{{t('scroll-threshold-tooltip')}}</ng-template>
+                    <span class="visually-hidden" id="scroll-threshold-help">
+                      <ng-container [ngTemplateOutlet]="bookScrollThresholdTooltip"></ng-container>
+                    </span>
+                  </div>
+                  <div class="col-md-4">
+                    <span class="range-text">> {{settingsForm.get('bookReaderScrollThreshold')?.value + '%'}}</span>
+                  </div>
+                </div>
+                <input type="range" class="form-range" id="scrollThreshold" min="0" max="100" step="5" formControlName="bookReaderScrollThreshold">
+              </div>
+              <div class="col-md-4 pe-2 mb-3">
+                <div class="row">
+                  <div class="col-md-8">
+                    <label for="distanceThreshold" class="form-label range-label" style="width: fit-content;">{{t('distance-threshold-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookDistanceThresholdTooltip" role="button" tabindex="0"></i>
+                    <ng-template #bookDistanceThresholdTooltip>{{t('distance-threshold-tooltip')}}</ng-template>
+                    <span class="visually-hidden" id="distance-threshold-help">
+                      <ng-container [ngTemplateOutlet]="bookDistanceThresholdTooltip"></ng-container>
+                    </span>
+                  </div>
+                  <div class="col-md-4">
+                    <span class="range-text">> {{settingsForm.get('bookReaderDistanceThreshold')?.value + '%'}}</span>
+                  </div>
+                </div>
+                <input type="range" class="form-range" id="distanceThreshold" min="0" max="100" step="5" formControlName="bookReaderDistanceThreshold">
+              </div>
+              <div class="col-md-4 pe-2 mb-3">
+                <div class="row">
+                  <div class="col-md-8">
+                    <label for="speedThreshold" class="form-label range-label" style="width: fit-content;">{{t('speed-threshold-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="bookSpeedThresholdTooltip" role="button" tabindex="0"></i>
+                    <ng-template #bookSpeedThresholdTooltip>{{t('speed-threshold-tooltip')}}</ng-template>
+                    <span class="visually-hidden" id="speed-threshold-help">
+                      <ng-container [ngTemplateOutlet]="bookSpeedThresholdTooltip"></ng-container>
+                    </span>
+                  </div>
+                  <div class="col-md-4">
+                    <span class="range-text">> {{settingsForm.get('bookReaderSpeedThreshold')?.value}} {{t('pixels-per-second')}}</span>
+                  </div>
+                </div>
+                <input type="range" class="form-range" id="speedThreshold" min="0.01" max="200" step="0.01" formControlName="bookReaderSpeedThreshold">
               </div>
             </div>
 

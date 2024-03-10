@@ -115,7 +115,7 @@
                     <label>{{settingsForm.get('bookReaderSwipeToPaginate')?.value ? t('on') : t('off')}} </label>
                   </div>
                 </div>
-                <div *ngIf="!!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0 controls">
+                <div *ngIf="!!settingsForm.get('bookReaderImmersiveMode')?.value && !!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0 controls">
                   <label for="scrollThreshold" class="form-label col-6">{{t('scroll-threshold-label')}}</label>
                   <span class="col-6 float-end" style="display: inline-flex;">
                     <i class="fa-solid fa-angle-down"  style="font-size: 24px;"></i>
@@ -126,7 +126,7 @@
                     > {{settingsForm.get('bookReaderScrollThreshold')?.value || 10}} %
                   </span>
                 </div>
-                <div *ngIf="!!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0 controls">
+                <div *ngIf="!!settingsForm.get('bookReaderImmersiveMode')?.value && !!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0 controls">
                   <label for="distanceThreshold" class="form-label col-6">{{t('swipe-distance-threshold-label')}}</label>
                   <span class="col-6 float-end" style="display: inline-flex;">
                     <i class="fa-solid fa-angle-down"  style="font-size: 24px;"></i>
@@ -137,7 +137,7 @@
                     > {{settingsForm.get('bookReaderDistanceThreshold')?.value || 50}} %
                   </span>
                 </div>
-                <div *ngIf="!!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0 controls">
+                <div *ngIf="!!settingsForm.get('bookReaderImmersiveMode')?.value && !!settingsForm.get('bookReaderSwipeToPaginate')?.value" class="row g-0 controls">
                   <label for="speedThreshold" class="form-label col-6">{{t('swipe-speed-threshold-label')}}</label>
                   <span class="col-6 float-end" style="display: inline-flex;">
                     <i class="fa-solid fa-angle-down"  style="font-size: 24px;"></i>
