@@ -248,12 +248,22 @@ public class ScannerService : IScannerService
         await _processSeries.Prime();
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanElapsedTime = await ScanFiles(library, new []{ folderPath }, false, TrackFiles, true);
+        var (scanElapsedTime, processedSeries) = await ScanFiles(library, new []{ folderPath },
+            false, TrackFiles, true);
+
+        // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
+        TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
+
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         // We now technically have all scannedSeries, we could invoke each Series to be scanned
         foreach (var pSeries in parsedSeries.Keys)
         {
+            // Don't allow any processing on files that aren't part of this series
+            if (!pSeries.NormalizedName.Equals(series.NormalizedName) && !pSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
+            {
+                continue;
+            }
             // Process Series
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
         }
@@ -329,9 +339,16 @@ public class ScannerService : IScannerService
             }
 
             parsedSeries.Add(foundParsedSeries, parsedFiles);
-            // TODO: In order to allow ProcessSeriesAsync to be on it's own task, I need this Track files to be handled elsewhere
-            //await _processSeries.ProcessSeriesAsync(parsedFiles, library, bypassFolderOptimizationChecks);
             return Task.CompletedTask;
+        }
+    }
+
+    private void TrackFoundSeriesAndFiles(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, IList<ScannedSeriesResult> seenSeries)
+    {
+        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0))
+        {
+            var parsedFiles = series.ParsedInfos;
+            parsedSeries.Add(series.ParsedSeries, parsedFiles);
         }
     }
 
@@ -500,12 +517,18 @@ public class ScannerService : IScannerService
         var totalFiles = 0;
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
-        var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
+        var (scanElapsedTime, processedSeries) = await ScanFiles(library, libraryFolderPaths,
+            shouldUseLibraryScan, TrackFiles, forceUpdate);
+
+        TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
+
+        // We should remove all processedSeries where parsedInfo count is 0 (but process series does this already too)
 
         // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
         await _processSeries.Prime();
         foreach (var pSeries in parsedSeries.Keys)
         {
+            totalFiles += parsedSeries[pSeries].Count;
             await _seriesProcessingSemaphore.WaitAsync();
             try
             {
@@ -597,32 +620,28 @@ public class ScannerService : IScannerService
                 NormalizedName = Parser.Normalize(parsedFiles[0].Series),
                 Format = parsedFiles[0].Format,
             };
-
-            if (skippedScan)
+            if (!skippedScan)
             {
-                parsedSeries.Add(foundParsedSeries, parsedFiles);
-                return Task.CompletedTask;
+                totalFiles += parsedFiles.Count;
             }
-
-            totalFiles += parsedFiles.Count;
 
             parsedSeries.Add(foundParsedSeries, parsedFiles);
             return Task.CompletedTask;
         }
     }
 
-    private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,
+    private async Task<Tuple<long, IList<ScannedSeriesResult>>> ScanFiles(Library library, IEnumerable<string> dirs,
         bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos = null, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();
 
-        await scanner.ScanLibrariesForSeries(library, dirs,
+        var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
             isLibraryScan, await _unitOfWork.SeriesRepository.GetFolderPathMap(library.Id), processSeriesInfos, forceChecks);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
-        return scanElapsedTime;
+        return Tuple.Create(scanElapsedTime, processedSeries);
     }
 
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
