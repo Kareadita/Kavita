@@ -196,12 +196,14 @@ public class ScannerService : IScannerService
     public async Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true)
     {
         var sw = Stopwatch.StartNew();
-        var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
+
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
-        var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
+        var existingChapterIdsToClean = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
+
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         if (library == null) return;
+
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
         {
@@ -214,6 +216,7 @@ public class ScannerService : IScannerService
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
         {
             // We don't care if it's multiple due to new scan loop enforcing all in one root directory
+            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
             var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
             if (seriesDirs.Keys.Count == 0)
             {
@@ -317,7 +320,7 @@ public class ScannerService : IScannerService
         await _metadataService.RemoveAbandonedMetadataKeys();
         //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
         //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
-        BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+        BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(existingChapterIdsToClean));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
