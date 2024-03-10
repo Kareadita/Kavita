@@ -150,6 +150,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   bookReaderWritingStyleControl = new FormControl();
   bookReaderTapToPaginateControl = new FormControl();
   bookReaderSwipeToPaginateControl = new FormControl();
+  bookReaderScrollThresholdControl = new FormControl();
+  bookReaderDistanceThresholdControl = new FormControl();
+  bookReaderSpeedThresholdControl = new FormControl();
   bookReaderLayoutModeControl = new FormControl();
   bookReaderThemeNameControl = new FormControl();
   bookReaderImmersiveModeControl = new FormControl();
@@ -250,6 +253,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderWritingStyle', this.bookReaderWritingStyleControl);
       this.settingsForm.addControl('bookReaderTapToPaginate', this.bookReaderTapToPaginateControl);
       this.settingsForm.addControl('bookReaderSwipeToPaginate', this.bookReaderSwipeToPaginateControl);
+      this.settingsForm.addControl('bookReaderScrollThreshold', this.bookReaderScrollThresholdControl);
+      this.settingsForm.addControl('bookReaderDistanceThreshold', this.bookReaderDistanceThresholdControl);
+      this.settingsForm.addControl('bookReaderSpeedThreshold', this.bookReaderSpeedThresholdControl);
       this.settingsForm.addControl('bookReaderLayoutMode', this.bookReaderLayoutModeControl);
       this.settingsForm.addControl('bookReaderThemeName', this.bookReaderThemeNameControl);
       this.settingsForm.addControl('bookReaderImmersiveMode', this.bookReaderImmersiveModeControl);
@@ -282,6 +288,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.bookReaderWritingStyleControl.setValue(this.user?.preferences.bookReaderWritingStyle);
       this.bookReaderTapToPaginateControl.setValue(!!this.user?.preferences.bookReaderTapToPaginate);
       this.bookReaderSwipeToPaginateControl.setValue(!!this.user?.preferences.bookReaderSwipeToPaginate);
+      this.bookReaderScrollThresholdControl.setValue(this.user?.preferences.bookReaderScrollThreshold);
+      this.bookReaderDistanceThresholdControl.setValue(this.user?.preferences.bookReaderDistanceThreshold);
+      this.bookReaderSpeedThresholdControl.setValue(this.user?.preferences.bookReaderSpeedThreshold);
       this.bookReaderLayoutModeControl.setValue(this.user?.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
       this.bookReaderThemeNameControl.setValue(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name);
       this.bookReaderImmersiveModeControl.setValue(this.user?.preferences.bookReaderImmersiveMode);
@@ -339,6 +348,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.bookReaderMarginControl.setValue(this.user.preferences.bookReaderMargin);
     this.bookReaderTapToPaginateControl.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.bookReaderSwipeToPaginateControl.setValue(this.user.preferences.bookReaderSwipeToPaginate);
+    this.bookReaderScrollThresholdControl.setValue(this.user?.preferences.bookReaderScrollThreshold);
+    this.bookReaderDistanceThresholdControl.setValue(this.user?.preferences.bookReaderDistanceThreshold);
+    this.bookReaderSpeedThresholdControl.setValue(this.user?.preferences.bookReaderSpeedThreshold);
     this.bookReaderReadingDirectionControl.setValue(this.user.preferences.bookReaderReadingDirection);
     this.bookReaderWritingStyleControl.setValue(this.user.preferences.bookReaderWritingStyle);
     this.bookReaderLayoutModeControl.setValue(this.user.preferences.bookReaderLayoutMode);
@@ -376,6 +388,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderSwipeToPaginate: modelSettings.bookReaderSwipeToPaginate,
+      bookReaderScrollThreshold: parseFloat(modelSettings.bookReaderScrollThreshold),
+      bookReaderDistanceThreshold: parseFloat(modelSettings.bookReaderDistanceThreshold),
+      bookReaderSpeedThreshold: parseFloat(modelSettings.bookReaderSpeedThreshold),
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
       bookReaderWritingStyle: parseInt(modelSettings.bookReaderWritingStyle, 10),
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),

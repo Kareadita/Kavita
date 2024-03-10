@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240310050129_SwipeThresholds")]
+    partial class SwipeThresholds
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
@@ -290,8 +293,7 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("BookReaderDistanceThreshold")
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue("30");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("BookReaderFontFamily")
                         .HasColumnType("TEXT");
@@ -315,12 +317,10 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("BookReaderScrollThreshold")
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue("30");
+                        .HasColumnType("INTEGER");
 
                     b.Property<double>("BookReaderSpeedThreshold")
-                        .HasColumnType("REAL")
-                        .HasDefaultValue("50");
+                        .HasColumnType("REAL");
 
                     b.Property<bool>("BookReaderSwipeToPaginate")
                         .HasColumnType("INTEGER");

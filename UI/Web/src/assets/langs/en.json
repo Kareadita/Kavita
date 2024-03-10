@@ -136,6 +136,16 @@
         "emulate-comic-book-label": "Emulate comic book",
         "swipe-to-paginate-label": "Swipe to Paginate",
         "swipe-to-paginate-tooltip": "Should the sides of the book reader screen allow swiping on it to move to prev/next page",
+        "swipe-thresholds-label": "Swipe to Paginate Threshold Settings",
+        "swipe-thresholds-tooltip": "Settings to control when a swipe should register as pagination",
+        "scroll-threshold-label": "Scroll Threshold",
+        "scroll-threshold-tooltip": "How far in the perpendicular plane to the reading direction can you swipe before it is considered a scroll instead of a page turn",
+        "distance-threshold-label": "Distance Threshold",
+        "distance-threshold-tooltip": "How far should the swipe be to invoke a page change",
+        "speed-threshold-label": "Speed Threshold",
+        "speed-threshold-tooltip": "How fast should the swipe be to invoke a page turn",
+        "pixels-per-second": "pixels/s",
+
 
         "book-reader-settings-title": "Book Reader",
         "tap-to-paginate-label": "Tap to Paginate",
