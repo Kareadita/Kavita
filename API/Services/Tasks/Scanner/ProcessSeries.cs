@@ -814,6 +814,9 @@ public class ProcessSeries : IProcessSeries
 
         void AddGenre(Genre genre, bool newTag)
         {
+            // If new tag, we can instead of adding immediately to allGenres, we could save it in a single transaction
+            // then add it, so that going forward, everyone gets the new Id
+
             chapter.Genres.Add(genre);
         }
 
@@ -830,153 +833,61 @@ public class ProcessSeries : IProcessSeries
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        var people = GetTagValues(comicInfo.Colorist);
+        var people = TagHelper.GetTagValues(comicInfo.Colorist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        UpdatePeople(people, PersonRole.Colorist, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Colorist, AddPerson);
 
-        people = GetTagValues(comicInfo.Characters);
+        people = TagHelper.GetTagValues(comicInfo.Characters);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        UpdatePeople(people, PersonRole.Character, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Character, AddPerson);
 
 
-        people = GetTagValues(comicInfo.Translator);
+        people = TagHelper.GetTagValues(comicInfo.Translator);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        UpdatePeople(people, PersonRole.Translator, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Translator, AddPerson);
 
 
-        people = GetTagValues(comicInfo.Writer);
+        people = TagHelper.GetTagValues(comicInfo.Writer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        UpdatePeople(people, PersonRole.Writer, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Writer, AddPerson);
 
-        people = GetTagValues(comicInfo.Editor);
+        people = TagHelper.GetTagValues(comicInfo.Editor);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        UpdatePeople(people, PersonRole.Editor, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Editor, AddPerson);
 
-        people = GetTagValues(comicInfo.Inker);
+        people = TagHelper.GetTagValues(comicInfo.Inker);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        UpdatePeople(people, PersonRole.Inker, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Inker, AddPerson);
 
-        people = GetTagValues(comicInfo.Letterer);
+        people = TagHelper.GetTagValues(comicInfo.Letterer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        UpdatePeople(people, PersonRole.Letterer, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Letterer, AddPerson);
 
-        people = GetTagValues(comicInfo.Penciller);
+        people = TagHelper.GetTagValues(comicInfo.Penciller);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        UpdatePeople(people, PersonRole.Penciller, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Penciller, AddPerson);
 
-        people = GetTagValues(comicInfo.CoverArtist);
+        people = TagHelper.GetTagValues(comicInfo.CoverArtist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        UpdatePeople(people, PersonRole.CoverArtist, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.CoverArtist, AddPerson);
 
-        people = GetTagValues(comicInfo.Publisher);
+        people = TagHelper.GetTagValues(comicInfo.Publisher);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        UpdatePeople(people, PersonRole.Publisher, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Publisher, AddPerson);
 
-        people = GetTagValues(comicInfo.Imprint);
+        people = TagHelper.GetTagValues(comicInfo.Imprint);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
-        UpdatePeople(people, PersonRole.Imprint, AddPerson);
+        PersonHelper.UpdatePeople(_people, people, PersonRole.Imprint, AddPerson);
 
-        var genres = GetTagValues(comicInfo.Genre);
+        var genres = TagHelper.GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
             genres.Select(g => new GenreBuilder(g).Build()).ToList());
-        UpdateGenre(genres, AddGenre);
+        GenreHelper.UpdateGenre(_genres, genres, AddGenre);
 
-        var tags = GetTagValues(comicInfo.Tags);
+        var tags = TagHelper.GetTagValues(comicInfo.Tags);
         TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
-        UpdateTag(tags, AddTag);
+        TagHelper.UpdateTag(_tags, tags, AddTag);
     }
 
-    private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
-    {
-        // TODO: Move this to an extension and test it
-        if (string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
-        {
-            return ImmutableList<string>.Empty;
-        }
-
-        return comicInfoTagSeparatedByComma.Split(",")
-            .Select(s => s.Trim())
-            .DistinctBy(Parser.Parser.Normalize)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and
-    /// add an entry. For each person in name, the callback will be executed.
-    /// </summary>
-    /// <remarks>This does not remove people if an empty list is passed into names</remarks>
-    /// <remarks>This is used to add new people to a list without worrying about duplicating rows in the DB</remarks>
-    /// <param name="names"></param>
-    /// <param name="role"></param>
-    /// <param name="action"></param>
-    private void UpdatePeople(IEnumerable<string> names, PersonRole role, Action<Person> action)
-    {
-        var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
-
-        foreach (var name in names)
-        {
-            var normalizedName = name.ToNormalized();
-            var person = allPeopleTypeRole.Find(p =>
-                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
-
-            if (person == null)
-            {
-                person = new PersonBuilder(name, role).Build();
-                _people.Add(person);
-            }
-            action(person);
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="names"></param>
-    /// <param name="action">Executes for each tag</param>
-    private void UpdateGenre(IEnumerable<string> names, Action<Genre, bool> action)
-    {
-        foreach (var name in names)
-        {
-            var normalizedName = name.ToNormalized();
-            if (string.IsNullOrEmpty(normalizedName)) continue;
-
-            _genres.TryGetValue(normalizedName, out var genre);
-            var newTag = genre == null;
-            if (newTag)
-            {
-                genre = new GenreBuilder(name).Build();
-                _genres.Add(normalizedName, genre);
-                _unitOfWork.GenreRepository.Attach(genre);
-            }
-
-            action(genre!, newTag);
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="names"></param>
-    /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
-    private void UpdateTag(IEnumerable<string> names, Action<Tag, bool> action)
-    {
-        // TODO: Use TagHelper.UpdateTag instead
-        foreach (var name in names)
-        {
-            if (string.IsNullOrEmpty(name.Trim())) continue;
-
-            var normalizedName = name.ToNormalized();
-            _tags.TryGetValue(normalizedName, out var tag);
-
-            var added = tag == null;
-            if (tag == null)
-            {
-                tag = new TagBuilder(name).Build();
-                _tags.Add(normalizedName, tag);
-            }
-
-            action(tag, added);
-        }
-    }
 
 }

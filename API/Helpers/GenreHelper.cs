@@ -12,24 +12,27 @@ namespace API.Helpers;
 
 public static class GenreHelper
 {
-    public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, Action<Genre> action)
+
+    public static void UpdateGenre(Dictionary<string, Genre> allGenres,
+        IEnumerable<string> names, Action<Genre, bool> action)
     {
         foreach (var name in names)
         {
             var normalizedName = name.ToNormalized();
             if (string.IsNullOrEmpty(normalizedName)) continue;
 
-            var genre = allGenres.FirstOrDefault(p => p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName));
-            if (genre == null)
+            if (allGenres.TryGetValue(normalizedName, out var genre))
+            {
+                action(genre, false);
+            }
+            else
             {
                 genre = new GenreBuilder(name).Build();
-                allGenres.Add(genre);
+                allGenres.Add(normalizedName, genre);
+                action(genre, true);
             }
-
-            action(genre);
         }
     }
-
 
     public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre>? action = null)
     {

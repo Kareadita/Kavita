@@ -462,7 +462,7 @@ public class ScannerService : IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries(bool forceUpdate = false)
     {
-        _logger.LogInformation("Starting Scan of All Libraries");
+        _logger.LogInformation("Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
         foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
             await ScanLibrary(lib.Id, forceUpdate);
