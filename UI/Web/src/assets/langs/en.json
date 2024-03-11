@@ -1527,7 +1527,7 @@
         "general-tab": "General",
         "cover-image-tab": "Cover Image",
         "close": "{{common.close}}",
-        "save": "{common.save}}",
+        "save": "{{common.save}}",
         "year-validation": "Must be greater than 1000, 0 or blank",
         "month-validation": "Must be between 1 and 12 or blank",
         "name-unique-validation": "Name must be unique",
