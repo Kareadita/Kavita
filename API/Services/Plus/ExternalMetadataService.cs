@@ -70,7 +70,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,

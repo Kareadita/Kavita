@@ -210,7 +210,6 @@ public class ProcessSeries : IProcessSeries
 
 
                 // Process reading list after commit as we need to commit per list
-                //await _readingListService.CreateReadingListsFromSeries(series, library);
                 BackgroundJob.Enqueue(() => _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
 
                 if (seriesAdded)
@@ -218,13 +217,15 @@ public class ProcessSeries : IProcessSeries
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
 
-                    BackgroundJob.Enqueue(() => _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
-                    //await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
+                    BackgroundJob.Enqueue(() =>
+                        _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
 
-                    //BackgroundJob.Enqueue(() => _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series.Id));
-                    await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
+                }
+                else
+                {
+                    await _unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                 }
 
                 _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
