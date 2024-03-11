@@ -512,8 +512,11 @@ public class ScannerService : IScannerService
 
         // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
         await _processSeries.Prime();
+        // We need to remove any keys where there is no actual parser info
         foreach (var pSeries in parsedSeries.Keys)
         {
+            if (parsedSeries[pSeries].Count == 0 || string.IsNullOrEmpty(parsedSeries[pSeries][0].Filename)) continue;
+
             totalFiles += parsedSeries[pSeries].Count;
             await _seriesProcessingSemaphore.WaitAsync();
             try

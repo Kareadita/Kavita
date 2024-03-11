@@ -34,14 +34,6 @@ public interface IProcessSeries
     /// <returns></returns>
     Task Prime();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false);
-    void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false);
-
-    // These exists only for Unit testing
-    //void UpdateSeriesMetadata(Series series, Library library);
-    //void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
-    //void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
-    //void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    //void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -61,6 +53,7 @@ public class ProcessSeries : IProcessSeries
     private readonly ICollectionTagService _collectionTagService;
     private readonly IReadingListService _readingListService;
     private readonly IExternalMetadataService _externalMetadataService;
+    private readonly ITagManagerService _tagManagerService;
 
     private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
@@ -70,7 +63,8 @@ public class ProcessSeries : IProcessSeries
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService, IReadingListService readingListService, IExternalMetadataService externalMetadataService)
+        ICollectionTagService collectionTagService, IReadingListService readingListService,
+        IExternalMetadataService externalMetadataService, ITagManagerService tagManagerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -84,6 +78,7 @@ public class ProcessSeries : IProcessSeries
         _collectionTagService = collectionTagService;
         _readingListService = readingListService;
         _externalMetadataService = externalMetadataService;
+        _tagManagerService = tagManagerService;
 
 
         _genres = new Dictionary<string, Genre>();
@@ -102,6 +97,8 @@ public class ProcessSeries : IProcessSeries
         _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
         _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
                             .ToDictionary(t => t.NormalizedTitle);
+
+        await _tagManagerService.Prime();
 
     }
 
@@ -151,7 +148,7 @@ public class ProcessSeries : IProcessSeries
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
-            UpdateVolumes(series, parsedInfos, forceUpdate);
+            await UpdateVolumes(series, parsedInfos, forceUpdate);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = series.Name.ToNormalized();
@@ -554,7 +551,7 @@ public class ProcessSeries : IProcessSeries
 
     }
 
-    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private async Task UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
@@ -599,7 +596,7 @@ public class ProcessSeries : IProcessSeries
                 try
                 {
                     var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
-                    UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
+                    await UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -713,7 +710,7 @@ public class ProcessSeries : IProcessSeries
             if (!forceUpdate && !_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
             existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
-            existingFile.FileName = Path.GetFileNameWithoutExtension(existingFile.FilePath);
+            existingFile.FileName = Parser.Parser.RemoveExtensionIfSupported(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }
@@ -728,7 +725,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
+    private async Task UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
     {
         if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
@@ -883,7 +880,11 @@ public class ProcessSeries : IProcessSeries
         var genres = TagHelper.GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
             genres.Select(g => new GenreBuilder(g).Build()).ToList());
-        GenreHelper.UpdateGenre(_genres, genres, AddGenre);
+        //GenreHelper.UpdateGenre(_genres, genres, AddGenre);
+        foreach (var genre in genres)
+        {
+            chapter.Genres.Add(await _tagManagerService.GetGenre(genre));
+        }
 
         var tags = TagHelper.GetTagValues(comicInfo.Tags);
         TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
