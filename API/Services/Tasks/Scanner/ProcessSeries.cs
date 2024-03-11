@@ -20,6 +20,7 @@ using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -207,7 +208,6 @@ public class ProcessSeries : IProcessSeries
                     return;
                 }
 
-                // TODO: put this on the background thread
 
                 // Process reading list after commit as we need to commit per list
                 //await _readingListService.CreateReadingListsFromSeries(series, library);

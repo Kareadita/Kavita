@@ -328,7 +328,7 @@ public class TaskScheduler : ITaskScheduler
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
-            _logger.LogInformation("A Library Scan is already running, rescheduling ScanLibrary in 3 hours");
+            _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
             BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
             return;
         }
