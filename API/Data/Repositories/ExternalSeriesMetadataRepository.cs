@@ -34,6 +34,7 @@ public interface IExternalSeriesMetadataRepository
     Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
+    Task LinkRecommendationsToSeries(int seriesId);
     Task<bool> IsBlacklistedSeries(int seriesId);
     Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true);
     Task RemoveFromBlacklist(int seriesId);
@@ -177,6 +178,13 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         };
 
         return seriesDetailPlusDto;
+    }
+
+    public async Task LinkRecommendationsToSeries(int seriesId)
+    {
+        var series = await _context.Series.Where(s => s.Id == seriesId).AsNoTracking().SingleOrDefaultAsync();
+        if (series == null) return;
+        await LinkRecommendationsToSeries(series);
     }
 
     /// <summary>

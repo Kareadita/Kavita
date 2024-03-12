@@ -65,87 +65,22 @@ internal class MockReadingItemService : IReadingItemService
     }
 }
 
-public class ParseScannedFilesTests
+public class ParseScannedFilesTests : AbstractDbTest
 {
     private readonly ILogger<ParseScannedFiles> _logger = Substitute.For<ILogger<ParseScannedFiles>>();
-    private readonly IUnitOfWork _unitOfWork;
-
-    private readonly DbConnection _connection;
-    private readonly DataContext _context;
-
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
 
     public ParseScannedFilesTests()
     {
-        var contextOptions = new DbContextOptionsBuilder()
-            .UseSqlite(CreateInMemoryDatabase())
-            .Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
-
         // Since ProcessFile relies on _readingItemService, we can implement our own versions of _readingItemService so we have control over how the calls work
+
     }
 
-    #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
-            .Build());
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    private async Task ResetDB()
+    protected override async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
 
         await _context.SaveChangesAsync();
     }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
-    }
-
-    #endregion
 
     #region MergeName
 
@@ -219,6 +154,15 @@ public class ParseScannedFilesTests
 
     #region ScanLibrariesForSeries
 
+    /// <summary>
+    /// Test that when a folder has 2 series with a localizedSeries, they combine into one final series
+    /// </summary>
+    // [Fact]
+    // public async Task ScanLibrariesForSeries_ShouldCombineSeries()
+    // {
+    //     // TODO: Implement these unit tests
+    // }
+
     [Fact]
     public async Task ScanLibrariesForSeries_ShouldFindFiles()
     {
@@ -233,34 +177,40 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        {
-            var skippedScan = parsedInfo.Item1;
-            var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
-
-            var foundParsedSeries = new ParsedSeries()
-            {
-                Name = parsedFiles.First().Series,
-                NormalizedName = parsedFiles.First().Series.ToNormalized(),
-                Format = parsedFiles.First().Format
-            };
-
-            parsedSeries.Add(foundParsedSeries, parsedFiles);
-            return Task.CompletedTask;
-        }
+        // var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        //
+        // Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        // {
+        //     var skippedScan = parsedInfo.Item1;
+        //     var parsedFiles = parsedInfo.Item2;
+        //     if (parsedFiles.Count == 0) return Task.CompletedTask;
+        //
+        //     var foundParsedSeries = new ParsedSeries()
+        //     {
+        //         Name = parsedFiles.First().Series,
+        //         NormalizedName = parsedFiles.First().Series.ToNormalized(),
+        //         Format = parsedFiles.First().Format
+        //     };
+        //
+        //     parsedSeries.Add(foundParsedSeries, parsedFiles);
+        //     return Task.CompletedTask;
+        // }
 
         var library =
             await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+
         library.Type = LibraryType.Manga;
-        await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
+        var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(1));
 
 
-        Assert.Equal(3, parsedSeries.Values.Count);
-        Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
+        // Assert.Equal(3, parsedSeries.Values.Count);
+        // Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
+
+        Assert.Equal(3, parsedSeries.Count);
+        Assert.NotEmpty(parsedSeries.Select(p => p.ParsedSeries).Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
     }
 
     #endregion
@@ -292,15 +242,13 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
-        var library =
-            await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
-        await psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, directoryPath, libraryFolder) =>
+        var scanResults = psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        foreach (var scanResult in scanResults)
         {
-            directoriesSeen.Add(directoryPath);
-            return Task.CompletedTask;
-        }, library);
+            directoriesSeen.Add(scanResult.Folder);
+        }
 
         Assert.Equal(2, directoriesSeen.Count);
     }
@@ -313,14 +261,18 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+
         var directoriesSeen = new HashSet<string>();
-        await psf.ProcessFiles("C:/Data/", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, directoryPath, libraryFolder) =>
+        var scanResults = psf.ProcessFiles("C:/Data/", false,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+
+        foreach (var scanResult in scanResults)
         {
-            directoriesSeen.Add(directoryPath);
-            return Task.CompletedTask;
-        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
-                LibraryIncludes.Folders | LibraryIncludes.FileTypes));
+            directoriesSeen.Add(scanResult.Folder);
+        }
 
         Assert.Single(directoriesSeen);
         directoriesSeen.TryGetValue("C:/Data/", out var actual);
@@ -344,17 +296,12 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
-        var callCount = 0;
-        await psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, folderPath, libraryFolder) =>
-        {
-            callCount++;
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+        var scanResults = psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
-            return Task.CompletedTask;
-        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
-            LibraryIncludes.Folders | LibraryIncludes.FileTypes));
-
-        Assert.Equal(2, callCount);
+        Assert.Equal(2, scanResults.Count);
     }
 
 
@@ -378,17 +325,17 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new BasicParser(ds, new ImageParser(ds))), Substitute.For<IEventHub>());
 
-        var callCount = 0;
-        await psf.ProcessFiles("C:/Data", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
-            (files, folderPath, libraryFolder) =>
-        {
-            callCount++;
-            return Task.CompletedTask;
-        }, await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
-            LibraryIncludes.Folders | LibraryIncludes.FileTypes));
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+        var scanResults = psf.ProcessFiles("C:/Data", false,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
-        Assert.Equal(1, callCount);
+        Assert.Single(scanResults);
     }
+
+
+
 
     #endregion
 }
