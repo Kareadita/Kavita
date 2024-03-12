@@ -172,6 +172,7 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
             break;
           case LibraryType.Comic:
+          case LibraryType.ComicVine:
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
