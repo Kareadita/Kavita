@@ -341,9 +341,6 @@ public class ParseScannedFiles
                         }
                     }
 
-                    // I think we can do a bit of work here and streamline this to still use scanResult
-                    //var processedSeries = new List<ScanResult>(); // NOTE: I need to figure out if I do this in the nested loop or bring it out
-
                     foreach (var series in scannedSeries.Keys)
                     {
                         if (scannedSeries[series].Count <= 0) continue;

@@ -317,16 +317,12 @@ public class ScannerService : IScannerService
         _processSeries.Reset();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
 
         await _metadataService.RemoveAbandonedMetadataKeys();
 
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(existingChapterIdsToClean));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
@@ -512,17 +508,20 @@ public class ScannerService : IScannerService
 
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
 
-        // We should remove all processedSeries where parsedInfo count is 0 (but process series does this already too)
+        // We need to remove any keys where there is no actual parser info
+        var toProcess = parsedSeries.Keys
+            .Where(k => parsedSeries[k].Any() && !string.IsNullOrEmpty(parsedSeries[k][0].Filename))
+            .ToList();
 
-        // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
-        await _processSeries.Prime();
+        if (toProcess.Count > 0)
+        {
+            // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
+            await _processSeries.Prime();
+        }
 
         var tasks = new List<Task>();
-        foreach (var pSeries in parsedSeries.Keys)
+        foreach (var pSeries in toProcess)
         {
-            // We need to remove any keys where there is no actual parser info
-            if (parsedSeries[pSeries].Count == 0 || string.IsNullOrEmpty(parsedSeries[pSeries][0].Filename)) continue;
-
             totalFiles += parsedSeries[pSeries].Count;
             tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
         }
