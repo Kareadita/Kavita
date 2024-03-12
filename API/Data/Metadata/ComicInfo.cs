@@ -177,7 +177,12 @@ public class ComicInfo
 
         if (!string.IsNullOrEmpty(info.Number))
         {
-            info.Number = info.Number.Replace(",", "."); // Corrective measure for non English OSes
+            info.Number = info.Number.Trim().Replace(",", "."); // Corrective measure for non English OSes
+        }
+
+        if (!string.IsNullOrEmpty(info.Volume))
+        {
+            info.Volume = info.Volume.Trim();
         }
     }
 

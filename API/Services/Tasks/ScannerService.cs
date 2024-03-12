@@ -246,7 +246,8 @@ public class ScannerService : IScannerService
         // If the series path doesn't exist anymore, it was either moved or renamed. We need to essentially delete it
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, new []{ folderPath },
@@ -288,35 +289,36 @@ public class ScannerService : IScannerService
         // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
         if (parsedSeries.Count == 0)
         {
-         var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
-         if (!string.IsNullOrEmpty(series.FolderPath) && !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
-         {
-             try
+             var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
+             if (!string.IsNullOrEmpty(series.FolderPath) && !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
              {
-                 _unitOfWork.SeriesRepository.Remove(series);
-                 await CommitAndSend(1, sw, scanElapsedTime, series);
-                 await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                     MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, series.LibraryId), false);
+                 try
+                 {
+                     _unitOfWork.SeriesRepository.Remove(series);
+                     await CommitAndSend(1, sw, scanElapsedTime, series);
+                     await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                         MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, series.LibraryId), false);
+                 }
+                 catch (Exception ex)
+                 {
+                     _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series as no files could be found. Aborting scan");
+                     await _unitOfWork.RollbackAsync();
+                     return;
+                 }
              }
-             catch (Exception ex)
+             else
              {
-                 _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series as no files could be found. Aborting scan");
+                 // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
+                 _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
+                 await _eventHub.SendMessageAsync(MessageFactory.Error,
+                     MessageFactory.ErrorEvent($"Error scanning {series.Name}", "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan"));
                  await _unitOfWork.RollbackAsync();
                  return;
              }
-         }
-         else
-         {
-             // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
-             _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
-             await _eventHub.SendMessageAsync(MessageFactory.Error,
-                 MessageFactory.ErrorEvent($"Error scanning {series.Name}", "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan"));
-             await _unitOfWork.RollbackAsync();
-             return;
-         }
-         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
-         if (parsedSeries.Count == 0) return;
         }
+
+        // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
+        if (parsedSeries.Count == 0) return;
 
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
@@ -325,8 +327,9 @@ public class ScannerService : IScannerService
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
 
         await _metadataService.RemoveAbandonedMetadataKeys();
-        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
-        //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
+
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(existingChapterIdsToClean));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
