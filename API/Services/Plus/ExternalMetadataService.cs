@@ -155,13 +155,14 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task GetNewSeriesData(int seriesId, LibraryType libraryType)
     {
         if (!IsPlusEligible(libraryType)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
 
         // Generate key based on seriesId and libraryType or any unique identifier for the request
         // Check if the request is allowed based on the rate limit
         if (!RateLimiter.TryAcquire(string.Empty))
         {
             // Request not allowed due to rate limit
-            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
+            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch"); // TODO: This will call even if we don't have a license.
             return;
         }
 

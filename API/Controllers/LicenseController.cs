@@ -32,7 +32,11 @@ public class LicenseController(
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
         var result = await licenseService.HasActiveLicense(forceCheck);
-        await taskScheduler.ScheduleKavitaPlusTasks();
+        if (result)
+        {
+            await taskScheduler.ScheduleKavitaPlusTasks();
+        }
+
         return Ok(result);
     }
 
