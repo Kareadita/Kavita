@@ -24,12 +24,16 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
         if (type != LibraryType.ComicVine) return null;
 
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+        // Mylar often outputs cover.jpg, ignore it by default
+        if (string.IsNullOrEmpty(fileName) || Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
+
         var directoryName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
+
         var info = new ParserInfo()
         {
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
-            Title = Parser.RemoveExtensionIfSupported(fileName),
+            Title = Parser.RemoveExtensionIfSupported(fileName)!,
             FullFilePath = filePath,
             Series = string.Empty,
             ComicInfo = comicInfo,
