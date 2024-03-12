@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -18,10 +19,16 @@ public interface ITagManagerService
     /// </summary>
     /// <returns></returns>
     Task Prime();
+    /// <summary>
+    /// Should be called after all work is done, will free up memory
+    /// </summary>
+    /// <returns></returns>
+    void Reset();
 
     Task<Genre?> GetGenre(string genre);
     Task<Tag?> GetTag(string tag);
     Task<Person?> GetPerson(string name, PersonRole role);
+    Task<CollectionTag?> GetCollectionTag(string name);
 }
 
 /// <summary>
@@ -34,18 +41,26 @@ public class TagManagerService : ITagManagerService
     private Dictionary<string, Genre> _genres;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, Person> _people;
+    private Dictionary<string, CollectionTag> _collectionTags;
 
     private readonly SemaphoreSlim _genreSemaphore = new SemaphoreSlim(1, 1);
     private readonly SemaphoreSlim _tagSemaphore = new SemaphoreSlim(1, 1);
     private readonly SemaphoreSlim _personSemaphore = new SemaphoreSlim(1, 1);
+    private readonly SemaphoreSlim _collectionTagSemaphore = new SemaphoreSlim(1, 1);
 
     public TagManagerService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
+        Reset();
 
+    }
+
+    public void Reset()
+    {
         _genres = new Dictionary<string, Genre>();
         _tags = new Dictionary<string, Tag>();
         _people = new Dictionary<string, Person>();
+        _collectionTags = new Dictionary<string, CollectionTag>();
     }
 
     public async Task Prime()
@@ -53,6 +68,9 @@ public class TagManagerService : ITagManagerService
         _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
         _people = (await _unitOfWork.PersonRepository.GetAllPeople()).ToDictionary(GetPersonKey);
+        _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
+            .ToDictionary(t => t.NormalizedTitle);
+
     }
 
     /// <summary>
@@ -155,5 +173,35 @@ public class TagManagerService : ITagManagerService
     private static string GetPersonKey(Person p)
     {
         return GetPersonKey(p.NormalizedName, p.Role);
+    }
+
+    /// <summary>
+    /// Gets the CollectionTag entity for the given string. If one doesn't exist, one will be created and committed.
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    public async Task<CollectionTag?> GetCollectionTag(string tag)
+    {
+        if (string.IsNullOrEmpty(tag)) return null;
+
+        await _collectionTagSemaphore.WaitAsync();
+        try
+        {
+            if (_collectionTags.TryGetValue(tag.ToNormalized(), out var result))
+            {
+                return result;
+            }
+
+            // We need to create a new Genre
+            result = new CollectionTagBuilder(tag).Build();
+            _unitOfWork.CollectionTagRepository.Add(result);
+            await _unitOfWork.CommitAsync();
+            _collectionTags.Add(result.NormalizedTitle, result);
+            return result;
+        }
+        finally
+        {
+            _collectionTagSemaphore.Release();
+        }
     }
 }

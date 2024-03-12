@@ -334,7 +334,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force));
+        BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
     }
@@ -428,8 +428,14 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasScanTaskRunningForLibrary(int libraryId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue, checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue, checkRunningJobs);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true, true}, ScanQueue,
+                checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false, true}, ScanQueue,
+                checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true, false}, ScanQueue,
+                checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false, false}, ScanQueue,
+                checkRunningJobs);
     }
 
     /// <summary>

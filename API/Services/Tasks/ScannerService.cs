@@ -33,7 +33,7 @@ public interface IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task ScanLibrary(int libraryId, bool forceUpdate = false);
+    Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true);
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
@@ -171,7 +171,7 @@ public class ScannerService : IScannerService
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).FirstOrDefault(f => f.Contains(parentDirectory));
+        var libraryFolder = libraryFolders.Select(Parser.NormalizePath).FirstOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
         var library = libraries.Find(l => l.Folders.Select(Parser.NormalizePath).Contains(libraryFolder));
@@ -183,7 +183,7 @@ public class ScannerService : IScannerService
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
             }
-            BackgroundJob.Schedule(() => ScanLibrary(library.Id, false), TimeSpan.FromMinutes(1));
+            BackgroundJob.Schedule(() => ScanLibrary(library.Id, false, true), TimeSpan.FromMinutes(1));
         }
     }
 
@@ -275,6 +275,8 @@ public class ScannerService : IScannerService
             // Process Series
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
         }
+
+        _processSeries.Reset();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
@@ -465,8 +467,9 @@ public class ScannerService : IScannerService
         _logger.LogInformation("Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
         foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
-            await ScanLibrary(lib.Id, forceUpdate);
+            await ScanLibrary(lib.Id, forceUpdate, true);
         }
+        _processSeries.Reset();
         _logger.LogInformation("Scan of All Libraries Finished");
     }
 
@@ -478,10 +481,11 @@ public class ScannerService : IScannerService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="forceUpdate">Defaults to false</param>
+    /// <param name="isSingleScan">Defaults to true. Is this a standalone invocation or is it in a loop?</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
+    public async Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true)
     {
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
@@ -512,22 +516,27 @@ public class ScannerService : IScannerService
 
         // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
         await _processSeries.Prime();
-        // We need to remove any keys where there is no actual parser info
+
+        var tasks = new List<Task>();
         foreach (var pSeries in parsedSeries.Keys)
         {
+            // We need to remove any keys where there is no actual parser info
             if (parsedSeries[pSeries].Count == 0 || string.IsNullOrEmpty(parsedSeries[pSeries][0].Filename)) continue;
 
             totalFiles += parsedSeries[pSeries].Count;
-            await _seriesProcessingSemaphore.WaitAsync();
-            try
-            {
-                await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate);
-            }
-            finally
-            {
-                _seriesProcessingSemaphore.Release();
-            }
+            tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
+            // await _seriesProcessingSemaphore.WaitAsync();
+            // try
+            // {
+            //
+            // }
+            // finally
+            // {
+            //     _seriesProcessingSemaphore.Release();
+            // }
         }
+
+        await Task.WhenAll(tasks);
 
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -547,6 +556,11 @@ public class ScannerService : IScannerService
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())
         {
+            if (isSingleScan)
+            {
+                _processSeries.Reset();
+            }
+
             if (totalFiles == 0)
             {
                 _logger.LogInformation(

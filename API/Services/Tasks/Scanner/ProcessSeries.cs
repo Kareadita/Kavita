@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
-using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -20,7 +17,6 @@ using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -33,6 +29,8 @@ public interface IProcessSeries
     /// </summary>
     /// <returns></returns>
     Task Prime();
+
+    void Reset();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false);
 }
 
@@ -55,10 +53,6 @@ public class ProcessSeries : IProcessSeries
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ITagManagerService _tagManagerService;
 
-    // private Dictionary<string, Genre> _genres;
-    // private IList<Person> _people;
-    // private Dictionary<string, Tag> _tags;
-    private Dictionary<string, CollectionTag> _collectionTags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -79,12 +73,6 @@ public class ProcessSeries : IProcessSeries
         _readingListService = readingListService;
         _externalMetadataService = externalMetadataService;
         _tagManagerService = tagManagerService;
-
-
-        // _genres = new Dictionary<string, Genre>();
-        // _people = new List<Person>();
-        // _tags = new Dictionary<string, Tag>();
-        _collectionTags = new Dictionary<string, CollectionTag>();
     }
 
     /// <summary>
@@ -92,14 +80,15 @@ public class ProcessSeries : IProcessSeries
     /// </summary>
     public async Task Prime()
     {
-        // _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
-        // _people = await _unitOfWork.PersonRepository.GetAllPeople();
-        // _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
-        _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
-                            .ToDictionary(t => t.NormalizedTitle);
-
         await _tagManagerService.Prime();
+    }
 
+    /// <summary>
+    /// Frees up memory
+    /// </summary>
+    public void Reset()
+    {
+        _tagManagerService.Reset();
     }
 
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false)
@@ -179,7 +168,7 @@ public class ProcessSeries : IProcessSeries
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
             }
 
-            UpdateSeriesMetadata(series, library);
+            await UpdateSeriesMetadata(series, library);
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -295,7 +284,7 @@ public class ProcessSeries : IProcessSeries
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    public void UpdateSeriesMetadata(Series series, Library library)
+    public async Task UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= new SeriesMetadataBuilder().Build();
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
@@ -369,14 +358,18 @@ public class ProcessSeries : IProcessSeries
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
             foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
-                var normalizedName = Parser.Parser.Normalize(collection);
-                if (!_collectionTags.TryGetValue(normalizedName, out var tag))
-                {
-                    tag = _collectionTagService.CreateTag(collection);
-                    _collectionTags.Add(normalizedName, tag);
-                }
+                var t = await _tagManagerService.GetCollectionTag(collection);
+                if (t == null) continue;
+                _collectionTagService.AddTagToSeriesMetadata(t, series.Metadata);
 
-                _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
+                // var normalizedName = Parser.Parser.Normalize(collection);
+                // if (!_collectionTags.TryGetValue(normalizedName, out var tag))
+                // {
+                //     tag = _collectionTagService.CreateTag(collection);
+                //     _collectionTags.Add(normalizedName, tag);
+                // }
+                //
+                // _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
             }
         }
 
