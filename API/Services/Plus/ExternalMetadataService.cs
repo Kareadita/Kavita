@@ -162,7 +162,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!RateLimiter.TryAcquire(string.Empty))
         {
             // Request not allowed due to rate limit
-            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch"); // TODO: This will call even if we don't have a license.
+            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
             return;
         }
 

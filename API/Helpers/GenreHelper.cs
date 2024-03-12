@@ -67,6 +67,7 @@ public static class GenreHelper
     public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Series series,
         IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
     {
+        // TODO: Write some unit tests
         if (tags == null) return;
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
