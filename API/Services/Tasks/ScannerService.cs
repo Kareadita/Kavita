@@ -86,8 +86,6 @@ public class ScannerService : IScannerService
     private readonly IProcessSeries _processSeries;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
-    private readonly SemaphoreSlim _seriesProcessingSemaphore = new SemaphoreSlim(1, 1);
-
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IDirectoryService directoryService, IReadingItemService readingItemService,
@@ -260,29 +258,6 @@ public class ScannerService : IScannerService
 
         // We now technically have all scannedSeries, we could invoke each Series to be scanned
 
-        // Don't allow any processing on files that aren't part of this series
-        var toProcess = parsedSeries.Keys.Where(key =>
-            key.NormalizedName.Equals(series.NormalizedName) ||
-            key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
-            .ToList();
-
-        if (toProcess.Count > 0)
-        {
-            await _processSeries.Prime();
-        }
-
-        foreach (var pSeries in toProcess)
-        {
-            // Process Series
-            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
-        }
-
-        _processSeries.Reset();
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
-
-
-
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);
 
@@ -320,6 +295,28 @@ public class ScannerService : IScannerService
         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
         if (parsedSeries.Count == 0) return;
 
+
+
+        // Don't allow any processing on files that aren't part of this series
+        var toProcess = parsedSeries.Keys.Where(key =>
+            key.NormalizedName.Equals(series.NormalizedName) ||
+            key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
+            .ToList();
+
+        if (toProcess.Count > 0)
+        {
+            await _processSeries.Prime();
+        }
+
+        foreach (var pSeries in toProcess)
+        {
+            // Process Series
+            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
+        }
+
+        _processSeries.Reset();
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
         // Tell UI that this series is done
@@ -528,15 +525,6 @@ public class ScannerService : IScannerService
 
             totalFiles += parsedSeries[pSeries].Count;
             tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
-            // await _seriesProcessingSemaphore.WaitAsync();
-            // try
-            // {
-            //
-            // }
-            // finally
-            // {
-            //     _seriesProcessingSemaphore.Release();
-            // }
         }
 
         await Task.WhenAll(tasks);

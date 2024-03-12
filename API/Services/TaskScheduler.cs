@@ -386,7 +386,7 @@ public class TaskScheduler : ITaskScheduler
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
-            // BUG: This can end up triggering a ton of scan series calls
+            // BUG: This can end up triggering a ton of scan series calls (but i haven't seen in practice)
             _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
             BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), TimeSpan.FromMinutes(10));
             return;
