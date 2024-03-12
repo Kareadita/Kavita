@@ -55,9 +55,9 @@ public class ProcessSeries : IProcessSeries
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ITagManagerService _tagManagerService;
 
-    private Dictionary<string, Genre> _genres;
-    private IList<Person> _people;
-    private Dictionary<string, Tag> _tags;
+    // private Dictionary<string, Genre> _genres;
+    // private IList<Person> _people;
+    // private Dictionary<string, Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
@@ -81,9 +81,9 @@ public class ProcessSeries : IProcessSeries
         _tagManagerService = tagManagerService;
 
 
-        _genres = new Dictionary<string, Genre>();
-        _people = new List<Person>();
-        _tags = new Dictionary<string, Tag>();
+        // _genres = new Dictionary<string, Genre>();
+        // _people = new List<Person>();
+        // _tags = new Dictionary<string, Tag>();
         _collectionTags = new Dictionary<string, CollectionTag>();
     }
 
@@ -92,9 +92,9 @@ public class ProcessSeries : IProcessSeries
     /// </summary>
     public async Task Prime()
     {
-        _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
-        _people = await _unitOfWork.PersonRepository.GetAllPeople();
-        _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
+        // _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
+        // _people = await _unitOfWork.PersonRepository.GetAllPeople();
+        // _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
         _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
                             .ToDictionary(t => t.NormalizedTitle);
 
@@ -833,49 +833,60 @@ public class ProcessSeries : IProcessSeries
 
         var people = TagHelper.GetTagValues(comicInfo.Colorist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Colorist, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Colorist, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Colorist);
 
         people = TagHelper.GetTagValues(comicInfo.Characters);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Character, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Character, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Character);
 
 
         people = TagHelper.GetTagValues(comicInfo.Translator);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Translator, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Translator, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Translator);
 
 
         people = TagHelper.GetTagValues(comicInfo.Writer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Writer, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Writer, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Writer);
 
         people = TagHelper.GetTagValues(comicInfo.Editor);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Editor, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Editor, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Editor);
 
         people = TagHelper.GetTagValues(comicInfo.Inker);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Inker, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Inker, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Inker);
 
         people = TagHelper.GetTagValues(comicInfo.Letterer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Letterer, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Letterer, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Letterer);
 
         people = TagHelper.GetTagValues(comicInfo.Penciller);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Penciller, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Penciller, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Penciller);
 
         people = TagHelper.GetTagValues(comicInfo.CoverArtist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.CoverArtist, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.CoverArtist, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.CoverArtist);
 
         people = TagHelper.GetTagValues(comicInfo.Publisher);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Publisher, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Publisher, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Publisher);
 
         people = TagHelper.GetTagValues(comicInfo.Imprint);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
-        PersonHelper.UpdatePeople(_people, people, PersonRole.Imprint, AddPerson);
+        //PersonHelper.UpdatePeople(_people, people, PersonRole.Imprint, AddPerson);
+        await UpdatePeople(chapter, people, PersonRole.Imprint);
 
         var genres = TagHelper.GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
@@ -883,13 +894,29 @@ public class ProcessSeries : IProcessSeries
         //GenreHelper.UpdateGenre(_genres, genres, AddGenre);
         foreach (var genre in genres)
         {
-            chapter.Genres.Add(await _tagManagerService.GetGenre(genre));
+            var g = await _tagManagerService.GetGenre(genre);
+            if (g == null) continue;
+            chapter.Genres.Add(g);
         }
 
         var tags = TagHelper.GetTagValues(comicInfo.Tags);
         TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
-        TagHelper.UpdateTag(_tags, tags, AddTag);
+        //TagHelper.UpdateTag(_tags, tags, AddTag);
+        foreach (var tag in tags)
+        {
+            var t = await _tagManagerService.GetTag(tag);
+            if (t == null) continue;
+            chapter.Tags.Add(t);
+        }
     }
 
-
+    private async Task UpdatePeople(Chapter chapter, IList<string> people, PersonRole role)
+    {
+        foreach (var person in people)
+        {
+            var p = await _tagManagerService.GetPerson(person, role);
+            if (p == null) continue;
+            chapter.People.Add(p);
+        }
+    }
 }
