@@ -2053,7 +2053,7 @@ public class SeriesRepository : ISeriesRepository
         foreach (var series in info)
         {
             if (series.FolderPath == null) continue;
-            if (!map.ContainsKey(series.FolderPath))
+            if (!map.TryGetValue(series.FolderPath, out var value))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
                 {
@@ -2062,9 +2062,8 @@ public class SeriesRepository : ISeriesRepository
             }
             else
             {
-                map[series.FolderPath].Add(series);
+                value.Add(series);
             }
-
         }
 
         return map;

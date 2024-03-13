@@ -17789,6 +17789,11 @@
             "description": "Highest path (that is under library root) that contains the series.",
             "nullable": true
           },
+          "lowestFolderPath": {
+            "type": "string",
+            "description": "Lowest path (that is under library root) that contains all files for the series.",
+            "nullable": true
+          },
           "lastFolderScanned": {
             "type": "string",
             "description": "Last time the folder was scanned",

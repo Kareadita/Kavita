@@ -318,7 +318,7 @@ public class LibraryRepository : ILibraryRepository
     /// <returns></returns>
     public async Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders)
     {
-        var normalized = folders.Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
+        var normalized = folders.Select(Parser.NormalizePath);
         return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
     }
 

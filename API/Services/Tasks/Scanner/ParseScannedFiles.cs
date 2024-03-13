@@ -76,7 +76,7 @@ public class ScannedSeriesResult
 
 public class SeriesModified
 {
-    public required string FolderPath { get; set; }
+    public required string? FolderPath { get; set; }
     public required string SeriesName { get; set; }
     public DateTime LastScanned { get; set; }
     public MangaFormat Format { get; set; }
@@ -416,7 +416,6 @@ public class ParseScannedFiles
             .ToList()!;
 
         result.ParserInfos = infos;
-        return;
     }
 
 
