@@ -641,7 +641,7 @@ public static class Parser
 
     private static readonly Regex ComicSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$|\s#)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
         MatchOptions, RegexTimeout
     );
 

@@ -77,7 +77,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             }
         }
 
-        // Check if this is a Special
+        // Check if this is a Special/Annual
         info.IsSpecial = Parser.IsComicSpecial(info.Filename) || Parser.IsComicSpecial(info.ComicInfo?.Format);
 
         // Patch in other information from ComicInfo

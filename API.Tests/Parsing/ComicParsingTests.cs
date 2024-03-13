@@ -208,8 +208,9 @@ public class ComicParsingTests
     [InlineData("Batman Beyond Omnibus (1999)", true)]
     [InlineData("Batman Beyond Omnibus", true)]
     [InlineData("01 Annual Batman Beyond", true)]
+    [InlineData("Blood Syndicate Annual #001", true)]
     public void IsComicSpecialTest(string input, bool expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(input));
+        Assert.Equal(expected, Parser.IsComicSpecial(input));
     }
 }
