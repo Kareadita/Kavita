@@ -32,8 +32,25 @@
                 </h5>
                 <div ngbAccordionCollapse>
                   <div ngbAccordionBody>
+                    {{summary | json }}
+                    {{summary.results.length}}
+                    {{summary.results.length > 0}}
+
+                    @if (summary.results.length > 0) {
+                      Test
+                    }
+
                     @if(summary.results.length > 0) {
-                      <h5>{{t('validate-warning')}}</h5>
+                      <div class="justify-content-center col">
+                        <div class="d-flex align-items-center">
+                          <div class="flex-shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation" style="font-size: 24px" aria-hidden="true"></i>
+                          </div>
+                          <div class="flex-grow-1 ms-3">
+                            {{t('validate-warning')}}
+                          </div>
+                        </div>
+                      </div>
                       <ol class="list-group list-group-numbered list-group-flush" >
                         <li class="list-group-item no-hover" *ngFor="let result of summary.results"
                             [innerHTML]="result | cblConflictReason | safeHtml">
@@ -46,10 +63,9 @@
                             <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
                           </div>
                           <div class="flex-grow-1 ms-3">
-                            {{t('validate-no-issue')}}
+                            {{t('validate-no-issue-description')}}
                           </div>
                         </div>
-                        {{t('validate-no-issue-description')}}
                       </div>
                     }
                   </div>
@@ -128,10 +144,29 @@
 
   </div>
   <div class="modal-footer">
-    <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
-    <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-    <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
-    <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
+    <form [formGroup]="cblSettingsForm" class="row align-items-center">
+      <div class="col-auto">
+        <div class="form-check form-switch">
+          <input type="checkbox" id="settings-comicvine-mode" role="switch" formControlName="comicVineMatching" class="form-check-input"
+                 aria-labelledby="auto-close-label">
+          <label class="form-check-label" for="settings-comicvine-mode">{{t('comicvine-parsing-label')}}</label>
+        </div>
+      </div>
+    </form>
+    <!-- Spacer -->
+    <div class="col" aria-hidden="true"></div>
+    <div class="col-auto">
+      <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
+    </div>
   </div>
 
 

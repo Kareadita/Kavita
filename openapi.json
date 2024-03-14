@@ -1101,6 +1101,10 @@
                   },
                   "FileName": {
                     "type": "string"
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -1121,6 +1125,9 @@
                   "style": "form"
                 },
                 "FileName": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -1191,6 +1198,10 @@
                   "dryRun": {
                     "type": "boolean",
                     "default": false
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -1214,6 +1225,9 @@
                   "style": "form"
                 },
                 "dryRun": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }

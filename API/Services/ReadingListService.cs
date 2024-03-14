@@ -36,8 +36,8 @@ public interface IReadingListService
     Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
         ReadingList readingList);
 
-    Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
-    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
+    Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false);
+    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false);
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
     /// <summary>
     /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.
@@ -530,7 +530,8 @@ public class ReadingListService : IReadingListService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="cblReading"></param>
-    public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading)
+    /// <param name="useComicLibraryMatching">When true, will force ComicVine library naming conventions: Series (Year) for Series name matching.</param>
+    public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false)
     {
         var importSummary = new CblImportSummaryDto
         {
@@ -552,9 +553,14 @@ public class ReadingListService : IReadingListService
             });
         }
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
+
+        var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
+
+        // How can we match properly with ComicVine library when year is part of the series unless we do this in 2 passes and see which has a better match
+
+
         if (!userSeries.Any())
         {
             // Report that no series exist in the reading list
@@ -584,6 +590,15 @@ public class ReadingListService : IReadingListService
         return importSummary;
     }
 
+    private static List<string> GetUniqueSeries(CblReadingList cblReading, bool useComicLibraryMatching)
+    {
+        if (useComicLibraryMatching)
+        {
+            return cblReading.Books.Book.Select(b => Parser.Normalize($"{b.Series} ({b.Volume})")).Distinct().ToList();
+        }
+        return cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
+    }
+
 
     /// <summary>
     /// Imports (or pretends to) a cbl into a reading list. Call <see cref="ValidateCblFile"/> first!
@@ -591,8 +606,9 @@ public class ReadingListService : IReadingListService
     /// <param name="userId"></param>
     /// <param name="cblReading"></param>
     /// <param name="dryRun"></param>
+    /// <param name="useComicLibraryMatching">When true, will force ComicVine library naming conventions: Series (Year) for Series name matching.</param>
     /// <returns></returns>
-    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false)
+    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
         _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
@@ -604,7 +620,7 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
+        var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         var allSeries = userSeries.ToDictionary(s => Parser.Normalize(s.Name));

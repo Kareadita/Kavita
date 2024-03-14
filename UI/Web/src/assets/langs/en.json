@@ -1547,7 +1547,6 @@
         "import-description": "To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.",
         "validate-description": "All files have been validated to see if there are any operations to do on the list. Any lists have have failed will not move to the next step. Fix the CBL files and retry.",
         "validate-warning": "There are issues with the CBL that will prevent an import. Correct these issues then try again.",
-        "validate-no-issue": "Looks good",
         "validate-no-issue-description": "No issues found with CBL, press next.",
         "dry-run-description": "This is a dry run and shows what will happen if you press Next and perform the import. All Failures will not be imported.",
         "prev": "Prev",
@@ -1557,7 +1556,8 @@
         "import-step": "Import CBLs",
         "validate-cbl-step": "Validate CBL",
         "dry-run-step": "Dry Run",
-        "final-import-step": "Final Step"
+        "final-import-step": "Final Step",
+        "comicvine-parsing-label": "Use ComicVine Series matching"
     },
 
     "pdf-reader": {
