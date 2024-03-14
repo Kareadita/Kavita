@@ -449,6 +449,22 @@ public class ProcessSeries : IProcessSeries
                 }
             }
 
+            if (!series.Metadata.TeamLocked)
+            {
+                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Team))
+                {
+                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                }
+            }
+
+            if (!series.Metadata.LocationLocked)
+            {
+                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Location))
+                {
+                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                }
+            }
+
             if (!series.Metadata.LettererLocked)
             {
                 foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Letterer))
@@ -846,6 +862,14 @@ public class ProcessSeries : IProcessSeries
         people = TagHelper.GetTagValues(comicInfo.Imprint);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
         await UpdatePeople(chapter, people, PersonRole.Imprint);
+
+        people = TagHelper.GetTagValues(comicInfo.Teams);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
+        await UpdatePeople(chapter, people, PersonRole.Team);
+
+        people = TagHelper.GetTagValues(comicInfo.Locations);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
+        await UpdatePeople(chapter, people, PersonRole.Location);
 
         var genres = TagHelper.GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,

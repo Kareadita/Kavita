@@ -129,6 +129,8 @@ public class ComicInfo
     public string Publisher { get; set; } = string.Empty;
     public string Imprint { get; set; } = string.Empty;
     public string Characters { get; set; } = string.Empty;
+    public string Teams { get; set; } = string.Empty;
+    public string Locations { get; set; } = string.Empty;
 
 
     public static AgeRating ConvertAgeRatingToEnum(string value)
@@ -157,6 +159,8 @@ public class ComicInfo
         info.Characters = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Characters);
         info.Translator = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Translator);
         info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);
+        info.Teams = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Teams);
+        info.Locations = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Locations);
 
         // We need to convert GTIN to ISBN
         if (!string.IsNullOrEmpty(info.GTIN))

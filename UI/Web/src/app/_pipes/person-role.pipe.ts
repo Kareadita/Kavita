@@ -33,6 +33,12 @@ export class PersonRolePipe implements PipeTransform {
         return this.translocoService.translate('person-role-pipe.imprint');
       case PersonRole.Writer:
         return this.translocoService.translate('person-role-pipe.writer');
+      case PersonRole.Team:
+        return this.translocoService.translate('person-role-pipe.team');
+      case PersonRole.Location:
+        return this.translocoService.translate('person-role-pipe.location');
+      case PersonRole.Translator:
+        return this.translocoService.translate('person-role-pipe.translator');
       case PersonRole.Other:
         return this.translocoService.translate('person-role-pipe.other');
       default:

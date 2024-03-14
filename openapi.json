@@ -3218,7 +3218,9 @@
                 10,
                 11,
                 12,
-                13
+                13,
+                14,
+                15
               ],
               "type": "integer",
               "format": "int32"
@@ -14330,6 +14332,20 @@
             },
             "nullable": true
           },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "genres": {
             "type": "array",
             "items": {
@@ -15629,7 +15645,9 @@
               26,
               27,
               28,
-              29
+              29,
+              30,
+              31
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",
@@ -16562,7 +16580,9 @@
               10,
               11,
               12,
-              13
+              13,
+              14,
+              15
             ],
             "type": "integer",
             "format": "int32"
@@ -16608,7 +16628,9 @@
               10,
               11,
               12,
-              13
+              13,
+              14,
+              15
             ],
             "type": "integer",
             "format": "int32"
@@ -18280,6 +18302,12 @@
           "translatorLocked": {
             "type": "boolean"
           },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
           "coverArtistLocked": {
             "type": "boolean"
           },
@@ -18413,6 +18441,20 @@
             },
             "nullable": true
           },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "ageRating": {
             "enum": [
               0,
@@ -18521,6 +18563,12 @@
             "type": "boolean"
           },
           "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
             "type": "boolean"
           },
           "coverArtistLocked": {

@@ -49,6 +49,8 @@ public enum FilterField
     /// Average rating from Kavita+ - Not usable for non-licensed users
     /// </summary>
     AverageRating = 28,
-    Imprint = 29
+    Imprint = 29,
+    Team = 30,
+    Location = 31
 
 }

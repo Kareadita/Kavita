@@ -61,6 +61,12 @@ public static class FilterFieldValueConverter
             FilterField.Imprint => value.Split(',')
                 .Select(int.Parse)
                 .ToList(),
+            FilterField.Team => value.Split(',')
+                .Select(int.Parse)
+                .ToList(),
+            FilterField.Location => value.Split(',')
+                .Select(int.Parse)
+                .ToList(),
             FilterField.Penciller => value.Split(',')
                 .Select(int.Parse)
                 .ToList(),

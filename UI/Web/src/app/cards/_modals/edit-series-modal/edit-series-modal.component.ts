@@ -488,7 +488,9 @@ export class EditSeriesModalComponent implements OnInit {
       this.updateFromPreset('penciller', this.metadata.pencillers, PersonRole.Penciller),
       this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
       this.updateFromPreset('imprint', this.metadata.imprints, PersonRole.Imprint),
-      this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator)
+      this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator),
+      this.updateFromPreset('teams', this.metadata.teams, PersonRole.Team),
+      this.updateFromPreset('locations', this.metadata.locations, PersonRole.Location),
     ]).pipe(map(results => {
       return of(true);
     }));
@@ -611,6 +613,10 @@ export class EditSeriesModalComponent implements OnInit {
 
   updatePerson(persons: Person[], role: PersonRole) {
     switch (role) {
+      case PersonRole.Other:
+        break;
+      case PersonRole.Artist:
+        break;
       case PersonRole.CoverArtist:
         this.metadata.coverArtists = persons;
         break;
@@ -638,11 +644,19 @@ export class EditSeriesModalComponent implements OnInit {
         case PersonRole.Imprint:
         this.metadata.imprints = persons;
         break;
+      case PersonRole.Team:
+        this.metadata.teams = persons;
+        break;
+      case PersonRole.Location:
+        this.metadata.locations = persons;
+        break;
       case PersonRole.Writer:
         this.metadata.writers = persons;
         break;
       case PersonRole.Translator:
         this.metadata.translators = persons;
+        break;
+
     }
     this.cdRef.markForCheck();
   }

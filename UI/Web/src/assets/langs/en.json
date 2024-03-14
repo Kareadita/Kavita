@@ -483,7 +483,10 @@
         "publisher": "Publisher",
         "writer": "Writer",
         "other": "Other",
-        "imprint": "Imprint"
+        "imprint": "Imprint",
+        "translator": "Translator",
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
     },
 
     "manga-format-pipe": {
@@ -760,6 +763,8 @@
         "pencillers-title": "Pencillers",
         "publishers-title": "Publishers",
         "imprints-title": "Imprints",
+        "teams-title": "Teams",
+        "locations-title": "Locations",
 
         "promoted": "{{common.promoted}}",
         "see-more": "See More",
@@ -937,6 +942,8 @@
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
         "imprints-title": "{{series-metadata-detail.imprints-title}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}",
         "not-defined": "Not defined",
         "read": "{{common.read}}",
         "unread": "Unread",
@@ -966,7 +973,9 @@
         "inkers-title": "{{series-metadata-detail.inkers-title}}",
         "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}"
+        "editors-title": "{{series-metadata-detail.editors-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}"
     },
 
     "cover-image-chooser": {
@@ -1697,6 +1706,8 @@
         "colorist-label": "Colorist",
         "character-label": "Character",
         "translator-label": "Translator",
+        "team-label": "{{filter-field-pipe.team}}",
+        "location-label": "{{filter-field-pipe.location}}",
         "language-label": "Language",
         "age-rating-label": "Age Rating",
         "publication-status-label": "Publication Status",
@@ -1946,6 +1957,8 @@
         "formats": "Formats",
         "genres": "Genres",
         "inker": "Inker",
+        "team": "Team",
+        "location": "Location",
         "languages": "Languages",
         "libraries": "Libraries",
         "letterer": "Letterer",

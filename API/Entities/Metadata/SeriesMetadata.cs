@@ -73,9 +73,10 @@ public class SeriesMetadata : IHasConcurrencyToken
     public bool PencillerLocked { get; set; }
     public bool PublisherLocked { get; set; }
     public bool TranslatorLocked { get; set; }
+    public bool TeamLocked { get; set; }
+    public bool LocationLocked { get; set; }
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
-
 
     // Relationship
     public Series Series { get; set; } = null!;

@@ -26,6 +26,8 @@ export interface SeriesMetadata {
     letterers: Array<Person>;
     editors: Array<Person>;
     translators: Array<Person>;
+    teams: Array<Person>;
+    locations: Array<Person>;
     ageRating: AgeRating;
     releaseYear: number;
     language: string;
@@ -46,6 +48,8 @@ export interface SeriesMetadata {
     lettererLocked: boolean;
     editorLocked: boolean;
     translatorLocked: boolean;
+    teamLocked: boolean;
+    locationLocked: boolean;
     ageRatingLocked: boolean;
     releaseYearLocked: boolean;
     languageLocked: boolean;

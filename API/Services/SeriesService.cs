@@ -259,8 +259,18 @@ public class SeriesService : ISeriesService
 
                     var allImprints = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Imprint,
                         updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Imprint, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allImprints.AsReadOnly(),
+                    PersonHelper.UpdatePeopleList(PersonRole.Imprint, updateSeriesMetadataDto.SeriesMetadata.Imprints, series, allImprints.AsReadOnly(),
                         HandleAddPerson,  () => series.Metadata.ImprintLocked = true);
+
+                    var allTeams = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Team,
+                        updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
+                    PersonHelper.UpdatePeopleList(PersonRole.Team, updateSeriesMetadataDto.SeriesMetadata.Teams, series, allTeams.AsReadOnly(),
+                        HandleAddPerson,  () => series.Metadata.TeamLocked = true);
+
+                    var allLocations = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Location,
+                        updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
+                    PersonHelper.UpdatePeopleList(PersonRole.Location, updateSeriesMetadataDto.SeriesMetadata.Locations, series, allLocations.AsReadOnly(),
+                        HandleAddPerson,  () => series.Metadata.LocationLocked = true);
 
                     var allTranslators = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Translator,
                         updateSeriesMetadataDto.SeriesMetadata!.Translators.Select(p => Parser.Normalize(p.Name)));

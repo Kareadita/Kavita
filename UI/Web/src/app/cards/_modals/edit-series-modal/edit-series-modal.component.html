@@ -327,7 +327,21 @@
                 </div>
               </div>
 
-
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="translator" class="form-label">{{t('translator-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="getPersonsSettings(PersonRole.Translator)"
+                                 [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
+                                 (newItemAdded)="metadata.translatorLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
 
               <div class="row g-0">
                 <div class="mb-3">
@@ -344,12 +358,29 @@
                   </app-typeahead>
                 </div>
               </div>
+
               <div class="row g-0">
                 <div class="mb-3">
-                  <label for="translator" class="form-label">{{t('translator-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="getPersonsSettings(PersonRole.Translator)"
-                                 [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
-                                 (newItemAdded)="metadata.translatorLocked = true">
+                  <label for="team" class="form-label">{{t('team-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.teamLocked = true" [settings]="getPersonsSettings(PersonRole.Team)"
+                                 [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
+                                 (newItemAdded)="metadata.teamLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="location" class="form-label">{{t('location-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location);metadata.locationLocked = true" [settings]="getPersonsSettings(PersonRole.Location)"
+                                 [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
+                                 (newItemAdded)="metadata.locationLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>

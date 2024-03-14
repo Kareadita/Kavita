@@ -148,6 +148,8 @@ export class NavHeaderComponent implements OnInit {
     this.clearSearch();
     filter = filter + '';
     switch(role) {
+      case PersonRole.Other:
+        break;
       case PersonRole.Writer:
         this.goTo({field: FilterField.Writers, comparison: FilterComparison.Equal, value: filter});
         break;
@@ -178,12 +180,19 @@ export class NavHeaderComponent implements OnInit {
       case PersonRole.Publisher:
         this.goTo({field: FilterField.Publisher, comparison: FilterComparison.Equal, value: filter});
         break;
-        case PersonRole.Imprint:
+      case PersonRole.Imprint:
         this.goTo({field: FilterField.Imprint, comparison: FilterComparison.Equal, value: filter});
+        break;
+      case PersonRole.Team:
+        this.goTo({field: FilterField.Team, comparison: FilterComparison.Equal, value: filter});
+        break;
+      case PersonRole.Location:
+        this.goTo({field: FilterField.Location, comparison: FilterComparison.Equal, value: filter});
         break;
       case PersonRole.Translator:
         this.goTo({field: FilterField.Translators, comparison: FilterComparison.Equal, value: filter});
         break;
+
     }
   }
 

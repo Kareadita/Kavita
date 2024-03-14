@@ -11,7 +11,9 @@ export enum PersonRole {
   Publisher = 10,
   Character = 11,
   Translator = 12,
-  Imprint = 13
+  Imprint = 13,
+  Team = 14,
+  Location = 15
 }
 
 export interface Person {

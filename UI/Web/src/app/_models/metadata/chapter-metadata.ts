@@ -34,6 +34,8 @@ export interface ChapterMetadata {
     letterers: Array<Person>;
     editors: Array<Person>;
     translators: Array<Person>;
+    teams: Array<Person>;
+    locations: Array<Person>;
 
 
 
