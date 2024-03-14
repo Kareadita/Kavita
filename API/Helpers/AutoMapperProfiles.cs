@@ -128,6 +128,14 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(
                         src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Teams,
+                opt =>
+                    opt.MapFrom(
+                        src => src.People.Where(p => p.Role == PersonRole.Team).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Locations,
+                opt =>
+                    opt.MapFrom(
+                        src => src.People.Where(p => p.Role == PersonRole.Location).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Genres,
                 opt =>
                     opt.MapFrom(
@@ -174,7 +182,14 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Editors,
                 opt =>
-                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)));
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Teams,
+                opt =>
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Team).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Locations,
+                opt =>
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Location).OrderBy(p => p.NormalizedName)))
+            ;
 
         CreateMap<AppUser, UserDto>()
             .ForMember(dest => dest.AgeRestriction,

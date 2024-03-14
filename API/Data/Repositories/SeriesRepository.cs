@@ -1185,6 +1185,8 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Team => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Location => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
@@ -2053,7 +2055,7 @@ public class SeriesRepository : ISeriesRepository
         foreach (var series in info)
         {
             if (series.FolderPath == null) continue;
-            if (!map.ContainsKey(series.FolderPath))
+            if (!map.TryGetValue(series.FolderPath, out var value))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
                 {
@@ -2062,9 +2064,8 @@ public class SeriesRepository : ISeriesRepository
             }
             else
             {
-                map[series.FolderPath].Add(series);
+                value.Add(series);
             }
-
         }
 
         return map;

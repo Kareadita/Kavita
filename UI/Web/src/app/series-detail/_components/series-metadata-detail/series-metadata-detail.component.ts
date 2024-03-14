@@ -92,7 +92,7 @@ export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
       + this.seriesMetadata.letterers.length + this.seriesMetadata.pencillers.length
       + this.seriesMetadata.publishers.length + this.seriesMetadata.characters.length
       + this.seriesMetadata.imprints.length + this.seriesMetadata.translators.length
-      + this.seriesMetadata.writers.length) / 11;
+      + this.seriesMetadata.writers.length + this.seriesMetadata.teams.length + this.seriesMetadata.locations.length) / 13;
     if (sum > 10) {
       this.isCollapsed = true;
     }
@@ -112,7 +112,10 @@ export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
                                   this.seriesMetadata.publishers.length > 0 ||
                                   this.seriesMetadata.characters.length > 0 ||
                                   this.seriesMetadata.imprints.length > 0 ||
-                                  this.seriesMetadata.translators.length > 0;
+                                  this.seriesMetadata.teams.length > 0 ||
+                                  this.seriesMetadata.locations.length > 0 ||
+                                  this.seriesMetadata.translators.length > 0
+    ;
 
 
     this.seriesSummary = (this.seriesMetadata?.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');

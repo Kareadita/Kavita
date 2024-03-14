@@ -2,6 +2,10 @@
   display: none;
 }
 
+.heading-badge  {
+  color: var(--bs-badge-color);
+}
+
 ::ng-deep .file-info {
   width: 83%;
   float: left;

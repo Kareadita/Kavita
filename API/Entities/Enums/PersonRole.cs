@@ -28,7 +28,7 @@ public enum PersonRole
     /// <summary>
     /// The publisher before another Publisher bought
     /// </summary>
-    Imprint = 13
-
-
+    Imprint = 13,
+    Team = 14,
+    Location = 15
 }

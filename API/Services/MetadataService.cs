@@ -131,8 +131,8 @@ public class MetadataService : IMetadataService
                 null, series.Created, forceUpdate, series.CoverImageLocked))
             return Task.CompletedTask;
 
-        series.Volumes ??= new List<Volume>();
-        series.CoverImage = series.GetCoverImage(); // BUG: At this point the volume or chapter hasn't regenerated the cover
+        series.Volumes ??= [];
+        series.CoverImage = series.GetCoverImage();
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;

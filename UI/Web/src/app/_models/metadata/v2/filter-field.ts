@@ -30,7 +30,9 @@ export enum FilterField
     WantToRead = 26,
     ReadingDate = 27,
     AverageRating = 28,
-    Imprint = 29
+    Imprint = 29,
+    Team = 30,
+    Location = 31
 }
 
 

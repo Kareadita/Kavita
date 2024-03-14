@@ -22,6 +22,12 @@ public static class SeriesExtensions
         var firstVolume = volumes.GetCoverImage(series.Format);
         if (firstVolume == null) return null;
 
+        // If first volume here is specials, move to the next as specials should almost always be last.
+        if (firstVolume.MinNumber.Is(Parser.SpecialVolumeNumber) && volumes.Count > 1)
+        {
+            firstVolume = volumes[1];
+        }
+
         var chapters = firstVolume.Chapters
             .OrderBy(c => c.SortOrder)
             .ToList();

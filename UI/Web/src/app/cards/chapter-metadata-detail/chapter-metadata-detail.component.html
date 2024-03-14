@@ -5,7 +5,8 @@
         && chapter.colorists.length === 0 && chapter.letterers.length === 0
         && chapter.editors.length === 0 && chapter.publishers.length === 0
         && chapter.characters.length === 0 && chapter.translators.length === 0
-        && chapter.imprints.length === 0">
+        && chapter.imprints.length === 0 && chapter.locations.length === 0
+        && chapter.teams.length === 0">
             {{t('no-data')}}
         </span>
       <div class="container-flex row row-cols-auto row-cols-lg-5 g-2 g-lg-3 me-0 mt-2">
@@ -99,6 +100,25 @@
             </ng-template>
           </app-badge-expander>
         </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.teams && chapter.teams.length > 0">
+          <h6>{{t('teams-title')}}</h6>
+          <app-badge-expander [items]="chapter.teams">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.locations && chapter.locations.length > 0">
+          <h6>{{t('locations-title')}}</h6>
+          <app-badge-expander [items]="chapter.locations">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
         <div class="col-auto mt-2" *ngIf="chapter.translators && chapter.translators.length > 0">
           <h6>{{t('translators-title')}}</h6>
           <app-badge-expander [items]="chapter.translators">

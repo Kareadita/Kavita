@@ -210,7 +210,7 @@ public class ScannerService : IScannerService
             return;
         }
 
-        var folderPath = series.FolderPath;
+        var folderPath = series.LowestFolderPath ?? series.FolderPath;
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
         {
             // We don't care if it's multiple due to new scan loop enforcing all in one root directory
@@ -265,7 +265,8 @@ public class ScannerService : IScannerService
         if (parsedSeries.Count == 0)
         {
              var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
-             if (!string.IsNullOrEmpty(series.FolderPath) && !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
+             if (!string.IsNullOrEmpty(series.FolderPath) &&
+                 !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
              {
                  try
                  {

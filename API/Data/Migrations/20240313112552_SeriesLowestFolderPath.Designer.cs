@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240313112552_SeriesLowestFolderPath")]
+    partial class SeriesLowestFolderPath
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -1268,9 +1271,6 @@ namespace API.Data.Migrations
                     b.Property<bool>("LettererLocked")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("LocationLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("MaxCount")
                         .HasColumnType("INTEGER");
 
@@ -1306,9 +1306,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("TagsLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("TeamLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TotalCount")

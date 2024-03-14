@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.8"
+    "version": "0.7.14.9"
   },
   "servers": [
     {
@@ -1101,6 +1101,10 @@
                   },
                   "FileName": {
                     "type": "string"
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -1121,6 +1125,9 @@
                   "style": "form"
                 },
                 "FileName": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -1191,6 +1198,10 @@
                   "dryRun": {
                     "type": "boolean",
                     "default": false
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -1214,6 +1225,9 @@
                   "style": "form"
                 },
                 "dryRun": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -3204,7 +3218,9 @@
                 10,
                 11,
                 12,
-                13
+                13,
+                14,
+                15
               ],
               "type": "integer",
               "format": "int32"
@@ -14316,6 +14332,20 @@
             },
             "nullable": true
           },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "genres": {
             "type": "array",
             "items": {
@@ -15615,7 +15645,9 @@
               26,
               27,
               28,
-              29
+              29,
+              30,
+              31
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",
@@ -16548,7 +16580,9 @@
               10,
               11,
               12,
-              13
+              13,
+              14,
+              15
             ],
             "type": "integer",
             "format": "int32"
@@ -16594,7 +16628,9 @@
               10,
               11,
               12,
-              13
+              13,
+              14,
+              15
             ],
             "type": "integer",
             "format": "int32"
@@ -17789,6 +17825,11 @@
             "description": "Highest path (that is under library root) that contains the series.",
             "nullable": true
           },
+          "lowestFolderPath": {
+            "type": "string",
+            "description": "Lowest path (that is under library root) that contains all files for the series.",
+            "nullable": true
+          },
           "lastFolderScanned": {
             "type": "string",
             "description": "Last time the folder was scanned",
@@ -18261,6 +18302,12 @@
           "translatorLocked": {
             "type": "boolean"
           },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
           "coverArtistLocked": {
             "type": "boolean"
           },
@@ -18394,6 +18441,20 @@
             },
             "nullable": true
           },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "ageRating": {
             "enum": [
               0,
@@ -18502,6 +18563,12 @@
             "type": "boolean"
           },
           "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
             "type": "boolean"
           },
           "coverArtistLocked": {

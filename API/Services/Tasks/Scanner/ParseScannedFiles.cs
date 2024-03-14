@@ -76,7 +76,7 @@ public class ScannedSeriesResult
 
 public class SeriesModified
 {
-    public required string FolderPath { get; set; }
+    public required string? FolderPath { get; set; }
     public required string SeriesName { get; set; }
     public DateTime LastScanned { get; set; }
     public MangaFormat Format { get; set; }
@@ -416,7 +416,6 @@ public class ParseScannedFiles
             .ToList()!;
 
         result.ParserInfos = infos;
-        return;
     }
 
 
@@ -453,7 +452,7 @@ public class ParseScannedFiles
                     if (float.TryParse(chapter.Chapters, out var parsedChapter))
                     {
                         counter = parsedChapter;
-                        if (!string.IsNullOrEmpty(prevIssue) && parsedChapter.Is(float.Parse(prevIssue)))
+                        if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
                         {
                             // Bump by 0.1
                             counter += 0.1f;

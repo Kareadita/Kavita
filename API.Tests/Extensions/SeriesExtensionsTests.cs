@@ -79,6 +79,53 @@ public class SeriesExtensionsTests
             .WithFormat(MangaFormat.Archive)
             .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
                 .WithName(Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("-1")
+                    .WithCoverImage("Chapter -1")
+                    .Build())
+                .WithChapter(new ChapterBuilder("0.5")
+                    .WithCoverImage("Chapter 0.5")
+                    .Build())
+                .WithChapter(new ChapterBuilder("2")
+                    .WithCoverImage("Chapter 2")
+                    .Build())
+                .WithChapter(new ChapterBuilder("1")
+                    .WithCoverImage("Chapter 1")
+                    .Build())
+                .WithChapter(new ChapterBuilder("3")
+                    .WithCoverImage("Chapter 3")
+                    .Build())
+                .WithChapter(new ChapterBuilder("4AU")
+                    .WithCoverImage("Chapter 4AU")
+                    .Build())
+                .Build())
+
+            .Build();
+
+
+        Assert.Equal("Chapter 1", series.GetCoverImage());
+    }
+
+    /// <summary>
+    /// Checks the case where there are specials and loose leafs, loose leaf chapters should be preferred
+    /// </summary>
+    [Fact]
+    public void GetCoverImage_LooseChapters_WithSub1_Chapter_WithSpecials()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithName(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder("I am a Special")
+                    .WithCoverImage("I am a Special")
+                    .Build())
+                .WithChapter(new ChapterBuilder("I am a Special 2")
+                    .WithCoverImage("I am a Special 2")
+                    .Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithName(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("0.5")
                     .WithCoverImage("Chapter 0.5")
                     .Build())

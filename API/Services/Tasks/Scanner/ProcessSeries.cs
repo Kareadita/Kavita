@@ -258,8 +258,9 @@ public class ProcessSeries : IProcessSeries
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
     {
-        var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(l => l.Path),
-            parsedInfos.Select(f => f.FullFilePath).ToList());
+        var libraryFolders = library.Folders.Select(l => Parser.Parser.NormalizePath(l.Path)).ToList();
+        var seriesFiles = parsedInfos.Select(f => Parser.Parser.NormalizePath(f.FullFilePath)).ToList();
+        var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryFolders, seriesFiles);
         if (seriesDirs.Keys.Count == 0)
         {
             _logger.LogCritical(
@@ -273,9 +274,18 @@ public class ProcessSeries : IProcessSeries
             // Don't save FolderPath if it's a library Folder
             if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
             {
+                // BUG: FolderPath can be a level higher than it needs to be. I'm not sure why it's like this, but I thought it should be one level lower.
+                // I think it's like this because higher level is checked or not checked. But i think we can do both
                 series.FolderPath = Parser.Parser.NormalizePath(seriesDirs.Keys.First());
                 _logger.LogDebug("Updating {Series} FolderPath to {FolderPath}", series.Name, series.FolderPath);
             }
+        }
+
+        var lowestFolder = _directoryService.FindLowestDirectoriesFromFiles(libraryFolders, seriesFiles);
+        if (!string.IsNullOrEmpty(lowestFolder))
+        {
+            series.LowestFolderPath = lowestFolder;
+            _logger.LogDebug("Updating {Series} LowestFolderPath to {FolderPath}", series.Name, series.LowestFolderPath);
         }
     }
 
@@ -434,6 +444,22 @@ public class ProcessSeries : IProcessSeries
             if (!series.Metadata.ImprintLocked)
             {
                 foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Imprint))
+                {
+                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                }
+            }
+
+            if (!series.Metadata.TeamLocked)
+            {
+                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Team))
+                {
+                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                }
+            }
+
+            if (!series.Metadata.LocationLocked)
+            {
+                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Location))
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
@@ -836,6 +862,14 @@ public class ProcessSeries : IProcessSeries
         people = TagHelper.GetTagValues(comicInfo.Imprint);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
         await UpdatePeople(chapter, people, PersonRole.Imprint);
+
+        people = TagHelper.GetTagValues(comicInfo.Teams);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
+        await UpdatePeople(chapter, people, PersonRole.Team);
+
+        people = TagHelper.GetTagValues(comicInfo.Locations);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
+        await UpdatePeople(chapter, people, PersonRole.Location);
 
         var genres = TagHelper.GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,

@@ -21,40 +21,20 @@
       <ng-container *ngIf="currentStepIndex === Step.Validate">
         <p>{{t('validate-description')}}</p>
         <div class="row g-0">
-
           <div ngbAccordion #accordion="ngbAccordion">
             @for(fileToProcess of filesToProcess; track fileToProcess.fileName) {
-              <div ngbAccordionItem *ngIf="fileToProcess.validateSummary as summary">
-                <h5 ngbAccordionHeader>
-                  <button ngbAccordionButton>
-                    <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
-                  </button>
-                </h5>
-                <div ngbAccordionCollapse>
-                  <div ngbAccordionBody>
-                    @if(summary.results.length > 0) {
-                      <h5>{{t('validate-warning')}}</h5>
-                      <ol class="list-group list-group-numbered list-group-flush" >
-                        <li class="list-group-item no-hover" *ngFor="let result of summary.results"
-                            [innerHTML]="result | cblConflictReason | safeHtml">
-                        </li>
-                      </ol>
-                    } @else {
-                      <div class="justify-content-center col">
-                        <div class="d-flex align-items-center">
-                          <div class="flex-shrink-0">
-                            <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
-                          </div>
-                          <div class="flex-grow-1 ms-3">
-                            {{t('validate-no-issue')}}
-                          </div>
-                        </div>
-                        {{t('validate-no-issue-description')}}
-                      </div>
-                    }
+                <div ngbAccordionItem *ngIf="fileToProcess.validateSummary as summary">
+                  <h5 ngbAccordionHeader>
+                    <button ngbAccordionButton>
+                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                    </button>
+                  </h5>
+                  <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                      <ng-container [ngTemplateOutlet]="validationList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                    </div>
                   </div>
                 </div>
-              </div>
             }
           </div>
         </div>
@@ -105,6 +85,38 @@
       </ng-container>
     </div>
 
+    <ng-template #validationList let-summary="summary">
+      @if (summary.results.length > 0) {
+        <div class="justify-content-center col">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 24px" aria-hidden="true"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              {{t('validate-warning')}}
+            </div>
+          </div>
+        </div>
+        <ol class="list-group list-group-numbered list-group-flush" >
+          <li class="list-group-item no-hover" *ngFor="let result of summary.results"
+              [innerHTML]="result | cblConflictReason | safeHtml">
+          </li>
+        </ol>
+      }
+      @else {
+        <div class="justify-content-center col">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              {{t('validate-no-issue-description')}}
+            </div>
+          </div>
+        </div>
+      }
+    </ng-template>
+
     <ng-template #resultsList let-summary="summary">
       <ul class="list-group list-group-flush">
         @for(result of summary.results; track result.order) {
@@ -115,23 +127,46 @@
     </ng-template>
 
     <ng-template #heading let-filename="filename" let-summary="summary">
-        <ng-container *ngIf="summary.success | cblImportResult as success">
-          <ng-container [ngSwitch]="summary.success">
-            <span *ngSwitchCase="CblImportResult.Success" class="badge bg-primary me-1">{{success}}</span>
-            <span *ngSwitchCase="CblImportResult.Fail" class="badge bg-danger me-1">{{success}}</span>
-            <span *ngSwitchCase="CblImportResult.Partial" class="badge bg-warning me-1">{{success}}</span>
-          </ng-container>
-        </ng-container>
-        <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
+      @switch (summary.success) {
+        @case (CblImportResult.Success) {
+          <span class="badge heading-badge bg-primary me-1">{{summary.success | cblImportResult}}</span>
+        }
+        @case (CblImportResult.Fail) {
+          <span class="badge heading-badge bg-danger me-1">{{summary.success | cblImportResult}}</span>
+        }
+        @case (CblImportResult.Partial) {
+          <span class="badge heading-badge bg-warning me-1">{{summary.success | cblImportResult}}</span>
+        }
+      }
+      <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
     </ng-template>
 
 
   </div>
   <div class="modal-footer">
-    <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
-    <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-    <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
-    <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
+    <form [formGroup]="cblSettingsForm" class="row align-items-center">
+      <div class="col-auto">
+        <div class="form-check form-switch">
+          <input type="checkbox" id="settings-comicvine-mode" role="switch" formControlName="comicVineMatching" class="form-check-input"
+                 aria-labelledby="auto-close-label">
+          <label class="form-check-label" for="settings-comicvine-mode">{{t('comicvine-parsing-label')}}</label>
+        </div>
+      </div>
+    </form>
+    <!-- Spacer -->
+    <div class="col" aria-hidden="true"></div>
+    <div class="col-auto">
+      <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
+    </div>
   </div>
 
 
