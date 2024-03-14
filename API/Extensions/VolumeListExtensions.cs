@@ -70,6 +70,16 @@ public static class VolumeListExtensions
         return volumes.FirstOrDefault(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 
+    /// <summary>
+    /// Returns the first (and only) special volume or null if none
+    /// </summary>
+    /// <param name="volumes"></param>
+    /// <returns></returns>
+    public static Volume? GetSpecialVolumeOrDefault(this IEnumerable<Volume> volumes)
+    {
+        return volumes.FirstOrDefault(v => v.MinNumber.Is(Parser.SpecialVolumeNumber));
+    }
+
     public static IEnumerable<VolumeDto> WhereNotLooseLeaf(this IEnumerable<VolumeDto> volumes)
     {
         return volumes.Where(v => v.MinNumber.Is(Parser.DefaultChapterNumber));

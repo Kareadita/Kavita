@@ -199,12 +199,13 @@ export class ImportCblModalComponent {
     const filenamesAllowedToProcess = this.filesToProcess.map(p => p.fileName);
     const files = (this.uploadForm.get('files')?.value || []).filter(f => filenamesAllowedToProcess.includes(f.name));
 
-    let pages = [];
+    const pages = [];
     for (let i = 0; i < files.length; i++) {
       const formData = new FormData();
-        formData.append('cbl', files[i]);
-        formData.append('dryRun', 'true');
-        pages.push(this.readingListService.importCbl(formData));
+      formData.append('cbl', files[i]);
+      formData.append('dryRun', 'true');
+      formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
+      pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {
         results.forEach(cblImport => {

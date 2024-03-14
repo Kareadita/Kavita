@@ -590,13 +590,18 @@ public class ReadingListService : IReadingListService
         return importSummary;
     }
 
+    private static string GetSeriesFormatting(CblBook book, bool useComicLibraryMatching)
+    {
+        return useComicLibraryMatching ? $"{book.Series} ({book.Volume})" : book.Series;
+    }
+
     private static List<string> GetUniqueSeries(CblReadingList cblReading, bool useComicLibraryMatching)
     {
         if (useComicLibraryMatching)
         {
-            return cblReading.Books.Book.Select(b => Parser.Normalize($"{b.Series} ({b.Volume})")).Distinct().ToList();
+            return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
         }
-        return cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
+        return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
     }
 
 
@@ -623,8 +628,8 @@ public class ReadingListService : IReadingListService
         var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-        var allSeries = userSeries.ToDictionary(s => Parser.Normalize(s.Name));
-        var allSeriesLocalized = userSeries.ToDictionary(s => Parser.Normalize(s.LocalizedName));
+        var allSeries = userSeries.ToDictionary(s => s.NormalizedName);
+        var allSeriesLocalized = userSeries.ToDictionary(s => s.NormalizedLocalizedName);
 
         var readingListNameNormalized = Parser.Normalize(cblReading.Name);
         // Get all the user's reading lists
@@ -651,27 +656,7 @@ public class ReadingListService : IReadingListService
         readingList.Items ??= new List<ReadingListItem>();
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
-
-            // I want to refactor this so that we move the matching logic into a method.
-            // But when I looked, we are returning statuses on different conditions, hard to keep it single responsibility
-            // Either refactor to return an enum for the state, make it return the BookResult, or refactor the reasoning so it's more straightforward
-
-            // var match = FindMatchingCblBookSeries(book);
-            // if (match == null)
-            // {
-            //     importSummary.Results.Add(new CblBookResult(book)
-            //     {
-            //         Reason = CblImportReason.SeriesMissing,
-            //         Order = i
-            //     });
-            //     continue;
-            // }
-
-
-            // TODO: I need a dedicated db query to get Series name's processed if they are ComicVine.
-            // In comicvine, series names are Series(Volume), but the spec just has Series="Series" Volume="Volume"
-            // So we need to combine them for comics that are in ComicVine libraries.
-            var normalizedSeries = Parser.Normalize(book.Series);
+            var normalizedSeries = Parser.Normalize(GetSeriesFormatting(book, useComicLibraryMatching));
             if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -685,7 +670,9 @@ public class ReadingListService : IReadingListService
             var bookVolume = string.IsNullOrEmpty(book.Volume)
                 ? Parser.LooseLeafVolume
                 : book.Volume;
-            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault();
+            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name)
+                                 ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault()
+                                 ?? bookSeries.Volumes.GetSpecialVolumeOrDefault();
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -699,9 +686,9 @@ public class ReadingListService : IReadingListService
 
             // We need to handle default chapter or empty string when it's just a volume
             var bookNumber = string.IsNullOrEmpty(book.Number)
-                ? Parser.DefaultChapterNumber
-                : float.Parse(book.Number);
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.MinNumber.Is(bookNumber));
+                ? Parser.DefaultChapter
+                : book.Number;
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Range == bookNumber);
             if (chapter == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -759,7 +746,7 @@ public class ReadingListService : IReadingListService
     private static IList<Series> FindCblImportConflicts(IEnumerable<Series> userSeries)
     {
         var dict = new HashSet<string>();
-        return userSeries.Where(series => !dict.Add(Parser.Normalize(series.Name))).ToList();
+        return userSeries.Where(series => !dict.Add(series.NormalizedName)).ToList();
     }
 
     private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,

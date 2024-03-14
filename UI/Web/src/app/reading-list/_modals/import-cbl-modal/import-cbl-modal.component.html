@@ -21,56 +21,20 @@
       <ng-container *ngIf="currentStepIndex === Step.Validate">
         <p>{{t('validate-description')}}</p>
         <div class="row g-0">
-
           <div ngbAccordion #accordion="ngbAccordion">
             @for(fileToProcess of filesToProcess; track fileToProcess.fileName) {
-              <div ngbAccordionItem *ngIf="fileToProcess.validateSummary as summary">
-                <h5 ngbAccordionHeader>
-                  <button ngbAccordionButton>
-                    <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
-                  </button>
-                </h5>
-                <div ngbAccordionCollapse>
-                  <div ngbAccordionBody>
-                    {{summary | json }}
-                    {{summary.results.length}}
-                    {{summary.results.length > 0}}
-
-                    @if (summary.results.length > 0) {
-                      Test
-                    }
-
-                    @if(summary.results.length > 0) {
-                      <div class="justify-content-center col">
-                        <div class="d-flex align-items-center">
-                          <div class="flex-shrink-0">
-                            <i class="fa-solid fa-triangle-exclamation" style="font-size: 24px" aria-hidden="true"></i>
-                          </div>
-                          <div class="flex-grow-1 ms-3">
-                            {{t('validate-warning')}}
-                          </div>
-                        </div>
-                      </div>
-                      <ol class="list-group list-group-numbered list-group-flush" >
-                        <li class="list-group-item no-hover" *ngFor="let result of summary.results"
-                            [innerHTML]="result | cblConflictReason | safeHtml">
-                        </li>
-                      </ol>
-                    } @else {
-                      <div class="justify-content-center col">
-                        <div class="d-flex align-items-center">
-                          <div class="flex-shrink-0">
-                            <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
-                          </div>
-                          <div class="flex-grow-1 ms-3">
-                            {{t('validate-no-issue-description')}}
-                          </div>
-                        </div>
-                      </div>
-                    }
+                <div ngbAccordionItem *ngIf="fileToProcess.validateSummary as summary">
+                  <h5 ngbAccordionHeader>
+                    <button ngbAccordionButton>
+                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                    </button>
+                  </h5>
+                  <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                      <ng-container [ngTemplateOutlet]="validationList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                    </div>
                   </div>
                 </div>
-              </div>
             }
           </div>
         </div>
@@ -121,6 +85,38 @@
       </ng-container>
     </div>
 
+    <ng-template #validationList let-summary="summary">
+      @if (summary.results.length > 0) {
+        <div class="justify-content-center col">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 24px" aria-hidden="true"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              {{t('validate-warning')}}
+            </div>
+          </div>
+        </div>
+        <ol class="list-group list-group-numbered list-group-flush" >
+          <li class="list-group-item no-hover" *ngFor="let result of summary.results"
+              [innerHTML]="result | cblConflictReason | safeHtml">
+          </li>
+        </ol>
+      }
+      @else {
+        <div class="justify-content-center col">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              {{t('validate-no-issue-description')}}
+            </div>
+          </div>
+        </div>
+      }
+    </ng-template>
+
     <ng-template #resultsList let-summary="summary">
       <ul class="list-group list-group-flush">
         @for(result of summary.results; track result.order) {
@@ -131,14 +127,18 @@
     </ng-template>
 
     <ng-template #heading let-filename="filename" let-summary="summary">
-        <ng-container *ngIf="summary.success | cblImportResult as success">
-          <ng-container [ngSwitch]="summary.success">
-            <span *ngSwitchCase="CblImportResult.Success" class="badge bg-primary me-1">{{success}}</span>
-            <span *ngSwitchCase="CblImportResult.Fail" class="badge bg-danger me-1">{{success}}</span>
-            <span *ngSwitchCase="CblImportResult.Partial" class="badge bg-warning me-1">{{success}}</span>
-          </ng-container>
-        </ng-container>
-        <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
+      @switch (summary.success) {
+        @case (CblImportResult.Success) {
+          <span class="badge heading-badge bg-primary me-1">{{summary.success | cblImportResult}}</span>
+        }
+        @case (CblImportResult.Fail) {
+          <span class="badge heading-badge bg-danger me-1">{{summary.success | cblImportResult}}</span>
+        }
+        @case (CblImportResult.Partial) {
+          <span class="badge heading-badge bg-warning me-1">{{summary.success | cblImportResult}}</span>
+        }
+      }
+      <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
     </ng-template>
 
 
