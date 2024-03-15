@@ -196,6 +196,12 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
             break;
+          case LibraryType.Generic:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            break;
         }
       }),
       takeUntilDestroyed(this.destroyRef)

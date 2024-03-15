@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using API.Data.Metadata;
 using API.Entities.Enums;
@@ -15,11 +16,8 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
     /// <summary>
     /// This Parser generates Series name to be defined as Series + first Issue Volume, so "Batman (2020)".
     /// </summary>
-    /// <param name="filePath"></param>
-    /// <param name="rootPath"></param>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type,
+        ComicInfo? comicInfo = null, IEnumerable<string>? extraRegex = null)
     {
         if (type != LibraryType.ComicVine) return null;
 

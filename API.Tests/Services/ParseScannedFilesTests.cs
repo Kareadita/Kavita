@@ -54,14 +54,14 @@ internal class MockReadingItemService : IReadingItemService
         throw new NotImplementedException();
     }
 
-    public ParserInfo Parse(string path, string rootPath, string libraryRoot, LibraryType type)
+    public ParserInfo Parse(string path, string rootPath, string libraryRoot, Library library)
     {
-        return _defaultParser.Parse(path, rootPath, libraryRoot, type);
+        return _defaultParser.Parse(path, rootPath, libraryRoot, library.Type);
     }
 
-    public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, LibraryType type)
+    public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, Library library)
     {
-        return _defaultParser.Parse(path, rootPath, libraryRoot, type);
+        return _defaultParser.Parse(path, rootPath, libraryRoot, library.Type);
     }
 }
 

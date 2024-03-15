@@ -65,6 +65,7 @@ export class UtilityService {
     switch(libraryType) {
       case LibraryType.Book:
       case LibraryType.LightNovel:
+      case LibraryType.Generic:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
       case LibraryType.ComicVine:

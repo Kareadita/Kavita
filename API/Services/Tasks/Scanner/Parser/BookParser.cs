@@ -1,11 +1,13 @@
-﻿using API.Data.Metadata;
+﻿using System.Collections.Generic;
+using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
 
 public class BookParser(IDirectoryService directoryService, IBookService bookService, IDefaultParser basicParser) : DefaultParser(directoryService)
 {
-    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo comicInfo = null)
+    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type,
+        ComicInfo? comicInfo = null, IEnumerable<string>? extraRegex = null)
     {
         var info = bookService.ParseInfo(filePath);
         if (info == null) return null;

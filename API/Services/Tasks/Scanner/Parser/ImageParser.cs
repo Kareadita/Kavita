@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -7,7 +8,8 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public class ImageParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type,
+        ComicInfo? comicInfo = null, IEnumerable<string>? extraRegex = null)
     {
         if (type != LibraryType.Image || !Parser.IsImage(filePath)) return null;
 

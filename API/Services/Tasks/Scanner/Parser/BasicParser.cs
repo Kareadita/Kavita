@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -11,7 +12,8 @@ namespace API.Services.Tasks.Scanner.Parser;
 /// </summary>
 public class BasicParser(IDirectoryService directoryService, IDefaultParser imageParser) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type,
+        ComicInfo? comicInfo = null, IEnumerable<string>? extraRegex = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.

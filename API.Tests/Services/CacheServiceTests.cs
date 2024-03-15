@@ -52,12 +52,12 @@ internal class MockReadingItemServiceForCacheService : IReadingItemService
         throw new System.NotImplementedException();
     }
 
-    public ParserInfo Parse(string path, string rootPath, string libraryRoot, LibraryType type)
+    public ParserInfo Parse(string path, string rootPath, string libraryRoot, Library library)
     {
         throw new System.NotImplementedException();
     }
 
-    public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, LibraryType type)
+    public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, Library library)
     {
         throw new System.NotImplementedException();
     }

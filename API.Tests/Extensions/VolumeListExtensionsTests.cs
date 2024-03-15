@@ -154,5 +154,25 @@ public class VolumeListExtensionsTests
     }
 
 
+    /// <summary>
+    /// Single volume (comicvine type style) with negative or non-numerical
+    /// </summary>
+    public void GetCoverImage_LooseChapters_WithSub1_InOneVolume()
+    {
+        var volumes = new List<Volume>()
+        {
+            new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("-1").WithCoverImage("Chapter -1").Build())
+                .WithChapter(new ChapterBuilder("1").WithCoverImage("Chapter 1").Build())
+                .Build(),
+        };
+
+        // Not testable due to the code not actually doing the heavy lifting
+        // var actual = volumes.GetCoverImage(MangaFormat.Archive);
+        // Assert.NotNull(actual);
+        // Assert.Equal("Chapter 1", actual.CoverImage);
+    }
+
+
     #endregion
 }

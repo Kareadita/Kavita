@@ -34,5 +34,10 @@ public enum LibraryType
     /// </summary>
     [Description("Comic (ComicVine)")]
     ComicVine = 5,
+    /// <summary>
+    /// This library requires custom regex from admin
+    /// </summary>
+    [Description("Generic")]
+    Generic = 6,
 
 }
