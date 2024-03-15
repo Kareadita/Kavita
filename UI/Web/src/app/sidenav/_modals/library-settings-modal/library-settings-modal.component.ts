@@ -197,6 +197,9 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
             break;
         }
+
+        this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible);
+        this.cdRef.markForCheck();
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();

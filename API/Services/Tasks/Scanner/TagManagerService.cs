@@ -67,7 +67,10 @@ public class TagManagerService : ITagManagerService
     {
         _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
-        _people = (await _unitOfWork.PersonRepository.GetAllPeople()).ToDictionary(GetPersonKey);
+        _people = (await _unitOfWork.PersonRepository.GetAllPeople())
+            .GroupBy(GetPersonKey)
+            .Select(g => g.First())
+            .ToDictionary(GetPersonKey);
         _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
             .ToDictionary(t => t.NormalizedTitle);
 

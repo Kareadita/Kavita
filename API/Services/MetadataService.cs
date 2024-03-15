@@ -108,9 +108,15 @@ public class MetadataService : IMetadataService
                 null, volume.Created, forceUpdate)) return Task.FromResult(false);
 
 
+        // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
         volume.Chapters ??= new List<Chapter>();
-        var firstChapter = volume.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default);
-        if (firstChapter == null) return Task.FromResult(false);
+
+        var firstChapter = volume.Chapters.FirstOrDefault(x => x.MinNumber.Is(1f));
+        if (firstChapter == null)
+        {
+            firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
+            if (firstChapter == null) return Task.FromResult(false);
+        }
 
         volume.CoverImage = firstChapter.CoverImage;
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
