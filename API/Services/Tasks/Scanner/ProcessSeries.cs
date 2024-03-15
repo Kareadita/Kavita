@@ -80,7 +80,14 @@ public class ProcessSeries : IProcessSeries
     /// </summary>
     public async Task Prime()
     {
-        await _tagManagerService.Prime();
+        try
+        {
+            await _tagManagerService.Prime();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "Unable to prime tag manager. Scan cannot proceed. Report to Kavita dev");
+        }
     }
 
     /// <summary>
