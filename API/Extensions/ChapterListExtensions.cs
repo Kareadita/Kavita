@@ -43,6 +43,6 @@ public static class ChapterListExtensions
     /// <returns></returns>
     public static int MinimumReleaseYear(this IList<Chapter> chapters)
     {
-        return chapters.Select(v => v.ReleaseDate.Year).Where(y => NumberHelper.IsValidYear(y)).DefaultIfEmpty().Min();
+        return chapters.Select(v => v.ReleaseDate.Year).Where(NumberHelper.IsValidYear).DefaultIfEmpty().Min();
     }
 }

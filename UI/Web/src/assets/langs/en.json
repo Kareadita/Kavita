@@ -502,7 +502,8 @@
         "comic": "Comic",
         "manga": "Manga",
         "comicVine": "ComicVine",
-        "image": "Image"
+        "image": "Image",
+        "lightNovel": "Light Novel"
     },
 
     "age-rating-pipe": {
