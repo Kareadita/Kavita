@@ -4,7 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.7.14.10</AssemblyVersion>
+        <AssemblyVersion>0.7.14.11</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <TieredPGO>true</TieredPGO>
     </PropertyGroup>
