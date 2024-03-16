@@ -256,6 +256,7 @@ public class Startup
                     await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterNumber.Migrate(dataContext, logger);
                     await MigrateMixedSpecials.Migrate(dataContext, unitOfWork, logger);
+                    await MigrateLooseLeafChapters.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterRange.Migrate(dataContext, unitOfWork, logger);
 

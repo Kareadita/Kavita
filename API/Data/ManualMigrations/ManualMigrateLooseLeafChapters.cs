@@ -11,32 +11,21 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Data.ManualMigrations;
 
-public class UserProgressCsvRecord
-{
-    public bool IsSpecial { get; set; }
-    public int AppUserId { get; set; }
-    public int PagesRead { get; set; }
-    public string Range { get; set; }
-    public string Number { get; set; }
-    public float MinNumber { get; set; }
-    public int SeriesId { get; set; }
-    public int VolumeId { get; set; }
-}
 
 /// <summary>
-/// v0.8.0 migration to move Specials into their own volume and retain user progress.
+/// v0.8.0 migration to move loose leaf chapters into their own volume and retain user progress.
 /// </summary>
-public static class MigrateMixedSpecials
+public static class MigrateLooseLeafChapters
 {
     public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
     {
-        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateMixedSpecials"))
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateLooseLeafChapters"))
         {
             return;
         }
 
         logger.LogCritical(
-            "Running ManualMigrateMixedSpecials migration - Please be patient, this may take some time. This is not an error");
+            "Running MigrateLooseLeafChapters migration - Please be patient, this may take some time. This is not an error");
 
         // First, group all the progresses into different series
 
@@ -58,7 +47,7 @@ public static class MigrateMixedSpecials
                 SeriesId = p.SeriesId,
                 VolumeId = p.VolumeId
             })
-            .Where(d => d.IsSpecial || d.Number == "0")
+            .Where(d => !d.IsSpecial)
             .Join(dataContext.Volume, d => d.VolumeId, v => v.Id, (d, v) => new
             {
                 ProgressRecord = d,
@@ -69,7 +58,8 @@ public static class MigrateMixedSpecials
 
         // First, group all the progresses into different series
         logger.LogCritical("Migrating {Count} progress events to new Volume structure - This may take over 10 minutes depending on size of DB. Please wait", progress.Count);
-        var progressesGroupedBySeries = progress.GroupBy(p => p.ProgressRecord.SeriesId);
+        var progressesGroupedBySeries = progress
+            .GroupBy(p => p.ProgressRecord.SeriesId);
 
         foreach (var seriesGroup in progressesGroupedBySeries)
         {
@@ -77,19 +67,19 @@ public static class MigrateMixedSpecials
             var seriesId = seriesGroup.Key;
 
             // Handle All Specials
-            var specialsInSeries = seriesGroup
-                .Where(p => p.ProgressRecord.IsSpecial)
+            var looseLeafsInSeries = seriesGroup
+                .Where(p => !p.ProgressRecord.IsSpecial)
                 .ToList();
 
             // Get distinct Volumes by Id. For each one, create it then create the progress events
-            var distinctVolumes = specialsInSeries.DistinctBy(d => d.Volume.Id);
+            var distinctVolumes = looseLeafsInSeries.DistinctBy(d => d.Volume.Id);
             foreach (var distinctVolume in distinctVolumes)
             {
                 // Create a new volume for each series with the appropriate number (-100000)
                 var chapters = await dataContext.Chapter
-                    .Where(c => c.VolumeId == distinctVolume.Volume.Id && c.IsSpecial).ToListAsync();
+                    .Where(c => c.VolumeId == distinctVolume.Volume.Id && !c.IsSpecial).ToListAsync();
 
-                var newVolume = new VolumeBuilder(Parser.SpecialVolume)
+                var newVolume = new VolumeBuilder(Parser.LooseLeafVolume)
                     .WithSeriesId(seriesId)
                     .WithChapters(chapters)
                     .Build();
@@ -103,20 +93,20 @@ public static class MigrateMixedSpecials
                 logger.LogInformation("Moving {Count} chapters from Volume Id {OldVolumeId} to New Volume {NewVolumeId}",
                     chapters.Count, distinctVolume.Volume.Id, newVolume.Id);
 
-                // Move the special chapters from the old volume to the new Volume
-                var specialChapters = await dataContext.Chapter
-                    .Where(c => c.VolumeId == distinctVolume.ProgressRecord.VolumeId && c.IsSpecial)
+                // Move the loose leaf chapters from the old volume to the new Volume
+                var looseLeafChapters = await dataContext.Chapter
+                    .Where(c => c.VolumeId == distinctVolume.ProgressRecord.VolumeId && !c.IsSpecial)
                     .ToListAsync();
 
-                foreach (var specialChapter in specialChapters)
+
+
+                foreach (var chapter in looseLeafChapters)
                 {
                     // Update the VolumeId on the existing progress event
-                    specialChapter.VolumeId = newVolume.Id;
+                    chapter.VolumeId = newVolume.Id;
                 }
                 await dataContext.SaveChangesAsync();
             }
-
-
         }
 
         // Save changes after processing all series
@@ -125,19 +115,16 @@ public static class MigrateMixedSpecials
             await dataContext.SaveChangesAsync();
         }
 
-        // Update all Volumes with Name as "0" -> Special
-        logger.LogCritical("Updating all Volumes with Name 0 to SpecialNumber");
 
-
-        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
-        {
-            Name = "ManualMigrateMixedSpecials",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
-        });
-
-        await dataContext.SaveChangesAsync();
+        // dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
+        // {
+        //     Name = "MigrateLooseLeafChapters",
+        //     ProductVersion = BuildInfo.Version.ToString(),
+        //     RanAt = DateTime.UtcNow
+        // });
+        //
+        // await dataContext.SaveChangesAsync();
         logger.LogCritical(
-            "Running ManualMigrateMixedSpecials migration - Completed. This is not an error");
+            "Running MigrateLooseLeafChapters migration - Completed. This is not an error");
     }
 }
