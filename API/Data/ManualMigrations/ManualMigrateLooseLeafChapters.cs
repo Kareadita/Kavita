@@ -116,14 +116,14 @@ public static class MigrateLooseLeafChapters
         }
 
 
-        // dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
-        // {
-        //     Name = "MigrateLooseLeafChapters",
-        //     ProductVersion = BuildInfo.Version.ToString(),
-        //     RanAt = DateTime.UtcNow
-        // });
-        //
-        // await dataContext.SaveChangesAsync();
+        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
+        {
+            Name = "MigrateLooseLeafChapters",
+            ProductVersion = BuildInfo.Version.ToString(),
+            RanAt = DateTime.UtcNow
+        });
+
+        await dataContext.SaveChangesAsync();
         logger.LogCritical(
             "Running MigrateLooseLeafChapters migration - Completed. This is not an error");
     }
