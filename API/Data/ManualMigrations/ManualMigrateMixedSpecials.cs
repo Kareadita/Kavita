@@ -125,9 +125,6 @@ public static class MigrateMixedSpecials
             await dataContext.SaveChangesAsync();
         }
 
-        // Update all Volumes with Name as "0" -> Special
-        logger.LogCritical("Updating all Volumes with Name 0 to SpecialNumber");
-
 
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
