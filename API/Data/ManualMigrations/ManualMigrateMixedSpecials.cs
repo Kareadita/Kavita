@@ -73,7 +73,7 @@ public static class MigrateMixedSpecials
             .ToListAsync();
 
         // First, group all the progresses into different series
-        logger.LogCritical("Migrating {Count} progress events to new Volume structure for Speecials - This may take over 10 minutes depending on size of DB. Please wait", progress.Count);
+        logger.LogCritical("Migrating {Count} progress events to new Volume structure for Specials - This may take over 10 minutes depending on size of DB. Please wait", progress.Count);
         var progressesGroupedBySeries = progress.GroupBy(p => p.ProgressRecord.SeriesId);
 
         foreach (var seriesGroup in progressesGroupedBySeries)
