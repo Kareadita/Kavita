@@ -15,7 +15,7 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
     {
         _mangaFile = new MangaFile()
         {
-            FilePath = filePath,
+            FilePath = Parser.NormalizePath(filePath),
             Format = format,
             Pages = pages,
             LastModified = File.GetLastWriteTime(filePath),

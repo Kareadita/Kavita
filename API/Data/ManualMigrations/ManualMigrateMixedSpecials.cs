@@ -63,7 +63,8 @@ public static class MigrateMixedSpecials
                 ProgressId = p.Id
             })
             .Where(d => d.IsSpecial || d.Number == "0")
-            .Join(dataContext.Volume, d => d.VolumeId, v => v.Id, (d, v) => new
+            .Join(dataContext.Volume, d => d.VolumeId, v => v.Id,
+                (d, v) => new
             {
                 ProgressRecord = d,
                 Volume = v
