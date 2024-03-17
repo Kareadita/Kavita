@@ -255,6 +255,7 @@ public class Startup
                     // v0.8.0
                     await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterNumber.Migrate(dataContext, logger);
+                    await MigrateProgressExport.Migrate(dataContext, directoryService, logger);
                     await MigrateMixedSpecials.Migrate(dataContext, unitOfWork, directoryService, logger);
                     await MigrateLooseLeafChapters.Migrate(dataContext, unitOfWork, directoryService, logger);
                     await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
