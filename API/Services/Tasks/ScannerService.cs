@@ -524,10 +524,11 @@ public class ScannerService : IScannerService
         foreach (var pSeries in toProcess)
         {
             totalFiles += parsedSeries[pSeries].Count;
-            tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
+            //tasks.Add();
+            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate);
         }
 
-        await Task.WhenAll(tasks);
+        //await Task.WhenAll(tasks);
 
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
