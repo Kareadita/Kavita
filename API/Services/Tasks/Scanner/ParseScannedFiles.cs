@@ -166,13 +166,17 @@ public class ParseScannedFiles
         }
 
         normalizedPath = Parser.Parser.NormalizePath(folderPath);
+        var libraryRoot =
+            library.Folders.FirstOrDefault(f =>
+                Parser.Parser.NormalizePath(folderPath).Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
+            folderPath;
         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
         {
             result.Add(new ScanResult()
             {
                 Files = ArraySegment<string>.Empty,
                 Folder = folderPath,
-                LibraryRoot = folderPath,
+                LibraryRoot = libraryRoot,
                 HasChanged = false
             });
         }
@@ -181,7 +185,7 @@ public class ParseScannedFiles
         {
             Files = _directoryService.ScanFiles(folderPath, fileExtensions),
             Folder = folderPath,
-            LibraryRoot = folderPath,
+            LibraryRoot = libraryRoot,
             HasChanged = true
         });
 

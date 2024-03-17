@@ -724,6 +724,7 @@ public class ProcessSeries : IProcessSeries
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
             existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
             existingFile.FileName = Parser.Parser.RemoveExtensionIfSupported(existingFile.FilePath);
+            existingFile.FilePath = Parser.Parser.NormalizePath(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }

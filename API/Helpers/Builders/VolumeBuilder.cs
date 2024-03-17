@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Data;
 using API.Entities;
@@ -73,6 +74,20 @@ public class VolumeBuilder : IEntityBuilder<Volume>
     public VolumeBuilder WithCoverImage(string cover)
     {
         _volume.CoverImage = cover;
+        return this;
+    }
+
+    public VolumeBuilder WithCreated(DateTime created)
+    {
+        _volume.Created = created;
+        _volume.CreatedUtc = created.ToUniversalTime();
+        return this;
+    }
+
+    public VolumeBuilder WithLastModified(DateTime lastModified)
+    {
+        _volume.LastModified = lastModified;
+        _volume.LastModifiedUtc = lastModified.ToUniversalTime();
         return this;
     }
 }
