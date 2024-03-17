@@ -2,10 +2,10 @@ name: Nightly Workflow
 
 on:
   push:
-    branches: ['develop', '!release/**']
+    branches: ['!release/**']
   pull_request:
     branches: [ 'develop', '!release/**' ]
-    types: [ closed ]
+    types: [ closed, synchronize ]
   workflow_dispatch:
 
 jobs:
