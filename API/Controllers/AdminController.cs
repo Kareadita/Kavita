@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Data.ManualMigrations;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
