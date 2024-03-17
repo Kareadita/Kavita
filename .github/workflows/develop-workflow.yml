@@ -21,7 +21,7 @@ jobs:
   build:
     name: Upload Kavita.Common for Version Bump
     runs-on: ubuntu-latest
-    if: github.head.ref == 'develop'
+    if: github.head.ref == 'refs/heads/develop'
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -37,7 +37,7 @@ jobs:
     name: Bump version
     needs: [ build ]
     runs-on: ubuntu-latest
-    if: github.head.ref == 'develop'
+    if: github.head.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -59,7 +59,7 @@ jobs:
     name: Build Nightly Docker
     needs: [ build, version ]
     runs-on: ubuntu-latest
-    if: github.head.ref == 'develop'
+    if: github.head.ref == 'refs/heads/develop'
     permissions:
       packages: write
       contents: read
