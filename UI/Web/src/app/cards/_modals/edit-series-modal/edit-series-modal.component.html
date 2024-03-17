@@ -229,6 +229,23 @@
                   </app-typeahead>
                 </div>
               </div>
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="imprint" class="form-label">{{t('imprint-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="getPersonsSettings(PersonRole.Imprint)"
+                                 [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
+                                 (newItemAdded)="metadata.imprintLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="penciller" class="form-label">{{t('penciller-label')}}</label>
@@ -310,7 +327,21 @@
                 </div>
               </div>
 
-
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="translator" class="form-label">{{t('translator-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="getPersonsSettings(PersonRole.Translator)"
+                                 [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
+                                 (newItemAdded)="metadata.translatorLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
 
               <div class="row g-0">
                 <div class="mb-3">
@@ -327,12 +358,29 @@
                   </app-typeahead>
                 </div>
               </div>
+
               <div class="row g-0">
                 <div class="mb-3">
-                  <label for="translator" class="form-label">{{t('translator-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="getPersonsSettings(PersonRole.Translator)"
-                                 [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
-                                 (newItemAdded)="metadata.translatorLocked = true">
+                  <label for="team" class="form-label">{{t('team-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.teamLocked = true" [settings]="getPersonsSettings(PersonRole.Team)"
+                                 [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
+                                 (newItemAdded)="metadata.teamLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="location" class="form-label">{{t('location-label')}}</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location);metadata.locationLocked = true" [settings]="getPersonsSettings(PersonRole.Location)"
+                                 [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
+                                 (newItemAdded)="metadata.locationLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
                       {{item.name}}
                     </ng-template>
@@ -408,7 +456,7 @@
                 <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
                   <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
                   <div class="flex-grow-1">
-                    <h5 class="mt-0 mb-1">{{t('volume-num')}} {{volume.name}}</h5>
+                    <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
                     <div>
                       <div class="row g-0">
                         <div class="col">
@@ -432,7 +480,7 @@
 
                       <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
                         <ul class="list-group mt-2">
-                          <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
+                          <li *ngFor="let file of volume.volumeFiles" class="list-group-item">
                             <span>{{file.filePath}}</span>
                             <div class="row g-0">
                               <div class="col">

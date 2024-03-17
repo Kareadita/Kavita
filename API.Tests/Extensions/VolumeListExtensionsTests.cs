@@ -23,10 +23,41 @@ public class VolumeListExtensionsTests
                 .Build(),
             new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
+
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
                 .Build(),
         };
 
+        var v = volumes.GetCoverImage(MangaFormat.Archive);
+        Assert.Equal(volumes[0].MinNumber, volumes.GetCoverImage(MangaFormat.Archive).MinNumber);
+    }
+
+    [Fact]
+    public void GetCoverImage_ChoosesVolume1_WhenHalf()
+    {
+        var volumes = new List<Volume>()
+        {
+            new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("0.5").Build())
+                .Build(),
+
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
+                .Build(),
+        };
+
+        var v = volumes.GetCoverImage(MangaFormat.Archive);
         Assert.Equal(volumes[0].MinNumber, volumes.GetCoverImage(MangaFormat.Archive).MinNumber);
     }
 
@@ -41,7 +72,12 @@ public class VolumeListExtensionsTests
                 .Build(),
             new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
                 .Build(),
         };
 
@@ -59,7 +95,12 @@ public class VolumeListExtensionsTests
                 .Build(),
             new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
                 .Build(),
         };
 
@@ -77,7 +118,12 @@ public class VolumeListExtensionsTests
                 .Build(),
             new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
                 .Build(),
         };
 
@@ -95,7 +141,12 @@ public class VolumeListExtensionsTests
                 .Build(),
             new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithIsSpecial(true)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1)
+                    .Build())
                 .Build(),
         };
 

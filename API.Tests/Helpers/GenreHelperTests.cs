@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.Data;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using Xunit;
@@ -12,42 +13,51 @@ public class GenreHelperTests
     [Fact]
     public void UpdateGenre_ShouldAddNewGenre()
     {
-        var allGenres = new List<Genre>
+        var allGenres = new Dictionary<string, Genre>
         {
-            new GenreBuilder("Action").Build(),
-            new GenreBuilder("action").Build(),
-            new GenreBuilder("Sci-fi").Build(),
+            {"Action".ToNormalized(), new GenreBuilder("Action").Build()},
+            {"Sci-fi".ToNormalized(), new GenreBuilder("Sci-fi").Build()}
         };
         var genreAdded = new List<Genre>();
+        var addedCount = 0;
 
-        GenreHelper.UpdateGenre(allGenres, new[] {"Action", "Adventure"}, genre =>
+        GenreHelper.UpdateGenre(allGenres, new[] {"Action", "Adventure"}, (genre, isNew) =>
         {
+            if (isNew)
+            {
+                addedCount++;
+            }
             genreAdded.Add(genre);
         });
 
         Assert.Equal(2, genreAdded.Count);
-        Assert.Equal(4, allGenres.Count);
+        Assert.Equal(1, addedCount);
+        Assert.Equal(3, allGenres.Count);
     }
 
     [Fact]
     public void UpdateGenre_ShouldNotAddDuplicateGenre()
     {
-        var allGenres = new List<Genre>
+        var allGenres = new Dictionary<string, Genre>
         {
-            new GenreBuilder("Action").Build(),
-            new GenreBuilder("action").Build(),
-            new GenreBuilder("Sci-fi").Build(),
-
+            {"Action".ToNormalized(), new GenreBuilder("Action").Build()},
+            {"Sci-fi".ToNormalized(), new GenreBuilder("Sci-fi").Build()}
         };
         var genreAdded = new List<Genre>();
+        var addedCount = 0;
 
-        GenreHelper.UpdateGenre(allGenres, new[] {"Action", "Scifi"}, genre =>
+        GenreHelper.UpdateGenre(allGenres, new[] {"Action", "Scifi"}, (genre, isNew) =>
         {
+            if (isNew)
+            {
+                addedCount++;
+            }
             genreAdded.Add(genre);
         });
 
-        Assert.Equal(3, allGenres.Count);
+        Assert.Equal(0, addedCount);
         Assert.Equal(2, genreAdded.Count);
+        Assert.Equal(2, allGenres.Count);
     }
 
     [Fact]

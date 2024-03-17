@@ -26,7 +26,9 @@ public class SeriesBuilder : IEntityBuilder<Series>
             SortName = name,
             NormalizedName = name.ToNormalized(),
             NormalizedLocalizedName = name.ToNormalized(),
-            Metadata = new SeriesMetadataBuilder().Build(),
+            Metadata = new SeriesMetadataBuilder()
+                .WithPublicationStatus(PublicationStatus.OnGoing)
+                .Build(),
             Volumes = new List<Volume>(),
             ExternalSeriesMetadata = new ExternalSeriesMetadata()
         };
@@ -88,6 +90,12 @@ public class SeriesBuilder : IEntityBuilder<Series>
     public SeriesBuilder WithLibraryId(int id)
     {
         _series.LibraryId = id;
+        return this;
+    }
+
+    public SeriesBuilder WithPublicationStatus(PublicationStatus status)
+    {
+        _series.Metadata.PublicationStatus = status;
         return this;
     }
 }

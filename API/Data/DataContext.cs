@@ -156,10 +156,15 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     {
         if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
 
-        entity.Created = DateTime.Now;
         entity.LastModified = DateTime.Now;
-        entity.CreatedUtc = DateTime.UtcNow;
         entity.LastModifiedUtc = DateTime.UtcNow;
+
+        // This allows for mocking
+        if (entity.Created == DateTime.MinValue)
+        {
+            entity.Created = DateTime.Now;
+            entity.CreatedUtc = DateTime.UtcNow;
+        }
     }
 
     private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)

@@ -2,6 +2,7 @@
 using System.IO;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;
 
@@ -19,6 +20,7 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
             Pages = pages,
             LastModified = File.GetLastWriteTime(filePath),
             LastModifiedUtc = File.GetLastWriteTimeUtc(filePath),
+            FileName = Parser.RemoveExtensionIfSupported(filePath)
         };
     }
 

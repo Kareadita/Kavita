@@ -47,7 +47,7 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series));
         CreateMap<LibraryDto, Library>();
         CreateMap<Volume, VolumeDto>()
-            .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.MinNumber));
+            .ForMember(dest => dest.Number, opt => opt.MapFrom(src => (int) src.MinNumber));
         CreateMap<MangaFile, MangaFileDto>();
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
@@ -128,6 +128,14 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(
                         src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Teams,
+                opt =>
+                    opt.MapFrom(
+                        src => src.People.Where(p => p.Role == PersonRole.Team).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Locations,
+                opt =>
+                    opt.MapFrom(
+                        src => src.People.Where(p => p.Role == PersonRole.Location).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Genres,
                 opt =>
                     opt.MapFrom(
@@ -154,6 +162,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Inkers,
                 opt =>
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Inker).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Imprints,
+                opt =>
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Imprint).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Letterers,
                 opt =>
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Letterer).OrderBy(p => p.NormalizedName)))
@@ -171,7 +182,14 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Editors,
                 opt =>
-                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)));
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Teams,
+                opt =>
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Team).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Locations,
+                opt =>
+                    opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Location).OrderBy(p => p.NormalizedName)))
+            ;
 
         CreateMap<AppUser, UserDto>()
             .ForMember(dest => dest.AgeRestriction,
@@ -200,6 +218,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<ReadingList, ReadingListDto>();
         CreateMap<ReadingListItem, ReadingListItemDto>();
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
+        CreateMap<ChapterDto, TachiyomiChapterDto>();
+        CreateMap<Chapter, TachiyomiChapterDto>();
 
         CreateMap<Series, SearchResultDto>()
             .ForMember(dest => dest.SeriesId,

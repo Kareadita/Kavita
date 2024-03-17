@@ -2,13 +2,13 @@ using API.Entities.Enums;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class MangaParserTests
+public class MangaParsingTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public MangaParserTests(ITestOutputHelper testOutputHelper)
+    public MangaParsingTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }
@@ -294,6 +294,7 @@ public class MangaParserTests
     [InlineData("Accel World Volume 2", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
     [InlineData("Historys Strongest Disciple Kenichi_v11_c90-98", "90-98")]
     [InlineData("Historys Strongest Disciple Kenichi c01-c04", "1-4")]
+    [InlineData("Adabana c00-02", "0-2")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

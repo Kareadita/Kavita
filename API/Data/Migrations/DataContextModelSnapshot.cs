@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -679,8 +679,14 @@ namespace API.Data.Migrations
                     b.Property<int>("MaxHoursToRead")
                         .HasColumnType("INTEGER");
 
+                    b.Property<float>("MaxNumber")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("MinHoursToRead")
                         .HasColumnType("INTEGER");
+
+                    b.Property<float>("MinNumber")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Number")
                         .HasColumnType("TEXT");
@@ -696,6 +702,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("SeriesGroup")
                         .HasColumnType("TEXT");
+
+                    b.Property<float>("SortOrder")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("StoryArc")
                         .HasColumnType("TEXT");
@@ -973,6 +982,9 @@ namespace API.Data.Migrations
                     b.Property<string>("Extension")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FilePath")
                         .HasColumnType("TEXT");
 
@@ -1241,6 +1253,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("GenresLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ImprintLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("InkerLocked")
                         .HasColumnType("INTEGER");
 
@@ -1251,6 +1266,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("LettererLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LocationLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxCount")
@@ -1288,6 +1306,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("TagsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TeamLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TotalCount")
@@ -1665,6 +1686,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("LocalizedNameLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("LowestFolderPath")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("MaxHoursToRead")
                         .HasColumnType("INTEGER");
 
@@ -1837,6 +1861,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LookupName")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MaxHoursToRead")

@@ -1,7 +1,8 @@
 import { MangaFile } from './manga-file';
 import { AgeRating } from './metadata/age-rating';
 
-export const LooseLeafOrSpecialNumber = 0;
+export const LooseLeafOrDefaultNumber = -100000;
+export const SpecialVolumeNumber = 100000;
 
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
@@ -9,7 +10,12 @@ export const LooseLeafOrSpecialNumber = 0;
 export interface Chapter {
     id: number;
     range: string;
+    /**
+     * @deprecated Use minNumber/maxNumber
+     */
     number: string;
+    minNumber: number;
+    maxNumber: number;
     files: Array<MangaFile>;
     /**
      * This is used in the UI, it is not updated or sent to Backend
@@ -44,4 +50,5 @@ export interface Chapter {
     webLinks: string;
     isbn: string;
     lastReadingProgress: string;
+    sortOrder: number;
 }

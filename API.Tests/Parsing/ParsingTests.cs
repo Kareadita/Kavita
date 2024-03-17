@@ -3,9 +3,9 @@ using System.Linq;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class ParserTests
+public class ParsingTests
 {
     [Fact]
     public void ShouldWork()
@@ -43,6 +43,18 @@ public class ParserTests
     public void HasSpecialTest(string input, bool expected)
     {
         Assert.Equal(expected,  HasSpecialMarker(input));
+    }
+
+    [Theory]
+    [InlineData("Beastars - SP01", 1)]
+    [InlineData("Beastars SP01", 1)]
+    [InlineData("Beastars Special 01", 0)]
+    [InlineData("Beastars Extra 01", 0)]
+    [InlineData("Batman Beyond - Return of the Joker (2001) SP01", 1)]
+    [InlineData("Batman Beyond - Return of the Joker (2001)", 0)]
+    public void ParseSpecialIndexTest(string input, int expected)
+    {
+        Assert.Equal(expected,  ParseSpecialIndex(input));
     }
 
     [Theory]
@@ -155,6 +167,7 @@ public class ParserTests
     [InlineData("3.5", 3.5)]
     [InlineData("3.5-4.0", 3.5)]
     [InlineData("asdfasdf", 0.0)]
+    [InlineData("-10", -10.0)]
     public void MinimumNumberFromRangeTest(string input, float expected)
     {
         Assert.Equal(expected, MinNumberFromRange(input));
@@ -171,6 +184,7 @@ public class ParserTests
     [InlineData("3.5", 3.5)]
     [InlineData("3.5-4.0", 4.0)]
     [InlineData("asdfasdf", 0.0)]
+    [InlineData("-10", -10.0)]
     public void MaximumNumberFromRangeTest(string input, float expected)
     {
         Assert.Equal(expected, MaxNumberFromRange(input));

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -12,10 +13,16 @@ namespace API.Services.Tasks.Scanner.Parser;
 public static class Parser
 {
     // NOTE: If you change this, don't forget to change in the UI (see Series Detail)
-    public const string DefaultChapter = "0"; // -2147483648
-    public const string LooseLeafVolume = "0";
-    public const int DefaultChapterNumber = 0;
-    public const int LooseLeafVolumeNumber = 0;
+    public const string DefaultChapter = "-100000"; // -2147483648
+    public const string LooseLeafVolume = "-100000";
+    public const int DefaultChapterNumber = -100_000;
+    public const int LooseLeafVolumeNumber = -100_000;
+    /// <summary>
+    /// The Volume Number of Specials to reside in
+    /// </summary>
+    public const int SpecialVolumeNumber = 100_000;
+    public const string SpecialVolume = "100000";
+
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
@@ -97,6 +104,12 @@ public static class Parser
         MatchOptions, RegexTimeout);
 
     private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+!]",
+        MatchOptions, RegexTimeout);
+
+    /// <summary>
+    /// Supports Batman (2020) or Batman (2)
+    /// </summary>
+    private static readonly Regex SeriesAndYearRegex = new Regex(@"^\D+\s\((?<Year>\d+)\)$",
         MatchOptions, RegexTimeout);
 
     /// <summary>
@@ -628,7 +641,7 @@ public static class Parser
 
     private static readonly Regex ComicSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$|\s#)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
         MatchOptions, RegexTimeout
     );
 
@@ -678,14 +691,22 @@ public static class Parser
         return SpecialMarkerRegex.IsMatch(filePath);
     }
 
+    public static int ParseSpecialIndex(string filePath)
+    {
+        var match = SpecialMarkerRegex.Match(filePath).Value.Replace("SP", string.Empty);
+        if (string.IsNullOrEmpty(match)) return 0;
+        return int.Parse(match);
+    }
+
     public static bool IsMangaSpecial(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);
         return  MangaSpecialRegex.IsMatch(filePath);
     }
 
-    public static bool IsComicSpecial(string filePath)
+    public static bool IsComicSpecial(string? filePath)
     {
+        if (string.IsNullOrEmpty(filePath)) return false;
         filePath = ReplaceUnderscores(filePath);
         return ComicSpecialRegex.IsMatch(filePath);
     }
@@ -944,35 +965,52 @@ public static class Parser
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
+            // Check if the range string is not null or empty
+            if (string.IsNullOrEmpty(range) || !Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
             {
-                return (float) 0.0;
+                return 0.0f;
             }
 
-            var tokens = range.Replace("_", string.Empty).Split("-");
-            return tokens.Min(t => t.AsFloat());
+            // Check if there is a range or not
+            if (Regex.IsMatch(range, @"\d-{1}\d"))
+            {
+
+                var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
+                return tokens.Min(t => t.AsFloat());
+            }
+
+            return float.Parse(range);
         }
-        catch
+        catch (Exception)
         {
-            return (float) 0.0;
+            return 0.0f;
         }
     }
+
 
     public static float MaxNumberFromRange(string range)
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
+            // Check if the range string is not null or empty
+            if (string.IsNullOrEmpty(range) || !Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
             {
-                return (float) 0.0;
+                return 0.0f;
             }
 
-            var tokens = range.Replace("_", string.Empty).Split("-");
-            return tokens.Max(t => t.AsFloat());
+            // Check if there is a range or not
+            if (Regex.IsMatch(range, @"\d-{1}\d"))
+            {
+
+                var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
+                return tokens.Max(t => t.AsFloat());
+            }
+
+            return float.Parse(range);
         }
-        catch
+        catch (Exception)
         {
-            return (float) 0.0;
+            return 0.0f;
         }
     }
 
@@ -1094,9 +1132,39 @@ public static class Parser
 
             // NOTE: This is failing for //localhost:5000/api/book/29919/book-resources?file=OPS/images/tick1.jpg
             var importFile = match.Groups["Filename"].Value;
-            if (!importFile.Contains("?")) return importFile;
+            if (!importFile.Contains('?')) return importFile;
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// If the name matches exactly Series (Volume digits)
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static bool IsSeriesAndYear(string? name)
+    {
+        return !string.IsNullOrEmpty(name) && SeriesAndYearRegex.IsMatch(name);
+    }
+
+    public static string ParseYear(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return string.Empty;
+        var match = SeriesAndYearRegex.Match(name);
+        if (!match.Success) return string.Empty;
+
+        return match.Groups["Year"].Value;
+    }
+
+    public static string? RemoveExtensionIfSupported(string? filename)
+    {
+        if (string.IsNullOrEmpty(filename)) return filename;
+
+        if (Regex.IsMatch(filename, SupportedExtensions))
+        {
+            return Regex.Replace(filename, SupportedExtensions, string.Empty);
+        }
+        return filename;
     }
 }

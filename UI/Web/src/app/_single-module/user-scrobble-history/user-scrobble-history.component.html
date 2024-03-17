@@ -62,7 +62,15 @@
       <td>
         <ng-container [ngSwitch]="item.scrobbleEventType">
           <ng-container *ngSwitchCase="ScrobbleEventType.ChapterRead">
-            {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
+            @if(item.volumeNumber === SpecialVolumeNumber) {
+              {{t('chapter-num', {num: item.volumeNumber})}}
+            } @else if (item.chapterNumber === LooseLeafOrDefaultNumber) {
+              {{t('volume-num', {num: item.volumeNumber})}}
+            } @else if (item.chapterNumber === LooseLeafOrDefaultNumber && item.volumeNumber === SpecialVolumeNumber) {
+
+            } @else {
+              {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
+            }
           </ng-container>
           <ng-container *ngSwitchCase="ScrobbleEventType.ScoreUpdated">
             {{t('rating', {r: item.rating})}}

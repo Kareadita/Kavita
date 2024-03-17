@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities.Interfaces;
+using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
@@ -12,6 +14,10 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     /// <remarks>For Books with Series_index, this will map to the Series Index.</remarks>
     public required string Name { get; set; }
+    /// <summary>
+    /// This is just the original Parsed volume number for lookups
+    /// </summary>
+    public string LookupName { get; set; }
     /// <summary>
     /// The minimum number in the Name field in Int form
     /// </summary>
@@ -54,5 +60,18 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     // Relationships
     public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
+
+    /// <summary>
+    /// Returns the Chapter Number. If the chapter is a range, returns that, formatted.
+    /// </summary>
+    /// <returns></returns>
+    public string GetNumberTitle()
+    {
+        if (MinNumber.Is(MaxNumber))
+        {
+            return $"{MinNumber}";
+        }
+        return $"{MinNumber}-{MaxNumber}";
+    }
 
 }

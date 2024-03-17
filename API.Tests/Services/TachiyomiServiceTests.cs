@@ -130,7 +130,7 @@ public class TachiyomiServiceTests
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
@@ -175,7 +175,7 @@ public class TachiyomiServiceTests
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
@@ -265,6 +265,7 @@ public class TachiyomiServiceTests
 
         Assert.Equal("21", latestChapter.Number);
     }
+
     [Fact]
     public async Task GetLatestChapter_ShouldReturnEncodedVolume_Progress()
     {
@@ -276,7 +277,7 @@ public class TachiyomiServiceTests
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
@@ -429,7 +430,7 @@ public class TachiyomiServiceTests
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
@@ -472,7 +473,7 @@ public class TachiyomiServiceTests
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
@@ -570,7 +571,7 @@ public class TachiyomiServiceTests
                 .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())

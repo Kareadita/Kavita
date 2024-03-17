@@ -6,20 +6,18 @@ using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace API.Tests.Parser;
+namespace API.Tests.Parsing;
 
-public class ComicParserTests
+public class ComicParsingTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly DefaultParser _defaultParser;
-    private static readonly string DefaultVolume = API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume;
+    private readonly IDefaultParser _basicParser;
 
-    public ComicParserTests(ITestOutputHelper testOutputHelper)
+    public ComicParsingTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _defaultParser =
-            new DefaultParser(new DirectoryService(Substitute.For<ILogger<DirectoryService>>(),
-                new MockFileSystem()));
+        var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
+        _basicParser = new BasicParser(directoryService, new ImageParser(directoryService));
     }
 
     [Theory]
@@ -210,8 +208,9 @@ public class ComicParserTests
     [InlineData("Batman Beyond Omnibus (1999)", true)]
     [InlineData("Batman Beyond Omnibus", true)]
     [InlineData("01 Annual Batman Beyond", true)]
+    [InlineData("Blood Syndicate Annual #001", true)]
     public void IsComicSpecialTest(string input, bool expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(input));
+        Assert.Equal(expected, Parser.IsComicSpecial(input));
     }
 }

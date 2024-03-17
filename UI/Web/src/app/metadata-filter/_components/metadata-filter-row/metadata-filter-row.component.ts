@@ -64,7 +64,8 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
     FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
     FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-    FilterField.Formats, FilterField.CollectionTags, FilterField.Tags
+    FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
+    FilterField.Imprint, FilterField.Team, FilterField.Location
 ];
 const BooleanFields = [FilterField.WantToRead];
 const DateFields = [FilterField.ReadingDate];
@@ -297,6 +298,9 @@ export class MetadataFilterRowComponent implements OnInit {
         case FilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
         case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
         case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
+        case FilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
+        case FilterField.Team: return this.getPersonOptions(PersonRole.Imprint);
+        case FilterField.Location: return this.getPersonOptions(PersonRole.Imprint);
         case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
         case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
       }

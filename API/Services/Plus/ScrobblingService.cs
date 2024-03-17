@@ -11,7 +11,9 @@ using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Scrobble;
+using API.Extensions;
 using API.Helpers;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Flurl.Http;
 using Hangfire;
@@ -330,6 +332,15 @@ public class ScrobblingService : IScrobblingService
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
                 Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             };
+            // NOTE: Not sure how to handle scrobbling specials or handling sending loose leaf volumes
+            if (evt.VolumeNumber is Parser.SpecialVolumeNumber)
+            {
+                evt.VolumeNumber = 0;
+            }
+            if (evt.VolumeNumber is Parser.DefaultChapterNumber)
+            {
+                evt.VolumeNumber = 0;
+            }
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} with Userid {UserId} ", series.Name, userId);
@@ -798,7 +809,7 @@ public class ScrobblingService : IScrobblingService
                     SeriesId = evt.SeriesId
                 });
                 evt.IsErrored = true;
-                evt.ErrorDetails = "Series cannot be matched for Scrobbling";
+                evt.ErrorDetails = UnknownSeriesErrorMessage;
                 evt.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(evt);
                 await _unitOfWork.CommitAsync();

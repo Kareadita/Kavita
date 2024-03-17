@@ -2,6 +2,7 @@
 using API.Data.Metadata;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 #nullable enable
@@ -12,7 +13,7 @@ public interface IReadingItemService
     int GetNumberOfPages(string filePath, MangaFormat format);
     string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
-    ParserInfo? ParseFile(string path, string rootPath, LibraryType type);
+    ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type);
 }
 
 public class ReadingItemService : IReadingItemService
@@ -21,16 +22,27 @@ public class ReadingItemService : IReadingItemService
     private readonly IBookService _bookService;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
-    private readonly IDefaultParser _defaultParser;
+    private readonly ILogger<ReadingItemService> _logger;
+    private readonly BasicParser _basicParser;
+    private readonly ComicVineParser _comicVineParser;
+    private readonly ImageParser _imageParser;
+    private readonly BookParser _bookParser;
+    private readonly PdfParser _pdfParser;
 
-    public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService, IDirectoryService directoryService)
+    public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
+        IDirectoryService directoryService, ILogger<ReadingItemService> logger)
     {
         _archiveService = archiveService;
         _bookService = bookService;
         _imageService = imageService;
         _directoryService = directoryService;
+        _logger = logger;
 
-        _defaultParser = new DefaultParser(directoryService);
+        _comicVineParser = new ComicVineParser(directoryService);
+        _imageParser = new ImageParser(directoryService);
+        _bookParser = new BookParser(directoryService, bookService, _basicParser);
+        _pdfParser = new PdfParser(directoryService);
+        _basicParser = new BasicParser(directoryService, _imageParser);
     }
 
     /// <summary>
@@ -59,75 +71,13 @@ public class ReadingItemService : IReadingItemService
     /// <param name="path">Path of a file</param>
     /// <param name="rootPath"></param>
     /// <param name="type">Library type to determine parsing to perform</param>
-    public ParserInfo? ParseFile(string path, string rootPath, LibraryType type)
+    public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type)
     {
-        var info = Parse(path, rootPath, type);
+        var info = Parse(path, rootPath, libraryRoot, type);
         if (info == null)
         {
+            _logger.LogError("Unable to parse any meaningful information out of file {FilePath}", path);
             return null;
-        }
-
-
-        // This catches when original library type is Manga/Comic and when parsing with non
-        if (Parser.IsEpub(path) && Parser.ParseVolume(info.Series) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
-        {
-            var hasVolumeInTitle = !Parser.ParseVolume(info.Title)
-                    .Equals(Parser.LooseLeafVolume);
-            var hasVolumeInSeries = !Parser.ParseVolume(info.Series)
-                .Equals(Parser.LooseLeafVolume);
-
-            if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
-            {
-                // This is likely a light novel for which we can set series from parsed title
-                info.Series = Parser.ParseSeries(info.Title);
-                info.Volumes = Parser.ParseVolume(info.Title);
-            }
-            else
-            {
-                var info2 = _defaultParser.Parse(path, rootPath, LibraryType.Book);
-                info.Merge(info2);
-            }
-
-        }
-
-        // This is first time ComicInfo is called
-        info.ComicInfo = GetComicInfo(path);
-        if (info.ComicInfo == null) return info;
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-        {
-            info.Volumes = info.ComicInfo.Volume;
-        }
-        if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-        {
-            info.Series = info.ComicInfo.Series.Trim();
-        }
-        if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-        {
-            info.Chapters = info.ComicInfo.Number;
-        }
-
-        // Patch is SeriesSort from ComicInfo
-        if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-        {
-            info.SeriesSort = info.ComicInfo.TitleSort.Trim();
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
-        {
-            info.IsSpecial = true;
-            info.Chapters = Parser.DefaultChapter;
-            info.Volumes = Parser.LooseLeafVolume;
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
-        {
-            info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
-        {
-            info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
         }
 
         return info;
@@ -216,8 +166,29 @@ public class ReadingItemService : IReadingItemService
     /// <param name="rootPath"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    private ParserInfo? Parse(string path, string rootPath, LibraryType type)
+    private ParserInfo? Parse(string path, string rootPath, string libraryRoot, LibraryType type)
     {
-        return Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
+        if (_comicVineParser.IsApplicable(path, type))
+        {
+            return _comicVineParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
+        }
+        if (_imageParser.IsApplicable(path, type))
+        {
+            return _imageParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
+        }
+        if (_bookParser.IsApplicable(path, type))
+        {
+            return _bookParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
+        }
+        if (_pdfParser.IsApplicable(path, type))
+        {
+            return _pdfParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
+        }
+        if (_basicParser.IsApplicable(path, type))
+        {
+            return _basicParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
+        }
+
+        return null;
     }
 }

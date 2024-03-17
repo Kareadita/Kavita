@@ -39,6 +39,31 @@ public static class IncludesExtensions
         return queryable.AsSplitQuery();
     }
 
+    public static IQueryable<Volume> Includes(this IQueryable<Volume> queryable,
+        VolumeIncludes includes)
+    {
+        if (includes.HasFlag(VolumeIncludes.Chapters))
+        {
+            queryable = queryable.Include(vol => vol.Chapters);
+        }
+
+        if (includes.HasFlag(VolumeIncludes.People))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.People);
+        }
+
+        if (includes.HasFlag(VolumeIncludes.Tags))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.Tags);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
     public static IQueryable<Series> Includes(this IQueryable<Series> query,
         SeriesIncludes includeFlags)
     {

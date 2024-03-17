@@ -46,7 +46,11 @@ enum Step {
 })
 export class ImportCblModalComponent {
 
+  protected readonly CblImportResult = CblImportResult;
+  protected readonly Step = Step;
+
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
+
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
     FileUploadValidators.accept(['.cbl']),
@@ -54,6 +58,9 @@ export class ImportCblModalComponent {
 
   uploadForm = new FormGroup({
     files: this.fileUploadControl
+  });
+  cblSettingsForm = new FormGroup({
+    comicVineMatching: new FormControl(true, [])
   });
 
   isLoading: boolean = false;
@@ -69,10 +76,6 @@ export class ImportCblModalComponent {
   filesToProcess: Array<FileStep> = [];
   failedFiles: Array<FileStep> = [];
 
-
-  get Breakpoint() { return Breakpoint; }
-  get Step() { return Step; }
-  get CblImportResult() { return CblImportResult; }
 
   get NextButtonLabel() {
     switch(this.currentStepIndex) {
@@ -105,11 +108,12 @@ export class ImportCblModalComponent {
           return;
         }
         // Load each file into filesToProcess and group their data
-        let pages = [];
+        const pages = [];
         for (let i = 0; i < files.length; i++) {
           const formData = new FormData();
             formData.append('cbl', files[i]);
-            formData.append('dryRun', true + '');
+            formData.append('dryRun', 'true');
+            formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
             pages.push(this.readingListService.validateCbl(formData));
         }
         forkJoin(pages).subscribe(results => {
@@ -195,12 +199,13 @@ export class ImportCblModalComponent {
     const filenamesAllowedToProcess = this.filesToProcess.map(p => p.fileName);
     const files = (this.uploadForm.get('files')?.value || []).filter(f => filenamesAllowedToProcess.includes(f.name));
 
-    let pages = [];
+    const pages = [];
     for (let i = 0; i < files.length; i++) {
       const formData = new FormData();
-        formData.append('cbl', files[i]);
-        formData.append('dryRun', 'true');
-        pages.push(this.readingListService.importCbl(formData));
+      formData.append('cbl', files[i]);
+      formData.append('dryRun', 'true');
+      formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
+      pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {
         results.forEach(cblImport => {
@@ -224,6 +229,7 @@ export class ImportCblModalComponent {
       const formData = new FormData();
       formData.append('cbl', files[i]);
       formData.append('dryRun', 'false');
+      formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
       pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {

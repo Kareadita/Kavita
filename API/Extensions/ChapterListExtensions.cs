@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using API.Entities;
 using API.Helpers;
@@ -28,10 +29,11 @@ public static class ChapterListExtensions
     /// <returns></returns>
     public static Chapter? GetChapterByRange(this IEnumerable<Chapter> chapters, ParserInfo info)
     {
+        var normalizedPath = Parser.NormalizePath(info.FullFilePath);
         var specialTreatment = info.IsSpecialInfo();
-        return specialTreatment
-            ? chapters.FirstOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath)))
-            : chapters.FirstOrDefault(c => c.Range == info.Chapters);
+         return specialTreatment
+             ? chapters.FirstOrDefault(c => c.Range == Parser.RemoveExtensionIfSupported(info.Filename) || c.Files.Select(f => Parser.NormalizePath(f.FilePath)).Contains(normalizedPath))
+             : chapters.FirstOrDefault(c => c.Range == info.Chapters);
     }
 
     /// <summary>
@@ -41,6 +43,6 @@ public static class ChapterListExtensions
     /// <returns></returns>
     public static int MinimumReleaseYear(this IList<Chapter> chapters)
     {
-        return chapters.Select(v => v.ReleaseDate.Year).Where(y => NumberHelper.IsValidYear(y)).DefaultIfEmpty().Min();
+        return chapters.Select(v => v.ReleaseDate.Year).Where(NumberHelper.IsValidYear).DefaultIfEmpty().Min();
     }
 }

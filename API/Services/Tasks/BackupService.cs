@@ -45,8 +45,6 @@ public class BackupService : IBackupService
         _backupFiles = new List<string>()
         {
             "appsettings.json",
-            "Hangfire.db", // This is not used atm
-            "Hangfire-log.db", // This is not used atm
             "kavita.db",
             "kavita.db-shm", // This wont always be there
             "kavita.db-wal" // This wont always be there
@@ -109,19 +107,21 @@ public class BackupService : IBackupService
         _directoryService.CopyFilesToDirectory(
             _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
+        await SendProgress(0.2F, "Copying logs");
         CopyLogsToBackupDirectory(tempDirectory);
 
         await SendProgress(0.25F, "Copying cover images");
-
         await CopyCoverImagesToBackupDirectory(tempDirectory);
 
-        await SendProgress(0.5F, "Copying bookmarks");
+        await SendProgress(0.35F, "Copying templates images");
+        CopyTemplatesToBackupDirectory(tempDirectory);
 
+        await SendProgress(0.5F, "Copying bookmarks");
         await CopyBookmarksToBackupDirectory(tempDirectory);
 
         await SendProgress(0.75F, "Copying themes");
-
         CopyThemesToBackupDirectory(tempDirectory);
+
         await SendProgress(0.85F, "Copying favicons");
         CopyFaviconsToBackupDirectory(tempDirectory);
 
@@ -148,6 +148,11 @@ public class BackupService : IBackupService
     private void CopyFaviconsToBackupDirectory(string tempDirectory)
     {
         _directoryService.CopyDirectoryToDirectory(_directoryService.FaviconDirectory, _directoryService.FileSystem.Path.Join(tempDirectory, "favicons"));
+    }
+
+    private void CopyTemplatesToBackupDirectory(string tempDirectory)
+    {
+        _directoryService.CopyDirectoryToDirectory(_directoryService.TemplateDirectory, _directoryService.FileSystem.Path.Join(tempDirectory, "templates"));
     }
 
     private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)

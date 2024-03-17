@@ -36,8 +36,8 @@ public interface IReadingListService
     Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
         ReadingList readingList);
 
-    Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
-    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
+    Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false);
+    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false);
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
     /// <summary>
     /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.
@@ -46,6 +46,8 @@ public interface IReadingListService
     /// <param name="library"></param>
     /// <returns></returns>
     Task CreateReadingListsFromSeries(Series series, Library library);
+
+    Task CreateReadingListsFromSeries(int libraryId, int seriesId);
 }
 
 /// <summary>
@@ -57,7 +59,7 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
+    private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 
@@ -391,8 +393,8 @@ public class ReadingListService : IReadingListService
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
         var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ChapterIncludes.Volumes))
-            .OrderBy(c => Parser.MinNumberFromRange(c.Volume.Name))
-            .ThenBy(x => x.Number.AsDouble(), _chapterSortComparerForInChapterSorting)
+            .OrderBy(c => c.Volume.MinNumber)
+            .ThenBy(x => x.MinNumber, _chapterSortComparerForInChapterSorting)
             .ToList();
 
         var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;
@@ -405,6 +407,20 @@ public class ReadingListService : IReadingListService
         await CalculateReadingListAgeRating(readingList, new []{ seriesId });
 
         return index > lastOrder + 1;
+    }
+
+    /// <summary>
+    /// Create Reading lists from a Series
+    /// </summary>
+    /// <remarks>Execute this from Hangfire</remarks>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    public async Task CreateReadingListsFromSeries(int libraryId, int seriesId)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (series == null || library == null) return;
+        await CreateReadingListsFromSeries(series, library);
     }
 
     public async Task CreateReadingListsFromSeries(Series series, Library library)
@@ -514,7 +530,8 @@ public class ReadingListService : IReadingListService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="cblReading"></param>
-    public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading)
+    /// <param name="useComicLibraryMatching">When true, will force ComicVine library naming conventions: Series (Year) for Series name matching.</param>
+    public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false)
     {
         var importSummary = new CblImportSummaryDto
         {
@@ -536,9 +553,14 @@ public class ReadingListService : IReadingListService
             });
         }
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
+
+        var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
+
+        // How can we match properly with ComicVine library when year is part of the series unless we do this in 2 passes and see which has a better match
+
+
         if (!userSeries.Any())
         {
             // Report that no series exist in the reading list
@@ -568,6 +590,20 @@ public class ReadingListService : IReadingListService
         return importSummary;
     }
 
+    private static string GetSeriesFormatting(CblBook book, bool useComicLibraryMatching)
+    {
+        return useComicLibraryMatching ? $"{book.Series} ({book.Volume})" : book.Series;
+    }
+
+    private static List<string> GetUniqueSeries(CblReadingList cblReading, bool useComicLibraryMatching)
+    {
+        if (useComicLibraryMatching)
+        {
+            return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
+        }
+        return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
+    }
+
 
     /// <summary>
     /// Imports (or pretends to) a cbl into a reading list. Call <see cref="ValidateCblFile"/> first!
@@ -575,8 +611,9 @@ public class ReadingListService : IReadingListService
     /// <param name="userId"></param>
     /// <param name="cblReading"></param>
     /// <param name="dryRun"></param>
+    /// <param name="useComicLibraryMatching">When true, will force ComicVine library naming conventions: Series (Year) for Series name matching.</param>
     /// <returns></returns>
-    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false)
+    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
         _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
@@ -588,11 +625,11 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
+        var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-        var allSeries = userSeries.ToDictionary(s => Parser.Normalize(s.Name));
-        var allSeriesLocalized = userSeries.ToDictionary(s => Parser.Normalize(s.LocalizedName));
+        var allSeries = userSeries.ToDictionary(s => s.NormalizedName);
+        var allSeriesLocalized = userSeries.ToDictionary(s => s.NormalizedLocalizedName);
 
         var readingListNameNormalized = Parser.Normalize(cblReading.Name);
         // Get all the user's reading lists
@@ -619,7 +656,7 @@ public class ReadingListService : IReadingListService
         readingList.Items ??= new List<ReadingListItem>();
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
-            var normalizedSeries = Parser.Normalize(book.Series);
+            var normalizedSeries = Parser.Normalize(GetSeriesFormatting(book, useComicLibraryMatching));
             if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -633,7 +670,9 @@ public class ReadingListService : IReadingListService
             var bookVolume = string.IsNullOrEmpty(book.Volume)
                 ? Parser.LooseLeafVolume
                 : book.Volume;
-            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault();
+            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name)
+                                 ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault()
+                                 ?? bookSeries.Volumes.GetSpecialVolumeOrDefault();
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -645,11 +684,11 @@ public class ReadingListService : IReadingListService
                 continue;
             }
 
-            // We need to handle chapter 0 or empty string when it's just a volume
+            // We need to handle default chapter or empty string when it's just a volume
             var bookNumber = string.IsNullOrEmpty(book.Number)
                 ? Parser.DefaultChapter
                 : book.Number;
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == bookNumber);
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Range == bookNumber);
             if (chapter == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -707,7 +746,7 @@ public class ReadingListService : IReadingListService
     private static IList<Series> FindCblImportConflicts(IEnumerable<Series> userSeries)
     {
         var dict = new HashSet<string>();
-        return userSeries.Where(series => !dict.Add(Parser.Normalize(series.Name))).ToList();
+        return userSeries.Where(series => !dict.Add(series.NormalizedName)).ToList();
     }
 
     private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,

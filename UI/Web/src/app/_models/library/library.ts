@@ -5,7 +5,8 @@ export enum LibraryType {
     Comic = 1,
     Book = 2,
     Images = 3,
-    LightNovel = 4
+    LightNovel = 4,
+    ComicVine = 5
 }
 
 export interface Library {

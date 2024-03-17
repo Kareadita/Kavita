@@ -60,12 +60,22 @@ public class ParserInfo
     /// If the file contains no volume/chapter information or contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
     /// </summary>
     public bool IsSpecial { get; set; }
+    /// <summary>
+    /// If the file has a Special Marker explicitly, this will contain the index
+    /// </summary>
+    public int SpecialIndex { get; set; } = 0;
 
     /// <summary>
     /// Used for specials or books, stores what the UI should show.
     /// <remarks>Manga does not use this field</remarks>
     /// </summary>
     public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// This can be filled in from ComicInfo.xml during scanning. Will update the SortOrder field on <see cref="Entities.Chapter"/>.
+    /// Falls back to Parsed Chapter number
+    /// </summary>
+    public float IssueOrder { get; set; }
 
     /// <summary>
     /// If the ParserInfo has the IsSpecial tag or both volumes and chapters are default aka 0

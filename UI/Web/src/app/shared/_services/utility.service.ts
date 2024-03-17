@@ -43,7 +43,7 @@ export class UtilityService {
 
 
   sortChapters = (a: Chapter, b: Chapter) => {
-    return parseFloat(a.number) - parseFloat(b.number);
+    return a.minNumber - b.minNumber;
   }
 
   mangaFormatToText(format: MangaFormat): string {
@@ -67,6 +67,7 @@ export class UtilityService {
       case LibraryType.LightNovel:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
+      case LibraryType.ComicVine:
         if (includeHash) {
           return this.translocoService.translate('common.issue-hash-num');
         }

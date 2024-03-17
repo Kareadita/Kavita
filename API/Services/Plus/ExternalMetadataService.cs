@@ -70,7 +70,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
@@ -155,6 +155,7 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task GetNewSeriesData(int seriesId, LibraryType libraryType)
     {
         if (!IsPlusEligible(libraryType)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
 
         // Generate key based on seriesId and libraryType or any unique identifier for the request
         // Check if the request is allowed based on the rate limit

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.2"
+    "version": "0.7.14.10"
   },
   "servers": [
     {
@@ -1101,6 +1101,10 @@
                   },
                   "FileName": {
                     "type": "string"
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -1121,6 +1125,9 @@
                   "style": "form"
                 },
                 "FileName": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -1191,6 +1198,10 @@
                   "dryRun": {
                     "type": "boolean",
                     "default": false
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -1214,6 +1225,9 @@
                   "style": "form"
                 },
                 "dryRun": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -2909,7 +2923,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2922,7 +2937,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -2935,7 +2951,8 @@
                     1,
                     2,
                     3,
-                    4
+                    4,
+                    5
                   ],
                   "type": "integer",
                   "format": "int32"
@@ -3200,7 +3217,10 @@
                 9,
                 10,
                 11,
-                12
+                12,
+                13,
+                14,
+                15
               ],
               "type": "integer",
               "format": "int32"
@@ -3619,7 +3639,8 @@
                 1,
                 2,
                 3,
-                4
+                4,
+                5
               ],
               "type": "integer",
               "format": "int32"
@@ -9191,7 +9212,8 @@
                 10,
                 11,
                 12,
-                13
+                13,
+                14
               ],
               "type": "integer",
               "description": "Represents a relationship between Series",
@@ -13526,7 +13548,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -13718,13 +13741,29 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of numbers. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\".",
+            "description": "Range of numbers. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If the chapter is a special, will return the Special Name",
             "nullable": true
           },
           "number": {
             "type": "string",
             "description": "Smallest number of the Range. Can be a partial like Chapter 4.5",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "Minimum Chapter Number.",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "description": "Maximum Chapter Number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
           },
           "files": {
             "type": "array",
@@ -13926,13 +13965,28 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\".",
+            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {
             "type": "string",
             "description": "Smallest number of the Range.",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
           },
           "pages": {
             "type": "integer",
@@ -14119,7 +14173,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "description": "Library type",
@@ -14242,6 +14297,13 @@
             },
             "nullable": true
           },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "colorists": {
             "type": "array",
             "items": {
@@ -14264,6 +14326,20 @@
             "nullable": true
           },
           "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PersonDto"
@@ -15568,7 +15644,10 @@
               25,
               26,
               27,
-              28
+              28,
+              29,
+              30,
+              31
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",
@@ -15885,7 +15964,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -15999,7 +16079,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -16162,6 +16243,11 @@
           "id": {
             "type": "integer",
             "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "The filename without extension",
+            "nullable": true
           },
           "filePath": {
             "type": "string",
@@ -16493,7 +16579,10 @@
               9,
               10,
               11,
-              12
+              12,
+              13,
+              14,
+              15
             ],
             "type": "integer",
             "format": "int32"
@@ -16538,7 +16627,10 @@
               9,
               10,
               11,
-              12
+              12,
+              13,
+              14,
+              15
             ],
             "type": "integer",
             "format": "int32"
@@ -16691,8 +16783,8 @@
             "format": "int32"
           },
           "chapterNumber": {
-            "type": "string",
-            "nullable": true
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false,
@@ -16989,7 +17081,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -17042,7 +17135,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -17245,6 +17339,13 @@
             "nullable": true
           },
           "editions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
+          },
+          "annuals": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SeriesDto"
@@ -17724,6 +17825,11 @@
             "description": "Highest path (that is under library root) that contains the series.",
             "nullable": true
           },
+          "lowestFolderPath": {
+            "type": "string",
+            "description": "Lowest path (that is under library root) that contains all files for the series.",
+            "nullable": true
+          },
           "lastFolderScanned": {
             "type": "string",
             "description": "Last time the folder was scanned",
@@ -18181,6 +18287,9 @@
           "inkerLocked": {
             "type": "boolean"
           },
+          "imprintLocked": {
+            "type": "boolean"
+          },
           "lettererLocked": {
             "type": "boolean"
           },
@@ -18191,6 +18300,12 @@
             "type": "boolean"
           },
           "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
             "type": "boolean"
           },
           "coverArtistLocked": {
@@ -18291,6 +18406,13 @@
             },
             "nullable": true
           },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
           "colorists": {
             "type": "array",
             "items": {
@@ -18313,6 +18435,20 @@
             "nullable": true
           },
           "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PersonDto"
@@ -18414,6 +18550,9 @@
           "inkerLocked": {
             "type": "boolean"
           },
+          "imprintLocked": {
+            "type": "boolean"
+          },
           "lettererLocked": {
             "type": "boolean"
           },
@@ -18424,6 +18563,12 @@
             "type": "boolean"
           },
           "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
             "type": "boolean"
           },
           "coverArtistLocked": {
@@ -18460,7 +18605,8 @@
               10,
               11,
               12,
-              13
+              13,
+              14
             ],
             "type": "integer",
             "description": "Represents a relationship between Series",
@@ -19381,7 +19527,8 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
             "format": "int32"
@@ -19799,6 +19946,14 @@
             "nullable": true
           },
           "editions": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "annuals": {
             "type": "array",
             "items": {
               "type": "integer",
@@ -20376,6 +20531,11 @@
             "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
             "nullable": true
           },
+          "lookupName": {
+            "type": "string",
+            "description": "This is just the original Parsed volume number for lookups",
+            "nullable": true
+          },
           "number": {
             "type": "integer",
             "description": "The minimum number in the Name field in Int form",
@@ -20472,9 +20632,9 @@
             "nullable": true
           },
           "number": {
-            "type": "number",
+            "type": "integer",
             "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
-            "format": "float",
+            "format": "int32",
             "deprecated": true
           },
           "pages": {
