@@ -34,7 +34,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
             Title = Parser.RemoveExtensionIfSupported(fileName)!,
-            FullFilePath = filePath,
+            FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo,
             Chapters = Parser.ParseComicChapter(fileName),

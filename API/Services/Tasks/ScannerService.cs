@@ -325,7 +325,7 @@ public class ScannerService : IScannerService
         await _metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(existingChapterIdsToClean));
-        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.CacheDirectory));
     }
 
     private void TrackFoundSeriesAndFiles(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, IList<ScannedSeriesResult> seenSeries)
@@ -485,7 +485,8 @@ public class ScannerService : IScannerService
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true)
     {
         var sw = Stopwatch.StartNew();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
@@ -501,7 +502,6 @@ public class ScannerService : IScannerService
         }
 
 
-        var totalFiles = 0;
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, libraryFolderPaths,
@@ -510,39 +510,9 @@ public class ScannerService : IScannerService
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
 
         // We need to remove any keys where there is no actual parser info
-        var toProcess = parsedSeries.Keys
-            .Where(k => parsedSeries[k].Any() && !string.IsNullOrEmpty(parsedSeries[k][0].Filename))
-            .ToList();
+        var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime);
 
-        if (toProcess.Count > 0)
-        {
-            // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
-            await _processSeries.Prime();
-        }
-
-        var tasks = new List<Task>();
-        foreach (var pSeries in toProcess)
-        {
-            totalFiles += parsedSeries[pSeries].Count;
-            //tasks.Add();
-            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate);
-        }
-
-        //await Task.WhenAll(tasks);
-
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
-
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
-
-        var time = DateTime.Now;
-        foreach (var folderPath in library.Folders)
-        {
-            folderPath.UpdateLastScanned(time);
-        }
-
-        library.UpdateLastScanned(time);
+        UpdateLastScanned(library);
 
 
         _unitOfWork.LibraryRepository.Update(library);
@@ -566,28 +536,7 @@ public class ScannerService : IScannerService
                     totalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
 
-            try
-            {
-                // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
-                // NOTE: This implementation is expensive
-                _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan");
-                var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(parsedSeries.Keys.ToList(), library.Id);
-                _logger.LogDebug("[ScannerService] Found {Count} series that needs to be removed: {SeriesList}",
-                    removedSeries.Count, removedSeries.Select(s => s.Name));
-                _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan - complete");
-
-                await _unitOfWork.CommitAsync();
-
-                foreach (var s in removedSeries)
-                {
-                    await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                        MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "[ScannerService] There was an issue deleting series for cleanup. Please check logs and rescan");
-            }
+            await RemoveSeriesNotFound(parsedSeries, library);
         }
         else
         {
@@ -598,7 +547,76 @@ public class ScannerService : IScannerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _metadataService.RemoveAbandonedMetadataKeys();
 
-        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.CacheDirectory));
+    }
+
+    private async Task RemoveSeriesNotFound(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library)
+    {
+        try
+        {
+            // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
+            // NOTE: This implementation is expensive
+            _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan");
+            var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(parsedSeries.Keys.ToList(), library.Id);
+            _logger.LogDebug("[ScannerService] Found {Count} series that needs to be removed: {SeriesList}",
+                removedSeries.Count, removedSeries.Select(s => s.Name));
+            _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan - complete");
+
+            await _unitOfWork.CommitAsync();
+
+            foreach (var s in removedSeries)
+            {
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "[ScannerService] There was an issue deleting series for cleanup. Please check logs and rescan");
+        }
+    }
+
+    private async Task<int> ProcessParsedSeries(bool forceUpdate, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library, long scanElapsedTime)
+    {
+        var toProcess = parsedSeries.Keys
+            .Where(k => parsedSeries[k].Any() && !string.IsNullOrEmpty(parsedSeries[k][0].Filename))
+            .ToList();
+
+        if (toProcess.Count > 0)
+        {
+            // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
+            await _processSeries.Prime();
+        }
+
+        var totalFiles = 0;
+        var tasks = new List<Task>();
+        foreach (var pSeries in toProcess)
+        {
+            totalFiles += parsedSeries[pSeries].Count;
+            tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
+            //await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate);
+        }
+
+        await Task.WhenAll(tasks);
+
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
+
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
+
+        return totalFiles;
+    }
+
+    private static void UpdateLastScanned(Library library)
+    {
+        var time = DateTime.Now;
+        foreach (var folderPath in library.Folders)
+        {
+            folderPath.UpdateLastScanned(time);
+        }
+
+        library.UpdateLastScanned(time);
     }
 
     private async Task<Tuple<long, IList<ScannedSeriesResult>>> ScanFiles(Library library, IEnumerable<string> dirs,

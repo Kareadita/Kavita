@@ -203,15 +203,17 @@ public class ProcessSeries : IProcessSeries
 
 
                 // Process reading list after commit as we need to commit per list
-                BackgroundJob.Enqueue(() => _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
+                // BackgroundJob.Enqueue(() => _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
+                await _readingListService.CreateReadingListsFromSeries(library.Id, series.Id);
 
                 if (seriesAdded)
                 {
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
 
-                    BackgroundJob.Enqueue(() =>
-                        _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
+                    // BackgroundJob.Enqueue(() =>
+                    //     _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
+                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
@@ -232,8 +234,10 @@ public class ProcessSeries : IProcessSeries
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
+        // BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
+        await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
     }
+
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
@@ -581,7 +585,7 @@ public class ProcessSeries : IProcessSeries
             {
                 // TODO: Push this to UI in some way
                 if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
-                _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                _logger.LogCritical(ex, "[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
                 throw new KavitaException(
                     $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
             }
@@ -705,7 +709,7 @@ public class ProcessSeries : IProcessSeries
             {
                 // Ensure we remove any files that no longer exist AND order
                 existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => p.FullFilePath == f.FilePath))
+                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
                     .OrderByNatural(f => f.FilePath).ToList();
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
             }

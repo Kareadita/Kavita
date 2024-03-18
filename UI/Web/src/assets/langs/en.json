@@ -706,7 +706,7 @@
         "description": "Complete the form to register an admin account",
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
-        "email-tooltip": "Email does not need to be a real address, but provides access to forgot password. It is not sent outside the server unless forgot password is used without a custom email service host.",
+        "email-tooltip": "Email does not need to be a real address, but provides access to forgot password. It is not sent outside the server unless Kavita emails you.",
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
