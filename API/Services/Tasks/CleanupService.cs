@@ -20,6 +20,7 @@ public interface ICleanupService
     Task Cleanup();
     Task CleanupDbEntries();
     void CleanupCacheAndTempDirectories();
+    void CleanupCacheDirectory();
     Task DeleteSeriesCoverImages();
     Task DeleteChapterCoverImages();
     Task DeleteTagCoverImages();
@@ -176,6 +177,23 @@ public class CleanupService : ICleanupService
         }
 
         _logger.LogInformation("Cache and temp directory purged");
+    }
+
+    public void CleanupCacheDirectory()
+    {
+        _logger.LogInformation("Performing cleanup of Cache directories");
+        _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
+
+        try
+        {
+            _directoryService.ClearDirectory(_directoryService.CacheDirectory);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
+        }
+
+        _logger.LogInformation("Cache directory purged");
     }
 
     /// <summary>
