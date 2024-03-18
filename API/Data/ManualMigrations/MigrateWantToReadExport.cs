@@ -20,6 +20,7 @@ public static class MigrateWantToReadExport
     {
         try
         {
+
             if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateWantToReadExport"))
             {
                 return;
