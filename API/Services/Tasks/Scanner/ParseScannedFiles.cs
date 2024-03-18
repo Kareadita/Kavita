@@ -170,6 +170,7 @@ public class ParseScannedFiles
             library.Folders.FirstOrDefault(f =>
                 Parser.Parser.NormalizePath(folderPath).Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
             folderPath;
+
         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
         {
             result.Add(new ScanResult()
@@ -312,53 +313,23 @@ public class ParseScannedFiles
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
-        var processedScannedSeries = new List<ScannedSeriesResult>();
+        //var processedScannedSeries = new List<ScannedSeriesResult>();
+        var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
         foreach (var folderPath in folders)
         {
             try
             {
                 var scanResults = ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
 
-                foreach (var scanResult in scanResults)
+                // foreach (var scanResult in scanResults)
+                // {
+                //     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
+                // }
+
+                await Task.WhenAll(scanResults.Select(async scanResult =>
                 {
-                    // scanResult is updated with the parsed infos
-                    await ProcessScanResult(scanResult, seriesPaths, library);
-
-                    // We now have all the parsed infos from the scan result, perform any merging that is necessary and post processing steps
-                    var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-
-                    // Merge any series together (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagator series
-                    MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
-
-                    // Combine everything into scannedSeries
-                    foreach (var info in scanResult.ParserInfos)
-                    {
-                        try
-                        {
-                            TrackSeries(scannedSeries, info);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex,
-                                "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
-                                info?.FullFilePath);
-                        }
-                    }
-
-                    foreach (var series in scannedSeries.Keys)
-                    {
-                        if (scannedSeries[series].Count <= 0) continue;
-
-                        UpdateSortOrder(scannedSeries, series);
-
-                        processedScannedSeries.Add(new ScannedSeriesResult()
-                        {
-                            HasChanged = scanResult.HasChanged,
-                            ParsedSeries = series,
-                            ParsedInfos = scannedSeries[series]
-                        });
-                    }
-                }
+                    await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
+                }));
 
             }
             catch (ArgumentException ex)
@@ -369,8 +340,50 @@ public class ParseScannedFiles
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
 
-        return processedScannedSeries;
+        return processedScannedSeries.ToList();
 
+    }
+
+    private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, ScanResult scanResult,
+        ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+    {
+        // scanResult is updated with the parsed infos
+        await ProcessScanResult(scanResult, seriesPaths, library); // NOTE: This may be able to be parallelized
+
+        // We now have all the parsed infos from the scan result, perform any merging that is necessary and post processing steps
+        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+
+        // Merge any series together (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagator series
+        MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
+
+        // Combine everything into scannedSeries
+        foreach (var info in scanResult.ParserInfos)
+        {
+            try
+            {
+                TrackSeries(scannedSeries, info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
+                    info?.FullFilePath);
+            }
+        }
+
+        foreach (var series in scannedSeries.Keys)
+        {
+            if (scannedSeries[series].Count <= 0) continue;
+
+            UpdateSortOrder(scannedSeries, series);
+
+            processedScannedSeries.Add(new ScannedSeriesResult()
+            {
+                HasChanged = scanResult.HasChanged,
+                ParsedSeries = series,
+                ParsedInfos = scannedSeries[series]
+            });
+        }
     }
 
     /// <summary>

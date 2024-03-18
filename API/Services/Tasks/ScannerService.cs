@@ -502,11 +502,10 @@ public class ScannerService : IScannerService
         }
 
 
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
 
         // We need to remove any keys where there is no actual parser info
