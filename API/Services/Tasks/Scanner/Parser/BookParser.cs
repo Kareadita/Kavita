@@ -10,6 +10,8 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
         var info = bookService.ParseInfo(filePath);
         if (info == null) return null;
 
+        info.ComicInfo = comicInfo;
+
         // This catches when original library type is Manga/Comic and when parsing with non
         if (Parser.ParseVolume(info.Series) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
         {
