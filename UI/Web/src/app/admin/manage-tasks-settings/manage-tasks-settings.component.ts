@@ -55,13 +55,6 @@ export class ManageTasksSettingsComponent implements OnInit {
       api: this.serverService.convertMedia(),
       successMessage: 'convert-media-task-success'
     },
-    // I removed this as it's not really needed, given that External Recs are the only thing that fill this cache now
-    // {
-    //   name: 'bust-cache-task',
-    //   description: 'bust-cache-task-desc',
-    //   api: this.serverService.bustCache(),
-    //   successMessage: 'bust-cache-task-success'
-    // },
     {
       name: 'bust-locale-task',
       description: 'bust-locale-task-desc',
@@ -245,20 +238,20 @@ export class ManageTasksSettingsComponent implements OnInit {
     modelSettings.taskScan = this.settingsForm.get('taskScan')?.value;
     modelSettings.taskCleanup = this.settingsForm.get('taskCleanup')?.value;
 
-    if (this.serverSettings.taskBackup === this.customOption) {
+    if (modelSettings.taskBackup === this.customOption) {
       modelSettings.taskBackup = this.settingsForm.get('taskBackupCustom')?.value;
     }
 
-    if (this.serverSettings.taskScan === this.customOption) {
+    if (modelSettings.taskScan === this.customOption) {
       modelSettings.taskScan = this.settingsForm.get('taskScanCustom')?.value;
     }
 
-    if (this.serverSettings.taskScan === this.customOption) {
+    if (modelSettings.taskCleanup === this.customOption) {
       modelSettings.taskCleanup = this.settingsForm.get('taskCleanupCustom')?.value;
     }
 
 
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
