@@ -3,12 +3,14 @@ using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
 
-public class BookParser(IDirectoryService directoryService, IBookService bookService, IDefaultParser basicParser) : DefaultParser(directoryService)
+public class BookParser(IDirectoryService directoryService, IBookService bookService, BasicParser basicParser) : DefaultParser(directoryService)
 {
     public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo comicInfo = null)
     {
         var info = bookService.ParseInfo(filePath);
         if (info == null) return null;
+
+        info.ComicInfo = comicInfo;
 
         // This catches when original library type is Manga/Comic and when parsing with non
         if (Parser.ParseVolume(info.Series) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?

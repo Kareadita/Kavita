@@ -781,7 +781,7 @@ public class BookService : IBookService
     /// <returns></returns>
     public ParserInfo? ParseInfo(string filePath)
     {
-        if (!Parser.IsEpub(filePath)) return null;
+        if (!Parser.IsEpub(filePath) || !_directoryService.FileSystem.File.Exists(filePath)) return null;
 
         try
         {
@@ -848,7 +848,7 @@ public class BookService : IBookService
                         Format = MangaFormat.Epub,
                         Filename = Path.GetFileName(filePath),
                         Title = specialName?.Trim() ?? string.Empty,
-                        FullFilePath = filePath,
+                        FullFilePath = Parser.NormalizePath(filePath),
                         IsSpecial = false,
                         Series = series.Trim(),
                         SeriesSort = series.Trim(),
@@ -870,7 +870,7 @@ public class BookService : IBookService
                 Format = MangaFormat.Epub,
                 Filename = Path.GetFileName(filePath),
                 Title = epubBook.Title.Trim(),
-                FullFilePath = filePath,
+                FullFilePath = Parser.NormalizePath(filePath),
                 IsSpecial = false,
                 Series = epubBook.Title.Trim(),
                 Volumes = Parser.LooseLeafVolume,

@@ -578,6 +578,13 @@ public class SeriesService : ISeriesService
         return !chapter.IsSpecial && chapter.MinNumber.IsNot(Parser.DefaultChapterNumber);
     }
 
+    /// <summary>
+    /// Should the volume be included and if so, this renames
+    /// </summary>
+    /// <param name="volume"></param>
+    /// <param name="libraryType"></param>
+    /// <param name="volumeLabel"></param>
+    /// <returns></returns>
     public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)

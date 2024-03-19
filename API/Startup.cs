@@ -260,6 +260,7 @@ public class Startup
                     await MigrateLooseLeafChapters.Migrate(dataContext, unitOfWork, directoryService, logger);
                     await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterRange.Migrate(dataContext, unitOfWork, logger);
+                    await MigrateMangaFilePath.Migrate(dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

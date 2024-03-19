@@ -440,22 +440,25 @@ public class ScrobblingService : IScrobblingService
                 // Might want to log this under ScrobbleError
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
                 {
-                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests");
+                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
                     await Task.Delay(TimeSpan.FromMinutes(10));
-                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unauthorized"))
+                    return await PostScrobbleUpdate(data, license, evt);
+                }
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unauthorized"))
                 {
                     _logger.LogCritical("Kavita+ responded with Unauthorized. Please check your subscription");
                     await _licenseService.HasActiveLicense(true);
                     evt.IsErrored = true;
                     evt.ErrorDetails = "Kavita+ subscription no longer active";
                     throw new KavitaException("Kavita+ responded with Unauthorized. Please check your subscription");
-                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Access token is invalid"))
+                }
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Access token is invalid"))
                 {
                     evt.IsErrored = true;
                     evt.ErrorDetails = AccessTokenErrorMessage;
                     throw new KavitaException("Access token is invalid");
                 }
-                else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
                     _logger.LogInformation("Kavita+ was unable to match the series");
@@ -490,10 +493,6 @@ public class ScrobblingService : IScrobblingService
                     evt.IsErrored = true;
                     evt.ErrorDetails = "Review was unable to be saved due to upstream requirements";
                 }
-
-                evt.IsErrored = true;
-                _logger.LogError("Scrobbling failed due to {ErrorMessage}: {SeriesName}", response.ErrorMessage, data.SeriesName);
-                throw new KavitaException($"Scrobbling failed due to {response.ErrorMessage}: {data.SeriesName}");
             }
 
             return response.RateLeft;

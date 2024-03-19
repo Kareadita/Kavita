@@ -21,7 +21,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
             ComicInfo = comicInfo,
             Format = MangaFormat.Image,
             Filename = Path.GetFileName(filePath),
-            FullFilePath = filePath,
+            FullFilePath = Parser.NormalizePath(filePath),
             Title = fileName,
         };
         ParseFromFallbackFolders(filePath, libraryRoot, LibraryType.Image, ref ret);
