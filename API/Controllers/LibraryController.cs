@@ -167,10 +167,35 @@ public class LibraryController : BaseApiController
     }
 
     /// <summary>
+    /// Return a specific library
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet]
+    public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
+    {
+        var username = User.GetUsername();
+        if (string.IsNullOrEmpty(username)) return Unauthorized();
+
+        var cacheKey = CacheKey + username;
+        var result = await _libraryCacheProvider.GetAsync<IEnumerable<LibraryDto>>(cacheKey);
+        if (result.HasValue)
+        {
+            return Ok(result.Value.FirstOrDefault(l => l.Id == libraryId));
+        }
+
+        var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username).ToList();
+        await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
+        _logger.LogDebug("Caching libraries for {Key}", cacheKey);
+
+        return Ok(ret.Find(l => l.Id == libraryId));
+    }
+
+    /// <summary>
     /// Return all libraries in the Server
     /// </summary>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet("libraries")]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
         var username = User.GetUsername();

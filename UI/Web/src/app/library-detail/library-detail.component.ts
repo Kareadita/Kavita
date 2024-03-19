@@ -231,7 +231,23 @@ export class LibraryDetailComponent implements OnInit {
   async handleAction(action: ActionItem<Library>, library: Library) {
     let lib: Partial<Library> = library;
     if (library === undefined) {
-      lib = {id: this.libraryId, name: this.libraryName};
+      //lib = {id: this.libraryId, name: this.libraryName}; // BUG: We need the whole library for editLibrary
+      this.libraryService.getLibrary(this.libraryId).subscribe(async library => {
+        switch (action.action) {
+          case(Action.Scan):
+            await this.actionService.scanLibrary(library);
+            break;
+          case(Action.RefreshMetadata):
+            await this.actionService.refreshMetadata(library);
+            break;
+          case(Action.Edit):
+            this.actionService.editLibrary(library);
+            break;
+          default:
+            break;
+        }
+      });
+      return
     }
     switch (action.action) {
       case(Action.Scan):

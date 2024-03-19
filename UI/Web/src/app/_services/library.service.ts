@@ -32,7 +32,7 @@ export class LibraryService {
       return of(this.libraryNames);
     }
 
-    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(libraries => {
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries').pipe(map(libraries => {
       this.libraryNames = {};
       libraries.forEach(lib => {
         if (this.libraryNames !== undefined) {
@@ -47,7 +47,7 @@ export class LibraryService {
     if (this.libraryNames != undefined && this.libraryNames.hasOwnProperty(libraryId)) {
       return of(this.libraryNames[libraryId]);
     }
-    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(l => {
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries').pipe(map(l => {
       this.libraryNames = {};
       l.forEach(lib => {
         if (this.libraryNames !== undefined) {
@@ -75,8 +75,12 @@ export class LibraryService {
     return this.httpClient.get<JumpKey[]>(this.baseUrl + 'library/jump-bar?libraryId=' + libraryId);
   }
 
+  getLibrary(libraryId: number) {
+    return this.httpClient.get<Library>(this.baseUrl + 'library?libraryId=' + libraryId);
+  }
+
   getLibraries() {
-    return this.httpClient.get<Library[]>(this.baseUrl + 'library');
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries');
   }
 
   updateLibrariesForMember(username: string, selectedLibraries: Library[]) {
