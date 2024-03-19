@@ -440,8 +440,9 @@ public class ScrobblingService : IScrobblingService
                 // Might want to log this under ScrobbleError
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
                 {
-                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests");
+                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
                     await Task.Delay(TimeSpan.FromMinutes(10));
+                    await PostScrobbleUpdate(data, license, evt);
                 } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unauthorized"))
                 {
                     _logger.LogCritical("Kavita+ responded with Unauthorized. Please check your subscription");
@@ -490,10 +491,6 @@ public class ScrobblingService : IScrobblingService
                     evt.IsErrored = true;
                     evt.ErrorDetails = "Review was unable to be saved due to upstream requirements";
                 }
-
-                evt.IsErrored = true;
-                _logger.LogError("Scrobbling failed due to {ErrorMessage}: {SeriesName}", response.ErrorMessage, data.SeriesName);
-                throw new KavitaException($"Scrobbling failed due to {response.ErrorMessage}: {data.SeriesName}");
             }
 
             return response.RateLeft;
