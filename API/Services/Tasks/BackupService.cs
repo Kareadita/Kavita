@@ -104,8 +104,13 @@ public class BackupService : IBackupService
         _directoryService.ExistOrCreate(tempDirectory);
         _directoryService.ClearDirectory(tempDirectory);
 
+        await SendProgress(0.1F, "Copying config files");
         _directoryService.CopyFilesToDirectory(
-            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)).ToList(), tempDirectory);
+            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)), tempDirectory);
+
+        // Copy any csv's as those are used for manual migrations
+        _directoryService.CopyFilesToDirectory(
+            _directoryService.GetFilesWithCertainExtensions(_directoryService.ConfigDirectory, @"\.csv"), tempDirectory);
 
         await SendProgress(0.2F, "Copying logs");
         CopyLogsToBackupDirectory(tempDirectory);

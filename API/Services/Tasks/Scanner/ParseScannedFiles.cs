@@ -321,15 +321,16 @@ public class ParseScannedFiles
             {
                 var scanResults = ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
 
-                // foreach (var scanResult in scanResults)
-                // {
-                //     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
-                // }
-
-                await Task.WhenAll(scanResults.Select(async scanResult =>
+                foreach (var scanResult in scanResults)
                 {
                     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
-                }));
+                }
+
+                // This reduced a 1.1k series networked scan by a little more than 1 hour, but the order series were added to Kavita was not alphabetical
+                // await Task.WhenAll(scanResults.Select(async scanResult =>
+                // {
+                //     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
+                // }));
 
             }
             catch (ArgumentException ex)
