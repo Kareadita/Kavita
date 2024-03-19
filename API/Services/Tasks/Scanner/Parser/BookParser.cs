@@ -3,7 +3,7 @@ using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
 
-public class BookParser(IDirectoryService directoryService, IBookService bookService, IDefaultParser basicParser) : DefaultParser(directoryService)
+public class BookParser(IDirectoryService directoryService, IBookService bookService, BasicParser basicParser) : DefaultParser(directoryService)
 {
     public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo comicInfo = null)
     {

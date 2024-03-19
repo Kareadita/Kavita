@@ -38,11 +38,12 @@ public class ReadingItemService : IReadingItemService
         _directoryService = directoryService;
         _logger = logger;
 
-        _comicVineParser = new ComicVineParser(directoryService);
         _imageParser = new ImageParser(directoryService);
-        _bookParser = new BookParser(directoryService, bookService, _basicParser);
-        _pdfParser = new PdfParser(directoryService);
         _basicParser = new BasicParser(directoryService, _imageParser);
+        _bookParser = new BookParser(directoryService, bookService, _basicParser);
+        _comicVineParser = new ComicVineParser(directoryService);
+        _pdfParser = new PdfParser(directoryService);
+
     }
 
     /// <summary>
@@ -73,14 +74,22 @@ public class ReadingItemService : IReadingItemService
     /// <param name="type">Library type to determine parsing to perform</param>
     public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type)
     {
-        var info = Parse(path, rootPath, libraryRoot, type);
-        if (info == null)
+        try
         {
-            _logger.LogError("Unable to parse any meaningful information out of file {FilePath}", path);
+            var info = Parse(path, rootPath, libraryRoot, type);
+            if (info == null)
+            {
+                _logger.LogError("Unable to parse any meaningful information out of file {FilePath}", path);
+                return null;
+            }
+
+            return info;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception when parsing file {FilePath}", path);
             return null;
         }
-
-        return info;
     }
 
     /// <summary>

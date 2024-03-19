@@ -203,7 +203,6 @@ public class ProcessSeries : IProcessSeries
 
 
                 // Process reading list after commit as we need to commit per list
-                // BackgroundJob.Enqueue(() => _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
                 await _readingListService.CreateReadingListsFromSeries(library.Id, series.Id);
 
                 if (seriesAdded)

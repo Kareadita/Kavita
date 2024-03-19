@@ -313,8 +313,8 @@ public class ParseScannedFiles
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
-        //var processedScannedSeries = new List<ScannedSeriesResult>();
-        var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
+        var processedScannedSeries = new List<ScannedSeriesResult>();
+        //var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
         foreach (var folderPath in folders)
         {
             try
@@ -346,7 +346,7 @@ public class ParseScannedFiles
     }
 
     private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, ScanResult scanResult,
-        ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+        List<ScannedSeriesResult> processedScannedSeries)
     {
         // scanResult is updated with the parsed infos
         await ProcessScanResult(scanResult, seriesPaths, library); // NOTE: This may be able to be parallelized

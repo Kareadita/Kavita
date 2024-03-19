@@ -781,7 +781,7 @@ public class BookService : IBookService
     /// <returns></returns>
     public ParserInfo? ParseInfo(string filePath)
     {
-        if (!Parser.IsEpub(filePath)) return null;
+        if (!Parser.IsEpub(filePath) || !_directoryService.FileSystem.File.Exists(filePath)) return null;
 
         try
         {
