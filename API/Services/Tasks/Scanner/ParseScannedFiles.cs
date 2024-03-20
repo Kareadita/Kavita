@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using ExCSS;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -448,22 +449,45 @@ public class ParseScannedFiles
                 var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
                 IList<ParserInfo> chapters;
                 var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
+                var hasAnySpMarker = infos.Exists(info => info.SpecialIndex > 0);
+                var counter = 0f;
 
-                if (specialTreatment)
+                if (specialTreatment && hasAnySpMarker)
                 {
                     chapters = infos
                         .OrderBy(info => info.SpecialIndex)
                         .ToList();
+
+                    foreach (var chapter in chapters)
+                    {
+                        chapter.IssueOrder = counter;
+                        counter++;
+                    }
+                    return;
                 }
-                else
+
+
+                chapters = infos
+                    .OrderByNatural(info => info.Chapters)
+                    .ToList();
+
+
+                // If everything is a special but we don't have any SpecialIndex, then order naturally and use 0, 1, 2
+                if (specialTreatment)
                 {
-                    chapters = infos
-                        .OrderByNatural(info => info.Chapters)
-                        .ToList();
+                    foreach (var chapter in chapters)
+                    {
+                        chapter.IssueOrder = counter;
+                        counter++;
+                    }
+                    return;
                 }
 
 
-                var counter = 0f;
+
+
+
+                counter = 0f;
                 var prevIssue = string.Empty;
                 foreach (var chapter in chapters)
                 {
