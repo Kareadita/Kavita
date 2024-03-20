@@ -1,9 +1,8 @@
 name: Nightly Workflow
 
 on:
-  pull_request:
+  push:
     branches: [ 'develop', '!release/**' ]
-    types: [ closed ]
   workflow_dispatch:
 
 jobs:
