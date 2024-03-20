@@ -22,6 +22,7 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
 
             if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
             {
+                // NOTE: I'm not sure the comment is true. I've never seen this triggered
                 // This is likely a light novel for which we can set series from parsed title
                 info.Series = Parser.ParseSeries(info.Title);
                 info.Volumes = Parser.ParseVolume(info.Title);
@@ -30,6 +31,12 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
             {
                 var info2 = basicParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Book, comicInfo);
                 info.Merge(info2);
+                if (type == LibraryType.LightNovel && hasVolumeInSeries && info2 != null && Parser.ParseVolume(info2.Series)
+                        .Equals(Parser.LooseLeafVolume))
+                {
+                    // Override the Series name so it groups appropriately
+                    info.Series = info2.Series;
+                }
             }
         }
 
