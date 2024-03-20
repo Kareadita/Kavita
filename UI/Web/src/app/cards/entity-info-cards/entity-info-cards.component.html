@@ -90,11 +90,8 @@
           <div class="col-auto">
             <app-icon-and-title [label]="t('links-title')" [clickable]="false" fontClasses="fa-solid fa-link" [title]="t('links-title')">
               <a class="me-1" [href]="link | safeHtml" *ngFor="let link of WebLinks" target="_blank" rel="noopener noreferrer" [title]="link">
-                <img width="24" height="24"  #img class="lazyload img-placeholder"
-                     src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                     [attr.data-src]="imageService.getWebLinkImage(link)"
-                     (error)="imageService.updateErroredWebLinkImage($event)"
-                     aria-hidden="true" alt="">
+                <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
+                           [errorImage]="imageService.errorWebLinkImage"></app-image>
               </a>
             </app-icon-and-title>
           </div>
