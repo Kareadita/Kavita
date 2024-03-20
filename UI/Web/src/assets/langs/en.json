@@ -1025,6 +1025,7 @@
         "id-title": "ID",
         "links-title": "{{series-metadata-detail.links-title}}",
         "isbn-title": "ISBN",
+        "sort-order-title": "Sort Order",
         "last-read-title": "Last Read",
         "less-than-hour": "<1 Hour",
         "range-hours": "{{value}} {{hourWord}}",

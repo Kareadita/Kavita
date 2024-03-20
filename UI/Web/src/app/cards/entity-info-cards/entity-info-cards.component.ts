@@ -57,7 +57,7 @@ export class EntityInfoCardsComponent implements OnInit {
   @Input() includeMetadata: boolean = false;
 
   /**
-   * Hide more system based fields, like Id or Date Added
+   * Hide more system based fields, like id or Date Added
    */
   @Input() showExtendedProperties: boolean = true;
 
