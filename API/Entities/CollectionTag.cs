@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities.Metadata;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,16 @@ public class CollectionTag
     public bool Promoted { get; set; }
 
     public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
+
+    /// <summary>
+    /// Is this Collection tag managed by another system, like Kavita+
+    /// </summary>
+    //public bool IsManaged { get; set; } = false;
+
+    /// <summary>
+    /// The last time this Collection was Synchronized. Only applicable for Managed Tags.
+    /// </summary>
+    //public DateTime LastSynchronized { get; set; }
 
     /// <summary>
     /// Not Used due to not using concurrency update

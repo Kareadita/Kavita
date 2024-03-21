@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import {take, tap} from 'rxjs/operators';
+import {take} from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import {
   readingDirections,
@@ -39,7 +39,6 @@ import { ManageDevicesComponent } from '../manage-devices/manage-devices.compone
 import { ThemeManagerComponent } from '../theme-manager/theme-manager.component';
 import { ApiKeyComponent } from '../api-key/api-key.component';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { AnilistKeyComponent } from '../anilist-key/anilist-key.component';
 import { ChangeAgeRestrictionComponent } from '../change-age-restriction/change-age-restriction.component';
 import { ChangePasswordComponent } from '../change-password/change-password.component';
 import { ChangeEmailComponent } from '../change-email/change-email.component';
@@ -50,6 +49,7 @@ import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ManageScrobblingProvidersComponent} from "../manage-scrobbling-providers/manage-scrobbling-providers.component";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -74,10 +74,10 @@ enum FragmentID {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
-    ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
+    ChangePasswordComponent, ChangeAgeRestrictionComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
     ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
-    TranslocoDirective, LoadingComponent],
+    TranslocoDirective, LoadingComponent, ManageScrobblingProvidersComponent],
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -166,7 +166,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.route.fragment.subscribe(frag => {
         const tab = this.tabs.filter(item => item.fragment === frag);
-        console.log('tab: ', tab);
         if (tab.length > 0) {
           this.active = tab[0];
         } else {

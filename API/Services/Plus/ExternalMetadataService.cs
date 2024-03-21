@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -61,6 +62,8 @@ public interface IExternalMetadataService
     /// <param name="libraryType"></param>
     /// <returns></returns>
     Task GetNewSeriesData(int seriesId, LibraryType libraryType);
+
+    Task<IList<MalStackDto>> GetStacksForUser(int userId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -172,6 +175,46 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // TODO: Fetch Series Metadata
 
+    }
+
+    public async Task<IList<MalStackDto>> GetStacksForUser(int userId)
+    {
+        if (!await _licenseService.HasActiveLicense()) return ArraySegment<MalStackDto>.Empty;
+
+        // See if this user has Mal account on record
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null || string.IsNullOrEmpty(user.MalUserName) || string.IsNullOrEmpty(user.MalAccessToken))
+        {
+            _logger.LogInformation("User is attempting to fetch MAL Stacks, but missing information on their account");
+            return ArraySegment<MalStackDto>.Empty;
+        }
+        try
+        {
+            _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
+
+            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+            var result = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stacks?username={user.MalUserName}")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", license)
+                .WithHeader("x-installId", HashUtil.ServerToken())
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .GetJsonAsync<IList<MalStackDto>>();
+
+            if (result == null)
+            {
+                return ArraySegment<MalStackDto>.Empty;
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Fetching Kavita+ for MAL Stacks for user {UserName} failed", user.MalUserName);
+            return ArraySegment<MalStackDto>.Empty;
+        }
     }
 
     /// <summary>

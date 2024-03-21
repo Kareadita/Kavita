@@ -484,9 +484,6 @@ public class ParseScannedFiles
                 }
 
 
-
-
-
                 counter = 0f;
                 var prevIssue = string.Empty;
                 foreach (var chapter in chapters)

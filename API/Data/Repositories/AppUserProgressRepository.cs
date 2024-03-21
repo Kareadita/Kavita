@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using API.Data.ManualMigrations;
 using API.DTOs;
+using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;

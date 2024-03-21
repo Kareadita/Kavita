@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs;
+namespace API.DTOs.Progress;
 #nullable enable
 
 public class ProgressDto

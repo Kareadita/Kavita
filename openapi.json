@@ -886,6 +886,55 @@
         }
       }
     },
+    "/api/Admin/update-chapter-progress": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Set the progress information for a particular user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProgressDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProgressDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProgressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Book/{chapterId}/book-info": {
       "get": {
         "tags": [
@@ -1503,6 +1552,45 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/mal-stacks": {
+      "get": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "For the authenticated user, if they have an active Kavita+ subscription and a MAL username on record,\r\nfetch their Mal interest stacks (including restacks)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MalStackDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MalStackDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MalStackDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -7350,6 +7438,35 @@
         }
       }
     },
+    "/api/Scrobbling/mal-token": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MalUserInfoDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MalUserInfoDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MalUserInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Scrobbling/update-anilist-token": {
       "post": {
         "tags": [
@@ -7372,6 +7489,39 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/update-mal-token": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Update the current user's MAL token (Client ID) and Username",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalUserInfoDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalUserInfoDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalUserInfoDto"
               }
             }
           }
@@ -12754,6 +12904,16 @@
             "description": "The JWT for the user's AniList account. Expires after a year.",
             "nullable": true
           },
+          "malUserName": {
+            "type": "string",
+            "description": "The Username of the MAL user",
+            "nullable": true
+          },
+          "malAccessToken": {
+            "type": "string",
+            "description": "The Client ID for the user's MAL account. User should create a client on MAL for this.",
+            "nullable": true
+          },
           "scrobbleHolds": {
             "type": "array",
             "items": {
@@ -16276,6 +16436,53 @@
           }
         },
         "additionalProperties": false
+      },
+      "MalStackDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "restackCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents an Interest Stack from MAL"
+      },
+      "MalUserInfoDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "This is actually the Client Id",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Information about a User's MAL connection"
       },
       "MangaFile": {
         "type": "object",
@@ -20131,6 +20338,10 @@
             "$ref": "#/components/schemas/AgeRestrictionDto"
           }
         },
+        "additionalProperties": false
+      },
+      "UpdateUserProgressDto": {
+        "type": "object",
         "additionalProperties": false
       },
       "UpdateUserReviewDto": {

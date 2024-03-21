@@ -294,11 +294,17 @@
         "no-token-set": "No Token Set",
         "token-set":  "Token Set",
         "generate": "Generate",
+        "generic-instructions": "Fill out information about different External Services you have to allow Kavita+ to interact with them.",
         "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "mal-instructions": "Kavita uses a MAL Client Id for authentication. Create a new Client for Kavita and once approved, supply the client Id and your username.",
+        "scrobbling-applicable-label": "Scrobbling Applicable",
         "token-input-label": "{{service}} Token Goes Here",
+        "mal-token-input-label": "MAL Client Id",
+        "mal-username-input-label": "MAL Username",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "loading": "{{common.loading}}"
     },
 
     "typeahead": {
@@ -937,6 +943,7 @@
         "metadata-tab": "Metadata",
         "cover-tab": "Cover",
         "info-tab": "Info",
+        "progress-tab": "Progress",
         "no-summary": "No Summary available.",
         "writers-title": "{{series-metadata-detail.writers-title}}",
         "genres-title": "{{series-metadata-detail.genres-title}}",
@@ -2126,6 +2133,7 @@
         "view-series": "View Series",
         "clear": "{{common.clear}}",
         "import-cbl": "Import CBL",
+        "import-mal-stack": "Import MAL Stack",
         "read": "Read",
         "add-rule-group-and": "Add Rule Group (AND)",
         "add-rule-group-or": "Add Rule Group (OR)",

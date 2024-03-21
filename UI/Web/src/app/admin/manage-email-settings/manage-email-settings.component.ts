@@ -1,17 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
@@ -23,8 +19,7 @@ import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageAlertsComponent, NgbAccordionBody, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionDirective,
-    NgbAccordionHeader, NgbAccordionItem, NgForOf, TitleCasePipe]
+    ManageAlertsComponent, TitleCasePipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

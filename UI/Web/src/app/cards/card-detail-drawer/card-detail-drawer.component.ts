@@ -55,7 +55,8 @@ enum TabID {
   General = 0,
   Metadata = 1,
   Cover = 2,
-  Files = 3
+  Progress = 3,
+  Files = 4
 }
 
 @Component({
@@ -106,6 +107,7 @@ export class CardDetailDrawerComponent implements OnInit {
     {title: 'general-tab', disabled: false},
     {title: 'metadata-tab', disabled: false},
     {title: 'cover-tab', disabled: false},
+    {title: 'progress-tab', disabled: false},
     {title: 'info-tab', disabled: false}
   ];
   active = this.tabs[0];
