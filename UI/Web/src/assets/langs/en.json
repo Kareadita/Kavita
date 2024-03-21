@@ -1559,6 +1559,14 @@
         "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them."
     },
 
+    "import-mal-collection-modal": {
+        "close": "{{common.close}}",
+        "title": "MAL Interest Stack Import",
+        "description": "Import your MAL Interest Stacks and create Collections within Kavita",
+        "series-count": "{{common.series-count}}",
+        "restack-count": "{{num}} Restacks"
+    },
+
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL Import",
