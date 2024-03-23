@@ -232,6 +232,7 @@ public class UploadController : BaseApiController
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
         var coverImageSize = settings.CoverImageSize;
+
         return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
             filename, encodeFormat, coverImageSize.GetDimensions().Width);
     }
