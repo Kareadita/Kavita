@@ -44,6 +44,7 @@ import {MetadataService} from "../_services/metadata.service";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
+import {LoadingComponent} from "../shared/loading/loading.component";
 
 @Component({
     selector: 'app-library-detail',
@@ -52,9 +53,13 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf
-    , CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
+    , CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective, LoadingComponent]
 })
 export class LibraryDetailComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   libraryId!: number;
   libraryName = '';
@@ -69,15 +74,13 @@ export class LibraryDetailComponent implements OnInit {
   filterActiveCheck!: SeriesFilterV2;
   refresh: EventEmitter<void> = new EventEmitter();
   jumpKeys: Array<JumpKey> = [];
+  bulkLoader: boolean = false;
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'library-tab', fragment: '', icon: 'fa-landmark'},
     {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly metadataService = inject(MetadataService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
@@ -123,7 +126,14 @@ export class LibraryDetailComponent implements OnInit {
         });
         break;
       case Action.Delete:
+        if (selectedSeries.length > 25) {
+          this.bulkLoader = true;
+          this.cdRef.markForCheck();
+        }
+
         this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+          this.bulkLoader = false;
+          this.cdRef.markForCheck();
           if (!successful) return;
           this.bulkSelectionService.deselectAll();
           this.loadPage();
