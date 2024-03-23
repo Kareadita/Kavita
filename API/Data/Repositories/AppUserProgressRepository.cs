@@ -8,6 +8,7 @@ using API.DTOs;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions.QueryExtensions;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -37,6 +38,7 @@ public interface IAppUserProgressRepository
     Task<DateTime?> GetLatestProgressForSeries(int seriesId, int userId);
     Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId);
     Task UpdateAllProgressThatAreMoreThanChapterPages();
+    Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0);
 }
 #nullable disable
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -232,6 +234,33 @@ public class AppUserProgressRepository : IAppUserProgressRepository
         // Execute the batch SQL
         var batchSql = sqlBuilder.ToString();
         await _context.Database.ExecuteSqlRawAsync(batchSql);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="userId">If 0, will pull all records</param>
+    /// <returns></returns>
+    public async Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0)
+    {
+        return await _context.AppUserProgresses
+            .WhereIf(userId > 0, p => p.AppUserId == userId)
+            .Where(p => p.ChapterId == chapterId)
+            .Include(p => p.AppUser)
+            .Select(p => new FullProgressDto()
+            {
+                AppUserId = p.AppUserId,
+                ChapterId = p.ChapterId,
+                PagesRead = p.PagesRead,
+                Id = p.Id,
+                Created = p.Created,
+                CreatedUtc = p.CreatedUtc,
+                LastModified = p.LastModified,
+                LastModifiedUtc = p.LastModifiedUtc,
+                UserName = p.AppUser.UserName
+            })
+            .ToListAsync();
     }
 
 #nullable enable

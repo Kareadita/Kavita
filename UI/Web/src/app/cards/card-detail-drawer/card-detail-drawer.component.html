@@ -46,12 +46,7 @@
         <li [ngbNavItem]="tabs[TabID.Progress]">
           <a ngbNavLink>{{t(tabs[TabID.Progress].title)}}</a>
           <ng-template ngbNavContent>
-
-
-            <p>Display Progress info for this chapter (dates) and let the admin edit them
-              PagesRead, CreatedUtc, LastModifiedUtc, User? (admin can set multiple entries)</p>
-
-            <p>Here we display a table of all reads with their dates</p>
+            <app-edit-chapter-progress [chapter]="chapter"></app-edit-chapter-progress>
           </ng-template>
         </li>
 

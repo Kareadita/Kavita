@@ -1567,6 +1567,15 @@
         "restack-count": "{{num}} Restacks"
     },
 
+    "edit-chapter-progress": {
+        "user-header": "User",
+        "page-read-header": "Pages Read",
+        "date-created-header": "Created (UTC)",
+        "date-updated-header": "Last Updated (UTC)",
+        "action-header": "{{common.edit}}",
+        "edit-alt": "{{common.edit}}"
+    },
+
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL Import",

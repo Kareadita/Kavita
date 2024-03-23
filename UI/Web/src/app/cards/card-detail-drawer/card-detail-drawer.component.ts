@@ -50,6 +50,7 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {EditChapterProgressComponent} from "../edit-chapter-progress/edit-chapter-progress.component";
 
 enum TabID {
   General = 0,
@@ -62,7 +63,7 @@ enum TabID {
 @Component({
   selector: 'app-card-detail-drawer',
   standalone: true,
-  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective],
+  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective, EditChapterProgressComponent],
   templateUrl: './card-detail-drawer.component.html',
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
