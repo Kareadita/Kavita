@@ -332,15 +332,7 @@ public class ScrobblingService : IScrobblingService
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
                 Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             };
-            // NOTE: Not sure how to handle scrobbling specials or handling sending loose leaf volumes
-            if (evt.VolumeNumber is Parser.SpecialVolumeNumber)
-            {
-                evt.VolumeNumber = 0;
-            }
-            if (evt.VolumeNumber is Parser.DefaultChapterNumber)
-            {
-                evt.VolumeNumber = 0;
-            }
+
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} with Userid {UserId} ", series.Name, userId);
@@ -826,6 +818,20 @@ public class ScrobblingService : IScrobblingService
             try
             {
                 var data = await createEvent(evt);
+                // We need to handle the encoding and changing it to the old one until we can update the API layer to handle these
+                // which could happen in v0.8.3
+                if (data.VolumeNumber is Parser.SpecialVolumeNumber)
+                {
+                    data.VolumeNumber = 0;
+                }
+                if (data.VolumeNumber is Parser.DefaultChapterNumber)
+                {
+                    data.VolumeNumber = 0;
+                }
+                if (data.ChapterNumber is Parser.DefaultChapterNumber)
+                {
+                    data.ChapterNumber = 0;
+                }
                 userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, license.Value, evt);
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
