@@ -97,6 +97,12 @@ namespace API.Data.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("MalAccessToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MalUserName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");

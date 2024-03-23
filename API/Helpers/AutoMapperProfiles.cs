@@ -10,6 +10,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
+using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Recommendation;

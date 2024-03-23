@@ -95,6 +95,11 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         // Patch in other information from ComicInfo
         UpdateFromComicInfo(ret);
 
+        if (ret.Volumes == Parser.LooseLeafVolume && ret.Chapters == Parser.DefaultChapter)
+        {
+            ret.IsSpecial = true;
+        }
+
         // v0.8.x: Introducing a change where Specials will go in a separate Volume with a reserved number
         if (ret.IsSpecial)
         {

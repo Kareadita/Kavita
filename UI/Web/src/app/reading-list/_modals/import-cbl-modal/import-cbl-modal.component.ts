@@ -7,7 +7,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
@@ -16,7 +16,7 @@ import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 interface FileStep {
   fileName: string;

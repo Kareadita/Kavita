@@ -294,11 +294,17 @@
         "no-token-set": "No Token Set",
         "token-set":  "Token Set",
         "generate": "Generate",
+        "generic-instructions": "Fill out information about different External Services you have to allow Kavita+ to interact with them.",
         "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "mal-instructions": "Kavita uses a MAL Client Id for authentication. Create a new Client for Kavita and once approved, supply the client Id and your username.",
+        "scrobbling-applicable-label": "Scrobbling Applicable",
         "token-input-label": "{{service}} Token Goes Here",
+        "mal-token-input-label": "MAL Client Id",
+        "mal-username-input-label": "MAL Username",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "loading": "{{common.loading}}"
     },
 
     "typeahead": {
@@ -937,6 +943,7 @@
         "metadata-tab": "Metadata",
         "cover-tab": "Cover",
         "info-tab": "Info",
+        "progress-tab": "Progress",
         "no-summary": "No Summary available.",
         "writers-title": "{{series-metadata-detail.writers-title}}",
         "genres-title": "{{series-metadata-detail.genres-title}}",
@@ -1025,6 +1032,7 @@
         "id-title": "ID",
         "links-title": "{{series-metadata-detail.links-title}}",
         "isbn-title": "ISBN",
+        "sort-order-title": "Sort Order",
         "last-read-title": "Last Read",
         "less-than-hour": "<1 Hour",
         "range-hours": "{{value}} {{hourWord}}",
@@ -1551,6 +1559,23 @@
         "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them."
     },
 
+    "import-mal-collection-modal": {
+        "close": "{{common.close}}",
+        "title": "MAL Interest Stack Import",
+        "description": "Import your MAL Interest Stacks and create Collections within Kavita",
+        "series-count": "{{common.series-count}}",
+        "restack-count": "{{num}} Restacks"
+    },
+
+    "edit-chapter-progress": {
+        "user-header": "User",
+        "page-read-header": "Pages Read",
+        "date-created-header": "Created (UTC)",
+        "date-updated-header": "Last Updated (UTC)",
+        "action-header": "{{common.edit}}",
+        "edit-alt": "{{common.edit}}"
+    },
+
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL Import",
@@ -1757,6 +1782,15 @@
         "no-data": "No progress, get to reading",
         "x-axis-label": "Day of Week",
         "y-axis-label": "Reading Events"
+    },
+
+    "kavitaplus-metadata-breakdown-stats": {
+        "title": "Kavita+ Metadata Breakdown",
+        "no-data": "No data",
+        "errored-series-label": "Errored Series",
+        "completed-series-label": "Completed Series",
+        "total-series-progress-label": "Series Processed: {{percent}}",
+        "complete": "All Series have metadata"
     },
 
     "file-breakdown-stats": {
@@ -2125,6 +2159,7 @@
         "view-series": "View Series",
         "clear": "{{common.clear}}",
         "import-cbl": "Import CBL",
+        "import-mal-stack": "Import MAL Stack",
         "read": "Read",
         "add-rule-group-and": "Add Rule Group (AND)",
         "add-rule-group-or": "Add Rule Group (OR)",

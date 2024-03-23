@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -61,6 +62,8 @@ public interface IExternalMetadataService
     /// <param name="libraryType"></param>
     /// <returns></returns>
     Task GetNewSeriesData(int seriesId, LibraryType libraryType);
+
+    Task<IList<MalStackDto>> GetStacksForUser(int userId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -70,7 +73,8 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create
+        (LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
@@ -137,12 +141,15 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task ForceKavitaPlusRefresh(int seriesId)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        // Remove from Blacklist if applicable
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
         if (!IsPlusEligible(libraryType)) return;
+
+        // Remove from Blacklist if applicable
         await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+
         var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
         if (metadata == null) return;
+
         metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
         await _unitOfWork.CommitAsync();
     }
@@ -170,8 +177,48 @@ public class ExternalMetadataService : IExternalMetadataService
         // Prefetch SeriesDetail data
         await GetSeriesDetailPlus(seriesId, libraryType);
 
-        // TODO: Fetch Series Metadata
+        // TODO: Fetch Series Metadata (Summary, etc)
 
+    }
+
+    public async Task<IList<MalStackDto>> GetStacksForUser(int userId)
+    {
+        if (!await _licenseService.HasActiveLicense()) return ArraySegment<MalStackDto>.Empty;
+
+        // See if this user has Mal account on record
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null || string.IsNullOrEmpty(user.MalUserName) || string.IsNullOrEmpty(user.MalAccessToken))
+        {
+            _logger.LogInformation("User is attempting to fetch MAL Stacks, but missing information on their account");
+            return ArraySegment<MalStackDto>.Empty;
+        }
+        try
+        {
+            _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
+
+            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+            var result = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stacks?username={user.MalUserName}")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", license)
+                .WithHeader("x-installId", HashUtil.ServerToken())
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .GetJsonAsync<IList<MalStackDto>>();
+
+            if (result == null)
+            {
+                return ArraySegment<MalStackDto>.Empty;
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Fetching Kavita+ for MAL Stacks for user {UserName} failed", user.MalUserName);
+            return ArraySegment<MalStackDto>.Empty;
+        }
     }
 
     /// <summary>

@@ -8,6 +8,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Plus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,14 +23,16 @@ public class StatsController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILocalizationService _localizationService;
+    private readonly ILicenseService _licenseService;
 
     public StatsController(IStatisticService statService, IUnitOfWork unitOfWork,
-        UserManager<AppUser> userManager, ILocalizationService localizationService)
+        UserManager<AppUser> userManager, ILocalizationService localizationService, ILicenseService licenseService)
     {
         _statService = statService;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _localizationService = localizationService;
+        _licenseService = licenseService;
     }
 
     [HttpGet("user/{userId}/read")]
@@ -181,6 +184,18 @@ public class StatsController : BaseApiController
         return Ok(_statService.GetWordsReadCountByYear(userId));
     }
 
-
+    /// <summary>
+    /// Returns for Kavita+ the number of Series that have been processed, errored, and not processed
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("kavitaplus-metadata-breakdown")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetKavitaPlusMetadataBreakdown()
+    {
+        if (!await _licenseService.HasActiveLicense())
+            return BadRequest("This data is not available for non-Kavita+ servers");
+        return Ok(await _statService.GetKavitaPlusMetadataBreakdown());
+    }
 
 }

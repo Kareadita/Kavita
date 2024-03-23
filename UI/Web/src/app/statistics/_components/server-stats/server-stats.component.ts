@@ -26,6 +26,10 @@ import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {
+  KavitaplusMetadataBreakdownStatsComponent
+} from "../kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
+import {AccountService} from "../../../_services/account.service";
 
 @Component({
     selector: 'app-server-stats',
@@ -33,11 +37,14 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
-      PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
-      CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
+  imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
+    PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
+    CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective, KavitaplusMetadataBreakdownStatsComponent]
 })
 export class ServerStatsComponent {
+
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly accountService = inject(AccountService);
 
   releaseYears$!: Observable<Array<PieDataItem>>;
   mostActiveUsers$!: Observable<Array<PieDataItem>>;
@@ -54,7 +61,7 @@ export class ServerStatsComponent {
   breakpointSubject = new ReplaySubject<Breakpoint>(1);
   breakpoint$: Observable<Breakpoint> = this.breakpointSubject.asObservable();
 
-  private readonly destroyRef = inject(DestroyRef);
+
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])

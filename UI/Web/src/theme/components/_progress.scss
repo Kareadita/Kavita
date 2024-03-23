@@ -1,10 +1,9 @@
 .progress {
     background-color: var(--progress-bg-color);
-
 }
 
 .progress-bar {
-    background-color: var(--progress-bar-color);
+    background-color: var(--progress-bar-color) !important;
 }
 
 .progress-bar-striped {

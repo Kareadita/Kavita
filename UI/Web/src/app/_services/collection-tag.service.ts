@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { CollectionTag } from '../_models/collection-tag';
 import { TextResonse } from '../_types/text-response';
 import { ImageService } from './image.service';
+import {MalStack} from "../_models/collection/mal-stack";
 
 @Injectable({
   providedIn: 'root'
@@ -44,5 +45,9 @@ export class CollectionTagService {
 
   deleteTag(tagId: number) {
     return this.httpClient.delete<string>(this.baseUrl + 'collection?tagId=' + tagId, TextResonse);
+  }
+
+  getMalStacks() {
+    return this.httpClient.get<Array<MalStack>>(this.baseUrl + 'collection/mal-stacks');
   }
 }

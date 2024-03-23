@@ -1,0 +1,36 @@
+<ng-container *transloco="let t; read: 'import-mal-collection-modal'">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="ngbModal.close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal">
+    <p>{{t('description')}}</p>
+
+    <ul>
+      @for(stack of stacks; track stack.url) {
+        <li>
+          <div><a [href]="stack.url" rel="noreferrer noopener" target="_blank">{{stack.title}}</a></div>
+          <div>by {{stack.author}} • {{t('series-count', {num: stack.seriesCount})}} • <span><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>{{t('restack-count', {num: stack.restackCount})}}</span></div>
+        </li>
+      }
+    </ul>
+
+  </div>
+
+  <div class="modal-footer">
+<!--    <div class="col-auto">-->
+<!--      <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>-->
+<!--    </div>-->
+<!--    <div class="col-auto">-->
+<!--      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>-->
+<!--    </div>-->
+<!--    <div class="col-auto">-->
+<!--      <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>-->
+<!--    </div>-->
+<!--    <div class="col-auto">-->
+<!--      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>-->
+<!--    </div>-->
+  </div>
+
+</ng-container>

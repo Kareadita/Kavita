@@ -7,8 +7,8 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
@@ -879,5 +879,22 @@ public class ReaderController : BaseApiController
         });
         await _unitOfWork.CommitAsync();
         return Ok();
+    }
+
+    /// <summary>
+    /// Get all progress events for a given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("all-chapter-progress")]
+    public async Task<ActionResult<IEnumerable<FullProgressDto>>> GetProgressForChapter(int chapterId)
+    {
+        if (User.IsInRole(PolicyConstants.AdminRole))
+        {
+            return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId));
+        }
+
+        return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, User.GetUserId()));
+
     }
 }
