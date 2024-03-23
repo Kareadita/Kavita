@@ -83,7 +83,7 @@ export class LibraryDetailComponent implements OnInit {
   active = this.tabs[0];
 
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
+  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
@@ -131,7 +131,7 @@ export class LibraryDetailComponent implements OnInit {
           this.cdRef.markForCheck();
         }
 
-        this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+        await this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
           this.bulkLoader = false;
           this.cdRef.markForCheck();
           if (!successful) return;
