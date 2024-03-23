@@ -23,7 +23,9 @@ export class LibraryService {
   constructor(private httpClient: HttpClient, private readonly messageHub: MessageHubService, private readonly destroyRef: DestroyRef) {
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(e => e.event === EVENTS.LibraryModified),
       tap((e) => {
-      this.libraryNames = undefined;
+        console.log('LibraryModified event came in, clearing library name cache');
+        this.libraryNames = undefined;
+        this.libraryTypes = undefined;
     })).subscribe();
   }
 

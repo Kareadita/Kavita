@@ -1784,6 +1784,15 @@
         "y-axis-label": "Reading Events"
     },
 
+    "kavitaplus-metadata-breakdown-stats": {
+        "title": "Kavita+ Metadata Breakdown",
+        "no-data": "No data",
+        "errored-series-label": "Errored Series",
+        "completed-series-label": "Completed Series",
+        "total-series-progress-label": "Series Processed: {{percent}}",
+        "complete": "All Series have metadata"
+    },
+
     "file-breakdown-stats": {
         "format-title": "Format",
         "format-tooltip": "Not Classified means Kavita has not scanned some files. This occurs on old files existing prior to v0.7. You may need to run a forced scan via Library settings modal.",

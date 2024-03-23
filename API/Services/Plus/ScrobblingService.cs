@@ -94,6 +94,7 @@ public class ScrobblingService : IScrobblingService
         ScrobbleProvider.AniList
     };
 
+
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
     private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
 
@@ -875,6 +876,7 @@ public class ScrobblingService : IScrobblingService
             await _unitOfWork.CommitAsync();
         }
     }
+
 
     private static bool DoesUserHaveProviderAndValid(ScrobbleEvent readEvent)
     {

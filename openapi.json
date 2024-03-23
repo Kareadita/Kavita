@@ -11032,6 +11032,45 @@
         }
       }
     },
+    "/api/Stats/kavitaplus-metadata-breakdown": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns for Kavita+ the number of Series that have been processed, errored, and not processed",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stream/dashboard": {
       "get": {
         "tags": [

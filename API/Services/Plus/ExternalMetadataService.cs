@@ -73,7 +73,8 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create
+        (LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
@@ -140,12 +141,15 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task ForceKavitaPlusRefresh(int seriesId)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        // Remove from Blacklist if applicable
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
         if (!IsPlusEligible(libraryType)) return;
+
+        // Remove from Blacklist if applicable
         await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+
         var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
         if (metadata == null) return;
+
         metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
         await _unitOfWork.CommitAsync();
     }
@@ -173,7 +177,7 @@ public class ExternalMetadataService : IExternalMetadataService
         // Prefetch SeriesDetail data
         await GetSeriesDetailPlus(seriesId, libraryType);
 
-        // TODO: Fetch Series Metadata
+        // TODO: Fetch Series Metadata (Summary, etc)
 
     }
 
