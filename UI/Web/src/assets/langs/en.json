@@ -1786,10 +1786,10 @@
 
     "kavitaplus-metadata-breakdown-stats": {
         "title": "Kavita+ Metadata Breakdown",
+        "description": "Kavita fetches metadata (ratings, reviews, recommendations, etc) slowly over time for eligible series.",
         "no-data": "No data",
         "errored-series-label": "Errored Series",
         "completed-series-label": "Completed Series",
-        "total-series-progress-label": "Series Processed: {{percent}}",
         "complete": "All Series have metadata"
     },
 

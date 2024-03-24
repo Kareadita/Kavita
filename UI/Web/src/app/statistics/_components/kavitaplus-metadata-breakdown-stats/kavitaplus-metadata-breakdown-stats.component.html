@@ -1,37 +1,23 @@
 <ng-container *transloco="let t; read: 'kavitaplus-metadata-breakdown-stats'">
   <div class="dashboard-card-content">
     <h4>{{t('title')}}</h4>
+    <p>{{t('description')}}</p>
 
     @if(breakdown) {
       @if(breakdown.totalSeries === 0 || breakdown.seriesCompleted === 0) {
         <div>{{t('no-data')}}</div>
-      }
-      @if (percentDone >= 1) {
-        <p>{{t('complete') }}</p>
       } @else {
-        <p>{{t('total-series-progress-label', {percent: percentDone * 100 | percent}) }}</p>
-
-        <div class="day-breakdown-chart">
-          <table class="charts-css pie show-labels">
-            <tbody>
-
-            <tr>
-              <th scope="row">{{t('completed-series-label')}}</th>
-              <td class="completed" style="--start: 0; --end: ' + {{ completedEnd }}">
-                <span class="data">{{ breakdown.seriesCompleted }}</span>
-              </td>
-            </tr>
-
-            <tr>
-              <th scope="row">{{t('errored-series-label')}}</th>
-              <td class="error" style="--start: ' + {{ errorStart }}; --end: {{ errorEnd }}'">
-                <span class="data">{{ breakdown.erroredSeries }}</span>
-              </td>
-            </tr>
-
-            </tbody>
-          </table>
-        </div>
+        <ngb-progressbar-stacked>
+          <ngb-progressbar type="danger" [value]="errorPercent" [ngbTooltip]="t('errored-series-label') + ' ' + breakdown.erroredSeries"></ngb-progressbar>
+          <ngb-progressbar type="success" [value]="completedPercent" [ngbTooltip]="t('completed-series-label') + ' ' + breakdown.seriesCompleted"></ngb-progressbar>
+        </ngb-progressbar-stacked>
+        @if (breakdown.seriesCompleted >= breakdown.totalSeries) {
+          <p>{{t('complete') }}
+            @if (breakdown.erroredSeries > 0) {
+              {{t('errored-series-label') }} {{breakdown.erroredSeries}}
+            }
+          </p>
+        }
       }
     }
   </div>
