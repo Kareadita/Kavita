@@ -579,7 +579,7 @@
         "published-label": "Published: ",
         "available": "Available",
         "description": "If you do not see an {{installed}}",
-        "description-continued": "tag, you are on a nightly release. Only major versions will show as available."
+        "description-continued": "tag, you are on a nightly release. Only major versions will show as available. A nightly tag will show when on a nightly from that stable."
     },
 
     "invite-user": {
