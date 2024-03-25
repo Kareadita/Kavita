@@ -258,7 +258,10 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   forceScan() {
     this.libraryService.scan(this.library!.id, true)
-      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name})));
+      .subscribe(() => {
+        this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name}));
+        this.close();
+      });
   }
 
   async save() {

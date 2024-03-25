@@ -22,6 +22,11 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
                 : Parser.ParseChapter(fileName)
         };
 
+        if (type == LibraryType.Book)
+        {
+            ret.Chapters = Parser.DefaultChapter;
+        }
+
         ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
         ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
 

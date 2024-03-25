@@ -31,7 +31,7 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
             {
                 var info2 = basicParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Book, comicInfo);
                 info.Merge(info2);
-                if (type == LibraryType.LightNovel && hasVolumeInSeries && info2 != null && Parser.ParseVolume(info2.Series)
+                if (hasVolumeInSeries && info2 != null && Parser.ParseVolume(info2.Series)
                         .Equals(Parser.LooseLeafVolume))
                 {
                     // Override the Series name so it groups appropriately

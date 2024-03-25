@@ -113,7 +113,35 @@ public static class MigrateLooseLeafChapters
                     //UpdateCoverImage(directoryService, logger, chapter, extension, newVolume);
                 }
 
-                // Update the progress table with the new VolumeId
+
+                var oldVolumeBookmarks = await dataContext.AppUserBookmark
+                    .Where(p => p.VolumeId == distinctVolume.Volume.Id).ToListAsync();
+                logger.LogInformation("Moving {Count} existing Bookmarks from Volume Id {OldVolumeId} to New Volume {NewVolumeId}",
+                    oldVolumeBookmarks.Count, distinctVolume.Volume.Id, newVolume.Id);
+                foreach (var bookmark in oldVolumeBookmarks)
+                {
+                    bookmark.VolumeId = newVolume.Id;
+                }
+
+
+                var oldVolumePersonalToC = await dataContext.AppUserTableOfContent
+                    .Where(p => p.VolumeId == distinctVolume.Volume.Id).ToListAsync();
+                logger.LogInformation("Moving {Count} existing Personal ToC from Volume Id {OldVolumeId} to New Volume {NewVolumeId}",
+                    oldVolumePersonalToC.Count, distinctVolume.Volume.Id, newVolume.Id);
+                foreach (var pToc in oldVolumePersonalToC)
+                {
+                    pToc.VolumeId = newVolume.Id;
+                }
+
+                var oldVolumeReadingListItems = await dataContext.ReadingListItem
+                    .Where(p => p.VolumeId == distinctVolume.Volume.Id).ToListAsync();
+                logger.LogInformation("Moving {Count} existing Personal ToC from Volume Id {OldVolumeId} to New Volume {NewVolumeId}",
+                    oldVolumeReadingListItems.Count, distinctVolume.Volume.Id, newVolume.Id);
+                foreach (var readingListItem in oldVolumeReadingListItems)
+                {
+                    readingListItem.VolumeId = newVolume.Id;
+                }
+
 
                 await dataContext.SaveChangesAsync();
             }

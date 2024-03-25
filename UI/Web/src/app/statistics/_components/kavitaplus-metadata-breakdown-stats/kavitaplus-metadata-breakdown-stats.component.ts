@@ -3,13 +3,17 @@ import {StatisticsService} from "../../../_services/statistics.service";
 import {KavitaPlusMetadataBreakdown} from "../../_models/kavitaplus-metadata-breakdown";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {PercentPipe} from "@angular/common";
+import {NgbProgressbar, NgbProgressbarStacked, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-kavitaplus-metadata-breakdown-stats',
   standalone: true,
   imports: [
     TranslocoDirective,
-    PercentPipe
+    PercentPipe,
+    NgbProgressbarStacked,
+    NgbProgressbar,
+    NgbTooltip
   ],
   templateUrl: './kavitaplus-metadata-breakdown-stats.component.html',
   styleUrl: './kavitaplus-metadata-breakdown-stats.component.scss',
@@ -20,20 +24,18 @@ export class KavitaplusMetadataBreakdownStatsComponent {
   private readonly statsService = inject(StatisticsService);
 
   breakdown: KavitaPlusMetadataBreakdown | undefined;
-  completedStart!: number;
-  completedEnd!: number;
-  errorStart!: number;
-  errorEnd!: number;
-  percentDone!: number;
+
+  errorPercent!: number;
+  completedPercent!: number;
+
 
   constructor() {
     this.statsService.getKavitaPlusMetadataBreakdown().subscribe(res => {
       this.breakdown = res;
-      this.completedStart = 0;
-      this.completedEnd = ((res.seriesCompleted - res.erroredSeries) / res.totalSeries);
-      this.errorStart = this.completedEnd;
-      this.errorEnd = Math.max(1, ((res.seriesCompleted) / res.totalSeries));
-      this.percentDone = res.seriesCompleted / res.totalSeries;
+
+      this.errorPercent = (res.erroredSeries / res.totalSeries) * 100;
+      this.completedPercent = ((res.seriesCompleted - res.erroredSeries) / res.totalSeries) * 100;
+
       this.cdRef.markForCheck();
     });
   }

@@ -10,12 +10,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
             fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
             dotnet-version: 8.0.x
 
@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj

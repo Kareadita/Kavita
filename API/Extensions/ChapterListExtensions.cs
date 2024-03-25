@@ -31,7 +31,7 @@ public static class ChapterListExtensions
     {
         var normalizedPath = Parser.NormalizePath(info.FullFilePath);
         var specialTreatment = info.IsSpecialInfo();
-         return specialTreatment
+        return specialTreatment
              ? chapters.FirstOrDefault(c => c.Range == Parser.RemoveExtensionIfSupported(info.Filename) || c.Files.Select(f => Parser.NormalizePath(f.FilePath)).Contains(normalizedPath))
              : chapters.FirstOrDefault(c => c.Range == info.Chapters);
     }

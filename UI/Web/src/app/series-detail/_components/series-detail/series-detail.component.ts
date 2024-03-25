@@ -339,6 +339,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   get ShowStorylineTab() {
     if (this.libraryType === LibraryType.ComicVine) return false;
+    // Edge case for bad pdf parse
+    if (this.libraryType === LibraryType.Book && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
+
     return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
       && (this.volumes.length > 0 || this.chapters.length > 0);
   }
@@ -727,7 +730,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     // Book libraries only have Volumes or Specials enabled
     if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
-        this.activeTabId = TabID.Specials;
+        if (this.specials.length === 0 && this.storyChapters.length > 0) {
+          // NOTE: This is an edge case caused by bad parsing of pdf files. Once the new pdf parser is in place, this should be removed
+          this.activeTabId = TabID.Storyline;
+        } else {
+          this.activeTabId = TabID.Specials;
+        }
       } else {
         this.activeTabId = TabID.Volumes;
       }

@@ -232,7 +232,7 @@ public static class Parser
             RegexTimeout),
         // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
         new Regex(
-            @"(?<Series>.*)( - )(?:v|vo|c|chapters)\d",
+            @"(?<Series>.+?)( - )(?:v|vo|c|chapters)\d",
             MatchOptions, RegexTimeout),
         // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
         new Regex(

@@ -206,6 +206,7 @@ public class MangaParsingTests
     [InlineData("test 2 years 1권", "test 2 years")]
     [InlineData("test 2 years 1화", "test 2 years")]
     [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.30 Omake", "Nagasarete Airantou")]
+    [InlineData("Cynthia The Mission - c000 - c006 (v06)", "Cynthia The Mission")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
