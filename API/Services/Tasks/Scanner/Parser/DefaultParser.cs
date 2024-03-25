@@ -107,11 +107,11 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         {
             info.Volumes = info.ComicInfo.Volume;
         }
-        if (string.IsNullOrEmpty(info.Series) && !string.IsNullOrEmpty(info.ComicInfo.Series))
+        if (!string.IsNullOrEmpty(info.ComicInfo.Series))
         {
             info.Series = info.ComicInfo.Series.Trim();
         }
-        if (string.IsNullOrEmpty(info.LocalizedSeries) && !string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+        if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
         {
             info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
         }
