@@ -180,5 +180,17 @@
     "unable-to-reset-k+": "No se ha podido restablecer la licencia de Kavita+ debido a un error. Contacta con el soporte de Kavita",
     "send-to-unallowed": "No puedes enviar a un dispositivo que no sea el tuyo",
     "email-not-enabled": "El correo electrónico no está habilitado en este servidor. No puede realizar esta acción.",
-    "send-to-size-limit": "El(Los) archivo(s) que intenta enviar es(son) demasiado(s) grande(s) para su programa de correo electrónico"
+    "send-to-size-limit": "El(Los) archivo(s) que intenta enviar es(son) demasiado(s) grande(s) para su programa de correo electrónico",
+    "process-scrobbling-events": "Procesar eventos de scrobbling",
+    "report-stats": "Informe de estadísticas",
+    "check-scrobbling-tokens": "Comprobar los token de scrobbling",
+    "process-processed-scrobbling-events": "Volver a procesar eventos de scrobbling procesados",
+    "cleanup": "Limpieza",
+    "remove-from-want-to-read": "Eliminar de querer leer",
+    "kavita+-data-refresh": "Actualización de los datos de Kavita+",
+    "backup": "Copia de seguridad",
+    "update-yearly-stats": "Actualizar estadísticas anualmente",
+    "license-check": "Comprobar la licencia",
+    "scan-libraries": "Escanear la biblioteca",
+    "check-updates": "Comprobar actualizaciones"
 }
