@@ -78,6 +78,8 @@ public class ComicParsingTests
     [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
     [InlineData("Kebab Том 1 Глава 1", "Kebab")]
     [InlineData("Манга Глава 1", "Манга")]
+    [InlineData("ReZero รีเซทชีวิต ฝ่าวิกฤตต่างโลก เล่ม 1", "ReZero รีเซทชีวิต ฝ่าวิกฤตต่างโลก")]
+    [InlineData("SKY WORLD สกายเวิลด์ เล่มที่ 1", "SKY WORLD สกายเวิลด์")]
     public void ParseComicSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicSeries(filename));
@@ -129,6 +131,9 @@ public class ComicParsingTests
     // Russian Tests
     [InlineData("Kebab Том 1 Глава 3", "1")]
     [InlineData("Манга Глава 2", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("ย้อนเวลากลับมาร้าย เล่ม 1", "1")]
+    [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1 ตอนที่ 3", "1")]
+    [InlineData("วิวาห์รัก เดิมพันชีวิต ตอนที่ 2", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
     public void ParseComicVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(filename));
@@ -178,6 +183,9 @@ public class ComicParsingTests
     [InlineData("Манга Глава 2", "2")]
     [InlineData("Манга 2 Глава", "2")]
     [InlineData("Манга Том 1 2 Глава", "2")]
+    [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1 ตอนที่ 3", "3")]
+    [InlineData("Max Level Returner ตอนที่ 5", "5")]
+    [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     public void ParseComicChapterTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(filename));
