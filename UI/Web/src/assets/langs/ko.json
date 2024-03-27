@@ -1084,7 +1084,6 @@
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL 가져오기",
-        "validate-no-issue": "문제 없음",
         "restart": "재시작",
         "next": "다음",
         "import-step": "CBL 가져오기",

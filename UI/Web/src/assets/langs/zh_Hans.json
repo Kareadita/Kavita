@@ -42,7 +42,9 @@
         "rating": "评分 {{r}}",
         "not-applicable": "不适用",
         "processed": "已处理",
-        "not-processed": "尚未处理"
+        "not-processed": "尚未处理",
+        "volume-num": "卷 {{num}}",
+        "chapter-num": "章节 {{num}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "阅读进度",
@@ -268,7 +270,13 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "token-valid": "令牌有效"
+        "token-valid": "令牌有效",
+        "scrobbling-applicable-label": "Scrobbling 适用",
+        "generic-instructions": "填写有关不同外部服务的信息，您必须允许 Kavita+ 与它们交互。",
+        "mal-instructions": "Kavita 使用 MAL 客户端 ID 进行身份验证。为 Kavita 创建一个新客户，一旦获得批准，请提供客户 ID 和您的用户名。",
+        "mal-token-input-label": "MAL 客户端 ID",
+        "mal-username-input-label": "MAL 用户名",
+        "loading": "{{common.loading}}"
     },
     "typeahead": {
         "locked-field": "字段已锁定",
@@ -410,7 +418,8 @@
         "side-story": "支线",
         "spin-off": "外传",
         "parent": "原作",
-        "edition": "版本"
+        "edition": "版本",
+        "annual": "年刊"
     },
     "publication-status-pipe": {
         "ongoing": "连载中",
@@ -430,7 +439,11 @@
         "penciller": "线稿师",
         "publisher": "出版社",
         "writer": "作者",
-        "other": "其他"
+        "other": "其他",
+        "translator": "译者",
+        "imprint": "压印",
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
     },
     "manga-format-pipe": {
         "epub": "EPUB",
@@ -442,7 +455,10 @@
     "library-type-pipe": {
         "book": "图书",
         "comic": "美漫",
-        "manga": "日漫"
+        "manga": "日漫",
+        "comicVine": "ComicVine",
+        "image": "图片",
+        "lightNovel": "轻小说"
     },
     "age-rating-pipe": {
         "unknown": "未知",
@@ -491,7 +507,7 @@
         "published-label": "出版： ",
         "available": "可用",
         "description": "如果您没有看到{{installed}}",
-        "description-continued": "标签，那么您正在使用测试版。只有主版本才会显示为可用。",
+        "description-continued": "标签，您正在使用的是夜间版本。只有主要版本才会显示为可用。当您使用的是该稳定版的夜间版本时，将显示夜间标签。",
         "nightly": "每晚： {{version}}"
     },
     "invite-user": {
@@ -611,7 +627,7 @@
         "description": "请完善表单以注册管理员账户",
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
-        "email-tooltip": "电子邮件地址不需要是真实的，但它可以提供访问忘记密码的功能。除非在没有自定义电子邮件服务主机的情况下使用了忘记密码功能，否则不会将其发送到服务器外部。",
+        "email-tooltip": "电子邮件不需要是真实地址，但可以提供忘记密码的访问权限。除非 Kavita 给您发送电子邮件，否则它不会发送到服务器外部。",
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
@@ -667,7 +683,10 @@
         "promoted": "{{common.promoted}}",
         "see-more": "查看更多",
         "see-less": "收起",
-        "rating-title": "评分"
+        "rating-title": "评分",
+        "imprints-title": "压印",
+        "teams-title": "团队",
+        "locations-title": "地点"
     },
     "badge-expander": {
         "more-items": "和{{count}}个更多"
@@ -826,7 +845,11 @@
         "files": "文件",
         "pages": "页面:",
         "added": "添加:",
-        "size": "文件大小:"
+        "size": "文件大小:",
+        "imprints-title": "{{series-metadata-detail.imprints-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}",
+        "progress-tab": "进程"
     },
     "card-detail-layout": {
         "total-items": "总共{{count}}个条目",
@@ -846,7 +869,9 @@
         "inkers-title": "{{series-metadata-detail.inkers-title}}",
         "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}"
+        "editors-title": "{{series-metadata-detail.editors-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}"
     },
     "cover-image-chooser": {
         "drag-n-drop": "拖放",
@@ -895,7 +920,8 @@
         "range-hours": "{{value}} {{hourWord}}",
         "hour": "小时",
         "hours": "小时",
-        "read-time-title": "{{series-info-cards.read-time-title}}"
+        "read-time-title": "{{series-info-cards.read-time-title}}",
+        "sort-order-title": "排序"
     },
     "series-info-cards": {
         "release-date-title": "{{entity-info-cards.release-date-title}}",
@@ -1350,7 +1376,6 @@
         "import-description": "要开始，请导入一个.cbl文件。Kavita 将在导入之前执行多个检查。某些步骤可能会因文件问题而阻止继续进行。",
         "validate-description": "已验证所有文件，以查看列表中是否有任何操作需要执行。任何失败的列表将不会进入下一步。请修复CBL文件并重试。",
         "validate-warning": "CBL存在问题，这会阻止导入。请纠正这些问题，然后重试。",
-        "validate-no-issue": "看起来不错",
         "validate-no-issue-description": "未发现与CBL相关的问题，请点击“下一步”。",
         "dry-run-description": "这是一次模拟运行，显示了如果您点击“下一步”并执行导入操作将会发生什么。所有失败的操作将不会被导入。",
         "prev": "上一页",
@@ -1360,7 +1385,8 @@
         "import-step": "导入CBL文件",
         "validate-cbl-step": "验证CBL文件",
         "dry-run-step": "模拟运行",
-        "final-import-step": "最后一步"
+        "final-import-step": "最后一步",
+        "comicvine-parsing-label": "使用 ComicVine 系列搭配"
     },
     "pdf-reader": {
         "loading-message": "加载中...PDF文件可能需要比预期更长的时间",
@@ -1517,7 +1543,12 @@
         "highest-count-tooltip": "在系列的所有ComicInfo中找到的最高计数",
         "max-issue-tooltip": "从系列中的所有ComicInfo中获取最大话数或卷数字段",
         "force-refresh-tooltip": "从 Kavita+ 强制刷新外部元数据",
-        "force-refresh": "强制刷新"
+        "force-refresh": "强制刷新",
+        "team-label": "{{filter-field-pipe.team}}",
+        "loose-leaf-volume": "活页章节",
+        "specials-volume": "特刊",
+        "imprint-label": "压印",
+        "location-label": "{{filter-field-pipe.location}}"
     },
     "day-breakdown": {
         "title": "每日统计分析",
@@ -1549,7 +1580,8 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}"
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "all-users": "全部用户"
     },
     "manga-format-stats": {
         "title": "格式",
@@ -1593,7 +1625,10 @@
         "people-count": "{{num}} 人",
         "tags": "标签",
         "people": "创作人员",
-        "genres": "分类"
+        "genres": "分类",
+        "series-count": "{{num}} 系列",
+        "volume-count": "{{num}} 卷",
+        "file-count": "{{num}} 文件"
     },
     "errors": {
         "series-doesnt-exist": "该系列已不存在",
@@ -1649,7 +1684,7 @@
         "mark-unread": "标记为未读",
         "series-removed-want-to-read": "已移除“想读”中的系列",
         "series-deleted": "系列已移除",
-        "file-send-to": "文件已通过邮件发送给{{name}}",
+        "file-send-to": "文件已通过邮件发送给 {{name}}",
         "theme-missing": "当前的主题已不存在。请刷新页面。",
         "email-sent": "已发送邮件到{{email}}",
         "k+-license-saved": "许可密钥已保存，但不是有效的。点击检查以重新验证订阅。首次注册可能需要一分钟来传播。",
@@ -1731,7 +1766,8 @@
         "remove-rule-group": "移除规则组",
         "customize": "自定义",
         "mark-invisible": "标记为隐藏",
-        "mark-visible": "标记为可见"
+        "mark-visible": "标记为可见",
+        "import-mal-stack": "导入 MAL Stack"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -1840,7 +1876,10 @@
         "file-path": "文件路径",
         "read-date": "阅读日期",
         "want-to-read": "想读",
-        "average-rating": "平均评分"
+        "average-rating": "平均评分",
+        "team": "团队",
+        "location": "地点",
+        "imprint": "压印"
     },
     "filter-comparison-pipe": {
         "begins-with": "开始于",
@@ -1979,5 +2018,28 @@
         "description-1": "请考虑升级，以便运行最新版本的 Kavita。",
         "description-2": "请查看我们的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>，了解有关如何更新的说明。",
         "description-3": "如果您有特定原因尚未更新，我们很想知道是什么让您一直使用过时的版本！停止我们的 discord，让我们知道是什么阻碍了您的升级之路。"
+    },
+    "edit-chapter-progress": {
+        "page-read-header": "阅读页数",
+        "date-created-header": "创建 (UTC)",
+        "date-updated-header": "最后更新时间 (UTC)",
+        "edit-alt": "{{common.edit}}",
+        "action-header": "{{common.edit}}",
+        "user-header": "用户"
+    },
+    "kavitaplus-metadata-breakdown-stats": {
+        "title": "Kavita+ 元数据分析",
+        "no-data": "无数据",
+        "errored-series-label": "错误系列",
+        "completed-series-label": "已完成系列",
+        "complete": "所有系列都有元数据",
+        "description": "Kavita 会随着时间的推移，缓慢的获取符合条件的系列元数据（评分、评论、推荐等）。"
+    },
+    "import-mal-collection-modal": {
+        "title": "MAL Interest Stack 导入",
+        "restack-count": "{{num}} Restacks",
+        "close": "{{common.close}}",
+        "description": "导入您的 MAL Interest Stacks 并在 Kavita 中创建收藏集",
+        "series-count": "{{common.series-count}}"
     }
 }

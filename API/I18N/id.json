@@ -96,5 +96,10 @@
     "age-restriction-not-applicable": "Tidak ada batasan",
     "generic-cover-collection-save": "Tidak dapat menyimpan gambar sampul ke Koleksi",
     "generic-cover-reading-list-save": "Tidak dapat menyimpan gambar sampul ke Daftar Baca",
-    "generic-user-delete": "Tidak dapat menghapus pengguna"
+    "generic-user-delete": "Tidak dapat menghapus pengguna",
+    "email-not-enabled": "Email tidak diaktifkan pada server ini. Anda tidak dapat melakukan tindakan ini.",
+    "generic-device-update": "Terjadi error saat memperbarui perangkat",
+    "generic-device-create": "Ada error saat membuat perangkat",
+    "generic-device-delete": "Terjadi error saat menghapus perangkat",
+    "greater-0": "{0} harus lebih besar dari 0"
 }

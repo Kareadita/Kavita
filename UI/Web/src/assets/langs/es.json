@@ -42,7 +42,9 @@
         "title": "Historial de Scrobble",
         "series-header": "Series",
         "created-header": "Creado",
-        "is-processed-header": "Está procesado"
+        "is-processed-header": "Está procesado",
+        "volume-num": "Volumen {{num}}",
+        "chapter-num": "Capítulo {{num}}"
     },
     "edit-reading-list-modal": {
         "year-label": "Año",
@@ -52,7 +54,7 @@
         "general-tab": "General",
         "cover-image-tab": "Portada",
         "close": "{{common.close}}",
-        "save": "{common.save}}",
+        "save": "{{common.save}}",
         "year-validation": "Debe ser mayor que 1000, 0 o blanco",
         "month-validation": "Debe estar entre 1 y 12 o en blanco",
         "required-field": "{{validation.required-field}}",
@@ -147,7 +149,6 @@
         "validate-description": "Todos los archivos se han validado para comprobar si hay operaciones pendientes en la lista. Cualquier lista que dé error no se moverá al siguiente paso. Repara los archivos CBL y vuelve a intentarlo.",
         "import-description": "Para comenzar, importa un archivo .cbl. Kavita debe realizar varias comprobaciones antes de importar. Algunos pasos se bloquearán debido a fallos en el archivo.",
         "validate-warning": "Hay problemas con el CBL que impiden la importación. Corrige estos fallos y prueba de nuevo.",
-        "validate-no-issue": "Parece correcto",
         "validate-no-issue-description": "No hay fallos en el CBL, pulsa siguiente.",
         "close": "{{common.close}}",
         "import-step": "Importar CBL",
@@ -156,7 +157,8 @@
         "restart": "Reiniciar",
         "validate-cbl-step": "Validar CBL",
         "dry-run-step": "Prueba",
-        "final-import-step": "Último paso"
+        "final-import-step": "Último paso",
+        "comicvine-parsing-label": "Utilice la combinación de la serie ComicVine"
     },
     "pdf-reader": {
         "incognito-mode": "Modo incógnito",
@@ -411,7 +413,13 @@
         "token-expired": "Token expirado",
         "no-token-set": "Token no configurado",
         "instructions": "Usuarios que usan el servicio por primera vez deben hacer clic en \"{{scrobbling-providers.generate}}\" debajo para permitir a Kavita+ comunicarse con {{service}}. Una vez autorizado, copia y pega el token en la caja de abajo. Puedes regenerar el token en cualquier momento.",
-        "token-valid": "Token válido"
+        "token-valid": "Token válido",
+        "generic-instructions": "Complete la información sobre los diferentes servicios externos que debe permitir que Kavita+ interactúe con ellos.",
+        "mal-instructions": "Kavita utiliza una identificación de cliente MAL para la autenticación. Cree un nuevo Cliente para Kavita y, una vez aprobado, proporcione la identificación del cliente y su nombre de usuario.",
+        "scrobbling-applicable-label": "Scrobbling aplicable",
+        "mal-username-input-label": "Nombre de usuario de MAL",
+        "mal-token-input-label": "ID de cliente MAL",
+        "loading": "{{common.loading}}"
     },
     "user-stats-info-cards": {
         "total-words-read-label": "Total de palabras leídas",
@@ -529,7 +537,10 @@
     "library-type-pipe": {
         "manga": "Manga",
         "book": "Libro",
-        "comic": "Cómic"
+        "comic": "Cómic",
+        "comicVine": "ComicVine",
+        "image": "Imagen",
+        "lightNovel": "Novela ligera"
     },
     "age-rating-pipe": {
         "unknown": "Desconocido",
@@ -709,7 +720,10 @@
         "editors-title": "Editores",
         "inkers-title": "Entintadores",
         "publishers-title": "Editoriales",
-        "rating-title": "Valoraciones"
+        "rating-title": "Valoraciones",
+        "teams-title": "Equipos",
+        "imprints-title": "Impresiones",
+        "locations-title": "Ubicaciones"
     },
     "update-notification-modal": {
         "close": "{{common.close}}",
@@ -816,7 +830,8 @@
         "edition": "Edicion",
         "alternative-setting": "Ajuste Alternativo",
         "spin-off": "Spin-Off",
-        "doujinshi": "Doujinshi"
+        "doujinshi": "Doujinshi",
+        "annual": "Anual"
     },
     "publication-status-pipe": {
         "ongoing": "En curso",
@@ -836,7 +851,11 @@
         "colorist": "Colorista",
         "inker": "Entintador",
         "letterer": "Rotulista",
-        "penciller": "Dibujante"
+        "penciller": "Dibujante",
+        "imprint": "Imprimir",
+        "translator": "Traductor",
+        "location": "{{filter-field-pipe.location}}",
+        "team": "{{filter-field-pipe.team}}"
     },
     "manga-format-pipe": {
         "unknown": "Desconocido",
@@ -885,7 +904,7 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "email-tooltip": "El correo no tiene por qué ser una direccion real. Pero provee acceso a contraseña olvidada. No se envia fuera del servidor a menos que se use la funcionalidad de contraseña olvidada con un servidor de correo personalizado.",
+        "email-tooltip": "No es necesario que el correo electrónico sea una dirección real, pero proporciona acceso a la contraseña olvidada. No se envía fuera del servidor a menos que Kavita le envíe un correo electrónico.",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "register": "Registrar",
@@ -943,7 +962,8 @@
         "add-rule-group-and": "Añadir grupo de reglas (AND)",
         "add-rule-group-or": "Añadir grupo de reglas (OR)",
         "mark-visible": "Marcar como visible",
-        "scan-series": "Escanea esta serie"
+        "scan-series": "Escanea esta serie",
+        "import-mal-stack": "Importar MAL Stack"
     },
     "preferences": {
         "automatic": "Automático",
@@ -1159,7 +1179,12 @@
         "highest-count-tooltip": "El recuento más alto encontrado en todos los ComicInfo de la serie",
         "max-issue-tooltip": "Campo número o volumen máximo de todos los ComicInfo de la serie",
         "force-refresh": "Forzar la actualización",
-        "force-refresh-tooltip": "Forzar la actualización de metadatos externos de Kavita+"
+        "force-refresh-tooltip": "Forzar la actualización de metadatos externos de Kavita+",
+        "imprint-label": "Imprimir",
+        "team-label": "{{filter-field-pipe.team}}",
+        "location-label": "{{filter-field-pipe.location}}",
+        "loose-leaf-volume": "Capítulos en hojas sueltas",
+        "specials-volume": "Especiales"
     },
     "nav-header": {
         "search-alt": "Buscar…",
@@ -1299,7 +1324,8 @@
         "read-time-title": "{{series-info-cards.read-time-title}}",
         "range-hours": "{{value}} {{hourWord}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}"
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "sort-order-title": "Orden de clasificación"
     },
     "series-info-cards": {
         "length-title": "Longitud",
@@ -1362,7 +1388,11 @@
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
         "writers-title": "{{series-metadata-detail.writers-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}"
+        "genres-title": "{{series-metadata-detail.genres-title}}",
+        "imprints-title": "{{series-metadata-detail.imprints-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}",
+        "progress-tab": "Progreso"
     },
     "chapter-metadata-detail": {
         "no-data": "No hay metadatos disponibles",
@@ -1375,7 +1405,9 @@
         "inkers-title": "{{series-metadata-detail.inkers-title}}",
         "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}"
+        "colorists-title": "{{series-metadata-detail.colorists-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}"
     },
     "table-of-contents": {
         "no-data": "Este libro no tiene Tabla de Contenidos definida en los metadatos o archivo toc"
@@ -1555,7 +1587,8 @@
         "last-year": "{{time-periods.last-year}}",
         "all-time": "{{time-periods.all-time}}",
         "no-data": "No se avanza en la lectura",
-        "last-90-days": "{{time-periods.last-90-days}}"
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "all-users": "Todos los usuarios"
     },
     "admin-dashboard": {
         "kavita+-desc-part-3": "hoy!",
@@ -1616,7 +1649,10 @@
         "path": "Ruta",
         "series-name": "Nombre de la serie",
         "collection-tags": "Etiquetas de la colección",
-        "average-rating": "Valoración media"
+        "average-rating": "Valoración media",
+        "team": "Equipo",
+        "location": "Ubicación",
+        "imprint": "Imprimir"
     },
     "filter-comparison-pipe": {
         "contains": "Contiene",
@@ -1807,7 +1843,10 @@
         "total-read-time-tooltip": "Duración total de la lectura: {{count}}",
         "tag-count": "{{num}} Etiquetas",
         "total-series-label": "Series totales",
-        "people-count": "{{num}} Personas"
+        "people-count": "{{num}} Personas",
+        "file-count": "{{num}} archivos",
+        "volume-count": "{{num}} volúmenes",
+        "series-count": "{{num}} series"
     },
     "library-recommended": {
         "rediscover": "Descubrir de nuevo",
@@ -1979,5 +2018,27 @@
         "description-1": "Por favor, considere la actualización para que esté ejecutando la última versión de Kavita.",
         "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
         "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
+    },
+    "import-mal-collection-modal": {
+        "close": "{{common.close}}",
+        "title": "Importación del conjunto de intereses MAL",
+        "restack-count": "{{num}} Reacciones",
+        "series-count": "{{common.series-count}}",
+        "description": "Importe sus grupo de intereses de la MAL y cree colecciones en Kavita"
+    },
+    "edit-chapter-progress": {
+        "user-header": "Usuario",
+        "date-updated-header": "Última actualización (UTC)",
+        "page-read-header": "Páginas leídas",
+        "date-created-header": "Creado (UTC)",
+        "action-header": "{{common.edit}}",
+        "edit-alt": "{{common.edit}}"
+    },
+    "kavitaplus-metadata-breakdown-stats": {
+        "no-data": "Sin datos",
+        "completed-series-label": "Series finalizadas",
+        "complete": "Todas las series tienen metadatos",
+        "title": "Desglose de los metadatos de Kavita+",
+        "errored-series-label": "Series con errores"
     }
 }
