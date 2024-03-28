@@ -129,7 +129,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   hasActiveLicense = false;
-  canEdit = true;
 
 
 
@@ -214,10 +213,15 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
       this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
       this.settingsForm.addControl('bookReaderWritingStyle', new FormControl(this.user.preferences.bookReaderWritingStyle, []))
-      this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
+      this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
       this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
       this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
       this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
+
+      this.settingsForm.addControl('pdfTheme', new FormControl(this.user?.preferences.pdfTheme, []));
+      this.settingsForm.addControl('pdfScrollMode', new FormControl(this.user?.preferences.pdfScrollMode, []));
+      this.settingsForm.addControl('pdfLayoutMode', new FormControl(this.user?.preferences.pdfLayoutMode, []));
+      this.settingsForm.addControl('pdfSpreadMode', new FormControl(this.user?.preferences.pdfSpreadMode, []));
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
@@ -278,6 +282,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
     this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews);
     this.settingsForm.get('locale')?.setValue(this.user.preferences.locale);
+
+    this.settingsForm.get('pdfTheme')?.setValue(this.user.preferences.pdfTheme);
+    this.settingsForm.get('pdfScrollMode')?.setValue(this.user.preferences.pdfScrollMode);
+    this.settingsForm.get('pdfLayoutMode')?.setValue(this.user.preferences.pdfLayoutMode);
+    this.settingsForm.get('pdfSpreadMode')?.setValue(this.user.preferences.pdfSpreadMode);
+
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -313,7 +323,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       swipeToPaginate: modelSettings.swipeToPaginate,
       collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
       shareReviews: modelSettings.shareReviews,
-      locale: modelSettings.locale
+      locale: modelSettings.locale,
+      pdfTheme: modelSettings.pdfTheme,
+      pdfScrollMode: modelSettings.pdfScrollMode,
+      pdfLayoutMode: modelSettings.pdfLayoutMode,
+      pdfSpreadMode: modelSettings.pdfSpreadMode,
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

@@ -1600,7 +1600,28 @@
         "incognito-mode": "Incognito Mode",
         "light-theme-alt": "Light Theme",
         "dark-theme-alt": "Dark Theme",
-        "close-reader-alt": "Close Reader"
+        "close-reader-alt": "Close Reader",
+        "toggle-incognito": "Turn off Incognito Mode"
+    },
+
+    "pdf-layout-mode-pipe": {
+        "single": "Single Page",
+        "book": "Book mode",
+        "multiple": "Default",
+        "infinite-scroll": "Infinite Scroll"
+    },
+
+    "pdf-scroll-mode-pipe": {
+        "vertical": "Vertical",
+        "horizontal": "Horizontal",
+        "wrapped": "Wrapped",
+        "page": "Single Page"
+    },
+
+    "pdf-spread-mode-pipe": {
+        "off": "No Spreads",
+        "odd": "Odd Spreads",
+        "even": "Even Spreads"
     },
 
     "infinite-scroller": {

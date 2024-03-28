@@ -13,7 +13,7 @@
       @for(rowForm of items.controls; track rowForm; let idx = $index) {
         <tr >
           <td id="progress-event--{{idx}}">
-            {{progressEvents[idx].userName}}
+            {{progressEvents[idx].userName | sentenceCase}}
           </td>
           <td>
             @if(editMode[idx]) {

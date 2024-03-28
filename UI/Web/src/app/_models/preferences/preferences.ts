@@ -8,6 +8,10 @@ import { ReadingDirection } from './reading-direction';
 import { ScalingOption } from './scaling-option';
 import { SiteTheme } from './site-theme';
 import {WritingStyle} from "./writing-style";
+import {PdfTheme} from "./pdf-theme";
+import {PdfScrollMode} from "./pdf-scroll-mode";
+import {PdfLayoutMode} from "./pdf-layout-mode";
+import {PdfSpreadMode} from "./pdf-spread-mode";
 
 export interface Preferences {
     // Manga Reader
@@ -33,6 +37,12 @@ export interface Preferences {
     bookReaderThemeName: string;
     bookReaderLayoutMode: BookPageLayoutMode;
     bookReaderImmersiveMode: boolean;
+
+    // PDF Reader
+    pdfTheme: PdfTheme;
+    pdfScrollMode: PdfScrollMode;
+    pdfLayoutMode: PdfLayoutMode;
+    pdfSpreadMode: PdfSpreadMode;
 
     // Global
     theme: SiteTheme;
