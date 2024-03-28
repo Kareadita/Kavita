@@ -28,11 +28,11 @@
     background-color: #3B9E76;
 }
 
-//$pagination-color: transparent;
-//$pagination-opacity: 0;
+$pagination-color: transparent;
+$pagination-opacity: 0;
 
-$pagination-color: red;
-$pagination-opacity: 0.7;
+//$pagination-color: red;
+//$pagination-opacity: 0.7;
 $action-bar-height: 36px;
 
 // Tap to Paginate
@@ -47,7 +47,7 @@ $action-bar-height: 36px;
   border: none !important;
   opacity: $pagination-opacity;
   outline: none;
-  height: 100vw;
+  height: 100%;
 
   &.immersive {
     top: 0px;
@@ -72,7 +72,7 @@ $action-bar-height: 36px;
   border-color: transparent;
   border: none !important;
   outline: none;
-  height: 100vw;
+  height: 100%;
   cursor: pointer;
 
   &.immersive {
@@ -91,7 +91,7 @@ $action-bar-height: 36px;
   border: none !important;
   z-index: 3;
   outline: none;
-  height: 100vw;
+  height: 100%;
   cursor: pointer;
 
   &.immersive {

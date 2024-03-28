@@ -14,8 +14,8 @@ public enum PdfScrollMode
     // [Description("Wrapped")]
     // Wrapped = 2,
     /// <summary>
-    /// Single page view (not supported, doesn't make sense for Kavita)
+    /// Single page view (tap to pagninate)
     /// </summary>
-    // [Description("Page")]
-    // Page = 3
+    [Description("Page")]
+    Page = 3
 }

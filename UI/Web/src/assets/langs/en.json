@@ -1615,7 +1615,7 @@
         "vertical": "Vertical",
         "horizontal": "Horizontal",
         "wrapped": "Wrapped",
-        "page": "Single Page"
+        "page": "Tap to Paginate"
     },
 
     "pdf-spread-mode-pipe": {

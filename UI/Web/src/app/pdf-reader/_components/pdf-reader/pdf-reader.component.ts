@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  HostListener, Inject,
+  HostListener, inject, Inject,
   OnDestroy,
   OnInit,
   ViewChild
@@ -19,7 +19,7 @@ import {
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
-import {KEY_CODES} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
@@ -50,9 +50,22 @@ import {PdfSpreadModePipe} from "../../_pipe/pdf-spread-mode.pipe";
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 
-  @ViewChild('container') container!: ElementRef;
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly seriesService = inject(SeriesService);
+  private readonly navService = inject(NavService);
+  private readonly toastr = inject(ToastrService);
+  private readonly bookService = inject(BookService);
+  private readonly themeService = inject(ThemeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  public readonly accountService = inject(AccountService);
+  public readonly readerService = inject(ReaderService);
+  public readonly utilityService = inject(UtilityService);
 
   protected readonly ScrollModeType = ScrollModeType;
+  protected readonly Breakpoint = Breakpoint;
+
+  @ViewChild('container') container!: ElementRef;
 
   libraryId!: number;
   seriesId!: number;
@@ -107,11 +120,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   scrollMode: ScrollModeType = ScrollModeType.vertical;
   spreadMode: SpreadType = 'off';
 
-  constructor(private route: ActivatedRoute, private router: Router, public accountService: AccountService,
-    private seriesService: SeriesService, public readerService: ReaderService,
-    private navService: NavService, private toastr: ToastrService,
-    private bookService: BookService, private themeService: ThemeService,
-    private readonly cdRef: ChangeDetectorRef, @Inject(DOCUMENT) private document: Document) {
+  constructor(@Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
