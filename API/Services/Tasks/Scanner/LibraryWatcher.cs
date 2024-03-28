@@ -148,14 +148,14 @@ public class LibraryWatcher : ILibraryWatcher
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
+        _logger.LogTrace("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name))));
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        _logger.LogDebug("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
+        _logger.LogTrace("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name)));
     }
 
@@ -167,7 +167,7 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnDeleted(object sender, FileSystemEventArgs e) {
         var isDirectory = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
         if (!isDirectory) return;
-        _logger.LogDebug("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
+        _logger.LogTrace("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, true));
     }
 
@@ -285,10 +285,10 @@ public class LibraryWatcher : ILibraryWatcher
 
         var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
         _logger.LogTrace("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
-        if (!rootFolder.Any()) return string.Empty;
+        if (rootFolder.Count == 0) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
-        return  Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[rootFolder.Count - 1]));
+        return Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[rootFolder.Count - 1]));
     }
 
 
