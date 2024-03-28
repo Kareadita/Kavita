@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240326203818_PdfSettings")]
+    [Migration("20240328130057_PdfSettings")]
     partial class PdfSettings
     {
         /// <inheritdoc />
@@ -362,6 +362,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PdfScrollMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PdfSpreadMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PdfTheme")

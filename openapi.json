@@ -13331,7 +13331,8 @@
           "pdfScrollMode": {
             "enum": [
               0,
-              1
+              1,
+              3
             ],
             "type": "integer",
             "description": "PDF Reader: Scroll mode of the reader",
@@ -20858,7 +20859,8 @@
           "pdfScrollMode": {
             "enum": [
               0,
-              1
+              1,
+              3
             ],
             "type": "integer",
             "description": "PDF Reader: Scroll mode of the reader",

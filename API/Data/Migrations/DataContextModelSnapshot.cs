@@ -361,6 +361,9 @@ namespace API.Data.Migrations
                     b.Property<int>("PdfScrollMode")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("PdfSpreadMode")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PdfTheme")
                         .HasColumnType("INTEGER");
 

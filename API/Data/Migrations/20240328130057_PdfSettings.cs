@@ -25,6 +25,13 @@ namespace API.Data.Migrations
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
+                name: "PdfSpreadMode",
+                table: "AppUserPreferences",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
                 name: "PdfTheme",
                 table: "AppUserPreferences",
                 type: "INTEGER",
@@ -41,6 +48,10 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "PdfScrollMode",
+                table: "AppUserPreferences");
+
+            migrationBuilder.DropColumn(
+                name: "PdfSpreadMode",
                 table: "AppUserPreferences");
 
             migrationBuilder.DropColumn(

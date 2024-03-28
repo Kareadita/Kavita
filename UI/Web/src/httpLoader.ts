@@ -10,6 +10,8 @@ export class HttpLoader implements TranslocoLoader {
   getTranslation(langPath: string) {
     const tokens = langPath.split('/');
     const langCode = tokens[tokens.length - 1];
-    return this.http.get<Translation>(`assets/langs/${langCode}.json?v=${(cacheBusting as { [key: string]: string })[langCode]}`);
+    const url = `assets/langs/${langCode}.json?v=${(cacheBusting as { [key: string]: string })[langCode]}`;
+    console.log('loading locale: ', url);
+    return this.http.get<Translation>(url);
   }
 }
