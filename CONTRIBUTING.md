@@ -24,7 +24,6 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
     - `cd Kavita/UI/Web`
     - `npm install`
     - `npm install -g @angular/cli`
-4. Update the `IP` constant in `UI\Web\src\environments\environment.ts` with your machines ip address
 5. Start the frontend 
     - `npm run start`
 6. Build the project in Visual Studio/Rider, Setting startup project to `API`
@@ -32,6 +31,8 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 8. Open http://localhost:4200
 9. (Deployment only) Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
+### Debugging on Device ###
+- Update `IP` constant in `Web/UI/src/environments/environment.ts` to your dev machine's ip instead of `localhost`.
 
 
 ### Contributing Code ###
