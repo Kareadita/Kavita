@@ -198,13 +198,14 @@ export class CardItemComponent implements OnInit {
     this.format = (this.entity as Series).format;
 
     if (this.utilityService.isChapter(this.entity)) {
-      const chapterTitle = this.utilityService.asChapter(this.entity).titleName;
+      const chapter = this.utilityService.asChapter(this.entity);
+      const chapterTitle = chapter.titleName;
       if (chapterTitle === '' || chapterTitle === null || chapterTitle === undefined) {
-        const volumeTitle = this.utilityService.asChapter(this.entity).volumeTitle
+        const volumeTitle = chapter.volumeTitle
         if (volumeTitle === '' || volumeTitle === null || volumeTitle === undefined) {
           this.tooltipTitle = (this.title).trim();
         } else {
-          this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+          this.tooltipTitle = (volumeTitle + ' ' + this.title).trim();
         }
       } else {
         this.tooltipTitle = chapterTitle;

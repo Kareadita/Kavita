@@ -64,6 +64,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <remarks><see cref="Services.Tasks.Scanner.Parser.Parser.NormalizePath"/> must be used before setting</remarks>
     public string? FolderPath { get; set; }
     /// <summary>
+    /// Lowest path (that is under library root) that contains all files for the series.
+    /// </summary>
+    /// <remarks><see cref="Services.Tasks.Scanner.Parser.Parser.NormalizePath"/> must be used before setting</remarks>
+    public string? LowestFolderPath { get; set; }
+    /// <summary>
     /// Last time the folder was scanned
     /// </summary>
     public DateTime LastFolderScanned { get; set; }

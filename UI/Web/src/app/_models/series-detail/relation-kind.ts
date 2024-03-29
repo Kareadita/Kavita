@@ -14,7 +14,8 @@ export enum RelationKind {
      * This is UI only. Backend will generate Parent series for everything but Prequel/Sequel
      */
     Parent = 12,
-    Edition = 13
+    Edition = 13,
+    Annual = 14
 }
 
 const RelationKindsUnsorted = [
@@ -22,6 +23,7 @@ const RelationKindsUnsorted = [
     {text: 'Sequel', value: RelationKind.Sequel},
     {text: 'Spin Off', value: RelationKind.SpinOff},
     {text: 'Adaptation', value: RelationKind.Adaptation},
+    {text: 'Annual', value: RelationKind.Annual},
     {text: 'Alternative Setting', value: RelationKind.AlternativeSetting},
     {text: 'Alternative Version', value: RelationKind.AlternativeVersion},
     {text: 'Side Story', value: RelationKind.SideStory},

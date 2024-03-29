@@ -18,6 +18,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import NoSleep from 'nosleep.js';
+import {FullProgress} from "../_models/readers/full-progress";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -153,6 +154,10 @@ export class ReaderService {
 
   saveProgress(libraryId: number, seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
     return this.httpClient.post(this.baseUrl + 'reader/progress', {libraryId, seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
+  }
+
+  getAllProgressForChapter(chapterId: number) {
+    return this.httpClient.get<Array<FullProgress>>(this.baseUrl + 'reader/all-chapter-progress?chapterId=' + chapterId);
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {

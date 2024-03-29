@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
@@ -17,20 +18,25 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     {
         _chapter = new Chapter()
         {
-            Range = string.IsNullOrEmpty(range) ? number : range,
+            Range = string.IsNullOrEmpty(range) ? number : Parser.RemoveExtensionIfSupported(range),
             Title = string.IsNullOrEmpty(range) ? number : range,
             Number = Parser.MinNumberFromRange(number).ToString(CultureInfo.InvariantCulture),
+            MinNumber = Parser.MinNumberFromRange(number),
+            MaxNumber = Parser.MaxNumberFromRange(number),
+            SortOrder = Parser.MinNumberFromRange(number),
             Files = new List<MangaFile>(),
-            Pages = 1
+            Pages = 1,
+            CreatedUtc = DateTime.UtcNow
         };
     }
 
     public static ChapterBuilder FromParserInfo(ParserInfo info)
     {
         var specialTreatment = info.IsSpecialInfo();
-        var specialTitle = specialTreatment ? info.Filename : info.Chapters;
+        var specialTitle = specialTreatment ? Parser.RemoveExtensionIfSupported(info.Filename) : info.Chapters;
         var builder = new ChapterBuilder(Parser.DefaultChapter);
-        return builder.WithNumber(specialTreatment ? Parser.DefaultChapter : Parser.MinNumberFromRange(info.Chapters) + string.Empty)
+
+        return builder.WithNumber(Parser.RemoveExtensionIfSupported(info.Chapters))
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
             .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
             ? info.Title
@@ -44,9 +50,18 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         return this;
     }
 
-    public ChapterBuilder WithNumber(string number)
+
+    private ChapterBuilder WithNumber(string number)
     {
         _chapter.Number = number;
+        _chapter.MinNumber = Parser.MinNumberFromRange(number);
+        _chapter.MaxNumber = Parser.MaxNumberFromRange(number);
+        return this;
+    }
+
+    public ChapterBuilder WithSortOrder(float order)
+    {
+        _chapter.SortOrder = order;
         return this;
     }
 
@@ -62,9 +77,9 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         return this;
     }
 
-    private ChapterBuilder WithRange(string range)
+    public ChapterBuilder WithRange(string range)
     {
-        _chapter.Range = range;
+        _chapter.Range = Parser.RemoveExtensionIfSupported(range);
         return this;
     }
 

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities.Metadata;
+using API.Services.Plus;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities;
@@ -40,6 +42,21 @@ public class CollectionTag
     public bool Promoted { get; set; }
 
     public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
+
+    /// <summary>
+    /// Is this Collection tag managed by another system, like Kavita+
+    /// </summary>
+    //public bool IsManaged { get; set; } = false;
+
+    /// <summary>
+    /// The last time this Collection was Synchronized. Only applicable for Managed Tags.
+    /// </summary>
+    //public DateTime LastSynchronized { get; set; }
+
+    /// <summary>
+    /// Who created this Collection (Kavita, or external services)
+    /// </summary>
+    //public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
 
     /// <summary>
     /// Not Used due to not using concurrency update

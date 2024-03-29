@@ -750,7 +750,9 @@
         "help": "{{common.help}}",
         "file-type-group-label": "文件类型",
         "file-type-group-tooltip": "Kavita 应该扫描哪些类型的文件。例如，档案将包含所有 cb*、zip、rar 等文件。",
-        "exclude-patterns-tooltip": "配置一组模式（Glob语法），Kavita 将在扫描目录时匹配这些模式，并将其从扫描程序结果中排除。"
+        "exclude-patterns-tooltip": "配置一组模式（Glob语法），Kavita 将在扫描目录时匹配这些模式，并将其从扫描程序结果中排除。",
+        "kavitaplus-eligible-tooltip": "Kavita+ 会提取信息还是支持 Scrobbling",
+        "kavitaplus-eligible-label": "Kavita+ 符合条件"
     },
     "reader-settings": {
         "general-settings-title": "常规设置",
@@ -1696,7 +1698,8 @@
         "review-deleted": "评论已删除",
         "delete-device": "您确定要删除该设备吗？",
         "collection-tag-deleted": "收藏标签已删除",
-        "force-kavita+-refresh-success": "Kavita+ 外部元数据已失效"
+        "force-kavita+-refresh-success": "Kavita+ 外部元数据已失效",
+        "confirm-download-size-ios": "iOS 在下载大于 200MB 的文件时出现问题，此下载可能无法完成。"
     },
     "actionable": {
         "scan-library": "扫描资料库",

@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
 using API.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Data.ManualMigrations;
@@ -21,8 +22,12 @@ public static class MigrateSmartFilterEncoding
 
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
-        logger.LogCritical("Running MigrateSmartFilterEncoding migration - Please be patient, this may take some time. This is not an error");
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateSmartFilterEncoding"))
+        {
+            return;
+        }
 
+        logger.LogCritical("Running MigrateSmartFilterEncoding migration - Please be patient, this may take some time. This is not an error");
 
         var smartFilters = dataContext.AppUserSmartFilter.ToList();
         foreach (var filter in smartFilters)

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Services;
+using API.Services.Plus;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,14 +25,16 @@ public class CollectionController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICollectionTagService _collectionService;
     private readonly ILocalizationService _localizationService;
+    private readonly IExternalMetadataService _externalMetadataService;
 
     /// <inheritdoc />
     public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, IExternalMetadataService externalMetadataService)
     {
         _unitOfWork = unitOfWork;
         _collectionService = collectionService;
         _localizationService = localizationService;
+        _externalMetadataService = externalMetadataService;
     }
 
     /// <summary>
@@ -167,5 +171,16 @@ public class CollectionController : BaseApiController
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+    }
+
+    /// <summary>
+    /// For the authenticated user, if they have an active Kavita+ subscription and a MAL username on record,
+    /// fetch their Mal interest stacks (including restacks)
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("mal-stacks")]
+    public async Task<ActionResult<IList<MalStackDto>>> GetMalStacksForUser()
+    {
+        return Ok(await _externalMetadataService.GetStacksForUser(User.GetUserId()));
     }
 }

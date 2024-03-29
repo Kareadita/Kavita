@@ -33,13 +33,14 @@ public class CblController : BaseApiController
     /// <param name="file">FormBody with parameter name of cbl</param>
     /// <returns></returns>
     [HttpPost("validate")]
-    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl([FromForm(Name = "cbl")] IFormFile file)
+    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl([FromForm(Name = "cbl")] IFormFile file,
+        [FromForm(Name = "comicVineMatching")] bool comicVineMatching = false)
     {
         var userId = User.GetUserId();
         try
         {
             var cbl = await SaveAndLoadCblFile(file);
-            var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
+            var importSummary = await _readingListService.ValidateCblFile(userId, cbl, comicVineMatching);
             importSummary.FileName = file.FileName;
             return Ok(importSummary);
         }
@@ -83,13 +84,14 @@ public class CblController : BaseApiController
     /// <param name="dryRun">If true, will only emulate the import but not perform. This should be done to preview what will happen</param>
     /// <returns></returns>
     [HttpPost("import")]
-    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
+    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file,
+        [FromForm(Name = "dryRun")] bool dryRun = false, [FromForm(Name = "comicVineMatching")] bool comicVineMatching = false)
     {
         try
         {
             var userId = User.GetUserId();
             var cbl = await SaveAndLoadCblFile(file);
-            var importSummary = await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun);
+            var importSummary = await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun, comicVineMatching);
             importSummary.FileName = file.FileName;
             return Ok(importSummary);
         } catch (ArgumentNullException)

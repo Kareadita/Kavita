@@ -21,7 +21,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
-import { Chapter } from 'src/app/_models/chapter';
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Genre } from 'src/app/_models/metadata/genre';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
@@ -58,6 +58,7 @@ import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
 import {LibraryType} from "../../../_models/library/library";
 import {ToastrService} from "ngx-toastr";
+import {Volume} from "../../../_models/volume";
 
 enum TabID {
   General = 0,
@@ -296,8 +297,10 @@ export class EditSeriesModalComponent implements OnInit {
         this.volumeCollapsed[v.name] = true;
       });
       this.seriesVolumes.forEach(vol => {
-        vol.volumeFiles = vol.chapters?.sort(this.utilityService.sortChapters).map((c: Chapter) => c.files.map((f: any) => {
-          f.chapter = c.number;
+        //.sort(this.utilityService.sortChapters) (no longer needed, all data is sorted on the backend)
+        vol.volumeFiles = vol.chapters?.map((c: Chapter) => c.files.map((f: any) => {
+          // TODO: Identify how to fix this hack
+          f.chapter = c.range;
           return f;
         })).flat();
       });
@@ -313,6 +316,15 @@ export class EditSeriesModalComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
+  }
+
+  formatVolumeName(volume: Volume) {
+    if (volume.minNumber === LooseLeafOrDefaultNumber) {
+      return translate('edit-series-modal.loose-leaf-volume');
+    } else if (volume.minNumber === SpecialVolumeNumber) {
+      return translate('edit-series-modal.specials-volume');
+    }
+    return translate('edit-series-modal.volume-num') + ' ' + volume.name;
   }
 
 
@@ -475,7 +487,10 @@ export class EditSeriesModalComponent implements OnInit {
       this.updateFromPreset('letterer', this.metadata.letterers, PersonRole.Letterer),
       this.updateFromPreset('penciller', this.metadata.pencillers, PersonRole.Penciller),
       this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
-      this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator)
+      this.updateFromPreset('imprint', this.metadata.imprints, PersonRole.Imprint),
+      this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator),
+      this.updateFromPreset('teams', this.metadata.teams, PersonRole.Team),
+      this.updateFromPreset('locations', this.metadata.locations, PersonRole.Location),
     ]).pipe(map(results => {
       return of(true);
     }));
@@ -598,6 +613,10 @@ export class EditSeriesModalComponent implements OnInit {
 
   updatePerson(persons: Person[], role: PersonRole) {
     switch (role) {
+      case PersonRole.Other:
+        break;
+      case PersonRole.Artist:
+        break;
       case PersonRole.CoverArtist:
         this.metadata.coverArtists = persons;
         break;
@@ -622,11 +641,22 @@ export class EditSeriesModalComponent implements OnInit {
       case PersonRole.Publisher:
         this.metadata.publishers = persons;
         break;
+        case PersonRole.Imprint:
+        this.metadata.imprints = persons;
+        break;
+      case PersonRole.Team:
+        this.metadata.teams = persons;
+        break;
+      case PersonRole.Location:
+        this.metadata.locations = persons;
+        break;
       case PersonRole.Writer:
         this.metadata.writers = persons;
         break;
       case PersonRole.Translator:
         this.metadata.translators = persons;
+        break;
+
     }
     this.cdRef.markForCheck();
   }

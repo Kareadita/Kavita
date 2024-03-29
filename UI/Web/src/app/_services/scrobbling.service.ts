@@ -36,8 +36,16 @@ export class ScrobblingService {
     return this.httpClient.post(this.baseUrl + 'scrobbling/update-anilist-token', {token});
   }
 
+  updateMalToken(username: string, accessToken: string) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/update-mal-token', {username, accessToken});
+  }
+
   getAniListToken() {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/anilist-token', TextResonse);
+  }
+
+  getMalToken() {
+    return this.httpClient.get<{username: string, accessToken: string}>(this.baseUrl + 'scrobbling/mal-token');
   }
 
   getScrobbleErrors() {

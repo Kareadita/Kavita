@@ -552,11 +552,9 @@ export class ActionService implements OnDestroy {
   }
 
   /**
-   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
-   * @param seriesId Series Id
-   * @param volumes Volumes, should have id, chapters and pagesRead populated
-   * @param chapters? Chapters, should have id
-   * @param callback Optional callback to perform actions after API completes
+   * Deletes all series
+   * @param seriesIds - List of series
+   * @param callback - Optional callback once complete
    */
    async deleteMultipleSeries(seriesIds: Array<Series>, callback?: BooleanActionCallback) {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-series', {count: seriesIds.length}))) {
@@ -565,11 +563,15 @@ export class ActionService implements OnDestroy {
       }
       return;
     }
-    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
-      this.toastr.success(translate('toasts.series-deleted'));
+    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(res => {
+      if (res) {
+        this.toastr.success(translate('toasts.series-deleted'));
+      } else {
+        this.toastr.error(translate('errors.generic'));
+      }
 
       if (callback) {
-        callback(true);
+        callback(res);
       }
     });
   }
@@ -584,7 +586,12 @@ export class ActionService implements OnDestroy {
 
     this.seriesService.delete(series.id).subscribe((res: boolean) => {
       if (callback) {
-        this.toastr.success(translate('toasts.series-deleted'));
+        if (res) {
+          this.toastr.success(translate('toasts.series-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
         callback(res);
       }
     });

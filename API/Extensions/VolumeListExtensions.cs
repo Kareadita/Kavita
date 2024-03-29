@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using API.Comparators;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
@@ -21,18 +25,68 @@ public static class VolumeListExtensions
     {
         if (volumes == null) throw new ArgumentException("Volumes cannot be null");
 
-        if (seriesFormat == MangaFormat.Epub || seriesFormat == MangaFormat.Pdf)
+        if (seriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
         {
             return volumes.MinBy(x => x.MinNumber);
         }
 
-
-        if (volumes.Any(x => x.MinNumber != 0f)) // TODO: Refactor this so we can avoid a magic number
+        if (volumes.HasAnyNonLooseLeafVolumes())
         {
-            return volumes.OrderBy(x => x.MinNumber).FirstOrDefault(x => x.MinNumber != 0);
+            return volumes.FirstNonLooseLeafOrDefault();
         }
 
         // We only have 1 volume of chapters, we need to be cautious if there are specials, as we don't want to order them first
         return volumes.MinBy(x => x.MinNumber);
+    }
+
+    /// <summary>
+    /// If the collection of volumes has any non-loose leaf volumes
+    /// </summary>
+    /// <param name="volumes"></param>
+    /// <returns></returns>
+    public static bool HasAnyNonLooseLeafVolumes(this IEnumerable<Volume> volumes)
+    {
+        return volumes.Any(v => v.MinNumber.IsNot(Parser.DefaultChapterNumber));
+    }
+
+    /// <summary>
+    /// Returns first non-loose leaf volume
+    /// </summary>
+    /// <param name="volumes"></param>
+    /// <returns></returns>
+    public static Volume? FirstNonLooseLeafOrDefault(this IEnumerable<Volume> volumes)
+    {
+        return volumes.OrderBy(x => x.MinNumber, ChapterSortComparerDefaultLast.Default)
+            .FirstOrDefault(v => v.MinNumber.IsNot(Parser.DefaultChapterNumber));
+    }
+
+    /// <summary>
+    /// Returns the first (and only) loose leaf volume or null if none
+    /// </summary>
+    /// <param name="volumes"></param>
+    /// <returns></returns>
+    public static Volume? GetLooseLeafVolumeOrDefault(this IEnumerable<Volume> volumes)
+    {
+        return volumes.FirstOrDefault(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
+    }
+
+    /// <summary>
+    /// Returns the first (and only) special volume or null if none
+    /// </summary>
+    /// <param name="volumes"></param>
+    /// <returns></returns>
+    public static Volume? GetSpecialVolumeOrDefault(this IEnumerable<Volume> volumes)
+    {
+        return volumes.FirstOrDefault(v => v.MinNumber.Is(Parser.SpecialVolumeNumber));
+    }
+
+    public static IEnumerable<VolumeDto> WhereNotLooseLeaf(this IEnumerable<VolumeDto> volumes)
+    {
+        return volumes.Where(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
+    }
+
+    public static IEnumerable<VolumeDto> WhereLooseLeaf(this IEnumerable<VolumeDto> volumes)
+    {
+        return volumes.Where(v => v.MinNumber.Is(Parser.DefaultChapterNumber));
     }
 }

@@ -49,6 +49,7 @@ public enum SeriesIncludes
     ExternalReviews = 64,
     ExternalRatings = 128,
     ExternalRecommendations = 256,
+    ExternalMetadata = 512
 
 }
 
@@ -497,6 +498,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(c => c.Files)
             .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
                         || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
+                        || EF.Functions.Like(c.Range, $"%{searchQuery}%")
                 )
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
@@ -551,7 +553,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// Returns Volumes, Metadata, and Collection Tags
+    /// Returns Full Series including all external links
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
@@ -559,9 +561,20 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Include(s => s.Volumes)
+            .Include(s => s.Relations)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
-            .Include(s => s.Relations)
+
+
+            .Include(s => s.ExternalSeriesMetadata)
+
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalRatings)
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalReviews)
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalRecommendations)
+
             .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
             .ToListAsync();
@@ -1171,6 +1184,9 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Letterer => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Team => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Location => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
@@ -1805,19 +1821,7 @@ public class SeriesRepository : ISeriesRepository
             AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating),
             AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating),
             Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating),
-            // Parent = await _context.Series
-            //     .SelectMany(s =>
-            //         s.TargetSeries.Where(r => r.TargetSeriesId == seriesId
-            //                                  && usersSeriesIds.Contains(r.TargetSeriesId)
-            //                                  && r.RelationKind != RelationKind.Prequel
-            //                                  && r.RelationKind != RelationKind.Sequel
-            //                                  && r.RelationKind != RelationKind.Edition)
-            //             .Select(sr => sr.Series))
-            //     .RestrictAgainstAgeRestriction(userRating)
-            //     .AsSplitQuery()
-            //     .AsNoTracking()
-            //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //     .ToListAsync(),
+            Annuals = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Annual, userRating),
             Parent = await _context.SeriesRelation
                 .Where(r => r.TargetSeriesId == seriesId
                                               && usersSeriesIds.Contains(r.TargetSeriesId)
@@ -1879,8 +1883,8 @@ public class SeriesRepository : ISeriesRepository
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
-                ChapterNumber = c.Number,
-                ChapterRange = c.Range,
+                ChapterNumber = c.MinNumber + string.Empty, // TODO: Refactor this
+                ChapterRange = c.Range, // TODO: Refactor this
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.MinNumber,
                 ChapterTitle = c.Title,
@@ -2051,7 +2055,7 @@ public class SeriesRepository : ISeriesRepository
         foreach (var series in info)
         {
             if (series.FolderPath == null) continue;
-            if (!map.ContainsKey(series.FolderPath))
+            if (!map.TryGetValue(series.FolderPath, out var value))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
                 {
@@ -2060,9 +2064,8 @@ public class SeriesRepository : ISeriesRepository
             }
             else
             {
-                map[series.FolderPath].Add(series);
+                value.Add(series);
             }
-
         }
 
         return map;

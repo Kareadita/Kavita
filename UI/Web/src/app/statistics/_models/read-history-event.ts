@@ -6,5 +6,5 @@ export interface ReadHistoryEvent {
     libraryId: number;
     readDate: string;
     chapterId: number;
-    chapterNumber: string;
+    chapterNumber: number;
 }

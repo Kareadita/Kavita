@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Data;
 using API.Entities;
@@ -15,6 +16,7 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         _volume = new Volume()
         {
             Name = volumeNumber,
+            LookupName = volumeNumber,
             MinNumber = Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
             MaxNumber = Services.Tasks.Scanner.Parser.Parser.MaxNumberFromRange(volumeNumber),
             Chapters = new List<Chapter>()
@@ -49,7 +51,7 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         return this;
     }
 
-    public VolumeBuilder WithChapters(List<Chapter> chapters)
+    public VolumeBuilder WithChapters(IList<Chapter> chapters)
     {
         _volume.Chapters = chapters;
         return this;
@@ -72,6 +74,20 @@ public class VolumeBuilder : IEntityBuilder<Volume>
     public VolumeBuilder WithCoverImage(string cover)
     {
         _volume.CoverImage = cover;
+        return this;
+    }
+
+    public VolumeBuilder WithCreated(DateTime created)
+    {
+        _volume.Created = created;
+        _volume.CreatedUtc = created.ToUniversalTime();
+        return this;
+    }
+
+    public VolumeBuilder WithLastModified(DateTime lastModified)
+    {
+        _volume.LastModified = lastModified;
+        _volume.LastModifiedUtc = lastModified.ToUniversalTime();
         return this;
     }
 }

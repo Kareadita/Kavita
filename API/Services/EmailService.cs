@@ -224,7 +224,7 @@ public class EmailService : IEmailService
     public async Task<bool> SendFilesToEmail(SendToDto data)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (!serverSetting.IsEmailSetup()) return false;
+        if (!serverSetting.IsEmailSetupForSendToDevice()) return false;
 
         var emailOptions = new EmailOptionsDto()
         {

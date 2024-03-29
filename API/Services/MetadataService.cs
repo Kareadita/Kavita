@@ -82,6 +82,7 @@ public class MetadataService : IMetadataService
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath,
             ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat, coverImageSize);
         _unitOfWork.ChapterRepository.Update(chapter);
+
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return Task.FromResult(true);
     }
@@ -107,9 +108,15 @@ public class MetadataService : IMetadataService
                 null, volume.Created, forceUpdate)) return Task.FromResult(false);
 
 
+        // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
         volume.Chapters ??= new List<Chapter>();
-        var firstChapter = volume.Chapters.MinBy(x => x.Number.AsDouble(), ChapterSortComparerZeroFirst.Default);
-        if (firstChapter == null) return Task.FromResult(false);
+
+        var firstChapter = volume.Chapters.FirstOrDefault(x => x.MinNumber.Is(1f));
+        if (firstChapter == null)
+        {
+            firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
+            if (firstChapter == null) return Task.FromResult(false);
+        }
 
         volume.CoverImage = firstChapter.CoverImage;
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
@@ -130,8 +137,8 @@ public class MetadataService : IMetadataService
                 null, series.Created, forceUpdate, series.CoverImageLocked))
             return Task.CompletedTask;
 
-        series.Volumes ??= new List<Volume>();
-        series.CoverImage = series.GetCoverImage(); // BUG: At this point the volume or chapter hasn't regenerated the cover
+        series.Volumes ??= [];
+        series.CoverImage = series.GetCoverImage();
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;

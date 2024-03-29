@@ -16,11 +16,13 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ToastrService} from "ngx-toastr";
+import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule,
+    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -101,4 +103,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
   }
 
 
+    protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
 }

@@ -20,7 +20,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, of, map, shareReplay } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
+import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library/library';
@@ -50,18 +50,20 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {EditChapterProgressComponent} from "../edit-chapter-progress/edit-chapter-progress.component";
 
 enum TabID {
   General = 0,
   Metadata = 1,
   Cover = 2,
-  Files = 3
+  Progress = 3,
+  Files = 4
 }
 
 @Component({
   selector: 'app-card-detail-drawer',
   standalone: true,
-  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective],
+  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective, EditChapterProgressComponent],
   templateUrl: './card-detail-drawer.component.html',
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -74,6 +76,7 @@ export class CardDetailDrawerComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
   protected readonly LibraryType = LibraryType;
   protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
 
   @Input() parentName = '';
   @Input() seriesId: number = 0;
@@ -105,6 +108,7 @@ export class CardDetailDrawerComponent implements OnInit {
     {title: 'general-tab', disabled: false},
     {title: 'metadata-tab', disabled: false},
     {title: 'cover-tab', disabled: false},
+    {title: 'progress-tab', disabled: false},
     {title: 'info-tab', disabled: false}
   ];
   active = this.tabs[0];
@@ -182,10 +186,10 @@ export class CardDetailDrawerComponent implements OnInit {
   }
 
   formatChapterNumber(chapter: Chapter) {
-    if (chapter.number === '0') {
+    if (chapter.minNumber === LooseLeafOrDefaultNumber) {
       return '1';
     }
-    return chapter.number;
+    return chapter.range + '';
   }
 
   performAction(action: ActionItem<any>, chapter: Chapter) {
@@ -281,5 +285,4 @@ export class CardDetailDrawerComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
 }

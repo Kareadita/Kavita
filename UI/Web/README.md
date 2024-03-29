@@ -34,3 +34,7 @@ Run `npm run start`
 ## Notes:
 - injected services should be at the top of the file
 - all components must be standalone
+
+# Update latest angular
+`ng update @angular/core @angular/cli @typescript-es
+lint/parser @angular/localize @angular/compiler-cli @angular/cli @angular-devkit/build-angular @angular/cdk`

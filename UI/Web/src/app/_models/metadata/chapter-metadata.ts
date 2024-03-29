@@ -18,8 +18,8 @@ export interface ChapterMetadata {
     count: number;
     totalCount: number;
     wordCount: number;
-    
-    
+
+
 
     genres: Array<Genre>;
     tags: Array<Tag>;
@@ -29,11 +29,14 @@ export interface ChapterMetadata {
     characters: Array<Person>;
     pencillers: Array<Person>;
     inkers: Array<Person>;
+    imprints: Array<Person>;
     colorists: Array<Person>;
     letterers: Array<Person>;
     editors: Array<Person>;
     translators: Array<Person>;
-    
+    teams: Array<Person>;
+    locations: Array<Person>;
 
-    
+
+
 }

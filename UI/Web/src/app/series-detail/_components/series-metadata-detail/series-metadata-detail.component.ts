@@ -4,7 +4,7 @@ import {
   Component,
   inject,
   Input,
-  OnChanges,
+  OnChanges, OnInit,
   SimpleChanges,
   ViewEncapsulation
 } from '@angular/core';
@@ -46,7 +46,7 @@ import {Rating} from "../../../_models/rating";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class SeriesMetadataDetailComponent implements OnChanges {
+export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
 
   protected readonly imageService = inject(ImageService);
   protected readonly utilityService = inject(UtilityService);
@@ -83,13 +83,26 @@ export class SeriesMetadataDetailComponent implements OnChanges {
     return this.seriesMetadata?.webLinks.split(',') || [];
   }
 
-  constructor() {
+  ngOnInit() {
     // If on desktop, we can just have all the data expanded by default:
     this.isCollapsed = this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop;
+    // Check if there is a lot of extended data, if so, re-collapse
+    const sum = (this.seriesMetadata.colorists.length + this.seriesMetadata.editors.length
+      + this.seriesMetadata.coverArtists.length + this.seriesMetadata.inkers.length
+      + this.seriesMetadata.letterers.length + this.seriesMetadata.pencillers.length
+      + this.seriesMetadata.publishers.length + this.seriesMetadata.characters.length
+      + this.seriesMetadata.imprints.length + this.seriesMetadata.translators.length
+      + this.seriesMetadata.writers.length + this.seriesMetadata.teams.length + this.seriesMetadata.locations.length) / 13;
+    if (sum > 10) {
+      this.isCollapsed = true;
+    }
     this.cdRef.markForCheck();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+
+
+
     this.hasExtendedProperties = this.seriesMetadata.colorists.length > 0 ||
                                   this.seriesMetadata.editors.length > 0 ||
                                   this.seriesMetadata.coverArtists.length > 0 ||
@@ -98,7 +111,11 @@ export class SeriesMetadataDetailComponent implements OnChanges {
                                   this.seriesMetadata.pencillers.length > 0 ||
                                   this.seriesMetadata.publishers.length > 0 ||
                                   this.seriesMetadata.characters.length > 0 ||
-                                  this.seriesMetadata.translators.length > 0;
+                                  this.seriesMetadata.imprints.length > 0 ||
+                                  this.seriesMetadata.teams.length > 0 ||
+                                  this.seriesMetadata.locations.length > 0 ||
+                                  this.seriesMetadata.translators.length > 0
+    ;
 
 
     this.seriesSummary = (this.seriesMetadata?.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');

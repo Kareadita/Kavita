@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 
 namespace API.Helpers;
@@ -46,6 +47,7 @@ public static class OrderableHelper
 
     public static void ReorderItems(List<ReadingListItem> items, int readingListItemId, int toPosition)
     {
+        if (toPosition < 0) throw new ArgumentException("toPosition cannot be less than 0");
         var item = items.Find(r => r.Id == readingListItemId);
         if (item != null)
         {

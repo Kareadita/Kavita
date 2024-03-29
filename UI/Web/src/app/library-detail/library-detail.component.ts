@@ -44,6 +44,7 @@ import {MetadataService} from "../_services/metadata.service";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
+import {LoadingComponent} from "../shared/loading/loading.component";
 
 @Component({
     selector: 'app-library-detail',
@@ -52,9 +53,13 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf
-    , CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
+    , CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective, LoadingComponent]
 })
 export class LibraryDetailComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   libraryId!: number;
   libraryName = '';
@@ -69,18 +74,16 @@ export class LibraryDetailComponent implements OnInit {
   filterActiveCheck!: SeriesFilterV2;
   refresh: EventEmitter<void> = new EventEmitter();
   jumpKeys: Array<JumpKey> = [];
+  bulkLoader: boolean = false;
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'library-tab', fragment: '', icon: 'fa-landmark'},
     {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly metadataService = inject(MetadataService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
+  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
@@ -123,7 +126,14 @@ export class LibraryDetailComponent implements OnInit {
         });
         break;
       case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+        if (selectedSeries.length > 25) {
+          this.bulkLoader = true;
+          this.cdRef.markForCheck();
+        }
+
+        await this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+          this.bulkLoader = false;
+          this.cdRef.markForCheck();
           if (!successful) return;
           this.bulkSelectionService.deselectAll();
           this.loadPage();
@@ -231,7 +241,23 @@ export class LibraryDetailComponent implements OnInit {
   async handleAction(action: ActionItem<Library>, library: Library) {
     let lib: Partial<Library> = library;
     if (library === undefined) {
-      lib = {id: this.libraryId, name: this.libraryName};
+      //lib = {id: this.libraryId, name: this.libraryName}; // BUG: We need the whole library for editLibrary
+      this.libraryService.getLibrary(this.libraryId).subscribe(async library => {
+        switch (action.action) {
+          case(Action.Scan):
+            await this.actionService.scanLibrary(library);
+            break;
+          case(Action.RefreshMetadata):
+            await this.actionService.refreshMetadata(library);
+            break;
+          case(Action.Edit):
+            this.actionService.editLibrary(library);
+            break;
+          default:
+            break;
+        }
+      });
+      return
     }
     switch (action.action) {
       case(Action.Scan):

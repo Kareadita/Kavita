@@ -4,7 +4,7 @@ using Xunit;
 
 namespace API.Tests.Comparers;
 
-public class ChapterSortComparerZeroFirstTests
+public class ChapterSortComparerDefaultFirstTests
 {
     [Theory]
     [InlineData(new[] {1, 2, 0}, new[] {0, 1, 2,})]
@@ -12,13 +12,13 @@ public class ChapterSortComparerZeroFirstTests
     [InlineData(new[] {1, 0, 0}, new[] {0, 0, 1})]
     public void ChapterSortComparerZeroFirstTest(int[] input, int[] expected)
     {
-        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerZeroFirst()).ToArray());
+        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerDefaultFirst()).ToArray());
     }
 
     [Theory]
-    [InlineData(new[] {1.0, 0.5, 0.3}, new[] {0.3, 0.5, 1.0})]
-    public void ChapterSortComparerZeroFirstTest_Doubles(double[] input, double[] expected)
+    [InlineData(new [] {1.0f, 0.5f, 0.3f}, new [] {0.3f, 0.5f, 1.0f})]
+    public void ChapterSortComparerZeroFirstTest_Doubles(float[] input, float[] expected)
     {
-        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerZeroFirst()).ToArray());
+        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerDefaultFirst()).ToArray());
     }
 }

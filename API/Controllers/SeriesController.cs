@@ -122,6 +122,11 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
+    /// <summary>
+    /// Deletes a series from Kavita
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns>If the series was deleted or not</returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpDelete("{seriesId}")]
     public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
@@ -139,7 +144,7 @@ public class SeriesController : BaseApiController
         var username = User.GetUsername();
         _logger.LogInformation("Series {@SeriesId} is being deleted by {UserName}", dto.SeriesIds, username);
 
-        if (await _seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok();
+        if (await _seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok(true);
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-delete"));
     }

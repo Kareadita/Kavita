@@ -56,6 +56,7 @@ public interface ILibraryRepository
     Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<bool> GetAllowsScrobblingBySeriesId(int seriesId);
 
+    Task<IDictionary<int, LibraryType>> GetLibraryTypesBySeriesIdsAsync(IList<int> seriesIds);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -317,7 +318,7 @@ public class LibraryRepository : ILibraryRepository
     /// <returns></returns>
     public async Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders)
     {
-        var normalized = folders.Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
+        var normalized = folders.Select(Parser.NormalizePath);
         return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
     }
 
@@ -351,5 +352,17 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Series.Where(s => s.Id == seriesId)
             .Select(s => s.Library.AllowScrobbling)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IDictionary<int, LibraryType>> GetLibraryTypesBySeriesIdsAsync(IList<int> seriesIds)
+    {
+        return await _context.Series
+            .Where(series => seriesIds.Contains(series.Id))
+            .Select(series => new
+            {
+                series.Id,
+                series.Library.Type
+            })
+            .ToDictionaryAsync(entity => entity.Id, entity => entity.Type);
     }
 }

@@ -218,7 +218,7 @@ public class ArchiveService : IArchiveService
     /// <returns></returns>
     public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format, CoverImageSize size = CoverImageSize.Default)
     {
-        if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
+        if (string.IsNullOrEmpty(archivePath) || !IsValidArchive(archivePath)) return string.Empty;
         try
         {
             var libraryHandler = CanOpen(archivePath);
@@ -353,7 +353,15 @@ public class ArchiveService : IArchiveService
             {
                 var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.Path.GetFileNameWithoutExtension(_directoryService.FileSystem.FileInfo.New(path).Name));
                 progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
-                ExtractArchive(path, tempPath);
+                if (Tasks.Scanner.Parser.Parser.IsArchive(path))
+                {
+                    ExtractArchive(path, tempPath);
+                }
+                else
+                {
+                    _directoryService.CopyFileToDirectory(path, tempPath);
+                }
+
                 count++;
             }
         }
@@ -392,7 +400,7 @@ public class ArchiveService : IArchiveService
             return false;
         }
 
-        if (Tasks.Scanner.Parser.Parser.IsArchive(archivePath) || Tasks.Scanner.Parser.Parser.IsEpub(archivePath)) return true;
+        if (Tasks.Scanner.Parser.Parser.IsArchive(archivePath)) return true;
 
         _logger.LogWarning("Archive {ArchivePath} is not a valid archive", archivePath);
         return false;

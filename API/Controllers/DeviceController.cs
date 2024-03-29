@@ -103,7 +103,7 @@ public class DeviceController : BaseApiController
         if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "ChapterIds"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
 
-        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetup();
+        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
         if (!isEmailSetup)
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
 
@@ -142,7 +142,7 @@ public class DeviceController : BaseApiController
         if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "SeriesId"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
 
-        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetup();
+        var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
         if (!isEmailSetup)
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
 

@@ -15,4 +15,5 @@ export interface RelatedSeries {
     doujinshis: Array<Series>;
     parent: Array<Series>;
     editions: Array<Series>;
+    annuals: Array<Series>;
 }

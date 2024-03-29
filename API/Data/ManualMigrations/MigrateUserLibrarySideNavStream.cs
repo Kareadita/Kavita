@@ -14,6 +14,10 @@ public static class MigrateUserLibrarySideNavStream
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateUserLibrarySideNavStream"))
+        {
+            return;
+        }
 
         var usersWithLibraryStreams = await dataContext.AppUser
             .Include(u => u.SideNavStreams)

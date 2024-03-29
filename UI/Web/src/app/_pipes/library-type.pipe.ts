@@ -18,8 +18,14 @@ export class LibraryTypePipe implements PipeTransform {
         return this.translocoService.translate('library-type-pipe.book');
       case LibraryType.Comic:
         return this.translocoService.translate('library-type-pipe.comic');
+      case LibraryType.ComicVine:
+        return this.translocoService.translate('library-type-pipe.comicVine');
+      case LibraryType.Images:
+        return this.translocoService.translate('library-type-pipe.image');
       case LibraryType.Manga:
         return this.translocoService.translate('library-type-pipe.manga');
+      case LibraryType.LightNovel:
+        return this.translocoService.translate('library-type-pipe.lightNovel');
       default:
         return '';
     }

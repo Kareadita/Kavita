@@ -64,6 +64,15 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     public string? AniListAccessToken { get; set; }
 
     /// <summary>
+    /// The Username of the MAL user
+    /// </summary>
+    public string? MalUserName { get; set; }
+    /// <summary>
+    /// The Client ID for the user's MAL account. User should create a client on MAL for this.
+    /// </summary>
+    public string? MalAccessToken { get; set; }
+
+    /// <summary>
     /// A list of Series the user doesn't want scrobbling for
     /// </summary>
     public ICollection<ScrobbleHold> ScrobbleHolds { get; set; } = null!;

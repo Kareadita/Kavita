@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using API.DTOs.System;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -52,6 +53,8 @@ public interface IDirectoryService
     string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
     bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "");
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
+        IList<string> filePaths);
+    string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
@@ -585,6 +588,43 @@ public class DirectoryService : IDirectoryService
     }
 
     /// <summary>
+    /// Finds the lowest directory from a set of file paths. Does not return the root path, will always select the lowest non-root path.
+    /// </summary>
+    /// <remarks>If the file paths do not contain anything from libraryFolders, this returns an empty dictionary back</remarks>
+    /// <param name="libraryFolders">List of top level folders which files belong to</param>
+    /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
+    /// <returns></returns>
+    public string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
+    {
+
+
+        var stopLookingForDirectories = false;
+        var dirs = new Dictionary<string, string>();
+        foreach (var folder in libraryFolders.Select(Tasks.Scanner.Parser.Parser.NormalizePath))
+        {
+            if (stopLookingForDirectories) break;
+            foreach (var file in filePaths.Select(Tasks.Scanner.Parser.Parser.NormalizePath))
+            {
+                if (!file.Contains(folder)) continue;
+
+                var lowestPath =   Path.GetDirectoryName(file)?.Replace(folder, string.Empty);
+                if (!string.IsNullOrEmpty(lowestPath))
+                {
+                    dirs.TryAdd(Parser.NormalizePath(lowestPath), string.Empty);
+                }
+
+            }
+        }
+
+        if (dirs.Keys.Count == 1) return dirs.Keys.First();
+        if (dirs.Keys.Count > 1)
+        {
+            return dirs.Keys.Last();
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
     /// </summary>
     /// <param name="folderPath"></param>
@@ -657,7 +697,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null)
     {
-        _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
+        _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
         if (!Exists(folderPath)) return files;
 

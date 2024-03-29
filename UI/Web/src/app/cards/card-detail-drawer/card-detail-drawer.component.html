@@ -32,59 +32,6 @@
 
               <app-entity-info-cards [entity]="data" [libraryId]="libraryId"></app-entity-info-cards>
 
-
-              <!-- 2 rows to show some tags-->
-              <ng-container *ngIf="chapterMetadata !== undefined">
-                <div class="row g-0 mb-2">
-                  <div class="col-md-6 col-sm-12">
-                    <h6>{{t('writers-title')}}</h6>
-                    <ng-container *ngIf="chapterMetadata.writers.length > 0; else noBadges">
-                      <app-badge-expander [items]="chapterMetadata.writers">
-                        <ng-template #badgeExpanderItem let-item let-position="idx">
-                          <app-person-badge [person]="item"></app-person-badge>
-                        </ng-template>
-                      </app-badge-expander>
-                    </ng-container>
-                  </div>
-                  <div class="col-md-6 col-sm-12">
-                    <h6>{{t('genres-title')}}</h6>
-                    <ng-container *ngIf="chapterMetadata.genres.length > 0; else noBadges">
-                      <app-badge-expander [items]="chapterMetadata.genres">
-                        <ng-template #badgeExpanderItem let-item let-position="idx">
-                          <app-tag-badge>{{item.title}}</app-tag-badge>
-                        </ng-template>
-                      </app-badge-expander>
-                    </ng-container>
-                  </div>
-                </div>
-                <div class="row g-0 mb-2">
-                  <div class="col-md-6 col-sm-12">
-                    <h6>{{t('publishers-title')}}</h6>
-                    <ng-container *ngIf="chapterMetadata.publishers.length > 0; else noBadges">
-                      <app-badge-expander [items]="chapterMetadata.publishers">
-                        <ng-template #badgeExpanderItem let-item let-position="idx">
-                          <app-person-badge [person]="item"></app-person-badge>
-                        </ng-template>
-                      </app-badge-expander>
-                    </ng-container>
-                  </div>
-                  <div class="col-md-6 col-sm-12">
-                    <h6>{{t('tags-title')}}</h6>
-                    <ng-container *ngIf="chapterMetadata.tags.length > 0; else noBadges">
-                      <app-badge-expander [items]="chapterMetadata.tags">
-                        <ng-template #badgeExpanderItem let-item let-position="idx">
-                          <app-tag-badge>{{item.title}}</app-tag-badge>
-                        </ng-template>
-                      </app-badge-expander>
-                    </ng-container>
-                  </div>
-                </div>
-
-                <ng-template #noBadges>
-                  {{t('not-defined')}}
-                </ng-template>
-              </ng-container>
-
             </div>
           </ng-template>
         </li>
@@ -93,6 +40,13 @@
           <a ngbNavLink>{{t(tabs[TabID.Metadata].title)}}</a>
           <ng-template ngbNavContent>
             <app-chapter-metadata-detail [chapter]="chapterMetadata"></app-chapter-metadata-detail>
+          </ng-template>
+        </li>
+
+        <li [ngbNavItem]="tabs[TabID.Progress]">
+          <a ngbNavLink>{{t(tabs[TabID.Progress].title)}}</a>
+          <ng-template ngbNavContent>
+            <app-edit-chapter-progress [chapter]="chapter"></app-edit-chapter-progress>
           </ng-template>
         </li>
 
@@ -113,8 +67,7 @@
             }
             <ul class="list-unstyled">
               <li class="d-flex my-4" *ngFor="let chapter of chapters">
-                <!-- TODO: Localize title -->
-                <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{utilityService.formatChapterName(libraryType, true, false)}} {{formatChapterNumber(chapter)}}">
+                <a (click)="readChapter(chapter)" href="javascript:void(0);" [title]="t('read')">
                   <app-image class="me-2" width="74px" [imageUrl]="imageService.getChapterCoverImage(chapter.id)"></app-image>
                 </a>
                 <div class="flex-grow-1">
@@ -123,7 +76,7 @@
                         <span>
                             <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions"
                                                   [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
-                            <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
+                            <ng-container *ngIf="chapter.minNumber !== LooseLeafOrSpecialNumber; else specialHeader">
                                 {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                             </ng-container>
                         </span>

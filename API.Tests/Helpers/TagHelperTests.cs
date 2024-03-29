@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using API.Data;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using Xunit;
@@ -12,50 +14,50 @@ public class TagHelperTests
     [Fact]
     public void UpdateTag_ShouldAddNewTag()
     {
-        var allTags = new List<Tag>
+        var allTags = new Dictionary<string, Tag>
         {
-            new TagBuilder("Action").Build(),
-            new TagBuilder("action").Build(),
-            new TagBuilder("Sci-fi").Build(),
+            {"Action".ToNormalized(), new TagBuilder("Action").Build()},
+            {"Sci-fi".ToNormalized(), new TagBuilder("Sci-fi").Build()}
         };
-        var tagAdded = new List<Tag>();
+        var tagCalled = new List<Tag>();
+        var addedCount = 0;
 
         TagHelper.UpdateTag(allTags, new[] {"Action", "Adventure"}, (tag, added) =>
         {
             if (added)
             {
-                tagAdded.Add(tag);
+                addedCount++;
             }
-
+            tagCalled.Add(tag);
         });
 
-        Assert.Single(tagAdded);
-        Assert.Equal(4, allTags.Count);
+        Assert.Equal(1, addedCount);
+        Assert.Equal(2, tagCalled.Count());
+        Assert.Equal(3, allTags.Count);
     }
 
     [Fact]
     public void UpdateTag_ShouldNotAddDuplicateTag()
     {
-        var allTags = new List<Tag>
+        var allTags = new Dictionary<string, Tag>
         {
-            new TagBuilder("Action").Build(),
-            new TagBuilder("action").Build(),
-            new TagBuilder("Sci-fi").Build(),
-
+            {"Action".ToNormalized(), new TagBuilder("Action").Build()},
+            {"Sci-fi".ToNormalized(), new TagBuilder("Sci-fi").Build()}
         };
-        var tagAdded = new List<Tag>();
+        var tagCalled = new List<Tag>();
+        var addedCount = 0;
 
         TagHelper.UpdateTag(allTags, new[] {"Action", "Scifi"}, (tag, added) =>
         {
             if (added)
             {
-                tagAdded.Add(tag);
+                addedCount++;
             }
-            TagHelper.AddTagIfNotExists(allTags, tag);
+            tagCalled.Add(tag);
         });
 
-        Assert.Equal(3, allTags.Count);
-        Assert.Empty(tagAdded);
+        Assert.Equal(2, allTags.Count);
+        Assert.Equal(0, addedCount);
     }
 
     [Fact]

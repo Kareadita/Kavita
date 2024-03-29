@@ -127,7 +127,11 @@ public class ComicInfo
     public string CoverArtist { get; set; } = string.Empty;
     public string Editor { get; set; } = string.Empty;
     public string Publisher { get; set; } = string.Empty;
+    public string Imprint { get; set; } = string.Empty;
     public string Characters { get; set; } = string.Empty;
+    public string Teams { get; set; } = string.Empty;
+    public string Locations { get; set; } = string.Empty;
+
 
     public static AgeRating ConvertAgeRatingToEnum(string value)
     {
@@ -151,9 +155,12 @@ public class ComicInfo
         info.Letterer = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Letterer);
         info.Penciller = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Penciller);
         info.Publisher = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Publisher);
+        info.Imprint = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Imprint);
         info.Characters = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Characters);
         info.Translator = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Translator);
         info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);
+        info.Teams = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Teams);
+        info.Locations = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Locations);
 
         // We need to convert GTIN to ISBN
         if (!string.IsNullOrEmpty(info.GTIN))
@@ -174,7 +181,12 @@ public class ComicInfo
 
         if (!string.IsNullOrEmpty(info.Number))
         {
-            info.Number = info.Number.Replace(",", "."); // Corrective measure for non English OSes
+            info.Number = info.Number.Trim().Replace(",", "."); // Corrective measure for non English OSes
+        }
+
+        if (!string.IsNullOrEmpty(info.Volume))
+        {
+            info.Volume = info.Volume.Trim();
         }
     }
 

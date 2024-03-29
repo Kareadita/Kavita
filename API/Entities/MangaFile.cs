@@ -13,6 +13,10 @@ public class MangaFile : IEntityDate
 {
     public int Id { get; set; }
     /// <summary>
+    /// The filename without extension
+    /// </summary>
+    public string FileName { get; set; }
+    /// <summary>
     /// Absolute path to the archive file
     /// </summary>
     public required string FilePath { get; set; }

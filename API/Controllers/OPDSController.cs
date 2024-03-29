@@ -13,12 +13,14 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
+using API.DTOs.Progress;
 using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +71,7 @@ public class OpdsController : BaseApiController
     };
 
     private readonly FilterV2Dto _filterV2Dto = new FilterV2Dto();
-    private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
+    private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
     private const int PageSize = 20;
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
@@ -856,8 +858,8 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
-        _chapterSortComparer);
+            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id))
+                .OrderBy(x => x.MinNumber, _chapterSortComparerDefaultLast);
 
             foreach (var chapterId in chapters.Select(c => c.Id))
             {
@@ -906,8 +908,8 @@ public class OpdsController : BaseApiController
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapters =
-            (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number, CultureInfo.InvariantCulture),
-                _chapterSortComparer);
+            (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId))
+            .OrderBy(x => x.MinNumber, _chapterSortComparerDefaultLast);
         var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");
@@ -1100,18 +1102,18 @@ public class OpdsController : BaseApiController
 
         var title = $"{series.Name}";
 
-        if (volume!.Chapters.Count == 1)
+        if (volume!.Chapters.Count == 1 && !volume.IsSpecial())
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
-            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType, volumeLabel);
-            if (volume.Name != "0")
+            SeriesService.RenameVolumeName(volume, libraryType, volumeLabel);
+            if (!volume.IsLooseLeaf())
             {
                 title += $" - {volume.Name}";
             }
         }
-        else if (volume.MinNumber != 0)
+        else if (!volume.IsLooseLeaf() && !volume.IsSpecial())
         {
-            title = $"{series.Name} - Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
+            title = $"{series.Name} -  Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }
         else
         {

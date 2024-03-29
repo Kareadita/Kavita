@@ -11,12 +11,13 @@
       </form>
     </div>
     <div class="col-md-2 mt-4">
-      <ngb-pagination *ngIf="pagination"
-                      [(page)]="pagination.currentPage"
-                      [pageSize]="pagination.itemsPerPage"
-                      [collectionSize]="pagination.totalItems"
-                      (pageChange)="onPageChange($event)"
-      ></ngb-pagination>
+      @if(pagination) {
+        <ngb-pagination [(page)]="pagination.currentPage"
+                        [pageSize]="pagination.itemsPerPage"
+                        [collectionSize]="pagination.totalItems"
+                        (pageChange)="onPageChange($event)"
+        ></ngb-pagination>
+      }
     </div>
   </div>
   <table class="table table-striped table-hover table-sm scrollable">
@@ -43,9 +44,12 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngIf="events.length === 0">
-      <td colspan="6">{{t('no-data')}}</td>
-    </tr>
+    @if (events.length === 0) {
+      <tr>
+        <td colspan="6">{{t('no-data')}}</td>
+      </tr>
+    }
+
     <tr *ngFor="let item of events; let idx = index;">
       <td>
         {{item.createdUtc | utcToLocalTime  | defaultValue}}
@@ -60,17 +64,28 @@
         <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
       </td>
       <td>
-        <ng-container [ngSwitch]="item.scrobbleEventType">
-          <ng-container *ngSwitchCase="ScrobbleEventType.ChapterRead">
-            {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
-          </ng-container>
-          <ng-container *ngSwitchCase="ScrobbleEventType.ScoreUpdated">
+        @switch (item.scrobbleEventType) {
+          @case (ScrobbleEventType.ChapterRead) {
+            @if(item.volumeNumber === LooseLeafOrDefaultNumber) {
+              {{t('chapter-num', {num: item.chapterNumber})}}
+            }
+            @else if (item.chapterNumber === LooseLeafOrDefaultNumber) {
+              {{t('volume-num', {num: item.volumeNumber})}}
+            }
+            @else if (item.chapterNumber === LooseLeafOrDefaultNumber && item.volumeNumber === SpecialVolumeNumber) {
+              Special
+            }
+            @else {
+              {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
+            }
+          }
+          @case (ScrobbleEventType.ScoreUpdated) {
             {{t('rating', {r: item.rating})}}
-          </ng-container>
-          <ng-container *ngSwitchDefault>
+          }
+          @default {
             {{t('not-applicable')}}
-          </ng-container>
-        </ng-container>
+          }
+        }
       </td>
       <td>
         @if(item.isProcessed) {

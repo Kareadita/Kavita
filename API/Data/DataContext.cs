@@ -143,6 +143,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);
+
+        builder.Entity<ExternalSeriesMetadata>()
+            .HasOne(em => em.Series)
+            .WithOne(s => s.ExternalSeriesMetadata)
+            .HasForeignKey<ExternalSeriesMetadata>(em => em.SeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     #nullable enable
@@ -150,10 +156,15 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     {
         if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
 
-        entity.Created = DateTime.Now;
         entity.LastModified = DateTime.Now;
-        entity.CreatedUtc = DateTime.UtcNow;
         entity.LastModifiedUtc = DateTime.UtcNow;
+
+        // This allows for mocking
+        if (entity.Created == DateTime.MinValue)
+        {
+            entity.Created = DateTime.Now;
+            entity.CreatedUtc = DateTime.UtcNow;
+        }
     }
 
     private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)
