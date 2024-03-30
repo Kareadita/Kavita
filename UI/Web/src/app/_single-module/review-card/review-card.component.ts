@@ -28,7 +28,7 @@ import {ScrobbleProvider} from "../../_services/scrobbling.service";
 @Component({
   selector: 'app-review-card',
   standalone: true,
-  imports: [CommonModule, ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe, TranslocoDirective],
+  imports: [ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe, TranslocoDirective],
   templateUrl: './review-card.component.html',
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

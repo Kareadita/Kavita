@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.9"
+    "version": "0.7.14.10"
   },
   "servers": [
     {
@@ -13300,9 +13300,6 @@
             "description": "Book Reader Option: Defines the writing styles vertical/horizontal",
             "format": "int32"
           },
-          "theme": {
-            "$ref": "#/components/schemas/SiteTheme"
-          },
           "bookThemeName": {
             "type": "string",
             "description": "Book Reader Option: The color theme to decorate the book contents",
@@ -13321,6 +13318,47 @@
           "bookReaderImmersiveMode": {
             "type": "boolean",
             "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfLayoutMode": {
+            "enum": [
+              0,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Layout Mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/SiteTheme"
           },
           "globalPageLayoutMode": {
             "enum": [
@@ -20626,6 +20664,10 @@
           "locale",
           "noTransitions",
           "pageSplitOption",
+          "pdfLayoutMode",
+          "pdfScrollMode",
+          "pdfSpreadMode",
+          "pdfTheme",
           "promptForDownloadSize",
           "readerMode",
           "readingDirection",
@@ -20804,6 +20846,44 @@
             "minLength": 1,
             "type": "string",
             "description": "UI Site Global Setting: The language locale that should be used for the user"
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfLayoutMode": {
+            "enum": [
+              0,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Layout Mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
           }
         },
         "additionalProperties": false

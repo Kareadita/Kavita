@@ -164,7 +164,9 @@ public static class IncludesExtensions
 
         if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
         {
-            query = query.Include(u => u.UserPreferences);
+            query = query
+                .Include(u => u.UserPreferences)
+                .ThenInclude(p => p.Theme);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))

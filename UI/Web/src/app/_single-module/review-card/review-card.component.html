@@ -3,10 +3,12 @@
     <div class="row g-0">
       <div class="col-md-2 d-none d-md-block">
         <i class="img-fluid rounded-start fa-solid fa-circle-user profile-image" aria-hidden="true"></i>
-        <div *ngIf="isMyReview" class="my-review">
-              <i class="fa-solid fa-star" aria-hidden="true" [title]="t('your-review')"></i>
-              <span class="visually-hidden">{{t('your-review')}}</span>
-        </div>
+        @if (isMyReview) {
+          <div class="my-review">
+            <i class="fa-solid fa-star" aria-hidden="true" [title]="t('your-review')"></i>
+            <span class="visually-hidden">{{t('your-review')}}</span>
+          </div>
+        }
       </div>
       <div class="col-md-10">
         <div class="card-body">
@@ -21,17 +23,19 @@
 
       <div class="card-footer bg-transparent text-muted">
         <div>
-          <ng-container *ngIf="isMyReview; else normalReview">
+          @if (isMyReview) {
             <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
             <img class="me-1" [ngSrc]="ScrobbleProvider.Kavita | providerImage" width="20" height="20" alt="">
             {{review.username}}
-          </ng-container>
-          <ng-template #normalReview>
+          } @else {
             <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
-          </ng-template>
+          }
+
           {{(isMyReview ? '' : review.username | defaultValue:'')}}
         </div>
-        <span class="review-score" *ngIf="review.isExternal">{{t('rating-percentage', {r: review.score})}}</span>
+        @if (review.isExternal){
+          <span class="review-score">{{t('rating-percentage', {r: review.score})}}</span>
+        }
       </div>
     </div>
   </div>

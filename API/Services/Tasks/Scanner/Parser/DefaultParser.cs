@@ -115,13 +115,21 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         {
             info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
         }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+        {
+            info.IsSpecial = true;
+            info.Chapters = Parser.DefaultChapter;
+            info.Volumes = Parser.SpecialVolume;
+        }
+
         if (!string.IsNullOrEmpty(info.ComicInfo.Number))
         {
             info.Chapters = info.ComicInfo.Number;
             if (info.IsSpecial && Parser.DefaultChapter != info.Chapters)
             {
                 info.IsSpecial = false;
-                info.Volumes = $"{Parser.SpecialVolumeNumber}";
+                info.Volumes = Parser.SpecialVolume;
             }
         }
 
@@ -130,6 +138,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         {
             info.SeriesSort = info.ComicInfo.TitleSort.Trim();
         }
+
     }
 
     public abstract bool IsApplicable(string filePath, LibraryType type);

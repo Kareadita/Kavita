@@ -152,4 +152,25 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public string Locale { get; set; }
+
+    /// <summary>
+    /// PDF Reader: Theme of the Reader
+    /// </summary>
+    [Required]
+    public PdfTheme PdfTheme { get; set; } = PdfTheme.Dark;
+    /// <summary>
+    /// PDF Reader: Scroll mode of the reader
+    /// </summary>
+    [Required]
+    public PdfScrollMode PdfScrollMode { get; set; } = PdfScrollMode.Vertical;
+    /// <summary>
+    /// PDF Reader: Layout Mode of the reader
+    /// </summary>
+    [Required]
+    public PdfLayoutMode PdfLayoutMode { get; set; } = PdfLayoutMode.Multiple;
+    /// <summary>
+    /// PDF Reader: Spread Mode of the reader
+    /// </summary>
+    [Required]
+    public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
 }

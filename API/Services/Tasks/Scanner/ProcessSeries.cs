@@ -701,7 +701,8 @@ public class ProcessSeries : IProcessSeries
         {
             if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
             {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else

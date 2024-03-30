@@ -7,6 +7,7 @@ import {FullProgress} from "../../_models/readers/full-progress";
 import {ReaderService} from "../../_services/reader.service";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 
 @Component({
   selector: 'app-edit-chapter-progress',
@@ -18,7 +19,8 @@ import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from
     TitleCasePipe,
     UtcToLocalTimePipe,
     TranslocoDirective,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    SentenceCasePipe
   ],
   templateUrl: './edit-chapter-progress.component.html',
   styleUrl: './edit-chapter-progress.component.scss',

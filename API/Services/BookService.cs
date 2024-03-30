@@ -382,7 +382,7 @@ public class BookService : IBookService
             }
         }
 
-        var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link");
+        var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link[@href]");
         if (styleNodes != null)
         {
             foreach (var styleLinks in styleNodes)
