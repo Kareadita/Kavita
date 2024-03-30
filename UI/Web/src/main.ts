@@ -28,12 +28,13 @@ import {provideTranslocoLocale} from "@ngneat/transloco-locale";
 import {provideTranslocoPersistTranslations} from "@ngneat/transloco-persist-translations";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
+import {distinctUntilChanged} from "rxjs/operators";
 
 const disableAnimations = !('animate' in document.documentElement);
 
 export function preloadUser(userService: AccountService, transloco: TranslocoService) {
   return function() {
-    return userService.currentUser$.pipe(switchMap((user) => {
+    return userService.currentUser$.pipe(distinctUntilChanged(), switchMap((user) => {
       if (user && user.preferences.locale) {
         transloco.setActiveLang(user.preferences.locale);
         return transloco.load(user.preferences.locale)
