@@ -174,16 +174,14 @@ public class CollectionController : BaseApiController
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
             if (user == null) return Unauthorized();
 
-            user.Collections = user.Collections.Where(c => c.Id != tagId).ToList();
-            _unitOfWork.UserRepository.Update(user);
-
-            if (await _unitOfWork.CommitAsync())
+            if (await _collectionService.DeleteTag(tagId, user))
             {
                 return Ok(await _localizationService.Translate(User.GetUserId(), "collection-deleted"));
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+
             await _unitOfWork.RollbackAsync();
         }
 

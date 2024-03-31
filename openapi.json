@@ -2387,7 +2387,7 @@
         "tags": [
           "Image"
         ],
-        "summary": "Returns cover image for Collection Tag",
+        "summary": "Returns cover image for Collection",
         "parameters": [
           {
             "name": "collectionTagId",
@@ -18551,6 +18551,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AppUserProgress"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserCollection"
             },
             "nullable": true
           },

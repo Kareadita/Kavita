@@ -11,12 +11,6 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "AppUserCollectionId",
-                table: "Series",
-                type: "INTEGER",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "AppUserCollection",
                 columns: table => new
@@ -50,41 +44,49 @@ namespace API.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Series_AppUserCollectionId",
-                table: "Series",
-                column: "AppUserCollectionId");
+            migrationBuilder.CreateTable(
+                name: "AppUserCollectionSeries",
+                columns: table => new
+                {
+                    CollectionsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ItemsId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUserCollectionSeries", x => new { x.CollectionsId, x.ItemsId });
+                    table.ForeignKey(
+                        name: "FK_AppUserCollectionSeries_AppUserCollection_CollectionsId",
+                        column: x => x.CollectionsId,
+                        principalTable: "AppUserCollection",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserCollectionSeries_Series_ItemsId",
+                        column: x => x.ItemsId,
+                        principalTable: "Series",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppUserCollection_AppUserId",
                 table: "AppUserCollection",
                 column: "AppUserId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Series_AppUserCollection_AppUserCollectionId",
-                table: "Series",
-                column: "AppUserCollectionId",
-                principalTable: "AppUserCollection",
-                principalColumn: "Id");
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserCollectionSeries_ItemsId",
+                table: "AppUserCollectionSeries",
+                column: "ItemsId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Series_AppUserCollection_AppUserCollectionId",
-                table: "Series");
+            migrationBuilder.DropTable(
+                name: "AppUserCollectionSeries");
 
             migrationBuilder.DropTable(
                 name: "AppUserCollection");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Series_AppUserCollectionId",
-                table: "Series");
-
-            migrationBuilder.DropColumn(
-                name: "AppUserCollectionId",
-                table: "Series");
         }
     }
 }

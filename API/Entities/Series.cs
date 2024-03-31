@@ -105,6 +105,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
 
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
     public ICollection<AppUserProgress> Progress { get; set; } = null!;
+    public ICollection<AppUserCollection> Collections { get; set; } = null!;
 
     /// <summary>
     /// Relations to other Series, like Sequels, Prequels, etc
@@ -112,6 +113,8 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <remarks>1 to Many relationship</remarks>
     public ICollection<SeriesRelation> Relations { get; set; } = null!;
     public ICollection<SeriesRelation> RelationOf { get; set; } = null!;
+
+
 
 
     // Relationships

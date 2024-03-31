@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240331133217_UserBasedCollections")]
+    [Migration("20240331172900_UserBasedCollections")]
     partial class UserBasedCollections
     {
         /// <inheritdoc />
@@ -1719,9 +1719,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserCollectionId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("AvgHoursToRead")
                         .HasColumnType("INTEGER");
 
@@ -1804,8 +1801,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserCollectionId");
 
                     b.HasIndex("LibraryId");
 
@@ -1984,6 +1979,21 @@ namespace API.Data.Migrations
                     b.HasIndex("SeriesId");
 
                     b.ToTable("Volume");
+                });
+
+            modelBuilder.Entity("AppUserCollectionSeries", b =>
+                {
+                    b.Property<int>("CollectionsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionsId", "ItemsId");
+
+                    b.HasIndex("ItemsId");
+
+                    b.ToTable("AppUserCollectionSeries");
                 });
 
             modelBuilder.Entity("AppUserLibrary", b =>
@@ -2685,10 +2695,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
-                    b.HasOne("API.Entities.AppUserCollection", null)
-                        .WithMany("Items")
-                        .HasForeignKey("AppUserCollectionId");
-
                     b.HasOne("API.Entities.Library", "Library")
                         .WithMany("Series")
                         .HasForeignKey("LibraryId")
@@ -2707,6 +2713,21 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("AppUserCollectionSeries", b =>
+                {
+                    b.HasOne("API.Entities.AppUserCollection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AppUserLibrary", b =>
@@ -2946,11 +2967,6 @@ namespace API.Data.Migrations
                     b.Navigation("UserRoles");
 
                     b.Navigation("WantToRead");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUserCollection", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("API.Entities.Chapter", b =>

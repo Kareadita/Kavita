@@ -18,6 +18,7 @@ public interface ICollectionTagService
 {
     Task<bool> TagExistsByName(string name);
     Task<bool> DeleteTag(CollectionTag tag);
+    Task<bool> DeleteTag(int tagId, AppUser user);
     Task<bool> UpdateTag(CollectionTagDto dto);
     Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
     Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
@@ -53,6 +54,17 @@ public class CollectionTagService : ICollectionTagService
     public async Task<bool> DeleteTag(CollectionTag tag)
     {
         _unitOfWork.CollectionTagRepository.Remove(tag);
+        return await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<bool> DeleteTag(int tagId, AppUser user)
+    {
+        var collectionTag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(tagId);
+        if (collectionTag == null) return true;
+        user.Collections.Remove(collectionTag);
+
+        if (!_unitOfWork.HasChanges()) return true;
+
         return await _unitOfWork.CommitAsync();
     }
 
