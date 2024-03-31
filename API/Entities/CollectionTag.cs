@@ -9,6 +9,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents a user entered field that is used as a tagging and grouping mechanism
 /// </summary>
+[Obsolete("Use AppUserCollection instead")]
 [Index(nameof(Id), nameof(Promoted), IsUnique = true)]
 public class CollectionTag
 {

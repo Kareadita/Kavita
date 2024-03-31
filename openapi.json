@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.10"
+    "version": "0.7.14.11"
   },
   "servers": [
     {
@@ -12927,6 +12927,14 @@
             "description": "Reading lists associated with this user",
             "nullable": true
           },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserCollection"
+            },
+            "description": "Collections associated with this user",
+            "nullable": true
+          },
           "wantToRead": {
             "type": "array",
             "items": {
@@ -13101,6 +13109,95 @@
         },
         "additionalProperties": false,
         "description": "Represents a saved page in a Chapter entity for a given user."
+      },
+      "AppUserCollection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedTitle": {
+            "type": "string",
+            "description": "A normalized string used to check if the collection already exists in the DB",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean",
+            "description": "Reading lists that are promoted are only done by admins"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "Path to the (managed) image file",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "The highest age rating from all Series within the collection",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Series"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a Collection of Series for a given User"
       },
       "AppUserDashboardStream": {
         "type": "object",

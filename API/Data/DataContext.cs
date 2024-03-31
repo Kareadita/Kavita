@@ -149,6 +149,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .WithOne(s => s.ExternalSeriesMetadata)
             .HasForeignKey<ExternalSeriesMetadata>(em => em.SeriesId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AppUserCollection>()
+            .Property(b => b.AgeRating)
+            .HasDefaultValue(AgeRating.Unknown);
     }
 
     #nullable enable
