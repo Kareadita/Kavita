@@ -19,6 +19,7 @@ public enum CollectionTagIncludes
 {
     None = 1,
     SeriesMetadata = 2,
+    SeriesMetadataWithSeries = 4
 }
 
 public interface ICollectionTagRepository

@@ -141,7 +141,7 @@ public interface ISeriesRepository
         MangaFormat format);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
-    Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
+    Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
     /// <summary>
     /// This is only used for <see cref="MigrateUserProgressLibraryId"/>
     /// </summary>
@@ -739,6 +739,7 @@ public class SeriesRepository : ISeriesRepository
             })
             .FirstOrDefaultAsync();
     }
+
 
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {
@@ -2072,18 +2073,20 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// Returns the highest Age Rating for a list of Series
+    /// Returns the highest Age Rating for a list of Series. Defaults to <see cref="AgeRating.Unknown"/>
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    public async Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
+    public async Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
     {
-        return await _context.Series
+        var ret = await _context.Series
             .Where(s => seriesIds.Contains(s.Id))
             .Include(s => s.Metadata)
             .Select(s => s.Metadata.AgeRating)
             .OrderBy(s => s)
             .LastOrDefaultAsync();
+        if (ret == null) return AgeRating.Unknown;
+        return ret;
     }
 
     /// <summary>

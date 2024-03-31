@@ -70,19 +70,19 @@
             <ng-template ngbNavContent>
 
               <div class="row g-0">
-                <div class="col-lg-8 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <label for="collections" class="form-label">{{t('collections-label')}}</label>
-                    <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
-                      <ng-template #badgeItem let-item let-position="idx">
-                        {{item.title}}
-                      </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
-                        {{item.title}}
-                      </ng-template>
-                    </app-typeahead>
-                  </div>
-                </div>
+<!--                <div class="col-lg-8 col-md-12 pe-2">-->
+<!--                  <div class="mb-3">-->
+<!--                    <label for="collections" class="form-label">{{t('collections-label')}}</label>-->
+<!--                    <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">-->
+<!--                      <ng-template #badgeItem let-item let-position="idx">-->
+<!--                        {{item.title}}-->
+<!--                      </ng-template>-->
+<!--                      <ng-template #optionItem let-item let-position="idx">-->
+<!--                        {{item.title}}-->
+<!--                      </ng-template>-->
+<!--                    </app-typeahead>-->
+<!--                  </div>-->
+<!--                </div>-->
                 <div class="col-lg-4 col-md-12">
                   <div class="mb-3" style="width: 100%">
                     <label for="release-year" class="form-label">{{t('release-year-label')}}</label>

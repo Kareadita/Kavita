@@ -19,6 +19,11 @@ public static class IncludesExtensions
             queryable = queryable.Include(c => c.SeriesMetadatas);
         }
 
+        if (includes.HasFlag(CollectionTagIncludes.SeriesMetadataWithSeries))
+        {
+            queryable = queryable.Include(c => c.SeriesMetadatas).ThenInclude(s => s.Series);
+        }
+
         return queryable.AsSplitQuery();
     }
 

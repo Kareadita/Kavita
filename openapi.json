@@ -13188,6 +13188,26 @@
             "type": "string",
             "format": "date-time"
           },
+          "lastSyncUtc": {
+            "type": "string",
+            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
+            "format": "int32"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
