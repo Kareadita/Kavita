@@ -31,11 +31,17 @@ import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco
 })
 export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
 
+  private readonly modal = inject(NgbActiveModal);
+  private readonly collectionService = inject(CollectionTagService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @Input({required: true}) title!: string;
   /**
    * Series Ids to add to Collection Tag
    */
   @Input() seriesIds: Array<number> = [];
+  @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
   /**
    * All existing collections sorted by recent use date
@@ -43,15 +49,6 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   lists: Array<CollectionTag> = [];
   loading: boolean = false;
   listForm: FormGroup = new FormGroup({});
-
-  collectionTitleTrackby = (index: number, item: CollectionTag) => `${item.title}`;
-
-
-  @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
-
-
-  constructor(private modal: NgbActiveModal, private collectionService: CollectionTagService,
-    private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 

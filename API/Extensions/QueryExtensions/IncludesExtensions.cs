@@ -27,6 +27,18 @@ public static class IncludesExtensions
         return queryable.AsSplitQuery();
     }
 
+    public static IQueryable<AppUserCollection> Includes(this IQueryable<AppUserCollection> queryable,
+        CollectionIncludes includes)
+    {
+        if (includes.HasFlag(CollectionIncludes.Series))
+        {
+            queryable = queryable.Include(c => c.Items);
+        }
+
+
+        return queryable.AsSplitQuery();
+    }
+
     public static IQueryable<Chapter> Includes(this IQueryable<Chapter> queryable,
         ChapterIncludes includes)
     {

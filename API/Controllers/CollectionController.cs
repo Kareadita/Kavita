@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -46,6 +47,7 @@ public class CollectionController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
+
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (isAdmin)
         {
@@ -53,6 +55,16 @@ public class CollectionController : BaseApiController
         }
 
         return Ok(await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id));
+    }
+
+    /// <summary>
+    /// Returns all Collection tags for a given User
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("v2")]
+    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetCollections()
+    {
+        return Ok(await _unitOfWork.CollectionTagRepository.GetTagsAsync(User.GetUserId(), true));
     }
 
     /// <summary>
@@ -159,11 +171,16 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId, CollectionTagIncludes.SeriesMetadata);
-            if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+            if (user == null) return Unauthorized();
 
-            if (await _collectionService.DeleteTag(tag))
+            user.Collections = user.Collections.Where(c => c.Id != tagId).ToList();
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
                 return Ok(await _localizationService.Translate(User.GetUserId(), "collection-deleted"));
+            }
         }
         catch (Exception)
         {

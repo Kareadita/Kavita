@@ -3,6 +3,7 @@ using System.Linq;
 using API.Data.Migrations;
 using API.DTOs;
 using API.DTOs.Account;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Device;
@@ -53,6 +54,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
         CreateMap<CollectionTag, CollectionTagDto>();
+        CreateMap<AppUserCollection, AppUserCollectionDto>();
         CreateMap<Person, PersonDto>();
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();

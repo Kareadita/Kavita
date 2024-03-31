@@ -13,7 +13,7 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {map, of} from 'rxjs';
 import {Observable} from 'rxjs/internal/Observable';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import {CollectionTag} from 'src/app/_models/collection-tag';
+import {CollectionTag, UserCollection} from 'src/app/_models/collection-tag';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Tag} from 'src/app/_models/tag';
 import {AccountService} from 'src/app/_services/account.service';
@@ -42,24 +42,29 @@ import {ToastrService} from "ngx-toastr";
 })
 export class AllCollectionsComponent implements OnInit {
 
-  isLoading: boolean = true;
-  collections: CollectionTag[] = [];
-  collectionTagActions: ActionItem<CollectionTag>[] = [];
-  jumpbarKeys: Array<JumpKey> = [];
-  trackByIdentity = (index: number, item: CollectionTag) => `${item.id}_${item.title}`;
-  isAdmin$: Observable<boolean> = of(false);
-
-
-  filterOpen: EventEmitter<boolean> = new EventEmitter();
   private readonly destroyRef = inject(DestroyRef);
   private readonly translocoService = inject(TranslocoService);
   private readonly toastr = inject(ToastrService);
+  private readonly collectionService = inject(CollectionTagService);
+  private readonly router = inject(Router);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly modalService = inject(NgbModal);
+  private readonly titleService = inject(Title);
+  private readonly jumpbarService = inject(JumpbarService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  public readonly imageService = inject(ImageService);
+  public readonly accountService = inject(AccountService);
 
-  constructor(private collectionService: CollectionTagService, private router: Router,
-    private actionFactoryService: ActionFactoryService, private modalService: NgbModal,
-    private titleService: Title, private jumpbarService: JumpbarService,
-    private readonly cdRef: ChangeDetectorRef, public imageService: ImageService,
-    public accountService: AccountService) {
+  isLoading: boolean = true;
+  collections: UserCollection[] = [];
+  collectionTagActions: ActionItem<CollectionTag>[] = [];
+  jumpbarKeys: Array<JumpKey> = [];
+  isAdmin$: Observable<boolean> = of(false);
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
+  trackByIdentity = (index: number, item: CollectionTag) => `${item.id}_${item.title}`;
+
+
+  constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - ' + this.translocoService.translate('all-collections.title'));
   }
@@ -82,7 +87,7 @@ export class AllCollectionsComponent implements OnInit {
   loadPage() {
     this.isLoading = true;
     this.cdRef.markForCheck();
-    this.collectionService.allTags().subscribe(tags => {
+    this.collectionService.allCollections().subscribe(tags => {
       this.collections = [...tags];
       this.isLoading = false;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(tags, (t: Tag) => t.title);

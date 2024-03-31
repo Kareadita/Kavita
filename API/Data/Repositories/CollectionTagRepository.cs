@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Enums;
@@ -22,6 +23,13 @@ public enum CollectionTagIncludes
     SeriesMetadataWithSeries = 4
 }
 
+[Flags]
+public enum CollectionIncludes
+{
+    None = 1,
+    Series = 2,
+}
+
 public interface ICollectionTagRepository
 {
     void Add(CollectionTag tag);
@@ -31,14 +39,24 @@ public interface ICollectionTagRepository
     Task<string?> GetCoverImageAsync(int collectionTagId);
     Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None);
+    Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None);
     void Update(CollectionTag tag);
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
+    /// <summary>
+    /// Returns all of the user's collections with the option of other user's promoted
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="includePromoted"></param>
+    /// <returns></returns>
+    Task<IEnumerable<AppUserCollectionDto>> GetTagsAsync(int userId, bool includePromoted = false);
 
     Task<IEnumerable<CollectionTag>> GetAllTagsByNamesAsync(IEnumerable<string> normalizedTitles,
         CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title);
+    Task<bool> TagExists(string title, int userId);
+
     Task<IList<CollectionTag>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IList<string>> GetRandomCoverImagesAsync(int collectionId);
 }
@@ -62,6 +80,7 @@ public class CollectionTagRepository : ICollectionTagRepository
     {
         _context.CollectionTag.Remove(tag);
     }
+
 
     public void Update(CollectionTag tag)
     {
@@ -91,6 +110,17 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<AppUserCollectionDto>> GetTagsAsync(int userId, bool includePromoted = false)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.AppUserCollection
+            .Where(uc => uc.AppUserId == userId || uc.Promoted)
+            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .OrderBy(uc => uc.Title)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<CollectionTag>> GetAllTagsByNamesAsync(IEnumerable<string> normalizedTitles, CollectionTagIncludes includes = CollectionTagIncludes.None)
     {
         return await _context.CollectionTag
@@ -102,7 +132,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<string?> GetCoverImageAsync(int collectionTagId)
     {
-        return await _context.CollectionTag
+        return await _context.AppUserCollection
             .Where(c => c.Id == collectionTagId)
             .Select(c => c.CoverImage)
             .SingleOrDefaultAsync();
@@ -116,10 +146,25 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync())!;
     }
 
+    [Obsolete("user TagExists with userId")]
     public async Task<bool> TagExists(string title)
     {
         var normalized = title.ToNormalized();
         return await _context.CollectionTag
+            .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
+    }
+
+    /// <summary>
+    /// If any tag exists for that given user's collections
+    /// </summary>
+    /// <param name="title"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<bool> TagExists(string title, int userId)
+    {
+        var normalized = title.ToNormalized();
+        return await _context.AppUserCollection
+            .Where(uc => uc.AppUserId == userId)
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
     }
 
@@ -172,6 +217,15 @@ public class CollectionTagRepository : ICollectionTagRepository
     public async Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None)
     {
         return await _context.CollectionTag
+            .Where(c => c.Id == tagId)
+            .Includes(includes)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None)
+    {
+        return await _context.AppUserCollection
             .Where(c => c.Id == tagId)
             .Includes(includes)
             .AsSplitQuery()

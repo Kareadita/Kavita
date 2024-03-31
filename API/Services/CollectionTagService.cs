@@ -56,6 +56,7 @@ public class CollectionTagService : ICollectionTagService
         return await _unitOfWork.CommitAsync();
     }
 
+
     public async Task<bool> UpdateTag(CollectionTagDto dto)
     {
         var existingTag = await _unitOfWork.CollectionTagRepository.GetTagAsync(dto.Id);

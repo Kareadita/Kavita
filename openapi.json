@@ -1368,6 +1368,45 @@
         }
       }
     },
+    "/api/Collection/v2": {
+      "get": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Returns all Collection tags for a given User",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Collection/search": {
       "get": {
         "tags": [
@@ -13218,6 +13257,78 @@
         },
         "additionalProperties": false,
         "description": "Represents a Collection of Series for a given User"
+      },
+      "AppUserCollectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean"
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "lastSyncUtc": {
+            "type": "string",
+            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
+            "format": "int32"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "AppUserDashboardStream": {
         "type": "object",
