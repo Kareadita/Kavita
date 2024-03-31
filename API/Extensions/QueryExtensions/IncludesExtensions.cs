@@ -206,6 +206,11 @@ public static class IncludesExtensions
             query = query.Include(u => u.ExternalSources);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.Collections))
+        {
+            query = query.Include(u => u.Collections);
+        }
+
         return query.AsSplitQuery();
     }
 

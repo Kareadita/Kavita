@@ -38,7 +38,8 @@ public enum AppUserIncludes
     SmartFilters = 1024,
     DashboardStreams = 2048,
     SideNavStreams = 4096,
-    ExternalSources = 8192 // 2^13
+    ExternalSources = 8192,
+    Collections = 16384 // 2^14
 }
 
 public interface IUserRepository
@@ -78,7 +79,7 @@ public interface IUserRepository
     Task<bool> HasAccessToSeries(int userId, int seriesId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByConfirmationToken(string token);
-    Task<AppUser> GetDefaultAdminUser();
+    Task<AppUser> GetDefaultAdminUser(AppUserIncludes includes = AppUserIncludes.None);
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
     Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId);
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
@@ -298,11 +299,13 @@ public class UserRepository : IUserRepository
     /// Returns the first admin account created
     /// </summary>
     /// <returns></returns>
-    public async Task<AppUser> GetDefaultAdminUser()
+    public async Task<AppUser> GetDefaultAdminUser(AppUserIncludes includes = AppUserIncludes.None)
     {
-        return (await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole))
+        return await _context.AppUser
+            .Includes(includes)
+            .Where(u => u.UserRoles.Any(r => r.Role.Name == PolicyConstants.AdminRole))
             .OrderBy(u => u.Created)
-            .First();
+            .FirstAsync();
     }
 
     public async Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId)
@@ -482,7 +485,7 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
-        return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
+        return (await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole)).OrderBy(u => u.CreatedUtc);
     }
 
     public async Task<bool> IsUserAdminAsync(AppUser? user)
