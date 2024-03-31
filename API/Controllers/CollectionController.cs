@@ -165,14 +165,13 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <param name="tagId"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpDelete]
     public async Task<ActionResult> DeleteTag(int tagId)
     {
         try
         {
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
-            if (user == null) return Unauthorized();
+            if (user == null || user.Collections.All(c => c.Id != tagId)) return Unauthorized();
 
             if (await _collectionService.DeleteTag(tagId, user))
             {
