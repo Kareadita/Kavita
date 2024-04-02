@@ -9,6 +9,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
@@ -454,7 +455,7 @@ public class OpdsController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
 
-        var tags = await _unitOfWork.CollectionTagRepository.GetTagsAsync(User.GetUserId(), true);
+        var tags = await _unitOfWork.CollectionTagRepository.GetTagsAsync(user.Id, true);
 
         var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);
@@ -490,20 +491,9 @@ public class OpdsController : BaseApiController
         var (baseUrl, prefix) = await GetPrefix();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        IEnumerable <CollectionTagDto> tags;
-        if (isAdmin)
-        {
-            tags = await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
-        }
-        else
-        {
-            tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId);
-        }
-
-        var tag = tags.SingleOrDefault(t => t.Id == collectionId);
-        if (tag == null)
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionId);
+        if (tag == null || (tag.AppUserId != user.Id && !tag.Promoted))
         {
             return BadRequest("Collection does not exist or you don't have access");
         }

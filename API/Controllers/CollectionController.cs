@@ -13,6 +13,7 @@ using API.Services.Plus;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -27,15 +28,18 @@ public class CollectionController : BaseApiController
     private readonly ICollectionTagService _collectionService;
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
+    private readonly ILogger<CollectionController> _logger;
 
     /// <inheritdoc />
     public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
-        ILocalizationService localizationService, IExternalMetadataService externalMetadataService)
+        ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
+        ILogger<CollectionController> logger)
     {
         _unitOfWork = unitOfWork;
         _collectionService = collectionService;
         _localizationService = localizationService;
         _externalMetadataService = externalMetadataService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -46,6 +50,7 @@ public class CollectionController : BaseApiController
     [Obsolete("Use v2")]
     public async Task<ActionResult<IEnumerable<CollectionTagDto>>> GetAllTags()
     {
+        _logger.LogError("This API is deprecated, use v2");
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
