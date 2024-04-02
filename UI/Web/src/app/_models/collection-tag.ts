@@ -24,6 +24,7 @@ export interface UserCollection {
   coverImageLocked: boolean;
   summary: string;
   lastSyncUtc: string;
+  owner: string;
   source: ScrobbleProvider;
   sourceUrl: string | null;
   ageRating: AgeRating;

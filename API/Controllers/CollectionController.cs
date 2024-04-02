@@ -43,6 +43,7 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet]
+    [Obsolete("Use v2")]
     public async Task<ActionResult<IEnumerable<CollectionTagDto>>> GetAllTags()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
@@ -75,11 +76,11 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> SearchTags(string? queryString)
+    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> SearchTags(string? queryString)
     {
         queryString ??= string.Empty;
         queryString = queryString.Replace(@"%", string.Empty);
-        if (queryString.Length == 0) return await GetAllTags();
+        if (queryString.Length == 0) return await GetCollections();
 
         return Ok(await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId()));
     }
@@ -161,7 +162,7 @@ public class CollectionController : BaseApiController
     }
 
     /// <summary>
-    /// Removes the collection tag from all Series it was attached to
+    /// Removes the collection tag from the user
     /// </summary>
     /// <param name="tagId"></param>
     /// <returns></returns>

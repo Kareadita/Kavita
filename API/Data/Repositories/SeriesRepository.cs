@@ -7,6 +7,7 @@ using API.Constants;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
@@ -362,12 +363,9 @@ public class SeriesRepository : ISeriesRepository
             .ToList();
 
         result.Libraries = await _context.Library
-            .Where(l => libraryIds.Contains(l.Id))
-            .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
-            .IsRestricted(QueryContext.Search)
-            .AsSplitQuery()
-            .OrderBy(l => l.Name.ToLower())
+            .Search(searchQuery, userId, libraryIds)
             .Take(maxRecords)
+            .OrderBy(l => l.Name.ToLower())
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -419,53 +417,33 @@ public class SeriesRepository : ISeriesRepository
 
 
         result.ReadingLists = await _context.ReadingList
-            .Where(rl => rl.AppUserId == userId || rl.Promoted)
-            .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
-            .RestrictAgainstAgeRestriction(userRating)
-            .AsSplitQuery()
-            .OrderBy(r => r.NormalizedTitle)
+            .Search(searchQuery, userId, userRating)
             .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Collections =  await _context.CollectionTag
-            .Where(c => (EF.Functions.Like(c.Title, $"%{searchQuery}%"))
-                                    || (EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%")))
-            .Where(c => c.Promoted || isAdmin)
-            .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle)
-            .AsSplitQuery()
+        result.Collections =  await _context.AppUserCollection
+            .Search(searchQuery, userId, userRating)
             .Take(maxRecords)
             .OrderBy(c => c.NormalizedTitle)
-            .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Persons = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(p => p.NormalizedName)
+            .SearchPeople(searchQuery, seriesIds)
             .Take(maxRecords)
+            .OrderBy(t => t.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Genres = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(t => t.NormalizedTitle)
+            .SearchGenres(searchQuery, seriesIds)
             .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Tags = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(t => t.NormalizedTitle)
+            .SearchTags(searchQuery, seriesIds)
             .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -1269,24 +1247,16 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams)
     {
-        var userLibraries = _context.Library
-            .Include(l => l.AppUsers)
-            .Where(library => library.AppUsers.Any(user => user.Id == userId))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(library => library.Id)
-            .ToList();
+        var userLibraries = _context.Library.GetUserLibraries(userId);
 
-        var query =  _context.CollectionTag
+        var query =  _context.AppUserCollection
             .Where(s => s.Id == collectionId)
-            .Include(c => c.SeriesMetadatas)
-            .ThenInclude(m => m.Series)
-            .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
+            .Include(c => c.Items)
+            .SelectMany(c => c.Items.Where(s => userLibraries.Contains(s.LibraryId)))
             .OrderBy(s => s.LibraryId)
             .ThenBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsSplitQuery()
-            .AsNoTracking();
+            .AsSplitQuery();
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }

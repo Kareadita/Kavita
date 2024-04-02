@@ -40,6 +40,7 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 
 @Component({
     selector: 'app-nav-header',
@@ -47,7 +48,9 @@ import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-resu
     styleUrls: ['./nav-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective]
+  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
+    SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
+    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective]
 })
 export class NavHeaderComponent implements OnInit {
 
@@ -267,4 +270,5 @@ export class NavHeaderComponent implements OnInit {
   }
 
 
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

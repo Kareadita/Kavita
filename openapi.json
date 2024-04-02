@@ -1343,13 +1343,14 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "delete": {
         "tags": [
           "Collection"
         ],
-        "summary": "Removes the collection tag from all Series it was attached to",
+        "summary": "Removes the collection tag from the user",
         "parameters": [
           {
             "name": "tagId",
@@ -1431,7 +1432,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1439,7 +1440,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1447,7 +1448,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               }
@@ -12481,6 +12482,7 @@
           "WantToRead"
         ],
         "summary": "Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)",
+        "description": "This will be removed in v0.8.x",
         "parameters": [
           {
             "name": "PageNumber",
@@ -18312,7 +18314,7 @@
           "collections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
+              "$ref": "#/components/schemas/AppUserCollectionDto"
             },
             "nullable": true
           },

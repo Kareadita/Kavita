@@ -181,6 +181,7 @@
 
     /* Rating star */
     --ratingstar-color: white;
+    --rating-star-color: var(--primary-color);
     --ratingstar-star-empty: #b0c4de;
     --ratingstar-star-filled: var(--primary-color);
 
@@ -256,9 +257,6 @@
     --review-card-star-color: gold;
     --review-spoiler-bg-color: var(--primary-color);
     --review-spoiler-text-color: var(--body-text-color);
-
-    /** Rating Star Color **/
-    --rating-star-color: var(--primary-color);
 
     /** Badge **/
     --badge-text-color: var(--bs-badge-color);

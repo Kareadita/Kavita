@@ -74,11 +74,22 @@
                     <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                   </div>
                   <div class="ms-1">
-                    <span>{{item.title}}</span>
-                    <span *ngIf="item.promoted">
-                    &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
-                    <span class="visually-hidden">{{t('promoted')}}</span>
-                  </span>
+                    <div>
+                      <span>{{item.title}}</span>
+                      @if(item.promoted) {
+                        <span>
+                      <i class="fa fa-angle-double-up ms-1" aria-hidden="true" title="Promoted"></i>
+                      <span class="visually-hidden">{{t('promoted')}}</span>
+                    </span>
+                      }
+                    </div>
+<!--                    <div>-->
+<!--                      @if (item.promoted && item.source === ScrobbleProvider.Kavita) {-->
+<!--                        {{item.owner}}-->
+<!--                      } @else {-->
+<!--                        {{item.source}}-->
+<!--                      }-->
+<!--                    </div>-->
                   </div>
                 </div>
               </ng-template>

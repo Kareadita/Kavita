@@ -25,7 +25,7 @@ export class CollectionTagService {
   }
 
   search(query: string) {
-    return this.httpClient.get<CollectionTag[]>(this.baseUrl + 'collection/search?queryString=' + encodeURIComponent(query)).pipe(map(tags => {
+    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection/search?queryString=' + encodeURIComponent(query)).pipe(map(tags => {
       tags.forEach(s => s.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(s.id)));
       return tags;
     }));

@@ -9,6 +9,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Extensions.QueryExtensions.Filtering;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,7 @@ public interface ICollectionTagRepository
     void Add(CollectionTag tag);
     void Remove(CollectionTag tag);
     Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync();
-    Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId);
+    Task<IEnumerable<AppUserCollectionDto>> SearchTagDtosAsync(string searchQuery, int userId);
     Task<string?> GetCoverImageAsync(int collectionTagId);
     Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None);
@@ -245,16 +246,12 @@ public class CollectionTagRepository : ICollectionTagRepository
             .SingleAsync();
     }
 
-    public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId)
+    public async Task<IEnumerable<AppUserCollectionDto>> SearchTagDtosAsync(string searchQuery, int userId)
     {
         var userRating = await GetUserAgeRestriction(userId);
-        return await _context.CollectionTag
-            .Where(s => EF.Functions.Like(s.Title!, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.NormalizedTitle!, $"%{searchQuery}%"))
-            .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle)
-            .AsNoTracking()
-            .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+        return await _context.AppUserCollection
+            .Search(searchQuery, userId, userRating)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 }

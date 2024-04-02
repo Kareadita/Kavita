@@ -450,15 +450,13 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
+
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        var tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
-            : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
+        var tags = await _unitOfWork.CollectionTagRepository.GetTagsAsync(User.GetUserId(), true);
 
-
+        var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
 
@@ -467,12 +465,15 @@ public class OpdsController : BaseApiController
             Id = tag.Id.ToString(),
             Title = tag.Title,
             Summary = tag.Summary,
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}")
-            }
+            Links =
+            [
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    $"{prefix}{apiKey}/collections/{tag.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}")
+            ]
         }));
 
         return CreateXmlResult(SerializeXml(feed));
