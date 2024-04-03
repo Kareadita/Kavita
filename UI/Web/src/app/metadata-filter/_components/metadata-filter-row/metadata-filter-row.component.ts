@@ -287,7 +287,7 @@ export class MetadataFilterRowComponent implements OnInit {
             return {value: status.id, label: status.title}
           })));
         case FilterField.CollectionTags:
-          return this.collectionTagService.allTags().pipe(map(statuses => statuses.map(status => {
+          return this.collectionTagService.allCollections().pipe(map(statuses => statuses.map(status => {
             return {value: status.id, label: status.title}
           })));
         case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);

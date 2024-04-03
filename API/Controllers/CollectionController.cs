@@ -43,35 +43,15 @@ public class CollectionController : BaseApiController
     }
 
     /// <summary>
-    /// Return a list of all collection tags on the server for the logged in user.
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    [Obsolete("Use v2")]
-    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> GetAllTags()
-    {
-        _logger.LogError("This API is deprecated, use v2");
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
-
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        if (isAdmin)
-        {
-            return Ok(await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync());
-        }
-
-        return Ok(await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id));
-    }
-
-    /// <summary>
     /// Returns all Collection tags for a given User
     /// </summary>
     /// <returns></returns>
-    [HttpGet("v2")]
-    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetCollections()
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.GetTagsAsync(User.GetUserId(), true));
+        return Ok(await _unitOfWork.CollectionTagRepository.GetTagsAsync(User.GetUserId(), !ownedOnly));
     }
+
 
     /// <summary>
     /// Searches against the collection tags on the DB and returns matches that meet the search criteria.
@@ -79,16 +59,16 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <param name="queryString">Search term</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> SearchTags(string? queryString)
-    {
-        queryString ??= string.Empty;
-        queryString = queryString.Replace(@"%", string.Empty);
-        if (queryString.Length == 0) return await GetCollections();
-
-        return Ok(await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId()));
-    }
+    // [Authorize(Policy = "RequireAdminRole")]
+    // [HttpGet("search")]
+    // public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> SearchTags(string? queryString)
+    // {
+    //     queryString ??= string.Empty;
+    //     queryString = queryString.Replace(@"%", string.Empty);
+    //     if (queryString.Length == 0) return await GetCollections();
+    //
+    //     return Ok(await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId()));
+    // }
 
     /// <summary>
     /// Checks if a collection exists with the name
@@ -110,11 +90,14 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateTag(CollectionTagDto updatedTag)
+    public async Task<ActionResult> UpdateTag(AppUserCollectionDto updatedTag)
     {
         try
         {
-            if (await _collectionService.UpdateTag(updatedTag)) return Ok(await _localizationService.Translate(User.GetUserId(), "collection-updated-successfully"));
+            if (await _collectionService.UpdateTag(updatedTag, User.GetUserId()))
+            {
+                return Ok(await _localizationService.Translate(User.GetUserId(), "collection-updated-successfully"));
+            }
         }
         catch (KavitaException ex)
         {

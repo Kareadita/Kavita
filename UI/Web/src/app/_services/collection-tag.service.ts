@@ -16,12 +16,8 @@ export class CollectionTagService {
 
   constructor(private httpClient: HttpClient, private imageService: ImageService) { }
 
-  allTags(kavitaOwnedOnly = false) {
-    return this.httpClient.get<CollectionTag[]>(this.baseUrl + 'collection?kavitaOwnedOnly=' + kavitaOwnedOnly);
-  }
-
-  allCollections() {
-    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection/v2');
+  allCollections(ownedOnly = false) {
+    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
   }
 
   search(query: string) {
@@ -31,7 +27,7 @@ export class CollectionTagService {
     }));
   }
 
-  updateTag(tag: CollectionTag) {
+  updateTag(tag: UserCollection) {
     return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
   }
 

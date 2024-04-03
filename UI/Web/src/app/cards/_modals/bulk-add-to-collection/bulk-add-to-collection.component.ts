@@ -13,7 +13,7 @@ import {
 import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { CollectionTag } from 'src/app/_models/collection-tag';
+import {CollectionTag, UserCollection} from 'src/app/_models/collection-tag';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
@@ -46,7 +46,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   /**
    * All existing collections sorted by recent use date
    */
-  lists: Array<CollectionTag> = [];
+  lists: Array<UserCollection> = [];
   loading: boolean = false;
   listForm: FormGroup = new FormGroup({});
 
@@ -57,7 +57,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
 
     this.loading = true;
     this.cdRef.markForCheck();
-    this.collectionService.allTags().subscribe(tags => {
+    this.collectionService.allCollections(true).subscribe(tags => {
       this.lists = tags;
       this.loading = false;
       this.cdRef.markForCheck();

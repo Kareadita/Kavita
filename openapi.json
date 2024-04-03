@@ -1312,7 +1312,17 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Return a list of all collection tags on the server for the logged in user.",
+        "summary": "Returns all Collection tags for a given User",
+        "parameters": [
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -1321,7 +1331,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1329,7 +1339,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1337,14 +1347,13 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               }
             }
           }
-        },
-        "deprecated": true
+        }
       },
       "delete": {
         "tags": [
@@ -1365,94 +1374,6 @@
         "responses": {
           "200": {
             "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Collection/v2": {
-      "get": {
-        "tags": [
-          "Collection"
-        ],
-        "summary": "Returns all Collection tags for a given User",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Collection/search": {
-      "get": {
-        "tags": [
-          "Collection"
-        ],
-        "summary": "Searches against the collection tags on the DB and returns matches that meet the search criteria.\r\n<remarks>Search strings will be cleaned of certain fields, like %</remarks>",
-        "parameters": [
-          {
-            "name": "queryString",
-            "in": "query",
-            "description": "Search term",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -1508,17 +1429,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             }
           }

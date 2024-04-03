@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Metadata;
+using API.Extensions;
 using API.Helpers.Builders;
 using API.SignalR;
 using Kavita.Common;
@@ -19,7 +21,7 @@ public interface ICollectionTagService
     Task<bool> TagExistsByName(string name);
     Task<bool> DeleteTag(CollectionTag tag);
     Task<bool> DeleteTag(int tagId, AppUser user);
-    Task<bool> UpdateTag(CollectionTagDto dto);
+    Task<bool> UpdateTag(AppUserCollectionDto dto, int userId);
     Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
     Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
     Task<CollectionTag> GetTagOrCreate(int tagId, string title);
@@ -69,19 +71,21 @@ public class CollectionTagService : ICollectionTagService
     }
 
 
-    public async Task<bool> UpdateTag(CollectionTagDto dto)
+    public async Task<bool> UpdateTag(AppUserCollectionDto dto, int userId)
     {
-        var existingTag = await _unitOfWork.CollectionTagRepository.GetTagAsync(dto.Id);
+        var existingTag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(dto.Id);
         if (existingTag == null) throw new KavitaException("collection-doesnt-exist");
 
         var title = dto.Title.Trim();
         if (string.IsNullOrEmpty(title)) throw new KavitaException("collection-tag-title-required");
-        if (!title.Equals(existingTag.Title) && await TagExistsByName(dto.Title))
+
+        // Ensure the title doesn't exist on the user's account already
+        if (!title.Equals(existingTag.Title) && await _unitOfWork.CollectionTagRepository.TagExists(dto.Title, userId))
             throw new KavitaException("collection-tag-duplicate");
 
-        existingTag.SeriesMetadatas ??= new List<SeriesMetadata>();
+        existingTag.Items ??= new List<Series>();
         existingTag.Title = title;
-        existingTag.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(dto.Title);
+        existingTag.NormalizedTitle = dto.Title.ToNormalized();
         existingTag.Promoted = dto.Promoted;
         existingTag.CoverImageLocked = dto.CoverImageLocked;
         _unitOfWork.CollectionTagRepository.Update(existingTag);

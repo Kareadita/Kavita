@@ -42,6 +42,7 @@ public interface ICollectionTagRepository
     Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None);
     void Update(CollectionTag tag);
+    void Update(AppUserCollection tag);
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
     /// <summary>
@@ -82,8 +83,12 @@ public class CollectionTagRepository : ICollectionTagRepository
         _context.CollectionTag.Remove(tag);
     }
 
-
     public void Update(CollectionTag tag)
+    {
+        _context.Entry(tag).State = EntityState.Modified;
+    }
+
+    public void Update(AppUserCollection tag)
     {
         _context.Entry(tag).State = EntityState.Modified;
     }
