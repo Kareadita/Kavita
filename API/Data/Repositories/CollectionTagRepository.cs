@@ -112,11 +112,12 @@ public class CollectionTagRepository : ICollectionTagRepository
     /// </summary>
     public async Task<int> RemoveTagsWithoutSeries()
     {
-        var tagsToDelete = await _context.CollectionTag
-            .Include(c => c.SeriesMetadatas)
-            .Where(c => c.SeriesMetadatas.Count == 0)
+        var tagsToDelete = await _context.AppUserCollection
+            .Include(c => c.Items)
+            .Where(c => c.Items.Count == 0)
             .AsSplitQuery()
             .ToListAsync();
+
         _context.RemoveRange(tagsToDelete);
 
         return await _context.SaveChangesAsync();

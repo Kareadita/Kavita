@@ -167,10 +167,7 @@ public class CollectionTagService : ICollectionTagService
 
 
         tag.Items ??= new List<Series>();
-        foreach (var seriesIdToRemove in seriesIds)
-        {
-            tag.Items.Remove(tag.Items.Single(sm => sm.Id == seriesIdToRemove));
-        }
+        tag.Items = tag.Items.Where(s => !seriesIds.Contains(s.Id)).ToList();
 
 
         if (tag.Items.Count == 0)

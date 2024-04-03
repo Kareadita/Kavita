@@ -77,18 +77,18 @@
                     <div>
                       <!-- TODO: Create a Search Item component for Collection -->
                       <span>{{item.title}}</span>
-                      @if(item.promoted) {
-                        <span>
-                      <i class="fa fa-angle-double-up ms-1" aria-hidden="true" title="Promoted"></i>
-                      <span class="visually-hidden">{{t('promoted')}}</span>
-                    </span>
-                      }
+                        @if(item.promoted) {
+                          <span>
+                            <i class="fa fa-angle-double-up ms-1" aria-hidden="true" title="Promoted"></i>
+                            <span class="visually-hidden">{{t('promoted')}}</span>
+                          </span>
+                        }
                     </div>
-                    <div>
+                    <div class="row g-0 fw-light">
                       @if(item.owner !== user.username) {
-                        <div class="col-auto">Owner: <span class="fw-light">{{item.owner}}</span></div>
+                        Created by: {{item.owner}}
                         @if(item.source !== ScrobbleProvider.Kavita) {
-                          <div class="col-auto">Provider: <span class="fw-light">{{item.source | providerImage}} {{item.source | providerName}}</span></div>
+                          via <span class="fw-light">{{item.source | providerImage}} {{item.source | providerName}}</span>
                         }
                       }
                     </div>

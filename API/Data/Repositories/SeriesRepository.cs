@@ -1094,29 +1094,27 @@ public class SeriesRepository : ISeriesRepository
             .Distinct()
             .ToListAsync();
 
-        if (collectionStmt.Comparison == FilterComparison.MustContains)
+        if (collectionStmt.Comparison != FilterComparison.MustContains)
+            return query.HasCollectionTags(true, collectionStmt.Comparison, value, collectionSeries);
+
+        var collectionSeriesTasks = value.Select(async collectionId =>
         {
-            var collectionSeriesTasks = value.Select(async collectionId =>
-            {
-                return await _context.AppUserCollection
-                    .Where(uc => uc.Promoted || uc.AppUserId == userId)
-                    .Where(uc => uc.Id == collectionId)
-                    .SelectMany(uc => uc.Items)
-                    .RestrictAgainstAgeRestriction(userRating)
-                    .Select(s => s.Id)
-                    .ToListAsync();
-            });
+            return await _context.AppUserCollection
+                .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                .Where(uc => uc.Id == collectionId)
+                .SelectMany(uc => uc.Items)
+                .RestrictAgainstAgeRestriction(userRating)
+                .Select(s => s.Id)
+                .ToListAsync();
+        });
 
-            var collectionSeriesLists = await Task.WhenAll(collectionSeriesTasks);
+        var collectionSeriesLists = await Task.WhenAll(collectionSeriesTasks);
 
-            // Find the common series among all collections
-            var commonSeries = collectionSeriesLists.Aggregate((common, next) => common.Intersect(next).ToList());
+        // Find the common series among all collections
+        var commonSeries = collectionSeriesLists.Aggregate((common, next) => common.Intersect(next).ToList());
 
-            // Filter the original query based on the common series
-            return query.Where(s => commonSeries.Contains(s.Id));
-        }
-
-        return query.HasCollectionTags(true, collectionStmt.Comparison, value, collectionSeries);
+        // Filter the original query based on the common series
+        return query.Where(s => commonSeries.Contains(s.Id));
     }
 
     private IQueryable<Series> ApplyWantToReadFilter(FilterV2Dto filter, IQueryable<Series> query, int userId)
