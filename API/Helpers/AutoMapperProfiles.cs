@@ -54,7 +54,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
         CreateMap<CollectionTag, CollectionTagDto>();
-        CreateMap<AppUserCollection, AppUserCollectionDto>();
+        CreateMap<AppUserCollection, AppUserCollectionDto>()
+            .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName));
         CreateMap<Person, PersonDto>();
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();

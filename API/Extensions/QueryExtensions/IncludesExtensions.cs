@@ -225,7 +225,8 @@ public static class IncludesExtensions
 
         if (includeFlags.HasFlag(AppUserIncludes.Collections))
         {
-            query = query.Include(u => u.Collections);
+            query = query.Include(u => u.Collections)
+                .ThenInclude(c => c.Items);
         }
 
         return query.AsSplitQuery();

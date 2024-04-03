@@ -115,12 +115,12 @@ public class SeriesService : ISeriesService
             if (series == null) return false;
 
             series.Metadata ??= new SeriesMetadataBuilder()
-                .WithCollectionTags(updateSeriesMetadataDto.CollectionTags.Select(dto =>
-                    new CollectionTagBuilder(dto.Title)
-                        .WithId(dto.Id)
-                        .WithSummary(dto.Summary)
-                        .WithIsPromoted(dto.Promoted)
-                        .Build()).ToList())
+                // .WithCollectionTags(updateSeriesMetadataDto.CollectionTags.Select(dto =>
+                //     new AppUserCollectionBuilder(dto.Title)
+                //         .WithId(dto.Id)
+                //         .WithSummary(dto.Summary)
+                //         .WithIsPromoted(dto.Promoted)
+                //         .Build()).ToList())
                 .Build();
 
             if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
@@ -344,37 +344,37 @@ public class SeriesService : ISeriesService
         // TODO: Move UpdateCollectionsList to a helper so we can easily test
         if (tags == null) return;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.CollectionTags.ToList();
-        foreach (var existing in existingTags)
-        {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-            {
-                // Remove tag
-                series.Metadata.CollectionTags.Remove(existing);
-            }
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tag in tags)
-        {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
-            if (existingTag != null)
-            {
-                if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
-                {
-                    handleAdd(existingTag);
-                }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(new CollectionTagBuilder(tag.Title)
-                    .WithId(tag.Id)
-                    .WithSummary(tag.Summary)
-                    .WithIsPromoted(tag.Promoted)
-                    .Build());
-            }
-        }
+        // var existingTags = series.Metadata.CollectionTags.ToList();
+        // foreach (var existing in existingTags)
+        // {
+        //     if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+        //     {
+        //         // Remove tag
+        //         series.Metadata.CollectionTags.Remove(existing);
+        //     }
+        // }
+        //
+        // // At this point, all tags that aren't in dto have been removed.
+        // foreach (var tag in tags)
+        // {
+        //     var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
+        //     if (existingTag != null)
+        //     {
+        //         if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
+        //         {
+        //             handleAdd(existingTag);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         // Add new tag
+        //         handleAdd(new AppUserCollectionBuilder(tag.Title)
+        //             .WithId(tag.Id)
+        //             .WithSummary(tag.Summary)
+        //             .WithIsPromoted(tag.Promoted)
+        //             .Build());
+        //     }
+        // }
     }
 
     /// <summary>

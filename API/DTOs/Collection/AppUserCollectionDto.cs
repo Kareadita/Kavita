@@ -22,7 +22,7 @@ public class AppUserCollectionDto
     /// <summary>
     /// Owner of the Collection
     /// </summary>
-    // public string? Owner { get; set; }
+    public string? Owner { get; set; }
 
     /// <summary>
     /// Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)

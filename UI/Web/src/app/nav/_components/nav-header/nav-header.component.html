@@ -75,6 +75,7 @@
                   </div>
                   <div class="ms-1">
                     <div>
+                      <!-- TODO: Create a Search Item component for Collection -->
                       <span>{{item.title}}</span>
                       @if(item.promoted) {
                         <span>
@@ -83,13 +84,14 @@
                     </span>
                       }
                     </div>
-<!--                    <div>-->
-<!--                      @if (item.promoted && item.source === ScrobbleProvider.Kavita) {-->
-<!--                        {{item.owner}}-->
-<!--                      } @else {-->
-<!--                        {{item.source}}-->
-<!--                      }-->
-<!--                    </div>-->
+                    <div>
+                      @if(item.owner !== user.username) {
+                        <div class="col-auto">Owner: <span class="fw-light">{{item.owner}}</span></div>
+                        @if(item.source !== ScrobbleProvider.Kavita) {
+                          <div class="col-auto">Provider: <span class="fw-light">{{item.source | providerImage}} {{item.source | providerName}}</span></div>
+                        }
+                      }
+                    </div>
                   </div>
                 </div>
               </ng-template>

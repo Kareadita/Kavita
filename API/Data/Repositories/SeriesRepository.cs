@@ -343,10 +343,7 @@ public class SeriesRepository : ISeriesRepository
             return await _context.Library.GetUserLibraries(userId, queryContext).ToListAsync();
         }
 
-        return new List<int>()
-        {
-            libraryId
-        };
+        return [libraryId];
     }
 
     public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery)
@@ -947,6 +944,20 @@ public class SeriesRepository : ISeriesRepository
             out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter,
             out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
+        IList<int> collectionSeries = [];
+        if (hasCollectionTagFilter)
+        {
+            collectionSeries = await _context.AppUserCollection
+                .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                .Where(uc => filter.CollectionTags.Contains(uc.Id))
+                .SelectMany(uc => uc.Items)
+                .RestrictAgainstAgeRestriction(userRating)
+                .Select(s => s.Id)
+                .Distinct()
+                .ToListAsync();
+        }
+
+
         var query = _context.Series
             .AsNoTracking()
             // This new style can handle any filterComparision coming from the user
@@ -958,7 +969,7 @@ public class SeriesRepository : ISeriesRepository
             .HasAgeRating(hasAgeRating, FilterComparison.Contains, filter.AgeRating)
             .HasPublicationStatus(hasPublicationFilter, FilterComparison.Contains, filter.PublicationStatus)
             .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
-            .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags)
+            .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags, collectionSeries)
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
@@ -1024,6 +1035,8 @@ public class SeriesRepository : ISeriesRepository
             .Select(u => u.CollapseSeriesRelationships)
             .SingleOrDefaultAsync();
 
+
+
         query ??= _context.Series
             .AsNoTracking();
 
@@ -1041,6 +1054,9 @@ public class SeriesRepository : ISeriesRepository
         query = ApplyWantToReadFilter(filter, query, userId);
 
 
+        query = await ApplyCollectionFilter(filter, query, userId, userRating);
+
+
         query = BuildFilterQuery(userId, filter, query);
 
 
@@ -1055,6 +1071,52 @@ public class SeriesRepository : ISeriesRepository
         return ApplyLimit(query
             .Sort(userId, filter.SortOptions)
             .AsSplitQuery(), filter.LimitTo);
+    }
+
+    private async Task<IQueryable<Series>> ApplyCollectionFilter(FilterV2Dto filter, IQueryable<Series> query, int userId, AgeRestriction userRating)
+    {
+        var collectionStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == FilterField.CollectionTags);
+        if (collectionStmt == null) return query;
+
+        var value = (IList<int>) FilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
+
+        if (value.Count == 0)
+        {
+            return query;
+        }
+
+        var collectionSeries = await _context.AppUserCollection
+            .Where(uc => uc.Promoted || uc.AppUserId == userId)
+            .Where(uc => value.Contains(uc.Id))
+            .SelectMany(uc => uc.Items)
+            .RestrictAgainstAgeRestriction(userRating)
+            .Select(s => s.Id)
+            .Distinct()
+            .ToListAsync();
+
+        if (collectionStmt.Comparison == FilterComparison.MustContains)
+        {
+            var collectionSeriesTasks = value.Select(async collectionId =>
+            {
+                return await _context.AppUserCollection
+                    .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                    .Where(uc => uc.Id == collectionId)
+                    .SelectMany(uc => uc.Items)
+                    .RestrictAgainstAgeRestriction(userRating)
+                    .Select(s => s.Id)
+                    .ToListAsync();
+            });
+
+            var collectionSeriesLists = await Task.WhenAll(collectionSeriesTasks);
+
+            // Find the common series among all collections
+            var commonSeries = collectionSeriesLists.Aggregate((common, next) => common.Intersect(next).ToList());
+
+            // Filter the original query based on the common series
+            return query.Where(s => commonSeries.Contains(s.Id));
+        }
+
+        return query.HasCollectionTags(true, collectionStmt.Comparison, value, collectionSeries);
     }
 
     private IQueryable<Series> ApplyWantToReadFilter(FilterV2Dto filter, IQueryable<Series> query, int userId)
@@ -1154,7 +1216,6 @@ public class SeriesRepository : ISeriesRepository
             FilterField.AgeRating => query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value),
             FilterField.UserRating => query.HasRating(true, statement.Comparison, (int) value, userId),
             FilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
-            FilterField.CollectionTags => query.HasCollectionTags(true, statement.Comparison, (IList<int>) value),
             FilterField.Translators => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Characters => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Publisher => query.HasPeople(true, statement.Comparison, (IList<int>) value),
@@ -1169,6 +1230,9 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
+            FilterField.CollectionTags =>
+                // This is handled in the code before this as it's handled in a more general, combined manner
+                query,
             FilterField.Libraries =>
                 // This is handled in the code before this as it's handled in a more general, combined manner
                 query,

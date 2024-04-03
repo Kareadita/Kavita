@@ -22,7 +22,7 @@ import { debounceTime, distinctUntilChanged, forkJoin, switchMap, tap } from 'rx
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
-import { CollectionTag } from 'src/app/_models/collection-tag';
+import {CollectionTag, UserCollection} from 'src/app/_models/collection-tag';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
@@ -52,7 +52,22 @@ enum TabID {
 })
 export class EditCollectionTagsComponent implements OnInit {
 
-  @Input({required: true}) tag!: CollectionTag;
+  public readonly modal = inject(NgbActiveModal);
+  public readonly utilityService = inject(UtilityService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly seriesService = inject(SeriesService);
+  private readonly collectionService = inject(CollectionTagService);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly imageService = inject(ImageService);
+  private readonly uploadService = inject(UploadService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
+
+  @Input({required: true}) tag!: UserCollection;
   series: Array<Series> = [];
   selections!: SelectionModel<Series>;
   isLoading: boolean = true;
@@ -64,25 +79,12 @@ export class EditCollectionTagsComponent implements OnInit {
   active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
-  private readonly destroyRef = inject(DestroyRef);
+
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  get Breakpoint() {
-    return Breakpoint;
-  }
-
-  get TabID() {
-    return TabID;
-  }
-
-  constructor(public modal: NgbActiveModal, private seriesService: SeriesService,
-    private collectionService: CollectionTagService, private toastr: ToastrService,
-    private confirmService: ConfirmService, private libraryService: LibraryService,
-    private imageService: ImageService, private uploadService: UploadService,
-    public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     if (this.pagination == undefined) {
@@ -177,8 +179,12 @@ export class EditCollectionTagsComponent implements OnInit {
 
     const apis = [
       this.collectionService.updateTag(tag),
-      this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id))
     ];
+
+    const unselectedSeries = this.selections.unselected().map(s => s.id);
+    if (unselectedSeries.length > 0) {
+      apis.push(this.collectionService.updateSeriesForTag(tag, unselectedSeries));
+    }
 
     if (selectedIndex > 0) {
       apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover));

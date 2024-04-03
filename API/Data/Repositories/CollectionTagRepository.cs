@@ -34,7 +34,9 @@ public enum CollectionIncludes
 public interface ICollectionTagRepository
 {
     void Add(CollectionTag tag);
+    void Attach(AppUserCollection tag);
     void Remove(CollectionTag tag);
+    void Remove(AppUserCollection tag);
     Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync();
     Task<IEnumerable<AppUserCollectionDto>> SearchTagDtosAsync(string searchQuery, int userId);
     Task<string?> GetCoverImageAsync(int collectionTagId);
@@ -45,6 +47,7 @@ public interface ICollectionTagRepository
     void Update(AppUserCollection tag);
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
+    Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None);
     /// <summary>
     /// Returns all of the user's collections with the option of other user's promoted
     /// </summary>
@@ -61,6 +64,7 @@ public interface ICollectionTagRepository
 
     Task<IList<CollectionTag>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IList<string>> GetRandomCoverImagesAsync(int collectionId);
+    Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -78,9 +82,19 @@ public class CollectionTagRepository : ICollectionTagRepository
         _context.CollectionTag.Add(tag);
     }
 
+    public void Attach(AppUserCollection tag)
+    {
+        _context.AppUserCollection.Attach(tag);
+    }
+
     public void Remove(CollectionTag tag)
     {
         _context.CollectionTag.Remove(tag);
+    }
+
+    public void Remove(AppUserCollection tag)
+    {
+        _context.AppUserCollection.Remove(tag);
     }
 
     public void Update(CollectionTag tag)
@@ -116,6 +130,14 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None)
+    {
+        return await _context.AppUserCollection
+            .OrderBy(c => c.NormalizedTitle)
+            .Includes(includes)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<AppUserCollectionDto>> GetTagsAsync(int userId, bool includePromoted = false)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
@@ -146,10 +168,10 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
-        return (await _context.CollectionTag
+        return await _context.AppUserCollection
             .Select(t => t.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync())!;
+            .ToListAsync();
     }
 
     [Obsolete("user TagExists with userId")]
@@ -191,10 +213,19 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Select(sm => sm.Series.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
             .ToListAsync();
+
         return data
             .OrderBy(_ => random.Next())
             .Take(4)
             .ToList();
+    }
+
+    public async Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None)
+    {
+        return await _context.AppUserCollection
+            .Where(c => c.AppUserId == userId)
+            .Includes(includes)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()

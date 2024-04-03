@@ -6,8 +6,10 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
+using API.Entities;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using Kavita.Common;
@@ -54,23 +56,6 @@ public class CollectionController : BaseApiController
 
 
     /// <summary>
-    /// Searches against the collection tags on the DB and returns matches that meet the search criteria.
-    /// <remarks>Search strings will be cleaned of certain fields, like %</remarks>
-    /// </summary>
-    /// <param name="queryString">Search term</param>
-    /// <returns></returns>
-    // [Authorize(Policy = "RequireAdminRole")]
-    // [HttpGet("search")]
-    // public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> SearchTags(string? queryString)
-    // {
-    //     queryString ??= string.Empty;
-    //     queryString = queryString.Replace(@"%", string.Empty);
-    //     if (queryString.Length == 0) return await GetCollections();
-    //
-    //     return Ok(await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId()));
-    // }
-
-    /// <summary>
     /// Checks if a collection exists with the name
     /// </summary>
     /// <param name="name">If empty or null, will return true as that is invalid</param>
@@ -79,7 +64,7 @@ public class CollectionController : BaseApiController
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {
-        return Ok(await _collectionService.TagExistsByName(name));
+        return Ok(await _unitOfWork.CollectionTagRepository.TagExists(name, User.GetUserId()));
     }
 
     /// <summary>
@@ -108,7 +93,7 @@ public class CollectionController : BaseApiController
     }
 
     /// <summary>
-    /// Adds a collection tag onto multiple Series. If tag id is 0, this will create a new tag.
+    /// Adds multiple series to a collection. If tag id is 0, this will create a new tag.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -117,9 +102,34 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
         // Create a new tag and save
-        var tag = await _collectionService.GetTagOrCreate(dto.CollectionTagId, dto.CollectionTagTitle);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+        if (user == null) return Unauthorized();
 
-        if (await _collectionService.AddTagToSeries(tag, dto.SeriesIds)) return Ok();
+        AppUserCollection? tag;
+        if (dto.CollectionTagId == 0)
+        {
+            tag = new AppUserCollectionBuilder(dto.CollectionTagTitle).Build();
+            user.Collections.Add(tag);
+        }
+        else
+        {
+            // Validate tag doesn't exist
+            tag = user.Collections.FirstOrDefault(t => t.Id == dto.CollectionTagId);
+        }
+
+        if (tag == null)
+        {
+            return BadRequest(_localizationService.Translate(User.GetUserId(), "collection-doesnt-exists"));
+        }
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList());
+        foreach (var s in series)
+        {
+            if (tag.Items.Contains(s)) continue;
+            tag.Items.Add(s);
+        }
+        _unitOfWork.UserRepository.Update(user);
+        if (await _unitOfWork.CommitAsync()) return Ok();
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
     }
@@ -135,7 +145,7 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updateSeriesForTagDto.Tag.Id, CollectionTagIncludes.SeriesMetadata);
+            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series);
             if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
 
             if (await _collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))

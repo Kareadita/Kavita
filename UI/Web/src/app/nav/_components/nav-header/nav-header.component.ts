@@ -41,6 +41,8 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 
 @Component({
     selector: 'app-nav-header',
@@ -50,7 +52,7 @@ import {ScrobbleProvider} from "../../../_services/scrobbling.service";
     standalone: true,
   imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective]
+    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe]
 })
 export class NavHeaderComponent implements OnInit {
 

@@ -260,7 +260,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         callback: this.dummyCallback,
-        requiresAdmin: true,
+        requiresAdmin: false,
         children: [],
       },
       {

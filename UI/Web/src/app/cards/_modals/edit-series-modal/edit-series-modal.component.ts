@@ -330,7 +330,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   setupTypeaheads() {
     forkJoin([
-      //this.setupCollectionTagsSettings(),
       this.setupTagSettings(),
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
@@ -340,33 +339,6 @@ export class EditSeriesModalComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
-  // setupCollectionTagsSettings() {
-  //   this.collectionTagSettings.minCharacters = 0;
-  //   this.collectionTagSettings.multiple = true;
-  //   this.collectionTagSettings.id = 'collections';
-  //   this.collectionTagSettings.unique = true;
-  //   this.collectionTagSettings.addIfNonExisting = true;
-  //   this.collectionTagSettings.fetchFn = (filter: string) => this.fetchCollectionTags(filter).pipe(map(items => this.collectionTagSettings.compareFn(items, filter)));
-  //   this.collectionTagSettings.addTransformFn = ((title: string) => {
-  //     return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
-  //   });
-  //   this.collectionTagSettings.compareFn = (options: CollectionTag[], filter: string) => {
-  //     return options.filter(m => this.utilityService.filter(m.title, filter));
-  //   }
-  //   this.collectionTagSettings.compareFnForAdd = (options: CollectionTag[], filter: string) => {
-  //     return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-  //   }
-  //   this.collectionTagSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {
-  //     return a.title === b.title;
-  //   }
-  //
-  //   if (this.metadata.collectionTags) {
-  //     this.collectionTagSettings.savedData = this.metadata.collectionTags;
-  //   }
-  //
-  //   return of(true);
-  // }
 
   setupTagSettings() {
     this.tagsSettings.minCharacters = 0;
@@ -544,10 +516,6 @@ export class EditSeriesModalComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
-  // fetchCollectionTags(filter: string = '') {
-  //   return this.collectionService.search(filter);
-  // }
 
   updateWeblinks(items: Array<string>) {
     this.metadata.webLinks = items.map(s => s.replaceAll(',', '%2C')).join(',');

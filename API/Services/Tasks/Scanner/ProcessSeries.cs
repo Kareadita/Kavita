@@ -376,7 +376,7 @@ public class ProcessSeries : IProcessSeries
             {
                 var t = await _tagManagerService.GetCollectionTag(collection);
                 if (t == null) continue;
-                _collectionTagService.AddTagToSeriesMetadata(t, series.Metadata);
+                await _collectionTagService.AddTagToSeriesMetadata(t, series);
             }
         }
 

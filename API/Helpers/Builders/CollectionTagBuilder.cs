@@ -1,57 +1,59 @@
 ﻿using System.Collections.Generic;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 
 namespace API.Helpers.Builders;
 
-public class CollectionTagBuilder : IEntityBuilder<CollectionTag>
+public class AppUserCollectionBuilder : IEntityBuilder<AppUserCollection>
 {
-    private readonly CollectionTag _collectionTag;
-    public CollectionTag Build() => _collectionTag;
+    private readonly AppUserCollection _collection;
+    public AppUserCollection Build() => _collection;
 
-    public CollectionTagBuilder(string title, bool promoted = false)
+    public AppUserCollectionBuilder(string title, bool promoted = false)
     {
         title = title.Trim();
-        _collectionTag = new CollectionTag()
+        _collection = new AppUserCollection()
         {
             Id = 0,
             NormalizedTitle = title.ToNormalized(),
             Title = title,
             Promoted = promoted,
             Summary = string.Empty,
-            SeriesMetadatas = new List<SeriesMetadata>()
+            AgeRating = AgeRating.Unknown,
+            Items = new List<Series>()
         };
     }
 
-    public CollectionTagBuilder WithId(int id)
+    public AppUserCollectionBuilder WithId(int id)
     {
-        _collectionTag.Id = id;
+        _collection.Id = id;
         return this;
     }
 
-    public CollectionTagBuilder WithSummary(string summary)
+    public AppUserCollectionBuilder WithSummary(string summary)
     {
-        _collectionTag.Summary = summary;
+        _collection.Summary = summary;
         return this;
     }
 
-    public CollectionTagBuilder WithIsPromoted(bool promoted)
+    public AppUserCollectionBuilder WithIsPromoted(bool promoted)
     {
-        _collectionTag.Promoted = promoted;
+        _collection.Promoted = promoted;
         return this;
     }
 
-    public CollectionTagBuilder WithSeriesMetadata(SeriesMetadata seriesMetadata)
+    public AppUserCollectionBuilder WithItems(Series series)
     {
-        _collectionTag.SeriesMetadatas ??= new List<SeriesMetadata>();
-        _collectionTag.SeriesMetadatas.Add(seriesMetadata);
+        _collection.Items ??= new List<Series>();
+        _collection.Items.Add(series);
         return this;
     }
 
-    public CollectionTagBuilder WithCoverImage(string cover)
+    public AppUserCollectionBuilder WithCoverImage(string cover)
     {
-        _collectionTag.CoverImage = cover;
+        _collection.CoverImage = cover;
         return this;
     }
 }

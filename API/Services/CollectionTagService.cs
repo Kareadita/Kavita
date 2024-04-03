@@ -18,15 +18,15 @@ namespace API.Services;
 
 public interface ICollectionTagService
 {
-    Task<bool> TagExistsByName(string name);
-    Task<bool> DeleteTag(CollectionTag tag);
+    //Task<bool> TagExistsByName(string name);
+    //Task<bool> DeleteTag(CollectionTag tag);
     Task<bool> DeleteTag(int tagId, AppUser user);
     Task<bool> UpdateTag(AppUserCollectionDto dto, int userId);
-    Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
-    Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
-    Task<CollectionTag> GetTagOrCreate(int tagId, string title);
-    void AddTagToSeriesMetadata(CollectionTag? tag, SeriesMetadata metadata);
-    CollectionTag CreateTag(string title);
+    // Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
+    Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds);
+    //Task<CollectionTag> GetTagOrCreate(int tagId, string title);
+    Task AddTagToSeriesMetadata(AppUserCollection? tag, Series series);
+    //CollectionTag CreateTag(string title);
     Task<bool> RemoveTagsWithoutSeries();
 }
 
@@ -47,11 +47,11 @@ public class CollectionTagService : ICollectionTagService
     /// </summary>
     /// <param name="name">If empty or null, will return true as that is invalid</param>
     /// <returns></returns>
-    public async Task<bool> TagExistsByName(string name)
-    {
-        if (string.IsNullOrEmpty(name.Trim())) return true;
-        return await _unitOfWork.CollectionTagRepository.TagExists(name);
-    }
+    // public async Task<bool> TagExistsByName(string name)
+    // {
+    //     if (string.IsNullOrEmpty(name.Trim())) return true;
+    //     return await _unitOfWork.CollectionTagRepository.TagExists(name);
+    // }
 
     public async Task<bool> DeleteTag(CollectionTag tag)
     {
@@ -118,17 +118,18 @@ public class CollectionTagService : ICollectionTagService
     /// <param name="tag">A full Tag</param>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    public async Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds)
+    public Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds)
     {
-        if (tag == null) return false;
-        var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(seriesIds);
-        foreach (var metadata in metadatas)
-        {
-            AddTagToSeriesMetadata(tag, metadata);
-        }
-
-        if (!_unitOfWork.HasChanges()) return true;
-        return await _unitOfWork.CommitAsync();
+        return Task.FromResult(false);
+        //if (tag == null) return false;
+        // var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(seriesIds);
+        // foreach (var metadata in metadatas)
+        // {
+        //     await AddTagToSeriesMetadata(tag, metadata);
+        // }
+        //
+        // if (!_unitOfWork.HasChanges()) return true;
+        // return await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
@@ -138,30 +139,41 @@ public class CollectionTagService : ICollectionTagService
     /// <param name="tag"></param>
     /// <param name="metadata"></param>
     /// <returns></returns>
-    public void AddTagToSeriesMetadata(CollectionTag? tag, SeriesMetadata metadata)
+    public async Task AddTagToSeriesMetadata(AppUserCollection? tag, Series series)
     {
         if (tag == null) return;
-        metadata.CollectionTags ??= new List<CollectionTag>();
-        if (metadata.CollectionTags.Any(t => t.NormalizedTitle.Equals(tag.NormalizedTitle, StringComparison.InvariantCulture))) return;
 
-        metadata.CollectionTags.Add(tag);
-        if (metadata.Id != 0)
-        {
-            _unitOfWork.SeriesMetadataRepository.Update(metadata);
-        }
+        var user = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
+        if (user.Collections.Any(t =>
+                t.NormalizedTitle.Equals(tag.NormalizedTitle, StringComparison.InvariantCulture))) return;
+
+        user.Collections.Add(tag);
+        tag.Items.Add(series);
+
+
+        // metadata.CollectionTags ??= new List<CollectionTag>();
+        // if (metadata.CollectionTags.Any(t => t.NormalizedTitle.Equals(tag.NormalizedTitle, StringComparison.InvariantCulture))) return;
+        //
+        // metadata.CollectionTags.Add(tag);
+        // if (metadata.Id != 0)
+        // {
+        //     _unitOfWork.SeriesMetadataRepository.Update(metadata);
+        // }
     }
 
-    public async Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds)
+    public async Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds)
     {
         if (tag == null) return false;
-        tag.SeriesMetadatas ??= new List<SeriesMetadata>();
+
+
+        tag.Items ??= new List<Series>();
         foreach (var seriesIdToRemove in seriesIds)
         {
-            tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
+            tag.Items.Remove(tag.Items.Single(sm => sm.Id == seriesIdToRemove));
         }
 
 
-        if (tag.SeriesMetadatas.Count == 0)
+        if (tag.Items.Count == 0)
         {
             _unitOfWork.CollectionTagRepository.Remove(tag);
         }
@@ -177,22 +189,22 @@ public class CollectionTagService : ICollectionTagService
     /// <param name="tagId"></param>
     /// <param name="title"></param>
     /// <returns></returns>
-    public async Task<CollectionTag> GetTagOrCreate(int tagId, string title)
-    {
-        return await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId, CollectionTagIncludes.SeriesMetadata) ?? CreateTag(title);
-    }
+    // public async Task<CollectionTag> GetTagOrCreate(int tagId, string title)
+    // {
+    //     return await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId, CollectionTagIncludes.SeriesMetadata) ?? CreateTag(title);
+    // }
 
     /// <summary>
     /// This just creates the entity and adds to tracking. Use <see cref="GetTagOrCreate"/> for checks of duplication.
     /// </summary>
     /// <param name="title"></param>
     /// <returns></returns>
-    public CollectionTag CreateTag(string title)
-    {
-        var tag = new CollectionTagBuilder(title).Build();
-        _unitOfWork.CollectionTagRepository.Add(tag);
-        return tag;
-    }
+    // public AppUserCollection CreateTag(string title)
+    // {
+    //     var tag = new AppUserCollectionBuilder(title).Build();
+    //     _unitOfWork.CollectionTagRepository.Add(tag);
+    //     return tag;
+    // }
 
     public async Task<bool> RemoveTagsWithoutSeries()
     {

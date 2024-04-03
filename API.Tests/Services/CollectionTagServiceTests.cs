@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Enums;
@@ -40,36 +41,42 @@ public class CollectionTagServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Series 2").Build())
             .Build());
 
-        _context.CollectionTag.Add(new CollectionTagBuilder("Tag 1").Build());
-        _context.CollectionTag.Add(new CollectionTagBuilder("Tag 2").WithIsPromoted(true).Build());
+        var user = _context.AppUser.First();
+        user.Collections = new List<AppUserCollection>()
+        {
+            new AppUserCollectionBuilder("Tag 1").Build(),
+            new AppUserCollectionBuilder("Tag 2").WithIsPromoted(true).Build()
+        };
+
         await _unitOfWork.CommitAsync();
     }
 
 
-    [Fact]
-    public async Task TagExistsByName_ShouldFindTag()
-    {
-        await SeedSeries();
-        Assert.True(await _service.TagExistsByName("Tag 1"));
-        Assert.True(await _service.TagExistsByName("tag 1"));
-        Assert.False(await _service.TagExistsByName("tag5"));
-    }
+    // [Fact]
+    // public async Task TagExistsByName_ShouldFindTag()
+    // {
+    //     await SeedSeries();
+    //     Assert.True(await _service.TagExistsByName("Tag 1"));
+    //     Assert.True(await _service.TagExistsByName("tag 1"));
+    //     Assert.False(await _service.TagExistsByName("tag5"));
+    // }
 
     [Fact]
     public async Task UpdateTag_ShouldUpdateFields()
     {
         await SeedSeries();
 
-        _context.CollectionTag.Add(new CollectionTagBuilder("UpdateTag_ShouldUpdateFields").WithId(3).WithIsPromoted(true).Build());
+        _context.AppUserCollection.Add(new AppUserCollectionBuilder("UpdateTag_ShouldUpdateFields").WithId(3).WithIsPromoted(true).Build());
         await _unitOfWork.CommitAsync();
 
-        await _service.UpdateTag(new CollectionTagDto()
+        await _service.UpdateTag(new AppUserCollectionDto()
         {
             Title = "UpdateTag_ShouldUpdateFields",
             Id = 3,
             Promoted = true,
             Summary = "Test Summary",
-        });
+            AgeRating = AgeRating.Unknown
+        }, 1);
 
         var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(3);
         Assert.NotNull(tag);

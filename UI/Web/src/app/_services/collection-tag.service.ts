@@ -20,13 +20,6 @@ export class CollectionTagService {
     return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
   }
 
-  search(query: string) {
-    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection/search?queryString=' + encodeURIComponent(query)).pipe(map(tags => {
-      tags.forEach(s => s.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(s.id)));
-      return tags;
-    }));
-  }
-
   updateTag(tag: UserCollection) {
     return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
   }

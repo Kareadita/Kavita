@@ -28,7 +28,7 @@ public interface ITagManagerService
     Task<Genre?> GetGenre(string genre);
     Task<Tag?> GetTag(string tag);
     Task<Person?> GetPerson(string name, PersonRole role);
-    Task<CollectionTag?> GetCollectionTag(string name);
+    Task<AppUserCollection?> GetCollectionTag(string name);
 }
 
 /// <summary>
@@ -41,7 +41,7 @@ public class TagManagerService : ITagManagerService
     private Dictionary<string, Genre> _genres;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, Person> _people;
-    private Dictionary<string, CollectionTag> _collectionTags;
+    private Dictionary<string, AppUserCollection> _collectionTags;
 
     private readonly SemaphoreSlim _genreSemaphore = new SemaphoreSlim(1, 1);
     private readonly SemaphoreSlim _tagSemaphore = new SemaphoreSlim(1, 1);
@@ -57,10 +57,10 @@ public class TagManagerService : ITagManagerService
 
     public void Reset()
     {
-        _genres = new Dictionary<string, Genre>();
-        _tags = new Dictionary<string, Tag>();
-        _people = new Dictionary<string, Person>();
-        _collectionTags = new Dictionary<string, CollectionTag>();
+        _genres = [];
+        _tags = [];
+        _people = [];
+        _collectionTags = [];
     }
 
     public async Task Prime()
@@ -71,7 +71,8 @@ public class TagManagerService : ITagManagerService
             .GroupBy(GetPersonKey)
             .Select(g => g.First())
             .ToDictionary(GetPersonKey);
-        _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
+        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser()!;
+        _collectionTags = (await _unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(defaultAdmin.Id, CollectionIncludes.Series))
             .ToDictionary(t => t.NormalizedTitle);
 
     }
@@ -183,7 +184,7 @@ public class TagManagerService : ITagManagerService
     /// </summary>
     /// <param name="tag"></param>
     /// <returns></returns>
-    public async Task<CollectionTag?> GetCollectionTag(string tag)
+    public async Task<AppUserCollection?> GetCollectionTag(string tag)
     {
         if (string.IsNullOrEmpty(tag)) return null;
 
@@ -196,8 +197,8 @@ public class TagManagerService : ITagManagerService
             }
 
             // We need to create a new Genre
-            result = new CollectionTagBuilder(tag).Build();
-            _unitOfWork.CollectionTagRepository.Add(result);
+            result = new AppUserCollectionBuilder(tag).Build();
+            _unitOfWork.CollectionTagRepository.Attach(result);
             await _unitOfWork.CommitAsync();
             _collectionTags.Add(result.NormalizedTitle, result);
             return result;

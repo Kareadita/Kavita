@@ -1456,7 +1456,7 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Adds a collection tag onto multiple Series. If tag id is 0, this will create a new tag.",
+        "summary": "Adds multiple series to a collection. If tag id is 0, this will create a new tag.",
         "requestBody": {
           "description": "",
           "content": {
@@ -13230,6 +13230,11 @@
           "coverImageLocked": {
             "type": "boolean"
           },
+          "owner": {
+            "type": "string",
+            "description": "Owner of the Collection",
+            "nullable": true
+          },
           "lastSyncUtc": {
             "type": "string",
             "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
@@ -18749,7 +18754,8 @@
             "items": {
               "$ref": "#/components/schemas/CollectionTag"
             },
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "genres": {
             "type": "array",
