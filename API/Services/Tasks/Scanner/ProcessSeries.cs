@@ -379,7 +379,6 @@ public class ProcessSeries : IProcessSeries
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
             foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
-
                 var t = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
                 if (t.Item1 == null) continue;
 
@@ -392,6 +391,7 @@ public class ProcessSeries : IProcessSeries
                 }
 
                 tag.Items.Add(series);
+                await _unitOfWork.CollectionTagRepository.UpdateTagAgeRating(tag);
             }
         }
 

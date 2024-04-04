@@ -52,14 +52,14 @@
           <div class="list-group" *ngIf="!isLoading">
             <h6>{{t('series-title')}}</h6>
             <div class="form-check">
-              <input id="selectall" type="checkbox" class="form-check-input"
+              <input id="selectall" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
                      [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
               <label for="selectall" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
             </div>
             <ul>
               <li class="list-group-item" *ngFor="let item of series; let i = index">
                 <div class="form-check">
-                  <input id="series-{{i}}" type="checkbox" class="form-check-input"
+                  <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
                          [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
                   <label attr.for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
                 </div>

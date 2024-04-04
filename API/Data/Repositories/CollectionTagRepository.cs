@@ -51,14 +51,12 @@ public interface ICollectionTagRepository
     /// <returns></returns>
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false);
 
-    Task<IEnumerable<CollectionTag>> GetAllTagsByNamesAsync(IEnumerable<string> normalizedTitles,
-        CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title, int userId);
-
     Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IList<string>> GetRandomCoverImagesAsync(int collectionId);
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None);
+    Task UpdateTagAgeRating(AppUserCollection tag);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -98,14 +96,6 @@ public class CollectionTagRepository : ICollectionTagRepository
         return await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None)
-    {
-        return await _context.CollectionTag
-            .OrderBy(c => c.NormalizedTitle)
-            .Includes(includes)
-            .ToListAsync();
-    }
-
     public async Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None)
     {
         return await _context.AppUserCollection
@@ -122,15 +112,6 @@ public class CollectionTagRepository : ICollectionTagRepository
             .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<CollectionTag>> GetAllTagsByNamesAsync(IEnumerable<string> normalizedTitles, CollectionTagIncludes includes = CollectionTagIncludes.None)
-    {
-        return await _context.CollectionTag
-            .Where(c => normalizedTitles.Contains(c.NormalizedTitle))
-            .OrderBy(c => c.NormalizedTitle)
-            .Includes(includes)
             .ToListAsync();
     }
 
@@ -202,6 +183,17 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(c => c.AppUserId == userId)
             .Includes(includes)
             .ToListAsync();
+    }
+
+    public async Task UpdateTagAgeRating(AppUserCollection tag)
+    {
+        var maxAgeRating = await _context.AppUserCollection
+            .Where(t => t.Id == tag.Id)
+            .SelectMany(uc => uc.Items.Select(s => s.Metadata))
+            .Select(sm => sm.AgeRating)
+            .MaxAsync();
+        tag.AgeRating = maxAgeRating;
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()

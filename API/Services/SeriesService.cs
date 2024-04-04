@@ -313,46 +313,6 @@ public class SeriesService : ISeriesService
         return false;
     }
 
-
-    private static void UpdateCollectionsList(ICollection<CollectionTagDto>? tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
-        Action<CollectionTag> handleAdd)
-    {
-        // TODO: Move UpdateCollectionsList to a helper so we can easily test
-        if (tags == null) return;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        // var existingTags = series.Metadata.CollectionTags.ToList();
-        // foreach (var existing in existingTags)
-        // {
-        //     if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-        //     {
-        //         // Remove tag
-        //         series.Metadata.CollectionTags.Remove(existing);
-        //     }
-        // }
-        //
-        // // At this point, all tags that aren't in dto have been removed.
-        // foreach (var tag in tags)
-        // {
-        //     var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
-        //     if (existingTag != null)
-        //     {
-        //         if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
-        //         {
-        //             handleAdd(existingTag);
-        //         }
-        //     }
-        //     else
-        //     {
-        //         // Add new tag
-        //         handleAdd(new AppUserCollectionBuilder(tag.Title)
-        //             .WithId(tag.Id)
-        //             .WithSummary(tag.Summary)
-        //             .WithIsPromoted(tag.Promoted)
-        //             .Build());
-        //     }
-        // }
-    }
-
     /// <summary>
     ///
     /// </summary>

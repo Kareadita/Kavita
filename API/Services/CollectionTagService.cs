@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Collection;
 using API.Entities;
 using API.Extensions;
+using API.Services.Plus;
 using API.SignalR;
 using Kavita.Common;
 
@@ -57,8 +58,12 @@ public class CollectionTagService : ICollectionTagService
             throw new KavitaException("collection-tag-duplicate");
 
         existingTag.Items ??= new List<Series>();
-        existingTag.Title = title;
-        existingTag.NormalizedTitle = dto.Title.ToNormalized();
+        if (existingTag.Source == ScrobbleProvider.Kavita)
+        {
+            existingTag.Title = title;
+            existingTag.NormalizedTitle = dto.Title.ToNormalized();
+        }
+
         existingTag.Promoted = dto.Promoted;
         existingTag.CoverImageLocked = dto.CoverImageLocked;
         _unitOfWork.CollectionTagRepository.Update(existingTag);
@@ -85,6 +90,12 @@ public class CollectionTagService : ICollectionTagService
         return await _unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Removes series from Collection tag. Will recalculate max age rating.
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <param name="seriesIds"></param>
+    /// <returns></returns>
     public async Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds)
     {
         if (tag == null) return false;
@@ -101,7 +112,13 @@ public class CollectionTagService : ICollectionTagService
 
         if (!_unitOfWork.HasChanges()) return true;
 
-        return await _unitOfWork.CommitAsync();
+        var result  =  await _unitOfWork.CommitAsync();
+        if (tag.Items.Count > 0)
+        {
+            await _unitOfWork.CollectionTagRepository.UpdateTagAgeRating(tag);
+        }
+
+        return result;
     }
 
     public async Task<bool> RemoveTagsWithoutSeries()
