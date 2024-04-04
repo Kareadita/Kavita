@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Extensions;
 
 namespace API.Helpers.Builders;
@@ -44,10 +43,21 @@ public class AppUserCollectionBuilder : IEntityBuilder<AppUserCollection>
         return this;
     }
 
-    public AppUserCollectionBuilder WithItems(Series series)
+    public AppUserCollectionBuilder WithItem(Series series)
     {
         _collection.Items ??= new List<Series>();
         _collection.Items.Add(series);
+        return this;
+    }
+
+    public AppUserCollectionBuilder WithItems(IEnumerable<Series> series)
+    {
+        _collection.Items ??= new List<Series>();
+        foreach (var s in series)
+        {
+            _collection.Items.Add(s);
+        }
+
         return this;
     }
 

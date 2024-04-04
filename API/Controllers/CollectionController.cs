@@ -7,7 +7,6 @@ using API.Data.Repositories;
 using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
-using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
@@ -30,18 +29,15 @@ public class CollectionController : BaseApiController
     private readonly ICollectionTagService _collectionService;
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
-    private readonly ILogger<CollectionController> _logger;
 
     /// <inheritdoc />
     public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
-        ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
-        ILogger<CollectionController> logger)
+        ILocalizationService localizationService, IExternalMetadataService externalMetadataService)
     {
         _unitOfWork = unitOfWork;
         _collectionService = collectionService;
         _localizationService = localizationService;
         _externalMetadataService = externalMetadataService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -51,7 +47,7 @@ public class CollectionController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.GetTagsAsync(User.GetUserId(), !ownedOnly));
+        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(User.GetUserId(), !ownedOnly));
     }
 
 

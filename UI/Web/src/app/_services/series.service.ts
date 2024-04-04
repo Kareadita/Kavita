@@ -168,10 +168,9 @@ export class SeriesService {
     }));
   }
 
-  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[]) {
+  updateMetadata(seriesMetadata: SeriesMetadata) {
     const data = {
       seriesMetadata,
-      collectionTags,
     };
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, TextResonse);
   }

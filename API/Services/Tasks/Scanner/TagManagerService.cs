@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ public interface ITagManagerService
     Task<Genre?> GetGenre(string genre);
     Task<Tag?> GetTag(string tag);
     Task<Person?> GetPerson(string name, PersonRole role);
-    Task<AppUserCollection?> GetCollectionTag(string name);
+    Task<Tuple<AppUserCollection?, bool>> GetCollectionTag(string? tag, AppUser userWithCollections);
 }
 
 /// <summary>
@@ -184,28 +185,30 @@ public class TagManagerService : ITagManagerService
     /// </summary>
     /// <param name="tag"></param>
     /// <returns></returns>
-    public async Task<AppUserCollection?> GetCollectionTag(string tag)
+    public async Task<Tuple<AppUserCollection?, bool>> GetCollectionTag(string? tag, AppUser userWithCollections)
     {
-        if (string.IsNullOrEmpty(tag)) return null;
+        if (string.IsNullOrEmpty(tag)) return Tuple.Create<AppUserCollection?, bool>(null, false);
 
         await _collectionTagSemaphore.WaitAsync();
+        AppUserCollection? result;
         try
         {
-            if (_collectionTags.TryGetValue(tag.ToNormalized(), out var result))
+            if (_collectionTags.TryGetValue(tag.ToNormalized(), out result))
             {
-                return result;
+                return Tuple.Create<AppUserCollection?, bool>(result, false);
             }
 
             // We need to create a new Genre
             result = new AppUserCollectionBuilder(tag).Build();
-            _unitOfWork.CollectionTagRepository.Attach(result);
+            userWithCollections.Collections.Add(result);
+            _unitOfWork.UserRepository.Update(userWithCollections);
             await _unitOfWork.CommitAsync();
             _collectionTags.Add(result.NormalizedTitle, result);
-            return result;
         }
         finally
         {
             _collectionTagSemaphore.Release();
         }
+        return Tuple.Create<AppUserCollection?, bool>(result, true);
     }
 }

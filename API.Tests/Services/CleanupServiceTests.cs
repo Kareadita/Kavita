@@ -435,24 +435,26 @@ public class CleanupServiceTests : AbstractDbTest
     [Fact]
     public async Task CleanupDbEntries_RemoveTagsWithoutSeries()
     {
-        var c = new CollectionTag()
+        var s = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test LIb").Build();
+        _context.Series.Add(s);
+
+        var c = new AppUserCollection()
         {
             Title = "Test Tag",
             NormalizedTitle = "Test Tag".ToNormalized(),
+            AgeRating = AgeRating.Unknown,
+            Items = new List<Series>() {s}
         };
-        var s = new SeriesBuilder("Test")
-            .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadataBuilder().WithCollectionTag(c).Build())
-            .Build();
-        s.Library = new LibraryBuilder("Test LIb").Build();
-
-        _context.Series.Add(s);
 
         _context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Collections = new List<AppUserCollection>() {c}
         });
-
         await _context.SaveChangesAsync();
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
@@ -465,7 +467,7 @@ public class CleanupServiceTests : AbstractDbTest
 
         await cleanupService.CleanupDbEntries();
 
-        Assert.Empty(await _unitOfWork.CollectionTagRepository.GetAllTagsAsync());
+        Assert.Empty(await _unitOfWork.CollectionTagRepository.GetAllCollectionsAsync());
     }
 
     #endregion

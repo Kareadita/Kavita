@@ -119,7 +119,6 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   public readonly imageService = inject(ImageService);
   private readonly libraryService = inject(LibraryService);
-  private readonly collectionService = inject(CollectionTagService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -155,10 +154,8 @@ export class EditSeriesModalComponent implements OnInit {
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
-  collectionTagSettings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
-  collectionTags: CollectionTag[] = [];
   tags: Tag[] = [];
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
@@ -335,7 +332,6 @@ export class EditSeriesModalComponent implements OnInit {
       this.setupPersonTypeahead(),
       this.setupLanguageTypeahead()
     ]).subscribe(results => {
-      this.collectionTags = this.metadata.collectionTags;
       this.cdRef.markForCheck();
     });
   }
@@ -527,7 +523,7 @@ export class EditSeriesModalComponent implements OnInit {
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
-      this.seriesService.updateMetadata(this.metadata, this.collectionTags)
+      this.seriesService.updateMetadata(this.metadata)
     ];
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
@@ -553,10 +549,6 @@ export class EditSeriesModalComponent implements OnInit {
     });
   }
 
-  updateCollections(tags: CollectionTag[]) {
-    this.collectionTags = tags;
-    this.cdRef.markForCheck();
-  }
 
   updateTags(tags: Tag[]) {
     this.tags = tags;

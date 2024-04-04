@@ -455,7 +455,7 @@ public class OpdsController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
 
-        var tags = await _unitOfWork.CollectionTagRepository.GetTagsAsync(user.Id, true);
+        var tags = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(user.Id, true);
 
         var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);

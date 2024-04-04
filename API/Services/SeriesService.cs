@@ -115,12 +115,6 @@ public class SeriesService : ISeriesService
             if (series == null) return false;
 
             series.Metadata ??= new SeriesMetadataBuilder()
-                // .WithCollectionTags(updateSeriesMetadataDto.CollectionTags.Select(dto =>
-                //     new AppUserCollectionBuilder(dto.Title)
-                //         .WithId(dto.Id)
-                //         .WithSummary(dto.Summary)
-                //         .WithIsPromoted(dto.Promoted)
-                //         .Build()).ToList())
                 .Build();
 
             if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
@@ -163,28 +157,16 @@ public class SeriesService : ISeriesService
                 series.Metadata.WebLinks = string.Empty;
             } else
             {
-                series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
-                    .Split(",")
+                series.Metadata.WebLinks = string.Join(',', updateSeriesMetadataDto.SeriesMetadata?.WebLinks
+                    .Split(',')
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Select(s => s.Trim())!
                 );
             }
 
 
-            if (updateSeriesMetadataDto.CollectionTags.Count > 0)
-            {
-                var allCollectionTags = (await _unitOfWork.CollectionTagRepository
-                    .GetAllTagsByNamesAsync(updateSeriesMetadataDto.CollectionTags.Select(t => Parser.Normalize(t.Title)))).ToList();
-                series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, tag =>
-                {
-                    series.Metadata.CollectionTags.Add(tag);
-                });
-            }
-
-
             if (updateSeriesMetadataDto.SeriesMetadata?.Genres != null &&
-                updateSeriesMetadataDto.SeriesMetadata.Genres.Any())
+                updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0)
             {
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
                 series.Metadata.Genres ??= new List<Genre>();
@@ -320,12 +302,6 @@ public class SeriesService : ISeriesService
                 _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
             }
 
-            if (updateSeriesMetadataDto.CollectionTags == null) return true;
-            foreach (var tag in updateSeriesMetadataDto.CollectionTags)
-            {
-                await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
-                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id, seriesId), false);
-            }
             return true;
         }
         catch (Exception ex)

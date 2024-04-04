@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions.QueryExtensions;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -34,8 +35,10 @@ public static class MigrateCollectionTagToUserCollections
         }
 
         // For all collectionTags, move them over to said user
-        var existingCollections =
-            await unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadataWithSeries);
+        var existingCollections = await dataContext.CollectionTag
+            .OrderBy(c => c.NormalizedTitle)
+            .Includes(CollectionTagIncludes.SeriesMetadataWithSeries)
+            .ToListAsync();
         foreach (var existingCollectionTag in existingCollections)
         {
             var collection = new AppUserCollection()

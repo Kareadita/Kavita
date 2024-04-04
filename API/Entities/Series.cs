@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Extensions;
 
 namespace API.Entities;
 
@@ -133,5 +134,13 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     {
         LastChapterAdded = DateTime.Now;
         LastChapterAddedUtc = DateTime.UtcNow;
+    }
+
+    public bool MatchesSeriesByName(string nameNormalized, string localizedNameNormalized)
+    {
+        return NormalizedName == nameNormalized ||
+               NormalizedLocalizedName == nameNormalized ||
+               NormalizedName == localizedNameNormalized ||
+               NormalizedLocalizedName == localizedNameNormalized;
     }
 }

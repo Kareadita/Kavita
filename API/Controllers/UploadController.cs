@@ -147,7 +147,7 @@ public class UploadController : BaseApiController
 
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
+            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadFileDto.Id);
             if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
 

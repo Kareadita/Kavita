@@ -48,14 +48,14 @@ public class QueryableExtensionsTests
         var items = new List<AppUserCollection>()
         {
             new AppUserCollectionBuilder("Test")
-                .WithItems(new SeriesBuilder("S1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build()).Build())
+                .WithItem(new SeriesBuilder("S1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build()).Build())
                 .Build(),
             new AppUserCollectionBuilder("Test 2")
-                .WithItems(new SeriesBuilder("S2").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build()).Build())
-                .WithItems(new SeriesBuilder("S1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build()).Build())
+                .WithItem(new SeriesBuilder("S2").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build()).Build())
+                .WithItem(new SeriesBuilder("S1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build()).Build())
                 .Build(),
             new AppUserCollectionBuilder("Test 3")
-                .WithItems(new SeriesBuilder("S3").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build()).Build())
+                .WithItem(new SeriesBuilder("S3").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build()).Build())
                 .Build(),
         };
 

@@ -20599,13 +20599,6 @@
         "properties": {
           "seriesMetadata": {
             "$ref": "#/components/schemas/SeriesMetadataDto"
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false
