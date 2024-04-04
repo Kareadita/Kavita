@@ -51,24 +51,25 @@
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
       <div>
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-          <span *ngIf="isPromoted()">
-            <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-            <span class="visually-hidden">(promoted)</span>
-          </span>
-          <ng-container *ngIf="format | mangaFormat as formatString">
+          <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
+          @if (format | mangaFormat; as formatString) {
             <i class="fa {{format | mangaFormatIcon}} me-1" aria-hidden="true" *ngIf="format !== MangaFormat.UNKNOWN" title="{{formatString}}"></i>
             <span class="visually-hidden">{{formatString}}</span>
-          </ng-container>
+          }
           {{title}}
         </span>
         <span class="card-actions float-end" *ngIf="actions && actions.length > 0">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
       </div>
-      <span class="card-title library" [ngbTooltip]="subtitle" placement="top" *ngIf="subtitle.length > 0">{{subtitle}}</span>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!suppressLibraryLink && libraryName">
-        {{libraryName | sentenceCase}}
-      </a>
+      @if (subtitleTemplate) {
+        <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+      }
+      @if (!suppressLibraryLink && libraryName) {
+        <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
+          {{libraryName | sentenceCase}}
+        </a>
+      }
     </div>
   </div>
 

@@ -1527,7 +1527,7 @@
         "skip-alt": "Skip to main content",
         "search-series-alt": "Search series",
         "search-alt": "Search…",
-        "promoted": "(promoted)",
+        "promoted": "{{common.promoted}}",
         "no-data": "No results found",
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
@@ -1535,7 +1535,14 @@
         "help": "{{common.help}}",
         "announcements": "Announcements",
         "logout": "Logout",
-        "all-filters": "Smart Filters",
+        "all-filters": "Smart Filters"
+    },
+
+    "promoted-icon": {
+        "promoted": "{{common.promoted}}"
+    },
+
+    "collection-owner": {
         "collection-created-label": "Created by: {{owner}}",
         "collection-via-label": "via {{source}}"
     },
@@ -1544,7 +1551,7 @@
         "title": "Add to Reading List",
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",
-        "promoted-alt": "Promoted",
+        "promoted-alt": "{{common.promoted}}",
         "no-data": "No lists created yet",
         "loading": "{{common.loading}}",
         "reading-list-label": "Reading List",
@@ -1569,6 +1576,8 @@
         "promote-label": "Promote",
         "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
     },
+
+
 
     "import-mal-collection-modal": {
         "close": "{{common.close}}",

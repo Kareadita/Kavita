@@ -75,23 +75,10 @@
                   </div>
                   <div class="ms-1">
                     <div>
-                      <!-- TODO: Create a Search Item component for Collection -->
                       <span>{{item.title}}</span>
-                        @if(item.promoted) {
-                          <span>
-                            <i class="fa fa-angle-double-up ms-1" aria-hidden="true" title="Promoted"></i>
-                            <span class="visually-hidden">{{t('promoted')}}</span>
-                          </span>
-                        }
+                      <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
                     </div>
-                    <div class="row g-0 fw-light">
-                      @if(item.owner !== user.username) {
-                        {{t('collection-created-label', {owner: item.owner})}}
-                        @if(item.source !== ScrobbleProvider.Kavita) {
-                          {{t('collection-via-label', {source: ((item.source | providerImage) + ' ' + (item.source | providerName))})}}
-                        }
-                      }
-                    </div>
+                    <app-collection-owner [collection]="item"></app-collection-owner>
                   </div>
                 </div>
               </ng-template>

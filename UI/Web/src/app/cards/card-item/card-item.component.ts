@@ -1,13 +1,13 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component, ContentChild, DestroyRef,
   EventEmitter,
   HostListener,
   inject,
   Input,
   OnInit,
-  Output
+  Output, TemplateRef
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -44,6 +44,7 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 
 @Component({
   selector: 'app-card-item',
@@ -62,7 +63,8 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
     RouterLink,
     TranslocoModule,
     SafeHtmlPipe,
-    RouterLinkActive
+    RouterLinkActive,
+    PromotedIconComponent
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],
@@ -81,6 +83,7 @@ export class CardItemComponent implements OnInit {
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+
   protected readonly MangaFormat = MangaFormat;
 
   /**
@@ -91,10 +94,6 @@ export class CardItemComponent implements OnInit {
    * Name of the card
    */
   @Input() title = '';
-  /**
-   * Shows below the title. Defaults to not visible
-   */
-  @Input() subtitle = '';
   /**
    * Any actions to perform on the card
    */
@@ -147,6 +146,7 @@ export class CardItemComponent implements OnInit {
    * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
+  @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
   /**
    * Library name item belongs to
    */

@@ -30,6 +30,10 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {ToastrService} from "ngx-toastr";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
+import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
 
 
 @Component({
@@ -38,7 +42,7 @@ import {ToastrService} from "ngx-toastr";
   styleUrls: ['./all-collections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective]
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 
@@ -115,4 +119,6 @@ export class AllCollectionsComponent implements OnInit {
         break;
     }
   }
+
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

@@ -43,6 +43,8 @@ import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-resu
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
+import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 
 @Component({
     selector: 'app-nav-header',
@@ -52,7 +54,7 @@ import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
     standalone: true,
   imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe]
+    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, PromotedIconComponent]
 })
 export class NavHeaderComponent implements OnInit {
 

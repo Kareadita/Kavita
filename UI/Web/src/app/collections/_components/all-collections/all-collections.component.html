@@ -13,7 +13,12 @@
     <ng-template #cardItem let-item let-position="idx">
       <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions"
                      [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                     (clicked)="loadCollection(item)"></app-card-item>
+                     (clicked)="loadCollection(item)">
+
+        <ng-template #subtitle>
+          <app-collection-owner [collection]="item"></app-collection-owner>
+        </ng-template>
+      </app-card-item>
     </ng-template>
 
     <ng-template #noData>
