@@ -326,7 +326,7 @@ export class ActionFactoryService {
             action: Action.AddToCollection,
             title: 'add-to-collection',
             callback: this.dummyCallback,
-            requiresAdmin: true,
+            requiresAdmin: false,
             children: [],
           },
         ],

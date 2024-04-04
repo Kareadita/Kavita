@@ -12,9 +12,7 @@ using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using Kavita.Common;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -56,7 +54,6 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <param name="name">If empty or null, will return true as that is invalid</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {
@@ -69,7 +66,6 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <param name="updatedTag"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateTag(AppUserCollectionDto updatedTag)
     {
@@ -93,7 +89,6 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update-for-series")]
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
@@ -135,7 +130,6 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <param name="updateSeriesForTagDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update-series")]
     public async Task<ActionResult> RemoveTagFromMultipleSeries(UpdateSeriesForTagDto updateSeriesForTagDto)
     {

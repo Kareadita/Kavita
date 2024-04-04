@@ -108,7 +108,7 @@ public class CollectionTagRepository : ICollectionTagRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.AppUserCollection
-            .Where(uc => uc.AppUserId == userId || uc.Promoted)
+            .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
             .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
