@@ -1535,7 +1535,9 @@
         "help": "{{common.help}}",
         "announcements": "Announcements",
         "logout": "Logout",
-        "all-filters": "Smart Filters"
+        "all-filters": "Smart Filters",
+        "collection-created-label": "Created by: {{owner}}",
+        "collection-via-label": "via {{source}}"
     },
 
     "add-to-list-modal": {

@@ -86,9 +86,9 @@
                     </div>
                     <div class="row g-0 fw-light">
                       @if(item.owner !== user.username) {
-                        Created by: {{item.owner}}
+                        {{t('collection-created-label', {owner: item.owner})}}
                         @if(item.source !== ScrobbleProvider.Kavita) {
-                          via <span class="fw-light">{{item.source | providerImage}} {{item.source | providerName}}</span>
+                          {{t('collection-via-label', {source: ((item.source | providerImage) + ' ' + (item.source | providerName))})}}
                         }
                       }
                     </div>
