@@ -468,7 +468,7 @@ public class ParseScannedFiles
 
 
                 chapters = infos
-                    .OrderByNatural(info => info.Chapters)
+                    .OrderByNatural(info => info.Filename)
                     .ToList();
 
 
