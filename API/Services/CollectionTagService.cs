@@ -17,7 +17,6 @@ public interface ICollectionTagService
     Task<bool> DeleteTag(int tagId, AppUser user);
     Task<bool> UpdateTag(AppUserCollectionDto dto, int userId);
     Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds);
-    Task<bool> RemoveTagsWithoutSeries();
 }
 
 
@@ -101,10 +100,8 @@ public class CollectionTagService : ICollectionTagService
     {
         if (tag == null) return false;
 
-
         tag.Items ??= new List<Series>();
         tag.Items = tag.Items.Where(s => !seriesIds.Contains(s.Id)).ToList();
-
 
         if (tag.Items.Count == 0)
         {
@@ -120,10 +117,5 @@ public class CollectionTagService : ICollectionTagService
         }
 
         return result;
-    }
-
-    public async Task<bool> RemoveTagsWithoutSeries()
-    {
-        return await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries() > 0;
     }
 }

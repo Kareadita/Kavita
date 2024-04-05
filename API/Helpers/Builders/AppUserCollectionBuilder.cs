@@ -2,6 +2,7 @@
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Plus;
 
 namespace API.Helpers.Builders;
 
@@ -21,15 +22,17 @@ public class AppUserCollectionBuilder : IEntityBuilder<AppUserCollection>
             Promoted = promoted,
             Summary = string.Empty,
             AgeRating = AgeRating.Unknown,
+            Source = ScrobbleProvider.Kavita,
             Items = new List<Series>()
         };
     }
 
-    public AppUserCollectionBuilder WithId(int id)
+    public AppUserCollectionBuilder WithSource(ScrobbleProvider provider)
     {
-        _collection.Id = id;
+        _collection.Source = provider;
         return this;
     }
+
 
     public AppUserCollectionBuilder WithSummary(string summary)
     {

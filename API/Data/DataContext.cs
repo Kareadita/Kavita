@@ -36,6 +36,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
+    [Obsolete]
     public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
     public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
     public DbSet<ReadingList> ReadingList { get; set; } = null!;
