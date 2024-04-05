@@ -380,5 +380,10 @@ export class CardItemComponent implements OnInit {
       //   this.actions = this.actions.filter(a => a.title !== 'Send To');
       // }
     }
+
+    // this.actions = this.actions.filter(a => {
+    //   if (!a.isAllowed) return true;
+    //   return a.isAllowed(a, this.entity);
+    // });
   }
 }

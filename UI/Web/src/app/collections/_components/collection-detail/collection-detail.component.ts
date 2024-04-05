@@ -52,6 +52,8 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {AccountService} from "../../../_services/account.service";
+import {User} from "../../../_models/user";
 
 @Component({
   selector: 'app-collection-detail',
@@ -73,6 +75,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private readonly seriesService = inject(SeriesService);
   private readonly toastr = inject(ToastrService);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
   private readonly titleService = inject(Title);
   private readonly jumpbarService = inject(JumpbarService);
@@ -96,6 +99,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   summary: string = '';
+  user!: User;
 
   actionInProgress: boolean = false;
   filterActiveCheck!: SeriesFilterV2;
@@ -200,6 +204,11 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
   ngOnInit(): void {
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      if (!user) return;
+      this.user = user;
+      this.cdRef.markForCheck();
+    });
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
       if (event.event == EVENTS.SeriesAddedToCollection) {
@@ -277,6 +286,10 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   handleCollectionActionCallback(action: ActionItem<UserCollection>, collectionTag: UserCollection) {
+    if (collectionTag.owner != this.user.username) {
+      this.toastr.error(translate('toasts.collection-not-owned'));
+      return;
+    }
     switch (action.action) {
       case(Action.Edit):
         this.openEditCollectionTagModal(this.collectionTag);

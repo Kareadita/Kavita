@@ -28,7 +28,7 @@ import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
@@ -109,6 +109,7 @@ export class AllCollectionsComponent implements OnInit {
   handleCollectionActionCallback(action: ActionItem<UserCollection>, collectionTag: UserCollection) {
 
     if (collectionTag.owner != this.user.username) {
+      this.toastr.error(translate('toasts.collection-not-owned'));
       return;
     }
 

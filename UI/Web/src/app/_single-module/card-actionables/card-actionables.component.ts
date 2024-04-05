@@ -53,6 +53,7 @@ export class CardActionablesComponent implements OnInit {
       if (!this.isAdmin && this.actions.filter(a => !a.requiresAdmin).length === 0) {
         this.actions = [];
       }
+
       this.cdRef.markForCheck();
     });
   }

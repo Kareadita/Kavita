@@ -2172,7 +2172,8 @@
         "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key",
         "anilist-token-expired": "Your AniList token is expired. Scrobbling will no longer process until you re-generate it in User Settings > Account",
         "collection-tag-deleted": "Collection Tag deleted",
-        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated"
+        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated",
+        "collection-not-owned": "You do not own this collection"
     },
 
     "actionable": {
