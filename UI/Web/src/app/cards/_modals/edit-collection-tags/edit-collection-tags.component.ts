@@ -24,7 +24,7 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
@@ -39,7 +39,8 @@ enum TabID {
 @Component({
   selector: 'app-edit-collection-tags',
   standalone: true,
-  imports: [CommonModule, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination, CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective],
+  imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
+    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
