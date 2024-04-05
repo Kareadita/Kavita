@@ -48,6 +48,18 @@ public class CollectionController : BaseApiController
         return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(User.GetUserId(), !ownedOnly));
     }
 
+    /// <summary>
+    /// Returns all collections that contain the Series for the user with the option to allow for promoted collections (non-user owned)
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="ownedOnly"></param>
+    /// <returns></returns>
+    [HttpGet("all-series")]
+    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetCollectionsBySeries(int seriesId, bool ownedOnly = false)
+    {
+        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosBySeriesAsync(User.GetUserId(), seriesId, !ownedOnly));
+    }
+
 
     /// <summary>
     /// Checks if a collection exists with the name
@@ -160,7 +172,9 @@ public class CollectionController : BaseApiController
         try
         {
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
-            if (user == null || user.Collections.All(c => c.Id != tagId)) return Unauthorized();
+            if (user == null) return Unauthorized();
+            if (user.Collections.All(c => c.Id != tagId))
+                return BadRequest(await _localizationService.Translate(user.Id, "access-denied"));
 
             if (await _collectionService.DeleteTag(tagId, user))
             {

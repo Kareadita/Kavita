@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { map, Observable, shareReplay } from 'rxjs';
 import { Chapter } from '../_models/chapter';
-import { CollectionTag } from '../_models/collection-tag';
+import {UserCollection} from '../_models/collection-tag';
 import { Device } from '../_models/device/device';
 import { Library } from '../_models/library/library';
 import { ReadingList } from '../_models/reading-list';
@@ -132,7 +132,7 @@ export class ActionFactoryService {
 
   chapterActions: Array<ActionItem<Chapter>> = [];
 
-  collectionTagActions: Array<ActionItem<CollectionTag>> = [];
+  collectionTagActions: Array<ActionItem<UserCollection>> = [];
 
   readingListActions: Array<ActionItem<ReadingList>> = [];
 
@@ -177,7 +177,7 @@ export class ActionFactoryService {
     return this.applyCallbackToList(this.chapterActions, callback);
   }
 
-  getCollectionTagActions(callback: (action: ActionItem<CollectionTag>, collectionTag: CollectionTag) => void) {
+  getCollectionTagActions(callback: (action: ActionItem<UserCollection>, collectionTag: UserCollection) => void) {
 		return this.applyCallbackToList(this.collectionTagActions, callback);
   }
 

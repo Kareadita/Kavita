@@ -1378,6 +1378,65 @@
         }
       }
     },
+    "/api/Collection/all-series": {
+      "get": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Returns all collections that contain the Series for the user with the option to allow for promoted collections (non-user owned)",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Collection/name-exists": {
       "get": {
         "tags": [
@@ -18924,14 +18983,6 @@
           },
           "summary": {
             "type": "string",
-            "nullable": true
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
-            },
-            "description": "Collections the Series belongs to",
             "nullable": true
           },
           "genres": {

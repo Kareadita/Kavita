@@ -1282,7 +1282,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId)
     {
-        var metadataDto = await _context.SeriesMetadata
+        return await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
@@ -1291,20 +1291,6 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
-
-        if (metadataDto != null)
-        {
-            metadataDto.CollectionTags = await _context.CollectionTag
-                .Include(t => t.SeriesMetadatas)
-                .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
-                .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .OrderBy(t => t.Title.ToLower())
-                .AsSplitQuery()
-                .ToListAsync();
-        }
-
-        return metadataDto;
     }
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams)

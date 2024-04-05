@@ -23,7 +23,7 @@ import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection
 import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
-import {CollectionTag, UserCollection} from 'src/app/_models/collection-tag';
+import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
@@ -276,7 +276,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  handleCollectionActionCallback(action: ActionItem<CollectionTag>, collectionTag: CollectionTag) {
+  handleCollectionActionCallback(action: ActionItem<UserCollection>, collectionTag: UserCollection) {
     switch (action.action) {
       case(Action.Edit):
         this.openEditCollectionTagModal(this.collectionTag);
@@ -298,7 +298,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  openEditCollectionTagModal(collectionTag: CollectionTag) {
+  openEditCollectionTagModal(collectionTag: UserCollection) {
     const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
     modalRef.componentInstance.tag = this.collectionTag;
     modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {

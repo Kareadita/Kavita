@@ -1,11 +1,20 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {CommonModule} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-card-actionables',
@@ -16,6 +25,10 @@ import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardActionablesComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input() iconClass = 'fa-ellipsis-v';
   @Input() btnClass = '';
@@ -29,10 +42,9 @@ export class CardActionablesComponent implements OnInit {
   canDownload: boolean = false;
   submenu: {[key: string]: NgbDropdown} = {};
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private accountService: AccountService) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((user) => {
       if (!user) return;
       this.isAdmin = this.accountService.hasAdminRole(user);
       this.canDownload = this.accountService.hasDownloadRole(user);

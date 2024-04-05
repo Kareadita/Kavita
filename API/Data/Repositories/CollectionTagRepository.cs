@@ -50,6 +50,7 @@ public interface ICollectionTagRepository
     /// <param name="includePromoted"></param>
     /// <returns></returns>
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false);
+    Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false);
 
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title, int userId);
@@ -68,7 +69,6 @@ public class CollectionTagRepository : ICollectionTagRepository
         _context = context;
         _mapper = mapper;
     }
-
 
     public void Remove(AppUserCollection tag)
     {
@@ -109,6 +109,18 @@ public class CollectionTagRepository : ICollectionTagRepository
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.AppUserCollection
             .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
+            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .OrderBy(uc => uc.Title)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.AppUserCollection
+            .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
+            .Where(uc => uc.Items.Any(s => s.Id == seriesId))
             .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)

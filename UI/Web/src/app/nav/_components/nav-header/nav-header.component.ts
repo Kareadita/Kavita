@@ -14,7 +14,7 @@ import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/rout
 import {fromEvent} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
-import {CollectionTag} from 'src/app/_models/collection-tag';
+import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -249,7 +249,7 @@ export class NavHeaderComponent implements OnInit {
     this.router.navigate(['library', item.id]);
   }
 
-  clickCollectionSearchResult(item: CollectionTag) {
+  clickCollectionSearchResult(item: UserCollection) {
     this.clearSearch();
     this.router.navigate(['collections', item.id]);
   }

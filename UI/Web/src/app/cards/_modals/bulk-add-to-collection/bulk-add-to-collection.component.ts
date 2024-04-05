@@ -13,7 +13,7 @@ import {
 import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import {CollectionTag, UserCollection} from 'src/app/_models/collection-tag';
+import {UserCollection} from 'src/app/_models/collection-tag';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
@@ -84,7 +84,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
     });
   }
 
-  addToCollection(tag: CollectionTag) {
+  addToCollection(tag: UserCollection) {
     if (this.seriesIds.length === 0) return;
 
     this.collectionService.addByMultiple(tag.id, this.seriesIds, '').subscribe(() => {

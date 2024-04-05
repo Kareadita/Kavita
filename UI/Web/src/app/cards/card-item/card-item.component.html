@@ -63,7 +63,9 @@
         </span>
       </div>
       @if (subtitleTemplate) {
-        <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+        <div style="text-align: center">
+          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+        </div>
       }
       @if (!suppressLibraryLink && libraryName) {
         <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">

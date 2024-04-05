@@ -35,13 +35,16 @@
   </app-metadata-detail>
 
   <!-- Collections -->
-  <app-metadata-detail [tags]="seriesMetadata.collectionTags" [libraryId]="series.libraryId" [heading]="t('collections-title')">
-    <ng-template #itemTemplate let-item>
-      <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-        {{item.title}}
-      </app-tag-badge>
-    </ng-template>
-  </app-metadata-detail>
+  @if (collections$) {
+    <app-metadata-detail [tags]="(collections$ | async)!" [libraryId]="series.libraryId" [heading]="t('collections-title')">
+      <ng-template #itemTemplate let-item>
+        <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
+          <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon> {{item.title}}
+        </app-tag-badge>
+      </ng-template>
+    </app-metadata-detail>
+  }
+
 
   <!-- Reading Lists -->
   <app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" [heading]="t('reading-lists-title')">

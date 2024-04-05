@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import {CollectionTag, UserCollection} from '../_models/collection-tag';
+import {UserCollection} from '../_models/collection-tag';
 import { TextResonse } from '../_types/text-response';
 import { ImageService } from './image.service';
 import {MalStack} from "../_models/collection/mal-stack";
@@ -20,11 +19,15 @@ export class CollectionTagService {
     return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
   }
 
+  allCollectionsForSeries(seriesId: number, ownedOnly = false) {
+    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection/all-series?ownedOnly=' + ownedOnly + '&seriesId=' + seriesId);
+  }
+
   updateTag(tag: UserCollection) {
     return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
   }
 
-  updateSeriesForTag(tag: CollectionTag, seriesIdsToRemove: Array<number>) {
+  updateSeriesForTag(tag: UserCollection, seriesIdsToRemove: Array<number>) {
     return this.httpClient.post(this.baseUrl + 'collection/update-series', {tag, seriesIdsToRemove}, TextResonse);
   }
 

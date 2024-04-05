@@ -20,6 +20,7 @@ export class MetadataDetailComponent {
 
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly utilityService = inject(UtilityService);
+
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly Breakpoint = Breakpoint;
 

@@ -14,7 +14,7 @@ import { filter, map } from 'rxjs/operators';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { CollectionTag } from 'src/app/_models/collection-tag';
+import { UserCollection } from 'src/app/_models/collection-tag';
 import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
@@ -113,7 +113,7 @@ export class CardItemComponent implements OnInit {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input({required: true}) entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem | NextExpectedChapter;
+  @Input({required: true}) entity!: Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter;
   /**
    * If the entity is selected or not.
    */
@@ -351,7 +351,7 @@ export class CardItemComponent implements OnInit {
 
 
   isPromoted() {
-    const tag = this.entity as CollectionTag;
+    const tag = this.entity as UserCollection;
     return tag.hasOwnProperty('promoted') && tag.promoted;
   }
 

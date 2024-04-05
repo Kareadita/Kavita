@@ -13,7 +13,7 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {map, of} from 'rxjs';
 import {Observable} from 'rxjs/internal/Observable';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import {CollectionTag, UserCollection} from 'src/app/_models/collection-tag';
+import {UserCollection} from 'src/app/_models/collection-tag';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Tag} from 'src/app/_models/tag';
 import {AccountService} from 'src/app/_services/account.service';
@@ -34,6 +34,7 @@ import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
+import {User} from "../../../_models/user";
 
 
 @Component({
@@ -61,16 +62,23 @@ export class AllCollectionsComponent implements OnInit {
 
   isLoading: boolean = true;
   collections: UserCollection[] = [];
-  collectionTagActions: ActionItem<CollectionTag>[] = [];
+  collectionTagActions: ActionItem<UserCollection>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
   isAdmin$: Observable<boolean> = of(false);
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  trackByIdentity = (index: number, item: CollectionTag) => `${item.id}_${item.title}`;
+  trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}`;
+  user!: User;
 
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - ' + this.translocoService.translate('all-collections.title'));
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      if (user) {
+        this.user = user;
+        this.cdRef.markForCheck();
+      }
+    });
   }
 
   ngOnInit() {
@@ -83,9 +91,8 @@ export class AllCollectionsComponent implements OnInit {
     }));
   }
 
-  loadCollection(item: CollectionTag) {
+  loadCollection(item: UserCollection) {
     this.router.navigate(['collections', item.id]);
-    this.loadPage();
   }
 
   loadPage() {
@@ -99,7 +106,12 @@ export class AllCollectionsComponent implements OnInit {
     });
   }
 
-  handleCollectionActionCallback(action: ActionItem<CollectionTag>, collectionTag: CollectionTag) {
+  handleCollectionActionCallback(action: ActionItem<UserCollection>, collectionTag: UserCollection) {
+
+    if (collectionTag.owner != this.user.username) {
+      return;
+    }
+
     switch (action.action) {
       case(Action.Delete):
         this.collectionService.deleteTag(collectionTag.id).subscribe(res => {

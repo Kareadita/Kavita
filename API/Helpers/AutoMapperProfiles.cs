@@ -144,10 +144,6 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(
                         src => src.Genres.OrderBy(p => p.NormalizedTitle)))
-            .ForMember(dest => dest.CollectionTags,
-                opt =>
-                    opt.MapFrom(
-                        src => src.CollectionTags.OrderBy(p => p.NormalizedTitle)))
             .ForMember(dest => dest.Tags,
                 opt =>
                     opt.MapFrom(
