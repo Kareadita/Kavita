@@ -45,7 +45,7 @@
 
       <div class="card-overlay"></div>
       @if (overlayInformation | safeHtml; as info) {
-        @if (info !== '' ||  info !== undefined) {
+        @if (info !== '' ||  info !== null) {
           <div class="overlay-information {{centerOverlay ? 'overlay-information--centered' : ''}}">
             <div class="position-relative">
               <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="info" placement="top" [innerHTML]="info"></span>
