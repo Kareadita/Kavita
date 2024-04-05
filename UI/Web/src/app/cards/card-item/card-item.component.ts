@@ -45,6 +45,7 @@ import {NextExpectedChapter} from "../../_models/series-detail/next-expected-cha
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
+import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 
 @Component({
   selector: 'app-card-item',
@@ -64,7 +65,8 @@ import {PromotedIconComponent} from "../../shared/_components/promoted-icon/prom
     TranslocoModule,
     SafeHtmlPipe,
     RouterLinkActive,
-    PromotedIconComponent
+    PromotedIconComponent,
+    SeriesFormatComponent
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],
