@@ -6,7 +6,6 @@ using API.Data.Repositories;
 using API.DTOs.Collection;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;

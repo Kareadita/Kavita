@@ -498,7 +498,7 @@ public class UserRepository : IUserRepository
     public async Task<IList<string>> GetRoles(int userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return ArraySegment<string>.Empty;
+        if (user == null || _userManager == null) return ArraySegment<string>.Empty; // userManager is null on Unit Tests only
 
         return await _userManager.GetRolesAsync(user);
     }
