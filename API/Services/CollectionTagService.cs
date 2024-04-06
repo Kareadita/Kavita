@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Collection;
 using API.Entities;
@@ -64,7 +65,11 @@ public class CollectionTagService : ICollectionTagService
             existingTag.NormalizedTitle = dto.Title.ToNormalized();
         }
 
-        existingTag.Promoted = dto.Promoted;
+        var roles = await _unitOfWork.UserRepository.GetRoles(userId);
+        if (roles.Contains(PolicyConstants.AdminRole) || roles.Contains(PolicyConstants.PromoteRole))
+        {
+            existingTag.Promoted = dto.Promoted;
+        }
         existingTag.CoverImageLocked = dto.CoverImageLocked;
         _unitOfWork.CollectionTagRepository.Update(existingTag);
 

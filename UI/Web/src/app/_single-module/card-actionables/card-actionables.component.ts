@@ -40,6 +40,7 @@ export class CardActionablesComponent implements OnInit {
 
   isAdmin: boolean = false;
   canDownload: boolean = false;
+  canPromote: boolean = false;
   submenu: {[key: string]: NgbDropdown} = {};
 
 
@@ -48,6 +49,7 @@ export class CardActionablesComponent implements OnInit {
       if (!user) return;
       this.isAdmin = this.accountService.hasAdminRole(user);
       this.canDownload = this.accountService.hasDownloadRole(user);
+      this.canPromote = this.accountService.hasPromoteRole(user);
 
       // We want to avoid an empty menu when user doesn't have access to anything
       if (!this.isAdmin && this.actions.filter(a => !a.requiresAdmin).length === 0) {
@@ -74,7 +76,10 @@ export class CardActionablesComponent implements OnInit {
   willRenderAction(action: ActionItem<any>) {
     return (action.requiresAdmin && this.isAdmin)
         || (action.action === Action.Download && (this.canDownload || this.isAdmin))
-        || (!action.requiresAdmin && action.action !== Action.Download);
+        || (!action.requiresAdmin && action.action !== Action.Download)
+        || (action.action === Action.Promote && (this.canPromote || this.isAdmin))
+        || (action.action === Action.UnPromote && (this.canPromote || this.isAdmin))
+      ;
   }
 
   shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {

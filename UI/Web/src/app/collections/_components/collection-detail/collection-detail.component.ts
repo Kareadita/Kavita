@@ -203,12 +203,14 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit(): void {
-    this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
       this.user = user;
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this))
+        .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
+
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
       if (event.event == EVENTS.SeriesAddedToCollection) {

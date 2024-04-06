@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Collection;
@@ -107,6 +108,11 @@ public class CollectionController : BaseApiController
         // This needs to take into account owner as I can select other users cards
         var collections = await _unitOfWork.CollectionTagRepository.GetCollectionsByIds(dto.CollectionIds);
         var userId = User.GetUserId();
+
+        if (!User.IsInRole(PolicyConstants.PromoteRole) && !User.IsInRole(PolicyConstants.AdminRole))
+        {
+            return BadRequest(await _localizationService.Translate(userId, "permission-denied"));
+        }
 
         foreach (var collection in collections)
         {

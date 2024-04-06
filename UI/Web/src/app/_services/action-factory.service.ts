@@ -153,13 +153,11 @@ export class ActionFactoryService {
   sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
 
   isAdmin = false;
-  hasDownloadRole = false;
 
   constructor(private accountService: AccountService, private deviceService: DeviceService) {
     this.accountService.currentUser$.subscribe((user) => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
-        this.hasDownloadRole = this.accountService.hasDownloadRole(user);
       } else {
         this._resetActions();
         return; // If user is logged out, we don't need to do anything

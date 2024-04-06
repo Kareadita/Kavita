@@ -58,6 +58,7 @@ public interface IUserRepository
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
+    Task<IList<string>> GetRoles(int userId);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
@@ -492,6 +493,14 @@ public class UserRepository : IUserRepository
     {
         if (user == null) return false;
         return await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+    }
+
+    public async Task<IList<string>> GetRoles(int userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return ArraySegment<string>.Empty;
+
+        return await _userManager.GetRolesAsync(user);
     }
 
     public async Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId)

@@ -107,8 +107,15 @@ export class AllCollectionsComponent implements OnInit {
 
   ngOnInit() {
     this.loadPage();
-    this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
-    this.cdRef.markForCheck();
+
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      if (!user) return;
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this))
+        .filter(action => this.collectionService.actionListFilter(action, user));
+      this.cdRef.markForCheck();
+    });
+
+
     this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(user => {
       if (!user) return false;
       return this.accountService.hasAdminRole(user);

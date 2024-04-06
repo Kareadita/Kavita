@@ -21,7 +21,9 @@ export enum Role {
   Bookmark = 'Bookmark',
   Download = 'Download',
   ChangeRestriction = 'Change Restriction',
-  ReadOnly = 'Read Only'
+  ReadOnly = 'Read Only',
+  Login = 'Login',
+  Promote = 'Promote',
 }
 
 @Injectable({
@@ -94,6 +96,10 @@ export class AccountService {
 
   hasReadOnlyRole(user: User) {
     return user && user.roles.includes(Role.ReadOnly);
+  }
+
+  hasPromoteRole(user: User) {
+    return user && user.roles.includes(Role.Promote) || user.roles.includes(Role.Admin);
   }
 
   getRoles() {

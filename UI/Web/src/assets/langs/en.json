@@ -1381,9 +1381,9 @@
         "promote-label": "Promote",
         "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.",
         "summary-label": "Summary",
-        "series-title": "Applies to Series",
         "deselect-all": "{{common.deselect-all}}",
-        "select-all": "{{common.select-all}}"
+        "select-all": "{{common.select-all}}",
+        "filter-label": "{{common.filter}}"
     },
 
     "library-detail": {

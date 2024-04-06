@@ -28,6 +28,9 @@ import {CommonModule, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
+import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
+import {AccountService} from "../../../_services/account.service";
 
 
 enum TabID {
@@ -40,7 +43,7 @@ enum TabID {
   selector: 'app-edit-collection-tags',
   standalone: true,
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
-    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet],
+    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -58,12 +61,14 @@ export class EditCollectionTagsComponent implements OnInit {
   private readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
   @Input({required: true}) tag!: UserCollection;
+
   series: Array<Series> = [];
   selections!: SelectionModel<Series>;
   isLoading: boolean = true;
@@ -75,10 +80,16 @@ export class EditCollectionTagsComponent implements OnInit {
   active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
+  formGroup = new FormGroup({'filter': new FormControl('', [])});
 
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
+  }
+
+  filterList = (listItem: Series) => {
+    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(query) >= 0 || listItem.localizedName.toLowerCase().indexOf(query) >= 0;
   }
 
 
@@ -98,6 +109,15 @@ export class EditCollectionTagsComponent implements OnInit {
       this.collectionTagForm.get('title')?.disable();
       this.collectionTagForm.get('summary')?.disable();
     }
+
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      if (!user) return;
+      if (!this.accountService.hasPromoteRole(user)) {
+        this.collectionTagForm.get('promoted')?.disable();
+        this.cdRef.markForCheck();
+      }
+    });
+
 
     this.collectionTagForm.get('title')?.valueChanges.pipe(
       debounceTime(100),
