@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   EventEmitter,
+  HostListener,
   inject,
   OnInit
 } from '@angular/core';
@@ -22,7 +23,7 @@ import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
+import {AsyncPipe, DecimalPipe} from '@angular/common';
 import {CardItemComponent} from '../../../cards/card-item/card-item.component';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {
@@ -35,6 +36,11 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
 import {User} from "../../../_models/user";
+import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
+import {ActionService} from "../../../_services/action.service";
+import {KEY_CODES} from "../../../shared/_services/utility.service";
 
 
 @Component({
@@ -43,7 +49,7 @@ import {User} from "../../../_models/user";
   styleUrls: ['./all-collections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent]
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, BulkOperationsComponent, SeriesCardComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 
@@ -59,6 +65,10 @@ export class AllCollectionsComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly imageService = inject(ImageService);
   public readonly accountService = inject(AccountService);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly actionService = inject(ActionService);
+
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 
   isLoading: boolean = true;
   collections: UserCollection[] = [];
@@ -68,6 +78,20 @@ export class AllCollectionsComponent implements OnInit {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}`;
   user!: User;
+
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+    }
+  }
 
 
   constructor() {
@@ -114,6 +138,12 @@ export class AllCollectionsComponent implements OnInit {
     }
 
     switch (action.action) {
+      case Action.Promote:
+        this.collectionService.promoteMultipleCollections([collectionTag.id], true).subscribe();
+        break;
+      case Action.UnPromote:
+        this.collectionService.promoteMultipleCollections([collectionTag.id], false).subscribe();
+        break;
       case(Action.Delete):
         this.collectionService.deleteTag(collectionTag.id).subscribe(res => {
           this.toastr.success(res);
@@ -133,5 +163,32 @@ export class AllCollectionsComponent implements OnInit {
     }
   }
 
-  protected readonly ScrobbleProvider = ScrobbleProvider;
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
+    const selectedCollectionIndexies = this.bulkSelectionService.getSelectedCardsForSource('collection');
+    const selectedCollections = this.collections.filter((col, index: number) => selectedCollectionIndexies.includes(index + ''));
+
+    switch (action.action) {
+      case Action.Promote:
+        this.actionService.promoteMultipleCollections(selectedCollections, true, (success) => {
+          if (!success) return;
+          this.bulkSelectionService.deselectAll();
+          this.loadPage();
+        });
+        break;
+      case Action.UnPromote:
+        this.actionService.promoteMultipleCollections(selectedCollections, false, (success) => {
+          if (!success) return;
+          this.bulkSelectionService.deselectAll();
+          this.loadPage();
+        });
+        break;
+      case Action.Delete:
+        this.actionService.deleteMultipleCollections(selectedCollections, (successful) => {
+          if (!successful) return;
+          this.loadPage();
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+    }
+  }
 }

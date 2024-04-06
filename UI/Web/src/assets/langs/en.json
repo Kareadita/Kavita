@@ -2173,7 +2173,12 @@
         "anilist-token-expired": "Your AniList token is expired. Scrobbling will no longer process until you re-generate it in User Settings > Account",
         "collection-tag-deleted": "Collection Tag deleted",
         "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated",
-        "collection-not-owned": "You do not own this collection"
+        "collection-not-owned": "You do not own this collection",
+        "collections-promoted": "Collections promoted",
+        "collections-unpromoted": "Collections un-promoted",
+        "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
+        "collections-deleted": "Collections deleted"
+
     },
 
     "actionable": {
@@ -2207,7 +2212,9 @@
         "remove-rule-group": "Remove Rule Group",
         "customize": "Customize",
         "mark-visible": "Mark as Visible",
-        "mark-invisible": "Mark as Invisible"
+        "mark-invisible": "Mark as Invisible",
+        "unpromote": "Un-Promote",
+        "promote": "Promote"
     },
 
     "preferences": {

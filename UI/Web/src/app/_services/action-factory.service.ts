@@ -98,6 +98,11 @@ export enum Action {
   RemoveRuleGroup = 21,
   MarkAsVisible = 22,
   MarkAsInvisible = 23,
+  /**
+   * Promotes the underlying item (Reading List, Collection)
+   */
+  Promote = 24,
+  UnPromote = 25
 }
 
 /**
@@ -276,6 +281,20 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
         requiresAdmin: false,
         class: 'danger',
+        children: [],
+      },
+      {
+        action: Action.Promote,
+        title: 'promote',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.UnPromote,
+        title: 'unpromote',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
         children: [],
       },
     ];

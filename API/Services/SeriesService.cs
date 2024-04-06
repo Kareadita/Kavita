@@ -397,7 +397,7 @@ public class SeriesService : ISeriesService
             }
 
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-            await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+            await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
             _taskScheduler.CleanupChapters(allChapterIds.ToArray());
             return true;
         }

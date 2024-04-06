@@ -37,10 +37,9 @@ public interface ICollectionTagRepository
 {
     void Remove(AppUserCollection tag);
     Task<string?> GetCoverImageAsync(int collectionTagId);
-    Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None);
     void Update(AppUserCollection tag);
-    Task<int> RemoveTagsWithoutSeries();
+    Task<int> RemoveCollectionsWithoutSeries();
 
     Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None);
     /// <summary>
@@ -53,11 +52,12 @@ public interface ICollectionTagRepository
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false);
 
     Task<IList<string>> GetAllCoverImagesAsync();
-    Task<bool> TagExists(string title, int userId);
+    Task<bool> CollectionExists(string title, int userId);
     Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IList<string>> GetRandomCoverImagesAsync(int collectionId);
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None);
-    Task UpdateTagAgeRating(AppUserCollection tag);
+    Task UpdateCollectionAgeRating(AppUserCollection tag);
+    Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -83,7 +83,7 @@ public class CollectionTagRepository : ICollectionTagRepository
     /// <summary>
     /// Removes any collection tags without any series
     /// </summary>
-    public async Task<int> RemoveTagsWithoutSeries()
+    public async Task<int> RemoveCollectionsWithoutSeries()
     {
         var tagsToDelete = await _context.AppUserCollection
             .Include(c => c.Items)
@@ -157,7 +157,7 @@ public class CollectionTagRepository : ICollectionTagRepository
     /// <param name="title"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<bool> TagExists(string title, int userId)
+    public async Task<bool> CollectionExists(string title, int userId)
     {
         var normalized = title.ToNormalized();
         return await _context.AppUserCollection
@@ -197,7 +197,7 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
-    public async Task UpdateTagAgeRating(AppUserCollection tag)
+    public async Task UpdateCollectionAgeRating(AppUserCollection tag)
     {
         var maxAgeRating = await _context.AppUserCollection
             .Where(t => t.Id == tag.Id)
@@ -206,6 +206,15 @@ public class CollectionTagRepository : ICollectionTagRepository
             .MaxAsync();
         tag.AgeRating = maxAgeRating;
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None)
+    {
+        return await _context.AppUserCollection
+            .Where(c => tags.Contains(c.Id))
+            .Includes(includes)
+            .AsSplitQuery()
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
@@ -230,15 +239,6 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
-
-    public async Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None)
-    {
-        return await _context.CollectionTag
-            .Where(c => c.Id == tagId)
-            .Includes(includes)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync();
-    }
 
     public async Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None)
     {

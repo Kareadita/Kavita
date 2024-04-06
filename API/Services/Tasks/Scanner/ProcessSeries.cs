@@ -391,7 +391,7 @@ public class ProcessSeries : IProcessSeries
                 }
 
                 tag.Items.Add(series);
-                await _unitOfWork.CollectionTagRepository.UpdateTagAgeRating(tag);
+                await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
             }
         }
 

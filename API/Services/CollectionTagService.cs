@@ -54,7 +54,7 @@ public class CollectionTagService : ICollectionTagService
         if (string.IsNullOrEmpty(title)) throw new KavitaException("collection-tag-title-required");
 
         // Ensure the title doesn't exist on the user's account already
-        if (!title.Equals(existingTag.Title) && await _unitOfWork.CollectionTagRepository.TagExists(dto.Title, userId))
+        if (!title.Equals(existingTag.Title) && await _unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, userId))
             throw new KavitaException("collection-tag-duplicate");
 
         existingTag.Items ??= new List<Series>();
@@ -113,7 +113,7 @@ public class CollectionTagService : ICollectionTagService
         var result  =  await _unitOfWork.CommitAsync();
         if (tag.Items.Count > 0)
         {
-            await _unitOfWork.CollectionTagRepository.UpdateTagAgeRating(tag);
+            await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
         }
 
         return result;

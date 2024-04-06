@@ -3,6 +3,7 @@
     <h2 title>{{t('title')}}</h2>
     <h6 subtitle>{{t('item-count', {num: collections.length | number})}}</h6>
   </app-side-nav-companion-bar>
+  <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
   <app-card-detail-layout
     [isLoading]="isLoading"
     [items]="collections"
@@ -13,7 +14,9 @@
     <ng-template #cardItem let-item let-position="idx">
       <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions"
                      [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                     (clicked)="loadCollection(item)">
+                     (clicked)="loadCollection(item)"
+                     (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
+                     [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true">
 
         <ng-template #subtitle>
           <app-collection-owner [collection]="item"></app-collection-owner>

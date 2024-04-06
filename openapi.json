@@ -1510,6 +1510,72 @@
         }
       }
     },
+    "/api/Collection/promote-multiple": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Promote/UnPromote multiple collections in one go. Will only update the authenticated user's collections and will only work if the user has promotion role",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/delete-multiple": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Promote/UnPromote multiple collections in one go",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Collection/update-for-series": {
       "post": {
         "tags": [
@@ -17335,6 +17401,23 @@
           "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromoteCollectionsDto": {
+        "type": "object",
+        "properties": {
+          "collectionIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

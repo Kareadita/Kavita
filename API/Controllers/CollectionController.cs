@@ -69,7 +69,7 @@ public class CollectionController : BaseApiController
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.TagExists(name, User.GetUserId()));
+        return Ok(await _unitOfWork.CollectionTagRepository.CollectionExists(name, User.GetUserId()));
     }
 
     /// <summary>
@@ -94,6 +94,53 @@ public class CollectionController : BaseApiController
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+    }
+
+    /// <summary>
+    /// Promote/UnPromote multiple collections in one go. Will only update the authenticated user's collections and will only work if the user has promotion role
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("promote-multiple")]
+    public async Task<ActionResult> PromoteMultipleCollections(PromoteCollectionsDto dto)
+    {
+        // This needs to take into account owner as I can select other users cards
+        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionsByIds(dto.CollectionIds);
+        var userId = User.GetUserId();
+
+        foreach (var collection in collections)
+        {
+            if (collection.AppUserId != userId) continue;
+            collection.Promoted = dto.Promoted;
+            _unitOfWork.CollectionTagRepository.Update(collection);
+        }
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
+
+
+    /// <summary>
+    /// Promote/UnPromote multiple collections in one go
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("delete-multiple")]
+    public async Task<ActionResult> DeleteMultipleCollections(PromoteCollectionsDto dto)
+    {
+        // This needs to take into account owner as I can select other users cards
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+        if (user == null) return Unauthorized();
+        user.Collections = user.Collections.Where(uc => !dto.CollectionIds.Contains(uc.Id)).ToList();
+        _unitOfWork.UserRepository.Update(user);
+
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
     }
 
     /// <summary>

@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import {UserCollection} from '../_models/collection-tag';
 import { TextResonse } from '../_types/text-response';
-import { ImageService } from './image.service';
 import {MalStack} from "../_models/collection/mal-stack";
 
 @Injectable({
@@ -13,7 +12,7 @@ export class CollectionTagService {
 
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient, private imageService: ImageService) { }
+  constructor(private httpClient: HttpClient) { }
 
   allCollections(ownedOnly = false) {
     return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
@@ -25,6 +24,10 @@ export class CollectionTagService {
 
   updateTag(tag: UserCollection) {
     return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
+  }
+
+  promoteMultipleCollections(tags: Array<number>, promoted: boolean) {
+    return this.httpClient.post(this.baseUrl + 'collection/promote-multiple', {collectionIds: tags, promoted}, TextResonse);
   }
 
   updateSeriesForTag(tag: UserCollection, seriesIdsToRemove: Array<number>) {
@@ -41,6 +44,10 @@ export class CollectionTagService {
 
   deleteTag(tagId: number) {
     return this.httpClient.delete<string>(this.baseUrl + 'collection?tagId=' + tagId, TextResonse);
+  }
+
+  deleteMultipleCollections(tags: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'collection/delete-multiple', {collectionIds: tags}, TextResonse);
   }
 
   getMalStacks() {
