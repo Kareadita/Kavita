@@ -3,6 +3,7 @@ using System.Linq;
 using API.Data.Migrations;
 using API.DTOs;
 using API.DTOs.Account;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Device;
@@ -53,6 +54,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<Chapter, ChapterDto>();
         CreateMap<Series, SeriesDto>();
         CreateMap<CollectionTag, CollectionTagDto>();
+        CreateMap<AppUserCollection, AppUserCollectionDto>()
+            .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName));
         CreateMap<Person, PersonDto>();
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
@@ -141,10 +144,6 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(
                         src => src.Genres.OrderBy(p => p.NormalizedTitle)))
-            .ForMember(dest => dest.CollectionTags,
-                opt =>
-                    opt.MapFrom(
-                        src => src.CollectionTags.OrderBy(p => p.NormalizedTitle)))
             .ForMember(dest => dest.Tags,
                 opt =>
                     opt.MapFrom(

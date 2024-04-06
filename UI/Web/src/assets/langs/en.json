@@ -1381,9 +1381,9 @@
         "promote-label": "Promote",
         "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.",
         "summary-label": "Summary",
-        "series-title": "Applies to Series",
         "deselect-all": "{{common.deselect-all}}",
-        "select-all": "{{common.select-all}}"
+        "select-all": "{{common.select-all}}",
+        "filter-label": "{{common.filter}}"
     },
 
     "library-detail": {
@@ -1527,7 +1527,7 @@
         "skip-alt": "Skip to main content",
         "search-series-alt": "Search series",
         "search-alt": "Search…",
-        "promoted": "(promoted)",
+        "promoted": "{{common.promoted}}",
         "no-data": "No results found",
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
@@ -1538,11 +1538,20 @@
         "all-filters": "Smart Filters"
     },
 
+    "promoted-icon": {
+        "promoted": "{{common.promoted}}"
+    },
+
+    "collection-owner": {
+        "collection-created-label": "Created by: {{owner}}",
+        "collection-via-label": "via {{source}}"
+    },
+
     "add-to-list-modal": {
         "title": "Add to Reading List",
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",
-        "promoted-alt": "Promoted",
+        "promoted-alt": "{{common.promoted}}",
         "no-data": "No lists created yet",
         "loading": "{{common.loading}}",
         "reading-list-label": "Reading List",
@@ -1565,8 +1574,10 @@
         "ending-title": "Ending",
         "starting-title": "Starting",
         "promote-label": "Promote",
-        "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them."
+        "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
     },
+
+
 
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1748,7 +1759,6 @@
         "cover-image-tab": "Cover Image",
         "related-tab": "Related",
         "info-tab": "Info",
-        "collections-label": "Collections",
         "genres-label": "Genres",
         "tags-label": "Tags",
         "cover-artist-label": "Cover Artist",
@@ -2162,7 +2172,13 @@
         "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key",
         "anilist-token-expired": "Your AniList token is expired. Scrobbling will no longer process until you re-generate it in User Settings > Account",
         "collection-tag-deleted": "Collection Tag deleted",
-        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated"
+        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated",
+        "collection-not-owned": "You do not own this collection",
+        "collections-promoted": "Collections promoted",
+        "collections-unpromoted": "Collections un-promoted",
+        "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
+        "collections-deleted": "Collections deleted"
+
     },
 
     "actionable": {
@@ -2196,7 +2212,9 @@
         "remove-rule-group": "Remove Rule Group",
         "customize": "Customize",
         "mark-visible": "Mark as Visible",
-        "mark-invisible": "Mark as Invisible"
+        "mark-invisible": "Mark as Invisible",
+        "unpromote": "Un-Promote",
+        "promote": "Promote"
     },
 
     "preferences": {

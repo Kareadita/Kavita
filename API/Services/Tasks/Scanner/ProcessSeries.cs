@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -371,12 +372,26 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
+            // Get the default admin to associate these tags to
+            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
+            if (defaultAdmin == null) return;
+
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
             foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
-                var t = await _tagManagerService.GetCollectionTag(collection);
-                if (t == null) continue;
-                _collectionTagService.AddTagToSeriesMetadata(t, series.Metadata);
+                var t = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
+                if (t.Item1 == null) continue;
+
+                var tag = t.Item1;
+
+                // Check if the Series is already on the tag
+                if (tag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
+                {
+                    continue;
+                }
+
+                tag.Items.Add(series);
+                await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
             }
         }
 

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -15,25 +7,30 @@ import {
   NgbNavItem,
   NgbNavLink,
   NgbNavOutlet,
-  NgbPagination, NgbTooltip
+  NgbPagination,
+  NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, forkJoin, switchMap, tap } from 'rxjs';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
-import { CollectionTag } from 'src/app/_models/collection-tag';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { CollectionTagService } from 'src/app/_services/collection-tag.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { UploadService } from 'src/app/_services/upload.service';
+import {ToastrService} from 'ngx-toastr';
+import {debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {SelectionModel} from 'src/app/typeahead/_components/typeahead.component';
+import {UserCollection} from 'src/app/_models/collection-tag';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {CollectionTagService} from 'src/app/_services/collection-tag.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
+import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
+import {AccountService} from "../../../_services/account.service";
 
 
 enum TabID {
@@ -45,14 +42,33 @@ enum TabID {
 @Component({
   selector: 'app-edit-collection-tags',
   standalone: true,
-  imports: [CommonModule, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination, CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective],
+  imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
+    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditCollectionTagsComponent implements OnInit {
 
-  @Input({required: true}) tag!: CollectionTag;
+  public readonly modal = inject(NgbActiveModal);
+  public readonly utilityService = inject(UtilityService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly seriesService = inject(SeriesService);
+  private readonly collectionService = inject(CollectionTagService);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly imageService = inject(ImageService);
+  private readonly uploadService = inject(UploadService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+
+  @Input({required: true}) tag!: UserCollection;
+
   series: Array<Series> = [];
   selections!: SelectionModel<Series>;
   isLoading: boolean = true;
@@ -64,25 +80,18 @@ export class EditCollectionTagsComponent implements OnInit {
   active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
-  private readonly destroyRef = inject(DestroyRef);
+  formGroup = new FormGroup({'filter': new FormControl('', [])});
+
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  get Breakpoint() {
-    return Breakpoint;
+  filterList = (listItem: Series) => {
+    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(query) >= 0 || listItem.localizedName.toLowerCase().indexOf(query) >= 0;
   }
 
-  get TabID() {
-    return TabID;
-  }
-
-  constructor(public modal: NgbActiveModal, private seriesService: SeriesService,
-    private collectionService: CollectionTagService, private toastr: ToastrService,
-    private confirmService: ConfirmService, private libraryService: LibraryService,
-    private imageService: ImageService, private uploadService: UploadService,
-    public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     if (this.pagination == undefined) {
@@ -95,6 +104,20 @@ export class EditCollectionTagsComponent implements OnInit {
       coverImageIndex: new FormControl(0, { nonNullable: true, validators: [] }),
       promoted: new FormControl(this.tag.promoted, { nonNullable: true, validators: [] }),
     });
+
+    if (this.tag.source !== ScrobbleProvider.Kavita) {
+      this.collectionTagForm.get('title')?.disable();
+      this.collectionTagForm.get('summary')?.disable();
+    }
+
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      if (!user) return;
+      if (!this.accountService.hasPromoteRole(user)) {
+        this.collectionTagForm.get('promoted')?.disable();
+        this.cdRef.markForCheck();
+      }
+    });
+
 
     this.collectionTagForm.get('title')?.valueChanges.pipe(
       debounceTime(100),
@@ -169,6 +192,9 @@ export class EditCollectionTagsComponent implements OnInit {
     const unselectedIds = this.selections.unselected().map(s => s.id);
     const tag = this.collectionTagForm.value;
     tag.id = this.tag.id;
+    tag.title = this.collectionTagForm.get('title')!.value;
+    tag.summary = this.collectionTagForm.get('summary')!.value;
+
 
     if (unselectedIds.length == this.series.length &&
       !await this.confirmService.confirm(translate('toasts.no-series-collection-warning'))) {
@@ -177,8 +203,12 @@ export class EditCollectionTagsComponent implements OnInit {
 
     const apis = [
       this.collectionService.updateTag(tag),
-      this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id))
     ];
+
+    const unselectedSeries = this.selections.unselected().map(s => s.id);
+    if (unselectedSeries.length > 0) {
+      apis.push(this.collectionService.updateSeriesForTag(tag, unselectedSeries));
+    }
 
     if (selectedIndex > 0) {
       apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover));
@@ -207,5 +237,4 @@ export class EditCollectionTagsComponent implements OnInit {
     });
     this.cdRef.markForCheck();
   }
-
 }

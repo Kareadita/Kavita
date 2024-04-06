@@ -23,7 +23,7 @@ import {translate} from "@ngneat/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SAVER, Saver} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
-import {CollectionTag} from "../../_models/collection-tag";
+import {UserCollection} from "../../_models/collection-tag";
 import {RecentlyAddedItem} from "../../_models/recently-added-item";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 
@@ -359,7 +359,7 @@ export class DownloadService {
     }
   }
 
-  mapToEntityType(events: DownloadEvent[], entity: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem | NextExpectedChapter) {
+  mapToEntityType(events: DownloadEvent[], entity: Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter) {
     if(this.utilityService.isSeries(entity)) {
       return events.find(e => e.entityType === 'series' && e.id == entity.id
         && e.subTitle === this.downloadSubtitle('series', (entity as Series))) || null;

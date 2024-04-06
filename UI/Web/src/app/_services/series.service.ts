@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { ChapterMetadata } from '../_models/metadata/chapter-metadata';
-import { CollectionTag } from '../_models/collection-tag';
+import { UserCollection } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
@@ -162,16 +162,12 @@ export class SeriesService {
   }
 
   getMetadata(seriesId: number) {
-    return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId).pipe(map(items => {
-      items?.collectionTags.forEach(tag => tag.coverImage = this.imageService.getCollectionCoverImage(tag.id));
-      return items;
-    }));
+    return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId);
   }
 
-  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[]) {
+  updateMetadata(seriesMetadata: SeriesMetadata) {
     const data = {
       seriesMetadata,
-      collectionTags,
     };
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, TextResonse);
   }

@@ -10,6 +10,7 @@ using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -46,6 +47,7 @@ public abstract class AbstractDbTest
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
+
 
         _unitOfWork = new UnitOfWork(_context, mapper, null);
     }

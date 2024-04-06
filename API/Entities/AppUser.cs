@@ -29,6 +29,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public ICollection<ReadingList> ReadingLists { get; set; } = null!;
     /// <summary>
+    /// Collections associated with this user
+    /// </summary>
+    public ICollection<AppUserCollection> Collections { get; set; } = null!;
+    /// <summary>
     /// A list of Series the user want's to read
     /// </summary>
     public ICollection<AppUserWantToRead> WantToRead { get; set; } = null!;

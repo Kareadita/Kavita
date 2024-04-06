@@ -40,6 +40,7 @@ public class WantToReadController : BaseApiController
     /// <summary>
     /// Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)
     /// </summary>
+    /// <remarks>This will be removed in v0.8.x</remarks>
     /// <param name="userParams"></param>
     /// <param name="filterDto"></param>
     /// <returns></returns>

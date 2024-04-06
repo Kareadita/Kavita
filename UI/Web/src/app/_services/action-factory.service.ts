@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { map, Observable, shareReplay } from 'rxjs';
 import { Chapter } from '../_models/chapter';
-import { CollectionTag } from '../_models/collection-tag';
+import {UserCollection} from '../_models/collection-tag';
 import { Device } from '../_models/device/device';
 import { Library } from '../_models/library/library';
 import { ReadingList } from '../_models/reading-list';
@@ -10,6 +10,7 @@ import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 import { DeviceService } from './device.service';
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
+import {User} from "../_models/user";
 
 export enum Action {
   Submenu = -1,
@@ -97,12 +98,23 @@ export enum Action {
   RemoveRuleGroup = 21,
   MarkAsVisible = 22,
   MarkAsInvisible = 23,
+  /**
+   * Promotes the underlying item (Reading List, Collection)
+   */
+  Promote = 24,
+  UnPromote = 25
 }
+
+/**
+ * Callback for an action
+ */
+export type ActionCallback<T> = (action: ActionItem<T>, data: T) => void;
+export type ActionAllowedCallback<T> = (action: ActionItem<T>) => boolean;
 
 export interface ActionItem<T> {
   title: string;
   action: Action;
-  callback: (action: ActionItem<T>, data: T) => void;
+  callback: ActionCallback<T>;
   requiresAdmin: boolean;
   children: Array<ActionItem<T>>;
   /**
@@ -132,7 +144,7 @@ export class ActionFactoryService {
 
   chapterActions: Array<ActionItem<Chapter>> = [];
 
-  collectionTagActions: Array<ActionItem<CollectionTag>> = [];
+  collectionTagActions: Array<ActionItem<UserCollection>> = [];
 
   readingListActions: Array<ActionItem<ReadingList>> = [];
 
@@ -141,13 +153,11 @@ export class ActionFactoryService {
   sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
 
   isAdmin = false;
-  hasDownloadRole = false;
 
   constructor(private accountService: AccountService, private deviceService: DeviceService) {
     this.accountService.currentUser$.subscribe((user) => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
-        this.hasDownloadRole = this.accountService.hasDownloadRole(user);
       } else {
         this._resetActions();
         return; // If user is logged out, we don't need to do anything
@@ -157,39 +167,39 @@ export class ActionFactoryService {
     });
   }
 
-  getLibraryActions(callback: (action: ActionItem<Library>, library: Library) => void) {
+  getLibraryActions(callback: ActionCallback<Library>) {
 		return this.applyCallbackToList(this.libraryActions, callback);
   }
 
-  getSeriesActions(callback: (action: ActionItem<Series>, series: Series) => void) {
+  getSeriesActions(callback: ActionCallback<Series>) {
 		return this.applyCallbackToList(this.seriesActions, callback);
   }
 
-  getSideNavStreamActions(callback: (action: ActionItem<SideNavStream>, series: SideNavStream) => void) {
+  getSideNavStreamActions(callback: ActionCallback<SideNavStream>) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback);
   }
 
-  getVolumeActions(callback: (action: ActionItem<Volume>, volume: Volume) => void) {
+  getVolumeActions(callback: ActionCallback<Volume>) {
 		return this.applyCallbackToList(this.volumeActions, callback);
   }
 
-  getChapterActions(callback: (action: ActionItem<Chapter>, chapter: Chapter) => void) {
+  getChapterActions(callback: ActionCallback<Chapter>) {
     return this.applyCallbackToList(this.chapterActions, callback);
   }
 
-  getCollectionTagActions(callback: (action: ActionItem<CollectionTag>, collectionTag: CollectionTag) => void) {
-		return this.applyCallbackToList(this.collectionTagActions, callback);
+  getCollectionTagActions(callback: ActionCallback<UserCollection>) {
+		return  this.applyCallbackToList(this.collectionTagActions, callback);
   }
 
-  getReadingListActions(callback: (action: ActionItem<ReadingList>, readingList: ReadingList) => void) {
+  getReadingListActions(callback: ActionCallback<ReadingList>) {
     return this.applyCallbackToList(this.readingListActions, callback);
   }
 
-  getBookmarkActions(callback: (action: ActionItem<Series>, series: Series) => void) {
+  getBookmarkActions(callback: ActionCallback<Series>) {
     return this.applyCallbackToList(this.bookmarkActions, callback);
   }
 
-  getMetadataFilterActions(callback: (action: ActionItem<any>, data: any) => void) {
+  getMetadataFilterActions(callback: ActionCallback<any>) {
     const actions = [
       {title: 'add-rule-group-and', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
       {title: 'add-rule-group-or', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
@@ -260,7 +270,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         callback: this.dummyCallback,
-        requiresAdmin: true,
+        requiresAdmin: false,
         children: [],
       },
       {
@@ -269,6 +279,20 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
         requiresAdmin: false,
         class: 'danger',
+        children: [],
+      },
+      {
+        action: Action.Promote,
+        title: 'promote',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.UnPromote,
+        title: 'unpromote',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
         children: [],
       },
     ];
@@ -326,7 +350,7 @@ export class ActionFactoryService {
             action: Action.AddToCollection,
             title: 'add-to-collection',
             callback: this.dummyCallback,
-            requiresAdmin: true,
+            requiresAdmin: false,
             children: [],
           },
         ],

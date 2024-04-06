@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.10"
+    "version": "0.7.14.11"
   },
   "servers": [
     {
@@ -1312,7 +1312,17 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Return a list of all collection tags on the server for the logged in user.",
+        "summary": "Returns all Collection tags for a given User",
+        "parameters": [
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -1321,7 +1331,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1329,7 +1339,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1337,7 +1347,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               }
@@ -1349,7 +1359,7 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Removes the collection tag from all Series it was attached to",
+        "summary": "Removes the collection tag from the user",
         "parameters": [
           {
             "name": "tagId",
@@ -1368,19 +1378,29 @@
         }
       }
     },
-    "/api/Collection/search": {
+    "/api/Collection/all-series": {
       "get": {
         "tags": [
           "Collection"
         ],
-        "summary": "Searches against the collection tags on the DB and returns matches that meet the search criteria.\r\n<remarks>Search strings will be cleaned of certain fields, like %</remarks>",
+        "summary": "Returns all collections that contain the Series for the user with the option to allow for promoted collections (non-user owned)",
         "parameters": [
           {
-            "name": "queryString",
+            "name": "seriesId",
             "in": "query",
-            "description": "Search term",
+            "description": "",
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -1392,7 +1412,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1400,7 +1420,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1408,7 +1428,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               }
@@ -1468,17 +1488,83 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/promote-multiple": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Promote/UnPromote multiple collections in one go. Will only update the authenticated user's collections and will only work if the user has promotion role",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/delete-multiple": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Promote/UnPromote multiple collections in one go",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
               }
             }
           }
@@ -1495,7 +1581,7 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Adds a collection tag onto multiple Series. If tag id is 0, this will create a new tag.",
+        "summary": "Adds multiple series to a collection. If tag id is 0, this will create a new tag.",
         "requestBody": {
           "description": "",
           "content": {
@@ -2348,7 +2434,7 @@
         "tags": [
           "Image"
         ],
-        "summary": "Returns cover image for Collection Tag",
+        "summary": "Returns cover image for Collection",
         "parameters": [
           {
             "name": "collectionTagId",
@@ -12442,6 +12528,7 @@
           "WantToRead"
         ],
         "summary": "Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)",
+        "description": "This will be removed in v0.8.x",
         "parameters": [
           {
             "name": "PageNumber",
@@ -12927,6 +13014,14 @@
             "description": "Reading lists associated with this user",
             "nullable": true
           },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserCollection"
+            },
+            "description": "Collections associated with this user",
+            "nullable": true
+          },
           "wantToRead": {
             "type": "array",
             "items": {
@@ -13101,6 +13196,192 @@
         },
         "additionalProperties": false,
         "description": "Represents a saved page in a Chapter entity for a given user."
+      },
+      "AppUserCollection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedTitle": {
+            "type": "string",
+            "description": "A normalized string used to check if the collection already exists in the DB",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean",
+            "description": "Reading lists that are promoted are only done by admins"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "Path to the (managed) image file",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "The highest age rating from all Series within the collection",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Series"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSyncUtc": {
+            "type": "string",
+            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
+            "format": "int32"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a Collection of Series for a given User"
+      },
+      "AppUserCollectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean"
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner of the Collection",
+            "nullable": true
+          },
+          "lastSyncUtc": {
+            "type": "string",
+            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
+            "format": "int32"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "AppUserDashboardStream": {
         "type": "object",
@@ -17124,6 +17405,23 @@
         },
         "additionalProperties": false
       },
+      "PromoteCollectionsDto": {
+        "type": "object",
+        "properties": {
+          "collectionIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "PublicationStatusStatCount": {
         "type": "object",
         "properties": {
@@ -18084,7 +18382,7 @@
           "collections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
+              "$ref": "#/components/schemas/AppUserCollectionDto"
             },
             "nullable": true
           },
@@ -18323,6 +18621,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AppUserProgress"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserCollection"
             },
             "nullable": true
           },
@@ -18591,7 +18896,8 @@
             "items": {
               "$ref": "#/components/schemas/CollectionTag"
             },
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "genres": {
             "type": "array",
@@ -18760,14 +19066,6 @@
           },
           "summary": {
             "type": "string",
-            "nullable": true
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
-            },
-            "description": "Collections the Series belongs to",
             "nullable": true
           },
           "genres": {
@@ -20435,13 +20733,6 @@
         "properties": {
           "seriesMetadata": {
             "$ref": "#/components/schemas/SeriesMetadataDto"
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false

@@ -107,7 +107,7 @@ public class CleanupService : ICleanupService
         await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
-        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
         await _unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries();
     }
 

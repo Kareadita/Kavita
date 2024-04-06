@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Extensions;
 
 namespace API.Entities;
 
@@ -105,6 +106,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
 
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
     public ICollection<AppUserProgress> Progress { get; set; } = null!;
+    public ICollection<AppUserCollection> Collections { get; set; } = null!;
 
     /// <summary>
     /// Relations to other Series, like Sequels, Prequels, etc
@@ -112,6 +114,8 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <remarks>1 to Many relationship</remarks>
     public ICollection<SeriesRelation> Relations { get; set; } = null!;
     public ICollection<SeriesRelation> RelationOf { get; set; } = null!;
+
+
 
 
     // Relationships
@@ -130,5 +134,13 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     {
         LastChapterAdded = DateTime.Now;
         LastChapterAddedUtc = DateTime.UtcNow;
+    }
+
+    public bool MatchesSeriesByName(string nameNormalized, string localizedNameNormalized)
+    {
+        return NormalizedName == nameNormalized ||
+               NormalizedLocalizedName == nameNormalized ||
+               NormalizedName == localizedNameNormalized ||
+               NormalizedLocalizedName == localizedNameNormalized;
     }
 }

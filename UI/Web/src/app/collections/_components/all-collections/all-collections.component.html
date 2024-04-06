@@ -3,6 +3,7 @@
     <h2 title>{{t('title')}}</h2>
     <h6 subtitle>{{t('item-count', {num: collections.length | number})}}</h6>
   </app-side-nav-companion-bar>
+  <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
   <app-card-detail-layout
     [isLoading]="isLoading"
     [items]="collections"
@@ -13,12 +14,21 @@
     <ng-template #cardItem let-item let-position="idx">
       <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions"
                      [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                     (clicked)="loadCollection(item)"></app-card-item>
+                     (clicked)="loadCollection(item)"
+                     (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
+                     [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true">
+
+        <ng-template #subtitle>
+          <app-collection-owner [collection]="item"></app-collection-owner>
+        </ng-template>
+      </app-card-item>
     </ng-template>
 
     <ng-template #noData>
       {{t('no-data')}}
-      <ng-container *ngIf="isAdmin$ | async"> {{t('create-one-part-1')}} <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">{{t('create-one-part-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a></ng-container>
+      @if(isAdmin$ | async) {
+        {{t('create-one-part-1')}} <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">{{t('create-one-part-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
+      }
     </ng-template>
   </app-card-detail-layout>
 

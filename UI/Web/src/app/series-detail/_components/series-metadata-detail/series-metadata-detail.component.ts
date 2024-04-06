@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   inject,
   Input,
   OnChanges, OnInit,
@@ -33,6 +33,12 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {Rating} from "../../../_models/rating";
+import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {shareReplay} from "rxjs/operators";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {Observable} from "rxjs";
+import {UserCollection} from "../../../_models/collection-tag";
 
 
 @Component({
@@ -40,7 +46,7 @@ import {Rating} from "../../../_models/rating";
   standalone: true,
   imports: [CommonModule, TagBadgeComponent, BadgeExpanderComponent, SafeHtmlPipe, ExternalRatingComponent,
     ReadMoreComponent, A11yClickDirective, PersonBadgeComponent, NgbCollapse, SeriesInfoCardsComponent,
-    MetadataDetailComponent, TranslocoDirective, ImageComponent],
+    MetadataDetailComponent, TranslocoDirective, ImageComponent, PromotedIconComponent],
   templateUrl: './series-metadata-detail.component.html',
   styleUrls: ['./series-metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +59,8 @@ export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly collectionTagService = inject(CollectionTagService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly FilterField = FilterField;
   protected readonly LibraryType = LibraryType;
@@ -77,6 +85,7 @@ export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
    * Html representation of Series Summary
    */
   seriesSummary: string = '';
+  collections$: Observable<UserCollection[]> | undefined;
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
@@ -96,7 +105,12 @@ export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
     if (sum > 10) {
       this.isCollapsed = true;
     }
+
+    this.collections$ = this.collectionTagService.allCollectionsForSeries(this.series.id).pipe(
+      takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
     this.cdRef.markForCheck();
+
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {

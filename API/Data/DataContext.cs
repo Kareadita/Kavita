@@ -36,6 +36,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
+    [Obsolete]
     public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
     public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
     public DbSet<ReadingList> ReadingList { get; set; } = null!;
@@ -64,6 +65,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
     public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
     public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
+    public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -149,6 +151,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .WithOne(s => s.ExternalSeriesMetadata)
             .HasForeignKey<ExternalSeriesMetadata>(em => em.SeriesId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AppUserCollection>()
+            .Property(b => b.AgeRating)
+            .HasDefaultValue(AgeRating.Unknown);
     }
 
     #nullable enable

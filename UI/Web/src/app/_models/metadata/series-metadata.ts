@@ -1,4 +1,3 @@
-import { CollectionTag } from "../collection-tag";
 import { Genre } from "./genre";
 import { AgeRating } from "./age-rating";
 import { PublicationStatus } from "./publication-status";
@@ -12,7 +11,6 @@ export interface SeriesMetadata {
     totalCount: number;
     maxCount: number;
 
-    collectionTags: Array<CollectionTag>;
     genres: Array<Genre>;
     tags: Array<Tag>;
     writers: Array<Person>;

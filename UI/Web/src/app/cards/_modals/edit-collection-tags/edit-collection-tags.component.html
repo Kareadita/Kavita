@@ -16,14 +16,16 @@
                 <label for="library-name" class="form-label">{{t('name-label')}}</label>
                 <input id="library-name" class="form-control" formControlName="title" type="text"
                        [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="collectionTagForm.dirty || collectionTagForm.touched">
-                  <div *ngIf="collectionTagForm.get('title')?.errors?.required">
-                    {{t('required-field')}}
+                @if (collectionTagForm.dirty || collectionTagForm.touched) {
+                  <div id="inviteForm-validations" class="invalid-feedback">
+                    @if (collectionTagForm.get('title')?.errors?.required) {
+                      <div>{{t('required-field')}}</div>
+                    }
+                    @if (collectionTagForm.get('title')?.errors?.duplicateName) {
+                      <div>{{t('name-validation')}}</div>
+                    }
                   </div>
-                  <div *ngIf="collectionTagForm.get('title')?.errors?.duplicateName">
-                    {{t('name-validation')}}
-                  </div>
-                </div>
+                }
               </div>
               <div class="col-md-3 col-sm-12 ms-2">
                 <div class="form-check form-switch">
@@ -49,32 +51,46 @@
       <li [ngbNavItem]="TabID.Series">
         <a ngbNavLink>{{t(TabID.Series)}}</a>
         <ng-template ngbNavContent>
-          <div class="list-group" *ngIf="!isLoading">
-            <h6>{{t('series-title')}}</h6>
-            <div class="form-check">
-              <input id="selectall" type="checkbox" class="form-check-input"
-                     [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-              <label for="selectall" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
-            </div>
-            <ul>
-              <li class="list-group-item" *ngFor="let item of series; let i = index">
-                <div class="form-check">
-                  <input id="series-{{i}}" type="checkbox" class="form-check-input"
-                         [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
-                  <label attr.for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
+          @if (!isLoading) {
+            <div class="list-group">
+              <form [formGroup]="formGroup">
+                <div class="row g-0 mb-3">
+                  <div class="col-md-12">
+                    <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+                    <div class="input-group">
+                      <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+                    </div>
+                  </div>
                 </div>
-              </li>
-            </ul>
-            <div class="d-flex justify-content-center" *ngIf="pagination && series.length !== 0">
-              <ngb-pagination
-                *ngIf="pagination.totalPages > 1"
-                [(page)]="pagination.currentPage"
-                [pageSize]="pagination.itemsPerPage"
-                (pageChange)="onPageChange($event)"
-                [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
-                [collectionSize]="pagination.totalItems"></ngb-pagination>
+              </form>
+              <div class="form-check">
+                <input id="select-all" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
+                       [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+                <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
+              </div>
+              <ul>
+                @for (item of series | filter: filterList; let i = $index; track item.id) {
+                  <li class="list-group-item">
+                    <div class="form-check">
+                      <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
+                             [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
+                      <label for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
+                    </div>
+                  </li>
+                }
+              </ul>
+              @if (pagination && series.length !== 0 && pagination.totalPages > 1) {
+                <div class="d-flex justify-content-center">
+                  <ngb-pagination
+                    [(page)]="pagination.currentPage"
+                    [pageSize]="pagination.itemsPerPage"
+                    (pageChange)="onPageChange($event)"
+                    [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+                    [collectionSize]="pagination.totalItems"></ngb-pagination>
+                </div>
+              }
             </div>
-          </div>
+          }
         </ng-template>
       </li>
 

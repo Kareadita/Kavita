@@ -64,7 +64,7 @@
       <ng-container>
         <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
           <app-icon-and-title [label]="t('format-title')" [clickable]="true"
-                              [fontClasses]="'fa ' + (series.format | mangaFormatIcon)"
+                              [fontClasses]="series.format | mangaFormatIcon"
                               (click)="handleGoTo(FilterField.Formats, series.format)" [title]="t('format-title')">
             {{series.format | mangaFormat}}
           </app-icon-and-title>

@@ -40,8 +40,14 @@ public static class PolicyConstants
     /// </summary>
     /// <remarks>This is used explicitly for Demo Server. Not sure why it would be used in another fashion</remarks>
     public const string ReadOnlyRole = "Read Only";
+    /// <summary>
+    /// Ability to promote entities (Collections, Reading Lists, etc).
+    /// </summary>
+    public const string PromoteRole = "Promote";
+
+
 
 
     public static readonly ImmutableArray<string> ValidRoles =
-        ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole, ChangeRestrictionRole, LoginRole, ReadOnlyRole);
+        ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole, ChangeRestrictionRole, LoginRole, ReadOnlyRole, PromoteRole);
 }

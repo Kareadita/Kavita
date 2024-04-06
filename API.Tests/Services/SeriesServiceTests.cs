@@ -768,7 +768,7 @@ public class SeriesServiceTests : AbstractDbTest
                 SeriesId = 1,
                 Genres = new List<GenreTagDto> {new GenreTagDto {Id = 0, Title = "New Genre"}}
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);
@@ -777,46 +777,6 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
-
-    }
-
-    [Fact]
-    public async Task UpdateSeriesMetadata_ShouldCreateNewTags_IfNoneExist()
-    {
-        await ResetDb();
-        var s = new SeriesBuilder("Test")
-            .Build();
-        s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
-
-        _context.Series.Add(s);
-        await _context.SaveChangesAsync();
-
-        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
-        {
-            SeriesMetadata = new SeriesMetadataDto
-            {
-                SeriesId = 1,
-                Genres = new List<GenreTagDto> {new GenreTagDto {Id = 0, Title = "New Genre"}},
-                Tags = new List<TagDto> {new TagDto {Id = 0, Title = "New Tag"}},
-                Characters = new List<PersonDto> {new PersonDto {Id = 0, Name = "Joe Shmo", Role = PersonRole.Character}},
-                Colorists = new List<PersonDto> {new PersonDto {Id = 0, Name = "Joe Shmo", Role = PersonRole.Colorist}},
-                Pencillers = new List<PersonDto> {new PersonDto {Id = 0, Name = "Joe Shmo 2", Role = PersonRole.Penciller}},
-            },
-            CollectionTags = new List<CollectionTagDto>
-            {
-                new CollectionTagDto {Id = 0, Promoted = false, Summary = string.Empty, CoverImageLocked = false, Title = "New Collection"}
-            }
-        });
-
-        Assert.True(success);
-
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
-        Assert.NotNull(series.Metadata);
-        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
-        Assert.True(series.Metadata.People.All(g => g.Name is "Joe Shmo" or "Joe Shmo 2"));
-        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(g => g.Title));
-        Assert.Contains("New Collection", series.Metadata.CollectionTags.Select(g => g.Title));
-
     }
 
     [Fact]
@@ -842,7 +802,7 @@ public class SeriesServiceTests : AbstractDbTest
                 SeriesId = 1,
                 Genres = new List<GenreTagDto> {new () {Id = 0, Title = "New Genre"}},
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);
@@ -875,7 +835,7 @@ public class SeriesServiceTests : AbstractDbTest
                 SeriesId = 1,
                 Publishers = new List<PersonDto> {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);
@@ -911,7 +871,7 @@ public class SeriesServiceTests : AbstractDbTest
                 Publishers = new List<PersonDto> {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
                 PublisherLocked = true
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);
@@ -944,7 +904,7 @@ public class SeriesServiceTests : AbstractDbTest
                 SeriesId = 1,
                 Publishers = new List<PersonDto>(),
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);
@@ -978,7 +938,7 @@ public class SeriesServiceTests : AbstractDbTest
                 Genres = new List<GenreTagDto> {new () {Id = 1, Title = "Existing Genre"}},
                 GenresLocked = true
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);
@@ -1007,7 +967,7 @@ public class SeriesServiceTests : AbstractDbTest
                 SeriesId = 1,
                 ReleaseYear = 100,
             },
-            CollectionTags = new List<CollectionTagDto>()
+
         });
 
         Assert.True(success);

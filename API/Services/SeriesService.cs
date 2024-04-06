@@ -115,12 +115,6 @@ public class SeriesService : ISeriesService
             if (series == null) return false;
 
             series.Metadata ??= new SeriesMetadataBuilder()
-                .WithCollectionTags(updateSeriesMetadataDto.CollectionTags.Select(dto =>
-                    new CollectionTagBuilder(dto.Title)
-                        .WithId(dto.Id)
-                        .WithSummary(dto.Summary)
-                        .WithIsPromoted(dto.Promoted)
-                        .Build()).ToList())
                 .Build();
 
             if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
@@ -163,28 +157,16 @@ public class SeriesService : ISeriesService
                 series.Metadata.WebLinks = string.Empty;
             } else
             {
-                series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
-                    .Split(",")
+                series.Metadata.WebLinks = string.Join(',', updateSeriesMetadataDto.SeriesMetadata?.WebLinks
+                    .Split(',')
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Select(s => s.Trim())!
                 );
             }
 
 
-            if (updateSeriesMetadataDto.CollectionTags.Count > 0)
-            {
-                var allCollectionTags = (await _unitOfWork.CollectionTagRepository
-                    .GetAllTagsByNamesAsync(updateSeriesMetadataDto.CollectionTags.Select(t => Parser.Normalize(t.Title)))).ToList();
-                series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, tag =>
-                {
-                    series.Metadata.CollectionTags.Add(tag);
-                });
-            }
-
-
             if (updateSeriesMetadataDto.SeriesMetadata?.Genres != null &&
-                updateSeriesMetadataDto.SeriesMetadata.Genres.Any())
+                updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0)
             {
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
                 series.Metadata.Genres ??= new List<Genre>();
@@ -320,12 +302,6 @@ public class SeriesService : ISeriesService
                 _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
             }
 
-            if (updateSeriesMetadataDto.CollectionTags == null) return true;
-            foreach (var tag in updateSeriesMetadataDto.CollectionTags)
-            {
-                await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
-                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id, seriesId), false);
-            }
             return true;
         }
         catch (Exception ex)
@@ -335,46 +311,6 @@ public class SeriesService : ISeriesService
         }
 
         return false;
-    }
-
-
-    private static void UpdateCollectionsList(ICollection<CollectionTagDto>? tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
-        Action<CollectionTag> handleAdd)
-    {
-        // TODO: Move UpdateCollectionsList to a helper so we can easily test
-        if (tags == null) return;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.CollectionTags.ToList();
-        foreach (var existing in existingTags)
-        {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-            {
-                // Remove tag
-                series.Metadata.CollectionTags.Remove(existing);
-            }
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tag in tags)
-        {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
-            if (existingTag != null)
-            {
-                if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
-                {
-                    handleAdd(existingTag);
-                }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(new CollectionTagBuilder(tag.Title)
-                    .WithId(tag.Id)
-                    .WithSummary(tag.Summary)
-                    .WithIsPromoted(tag.Promoted)
-                    .Build());
-            }
-        }
     }
 
     /// <summary>
@@ -461,7 +397,7 @@ public class SeriesService : ISeriesService
             }
 
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-            await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+            await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
             _taskScheduler.CleanupChapters(allChapterIds.ToArray());
             return true;
         }

@@ -189,6 +189,66 @@ namespace API.Data.Migrations
                     b.ToTable("AppUserBookmark");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserCollection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AgeRating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastSyncUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Promoted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AppUserCollection");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserDashboardStream", b =>
                 {
                     b.Property<int>("Id")
@@ -1918,6 +1978,21 @@ namespace API.Data.Migrations
                     b.ToTable("Volume");
                 });
 
+            modelBuilder.Entity("AppUserCollectionSeries", b =>
+                {
+                    b.Property<int>("CollectionsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionsId", "ItemsId");
+
+                    b.HasIndex("ItemsId");
+
+                    b.ToTable("AppUserCollectionSeries");
+                });
+
             modelBuilder.Entity("AppUserLibrary", b =>
                 {
                     b.Property<int>("AppUsersId")
@@ -2171,6 +2246,17 @@ namespace API.Data.Migrations
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
                         .WithMany("Bookmarks")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserCollection", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("Collections")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2626,6 +2712,21 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
                 });
 
+            modelBuilder.Entity("AppUserCollectionSeries", b =>
+                {
+                    b.HasOne("API.Entities.AppUserCollection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AppUserLibrary", b =>
                 {
                     b.HasOne("API.Entities.AppUser", null)
@@ -2835,6 +2936,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
                     b.Navigation("Bookmarks");
+
+                    b.Navigation("Collections");
 
                     b.Navigation("DashboardStreams");
 

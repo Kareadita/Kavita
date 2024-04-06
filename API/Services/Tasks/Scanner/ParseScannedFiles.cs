@@ -467,14 +467,13 @@ public class ParseScannedFiles
                 }
 
 
-                chapters = infos
-                    .OrderByNatural(info => info.Chapters)
-                    .ToList();
-
-
                 // If everything is a special but we don't have any SpecialIndex, then order naturally and use 0, 1, 2
                 if (specialTreatment)
                 {
+                    chapters = infos
+                        .OrderByNatural(info => Parser.Parser.RemoveExtensionIfSupported(info.Filename)!)
+                        .ToList();
+
                     foreach (var chapter in chapters)
                     {
                         chapter.IssueOrder = counter;
@@ -483,6 +482,9 @@ public class ParseScannedFiles
                     return;
                 }
 
+                chapters = infos
+                    .OrderByNatural(info => info.Chapters)
+                    .ToList();
 
                 counter = 0f;
                 var prevIssue = string.Empty;

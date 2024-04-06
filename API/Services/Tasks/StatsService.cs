@@ -134,7 +134,7 @@ public class StatsService : IStatsService
 
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
-            NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
+            NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsAsync()).Count(),
             NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
             OPDSEnabled = serverSettings.EnableOpds,
             NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Count(),

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities.Enums;
 
@@ -9,11 +8,6 @@ public class SeriesMetadataDto
 {
     public int Id { get; set; }
     public string Summary { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Collections the Series belongs to
-    /// </summary>
-    public ICollection<CollectionTagDto> CollectionTags { get; set; } = new List<CollectionTagDto>();
 
     /// <summary>
     /// Genres for the Series
