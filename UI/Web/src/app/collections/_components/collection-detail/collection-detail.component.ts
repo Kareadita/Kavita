@@ -247,7 +247,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       const matchingTags = tags.filter(t => t.id === tagId);
       if (matchingTags.length === 0) {
         this.toastr.error(this.translocoService.translate('errors.collection-invalid-access'));
-        // TODO: Why would access need to be checked? Even if a id was guessed, the series wouldn't return
         this.router.navigateByUrl('/');
         return;
       }
@@ -293,6 +292,12 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
     switch (action.action) {
+      case Action.Promote:
+        this.collectionService.promoteMultipleCollections([this.collectionTag.id], true).subscribe();
+        break;
+      case Action.UnPromote:
+        this.collectionService.promoteMultipleCollections([this.collectionTag.id], false).subscribe();
+        break;
       case(Action.Edit):
         this.openEditCollectionTagModal(this.collectionTag);
         break;
@@ -321,6 +326,4 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.loadPage();
     });
   }
-
-  protected readonly undefined = undefined;
 }
