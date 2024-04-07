@@ -51,16 +51,19 @@ public class EmailService : IEmailService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
     private readonly IHostEnvironment _environment;
+    private readonly ILocalizationService _localizationService;
 
     private const string TemplatePath = @"{0}.html";
     private const string LocalHost = "localhost:4200";
 
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IHostEnvironment environment)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService,
+        IHostEnvironment environment, ILocalizationService localizationService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _environment = environment;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -75,9 +78,18 @@ public class EmailService : IEmailService
         };
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (!IsValidEmail(adminEmail) || !settings.IsEmailSetup())
+        if (!IsValidEmail(adminEmail))
         {
-            result.ErrorMessage = "You need to fill in more information in settings and ensure your account has a valid email to send a test email";
+            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+            result.ErrorMessage = await _localizationService.Translate(defaultAdmin.Id, "account-email-invalid");
+            result.Successful = false;
+            return result;
+        }
+
+        if (!settings.IsEmailSetup())
+        {
+            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+            result.ErrorMessage = await _localizationService.Translate(defaultAdmin.Id, "email-settings-invalid");
             result.Successful = false;
             return result;
         }

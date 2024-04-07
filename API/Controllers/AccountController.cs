@@ -363,7 +363,7 @@ public class AccountController : BaseApiController
         }
 
         // Validate no other users exist with this email
-        if (user.Email!.Equals(dto.Email)) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Email!.Equals(dto.Email)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         // Check if email is used by another user
         var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
@@ -386,8 +386,12 @@ public class AccountController : BaseApiController
         user.ConfirmationToken = token;
         await _userManager.UpdateAsync(user);
 
+        var emailLink = await _emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
+        _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+
         if (!shouldEmailUser)
         {
+            _logger.LogInformation("Cannot email admin, email not setup or admin email invalid");
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
@@ -399,9 +403,6 @@ public class AccountController : BaseApiController
         // Send a confirmation email
         try
         {
-            var emailLink = await _emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
-            _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-
             if (!_emailService.IsValidEmail(user.Email))
             {
                 _logger.LogCritical("[Update Email]: User is trying to update their email, but their existing email ({Email}) isn't valid. No email will be send", user.Email);
@@ -839,6 +840,7 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(user.Id, "generic-user-email-update"));
         }
         user.ConfirmationToken = null;
+        user.EmailConfirmed = true;
         await _unitOfWork.CommitAsync();
 
 
