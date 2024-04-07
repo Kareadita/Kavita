@@ -13,7 +13,7 @@ import {
   RendererStyleFlags2,
   ViewChild
 } from '@angular/core';
-import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of } from 'rxjs';
@@ -268,7 +268,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
    * Will hide if all content in book is absolute positioned
    */
-
   horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
@@ -513,7 +512,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         tap((e) => {
           const selection = window.getSelection();
           this.hidePagination = selection !== null && selection.toString().trim() !== '';
-          console.log('hide pagination: ', this.hidePagination);
           this.cdRef.markForCheck();
         })
       )
@@ -525,7 +523,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         distinctUntilChanged(),
         tap((e) => {
           this.hidePagination = false;
-          console.log('hide pagination: ', this.hidePagination);
           this.cdRef.markForCheck();
         })
       )

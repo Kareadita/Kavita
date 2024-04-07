@@ -2177,7 +2177,8 @@
         "collections-promoted": "Collections promoted",
         "collections-unpromoted": "Collections un-promoted",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
-        "collections-deleted": "Collections deleted"
+        "collections-deleted": "Collections deleted",
+        "pdf-book-mode-screen-size": "Screen too small for Book mode"
 
     },
 
