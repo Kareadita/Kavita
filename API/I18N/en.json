@@ -40,6 +40,8 @@
     "invalid-username": "Invalid username",
     "critical-email-migration": "There was an issue during email migration. Contact support",
     "email-not-enabled": "Email is not enabled on this server. You cannot perform this action.",
+    "account-email-invalid": "The email on file for the admin account is not a valid email. Cannot send test email.",
+    "email-settings-invalid": "Email settings missing information. Ensure all email settings are saved.",
 
     "chapter-doesnt-exist": "Chapter does not exist",
     "file-missing": "File was not found in book",

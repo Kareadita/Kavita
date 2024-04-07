@@ -120,7 +120,7 @@ export class ManageEmailSettingsComponent implements OnInit {
       if (res.successful) {
         this.toastr.success(translate('toasts.email-sent', {email: res.emailAddress}));
       } else {
-        this.toastr.error(translate('toasts.email-not-sent-test'))
+        this.toastr.error(res.errorMessage);
       }
     });
   }

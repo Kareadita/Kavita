@@ -2127,7 +2127,6 @@
         "file-send-to": "File(s) emailed to {{name}}",
         "theme-missing": "The active theme no longer exists. Please refresh the page.",
         "email-sent": "Email sent to {{email}}",
-        "email-not-sent-test": "There was an exception when sending the email. Check logs for details. This indicates improper settings.",
         "email-not-sent": "Email on file is not a valid email and can not be sent. A link has been dumped in logs. The admin can provide this link to complete flow.",
         "k+-license-saved": "License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.",
         "k+-unlocked": "Kavita+ unlocked!",
@@ -2177,7 +2176,8 @@
         "collections-promoted": "Collections promoted",
         "collections-unpromoted": "Collections un-promoted",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
-        "collections-deleted": "Collections deleted"
+        "collections-deleted": "Collections deleted",
+        "pdf-book-mode-screen-size": "Screen too small for Book mode"
 
     },
 

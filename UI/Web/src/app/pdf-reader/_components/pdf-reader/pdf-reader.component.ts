@@ -1,23 +1,19 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   ElementRef,
-  HostListener, inject, Inject,
+  HostListener,
+  inject,
+  Inject,
   OnDestroy,
   OnInit,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {
-  NgxExtendedPdfViewerModule,
-  NgxExtendedPdfViewerService,
-  PageViewModeType,
-  ProgressBarEvent,
-  ScrollModeType
-} from 'ngx-extended-pdf-viewer';
+import {NgxExtendedPdfViewerModule, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs';
+import {Observable, take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
 import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
@@ -61,6 +57,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   public readonly accountService = inject(AccountService);
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
+  public readonly destroyRef = inject(DestroyRef);
 
   protected readonly ScrollModeType = ScrollModeType;
   protected readonly Breakpoint = Breakpoint;
@@ -182,6 +179,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     });
   }
 
+
   calcScrollbarNeeded() {
     const viewContainer = this.document.querySelector('#viewerContainer');
     if (viewContainer == null) return;
@@ -267,7 +265,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-    setTimeout(() => this.readerService.enableWakeLock(this.container.nativeElement), 1000); // TODO: This needs to be in afterviewinit i think
+    setTimeout(() => this.readerService.enableWakeLock(this.container.nativeElement), 1000);
   }
 
   /**
@@ -300,8 +298,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.scrollMode = options[index];
 
     this.calcScrollbarNeeded();
-
+    const currPage = this.currentPage;
     this.cdRef.markForCheck();
+
+    setTimeout(() => {
+      this.currentPage = currPage;
+      this.cdRef.markForCheck();
+    }, 100);
   }
 
   toggleSpreadMode() {
@@ -318,6 +321,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     if (this.pageLayoutMode === 'book') {
       this.pageLayoutMode = 'multiple';
     } else {
+      if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+        this.toastr.info(translate('toasts.pdf-book-mode-screen-size'));
+        return;
+      }
       this.pageLayoutMode = 'book';
       // If the fit is automatic, let's adjust to 100% to ensure it renders correctly (can't do this, but it doesn't always happen)
     }
