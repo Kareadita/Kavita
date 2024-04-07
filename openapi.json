@@ -16658,6 +16658,7 @@
           },
           "created": {
             "type": "string",
+            "description": "Extra Regex that can be used for parsing",
             "format": "date-time"
           },
           "lastModified": {

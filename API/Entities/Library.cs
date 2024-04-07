@@ -40,8 +40,11 @@ public class Library : IEntityDate
     /// </summary>
     /// <remarks>Scrobbling requires a valid LicenseKey</remarks>
     public bool AllowScrobbling { get; set; } = true;
-
-
+    /// <summary>
+    /// Extra Regex that can be used for parsing
+    /// </summary>
+    /// <remarks>This is only used for Generic Library</remarks>
+    //public string? ExtraParsingRegex { get; set; }
 
 
 

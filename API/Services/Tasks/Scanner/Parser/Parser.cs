@@ -36,7 +36,7 @@ public static class Parser
     public const string SupportedExtensions =
         ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
 
-    private const RegexOptions MatchOptions =
+    public const RegexOptions MatchOptions =
         RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;
 
     private static readonly ImmutableArray<string> FormatTagSpecialKeywords = ImmutableArray.Create(
@@ -1149,7 +1149,7 @@ public static class Parser
 
     public static string? ExtractFilename(string fileUrl)
     {
-        var matches = Parser.CssImageUrlRegex.Matches(fileUrl);
+        var matches = CssImageUrlRegex.Matches(fileUrl);
         foreach (Match match in matches)
         {
             if (!match.Success) continue;

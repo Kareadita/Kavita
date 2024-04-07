@@ -17,7 +17,13 @@ public class GenericLibraryParser(IDirectoryService directoryService) : DefaultP
     public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type,
         ComicInfo? comicInfo = null, IEnumerable<string>? extraRegex = null)
     {
-        if (extraRegex == null) return null;
+        //if (extraRegex == null) return null;
+
+        // It can be very difficult for the user to supply all the regex needed to properly parse, we might need to let them override (but not sure how this will work)
+        extraRegex = new List<string>()
+        {
+            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)"
+        };
 
         // The idea is this is passed in as a default param. Only Generic will use it
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
@@ -36,7 +42,7 @@ public class GenericLibraryParser(IDirectoryService directoryService) : DefaultP
 
         foreach (var regex in extraRegex)
         {
-            var matches = new Regex(regex, RegexOptions.IgnoreCase).Matches(fileName);
+            var matches = new Regex(regex, Parser.MatchOptions, Parser.RegexTimeout).Matches(fileName);
             foreach (var group in matches.Select(match => match.Groups))
             {
                 foreach (var matchKey in group.Keys)
@@ -49,6 +55,9 @@ public class GenericLibraryParser(IDirectoryService directoryService) : DefaultP
                             break;
                         case "Chapter":
                             info.Chapters = SetIfNotDefault(matchValue, info.Chapters);
+                            break;
+                        case "Volume":
+                            info.Volumes = SetIfNotDefault(matchValue, info.Volumes);
                             break;
                     }
                 }

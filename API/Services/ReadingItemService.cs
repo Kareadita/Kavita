@@ -28,6 +28,7 @@ public class ReadingItemService : IReadingItemService
     private readonly ImageParser _imageParser;
     private readonly BookParser _bookParser;
     private readonly PdfParser _pdfParser;
+    private readonly GenericLibraryParser _genericParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
         IDirectoryService directoryService, ILogger<ReadingItemService> logger)
@@ -43,6 +44,7 @@ public class ReadingItemService : IReadingItemService
         _bookParser = new BookParser(directoryService, bookService, _basicParser);
         _comicVineParser = new ComicVineParser(directoryService);
         _pdfParser = new PdfParser(directoryService);
+        _genericParser = new GenericLibraryParser(directoryService);
 
     }
 
@@ -177,6 +179,10 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     private ParserInfo? Parse(string path, string rootPath, string libraryRoot, LibraryType type)
     {
+        if (_genericParser.IsApplicable(path, type))
+        {
+            return _genericParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
+        }
         if (_comicVineParser.IsApplicable(path, type))
         {
             return _comicVineParser.Parse(path, rootPath, libraryRoot, type, GetComicInfo(path));
