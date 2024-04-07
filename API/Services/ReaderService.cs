@@ -9,6 +9,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
@@ -76,7 +77,7 @@ public class ReaderService : IReaderService
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
-        return Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
+        return Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
     }
 
     /// <summary>
@@ -133,7 +134,11 @@ public class ReaderService : IReaderService
                     VolumeId = chapter.VolumeId,
                     SeriesId = seriesId,
                     ChapterId = chapter.Id,
-                    LibraryId = series.LibraryId
+                    LibraryId = series.LibraryId,
+                    Created = DateTime.Now,
+                    CreatedUtc = DateTime.UtcNow,
+                    LastModified = DateTime.Now,
+                    LastModifiedUtc = DateTime.UtcNow
                 });
             }
             else
@@ -142,6 +147,8 @@ public class ReaderService : IReaderService
                 userProgress.SeriesId = seriesId;
                 userProgress.VolumeId = chapter.VolumeId;
             }
+
+            userProgress?.MarkModified();
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
@@ -176,6 +183,7 @@ public class ReaderService : IReaderService
             userProgress.PagesRead = 0;
             userProgress.SeriesId = seriesId;
             userProgress.VolumeId = chapter.VolumeId;
+            userProgress.MarkModified();
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
@@ -265,7 +273,11 @@ public class ReaderService : IReaderService
                     SeriesId = progressDto.SeriesId,
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
-                    BookScrollId = progressDto.BookScrollId
+                    BookScrollId = progressDto.BookScrollId,
+                    Created = DateTime.Now,
+                    CreatedUtc = DateTime.UtcNow,
+                    LastModified = DateTime.Now,
+                    LastModifiedUtc = DateTime.UtcNow
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
@@ -278,6 +290,8 @@ public class ReaderService : IReaderService
                 userProgress.BookScrollId = progressDto.BookScrollId;
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
+
+            userProgress?.MarkModified();
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {

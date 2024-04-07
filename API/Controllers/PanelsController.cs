@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Progress;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
@@ -13,7 +14,7 @@ public class SearchResultGroupDto
 {
     public IEnumerable<LibraryDto> Libraries { get; set; } = default!;
     public IEnumerable<SearchResultDto> Series { get; set; } = default!;
-    public IEnumerable<CollectionTagDto> Collections { get; set; } = default!;
+    public IEnumerable<AppUserCollectionDto> Collections { get; set; } = default!;
     public IEnumerable<ReadingListDto> ReadingLists { get; set; } = default!;
     public IEnumerable<PersonDto> Persons { get; set; } = default!;
     public IEnumerable<GenreTagDto> Genres { get; set; } = default!;

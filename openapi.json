@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.10"
+    "version": "0.7.14.13"
   },
   "servers": [
     {
@@ -886,6 +886,55 @@
         }
       }
     },
+    "/api/Admin/update-chapter-progress": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Set the progress information for a particular user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProgressDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProgressDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProgressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Book/{chapterId}/book-info": {
       "get": {
         "tags": [
@@ -1263,7 +1312,17 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Return a list of all collection tags on the server for the logged in user.",
+        "summary": "Returns all Collection tags for a given User",
+        "parameters": [
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -1272,7 +1331,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1280,7 +1339,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1288,7 +1347,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               }
@@ -1300,7 +1359,7 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Removes the collection tag from all Series it was attached to",
+        "summary": "Removes the collection tag from the user",
         "parameters": [
           {
             "name": "tagId",
@@ -1319,19 +1378,29 @@
         }
       }
     },
-    "/api/Collection/search": {
+    "/api/Collection/all-series": {
       "get": {
         "tags": [
           "Collection"
         ],
-        "summary": "Searches against the collection tags on the DB and returns matches that meet the search criteria.\r\n<remarks>Search strings will be cleaned of certain fields, like %</remarks>",
+        "summary": "Returns all collections that contain the Series for the user with the option to allow for promoted collections (non-user owned)",
         "parameters": [
           {
-            "name": "queryString",
+            "name": "seriesId",
             "in": "query",
-            "description": "Search term",
+            "description": "",
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -1343,7 +1412,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1351,7 +1420,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               },
@@ -1359,7 +1428,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CollectionTagDto"
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
                   }
                 }
               }
@@ -1419,17 +1488,83 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CollectionTagDto"
+                "$ref": "#/components/schemas/AppUserCollectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/promote-multiple": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Promote/UnPromote multiple collections in one go. Will only update the authenticated user's collections and will only work if the user has promotion role",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/delete-multiple": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Promote/UnPromote multiple collections in one go",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCollectionsDto"
               }
             }
           }
@@ -1446,7 +1581,7 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Adds a collection tag onto multiple Series. If tag id is 0, this will create a new tag.",
+        "summary": "Adds multiple series to a collection. If tag id is 0, this will create a new tag.",
         "requestBody": {
           "description": "",
           "content": {
@@ -1503,6 +1638,45 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Collection/mal-stacks": {
+      "get": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "For the authenticated user, if they have an active Kavita+ subscription and a MAL username on record,\r\nfetch their Mal interest stacks (including restacks)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MalStackDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MalStackDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MalStackDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2260,7 +2434,7 @@
         "tags": [
           "Image"
         ],
-        "summary": "Returns cover image for Collection Tag",
+        "summary": "Returns cover image for Collection",
         "parameters": [
           {
             "name": "collectionTagId",
@@ -2502,6 +2676,46 @@
       }
     },
     "/api/Library": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Return a specific library",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Library/libraries": {
       "get": {
         "tags": [
           "Library"
@@ -6090,6 +6304,56 @@
         }
       }
     },
+    "/api/Reader/all-chapter-progress": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Get all progress events for a given chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FullProgressDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FullProgressDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FullProgressDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ReadingList": {
       "get": {
         "tags": [
@@ -7314,6 +7578,35 @@
         }
       }
     },
+    "/api/Scrobbling/mal-token": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MalUserInfoDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MalUserInfoDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MalUserInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Scrobbling/update-anilist-token": {
       "post": {
         "tags": [
@@ -7336,6 +7629,39 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/update-mal-token": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Update the current user's MAL token (Client ID) and Username",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalUserInfoDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalUserInfoDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalUserInfoDto"
               }
             }
           }
@@ -10796,6 +11122,45 @@
         }
       }
     },
+    "/api/Stats/kavitaplus-metadata-breakdown": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns for Kavita+ the number of Series that have been processed, errored, and not processed",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stream/dashboard": {
       "get": {
         "tags": [
@@ -12167,6 +12532,7 @@
           "WantToRead"
         ],
         "summary": "Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)",
+        "description": "This will be removed in v0.8.x",
         "parameters": [
           {
             "name": "PageNumber",
@@ -12652,6 +13018,14 @@
             "description": "Reading lists associated with this user",
             "nullable": true
           },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserCollection"
+            },
+            "description": "Collections associated with this user",
+            "nullable": true
+          },
           "wantToRead": {
             "type": "array",
             "items": {
@@ -12716,6 +13090,16 @@
           "aniListAccessToken": {
             "type": "string",
             "description": "The JWT for the user's AniList account. Expires after a year.",
+            "nullable": true
+          },
+          "malUserName": {
+            "type": "string",
+            "description": "The Username of the MAL user",
+            "nullable": true
+          },
+          "malAccessToken": {
+            "type": "string",
+            "description": "The Client ID for the user's MAL account. User should create a client on MAL for this.",
             "nullable": true
           },
           "scrobbleHolds": {
@@ -12816,6 +13200,192 @@
         },
         "additionalProperties": false,
         "description": "Represents a saved page in a Chapter entity for a given user."
+      },
+      "AppUserCollection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedTitle": {
+            "type": "string",
+            "description": "A normalized string used to check if the collection already exists in the DB",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean",
+            "description": "Reading lists that are promoted are only done by admins"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "Path to the (managed) image file",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "The highest age rating from all Series within the collection",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Series"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSyncUtc": {
+            "type": "string",
+            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
+            "format": "int32"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a Collection of Series for a given User"
+      },
+      "AppUserCollectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean"
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner of the Collection",
+            "nullable": true
+          },
+          "lastSyncUtc": {
+            "type": "string",
+            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
+            "format": "int32"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "AppUserDashboardStream": {
         "type": "object",
@@ -13015,9 +13585,6 @@
             "description": "Book Reader Option: Defines the writing styles vertical/horizontal",
             "format": "int32"
           },
-          "theme": {
-            "$ref": "#/components/schemas/SiteTheme"
-          },
           "bookThemeName": {
             "type": "string",
             "description": "Book Reader Option: The color theme to decorate the book contents",
@@ -13036,6 +13603,47 @@
           "bookReaderImmersiveMode": {
             "type": "boolean",
             "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfLayoutMode": {
+            "enum": [
+              0,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Layout Mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/SiteTheme"
           },
           "globalPageLayoutMode": {
             "enum": [
@@ -15732,6 +16340,49 @@
         },
         "additionalProperties": false
       },
+      "FullProgressDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "A full progress Record from the DB (not all data, only what's needed for API)"
+      },
       "Genre": {
         "type": "object",
         "properties": {
@@ -16245,6 +16896,58 @@
         },
         "additionalProperties": false
       },
+      "MalStackDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "restackCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "existingId": {
+            "type": "integer",
+            "description": "If an existing collection exists within Kavita",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents an Interest Stack from MAL"
+      },
+      "MalUserInfoDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "This is actually the Client Id",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Information about a User's MAL connection"
+      },
       "MangaFile": {
         "type": "object",
         "properties": {
@@ -16706,6 +17409,23 @@
           "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromoteCollectionsDto": {
+        "type": "object",
+        "properties": {
+          "collectionIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "promoted": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -17672,7 +18392,7 @@
           "collections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
+              "$ref": "#/components/schemas/AppUserCollectionDto"
             },
             "nullable": true
           },
@@ -17911,6 +18631,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AppUserProgress"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserCollection"
             },
             "nullable": true
           },
@@ -18179,7 +18906,8 @@
             "items": {
               "$ref": "#/components/schemas/CollectionTag"
             },
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "genres": {
             "type": "array",
@@ -18348,14 +19076,6 @@
           },
           "summary": {
             "type": "string",
-            "nullable": true
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
-            },
-            "description": "Collections the Series belongs to",
             "nullable": true
           },
           "genres": {
@@ -20024,13 +20744,6 @@
         "properties": {
           "seriesMetadata": {
             "$ref": "#/components/schemas/SeriesMetadataDto"
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTagDto"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20100,6 +20813,24 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserProgressDto": {
+        "type": "object",
+        "properties": {
+          "pageNum": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -20235,6 +20966,10 @@
           "locale",
           "noTransitions",
           "pageSplitOption",
+          "pdfLayoutMode",
+          "pdfScrollMode",
+          "pdfSpreadMode",
+          "pdfTheme",
           "promptForDownloadSize",
           "readerMode",
           "readingDirection",
@@ -20413,6 +21148,44 @@
             "minLength": 1,
             "type": "string",
             "description": "UI Site Global Setting: The language locale that should be used for the user"
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfLayoutMode": {
+            "enum": [
+              0,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Layout Mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
           }
         },
         "additionalProperties": false

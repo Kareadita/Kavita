@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Uploads;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.SignalR;
@@ -98,6 +99,7 @@ public class UploadController : BaseApiController
         try
         {
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
+
             if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetSeriesFormat(uploadFileDto.Id)}");
 
@@ -145,7 +147,7 @@ public class UploadController : BaseApiController
 
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
+            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadFileDto.Id);
             if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
 
@@ -225,17 +227,14 @@ public class UploadController : BaseApiController
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-reading-list-save"));
     }
 
-    private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename, int thumbnailSize = 0)
+    private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename)
     {
-        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
-        if (thumbnailSize > 0)
-        {
-            return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-                filename, encodeFormat, thumbnailSize);
-        }
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var encodeFormat = settings.EncodeMediaAs;
+        var coverImageSize = settings.CoverImageSize;
 
         return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-            filename, encodeFormat);
+            filename, encodeFormat, coverImageSize.GetDimensions().Width);
     }
 
     /// <summary>
@@ -326,8 +325,7 @@ public class UploadController : BaseApiController
         try
         {
             var filePath = await CreateThumbnail(uploadFileDto,
-                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}",
-                ImageService.LibraryThumbnailWidth);
+                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
             {

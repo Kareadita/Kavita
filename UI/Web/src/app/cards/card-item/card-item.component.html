@@ -31,45 +31,53 @@
         </div>
       }
 
-      <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
-        <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
-      </div>
-
-      <div class="count" *ngIf="count > 1">
-        <span class="badge bg-primary">{{count}}</span>
-      </div>
-      <div class="card-overlay"></div>
-      @if (overlayInformation | safeHtml; as info) {
-        <div class="overlay-information {{centerOverlay ? 'overlay-information--centered' : ''}}" *ngIf="info !== '' ||  info !== undefined">
-          <div class="position-relative">
-            <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="info" placement="top" [innerHTML]="info"></span>
-          </div>
+      @if (allowSelection) {
+        <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">
+          <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
         </div>
       }
-    </div>
 
-    <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
-      <div>
+      @if (count > 1) {
+        <div class="count">
+          <span class="badge bg-primary">{{count}}</span>
+        </div>
+      }
+
+      <div class="card-overlay"></div>
+      @if (overlayInformation | safeHtml; as info) {
+        @if (info !== '' ||  info !== null) {
+          <div class="overlay-information {{centerOverlay ? 'overlay-information--centered' : ''}}">
+            <div class="position-relative">
+              <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="info" placement="top" [innerHTML]="info"></span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+    @if (title.length > 0 || actions.length > 0) {
+      <div class="card-body">
+        <div>
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-          <span *ngIf="isPromoted()">
-            <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-            <span class="visually-hidden">(promoted)</span>
-          </span>
-          <ng-container *ngIf="format | mangaFormat as formatString">
-            <i class="fa {{format | mangaFormatIcon}} me-1" aria-hidden="true" *ngIf="format !== MangaFormat.UNKNOWN" title="{{formatString}}"></i>
-            <span class="visually-hidden">{{formatString}}</span>
-          </ng-container>
+          <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
+          <app-series-format [format]="format"></app-series-format>
           {{title}}
         </span>
-        <span class="card-actions float-end" *ngIf="actions && actions.length > 0">
+          <span class="card-actions float-end" *ngIf="actions && actions.length > 0">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
+        </div>
+        @if (subtitleTemplate) {
+          <div style="text-align: center">
+            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+          </div>
+        }
+        @if (!suppressLibraryLink && libraryName) {
+          <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
+            {{libraryName | sentenceCase}}
+          </a>
+        }
       </div>
-      <span class="card-title library" [ngbTooltip]="subtitle" placement="top" *ngIf="subtitle.length > 0">{{subtitle}}</span>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!suppressLibraryLink && libraryName">
-        {{libraryName | sentenceCase}}
-      </a>
-    </div>
+    }
   </div>
 
 </ng-container>

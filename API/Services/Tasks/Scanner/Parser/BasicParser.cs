@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using System.Collections.Generic;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -29,7 +29,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
             Title = Parser.RemoveExtensionIfSupported(fileName),
-            FullFilePath = filePath,
+            FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo
         };
@@ -96,6 +96,11 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
 
         // Patch in other information from ComicInfo
         UpdateFromComicInfo(ret);
+
+        if (ret.Volumes == Parser.LooseLeafVolume && ret.Chapters == Parser.DefaultChapter)
+        {
+            ret.IsSpecial = true;
+        }
 
         // v0.8.x: Introducing a change where Specials will go in a separate Volume with a reserved number
         if (ret.IsSpecial)

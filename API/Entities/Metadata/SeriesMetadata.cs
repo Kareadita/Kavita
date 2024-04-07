@@ -14,6 +14,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
     public string Summary { get; set; } = string.Empty;
 
+    [Obsolete("Use AppUserCollection instead")]
     public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();

@@ -9,10 +9,12 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
+using API.DTOs.Progress;
 using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
@@ -449,15 +451,13 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
+
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        var tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
-            : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
+        var tags = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(user.Id, true);
 
-
+        var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
 
@@ -466,12 +466,15 @@ public class OpdsController : BaseApiController
             Id = tag.Id.ToString(),
             Title = tag.Title,
             Summary = tag.Summary,
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}")
-            }
+            Links =
+            [
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    $"{prefix}{apiKey}/collections/{tag.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}")
+            ]
         }));
 
         return CreateXmlResult(SerializeXml(feed));
@@ -488,20 +491,9 @@ public class OpdsController : BaseApiController
         var (baseUrl, prefix) = await GetPrefix();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        IEnumerable <CollectionTagDto> tags;
-        if (isAdmin)
-        {
-            tags = await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
-        }
-        else
-        {
-            tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId);
-        }
-
-        var tag = tags.SingleOrDefault(t => t.Id == collectionId);
-        if (tag == null)
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionId);
+        if (tag == null || (tag.AppUserId != user.Id && !tag.Promoted))
         {
             return BadRequest("Collection does not exist or you don't have access");
         }
@@ -1131,7 +1123,9 @@ public class OpdsController : BaseApiController
             Id = mangaFile.Id.ToString(),
             Title = title,
             Extent = fileSize,
-            Summary = $"{fileType.Split("/")[1]} - {fileSize}",
+            Summary = $"File Type: {fileType.Split("/")[1]} - {fileSize}" + (string.IsNullOrWhiteSpace(chapter.Summary)
+                ? string.Empty
+                : $"     Summary: {chapter.Summary}"),
             Format = mangaFile.Format.ToString(),
             Links = new List<FeedLink>()
             {
@@ -1287,7 +1281,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private string SerializeXml(Feed feed)
+    private string SerializeXml(Feed? feed)
     {
         if (feed == null) return string.Empty;
         using var sm = new StringWriter();

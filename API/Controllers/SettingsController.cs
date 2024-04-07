@@ -457,6 +457,7 @@ public class SettingsController : BaseApiController
         }
     }
 
+
     /// <summary>
     /// All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.
     /// </summary>
@@ -510,6 +511,7 @@ public class SettingsController : BaseApiController
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl()
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        if (string.IsNullOrEmpty(user?.Email)) return BadRequest("Your account has no email on record. Cannot email.");
         return Ok(await _emailService.SendTestEmail(user!.Email));
     }
 }

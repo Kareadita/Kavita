@@ -206,6 +206,10 @@ public class MangaParsingTests
     [InlineData("test 2 years 1권", "test 2 years")]
     [InlineData("test 2 years 1화", "test 2 years")]
     [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.30 Omake", "Nagasarete Airantou")]
+    [InlineData("Cynthia The Mission - c000 - c006 (v06)", "Cynthia The Mission")]
+    [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1", "เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท")]
+    [InlineData("Max Level Returner เล่มที่ 5", "Max Level Returner")]
+    [InlineData("หนึ่งความคิด นิจนิรันดร์ เล่ม 2", "หนึ่งความคิด นิจนิรันดร์")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
@@ -295,6 +299,9 @@ public class MangaParsingTests
     [InlineData("Historys Strongest Disciple Kenichi_v11_c90-98", "90-98")]
     [InlineData("Historys Strongest Disciple Kenichi c01-c04", "1-4")]
     [InlineData("Adabana c00-02", "0-2")]
+    [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1 ตอนที่ 3", "3")]
+    [InlineData("Max Level Returner ตอนที่ 5", "5")]
+    [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

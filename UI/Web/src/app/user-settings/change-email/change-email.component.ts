@@ -68,7 +68,6 @@ export class ChangeEmailComponent implements OnInit {
     const model = this.form.value;
     this.errors = [];
     this.accountService.updateEmail(model.email, model.password).subscribe(updateEmailResponse => {
-
       if (updateEmailResponse.invalidEmail) {
         this.toastr.success(translate('toasts.email-sent-to-no-existing', {email: model.email}));
       }

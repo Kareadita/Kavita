@@ -19,6 +19,23 @@ public static class IncludesExtensions
             queryable = queryable.Include(c => c.SeriesMetadatas);
         }
 
+        if (includes.HasFlag(CollectionTagIncludes.SeriesMetadataWithSeries))
+        {
+            queryable = queryable.Include(c => c.SeriesMetadatas).ThenInclude(s => s.Series);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
+    public static IQueryable<AppUserCollection> Includes(this IQueryable<AppUserCollection> queryable,
+        CollectionIncludes includes)
+    {
+        if (includes.HasFlag(CollectionIncludes.Series))
+        {
+            queryable = queryable.Include(c => c.Items);
+        }
+
+
         return queryable.AsSplitQuery();
     }
 
@@ -164,7 +181,9 @@ public static class IncludesExtensions
 
         if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
         {
-            query = query.Include(u => u.UserPreferences);
+            query = query
+                .Include(u => u.UserPreferences)
+                .ThenInclude(p => p.Theme);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
@@ -202,6 +221,12 @@ public static class IncludesExtensions
         if (includeFlags.HasFlag(AppUserIncludes.ExternalSources))
         {
             query = query.Include(u => u.ExternalSources);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Collections))
+        {
+            query = query.Include(u => u.Collections)
+                .ThenInclude(c => c.Items);
         }
 
         return query.AsSplitQuery();

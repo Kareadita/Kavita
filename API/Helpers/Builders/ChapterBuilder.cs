@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
@@ -36,7 +35,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         var specialTitle = specialTreatment ? Parser.RemoveExtensionIfSupported(info.Filename) : info.Chapters;
         var builder = new ChapterBuilder(Parser.DefaultChapter);
 
-        return builder.WithNumber(Parser.RemoveExtensionIfSupported(info.Chapters))
+        return builder.WithNumber(Parser.RemoveExtensionIfSupported(info.Chapters)!)
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
             .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
             ? info.Title

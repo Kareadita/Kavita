@@ -16,6 +16,7 @@ import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {tap} from "rxjs/operators";
 
 @Component({
     selector: 'app-theme-manager',
@@ -52,19 +53,11 @@ export class ThemeManagerComponent {
   }
 
   applyTheme(theme: SiteTheme) {
+    if (!this.user) return;
 
-    if (this.user) {
-      const pref = Object.assign({}, this.user.preferences);
-      pref.theme = theme;
-      this.accountService.updatePreferences(pref).subscribe(updatedPref => {
-        if (this.user) {
-          this.user.preferences = updatedPref;
-        }
-        this.themeService.setTheme(theme.name);
-        this.cdRef.markForCheck();
-      });
-    }
-
+    const pref = Object.assign({}, this.user.preferences);
+    pref.theme = theme;
+    this.accountService.updatePreferences(pref).subscribe();
   }
 
   updateDefault(theme: SiteTheme) {

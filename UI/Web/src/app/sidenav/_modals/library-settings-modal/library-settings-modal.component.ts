@@ -203,6 +203,9 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
             break;
         }
+
+        this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible);
+        this.cdRef.markForCheck();
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
@@ -261,7 +264,10 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   forceScan() {
     this.libraryService.scan(this.library!.id, true)
-      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name})));
+      .subscribe(() => {
+        this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name}));
+        this.close();
+      });
   }
 
   async save() {

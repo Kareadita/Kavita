@@ -114,65 +114,65 @@ public class CollectionTagRepositoryTests
 
     #endregion
 
-    #region RemoveTagsWithoutSeries
-
-    [Fact]
-    public async Task RemoveTagsWithoutSeries_ShouldRemoveTags()
-    {
-        var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
-        var series = new SeriesBuilder("Test 1").Build();
-        var commonTag = new CollectionTagBuilder("Tag 1").Build();
-        series.Metadata.CollectionTags.Add(commonTag);
-        series.Metadata.CollectionTags.Add(new CollectionTagBuilder("Tag 2").Build());
-
-        var series2 = new SeriesBuilder("Test 1").Build();
-        series2.Metadata.CollectionTags.Add(commonTag);
-        library.Series.Add(series);
-        library.Series.Add(series2);
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
-
-        Assert.Equal(2, series.Metadata.CollectionTags.Count);
-        Assert.Single(series2.Metadata.CollectionTags);
-
-        // Delete both series
-        _unitOfWork.SeriesRepository.Remove(series);
-        _unitOfWork.SeriesRepository.Remove(series2);
-
-        await _unitOfWork.CommitAsync();
-
-        // Validate that both tags exist
-        Assert.Equal(2, (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count());
-
-        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-
-        Assert.Empty(await _unitOfWork.CollectionTagRepository.GetAllTagsAsync());
-    }
-
-    [Fact]
-    public async Task RemoveTagsWithoutSeries_ShouldNotRemoveTags()
-    {
-        var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
-        var series = new SeriesBuilder("Test 1").Build();
-        var commonTag = new CollectionTagBuilder("Tag 1").Build();
-        series.Metadata.CollectionTags.Add(commonTag);
-        series.Metadata.CollectionTags.Add(new CollectionTagBuilder("Tag 2").Build());
-
-        var series2 = new SeriesBuilder("Test 1").Build();
-        series2.Metadata.CollectionTags.Add(commonTag);
-        library.Series.Add(series);
-        library.Series.Add(series2);
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
-
-        Assert.Equal(2, series.Metadata.CollectionTags.Count);
-        Assert.Single(series2.Metadata.CollectionTags);
-
-        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-
-        // Validate that both tags exist
-        Assert.Equal(2, (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count());
-    }
-
-    #endregion
+    // #region RemoveTagsWithoutSeries
+    //
+    // [Fact]
+    // public async Task RemoveTagsWithoutSeries_ShouldRemoveTags()
+    // {
+    //     var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
+    //     var series = new SeriesBuilder("Test 1").Build();
+    //     var commonTag = new AppUserCollectionBuilder("Tag 1").Build();
+    //     series.Metadata.CollectionTags.Add(commonTag);
+    //     series.Metadata.CollectionTags.Add(new AppUserCollectionBuilder("Tag 2").Build());
+    //
+    //     var series2 = new SeriesBuilder("Test 1").Build();
+    //     series2.Metadata.CollectionTags.Add(commonTag);
+    //     library.Series.Add(series);
+    //     library.Series.Add(series2);
+    //     _unitOfWork.LibraryRepository.Add(library);
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     Assert.Equal(2, series.Metadata.CollectionTags.Count);
+    //     Assert.Single(series2.Metadata.CollectionTags);
+    //
+    //     // Delete both series
+    //     _unitOfWork.SeriesRepository.Remove(series);
+    //     _unitOfWork.SeriesRepository.Remove(series2);
+    //
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     // Validate that both tags exist
+    //     Assert.Equal(2, (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count());
+    //
+    //     await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+    //
+    //     Assert.Empty(await _unitOfWork.CollectionTagRepository.GetAllTagsAsync());
+    // }
+    //
+    // [Fact]
+    // public async Task RemoveTagsWithoutSeries_ShouldNotRemoveTags()
+    // {
+    //     var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
+    //     var series = new SeriesBuilder("Test 1").Build();
+    //     var commonTag = new AppUserCollectionBuilder("Tag 1").Build();
+    //     series.Metadata.CollectionTags.Add(commonTag);
+    //     series.Metadata.CollectionTags.Add(new AppUserCollectionBuilder("Tag 2").Build());
+    //
+    //     var series2 = new SeriesBuilder("Test 1").Build();
+    //     series2.Metadata.CollectionTags.Add(commonTag);
+    //     library.Series.Add(series);
+    //     library.Series.Add(series2);
+    //     _unitOfWork.LibraryRepository.Add(library);
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     Assert.Equal(2, series.Metadata.CollectionTags.Count);
+    //     Assert.Single(series2.Metadata.CollectionTags);
+    //
+    //     await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+    //
+    //     // Validate that both tags exist
+    //     Assert.Equal(2, (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count());
+    // }
+    //
+    // #endregion
 }

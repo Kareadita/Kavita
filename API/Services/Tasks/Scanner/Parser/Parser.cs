@@ -121,6 +121,10 @@ public static class Parser
 
     private static readonly Regex[] MangaVolumeRegex = new[]
     {
+        // Thai Volume: เล่ม n -> Volume n
+        new Regex(
+            @"(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
+            MatchOptions, RegexTimeout),
         // Dance in the Vampire Bund v16-17
         new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
@@ -194,6 +198,10 @@ public static class Parser
 
     private static readonly Regex[] MangaSeriesRegex = new[]
     {
+        // Thai Volume: เล่ม n -> Volume n
+        new Regex(
+            @"(?<Series>.+?)(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
+            MatchOptions, RegexTimeout),
         // Russian Volume: Том n -> Volume n, Тома n -> Volume
         new Regex(
             @"(?<Series>.+?)Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
@@ -232,7 +240,7 @@ public static class Parser
             RegexTimeout),
         // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
         new Regex(
-            @"(?<Series>.*)( - )(?:v|vo|c|chapters)\d",
+            @"(?<Series>.+?)( - )(?:v|vo|c|chapters)\d",
             MatchOptions, RegexTimeout),
         // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
         new Regex(
@@ -368,6 +376,10 @@ public static class Parser
 
     private static readonly Regex[] ComicSeriesRegex = new[]
     {
+        // Thai Volume: เล่ม n -> Volume n
+        new Regex(
+            @"(?<Series>.+?)(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
+            MatchOptions, RegexTimeout),
         // Russian Volume: Том n -> Volume n, Тома n -> Volume
         new Regex(
             @"(?<Series>.+?)Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
@@ -456,6 +468,10 @@ public static class Parser
 
     private static readonly Regex[] ComicVolumeRegex = new[]
     {
+        // Thai Volume: เล่ม n -> Volume n
+        new Regex(
+            @"(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
+            MatchOptions, RegexTimeout),
         // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
         new Regex(
             @"^(?<Series>.+?)(?: |_)(t|v)(?<Volume>" + NumberRange + @")",
@@ -492,6 +508,10 @@ public static class Parser
 
     private static readonly Regex[] ComicChapterRegex = new[]
     {
+        // Thai Volume: บทที่ n -> Chapter n, ตอนที่ n -> Chapter n
+        new Regex(
+            @"(บทที่|ตอนที่)(\s)?(\.?)(\s|_)?(?<Chapter>\d+(\-\d+)?(\.\d+)?)",
+            MatchOptions, RegexTimeout),
         // Batman & Wildcat (1 of 3)
         new Regex(
             @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
@@ -557,6 +577,10 @@ public static class Parser
 
     private static readonly Regex[] MangaChapterRegex = new[]
     {
+        // Thai Chapter: บทที่ n -> Chapter n, ตอนที่ n -> Chapter n, เล่ม n -> Volume n, เล่มที่ n -> Volume n
+        new Regex(
+            @"(?<Volume>((เล่ม|เล่มที่))?(\s|_)?\.?\d+)(\s|_)(บทที่|ตอนที่)\.?(\s|_)?(?<Chapter>\d+)",
+            MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
         new Regex(
             @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)(-c?\d+(\.\d)?)?)",

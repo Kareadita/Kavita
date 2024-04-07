@@ -107,6 +107,7 @@ public class MetadataService : IMetadataService
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
                 null, volume.Created, forceUpdate)) return Task.FromResult(false);
 
+
         // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
         volume.Chapters ??= new List<Chapter>();
 
@@ -116,7 +117,6 @@ public class MetadataService : IMetadataService
             firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
             if (firstChapter == null) return Task.FromResult(false);
         }
-
 
         volume.CoverImage = firstChapter.CoverImage;
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
@@ -278,7 +278,7 @@ public class MetadataService : IMetadataService
         await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
-        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
         await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
 
     }

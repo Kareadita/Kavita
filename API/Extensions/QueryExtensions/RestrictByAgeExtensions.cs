@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
@@ -24,6 +25,7 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
+    [Obsolete]
     public static IQueryable<CollectionTag> RestrictAgainstAgeRestriction(this IQueryable<CollectionTag> queryable, AgeRestriction restriction)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
@@ -36,6 +38,20 @@ public static class RestrictByAgeExtensions
 
         return queryable.Where(c => c.SeriesMetadatas.All(sm =>
             sm.AgeRating <= restriction.AgeRating && sm.AgeRating > AgeRating.Unknown));
+    }
+
+    public static IQueryable<AppUserCollection> RestrictAgainstAgeRestriction(this IQueryable<AppUserCollection> queryable, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
+
+        if (restriction.IncludeUnknowns)
+        {
+            return queryable.Where(c => c.Items.All(sm =>
+                sm.Metadata.AgeRating <= restriction.AgeRating));
+        }
+
+        return queryable.Where(c => c.Items.All(sm =>
+            sm.Metadata.AgeRating <= restriction.AgeRating && sm.Metadata.AgeRating > AgeRating.Unknown));
     }
 
     public static IQueryable<Genre> RestrictAgainstAgeRestriction(this IQueryable<Genre> queryable, AgeRestriction restriction)

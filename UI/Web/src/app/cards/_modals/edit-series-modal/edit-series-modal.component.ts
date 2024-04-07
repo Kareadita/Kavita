@@ -22,7 +22,6 @@ import { map } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
-import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Genre } from 'src/app/_models/metadata/genre';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { Language } from 'src/app/_models/metadata/language';
@@ -31,7 +30,6 @@ import { Person, PersonRole } from 'src/app/_models/metadata/person';
 import { Series } from 'src/app/_models/series';
 import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
 import { Tag } from 'src/app/_models/tag';
-import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
@@ -119,7 +117,6 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   public readonly imageService = inject(ImageService);
   private readonly libraryService = inject(LibraryService);
-  private readonly collectionService = inject(CollectionTagService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -155,10 +152,8 @@ export class EditSeriesModalComponent implements OnInit {
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
-  collectionTagSettings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
-  collectionTags: CollectionTag[] = [];
   tags: Tag[] = [];
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
@@ -330,42 +325,13 @@ export class EditSeriesModalComponent implements OnInit {
 
   setupTypeaheads() {
     forkJoin([
-      this.setupCollectionTagsSettings(),
       this.setupTagSettings(),
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
       this.setupLanguageTypeahead()
     ]).subscribe(results => {
-      this.collectionTags = this.metadata.collectionTags;
       this.cdRef.markForCheck();
     });
-  }
-
-  setupCollectionTagsSettings() {
-    this.collectionTagSettings.minCharacters = 0;
-    this.collectionTagSettings.multiple = true;
-    this.collectionTagSettings.id = 'collections';
-    this.collectionTagSettings.unique = true;
-    this.collectionTagSettings.addIfNonExisting = true;
-    this.collectionTagSettings.fetchFn = (filter: string) => this.fetchCollectionTags(filter).pipe(map(items => this.collectionTagSettings.compareFn(items, filter)));
-    this.collectionTagSettings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
-    });
-    this.collectionTagSettings.compareFn = (options: CollectionTag[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.collectionTagSettings.compareFnForAdd = (options: CollectionTag[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.collectionTagSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {
-      return a.title === b.title;
-    }
-
-    if (this.metadata.collectionTags) {
-      this.collectionTagSettings.savedData = this.metadata.collectionTags;
-    }
-
-    return of(true);
   }
 
   setupTagSettings() {
@@ -545,10 +511,6 @@ export class EditSeriesModalComponent implements OnInit {
     });
   }
 
-  fetchCollectionTags(filter: string = '') {
-    return this.collectionService.search(filter);
-  }
-
   updateWeblinks(items: Array<string>) {
     this.metadata.webLinks = items.map(s => s.replaceAll(',', '%2C')).join(',');
   }
@@ -559,7 +521,7 @@ export class EditSeriesModalComponent implements OnInit {
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
-      this.seriesService.updateMetadata(this.metadata, this.collectionTags)
+      this.seriesService.updateMetadata(this.metadata)
     ];
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
@@ -585,10 +547,6 @@ export class EditSeriesModalComponent implements OnInit {
     });
   }
 
-  updateCollections(tags: CollectionTag[]) {
-    this.collectionTags = tags;
-    this.cdRef.markForCheck();
-  }
 
   updateTags(tags: Tag[]) {
     this.tags = tags;

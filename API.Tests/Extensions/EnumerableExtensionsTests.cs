@@ -74,10 +74,10 @@ public class EnumerableExtensionsTests
             new[] {@"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\001.jpg", @"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\002.jpg"},
             new[] {@"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\001.jpg", @"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\002.jpg"}
         )]
-    [InlineData(
-        new[] {"01/001.jpg", "001.jpg"},
-        new[] {"001.jpg", "01/001.jpg"}
-    )]
+        [InlineData(
+            new[] {"01/001.jpg", "001.jpg"},
+            new[] {"001.jpg", "01/001.jpg"}
+        )]
         public void TestNaturalSort(string[] input, string[] expected)
         {
             Assert.Equal(expected, input.OrderByNatural(x => x).ToArray());

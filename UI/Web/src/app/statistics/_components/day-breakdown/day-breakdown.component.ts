@@ -21,17 +21,19 @@ import {tap} from "rxjs/operators";
 })
 export class DayBreakdownComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly statService = inject(StatisticsService);
+
   @Input() userId = 0;
+
   view: [number, number] = [0,0];
   showLegend: boolean = true;
   max: number = 1;
 
   formControl: FormControl = new FormControl(true, []);
   dayBreakdown$!: Observable<Array<PieDataItem>>;
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
-  constructor(private statService: StatisticsService) {}
 
   ngOnInit() {
     const dayOfWeekPipe = new DayOfWeekPipe();

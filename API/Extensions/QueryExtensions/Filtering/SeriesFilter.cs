@@ -551,25 +551,26 @@ public static class SeriesFilter
     }
 
     public static IQueryable<Series> HasCollectionTags(this IQueryable<Series> queryable, bool condition,
-        FilterComparison comparison, IList<int> collectionTags)
+        FilterComparison comparison, IList<int> collectionTags, IList<int> collectionSeries)
     {
         if (!condition || collectionTags.Count == 0) return queryable;
+
 
         switch (comparison)
         {
             case FilterComparison.Equal:
             case FilterComparison.Contains:
-                return queryable.Where(s => s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+                return queryable.Where(s => collectionSeries.Contains(s.Id));
             case FilterComparison.NotContains:
             case FilterComparison.NotEqual:
-                return queryable.Where(s => !s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+                return queryable.Where(s => !collectionSeries.Contains(s.Id));
             case FilterComparison.MustContains:
-                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
+                // // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
                 var queries = new List<IQueryable<Series>>()
                 {
                     queryable
                 };
-                queries.AddRange(collectionTags.Select(gId => queryable.Where(s => s.Metadata.CollectionTags.Any(p => p.Id == gId))));
+                queries.AddRange(collectionSeries.Select(gId => queryable.Where(s => collectionSeries.Any(p => p == s.Id))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.GreaterThan:

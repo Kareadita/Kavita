@@ -39,5 +39,4 @@ public enum LibraryType
     /// </summary>
     [Description("Generic")]
     Generic = 6,
-
 }

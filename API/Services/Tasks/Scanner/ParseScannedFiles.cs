@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using ExCSS;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -166,13 +167,18 @@ public class ParseScannedFiles
         }
 
         normalizedPath = Parser.Parser.NormalizePath(folderPath);
+        var libraryRoot =
+            library.Folders.FirstOrDefault(f =>
+                Parser.Parser.NormalizePath(folderPath).Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
+            folderPath;
+
         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
         {
             result.Add(new ScanResult()
             {
                 Files = ArraySegment<string>.Empty,
                 Folder = folderPath,
-                LibraryRoot = folderPath,
+                LibraryRoot = libraryRoot,
                 HasChanged = false
             });
         }
@@ -181,7 +187,7 @@ public class ParseScannedFiles
         {
             Files = _directoryService.ScanFiles(folderPath, fileExtensions),
             Folder = folderPath,
-            LibraryRoot = folderPath,
+            LibraryRoot = libraryRoot,
             HasChanged = true
         });
 
@@ -309,6 +315,7 @@ public class ParseScannedFiles
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
         var processedScannedSeries = new List<ScannedSeriesResult>();
+        //var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
         foreach (var folderPath in folders)
         {
             try
@@ -317,44 +324,14 @@ public class ParseScannedFiles
 
                 foreach (var scanResult in scanResults)
                 {
-                    // scanResult is updated with the parsed infos
-                    await ProcessScanResult(scanResult, seriesPaths, library);
-
-                    // We now have all the parsed infos from the scan result, perform any merging that is necessary and post processing steps
-                    var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-
-                    // Merge any series together (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagator series
-                    MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
-
-                    // Combine everything into scannedSeries
-                    foreach (var info in scanResult.ParserInfos)
-                    {
-                        try
-                        {
-                            TrackSeries(scannedSeries, info);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex,
-                                "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
-                                info?.FullFilePath);
-                        }
-                    }
-
-                    foreach (var series in scannedSeries.Keys)
-                    {
-                        if (scannedSeries[series].Count <= 0) continue;
-
-                        UpdateSortOrder(scannedSeries, series);
-
-                        processedScannedSeries.Add(new ScannedSeriesResult()
-                        {
-                            HasChanged = scanResult.HasChanged,
-                            ParsedSeries = series,
-                            ParsedInfos = scannedSeries[series]
-                        });
-                    }
+                    await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
                 }
+
+                // This reduced a 1.1k series networked scan by a little more than 1 hour, but the order series were added to Kavita was not alphabetical
+                // await Task.WhenAll(scanResults.Select(async scanResult =>
+                // {
+                //     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
+                // }));
 
             }
             catch (ArgumentException ex)
@@ -365,8 +342,50 @@ public class ParseScannedFiles
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
 
-        return processedScannedSeries;
+        return processedScannedSeries.ToList();
 
+    }
+
+    private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, ScanResult scanResult,
+        List<ScannedSeriesResult> processedScannedSeries)
+    {
+        // scanResult is updated with the parsed infos
+        await ProcessScanResult(scanResult, seriesPaths, library); // NOTE: This may be able to be parallelized
+
+        // We now have all the parsed infos from the scan result, perform any merging that is necessary and post processing steps
+        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+
+        // Merge any series together (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagator series
+        MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
+
+        // Combine everything into scannedSeries
+        foreach (var info in scanResult.ParserInfos)
+        {
+            try
+            {
+                TrackSeries(scannedSeries, info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
+                    info?.FullFilePath);
+            }
+        }
+
+        foreach (var series in scannedSeries.Keys)
+        {
+            if (scannedSeries[series].Count <= 0) continue;
+
+            UpdateSortOrder(scannedSeries, series);
+
+            processedScannedSeries.Add(new ScannedSeriesResult()
+            {
+                HasChanged = scanResult.HasChanged,
+                ParsedSeries = series,
+                ParsedInfos = scannedSeries[series]
+            });
+        }
     }
 
     /// <summary>
@@ -397,21 +416,18 @@ public class ParseScannedFiles
         var folder = result.Folder;
         var libraryRoot = result.LibraryRoot;
 
-        // When processing files for a folder and we do enter, we need to parse the information and combine parser infos
-        // NOTE: We might want to move the merge step later in the process, like return and combine.
         _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
         if (files.Count == 0)
         {
-            _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", folder);
-            result.ParserInfos = ArraySegment<ParserInfo>.Empty;
+            _logger.LogInformation("[ScannerService] {Folder} is empty or is no longer in this location", folder);
             return;
         }
 
         // Multiple Series can exist within a folder. We should instead put these infos on the result and perform merging above
         IList<ParserInfo> infos = files
-            .Select(file => _readingItemService.ParseFile(file, folder, libraryRoot, library))
+            .Select(file => _readingItemService.ParseFile(file, folder, libraryRoot, library.Type))
             .Where(info => info != null)
             .ToList()!;
 
@@ -430,22 +446,44 @@ public class ParseScannedFiles
                 var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
                 IList<ParserInfo> chapters;
                 var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
+                var hasAnySpMarker = infos.Exists(info => info.SpecialIndex > 0);
+                var counter = 0f;
 
-                if (specialTreatment)
+                if (specialTreatment && hasAnySpMarker)
                 {
                     chapters = infos
                         .OrderBy(info => info.SpecialIndex)
                         .ToList();
+
+                    foreach (var chapter in chapters)
+                    {
+                        chapter.IssueOrder = counter;
+                        counter++;
+                    }
+                    return;
                 }
-                else
+
+
+                // If everything is a special but we don't have any SpecialIndex, then order naturally and use 0, 1, 2
+                if (specialTreatment)
                 {
                     chapters = infos
-                        .OrderByNatural(info => info.Chapters)
+                        .OrderByNatural(info => Parser.Parser.RemoveExtensionIfSupported(info.Filename)!)
                         .ToList();
+
+                    foreach (var chapter in chapters)
+                    {
+                        chapter.IssueOrder = counter;
+                        counter++;
+                    }
+                    return;
                 }
 
+                chapters = infos
+                    .OrderByNatural(info => info.Chapters)
+                    .ToList();
 
-                var counter = 0f;
+                counter = 0f;
                 var prevIssue = string.Empty;
                 foreach (var chapter in chapters)
                 {

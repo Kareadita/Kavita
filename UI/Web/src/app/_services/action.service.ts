@@ -20,6 +20,8 @@ import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
 import {translate, TranslocoService} from "@ngneat/transloco";
+import {UserCollection} from "../_models/collection-tag";
+import {CollectionTagService} from "./collection-tag.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -43,7 +45,8 @@ export class ActionService implements OnDestroy {
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService) { }
+    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
+    private readonly collectionTagService: CollectionTagService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -376,6 +379,43 @@ export class ActionService implements OnDestroy {
 
       if (callback) {
         callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all series as Unread.
+   * @param collections UserCollection, should have id, pagesRead populated
+   * @param promoted boolean, promoted state
+   * @param callback Optional callback to perform actions after API completes
+   */
+  promoteMultipleCollections(collections: Array<UserCollection>, promoted: boolean, callback?: BooleanActionCallback) {
+    this.collectionTagService.promoteMultipleCollections(collections.map(v => v.id), promoted).pipe(take(1)).subscribe(() => {
+      if (promoted) {
+        this.toastr.success(translate('toasts.collections-promoted'));
+      } else {
+        this.toastr.success(translate('toasts.collections-unpromoted'));
+      }
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Deletes multiple collections
+   * @param collections UserCollection, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes
+   */
+  async deleteMultipleCollections(collections: Array<UserCollection>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-collections'))) return;
+
+    this.collectionTagService.deleteMultipleCollections(collections.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      this.toastr.success(translate('toasts.collections-deleted'));
+
+      if (callback) {
+        callback(true);
       }
     });
   }

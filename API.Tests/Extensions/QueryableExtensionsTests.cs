@@ -45,17 +45,17 @@ public class QueryableExtensionsTests
     [InlineData(false, 1)]
     public void RestrictAgainstAgeRestriction_CollectionTag_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
-        var items = new List<CollectionTag>()
+        var items = new List<AppUserCollection>()
         {
-            new CollectionTagBuilder("Test")
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+            new AppUserCollectionBuilder("Test")
+                .WithItem(new SeriesBuilder("S1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build()).Build())
                 .Build(),
-            new CollectionTagBuilder("Test 2")
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+            new AppUserCollectionBuilder("Test 2")
+                .WithItem(new SeriesBuilder("S2").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build()).Build())
+                .WithItem(new SeriesBuilder("S1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build()).Build())
                 .Build(),
-            new CollectionTagBuilder("Test 3")
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
+            new AppUserCollectionBuilder("Test 3")
+                .WithItem(new SeriesBuilder("S3").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build()).Build())
                 .Build(),
         };
 

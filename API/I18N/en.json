@@ -40,6 +40,8 @@
     "invalid-username": "Invalid username",
     "critical-email-migration": "There was an issue during email migration. Contact support",
     "email-not-enabled": "Email is not enabled on this server. You cannot perform this action.",
+    "account-email-invalid": "The email on file for the admin account is not a valid email. Cannot send test email.",
+    "email-settings-invalid": "Email settings missing information. Ensure all email settings are saved.",
 
     "chapter-doesnt-exist": "Chapter does not exist",
     "file-missing": "File was not found in book",
@@ -200,8 +202,19 @@
     "volume-num": "Volume {0}",
     "book-num": "Book {0}",
     "issue-num": "Issue {0}{1}",
-    "chapter-num": "Chapter {0}"
+    "chapter-num": "Chapter {0}",
 
-
+    "check-updates": "Check Updates",
+    "license-check": "License Check",
+    "process-scrobbling-events": "Process Scrobbling Events",
+    "report-stats": "Report Stats",
+    "check-scrobbling-tokens": "Check Scrobbling Tokens",
+    "cleanup": "Cleanup",
+    "process-processed-scrobbling-events": "Process Processed Scrobbling Events",
+    "remove-from-want-to-read": "Want to Read Cleanup",
+    "scan-libraries": "Scan Libraries",
+    "kavita+-data-refresh": "Kavita+ Data Refresh",
+    "backup": "Backup",
+    "update-yearly-stats": "Update Yearly Stats"
 
 }

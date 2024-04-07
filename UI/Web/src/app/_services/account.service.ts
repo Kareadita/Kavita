@@ -21,7 +21,9 @@ export enum Role {
   Bookmark = 'Bookmark',
   Download = 'Download',
   ChangeRestriction = 'Change Restriction',
-  ReadOnly = 'Read Only'
+  ReadOnly = 'Read Only',
+  Login = 'Login',
+  Promote = 'Promote',
 }
 
 @Injectable({
@@ -52,6 +54,8 @@ export class AccountService {
    */
   private refreshTokenTimeout: ReturnType<typeof setTimeout> | undefined;
 
+  private isOnline: boolean = true;
+
   constructor(private httpClient: HttpClient, private router: Router,
     private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
@@ -59,6 +63,15 @@ export class AccountService {
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
+
+    window.addEventListener("offline", (e) => {
+      this.isOnline = false;
+    });
+
+    window.addEventListener("online", (e) => {
+      this.isOnline = true;
+      this.refreshToken().subscribe();
+    });
   }
 
   hasAdminRole(user: User) {
@@ -83,6 +96,10 @@ export class AccountService {
 
   hasReadOnlyRole(user: User) {
     return user && user.roles.includes(Role.ReadOnly);
+  }
+
+  hasPromoteRole(user: User) {
+    return user && user.roles.includes(Role.Promote) || user.roles.includes(Role.Admin);
   }
 
   getRoles() {
@@ -143,6 +160,7 @@ export class AccountService {
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
+
       if (user.preferences && user.preferences.theme) {
         this.themeService.setTheme(user.preferences.theme.name);
       } else {
@@ -329,7 +347,7 @@ export class AccountService {
 
 
   private refreshToken() {
-    if (this.currentUser === null || this.currentUser === undefined) return of();
+    if (this.currentUser === null || this.currentUser === undefined || !this.isOnline) return of();
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
      {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {

@@ -221,18 +221,18 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("jobs")]
-    public ActionResult<IEnumerable<JobDto>> GetJobs()
+    public async Task<ActionResult<IEnumerable<JobDto>>> GetJobs()
     {
-        var recurringJobs = JobStorage.Current.GetConnection().GetRecurringJobs().Select(
-            dto =>
-                new JobDto() {
-                    Id = dto.Id,
-                    Title = dto.Id.Replace('-', ' '),
-                    Cron = dto.Cron,
-                    LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
-                });
+        var jobDtoTasks = JobStorage.Current.GetConnection().GetRecurringJobs().Select(async dto =>
+            new JobDto()
+            {
+                Id = dto.Id,
+                Title = await _localizationService.Translate(User.GetUserId(), dto.Id),
+                Cron = dto.Cron,
+                LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
+            });
 
-        return Ok(recurringJobs);
+        return Ok(await Task.WhenAll(jobDtoTasks));
     }
 
     /// <summary>

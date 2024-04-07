@@ -1,10 +1,12 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { CollectionTag } from '../_models/collection-tag';
-import { TextResonse } from '../_types/text-response';
-import { ImageService } from './image.service';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {environment} from 'src/environments/environment';
+import {UserCollection} from '../_models/collection-tag';
+import {TextResonse} from '../_types/text-response';
+import {MalStack} from "../_models/collection/mal-stack";
+import {Action, ActionItem} from "./action-factory.service";
+import {User} from "../_models/user";
+import {AccountService} from "./account.service";
 
 @Injectable({
   providedIn: 'root'
@@ -13,24 +15,25 @@ export class CollectionTagService {
 
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient, private imageService: ImageService) { }
+  constructor(private httpClient: HttpClient, private accountService: AccountService) { }
 
-  allTags() {
-    return this.httpClient.get<CollectionTag[]>(this.baseUrl + 'collection/');
+  allCollections(ownedOnly = false) {
+    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
   }
 
-  search(query: string) {
-    return this.httpClient.get<CollectionTag[]>(this.baseUrl + 'collection/search?queryString=' + encodeURIComponent(query)).pipe(map(tags => {
-      tags.forEach(s => s.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(s.id)));
-      return tags;
-    }));
+  allCollectionsForSeries(seriesId: number, ownedOnly = false) {
+    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection/all-series?ownedOnly=' + ownedOnly + '&seriesId=' + seriesId);
   }
 
-  updateTag(tag: CollectionTag) {
+  updateTag(tag: UserCollection) {
     return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
   }
 
-  updateSeriesForTag(tag: CollectionTag, seriesIdsToRemove: Array<number>) {
+  promoteMultipleCollections(tags: Array<number>, promoted: boolean) {
+    return this.httpClient.post(this.baseUrl + 'collection/promote-multiple', {collectionIds: tags, promoted}, TextResonse);
+  }
+
+  updateSeriesForTag(tag: UserCollection, seriesIdsToRemove: Array<number>) {
     return this.httpClient.post(this.baseUrl + 'collection/update-series', {tag, seriesIdsToRemove}, TextResonse);
   }
 
@@ -44,5 +47,21 @@ export class CollectionTagService {
 
   deleteTag(tagId: number) {
     return this.httpClient.delete<string>(this.baseUrl + 'collection?tagId=' + tagId, TextResonse);
+  }
+
+  deleteMultipleCollections(tags: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'collection/delete-multiple', {collectionIds: tags}, TextResonse);
+  }
+
+  getMalStacks() {
+    return this.httpClient.get<Array<MalStack>>(this.baseUrl + 'collection/mal-stacks');
+  }
+
+  actionListFilter(action: ActionItem<UserCollection>, user: User) {
+    const canPromote = this.accountService.hasAdminRole(user) || this.accountService.hasPromoteRole(user);
+    const isPromotionAction = action.action == Action.Promote || action.action == Action.UnPromote;
+
+    if (isPromotionAction) return canPromote;
+    return true;
   }
 }

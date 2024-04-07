@@ -25,14 +25,16 @@ import {Breakpoint, UtilityService} from "../../../shared/_services/utility.serv
 })
 export class CustomizeDashboardStreamsComponent {
 
-  items: DashboardStream[] = [];
-  smartFilters: SmartFilter[] = [];
-  accessibilityMode: boolean = false;
-
   private readonly dashboardService = inject(DashboardService);
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly utilityService = inject(UtilityService);
+
+  items: DashboardStream[] = [];
+  smartFilters: SmartFilter[] = [];
+  accessibilityMode: boolean = false;
+
+
 
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])

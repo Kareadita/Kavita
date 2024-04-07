@@ -75,13 +75,13 @@ body:
   - type: dropdown
     id: mobile-browsers
     attributes:
-      label: If the issue is being seen on the UI, what browsers are you seeing the problem on?
+      label: If the issue is being seen on the Mobile UI, what browsers are you seeing the problem on?
       multiple: true
       options:
         - Firefox
         - Chrome
         - Safari
-        - Microsoft Edge
+        - Other iOS Browser
   - type: textarea
     id: logs
     attributes:

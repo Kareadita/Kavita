@@ -72,13 +72,15 @@
               <div class="row g-0">
                 <div class="col-lg-8 col-md-12 pe-2">
                   <div class="mb-3">
-                    <label for="collections" class="form-label">{{t('collections-label')}}</label>
-                    <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
+                    <label for="language" class="form-label">{{t('language-label')}}</label>
+                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
+                                   [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
+                                   (newItemAdded)="metadata.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
                       </ng-template>
                       <ng-template #optionItem let-item let-position="idx">
-                        {{item.title}}
+                        {{item.title}} ({{item.isoCode}})
                       </ng-template>
                     </app-typeahead>
                   </div>
@@ -138,22 +140,10 @@
               </div>
 
               <div class="row g-0">
-                <div class="col-lg-4 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <label for="language" class="form-label">{{t('language-label')}}</label>
-                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
-                                   [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
-                                   (newItemAdded)="metadata.languageLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
-                        {{item.title}}
-                      </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
-                        {{item.title}} ({{item.isoCode}})
-                      </ng-template>
-                    </app-typeahead>
-                  </div>
-                </div>
-                <div class="col-lg-4 col-md-12 pe-2">
+<!--                <div class="col-lg-4 col-md-12 pe-2">-->
+<!--                  -->
+<!--                </div>-->
+                <div class="col-lg-6 col-md-12 pe-2">
                   <div class="mb-3">
                     <label for="age-rating" class="form-label">{{t('age-rating-label')}}</label>
                     <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
@@ -164,7 +154,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-lg-4 col-md-12">
+                <div class="col-lg-6 col-md-12">
                   <div class="mb-3">
                     <label for="publication-status" class="form-label">{{t('publication-status-label')}}</label>
                     <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">

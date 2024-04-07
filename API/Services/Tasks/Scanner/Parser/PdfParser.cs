@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using System.Collections.Generic;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -16,13 +16,18 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
             Title = Parser.RemoveExtensionIfSupported(fileName)!,
-            FullFilePath = filePath,
+            FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo,
             Chapters = type == LibraryType.Comic
                 ? Parser.ParseComicChapter(fileName)
                 : Parser.ParseChapter(fileName)
         };
+
+        if (type == LibraryType.Book)
+        {
+            ret.Chapters = Parser.DefaultChapter;
+        }
 
         ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
         ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);

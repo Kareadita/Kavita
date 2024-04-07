@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -80,7 +81,14 @@ public class ProcessSeries : IProcessSeries
     /// </summary>
     public async Task Prime()
     {
-        await _tagManagerService.Prime();
+        try
+        {
+            await _tagManagerService.Prime();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "Unable to prime tag manager. Scan cannot proceed. Report to Kavita dev");
+        }
     }
 
     /// <summary>
@@ -196,15 +204,16 @@ public class ProcessSeries : IProcessSeries
 
 
                 // Process reading list after commit as we need to commit per list
-                BackgroundJob.Enqueue(() => _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
+                await _readingListService.CreateReadingListsFromSeries(library.Id, series.Id);
 
                 if (seriesAdded)
                 {
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
 
-                    BackgroundJob.Enqueue(() =>
-                        _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
+                    // BackgroundJob.Enqueue(() =>
+                    //     _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
+                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
@@ -225,8 +234,10 @@ public class ProcessSeries : IProcessSeries
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
+        // BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
+        await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
     }
+
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
@@ -361,12 +372,26 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
+            // Get the default admin to associate these tags to
+            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
+            if (defaultAdmin == null) return;
+
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
             foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
-                var t = await _tagManagerService.GetCollectionTag(collection);
-                if (t == null) continue;
-                _collectionTagService.AddTagToSeriesMetadata(t, series.Metadata);
+                var t = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
+                if (t.Item1 == null) continue;
+
+                var tag = t.Item1;
+
+                // Check if the Series is already on the tag
+                if (tag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
+                {
+                    continue;
+                }
+
+                tag.Items.Add(series);
+                await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
             }
         }
 
@@ -574,7 +599,7 @@ public class ProcessSeries : IProcessSeries
             {
                 // TODO: Push this to UI in some way
                 if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
-                _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                _logger.LogCritical(ex, "[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
                 throw new KavitaException(
                     $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
             }
@@ -691,14 +716,15 @@ public class ProcessSeries : IProcessSeries
         {
             if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
             {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else
             {
                 // Ensure we remove any files that no longer exist AND order
                 existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => p.FullFilePath == f.FilePath))
+                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
                     .OrderByNatural(f => f.FilePath).ToList();
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
             }
@@ -717,6 +743,7 @@ public class ProcessSeries : IProcessSeries
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
             existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
             existingFile.FileName = Parser.Parser.RemoveExtensionIfSupported(existingFile.FilePath);
+            existingFile.FilePath = Parser.Parser.NormalizePath(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }

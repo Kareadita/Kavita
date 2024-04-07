@@ -148,7 +148,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
             if (this.pageOperationsForm.get('accessibilityMode')?.disabled) return;
             this.pageOperationsForm.get('accessibilityMode')?.disable();
           } else {
-            if (this.pageOperationsForm.get('accessibilityMode')?.disabled) return;
             this.pageOperationsForm.get('accessibilityMode')?.enable();
           }
         }),
