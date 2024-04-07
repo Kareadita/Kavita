@@ -1123,7 +1123,9 @@ public class OpdsController : BaseApiController
             Id = mangaFile.Id.ToString(),
             Title = title,
             Extent = fileSize,
-            Summary = $"{fileType.Split("/")[1]} - {fileSize}",
+            Summary = $"File Type: {fileType.Split("/")[1]} - {fileSize}" + (string.IsNullOrWhiteSpace(chapter.Summary)
+                ? string.Empty
+                : $"     Summary: {chapter.Summary}"),
             Format = mangaFile.Format.ToString(),
             Links = new List<FeedLink>()
             {
@@ -1279,7 +1281,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private string SerializeXml(Feed feed)
+    private string SerializeXml(Feed? feed)
     {
         if (feed == null) return string.Empty;
         using var sm = new StringWriter();
