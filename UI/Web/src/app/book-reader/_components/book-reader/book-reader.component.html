@@ -63,6 +63,10 @@
                     (colorThemeUpdate)="updateColorTheme($event)"
                     (styleUpdate)="updateReaderStyles($event)"
                     (clickToPaginateChanged)="showPaginationOverlay($event)"
+                    (swipeToPaginateChanged)="toggleSwipeToPaginate($event)"
+                    (scrollThresholdChanged)="updateScrollThreshold($event)"
+                    (distanceThresholdChanged)="updateDistanceThreshold($event)"
+                    (speedThresholdChanged)="updateSpeedThreshold($event)"
                     (fullscreen)="toggleFullscreen()"
                     (bookReaderWritingStyle)="updateWritingStyle($event)"
                     (layoutModeUpdate)="updateLayoutMode($event)"
@@ -104,26 +108,25 @@
     <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}"
          [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading" (click)="handleReaderClick($event)">
 
-      <ng-container *ngIf="clickToPaginate && !hidePagination">
+      <ng-container *ngIf="clickToPaginate && !hidePagination && !actionBarVisible">
         <div class="left {{clickOverlayClass('left')}} no-observe"
-             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD, $event)"
              [ngClass]="{'immersive' : immersiveMode}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
         <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
-             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, $event)"
              [ngClass]="{'immersive' : immersiveMode}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
       </ng-container>
         <div #bookContainer class="book-container {{WritingStyleClass}}"
-          [ngClass]="{'immersive' : immersiveMode}"
-             (mousedown)="mouseDown($event)" >
+          [ngClass]="{'immersive' : immersiveMode}" >
 
         <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
              [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
-             [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
-             [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
+             [ngClass]="{'immersive': immersiveMode && actionBarVisible, 'preventHighlight': !actionBarVisible && swipeToPaginate}"
+             [innerHtml]="page" *ngIf="page !== undefined" (wheel)="onWheel($event)"></div>
         <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
              (click)="$event.stopPropagation();"
              [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
@@ -134,7 +137,7 @@
     <ng-template #actionBar let-isTop>
       <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
         <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
-                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD, $event)"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? t('previous') : t('next')}} Page">
           <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
@@ -158,7 +161,7 @@
         <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
         <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
-                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+                (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, $event)"
                  title="{{readingDirection === ReadingDirection.LeftToRight ? t('next') : t('previous')}} Page">
           <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
         </button>

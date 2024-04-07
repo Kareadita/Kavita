@@ -13563,6 +13563,25 @@
             "type": "boolean",
             "description": "Book Reader Option: Allows tapping on side of screens to paginate"
           },
+          "bookReaderSwipeToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows swiping across the screen to paginate"
+          },
+          "bookReaderScrollThreshold": {
+            "type": "integer",
+            "description": "Book Reader Option: Sets scroll threshold for swipe pagination",
+            "format": "int32"
+          },
+          "bookReaderDistanceThreshold": {
+            "type": "integer",
+            "description": "Book Reader Option: Sets distance threshold for swipe pagination",
+            "format": "int32"
+          },
+          "bookReaderSpeedThreshold": {
+            "type": "number",
+            "description": "Book Reader Option: Sets speed threshold for swipe pagination",
+            "format": "double"
+          },
           "bookReaderReadingDirection": {
             "enum": [
               0,
@@ -20945,6 +20964,7 @@
           "bookReaderLineSpacing",
           "bookReaderMargin",
           "bookReaderReadingDirection",
+          "bookReaderSwipeToPaginate",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
           "bookReaderWritingStyle",
@@ -21065,6 +21085,25 @@
           "bookReaderTapToPaginate": {
             "type": "boolean",
             "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+          },
+          "bookReaderSwipeToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows swiping across the screen to paginate"
+          },
+          "bookReaderScrollThreshold": {
+            "type": "integer",
+            "description": "Book Reader Option: Sets scroll threshold for swipe pagination",
+            "format": "int32"
+          },
+          "bookReaderDistanceThreshold": {
+            "type": "integer",
+            "description": "Book Reader Option: Sets distance threshold for swipe pagination",
+            "format": "int32"
+          },
+          "bookReaderSpeedThreshold": {
+            "type": "number",
+            "description": "Book Reader Option: Sets speed threshold for swipe pagination",
+            "format": "double"
           },
           "bookReaderReadingDirection": {
             "enum": [

@@ -94,6 +94,10 @@ $action-bar-height: 38px;
     opacity: 0;
 }
 
+.preventHighlight {
+    -webkit-user-select: none;
+    user-select: none;
+}
 
 .action-bar {
     background-color: var(--br-actionbar-bg-color);
