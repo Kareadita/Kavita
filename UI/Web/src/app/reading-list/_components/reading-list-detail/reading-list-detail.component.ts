@@ -60,7 +60,6 @@ export class ReadingListDetailComponent implements OnInit {
   isAdmin: boolean = false;
   isLoading: boolean = false;
   accessibilityMode: boolean = false;
-  hasDownloadingRole: boolean = false;
   readingListSummary: string = '';
 
   libraryTypes: {[key: number]: LibraryType} = {};
@@ -114,7 +113,6 @@ export class ReadingListDetailComponent implements OnInit {
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
-          this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
 
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
             .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));

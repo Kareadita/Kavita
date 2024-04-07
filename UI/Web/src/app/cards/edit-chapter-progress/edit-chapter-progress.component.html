@@ -1,0 +1,48 @@
+<ng-container *transloco="let t; read: 'edit-chapter-progress'">
+  <table class="table table-striped" [formGroup]="formGroup">
+    <thead>
+    <tr>
+      <th scope="col">{{t('user-header')}}</th>
+      <th scope="col">{{t('page-read-header')}}</th>
+      <th scope="col">{{t('date-created-header')}}</th>
+      <th scope="col">{{t('date-updated-header')}}</th>
+<!--      <th scope="col">{{t('action-header')}}</th>-->
+    </tr>
+    </thead>
+    <tbody>
+      @for(rowForm of items.controls; track rowForm; let idx = $index) {
+        <tr >
+          <td id="progress-event--{{idx}}">
+            {{progressEvents[idx].userName | sentenceCase}}
+          </td>
+          <td>
+            @if(editMode[idx]) {
+              <input type="number" formControlName="pagesRead" class="form-control"/>
+            } @else {
+              {{progressEvents[idx].pagesRead}}
+            }
+          </td>
+          <td>
+            {{progressEvents[idx].createdUtc}}
+          </td>
+          <td>
+            {{progressEvents[idx].lastModifiedUtc}}
+          </td>
+<!--          <td>-->
+<!--            @if(editMode[idx]) {-->
+<!--              <button class="btn btn-primary" (click)="save(progressEvents[idx], idx)" attr.aria-labelledby="progress-event&#45;&#45;{{idx}}">-->
+<!--                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>-->
+<!--                <span class="visually-hidden">{{t('save-alt')}}</span>-->
+<!--              </button>-->
+<!--            } @else {-->
+<!--              <button class="btn btn-primary" (click)="edit(progressEvents[idx], idx)" attr.aria-labelledby="progress-event&#45;&#45;{{idx}}">-->
+<!--                <i class="fa-solid fa-pencil" aria-hidden="true"></i>-->
+<!--                <span class="visually-hidden">{{t('edit-alt')}}</span>-->
+<!--              </button>-->
+<!--            }-->
+<!--          </td>-->
+        </tr>
+      }
+    </tbody>
+  </table>
+</ng-container>

@@ -200,8 +200,19 @@
     "volume-num": "Volume {0}",
     "book-num": "Book {0}",
     "issue-num": "Issue {0}{1}",
-    "chapter-num": "Chapter {0}"
+    "chapter-num": "Chapter {0}",
 
-
+    "check-updates": "Check Updates",
+    "license-check": "License Check",
+    "process-scrobbling-events": "Process Scrobbling Events",
+    "report-stats": "Report Stats",
+    "check-scrobbling-tokens": "Check Scrobbling Tokens",
+    "cleanup": "Cleanup",
+    "process-processed-scrobbling-events": "Process Processed Scrobbling Events",
+    "remove-from-want-to-read": "Want to Read Cleanup",
+    "scan-libraries": "Scan Libraries",
+    "kavita+-data-refresh": "Kavita+ Data Refresh",
+    "backup": "Backup",
+    "update-yearly-stats": "Update Yearly Stats"
 
 }

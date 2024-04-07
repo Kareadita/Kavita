@@ -60,7 +60,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "A resenha deve ter pelo menos {{count}} caracteres",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -748,7 +749,9 @@
         "help": "{{common.help}}",
         "file-type-group-label": "Tipos de Ficheiros",
         "file-type-group-tooltip": "Os tipos de ficheiros que o Kavita pode procurar. Por exemplo, Arquivo irá incluir todos os ficheiros cb*, zip, rar, etc.",
-        "exclude-patterns-tooltip": "Configura um conjunto de padrões (sintaxe Glob) que o Kavita irá excluir dos resultados da analise de directorias."
+        "exclude-patterns-tooltip": "Configura um conjunto de padrões (sintaxe Glob) que o Kavita irá excluir dos resultados da analise de directorias.",
+        "kavitaplus-eligible-label": "Kavita+ Elegível",
+        "kavitaplus-eligible-tooltip": "O Kavita+ extrairá informações ou oferecerá suporte ao Scrobbling"
     },
     "reader-settings": {
         "general-settings-title": "Definições Gerais",
@@ -1086,7 +1089,8 @@
         "donations-title": "Donativos:",
         "source-title": "Código fonte:",
         "feature-request-title": "Pedidos de Funcionalidades:",
-        "localization-title": "Idiomas:"
+        "localization-title": "Idiomas:",
+        "updates-title": "Histórico das Atualizações"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
@@ -1212,7 +1216,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "O Kavita+ é um serviço de subscrição premium que desbloqueia funcionalidades para todos os utilizadores desta instância Kavita. Compre uma subscrição para desbloquear ",
         "kavita+-desc-part-2": "os benefícios premium",
-        "kavita+-desc-part-3": "agora!"
+        "kavita+-desc-part-3": "agora!",
+        "kavita+-releases": "Ver lançamentos",
+        "kavita+-requirement": "Kavita+ foi projetado para funcionar apenas com a versão mais recente – 2 versões. Qualquer coisa fora disso está sujeita a não funcionar."
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -1508,7 +1514,9 @@
         "chapter-title": "Capítulo:",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Valor mais alto do Count encontrado em todos os ComicInfo de uma Série",
-        "max-issue-tooltip": "Valor máximo dos campos Issue ou Volume em todos os ComicInfo da série"
+        "max-issue-tooltip": "Valor máximo dos campos Issue ou Volume em todos os ComicInfo da série",
+        "force-refresh": "Forçar Atualização",
+        "force-refresh-tooltip": "Forçar a atualização de metadados externos do Kavita+"
     },
     "day-breakdown": {
         "x-axis-label": "Dia da Semana",

@@ -1,20 +1,20 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component, ContentChild, DestroyRef,
   EventEmitter,
   HostListener,
   inject,
   Input,
   OnInit,
-  Output
+  Output, TemplateRef
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { CollectionTag } from 'src/app/_models/collection-tag';
+import { UserCollection } from 'src/app/_models/collection-tag';
 import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
@@ -44,6 +44,8 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
+import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 
 @Component({
   selector: 'app-card-item',
@@ -62,7 +64,9 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
     RouterLink,
     TranslocoModule,
     SafeHtmlPipe,
-    RouterLinkActive
+    RouterLinkActive,
+    PromotedIconComponent,
+    SeriesFormatComponent
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],
@@ -81,6 +85,7 @@ export class CardItemComponent implements OnInit {
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+
   protected readonly MangaFormat = MangaFormat;
 
   /**
@@ -91,10 +96,6 @@ export class CardItemComponent implements OnInit {
    * Name of the card
    */
   @Input() title = '';
-  /**
-   * Shows below the title. Defaults to not visible
-   */
-  @Input() subtitle = '';
   /**
    * Any actions to perform on the card
    */
@@ -114,7 +115,7 @@ export class CardItemComponent implements OnInit {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input({required: true}) entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem | NextExpectedChapter;
+  @Input({required: true}) entity!: Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter;
   /**
    * If the entity is selected or not.
    */
@@ -147,6 +148,7 @@ export class CardItemComponent implements OnInit {
    * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
+  @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
   /**
    * Library name item belongs to
    */
@@ -198,13 +200,14 @@ export class CardItemComponent implements OnInit {
     this.format = (this.entity as Series).format;
 
     if (this.utilityService.isChapter(this.entity)) {
-      const chapterTitle = this.utilityService.asChapter(this.entity).titleName;
+      const chapter = this.utilityService.asChapter(this.entity);
+      const chapterTitle = chapter.titleName;
       if (chapterTitle === '' || chapterTitle === null || chapterTitle === undefined) {
-        const volumeTitle = this.utilityService.asChapter(this.entity).volumeTitle
+        const volumeTitle = chapter.volumeTitle
         if (volumeTitle === '' || volumeTitle === null || volumeTitle === undefined) {
           this.tooltipTitle = (this.title).trim();
         } else {
-          this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+          this.tooltipTitle = (volumeTitle + ' ' + this.title).trim();
         }
       } else {
         this.tooltipTitle = chapterTitle;
@@ -350,7 +353,7 @@ export class CardItemComponent implements OnInit {
 
 
   isPromoted() {
-    const tag = this.entity as CollectionTag;
+    const tag = this.entity as UserCollection;
     return tag.hasOwnProperty('promoted') && tag.promoted;
   }
 
@@ -377,5 +380,10 @@ export class CardItemComponent implements OnInit {
       //   this.actions = this.actions.filter(a => a.title !== 'Send To');
       // }
     }
+
+    // this.actions = this.actions.filter(a => {
+    //   if (!a.isAllowed) return true;
+    //   return a.isAllowed(a, this.entity);
+    // });
   }
 }

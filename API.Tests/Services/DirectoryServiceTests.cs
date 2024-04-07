@@ -721,6 +721,45 @@ public class DirectoryServiceTests
 
     #endregion
 
+    #region FindLowestDirectoriesFromFiles
+
+    [Theory]
+    [InlineData(new [] {"C:/Manga/"},
+        new [] {"C:/Manga/Love Hina/Vol. 01.cbz"},
+        "C:/Manga/Love Hina")]
+    [InlineData(new [] {"C:/Manga/"},
+        new [] {"C:/Manga/Romance/Love Hina/Vol. 01.cbz"},
+        "C:/Manga/Romance/Love Hina")]
+    [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/Dir 2/"},
+        new [] {"C:/Manga/Dir 1/Love Hina/Vol. 01.cbz"},
+        "C:/Manga/Dir 1/Love Hina")]
+    [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/"},
+        new [] {"D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz"},
+        null)]
+    [InlineData(new [] {"C:/Manga/"},
+        new [] {"C:/Manga//Love Hina/Vol. 01.cbz"},
+        "C:/Manga/Love Hina")]
+    [InlineData(new [] {@"C:\mount\drive\Library\Test Library\Comics\"},
+        new [] {@"C:\mount\drive\Library\Test Library\Comics\Bruce Lee (1994)\Bruce Lee #001 (1994).cbz"},
+        @"C:/mount/drive/Library/Test Library/Comics/Bruce Lee (1994)")]
+    public void FindLowestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
+    {
+        var fileSystem = new MockFileSystem();
+        foreach (var directory in rootDirectories)
+        {
+            fileSystem.AddDirectory(directory);
+        }
+        foreach (var f in files)
+        {
+            fileSystem.AddFile(f, new MockFileData(""));
+        }
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+        var actual = ds.FindLowestDirectoriesFromFiles(rootDirectories, files);
+        Assert.Equal(expectedDirectory, actual);
+    }
+
+    #endregion
     #region GetFoldersTillRoot
 
     [Theory]

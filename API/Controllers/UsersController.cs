@@ -122,6 +122,12 @@ public class UsersController : BaseApiController
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
+
+        existingPreferences.PdfTheme = preferencesDto.PdfTheme;
+        existingPreferences.PdfLayoutMode = preferencesDto.PdfLayoutMode;
+        existingPreferences.PdfScrollMode = preferencesDto.PdfScrollMode;
+        existingPreferences.PdfSpreadMode = preferencesDto.PdfSpreadMode;
+
         if (_localizationService.GetLocales().Contains(preferencesDto.Locale))
         {
             existingPreferences.Locale = preferencesDto.Locale;

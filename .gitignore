@@ -520,6 +520,7 @@ UI/Web/dist/
 /API/config/*.db
 /API/config/*.bak
 /API/config/*.backup
+/API/config/*.csv
 /API/config/Hangfire.db
 /API/config/Hangfire-log.db
 API/config/covers/

@@ -42,6 +42,8 @@
         "is-processed-header": "Is Processed",
         "no-data": "No Data",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
+        "volume-num": "Volume {{num}}",
+        "chapter-num": "Chapter {{num}}",
         "rating": "Rating {{r}}",
         "not-applicable": "Not Applicable",
         "processed": "Processed",
@@ -167,6 +169,15 @@
         "line-height-book-tooltip": "How much spacing between the lines of the book",
         "margin-book-label": "Margin",
         "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
+
+        "pdf-reader-settings-title": "PDF Reader",
+        "pdf-layout-mode-label": "Layout Mode",
+        "pdf-layout-mode-tooltip": "How the reader lays the pdf out. Default is pages stacked with scrolling and Book emulates a physical book",
+        "pdf-scroll-mode-label": "Scroll Mode",
+        "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",
+        "pdf-spread-mode-label": "Spread Mode",
+        "pdf-spread-mode-tooltip": "How pages should be laid out. Single or double (odd/even)",
+        "pdf-theme-label": "Theme",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Tachiyomi users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
@@ -303,11 +314,17 @@
         "no-token-set": "No Token Set",
         "token-set":  "Token Set",
         "generate": "Generate",
+        "generic-instructions": "Fill out information about different External Services you have to allow Kavita+ to interact with them.",
         "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "mal-instructions": "Kavita uses a MAL Client Id for authentication. Create a new Client for Kavita and once approved, supply the client Id and your username.",
+        "scrobbling-applicable-label": "Scrobbling Applicable",
         "token-input-label": "{{service}} Token Goes Here",
+        "mal-token-input-label": "MAL Client Id",
+        "mal-username-input-label": "MAL Username",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "loading": "{{common.loading}}"
     },
 
     "typeahead": {
@@ -468,7 +485,8 @@
         "side-story": "Side Story",
         "spin-off": "Spin Off",
         "parent": "Parent",
-        "edition": "Edition"
+        "edition": "Edition",
+        "annual": "Annual"
     },
 
     "publication-status-pipe": {
@@ -490,7 +508,11 @@
         "penciller": "Penciller",
         "publisher": "Publisher",
         "writer": "Writer",
-        "other": "Other"
+        "other": "Other",
+        "imprint": "Imprint",
+        "translator": "Translator",
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
     },
 
     "manga-format-pipe": {
@@ -504,7 +526,10 @@
     "library-type-pipe": {
         "book": "Book",
         "comic": "Comic",
-        "manga": "Manga"
+        "manga": "Manga",
+        "comicVine": "ComicVine",
+        "image": "Image",
+        "lightNovel": "Light Novel"
     },
 
     "age-rating-pipe": {
@@ -574,7 +599,7 @@
         "published-label": "Published: ",
         "available": "Available",
         "description": "If you do not see an {{installed}}",
-        "description-continued": "tag, you are on a nightly release. Only major versions will show as available."
+        "description-continued": "tag, you are on a nightly release. Only major versions will show as available. A nightly tag will show when on a nightly from that stable."
     },
 
     "invite-user": {
@@ -707,7 +732,7 @@
         "description": "Complete the form to register an admin account",
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
-        "email-tooltip": "Email does not need to be a real address, but provides access to forgot password. It is not sent outside the server unless forgot password is used without a custom email service host.",
+        "email-tooltip": "Email does not need to be a real address, but provides access to forgot password. It is not sent outside the server unless Kavita emails you.",
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
@@ -764,6 +789,9 @@
         "translators-title": "Translators",
         "pencillers-title": "Pencillers",
         "publishers-title": "Publishers",
+        "imprints-title": "Imprints",
+        "teams-title": "Teams",
+        "locations-title": "Locations",
 
         "promoted": "{{common.promoted}}",
         "see-more": "See More",
@@ -822,6 +850,8 @@
         "last-scanned-label": "Last Scanned:",
         "type-label": "Type",
         "type-tooltip": "Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but have different naming in the UI.",
+        "kavitaplus-eligible-label": "Kavita+ Eligible",
+        "kavitaplus-eligible-tooltip": "Will Kavita+ pull information or support Scrobbling",
         "folder-description": "Add folders to your library",
         "browse": "Browse for Media Folders",
         "help-us-part-1": "Help us out by following ",
@@ -939,11 +969,15 @@
         "metadata-tab": "Metadata",
         "cover-tab": "Cover",
         "info-tab": "Info",
+        "progress-tab": "Progress",
         "no-summary": "No Summary available.",
         "writers-title": "{{series-metadata-detail.writers-title}}",
         "genres-title": "{{series-metadata-detail.genres-title}}",
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "imprints-title": "{{series-metadata-detail.imprints-title}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}",
         "not-defined": "Not defined",
         "read": "{{common.read}}",
         "unread": "Unread",
@@ -973,7 +1007,9 @@
         "inkers-title": "{{series-metadata-detail.inkers-title}}",
         "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}"
+        "editors-title": "{{series-metadata-detail.editors-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}"
     },
 
     "cover-image-chooser": {
@@ -1022,6 +1058,7 @@
         "id-title": "ID",
         "links-title": "{{series-metadata-detail.links-title}}",
         "isbn-title": "ISBN",
+        "sort-order-title": "Sort Order",
         "last-read-title": "Last Read",
         "less-than-hour": "<1 Hour",
         "range-hours": "{{value}} {{hourWord}}",
@@ -1361,9 +1398,9 @@
         "promote-label": "Promote",
         "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.",
         "summary-label": "Summary",
-        "series-title": "Applies to Series",
         "deselect-all": "{{common.deselect-all}}",
-        "select-all": "{{common.select-all}}"
+        "select-all": "{{common.select-all}}",
+        "filter-label": "{{common.filter}}"
     },
 
     "library-detail": {
@@ -1507,7 +1544,7 @@
         "skip-alt": "Skip to main content",
         "search-series-alt": "Search series",
         "search-alt": "Search…",
-        "promoted": "(promoted)",
+        "promoted": "{{common.promoted}}",
         "no-data": "No results found",
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
@@ -1518,11 +1555,20 @@
         "all-filters": "Smart Filters"
     },
 
+    "promoted-icon": {
+        "promoted": "{{common.promoted}}"
+    },
+
+    "collection-owner": {
+        "collection-created-label": "Created by: {{owner}}",
+        "collection-via-label": "via {{source}}"
+    },
+
     "add-to-list-modal": {
         "title": "Add to Reading List",
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",
-        "promoted-alt": "Promoted",
+        "promoted-alt": "{{common.promoted}}",
         "no-data": "No lists created yet",
         "loading": "{{common.loading}}",
         "reading-list-label": "Reading List",
@@ -1534,7 +1580,7 @@
         "general-tab": "General",
         "cover-image-tab": "Cover Image",
         "close": "{{common.close}}",
-        "save": "{common.save}}",
+        "save": "{{common.save}}",
         "year-validation": "Must be greater than 1000, 0 or blank",
         "month-validation": "Must be between 1 and 12 or blank",
         "name-unique-validation": "Name must be unique",
@@ -1545,7 +1591,26 @@
         "ending-title": "Ending",
         "starting-title": "Starting",
         "promote-label": "Promote",
-        "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them."
+        "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
+    },
+
+
+
+    "import-mal-collection-modal": {
+        "close": "{{common.close}}",
+        "title": "MAL Interest Stack Import",
+        "description": "Import your MAL Interest Stacks and create Collections within Kavita",
+        "series-count": "{{common.series-count}}",
+        "restack-count": "{{num}} Restacks"
+    },
+
+    "edit-chapter-progress": {
+        "user-header": "User",
+        "page-read-header": "Pages Read",
+        "date-created-header": "Created (UTC)",
+        "date-updated-header": "Last Updated (UTC)",
+        "action-header": "{{common.edit}}",
+        "edit-alt": "{{common.edit}}"
     },
 
     "import-cbl-modal": {
@@ -1554,7 +1619,6 @@
         "import-description": "To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.",
         "validate-description": "All files have been validated to see if there are any operations to do on the list. Any lists have have failed will not move to the next step. Fix the CBL files and retry.",
         "validate-warning": "There are issues with the CBL that will prevent an import. Correct these issues then try again.",
-        "validate-no-issue": "Looks good",
         "validate-no-issue-description": "No issues found with CBL, press next.",
         "dry-run-description": "This is a dry run and shows what will happen if you press Next and perform the import. All Failures will not be imported.",
         "prev": "Prev",
@@ -1564,7 +1628,8 @@
         "import-step": "Import CBLs",
         "validate-cbl-step": "Validate CBL",
         "dry-run-step": "Dry Run",
-        "final-import-step": "Final Step"
+        "final-import-step": "Final Step",
+        "comicvine-parsing-label": "Use ComicVine Series matching"
     },
 
     "pdf-reader": {
@@ -1572,7 +1637,28 @@
         "incognito-mode": "Incognito Mode",
         "light-theme-alt": "Light Theme",
         "dark-theme-alt": "Dark Theme",
-        "close-reader-alt": "Close Reader"
+        "close-reader-alt": "Close Reader",
+        "toggle-incognito": "Turn off Incognito Mode"
+    },
+
+    "pdf-layout-mode-pipe": {
+        "single": "Single Page",
+        "book": "Book mode",
+        "multiple": "Default",
+        "infinite-scroll": "Infinite Scroll"
+    },
+
+    "pdf-scroll-mode-pipe": {
+        "vertical": "Vertical",
+        "horizontal": "Horizontal",
+        "wrapped": "Wrapped",
+        "page": "Tap to Paginate"
+    },
+
+    "pdf-spread-mode-pipe": {
+        "off": "No Spreads",
+        "odd": "Odd Spreads",
+        "even": "Even Spreads"
     },
 
     "infinite-scroller": {
@@ -1690,12 +1776,12 @@
         "cover-image-tab": "Cover Image",
         "related-tab": "Related",
         "info-tab": "Info",
-        "collections-label": "Collections",
         "genres-label": "Genres",
         "tags-label": "Tags",
         "cover-artist-label": "Cover Artist",
         "writer-label": "Writer",
         "publisher-label": "Publisher",
+        "imprint-label": "Imprint",
         "penciller-label": "Penciller",
         "letterer-label": "Letterer",
         "inker-label": "Inker",
@@ -1703,6 +1789,8 @@
         "colorist-label": "Colorist",
         "character-label": "Character",
         "translator-label": "Translator",
+        "team-label": "{{filter-field-pipe.team}}",
+        "location-label": "{{filter-field-pipe.location}}",
         "language-label": "Language",
         "age-rating-label": "Age Rating",
         "publication-status-label": "Publication Status",
@@ -1741,7 +1829,9 @@
         "highest-count-tooltip": "Highest Count found across all ComicInfo in the Series",
         "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series",
         "force-refresh": "Force Refresh",
-        "force-refresh-tooltip": "Force refresh external metadata from Kavita+"
+        "force-refresh-tooltip": "Force refresh external metadata from Kavita+",
+        "loose-leaf-volume": "Loose Leaf Chapters",
+        "specials-volume": "Specials"
     },
 
     "day-breakdown": {
@@ -1749,6 +1839,15 @@
         "no-data": "No progress, get to reading",
         "x-axis-label": "Day of Week",
         "y-axis-label": "Reading Events"
+    },
+
+    "kavitaplus-metadata-breakdown-stats": {
+        "title": "Kavita+ Metadata Breakdown",
+        "description": "Kavita fetches metadata (ratings, reviews, recommendations, etc) slowly over time for eligible series.",
+        "no-data": "No data",
+        "errored-series-label": "Errored Series",
+        "completed-series-label": "Completed Series",
+        "complete": "All Series have metadata"
     },
 
     "file-breakdown-stats": {
@@ -1771,6 +1870,7 @@
         "y-axis-label": "Hours Read",
         "no-data": "No Reading Progress",
         "time-frame-label": "Time Frame",
+        "all-users": "All Users",
         "this-week": "{{time-periods.this-week}}",
         "last-7-days": "{{time-periods.last-7-days}}",
         "last-30-days": "{{time-periods.last-30-days}}",
@@ -1833,6 +1933,9 @@
         "popular-libraries-title": "Popular Libraries",
         "popular-series-title": "Popular Series",
         "recently-read-title": "Recently Read",
+        "series-count": "{{num}} Series",
+        "volume-count": "{{num}} Volumes",
+        "file-count": "{{num}} Files",
         "genre-count": "{{num}} Genres",
         "tag-count": "{{num}} Tags",
         "people-count": "{{num}} People",
@@ -1950,11 +2053,14 @@
         "formats": "Formats",
         "genres": "Genres",
         "inker": "Inker",
+        "team": "Team",
+        "location": "Location",
         "languages": "Languages",
         "libraries": "Libraries",
         "letterer": "Letterer",
         "publication-status": "Publication Status",
         "penciller": "Penciller",
+        "imprint": "Imprint",
         "publisher": "Publisher",
         "read-progress": "Read Progress",
         "read-time": "Read Time",
@@ -2075,6 +2181,7 @@
         "confirm-library-delete": "Are you sure you want to delete the {{name}} library? You cannot undo this action.",
         "confirm-library-type-change": "Changing library type will trigger a new scan with different parsing rules and may lead to series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?",
         "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?",
+        "confirm-download-size-ios": "iOS has issues downloading files that are larger than 200MB, this download might not complete.",
         "list-doesnt-exist": "This list doesn't exist",
         "confirm-delete-smart-filter": "Are you sure you want to delete this Smart Filter?",
         "smart-filter-deleted": "Smart Filter Deleted",
@@ -2082,7 +2189,13 @@
         "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key",
         "anilist-token-expired": "Your AniList token is expired. Scrobbling will no longer process until you re-generate it in User Settings > Account",
         "collection-tag-deleted": "Collection Tag deleted",
-        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated"
+        "force-kavita+-refresh-success": "Kavita+ external metadata has been invalidated",
+        "collection-not-owned": "You do not own this collection",
+        "collections-promoted": "Collections promoted",
+        "collections-unpromoted": "Collections un-promoted",
+        "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
+        "collections-deleted": "Collections deleted"
+
     },
 
     "actionable": {
@@ -2109,13 +2222,16 @@
         "view-series": "View Series",
         "clear": "{{common.clear}}",
         "import-cbl": "Import CBL",
+        "import-mal-stack": "Import MAL Stack",
         "read": "Read",
         "add-rule-group-and": "Add Rule Group (AND)",
         "add-rule-group-or": "Add Rule Group (OR)",
         "remove-rule-group": "Remove Rule Group",
         "customize": "Customize",
         "mark-visible": "Mark as Visible",
-        "mark-invisible": "Mark as Invisible"
+        "mark-invisible": "Mark as Invisible",
+        "unpromote": "Un-Promote",
+        "promote": "Promote"
     },
 
     "preferences": {
@@ -2138,7 +2254,17 @@
         "2-column": "2 Column",
         "cards": "Cards",
         "list": "List",
-        "up-to-down": "Up to Down"
+        "up-to-down": "Up to Down",
+        "pdf-multiple": "Default",
+        "pdf-book": "Book",
+        "pdf-vertical": "Scroll Vertical",
+        "pdf-horizontal": "Scroll Horizontal",
+        "pdf-page": "Tap to Paginate",
+        "pdf-none": "None",
+        "pdf-odd": "Odd",
+        "pdf-even": "Even",
+        "pdf-light": "Light",
+        "pdf-dark": "Dark"
     },
 
 

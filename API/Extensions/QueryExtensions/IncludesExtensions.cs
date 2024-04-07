@@ -19,6 +19,23 @@ public static class IncludesExtensions
             queryable = queryable.Include(c => c.SeriesMetadatas);
         }
 
+        if (includes.HasFlag(CollectionTagIncludes.SeriesMetadataWithSeries))
+        {
+            queryable = queryable.Include(c => c.SeriesMetadatas).ThenInclude(s => s.Series);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
+    public static IQueryable<AppUserCollection> Includes(this IQueryable<AppUserCollection> queryable,
+        CollectionIncludes includes)
+    {
+        if (includes.HasFlag(CollectionIncludes.Series))
+        {
+            queryable = queryable.Include(c => c.Items);
+        }
+
+
         return queryable.AsSplitQuery();
     }
 
@@ -34,6 +51,31 @@ public static class IncludesExtensions
         {
             queryable = queryable
                 .Include(c => c.Files);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
+    public static IQueryable<Volume> Includes(this IQueryable<Volume> queryable,
+        VolumeIncludes includes)
+    {
+        if (includes.HasFlag(VolumeIncludes.Chapters))
+        {
+            queryable = queryable.Include(vol => vol.Chapters);
+        }
+
+        if (includes.HasFlag(VolumeIncludes.People))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.People);
+        }
+
+        if (includes.HasFlag(VolumeIncludes.Tags))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.Tags);
         }
 
         return queryable.AsSplitQuery();
@@ -78,6 +120,12 @@ public static class IncludesExtensions
             query = query
                 .Include(s => s.ExternalSeriesMetadata)
                 .ThenInclude(s => s.ExternalRatings);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.ExternalMetadata))
+        {
+            query = query
+                .Include(s => s.ExternalSeriesMetadata);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.ExternalRecommendations))
@@ -133,7 +181,9 @@ public static class IncludesExtensions
 
         if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
         {
-            query = query.Include(u => u.UserPreferences);
+            query = query
+                .Include(u => u.UserPreferences)
+                .ThenInclude(p => p.Theme);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
@@ -171,6 +221,12 @@ public static class IncludesExtensions
         if (includeFlags.HasFlag(AppUserIncludes.ExternalSources))
         {
             query = query.Include(u => u.ExternalSources);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Collections))
+        {
+            query = query.Include(u => u.Collections)
+                .ThenInclude(c => c.Items);
         }
 
         return query.AsSplitQuery();

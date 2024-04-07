@@ -20,6 +20,8 @@ import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
 import {translate, TranslocoService} from "@ngneat/transloco";
+import {UserCollection} from "../_models/collection-tag";
+import {CollectionTagService} from "./collection-tag.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -43,7 +45,8 @@ export class ActionService implements OnDestroy {
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService) { }
+    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
+    private readonly collectionTagService: CollectionTagService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -380,6 +383,43 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  /**
+   * Mark all series as Unread.
+   * @param collections UserCollection, should have id, pagesRead populated
+   * @param promoted boolean, promoted state
+   * @param callback Optional callback to perform actions after API completes
+   */
+  promoteMultipleCollections(collections: Array<UserCollection>, promoted: boolean, callback?: BooleanActionCallback) {
+    this.collectionTagService.promoteMultipleCollections(collections.map(v => v.id), promoted).pipe(take(1)).subscribe(() => {
+      if (promoted) {
+        this.toastr.success(translate('toasts.collections-promoted'));
+      } else {
+        this.toastr.success(translate('toasts.collections-unpromoted'));
+      }
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Deletes multiple collections
+   * @param collections UserCollection, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes
+   */
+  async deleteMultipleCollections(collections: Array<UserCollection>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-collections'))) return;
+
+    this.collectionTagService.deleteMultipleCollections(collections.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      this.toastr.success(translate('toasts.collections-deleted'));
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
   addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
@@ -552,11 +592,9 @@ export class ActionService implements OnDestroy {
   }
 
   /**
-   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
-   * @param seriesId Series Id
-   * @param volumes Volumes, should have id, chapters and pagesRead populated
-   * @param chapters? Chapters, should have id
-   * @param callback Optional callback to perform actions after API completes
+   * Deletes all series
+   * @param seriesIds - List of series
+   * @param callback - Optional callback once complete
    */
    async deleteMultipleSeries(seriesIds: Array<Series>, callback?: BooleanActionCallback) {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-series', {count: seriesIds.length}))) {
@@ -565,11 +603,15 @@ export class ActionService implements OnDestroy {
       }
       return;
     }
-    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
-      this.toastr.success(translate('toasts.series-deleted'));
+    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(res => {
+      if (res) {
+        this.toastr.success(translate('toasts.series-deleted'));
+      } else {
+        this.toastr.error(translate('errors.generic'));
+      }
 
       if (callback) {
-        callback(true);
+        callback(res);
       }
     });
   }
@@ -584,7 +626,12 @@ export class ActionService implements OnDestroy {
 
     this.seriesService.delete(series.id).subscribe((res: boolean) => {
       if (callback) {
-        this.toastr.success(translate('toasts.series-deleted'));
+        if (res) {
+          this.toastr.success(translate('toasts.series-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
         callback(res);
       }
     });

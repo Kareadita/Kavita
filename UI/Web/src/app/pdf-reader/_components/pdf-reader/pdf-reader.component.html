@@ -33,15 +33,24 @@
       [backgroundColor]="backgroundColor"
       [customToolbar]="multiToolbar"
       [language]="user.preferences.locale"
+
       [(scrollMode)]="scrollMode"
+      [pageViewMode]="pageLayoutMode"
+      [spread]="spreadMode"
 
       (pageChange)="saveProgress()"
       (pdfLoadingStarts)="updateLoading(true)"
       (pdfLoaded)="updateLoading(false)"
       (progress)="updateLoadProgress($event)"
+      (zoomChange)="calcScrollbarNeeded()"
     >
 
     </ngx-extended-pdf-viewer>
+
+    @if (scrollMode === ScrollModeType.page) {
+      <div class="left" (click)="prevPage()"></div>
+      <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}}" (click)="nextPage()"></div>
+    }
 
     <ng-template #multiToolbar>
       <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}">
@@ -49,9 +58,29 @@
           <pdf-toggle-sidebar></pdf-toggle-sidebar>
           <pdf-find-button></pdf-find-button>
           <pdf-paging-area></pdf-paging-area>
+
+          @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {
+            <button class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" [ngbTooltip]="bookTitle">
+              <i class="toolbar-icon fa-solid fa-info" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{bookTitle}}</span>
+            </button>
+          }
+
+          <button *ngIf="incognitoMode" [ngbTooltip]="t('toggle-incognito')" (click)="turnOffIncognito()" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton">
+            <i class="toolbar-icon fa fa-glasses" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('incognito-mode')}}</span>
+          </button>
+
+          <button class="btn-icon col-2 col-xs-1 mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="closeReader()" [ngbTooltip]="t('close-reader-alt')">
+            <i class="toolbar-icon fa fa-times-circle" aria-hidden="true" [ngStyle]="{color: fontColor}"></i>
+            <span class="visually-hidden">{{t('close-reader-alt')}}</span>
+          </button>
         </div>
 
-        <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+        @if (utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {
+          <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+        }
+
 
         <div id="toolbarViewerRight">
           <pdf-hand-tool></pdf-hand-tool>
@@ -59,42 +88,66 @@
           <pdf-presentation-mode></pdf-presentation-mode>
 
 
-          <!-- This is not yet supported by the underlying library
-          <button (click)="toggleBookPageMode()" class="btn btn-icon toolbarButton">
-              <i class="toolbar-icon fa-solid {{this.bookMode !== 'book' ? 'fa-book' : 'fa-book-open'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-              <span class="visually-hidden">{{this.bookMode !== 'book' ? 'Book Mode' : 'Normal Mode'}}</span>
-          </button> -->
+          @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {
+            <button (click)="toggleBookPageMode()" class="btn-icon toolbarButton" [ngbTooltip]="pageLayoutMode | pdfLayoutMode" [disabled]="scrollMode === ScrollModeType.page">
+                <i class="toolbar-icon fa-solid {{this.pageLayoutMode !== 'book' ? 'fa-book' : 'fa-book-open'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+                <span class="visually-hidden">{{this.pageLayoutMode | pdfLayoutMode}}</span>
+            </button>
+          }
 
-          <button class="btn btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" [ngbTooltip]="bookTitle">
-            <i class="toolbar-icon fa-solid fa-info" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-            <span class="visually-hidden">{{bookTitle}}</span>
+
+          <!-- scroll mode should be disabled when book mode is used -->
+          <button (click)="toggleScrollMode()" class="btn-icon toolbarButton" [ngbTooltip]="scrollMode | pdfScrollMode" [disabled]="this.pageLayoutMode === 'book'">
+            @switch (scrollMode) {
+              @case (ScrollModeType.vertical) {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 4c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5h-3c-1 0-1.5-.5-1.5-1.5v-5C5 4.5 5.5 4 6.5 4zM11 0v.5c0 1-.5 1.5-1.5 1.5h-3C5.5 2 5 1.5 5 .5V0h6zM11 16v-.5c0-1-.5-1.5-1.5-1.5h-3c-1 0-1.5.5-1.5 1.5v.5h6z"></path></svg>
+              }
+              @case (ScrollModeType.page) {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,7V9H12V17H14V7H10Z"></path></svg>
+              }
+              @case (ScrollModeType.horizontal) {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px"> <path fill="currentColor" d="M0 4h1.5c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5H0zM9.5 4c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5h-3c-1 0-1.5-.5-1.5-1.5v-5C5 4.5 5.5 4 6.5 4zM16 4h-1.5c-1 0-1.5.5-1.5 1.5v5c0 1 .5 1.5 1.5 1.5H16z"></path> </svg>
+              }
+              @case (ScrollModeType.wrapped) {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 4c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5h-3c-1 0-1.5-.5-1.5-1.5v-5C1 4.5 1.5 4 2.5 4zM7 0v.5C7 1.5 6.5 2 5.5 2h-3C1.5 2 1 1.5 1 .5V0h6zM7 16v-.5c0-1-.5-1.5-1.5-1.5h-3c-1 0-1.5.5-1.5 1.5v.5h6zM13.5 4c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5h-3c-1 0-1.5-.5-1.5-1.5v-5c0-1 .5-1.5 1.5-1.5zM15 0v.5c0 1-.5 1.5-1.5 1.5h-3C9.5 2 9 1.5 9 .5V0h6zM15 16v-.507c0-1-.5-1.5-1.5-1.5h-3C9.5 14 9 14.5 9 15.5v.5h6z"></path></svg>
+              }
+            }
+
+            <span class="visually-hidden">{{scrollMode | pdfScrollMode}}</span>
           </button>
 
-          <button *ngIf="incognitoMode" (click)="turnOffIncognito()" class="btn btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton">
-            <i class="toolbar-icon fa fa-glasses" [ngStyle]="{color: fontColor}" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode')}}</span>
+          <button (click)="toggleSpreadMode()" class="btn-icon toolbarButton" [ngbTooltip]="spreadMode | pdfSpreadMode" [disabled]="this.pageLayoutMode === 'book'">
+
+            @switch (spreadMode) {
+              @case ('off') {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3c-1 0-1.5.5-1.5 1.5v7c0 1 .5 1.5 1.5 1.5h4c1 0 1.5-.5 1.5-1.5v-7c0-1-.5-1.5-1.5-1.5z"></path></svg>
+              }
+              @case ('odd') {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px" viewBox="0 0 24 24"><path fill="currentColor" d="M10.56 3.5C9.56 3.5 9 4 9 5v6.5c0 1 .5 1.5 1.5 1.5h4c1 0 1.5-.5 1.5-1.5V5c0-1-.5-1.5-1.5-1.5zm1.93 1.2c.8 0 1.4.2 1.8.64.5.4.7 1 .7 1.7 0 .5-.2 1-.5 1.44-.2.3-.6.6-1 .93l-.6.4c-.4.3-.6.4-.7.55-.1.1-.2.2-.3.4h3.2v1.27h-5c0-.5.1-1 .3-1.43.2-.49.7-1 1.5-1.54.7-.5 1.1-.8 1.3-1.02.3-.3.4-.7.4-1.05 0-.3-.1-.6-.3-.77-.2-.2-.4-.3-.7-.3-.4 0-.7.2-.9.5-.1.2-.1.5-.2.9h-1.4c0-.6.2-1.1.3-1.5.4-.7 1.1-1.1 2-1.1zM1.54 3.5C.54 3.5 0 4 0 5v6.5c0 1 .5 1.5 1.54 1.5h4c1 0 1.5-.5 1.5-1.5V5c0-1-.5-1.5-1.5-1.5zm1.8 1.125H4.5V12H3V6.9H1.3v-1c.5 0 .8 0 .97-.03.33-.07.53-.17.73-.37.1-.2.2-.3.25-.5.05-.2.05-.3.05-.3z"></path></svg>
+              }
+              @case ('even') {
+                <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px"><path fill="currentColor" d="M1.5 3.5C.5 3.5 0 4 0 5v6.5c0 1 .5 1.5 1.5 1.5h4c1 0 1.5-.5 1.5-1.5V5c0-1-.5-1.5-1.5-1.5zm2 1.2c.8 0 1.4.2 1.8.6.5.4.7 1 .7 1.7 0 .5-.2 1-.5 1.4-.2.3-.5.7-1 1l-.6.4c-.4.3-.6.4-.75.56-.15.14-.25.24-.35.44H6v1.3H1c0-.6.1-1.1.3-1.5.3-.6.7-1 1.5-1.6.7-.4 1.1-.8 1.28-1 .32-.3.42-.6.42-1 0-.3-.1-.6-.23-.8-.17-.2-.37-.3-.77-.3s-.7.1-.9.5c-.04.2-.1.5-.1.9H1.1c0-.6.1-1.1.3-1.5.4-.7 1.1-1.1 2.1-1.1zM10.54 3.54C9.5 3.54 9 4 9 5v6.5c0 1 .5 1.5 1.54 1.5h4c.96 0 1.46-.5 1.46-1.5V5c0-1-.5-1.46-1.5-1.46zm1.9.95c.7 0 1.3.2 1.7.5.4.4.6.8.6 1.4 0 .4-.1.8-.4 1.1-.2.2-.3.3-.5.4.1 0 .3.1.6.3.4.3.5.8.5 1.4 0 .6-.2 1.2-.6 1.6-.4.5-1.1.7-1.9.7-1 0-1.8-.3-2.2-1-.14-.29-.24-.69-.24-1.29h1.4c0 .3 0 .5.1.7.2.4.5.5 1 .5.3 0 .5-.1.7-.3.2-.2.3-.5.3-.8 0-.5-.2-.8-.6-.95-.2-.05-.5-.15-1-.15v-1c.5 0 .8-.1 1-.14.3-.1.5-.4.5-.9 0-.3-.1-.5-.2-.7-.2-.2-.4-.3-.7-.3-.3 0-.6.1-.75.3-.2.2-.2.5-.2.86h-1.34c0-.4.1-.7.19-1.1 0-.12.2-.32.4-.62.2-.2.4-.3.7-.4.3-.1.6-.1 1-.1z"></path></svg>
+              }
+            }
+
+            <span class="visually-hidden">{{spreadMode | pdfSpreadMode}}</span>
           </button>
+
+
+
+
 
           <!-- This is pretty experimental, so it might not work perfectly -->
-          <button (click)="toggleTheme()" class="btn btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton">
+          <button (click)="toggleTheme()" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton toolbar-btn-fix">
             <i class="toolbar-icon fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
             <span class="visually-hidden">{{this.theme === 'light' ? t('light-theme-alt') : t('dark-theme-alt')}}</span>
           </button>
 
-          <button class="btn btn-icon col-2 col-xs-1 mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="closeReader()">
-            <i class="toolbar-icon fa fa-times-circle" aria-hidden="true" [ngStyle]="{color: fontColor}"></i>
-            <span class="visually-hidden">{{t('close-reader-alt')}}</span>
-          </button>
+
+
 
           <div class="verticalToolbarSeparator hiddenSmallView"></div>
           <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
-
-          <pdf-single-page-mode [show]="true" [scrollMode]="scrollMode"></pdf-single-page-mode>
-          <pdf-vertical-scroll-mode [show]="true" [scrollMode]="scrollMode"></pdf-vertical-scroll-mode>
-          <pdf-horizontal-scroll [show]="true" [scrollMode]="scrollMode"></pdf-horizontal-scroll>
-          <pdf-wrapped-scroll-mode [show]="true" [scrollMode]="scrollMode"></pdf-wrapped-scroll-mode>
-          <pdf-no-spread [show]=true [scrollMode]="scrollMode"></pdf-no-spread>
-          <pdf-odd-spread [show]=true [scrollMode]="scrollMode"></pdf-odd-spread>
-          <pdf-even-spread [show]="true" [scrollMode]="scrollMode"></pdf-even-spread>
         </div>
 
       </div>

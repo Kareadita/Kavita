@@ -55,7 +55,7 @@ import {
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Chapter} from 'src/app/_models/chapter';
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
@@ -137,8 +137,6 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
-const KavitaPlusSupportedLibraryTypes = [LibraryType.Manga, LibraryType.Book];
-
 @Component({
     selector: 'app-series-detail',
     templateUrl: './series-detail.component.html',
@@ -185,6 +183,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
   protected readonly TagBadgeCursor = TagBadgeCursor;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -241,7 +241,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Track by function for Chapter to tell when to refresh card data
    */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.minNumber}_${item.maxNumber}_${item.volumeId}_${item.pagesRead}`;
   trackByRelatedSeriesIdentify = (index: number, item: RelatedSeriesPair) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
   trackBySeriesIdentify = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
@@ -337,6 +337,32 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
+  get ShowStorylineTab() {
+    if (this.libraryType === LibraryType.ComicVine) return false;
+    // Edge case for bad pdf parse
+    if (this.libraryType === LibraryType.Book && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
+
+    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
+      && (this.volumes.length > 0 || this.chapters.length > 0);
+  }
+
+  get ShowVolumeTab() {
+    if (this.libraryType === LibraryType.ComicVine) {
+      if (this.volumes.length > 1) return true;
+      if (this.specials.length === 0 && this.chapters.length === 0) return true;
+      return false;
+    }
+    return this.volumes.length > 0;
+  }
+
+  get ShowChaptersTab() {
+    return this.chapters.length > 0;
+  }
+
+  get UseBookLogic() {
+    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
+  }
+
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
@@ -356,13 +382,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // This is a lone chapter
       if (vol.length === 0) {
-        return 'Ch ' + this.currentlyReadingChapter.number;
+        return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range) and Localize it
       }
 
-      if (this.currentlyReadingChapter.number === "0") {
+      if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
         return 'Vol ' + vol[0].minNumber;
       }
-      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.number;
+      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.minNumber;
     }
 
     return this.currentlyReadingChapter.title;
@@ -614,6 +640,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPlusMetadata(this.seriesId, this.libraryType);
       }
 
+      if (this.libraryType === LibraryType.LightNovel) {
+        this.renderMode = PageLayoutMode.List;
+        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
+        this.cdRef.markForCheck();
+      }
+
+
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
@@ -639,6 +672,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
           ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
           ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
+          ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
         ];
         if (this.relations.length > 0) {
           this.hasRelations = true;
@@ -694,20 +728,36 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   updateSelectedTab() {
     // Book libraries only have Volumes or Specials enabled
-    if (this.libraryType === LibraryType.Book) {
+    if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
-        this.activeTabId = TabID.Specials;
+        if (this.specials.length === 0 && this.storyChapters.length > 0) {
+          // NOTE: This is an edge case caused by bad parsing of pdf files. Once the new pdf parser is in place, this should be removed
+          this.activeTabId = TabID.Storyline;
+        } else {
+          this.activeTabId = TabID.Specials;
+        }
       } else {
         this.activeTabId = TabID.Volumes;
       }
+      this.cdRef.markForCheck();
       return;
     }
 
     if (this.volumes.length === 0 && this.chapters.length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
-      this.activeTabId = TabID.Storyline;
+      if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
+        if (this.chapters.length === 0) {
+          this.activeTabId = TabID.Specials;
+        } else {
+          this.activeTabId = TabID.Chapters;
+        }
+      } else {
+        this.activeTabId = TabID.Storyline;
+      }
+
     }
+    this.cdRef.markForCheck();
   }
 
 

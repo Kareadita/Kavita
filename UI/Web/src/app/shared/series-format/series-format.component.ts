@@ -18,9 +18,7 @@ import {CommonModule} from "@angular/common";
 })
 export class SeriesFormatComponent {
 
-  @Input() format: MangaFormat = MangaFormat.UNKNOWN;
+  protected readonly MangaFormat = MangaFormat;
 
-  get MangaFormat(): typeof MangaFormat {
-    return MangaFormat;
-  }
+  @Input() format: MangaFormat = MangaFormat.UNKNOWN;
 }

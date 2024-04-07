@@ -126,6 +126,7 @@ public class DeviceService : IDeviceService
         device.UpdateLastUsed();
         _unitOfWork.DeviceRepository.Update(device);
         await _unitOfWork.CommitAsync();
+
         var success = await _emailService.SendFilesToEmail(new SendToDto()
         {
             DestinationEmail = device.EmailAddress!,

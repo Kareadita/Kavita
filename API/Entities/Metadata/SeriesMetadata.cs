@@ -14,6 +14,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
     public string Summary { get; set; } = string.Empty;
 
+    [Obsolete("Use AppUserCollection instead")]
     public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
@@ -68,13 +69,15 @@ public class SeriesMetadata : IHasConcurrencyToken
     public bool ColoristLocked { get; set; }
     public bool EditorLocked { get; set; }
     public bool InkerLocked { get; set; }
+    public bool ImprintLocked { get; set; }
     public bool LettererLocked { get; set; }
     public bool PencillerLocked { get; set; }
     public bool PublisherLocked { get; set; }
     public bool TranslatorLocked { get; set; }
+    public bool TeamLocked { get; set; }
+    public bool LocationLocked { get; set; }
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
-
 
     // Relationship
     public Series Series { get; set; } = null!;

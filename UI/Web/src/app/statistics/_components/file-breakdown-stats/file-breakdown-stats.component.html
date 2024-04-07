@@ -23,6 +23,7 @@
       <ng-container *ngIf="formControl.value; else tableLayout">
         <ngx-charts-advanced-pie-chart [results]="vizData2$ | async"></ngx-charts-advanced-pie-chart>
       </ng-container>
+
       <ng-template #tableLayout>
         <table class="table table-striped table-striped table-hover table-sm scrollable">
           <thead>

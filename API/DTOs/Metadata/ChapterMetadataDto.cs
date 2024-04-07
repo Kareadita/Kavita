@@ -18,10 +18,13 @@ public class ChapterMetadataDto
     public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Inkers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Imprints { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Teams { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Locations { get; set; } = new List<PersonDto>();
 
     public ICollection<GenreTagDto> Genres { get; set; } = new List<GenreTagDto>();
 

@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { ChapterMetadata } from '../_models/metadata/chapter-metadata';
-import { CollectionTag } from '../_models/collection-tag';
+import { UserCollection } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
@@ -80,11 +80,11 @@ export class SeriesService {
   }
 
   delete(seriesId: number) {
-    return this.httpClient.delete<boolean>(this.baseUrl + 'series/' + seriesId);
+    return this.httpClient.delete<string>(this.baseUrl + 'series/' + seriesId, TextResonse).pipe(map(s => s === "true"));
   }
 
   deleteMultipleSeries(seriesIds: Array<number>) {
-    return this.httpClient.post<boolean>(this.baseUrl + 'series/delete-multiple', {seriesIds});
+    return this.httpClient.post<string>(this.baseUrl + 'series/delete-multiple', {seriesIds}, TextResonse).pipe(map(s => s === "true"));
   }
 
   updateRating(seriesId: number, userRating: number) {
@@ -162,16 +162,12 @@ export class SeriesService {
   }
 
   getMetadata(seriesId: number) {
-    return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId).pipe(map(items => {
-      items?.collectionTags.forEach(tag => tag.coverImage = this.imageService.getCollectionCoverImage(tag.id));
-      return items;
-    }));
+    return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId);
   }
 
-  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[]) {
+  updateMetadata(seriesMetadata: SeriesMetadata) {
     const data = {
       seriesMetadata,
-      collectionTags,
     };
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, TextResonse);
   }
@@ -199,10 +195,11 @@ export class SeriesService {
   updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>,
     contains: Array<number>, others: Array<number>, prequels: Array<number>,
     sequels: Array<number>, sideStories: Array<number>, spinOffs: Array<number>,
-    alternativeSettings: Array<number>, alternativeVersions: Array<number>, doujinshis: Array<number>, editions: Array<number>) {
+    alternativeSettings: Array<number>, alternativeVersions: Array<number>,
+    doujinshis: Array<number>, editions: Array<number>, annuals: Array<number>) {
     return this.httpClient.post(this.baseUrl + 'series/update-related?seriesId=' + seriesId,
     {seriesId, adaptations, characters, sequels, prequels, contains, others, sideStories, spinOffs,
-     alternativeSettings, alternativeVersions, doujinshis, editions});
+     alternativeSettings, alternativeVersions, doujinshis, editions, annuals});
   }
 
   getSeriesDetail(seriesId: number) {

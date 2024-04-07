@@ -11,7 +11,7 @@
               <label for="time-select-read-by-day" class="form-check-label"></label>
               <select id="time-select-read-by-day" class="form-select" formControlName="users"
                       [class.is-invalid]="formGroup.get('users')?.invalid && formGroup.get('users')?.touched">
-                <option [value]="0">All Users</option>
+                <option [value]="0">{{t('all-users')}}</option>
                 <option *ngFor="let item of users$ | async" [value]="item.id">{{item.username}}</option>
               </select>
             </div>

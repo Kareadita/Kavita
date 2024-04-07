@@ -382,7 +382,7 @@ public class BookService : IBookService
             }
         }
 
-        var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link");
+        var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link[@href]");
         if (styleNodes != null)
         {
             foreach (var styleLinks in styleNodes)
@@ -551,7 +551,7 @@ public class BookService : IBookService
             }
 
             // If this is a single book and not a collection, set publication status to Completed
-            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.DefaultVolume))
+            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.LooseLeafVolume))
             {
                 info.Count = 1;
             }
@@ -561,7 +561,7 @@ public class BookService : IBookService
                 epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
 
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
-                .Equals(Parser.DefaultVolume);
+                .Equals(Parser.LooseLeafVolume);
 
             if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
             {
@@ -781,7 +781,7 @@ public class BookService : IBookService
     /// <returns></returns>
     public ParserInfo? ParseInfo(string filePath)
     {
-        if (!Parser.IsEpub(filePath)) return null;
+        if (!Parser.IsEpub(filePath) || !_directoryService.FileSystem.File.Exists(filePath)) return null;
 
         try
         {
@@ -848,7 +848,7 @@ public class BookService : IBookService
                         Format = MangaFormat.Epub,
                         Filename = Path.GetFileName(filePath),
                         Title = specialName?.Trim() ?? string.Empty,
-                        FullFilePath = filePath,
+                        FullFilePath = Parser.NormalizePath(filePath),
                         IsSpecial = false,
                         Series = series.Trim(),
                         SeriesSort = series.Trim(),
@@ -870,10 +870,10 @@ public class BookService : IBookService
                 Format = MangaFormat.Epub,
                 Filename = Path.GetFileName(filePath),
                 Title = epubBook.Title.Trim(),
-                FullFilePath = filePath,
+                FullFilePath = Parser.NormalizePath(filePath),
                 IsSpecial = false,
                 Series = epubBook.Title.Trim(),
-                Volumes = Parser.DefaultVolume,
+                Volumes = Parser.LooseLeafVolume,
             };
         }
         catch (Exception ex)

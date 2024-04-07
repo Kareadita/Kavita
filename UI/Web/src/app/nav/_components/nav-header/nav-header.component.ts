@@ -14,7 +14,7 @@ import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/rout
 import {fromEvent} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
-import {CollectionTag} from 'src/app/_models/collection-tag';
+import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -40,6 +40,11 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
+import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 
 @Component({
     selector: 'app-nav-header',
@@ -47,7 +52,9 @@ import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-resu
     styleUrls: ['./nav-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective]
+  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
+    SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
+    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, PromotedIconComponent]
 })
 export class NavHeaderComponent implements OnInit {
 
@@ -148,6 +155,8 @@ export class NavHeaderComponent implements OnInit {
     this.clearSearch();
     filter = filter + '';
     switch(role) {
+      case PersonRole.Other:
+        break;
       case PersonRole.Writer:
         this.goTo({field: FilterField.Writers, comparison: FilterComparison.Equal, value: filter});
         break;
@@ -178,9 +187,19 @@ export class NavHeaderComponent implements OnInit {
       case PersonRole.Publisher:
         this.goTo({field: FilterField.Publisher, comparison: FilterComparison.Equal, value: filter});
         break;
+      case PersonRole.Imprint:
+        this.goTo({field: FilterField.Imprint, comparison: FilterComparison.Equal, value: filter});
+        break;
+      case PersonRole.Team:
+        this.goTo({field: FilterField.Team, comparison: FilterComparison.Equal, value: filter});
+        break;
+      case PersonRole.Location:
+        this.goTo({field: FilterField.Location, comparison: FilterComparison.Equal, value: filter});
+        break;
       case PersonRole.Translator:
         this.goTo({field: FilterField.Translators, comparison: FilterComparison.Equal, value: filter});
         break;
+
     }
   }
 
@@ -230,7 +249,7 @@ export class NavHeaderComponent implements OnInit {
     this.router.navigate(['library', item.id]);
   }
 
-  clickCollectionSearchResult(item: CollectionTag) {
+  clickCollectionSearchResult(item: UserCollection) {
     this.clearSearch();
     this.router.navigate(['collections', item.id]);
   }
@@ -255,4 +274,5 @@ export class NavHeaderComponent implements OnInit {
   }
 
 
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

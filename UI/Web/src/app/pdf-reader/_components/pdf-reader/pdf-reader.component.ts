@@ -1,27 +1,43 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ElementRef,
-  HostListener,
-  inject, OnDestroy,
-  OnInit, ViewChild
+  Component,
+  ElementRef,
+  HostListener, inject, Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgxExtendedPdfViewerService, PageViewModeType, ScrollModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs';
-import { BookService } from 'src/app/book-reader/_services/book.service';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { CHAPTER_ID_DOESNT_EXIST, ReaderService } from 'src/app/_services/reader.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { ThemeService } from 'src/app/_services/theme.service';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, NgStyle, AsyncPipe } from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {
+  NgxExtendedPdfViewerModule,
+  NgxExtendedPdfViewerService,
+  PageViewModeType,
+  ProgressBarEvent,
+  ScrollModeType
+} from 'ngx-extended-pdf-viewer';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs';
+import {BookService} from 'src/app/book-reader/_services/book.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Chapter} from 'src/app/_models/chapter';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from 'src/app/_services/reader.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {AsyncPipe, DOCUMENT, NgIf, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {PdfLayoutMode} from "../../../_models/preferences/pdf-layout-mode";
+import {PdfScrollMode} from "../../../_models/preferences/pdf-scroll-mode";
+import {PdfTheme} from "../../../_models/preferences/pdf-theme";
+import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
+import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
+import {PdfLayoutModePipe} from "../../_pipe/pdf-layout-mode.pipe";
+import {PdfScrollModePipe} from "../../_pipe/pdf-scroll-mode.pipe";
+import {PdfSpreadModePipe} from "../../_pipe/pdf-spread-mode.pipe";
 
 @Component({
     selector: 'app-pdf-reader',
@@ -29,9 +45,25 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./pdf-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective]
+  imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
+    PdfLayoutModePipe, PdfScrollModePipe, PdfSpreadModePipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
+
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly seriesService = inject(SeriesService);
+  private readonly navService = inject(NavService);
+  private readonly toastr = inject(ToastrService);
+  private readonly bookService = inject(BookService);
+  private readonly themeService = inject(ThemeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  public readonly accountService = inject(AccountService);
+  public readonly readerService = inject(ReaderService);
+  public readonly utilityService = inject(UtilityService);
+
+  protected readonly ScrollModeType = ScrollModeType;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('container') container!: ElementRef;
 
@@ -82,20 +114,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    * How much of the current document is loaded
    */
   loadPercent: number = 0;
+  scrollbarNeeded = false;
 
-  /**
-   * This can't be updated dynamically:
-   * https://github.com/stephanrauh/ngx-extended-pdf-viewer/issues/1415
-   */
-  bookMode: PageViewModeType = 'multiple';
-
+  pageLayoutMode: PageViewModeType = 'multiple';
   scrollMode: ScrollModeType = ScrollModeType.vertical;
+  spreadMode: SpreadType = 'off';
 
-  constructor(private route: ActivatedRoute, private router: Router, public accountService: AccountService,
-    private seriesService: SeriesService, public readerService: ReaderService,
-    private navService: NavService, private toastr: ToastrService,
-    private bookService: BookService, private themeService: ThemeService,
-    private readonly cdRef: ChangeDetectorRef, private pdfViewerService: NgxExtendedPdfViewerService) {
+  constructor(@Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
@@ -106,6 +131,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     if (event.key === KEY_CODES.ESC_KEY) {
       this.closeReader();
     }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  onResize(){
+    // Update the window Height
+    this.calcScrollbarNeeded();
   }
 
   ngOnDestroy(): void {
@@ -150,7 +182,71 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  calcScrollbarNeeded() {
+    const viewContainer = this.document.querySelector('#viewerContainer');
+    if (viewContainer == null) return;
+    this.scrollbarNeeded = viewContainer.scrollHeight > this.container?.nativeElement?.clientHeight;
+    this.cdRef.markForCheck();
+  }
+
+  convertPdfLayoutMode(mode: PdfLayoutMode) {
+    switch (mode) {
+      case PdfLayoutMode.Multiple:
+        return 'multiple';
+      case PdfLayoutMode.Single:
+        return 'single';
+      case PdfLayoutMode.Book:
+        return 'book';
+      case PdfLayoutMode.InfiniteScroll:
+        return 'infinite-scroll';
+
+    }
+  }
+
+  convertPdfScrollMode(mode: PdfScrollMode) {
+    switch (mode) {
+      case PdfScrollMode.Vertical:
+        return ScrollModeType.vertical;
+      case PdfScrollMode.Horizontal:
+        return ScrollModeType.horizontal;
+      case PdfScrollMode.Wrapped:
+        return ScrollModeType.wrapped;
+      case PdfScrollMode.Page:
+        return ScrollModeType.page;
+    }
+  }
+
+  convertPdfSpreadMode(mode: PdfSpreadMode): SpreadType {
+    switch (mode) {
+      case PdfSpreadMode.None:
+        return 'off' as SpreadType;
+      case PdfSpreadMode.Odd:
+        return 'odd' as SpreadType;
+      case PdfSpreadMode.Even:
+        return 'even' as SpreadType;
+    }
+  }
+
+  convertPdfTheme(theme: PdfTheme) {
+    switch (theme) {
+      case PdfTheme.Dark:
+        return 'dark';
+      case PdfTheme.Light:
+        return 'light';
+    }
+  }
+
   init() {
+
+    this.pageLayoutMode = this.convertPdfLayoutMode(this.user.preferences.pdfLayoutMode || PdfLayoutMode.Multiple);
+    this.scrollMode = this.convertPdfScrollMode(this.user.preferences.pdfScrollMode || PdfScrollMode.Vertical);
+    this.spreadMode = this.convertPdfSpreadMode(this.user.preferences.pdfSpreadMode || PdfSpreadMode.None);
+    this.theme = this.convertPdfTheme(this.user.preferences.pdfTheme || PdfTheme.Dark);
+    this.backgroundColor = this.themeMap[this.theme].background;
+    this.fontColor = this.themeMap[this.theme].font; // TODO: Move this to an observable or something
+
+    this.calcScrollbarNeeded();
+
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
       this.volumeId = info.volumeId;
       this.bookTitle = info.bookTitle;
@@ -171,7 +267,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-    this.readerService.enableWakeLock(this.container.nativeElement);
+    setTimeout(() => this.readerService.enableWakeLock(this.container.nativeElement), 1000); // TODO: This needs to be in afterviewinit i think
   }
 
   /**
@@ -197,11 +293,33 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
+  toggleScrollMode() {
+    const options: Array<ScrollModeType> = [ScrollModeType.vertical, ScrollModeType.horizontal, ScrollModeType.page];
+    let index = options.indexOf(this.scrollMode) + 1;
+    if (index >= options.length) index = 0;
+    this.scrollMode = options[index];
+
+    this.calcScrollbarNeeded();
+
+    this.cdRef.markForCheck();
+  }
+
+  toggleSpreadMode() {
+     const options: Array<SpreadType> = ['off', 'odd', 'even'];
+     let index = options.indexOf(this.spreadMode) + 1;
+     if (index >= options.length) index = 0;
+     this.spreadMode = options[index];
+
+
+    this.cdRef.markForCheck();
+  }
+
   toggleBookPageMode() {
-    if (this.bookMode === 'book') {
-      this.bookMode = 'multiple';
+    if (this.pageLayoutMode === 'book') {
+      this.pageLayoutMode = 'multiple';
     } else {
-      this.bookMode = 'book';
+      this.pageLayoutMode = 'book';
+      // If the fit is automatic, let's adjust to 100% to ensure it renders correctly (can't do this, but it doesn't always happen)
     }
     this.cdRef.markForCheck();
   }
@@ -222,6 +340,18 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   updateLoadProgress(event: ProgressBarEvent) {
     this.loadPercent = event.percent;
+    this.cdRef.markForCheck();
+  }
+
+  prevPage() {
+     this.currentPage--;
+     if (this.currentPage < 0) this.currentPage = 0;
+     this.cdRef.markForCheck();
+  }
+
+  nextPage() {
+    this.currentPage++;
+    if (this.currentPage > this.maxPages) this.currentPage = this.maxPages;
     this.cdRef.markForCheck();
   }
 

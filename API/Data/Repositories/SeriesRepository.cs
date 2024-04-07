@@ -7,6 +7,7 @@ using API.Constants;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
@@ -49,6 +50,7 @@ public enum SeriesIncludes
     ExternalReviews = 64,
     ExternalRatings = 128,
     ExternalRecommendations = 256,
+    ExternalMetadata = 512
 
 }
 
@@ -140,7 +142,7 @@ public interface ISeriesRepository
         MangaFormat format);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
-    Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
+    Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
     /// <summary>
     /// This is only used for <see cref="MigrateUserProgressLibraryId"/>
     /// </summary>
@@ -341,10 +343,7 @@ public class SeriesRepository : ISeriesRepository
             return await _context.Library.GetUserLibraries(userId, queryContext).ToListAsync();
         }
 
-        return new List<int>()
-        {
-            libraryId
-        };
+        return [libraryId];
     }
 
     public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery)
@@ -361,12 +360,9 @@ public class SeriesRepository : ISeriesRepository
             .ToList();
 
         result.Libraries = await _context.Library
-            .Where(l => libraryIds.Contains(l.Id))
-            .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
-            .IsRestricted(QueryContext.Search)
-            .AsSplitQuery()
-            .OrderBy(l => l.Name.ToLower())
+            .Search(searchQuery, userId, libraryIds)
             .Take(maxRecords)
+            .OrderBy(l => l.Name.ToLower())
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -418,53 +414,33 @@ public class SeriesRepository : ISeriesRepository
 
 
         result.ReadingLists = await _context.ReadingList
-            .Where(rl => rl.AppUserId == userId || rl.Promoted)
-            .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
-            .RestrictAgainstAgeRestriction(userRating)
-            .AsSplitQuery()
-            .OrderBy(r => r.NormalizedTitle)
+            .Search(searchQuery, userId, userRating)
             .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Collections =  await _context.CollectionTag
-            .Where(c => (EF.Functions.Like(c.Title, $"%{searchQuery}%"))
-                                    || (EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%")))
-            .Where(c => c.Promoted || isAdmin)
-            .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle)
-            .AsSplitQuery()
+        result.Collections =  await _context.AppUserCollection
+            .Search(searchQuery, userId, userRating)
             .Take(maxRecords)
             .OrderBy(c => c.NormalizedTitle)
-            .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Persons = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(p => p.NormalizedName)
+            .SearchPeople(searchQuery, seriesIds)
             .Take(maxRecords)
+            .OrderBy(t => t.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Genres = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(t => t.NormalizedTitle)
+            .SearchGenres(searchQuery, seriesIds)
             .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Tags = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(t => t.NormalizedTitle)
+            .SearchTags(searchQuery, seriesIds)
             .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -497,6 +473,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(c => c.Files)
             .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
                         || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
+                        || EF.Functions.Like(c.Range, $"%{searchQuery}%")
                 )
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
@@ -551,7 +528,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// Returns Volumes, Metadata, and Collection Tags
+    /// Returns Full Series including all external links
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
@@ -559,9 +536,20 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Include(s => s.Volumes)
+            .Include(s => s.Relations)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
-            .Include(s => s.Relations)
+
+
+            .Include(s => s.ExternalSeriesMetadata)
+
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalRatings)
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalReviews)
+            .Include(s => s.ExternalSeriesMetadata)
+            .ThenInclude(e => e.ExternalRecommendations)
+
             .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
             .ToListAsync();
@@ -726,6 +714,7 @@ public class SeriesRepository : ISeriesRepository
             })
             .FirstOrDefaultAsync();
     }
+
 
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {
@@ -955,6 +944,20 @@ public class SeriesRepository : ISeriesRepository
             out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter,
             out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
+        IList<int> collectionSeries = [];
+        if (hasCollectionTagFilter)
+        {
+            collectionSeries = await _context.AppUserCollection
+                .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                .Where(uc => filter.CollectionTags.Contains(uc.Id))
+                .SelectMany(uc => uc.Items)
+                .RestrictAgainstAgeRestriction(userRating)
+                .Select(s => s.Id)
+                .Distinct()
+                .ToListAsync();
+        }
+
+
         var query = _context.Series
             .AsNoTracking()
             // This new style can handle any filterComparision coming from the user
@@ -966,7 +969,7 @@ public class SeriesRepository : ISeriesRepository
             .HasAgeRating(hasAgeRating, FilterComparison.Contains, filter.AgeRating)
             .HasPublicationStatus(hasPublicationFilter, FilterComparison.Contains, filter.PublicationStatus)
             .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
-            .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags)
+            .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags, collectionSeries)
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
@@ -1032,6 +1035,8 @@ public class SeriesRepository : ISeriesRepository
             .Select(u => u.CollapseSeriesRelationships)
             .SingleOrDefaultAsync();
 
+
+
         query ??= _context.Series
             .AsNoTracking();
 
@@ -1049,6 +1054,9 @@ public class SeriesRepository : ISeriesRepository
         query = ApplyWantToReadFilter(filter, query, userId);
 
 
+        query = await ApplyCollectionFilter(filter, query, userId, userRating);
+
+
         query = BuildFilterQuery(userId, filter, query);
 
 
@@ -1063,6 +1071,50 @@ public class SeriesRepository : ISeriesRepository
         return ApplyLimit(query
             .Sort(userId, filter.SortOptions)
             .AsSplitQuery(), filter.LimitTo);
+    }
+
+    private async Task<IQueryable<Series>> ApplyCollectionFilter(FilterV2Dto filter, IQueryable<Series> query, int userId, AgeRestriction userRating)
+    {
+        var collectionStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == FilterField.CollectionTags);
+        if (collectionStmt == null) return query;
+
+        var value = (IList<int>) FilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
+
+        if (value.Count == 0)
+        {
+            return query;
+        }
+
+        var collectionSeries = await _context.AppUserCollection
+            .Where(uc => uc.Promoted || uc.AppUserId == userId)
+            .Where(uc => value.Contains(uc.Id))
+            .SelectMany(uc => uc.Items)
+            .RestrictAgainstAgeRestriction(userRating)
+            .Select(s => s.Id)
+            .Distinct()
+            .ToListAsync();
+
+        if (collectionStmt.Comparison != FilterComparison.MustContains)
+            return query.HasCollectionTags(true, collectionStmt.Comparison, value, collectionSeries);
+
+        var collectionSeriesTasks = value.Select(async collectionId =>
+        {
+            return await _context.AppUserCollection
+                .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                .Where(uc => uc.Id == collectionId)
+                .SelectMany(uc => uc.Items)
+                .RestrictAgainstAgeRestriction(userRating)
+                .Select(s => s.Id)
+                .ToListAsync();
+        });
+
+        var collectionSeriesLists = await Task.WhenAll(collectionSeriesTasks);
+
+        // Find the common series among all collections
+        var commonSeries = collectionSeriesLists.Aggregate((common, next) => common.Intersect(next).ToList());
+
+        // Filter the original query based on the common series
+        return query.Where(s => commonSeries.Contains(s.Id));
     }
 
     private IQueryable<Series> ApplyWantToReadFilter(FilterV2Dto filter, IQueryable<Series> query, int userId)
@@ -1162,7 +1214,6 @@ public class SeriesRepository : ISeriesRepository
             FilterField.AgeRating => query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value),
             FilterField.UserRating => query.HasRating(true, statement.Comparison, (int) value, userId),
             FilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
-            FilterField.CollectionTags => query.HasCollectionTags(true, statement.Comparison, (IList<int>) value),
             FilterField.Translators => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Characters => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Publisher => query.HasPeople(true, statement.Comparison, (IList<int>) value),
@@ -1171,9 +1222,15 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Letterer => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Team => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Location => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
+            FilterField.CollectionTags =>
+                // This is handled in the code before this as it's handled in a more general, combined manner
+                query,
             FilterField.Libraries =>
                 // This is handled in the code before this as it's handled in a more general, combined manner
                 query,
@@ -1225,7 +1282,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId)
     {
-        var metadataDto = await _context.SeriesMetadata
+        return await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
@@ -1234,42 +1291,20 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
-
-        if (metadataDto != null)
-        {
-            metadataDto.CollectionTags = await _context.CollectionTag
-                .Include(t => t.SeriesMetadatas)
-                .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
-                .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .OrderBy(t => t.Title.ToLower())
-                .AsSplitQuery()
-                .ToListAsync();
-        }
-
-        return metadataDto;
     }
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams)
     {
-        var userLibraries = _context.Library
-            .Include(l => l.AppUsers)
-            .Where(library => library.AppUsers.Any(user => user.Id == userId))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(library => library.Id)
-            .ToList();
+        var userLibraries = _context.Library.GetUserLibraries(userId);
 
-        var query =  _context.CollectionTag
+        var query =  _context.AppUserCollection
             .Where(s => s.Id == collectionId)
-            .Include(c => c.SeriesMetadatas)
-            .ThenInclude(m => m.Series)
-            .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
+            .Include(c => c.Items)
+            .SelectMany(c => c.Items.Where(s => userLibraries.Contains(s.LibraryId)))
             .OrderBy(s => s.LibraryId)
             .ThenBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsSplitQuery()
-            .AsNoTracking();
+            .AsSplitQuery();
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
@@ -1805,19 +1840,7 @@ public class SeriesRepository : ISeriesRepository
             AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating),
             AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating),
             Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating),
-            // Parent = await _context.Series
-            //     .SelectMany(s =>
-            //         s.TargetSeries.Where(r => r.TargetSeriesId == seriesId
-            //                                  && usersSeriesIds.Contains(r.TargetSeriesId)
-            //                                  && r.RelationKind != RelationKind.Prequel
-            //                                  && r.RelationKind != RelationKind.Sequel
-            //                                  && r.RelationKind != RelationKind.Edition)
-            //             .Select(sr => sr.Series))
-            //     .RestrictAgainstAgeRestriction(userRating)
-            //     .AsSplitQuery()
-            //     .AsNoTracking()
-            //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //     .ToListAsync(),
+            Annuals = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Annual, userRating),
             Parent = await _context.SeriesRelation
                 .Where(r => r.TargetSeriesId == seriesId
                                               && usersSeriesIds.Contains(r.TargetSeriesId)
@@ -1879,8 +1902,8 @@ public class SeriesRepository : ISeriesRepository
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
-                ChapterNumber = c.Number,
-                ChapterRange = c.Range,
+                ChapterNumber = c.MinNumber + string.Empty, // TODO: Refactor this
+                ChapterRange = c.Range, // TODO: Refactor this
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.MinNumber,
                 ChapterTitle = c.Title,
@@ -2051,7 +2074,7 @@ public class SeriesRepository : ISeriesRepository
         foreach (var series in info)
         {
             if (series.FolderPath == null) continue;
-            if (!map.ContainsKey(series.FolderPath))
+            if (!map.TryGetValue(series.FolderPath, out var value))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
                 {
@@ -2060,27 +2083,28 @@ public class SeriesRepository : ISeriesRepository
             }
             else
             {
-                map[series.FolderPath].Add(series);
+                value.Add(series);
             }
-
         }
 
         return map;
     }
 
     /// <summary>
-    /// Returns the highest Age Rating for a list of Series
+    /// Returns the highest Age Rating for a list of Series. Defaults to <see cref="AgeRating.Unknown"/>
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    public async Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
+    public async Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
     {
-        return await _context.Series
+        var ret = await _context.Series
             .Where(s => seriesIds.Contains(s.Id))
             .Include(s => s.Metadata)
             .Select(s => s.Metadata.AgeRating)
             .OrderBy(s => s)
             .LastOrDefaultAsync();
+        if (ret == null) return AgeRating.Unknown;
+        return ret;
     }
 
     /// <summary>

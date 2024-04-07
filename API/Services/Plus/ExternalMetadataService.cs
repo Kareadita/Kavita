@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Collection;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -13,6 +14,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Helpers;
 using AutoMapper;
 using Flurl.Http;
 using Hangfire;
@@ -60,6 +62,8 @@ public interface IExternalMetadataService
     /// <param name="libraryType"></param>
     /// <returns></returns>
     Task GetNewSeriesData(int seriesId, LibraryType libraryType);
+
+    Task<IList<MalStackDto>> GetStacksForUser(int userId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -69,13 +73,16 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create<LibraryType>(LibraryType.Comic);
+    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create
+        (LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
         Ratings = ArraySegment<RatingDto>.Empty,
         Reviews = ArraySegment<UserReviewDto>.Empty
     };
+    // Allow 50 requests per 24 hours
+    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(12), false);
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {
@@ -83,7 +90,6 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger = logger;
         _mapper = mapper;
         _licenseService = licenseService;
-
 
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
@@ -114,17 +120,17 @@ public class ExternalMetadataService : IExternalMetadataService
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeriesIdsWithoutMetadata(25);
         if (ids.Count == 0) return;
 
-        _logger.LogInformation("Started Refreshing {Count} series data from Kavita+", ids.Count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
         var count = 0;
+        var libTypes = await _unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(ids);
         foreach (var seriesId in ids)
         {
-            // TODO: Rewrite this so it's streamlined and not multiple DB calls
-            var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
-            await GetSeriesDetailPlus(seriesId, libraryType);
+            var libraryType = libTypes[seriesId];
+            await GetNewSeriesData(seriesId, libraryType);
             await Task.Delay(1500);
             count++;
         }
-        _logger.LogInformation("Finished Refreshing {Count} series data from Kavita+", count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
     }
 
     /// <summary>
@@ -135,23 +141,84 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task ForceKavitaPlusRefresh(int seriesId)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        // Remove from Blacklist if applicable
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
         if (!IsPlusEligible(libraryType)) return;
+
+        // Remove from Blacklist if applicable
         await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+
         var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
         if (metadata == null) return;
+
         metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
         await _unitOfWork.CommitAsync();
     }
 
-    [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public Task GetNewSeriesData(int seriesId, LibraryType libraryType)
+    /// <summary>
+    /// Fetches data from Kavita+
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    public async Task GetNewSeriesData(int seriesId, LibraryType libraryType)
     {
-        // TODO: Implement this task
-        if (!IsPlusEligible(libraryType)) return Task.CompletedTask;
-        return Task.CompletedTask;
+        if (!IsPlusEligible(libraryType)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
+
+        // Generate key based on seriesId and libraryType or any unique identifier for the request
+        // Check if the request is allowed based on the rate limit
+        if (!RateLimiter.TryAcquire(string.Empty))
+        {
+            // Request not allowed due to rate limit
+            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
+            return;
+        }
+
+        _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
+        // Prefetch SeriesDetail data
+        await GetSeriesDetailPlus(seriesId, libraryType);
+
+        // TODO: Fetch Series Metadata (Summary, etc)
+
+    }
+
+    public async Task<IList<MalStackDto>> GetStacksForUser(int userId)
+    {
+        if (!await _licenseService.HasActiveLicense()) return ArraySegment<MalStackDto>.Empty;
+
+        // See if this user has Mal account on record
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null || string.IsNullOrEmpty(user.MalUserName) || string.IsNullOrEmpty(user.MalAccessToken))
+        {
+            _logger.LogInformation("User is attempting to fetch MAL Stacks, but missing information on their account");
+            return ArraySegment<MalStackDto>.Empty;
+        }
+        try
+        {
+            _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
+
+            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+            var result = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stacks?username={user.MalUserName}")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", license)
+                .WithHeader("x-installId", HashUtil.ServerToken())
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .GetJsonAsync<IList<MalStackDto>>();
+
+            if (result == null)
+            {
+                return ArraySegment<MalStackDto>.Empty;
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Fetching Kavita+ for MAL Stacks for user {UserName} failed", user.MalUserName);
+            return ArraySegment<MalStackDto>.Empty;
+        }
     }
 
     /// <summary>
@@ -420,6 +487,7 @@ public class ExternalMetadataService : IExternalMetadataService
             LibraryType.Manga => seriesFormat == MangaFormat.Epub ? MediaFormat.LightNovel : MediaFormat.Manga,
             LibraryType.Comic => MediaFormat.Comic,
             LibraryType.Book => MediaFormat.Book,
+            LibraryType.LightNovel => MediaFormat.LightNovel,
             _ => MediaFormat.Unknown
         };
     }

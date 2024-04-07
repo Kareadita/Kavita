@@ -29,6 +29,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public ICollection<ReadingList> ReadingLists { get; set; } = null!;
     /// <summary>
+    /// Collections associated with this user
+    /// </summary>
+    public ICollection<AppUserCollection> Collections { get; set; } = null!;
+    /// <summary>
     /// A list of Series the user want's to read
     /// </summary>
     public ICollection<AppUserWantToRead> WantToRead { get; set; } = null!;
@@ -62,6 +66,15 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     /// <remarks>Requires Kavita+ Subscription</remarks>
     public string? AniListAccessToken { get; set; }
+
+    /// <summary>
+    /// The Username of the MAL user
+    /// </summary>
+    public string? MalUserName { get; set; }
+    /// <summary>
+    /// The Client ID for the user's MAL account. User should create a client on MAL for this.
+    /// </summary>
+    public string? MalAccessToken { get; set; }
 
     /// <summary>
     /// A list of Series the user doesn't want scrobbling for

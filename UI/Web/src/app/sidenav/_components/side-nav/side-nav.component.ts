@@ -30,6 +30,9 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
+import {
+  ImportMalCollectionModalComponent
+} from "../../../collections/_components/import-mal-collection-modal/import-mal-collection-modal.component";
 
 @Component({
   selector: 'app-side-nav',
@@ -46,8 +49,12 @@ export class SideNavComponent implements OnInit {
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
-  homeActions = [{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.handleHomeActions.bind(this)}];
+  readingListActions = [];
+  homeActions = [
+    {action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.openCustomize.bind(this)},
+    {action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)},
+    //{action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)}, // This requires the Collection Rework (https://github.com/Kareadita/Kavita/issues/2810)
+  ];
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
@@ -168,12 +175,20 @@ export class SideNavComponent implements OnInit {
     }
   }
 
-  handleHomeActions() {
+  handleHomeActions(action: ActionItem<void>) {
+    action.callback(action, undefined);
+  }
+
+  openCustomize() {
     this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   importCbl() {
     this.ngbModal.open(ImportCblModalComponent, {size: 'xl', fullscreen: 'md'});
+  }
+
+  importMalCollection() {
+    this.ngbModal.open(ImportMalCollectionModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   performAction(action: ActionItem<Library>, library: Library) {
@@ -185,8 +200,10 @@ export class SideNavComponent implements OnInit {
   getLibraryTypeIcon(format: LibraryType) {
     switch (format) {
       case LibraryType.Book:
+      case LibraryType.LightNovel:
         return 'fa-book';
       case LibraryType.Comic:
+      case LibraryType.ComicVine:
       case LibraryType.Manga:
         return 'fa-book-open';
       case LibraryType.Images:

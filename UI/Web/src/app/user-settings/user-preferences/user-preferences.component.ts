@@ -7,54 +7,82 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import {take, tap} from 'rxjs/operators';
-import { Title } from '@angular/platform-browser';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {Title} from '@angular/platform-browser';
 import {
-  readingDirections,
-  scalingOptions,
-  pageSplitOptions,
-  readingModes,
-  Preferences,
   bookLayoutModes,
+  bookWritingStyles,
   layoutModes,
   pageLayoutModes,
-  bookWritingStyles
+  pageSplitOptions,
+  pdfLayoutModes,
+  pdfScrollModes,
+  pdfSpreadModes,
+  pdfThemes,
+  Preferences,
+  readingDirections,
+  readingModes,
+  scalingOptions
 } from 'src/app/_models/preferences/preferences';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { SettingsService } from 'src/app/admin/settings.service';
-import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {SettingsService} from 'src/app/admin/settings.service';
+import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {forkJoin} from 'rxjs';
-import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
-import { BookService } from 'src/app/book-reader/_services/book.service';
+import {bookColorThemes} from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
+import {BookService} from 'src/app/book-reader/_services/book.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import { UserHoldsComponent } from '../user-holds/user-holds.component';
-import { UserScrobbleHistoryComponent } from '../../_single-module/user-scrobble-history/user-scrobble-history.component';
-import { UserStatsComponent } from '../../statistics/_components/user-stats/user-stats.component';
-import { ManageDevicesComponent } from '../manage-devices/manage-devices.component';
-import { ThemeManagerComponent } from '../theme-manager/theme-manager.component';
-import { ApiKeyComponent } from '../api-key/api-key.component';
-import { ColorPickerModule } from 'ngx-color-picker';
-import { AnilistKeyComponent } from '../anilist-key/anilist-key.component';
-import { ChangeAgeRestrictionComponent } from '../change-age-restriction/change-age-restriction.component';
-import { ChangePasswordComponent } from '../change-password/change-password.component';
-import { ChangeEmailComponent } from '../change-email/change-email.component';
-import { NgFor, NgIf, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
-import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
-import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
+import {UserHoldsComponent} from '../user-holds/user-holds.component';
+import {UserScrobbleHistoryComponent} from '../../_single-module/user-scrobble-history/user-scrobble-history.component';
+import {UserStatsComponent} from '../../statistics/_components/user-stats/user-stats.component';
+import {ManageDevicesComponent} from '../manage-devices/manage-devices.component';
+import {ThemeManagerComponent} from '../theme-manager/theme-manager.component';
+import {ApiKeyComponent} from '../api-key/api-key.component';
+import {ColorPickerModule} from 'ngx-color-picker';
+import {ChangeAgeRestrictionComponent} from '../change-age-restriction/change-age-restriction.component';
+import {ChangePasswordComponent} from '../change-password/change-password.component';
+import {ChangeEmailComponent} from '../change-email/change-email.component';
+import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem,
+  NgbAccordionToggle,
+  NgbCollapse,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
+import {
+  SideNavCompanionBarComponent
+} from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ManageScrobblingProvidersComponent} from "../manage-scrobbling-providers/manage-scrobbling-providers.component";
+import {PdfLayoutModePipe} from "../../pdf-reader/_pipe/pdf-layout-mode.pipe";
+import {PdfTheme} from "../../_models/preferences/pdf-theme";
+import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
+import {PdfLayoutMode} from "../../_models/preferences/pdf-layout-mode";
+import {PdfSpreadMode} from "../../_models/preferences/pdf-spread-mode";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
   BookReader = 'book-reader',
-  GlobalSettings = 'global-settings'
+  GlobalSettings = 'global-settings',
+  PdfReader = 'pdf-reader'
 }
 
 enum FragmentID {
@@ -74,10 +102,10 @@ enum FragmentID {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
-    ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
+    ChangePasswordComponent, ChangeAgeRestrictionComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
     ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
-    TranslocoDirective, LoadingComponent],
+    TranslocoDirective, LoadingComponent, ManageScrobblingProvidersComponent, PdfLayoutModePipe],
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -108,6 +136,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   pageLayoutModesTranslated = pageLayoutModes.map(this.translatePrefOptions);
   bookWritingStylesTranslated = bookWritingStyles.map(this.translatePrefOptions);
+  pdfLayoutModesTranslated = pdfLayoutModes.map(this.translatePrefOptions);
+  pdfScrollModesTranslated = pdfScrollModes.map(this.translatePrefOptions);
+  pdfSpreadModesTranslated = pdfSpreadModes.map(this.translatePrefOptions);
+  pdfThemesTranslated = pdfThemes.map(this.translatePrefOptions);
+
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -129,7 +162,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   hasActiveLicense = false;
-  canEdit = true;
 
   //Initialize form controls
   readingDirectionControl = new FormControl();
@@ -156,6 +188,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   bookReaderLayoutModeControl = new FormControl();
   bookReaderThemeNameControl = new FormControl();
   bookReaderImmersiveModeControl = new FormControl();
+
+  pdfTheme = new FormControl();
+  pdfScrollMode = new FormControl();
+  pdfLayoutMode = new FormControl();
+  pdfSpreadMode = new FormControl();
 
   themeControl = new FormControl();
   globalPageLayoutModeControl = new FormControl();
@@ -201,7 +238,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.route.fragment.subscribe(frag => {
         const tab = this.tabs.filter(item => item.fragment === frag);
-        console.log('tab: ', tab);
         if (tab.length > 0) {
           this.active = tab[0];
         } else {
@@ -260,6 +296,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderThemeName', this.bookReaderThemeNameControl);
       this.settingsForm.addControl('bookReaderImmersiveMode', this.bookReaderImmersiveModeControl);
 
+      this.settingsForm.addControl('pdfTheme', this.pdfTheme);
+      this.settingsForm.addControl('pdfScrollMode', this.pdfScrollMode);
+      this.settingsForm.addControl('pdfLayoutMode', this.pdfLayoutMode);
+      this.settingsForm.addControl('pdfSpreadMode', this.pdfSpreadMode);
+
       this.settingsForm.addControl('theme', this.themeControl);
       this.settingsForm.addControl('globalPageLayoutMode', this.globalPageLayoutModeControl);
       this.settingsForm.addControl('blurUnreadSummaries', this.blurUnreadSummariesControl);
@@ -294,6 +335,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.bookReaderLayoutModeControl.setValue(this.user?.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
       this.bookReaderThemeNameControl.setValue(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name);
       this.bookReaderImmersiveModeControl.setValue(this.user?.preferences.bookReaderImmersiveMode);
+
+      this.pdfTheme.setValue(this.user?.preferences.pdfTheme || PdfTheme.Dark);
+      this.pdfScrollMode.setValue(this.user?.preferences.pdfScrollMode || PdfScrollMode.Vertical);
+      this.pdfLayoutMode.setValue(this.user?.preferences.pdfLayoutMode || PdfLayoutMode.Multiple);
+      this.pdfSpreadMode.setValue(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None);
 
       this.themeControl.setValue(this.user?.preferences.theme);
       this.globalPageLayoutModeControl.setValue(this.user?.preferences.globalPageLayoutMode);
@@ -366,6 +412,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.collapseSeriesRelationshipsControl.setValue(this.user.preferences.collapseSeriesRelationships);
     this.shareReviewsControl.setValue(this.user.preferences.shareReviews);
     this.localeControl.setValue(this.user.preferences.locale);
+    this.pdfTheme.setValue(this.user?.preferences.pdfTheme);
+    this.pdfScrollMode.setValue(this.user?.preferences.pdfScrollMode);
+    this.pdfLayoutMode.setValue(this.user?.preferences.pdfLayoutMode);
+    this.pdfSpreadMode.setValue(this.user?.preferences.pdfSpreadMode);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -405,7 +455,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       swipeToPaginate: modelSettings.swipeToPaginate,
       collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
       shareReviews: modelSettings.shareReviews,
-      locale: modelSettings.locale
+      locale: modelSettings.locale,
+      pdfTheme: parseInt(modelSettings.pdfTheme, 10),
+      pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
+      pdfLayoutMode: parseInt(modelSettings.pdfLayoutMode, 10),
+      pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs: any) => {

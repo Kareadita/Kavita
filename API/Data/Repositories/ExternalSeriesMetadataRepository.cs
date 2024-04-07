@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface IExternalSeriesMetadataRepository
 {
@@ -28,10 +29,12 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalReview>? reviews);
     void Remove(IEnumerable<ExternalRating>? ratings);
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
+    void Remove(ExternalSeriesMetadata metadata);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
     Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId);
     Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
+    Task LinkRecommendationsToSeries(int seriesId);
     Task<bool> IsBlacklistedSeries(int seriesId);
     Task CreateBlacklistedSeries(int seriesId, bool saveChanges = true);
     Task RemoveFromBlacklist(int seriesId);
@@ -70,16 +73,22 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         _context.ExternalReview.RemoveRange(reviews);
     }
 
-    public void Remove(IEnumerable<ExternalRating> ratings)
+    public void Remove(IEnumerable<ExternalRating>? ratings)
     {
         if (ratings == null) return;
         _context.ExternalRating.RemoveRange(ratings);
     }
 
-    public void Remove(IEnumerable<ExternalRecommendation> recommendations)
+    public void Remove(IEnumerable<ExternalRecommendation>? recommendations)
     {
         if (recommendations == null) return;
         _context.ExternalRecommendation.RemoveRange(recommendations);
+    }
+
+    public void Remove(ExternalSeriesMetadata? metadata)
+    {
+        if (metadata == null) return;
+        _context.ExternalSeriesMetadata.Remove(metadata);
     }
 
     /// <summary>
@@ -169,6 +178,13 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         };
 
         return seriesDetailPlusDto;
+    }
+
+    public async Task LinkRecommendationsToSeries(int seriesId)
+    {
+        var series = await _context.Series.Where(s => s.Id == seriesId).AsNoTracking().SingleOrDefaultAsync();
+        if (series == null) return;
+        await LinkRecommendationsToSeries(series);
     }
 
     /// <summary>

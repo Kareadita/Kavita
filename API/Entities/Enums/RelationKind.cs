@@ -71,6 +71,11 @@ public enum RelationKind
     /// Same story, could be translation, colorization... Different edition of the series
     /// </summary>
     [Description("Edition")]
-    Edition = 13
+    Edition = 13,
+    /// <summary>
+    /// The target series is an annual of the Series
+    /// </summary>
+    [Description("Annual")]
+    Annual = 14
 
 }

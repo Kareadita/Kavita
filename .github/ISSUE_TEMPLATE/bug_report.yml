@@ -28,7 +28,7 @@ body:
       label: Kavita Version Number - Don't see your version number listed? Then your install is out of date. Please update and see if your issue still persists.
       multiple: false
       options:
-        - 0.7.13 - Stable
+        - 0.7.14 - Stable
         - Nightly Testing Branch
     validations:
       required: true
@@ -75,13 +75,13 @@ body:
   - type: dropdown
     id: mobile-browsers
     attributes:
-      label: If the issue is being seen on the UI, what browsers are you seeing the problem on?
+      label: If the issue is being seen on the Mobile UI, what browsers are you seeing the problem on?
       multiple: true
       options:
         - Firefox
         - Chrome
         - Safari
-        - Microsoft Edge
+        - Other iOS Browser
   - type: textarea
     id: logs
     attributes:

@@ -9,6 +9,6 @@ export interface UserReview {
   tagline?: string;
   isExternal: boolean;
   bodyJustText?: string;
-  externalUrl?: string;
+  siteUrl?: string;
   provider: ScrobbleProvider;
 }

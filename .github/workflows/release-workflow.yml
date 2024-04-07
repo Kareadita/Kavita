@@ -30,11 +30,11 @@ jobs:
     if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj
@@ -59,6 +59,13 @@ jobs:
         id: parse-body
         run: |
           body="${{ steps.findPr.outputs.body }}"
+          body=${body//\'/}
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
+
           if [[ ${#body} -gt 1870 ]] ; then
             body=${body:0:1870}
             body="${body}...and much more.
@@ -66,25 +73,18 @@ jobs:
             Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
           fi
 
-          body=${body//\'/}
-          body=${body//'%'/'%25'}
-          body=${body//$'\n'/'%0A'}
-          body=${body//$'\r'/'%0D'}
-          body=${body//$'`'/'%60'}
-          body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
 
-
       - name: Check Out Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: develop
 
       - name: NodeJS to Compile WebUI
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.13.x'
+          node-version: 20
       - run: |
 
           cd UI/Web || exit
@@ -100,7 +100,7 @@ jobs:
           cd ../ || exit
 
       - name: Get csproj Version
-        uses: kzrnm/get-net-sdk-project-versions-action@v1
+        uses: kzrnm/get-net-sdk-project-versions-action@v2
         id: get-version
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
@@ -117,7 +117,7 @@ jobs:
         id: parse-version
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
             dotnet-version: 8.0.x
       - name: Install Swashbuckle CLI
@@ -126,28 +126,28 @@ jobs:
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push stable
         id: docker_build_stable
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -156,7 +156,7 @@ jobs:
 
       - name: Build and push nightly
         id: docker_build_nightly
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64

@@ -1,68 +1,48 @@
-title: "[Kavita] Idea Submission"
-labels: ["Idea Submission"]
+title: "[Kavita] Idea / Feature Submission"
+labels:
+  - "Idea Submission"
 body:
   - type: markdown
     attributes:
       value: |
-        ## 🌟 Idea Submission for Kavita 🌟
+        ## Idea Submission for Kavita 💡
 
-        This is a template for submitting your ideas to enhance Kavita. Please fill out the details below, and let's make Kavita even better together!
-
+        Please fill out the details below, and let's make Kavita even better together!
+        
   - type: textarea
     id: idea-description
     attributes:
       label: Idea Description
-      description: "Describe your idea in detail."
       value: |
-        [Include a brief overview of your idea]
-
-  - type: markdown
-    attributes:
-      value: |
-        **Why I Think This Is Important:**
-
-        [Provide context on why you believe this idea is valuable or necessary for Kavita users]
-
-  - type: markdown
-    attributes:
-      value: |
-        **How You Can Contribute:**
-
-        1. **Upvote if You Agree:**
-           - If you resonate with my idea, please upvote it! This helps us gauge community interest.
-
-        2. **Leave Your Thoughts:**
-           - Feel free to leave comments with your opinions, suggestions, or even constructive critiques.
-
-        Let's work together to shape the future of Kavita! 🌟
-
-  - type: input
-    id: duration-of-use
-    attributes:
-      label: Duration of Using Kavita
-      description: "How long have you been using Kavita?"
-    validations:
-      required: true
-
+        Go into as much detail as possible to explain why your idea should be added to Kavita. Try to present some use cases and examples of how it would help other users. The more detail you have the better. 
+  
   - type: dropdown
     id: idea-category
     attributes:
       label: Idea Category
       options:
+        - API 
         - Feature Enhancement
         - User Experience
         - Performance Improvement
-      description: "Select the category that best fits your idea."
+        - Web UI
+      description: "What area would your idea help with?"
     validations:
       required: true
-
+      
+  - type: input
+    id: duration-of-use
+    attributes:
+      label: Duration of Using Kavita
+      description: "How long have you been using Kavita?"
+      
   - type: checkboxes
     attributes:
-      label: Agreement
+      label: Before submitting
       options:
-        - label: "I agree that this is solely for submitting ideas, and I will search for existing ideas before posting."
+        - label: "I've already searched for existing ideas before posting."
           required: true
-
+          
   - type: markdown
     attributes:
       value: |
