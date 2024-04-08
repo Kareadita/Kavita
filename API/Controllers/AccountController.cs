@@ -37,6 +37,8 @@ namespace API.Controllers;
 /// </summary>
 public class AccountController : BaseApiController
 {
+    private static readonly string BadCredentialsMessage = "Your credentials are not correct";
+
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ITokenService _tokenService;
@@ -204,7 +206,7 @@ public class AccountController : BaseApiController
         if (user == null)
         {
             _logger.LogWarning("Attempted login by {UserName} failed due to unable to find account", loginDto.Username);
-            return Unauthorized(await _localizationService.Get("en", "bad-credentials"));
+            return Unauthorized(BadCredentialsMessage);
         }
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
@@ -225,10 +227,10 @@ public class AccountController : BaseApiController
 
             if (!result.Succeeded)
             {
-                var errorStr = await _localizationService.Translate(user.Id,
-                    result.IsNotAllowed ? "confirm-email" : "bad-credentials");
-                _logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive,
-                    errorStr);
+                string errorStr = result.IsNotAllowed
+                                ? await _localizationService.Translate(user.Id, "confirm-email")
+                                : BadCredentialsMessage;
+                _logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive, errorStr);
                 return Unauthorized(errorStr);
             }
         }
@@ -858,7 +860,7 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
         if (user == null)
         {
-            return BadRequest(await _localizationService.Get("en", "bad-credentials"));
+            return BadRequest(BadCredentialsMessage);
         }
 
         try
@@ -868,7 +870,7 @@ public class AccountController : BaseApiController
             if (!result)
             {
                 _logger.LogInformation("Unable to reset password, your email token is not correct: {@Dto}", dto);
-                return BadRequest(await _localizationService.Translate(user.Id, "bad-credentials"));
+                return BadRequest(BadCredentialsMessage);
             }
 
             var errors = await _accountService.ChangeUserPassword(user, dto.Password);
@@ -948,12 +950,12 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<UserDto>> ConfirmMigrationEmail(ConfirmMigrationEmailDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-        if (user == null) return BadRequest(await _localizationService.Get("en", "bad-credentials"));
+        if (user == null) return BadRequest(BadCredentialsMessage);
 
         if (!await ConfirmEmailToken(dto.Token, user))
         {
             _logger.LogInformation("confirm-migration-email email token is invalid");
-            return BadRequest(await _localizationService.Translate(user.Id, "bad-credentials"));
+            return BadRequest(BadCredentialsMessage);
         }
 
         await _unitOfWork.CommitAsync();
