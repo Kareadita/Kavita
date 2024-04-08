@@ -42,7 +42,9 @@
         "rating": "Bewertung {{r}}",
         "not-applicable": "Nicht anwendbar",
         "processed": "Verarbeitet",
-        "not-processed": "Nicht verarbeitet"
+        "not-processed": "Nicht verarbeitet",
+        "chapter-num": "Kapitel {{num}}",
+        "volume-num": "Band {{num}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Lesefortschritt",
@@ -193,7 +195,8 @@
         "email-label": "E-Mail: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "email-setup-alert": "Möchtest du Dateien an deine Geräte senden? Lasse von deinen Admin vorerst die E-Mail-Einstellungen konfigurieren!"
     },
     "edit-device": {
         "device-name-label": "Gerätename",
@@ -218,7 +221,7 @@
         "permission-error": "Sie haben nicht die Erlaubnis, Ihr Passwort zu ändern. Wenden Sie sich an den Administrator des Servers."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "Neue E-Mail",
         "current-password-label": "Aktuelles Passwort",
         "email-not-confirmed": "Diese E-Mail-Adresse ist nicht bestätigt",
         "email-updated-title": "E-Mail Adresse aktualisiert",
@@ -233,7 +236,9 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Es scheint Sie haben keine gültige E-Mail angegeben. Ändern Sie die E-Mail, so muss Ihnen der Admin zur Bestätigung einen Link zusenden.",
-        "valid-email": "Gültige E-Mail Adresse"
+        "valid-email": "Gültige E-Mail Adresse",
+        "email-confirmed": "Diese E-Mail ist bestätigt worden",
+        "email-title": "E-Mail"
     },
     "change-age-restriction": {
         "age-restriction-label": "Altersbeschränkung",
@@ -263,7 +268,8 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "token-set": "Token festgelegt"
+        "token-set": "Token festgelegt",
+        "token-valid": "Der Token ist valide"
     },
     "typeahead": {
         "locked-field": "Feld ist gesperrt",
@@ -409,27 +415,38 @@
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "submit": "{{common.submit}}"
+        "submit": "{{common.submit}}",
+        "title": "Password-Zurücksetzung"
     },
     "reset-password-modal": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "new-password-label": "Neues Passwort",
+        "title": "Setze {{username}}s Passwort zurück"
     },
     "all-series": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Alle Serien"
     },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-description": "Sie können den folgenden Link verwenden, um das Konto für Ihren Benutzer einzurichten, oder die Taste \"Kopieren\" verwenden. Möglicherweise müssen Sie sich erst abmelden, bevor Sie den Link zur Registrierung eines neuen Benutzers verwenden können. Wenn Ihr Server von außen erreichbar ist, wurde eine E-Mail an den Benutzer gesendet und die Links können von diesem verwendet werden, um die Einrichtung des Kontos abzuschließen.",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "setup-user-title": "Nutzer wurde eingeladen",
+        "invite": "Einladung",
+        "setup-user-account-tooltip": "Kopiere dies und füge es in einem neuen Tab ein. Du musst dich vielleicht abmelden.",
+        "title": "Lade einen Nutzer ein",
+        "invite-url-label": "Einladungs-URL",
+        "inviting": "Lade ein…"
     },
     "library-selector": {
         "title": "Bibliotheken",
         "select-all": "{{common.select-all}}",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "no-data": "Bisher wurde noch keine Bibliothek aufgesetzt."
     },
     "license": {
         "title": "Kavita+ Lizenz",
@@ -443,7 +460,16 @@
         "activate-license-label": "Lizenzschlüssel",
         "activate-email-label": "{{common.email}}",
         "activate-delete": "Löschen",
-        "activate-save": "{{common.save}}"
+        "activate-save": "{{common.save}}",
+        "license-not-valid": "Lizenz ist nicht valide",
+        "activate-discordId-tooltip": "Verbinde deinen Discord-Account mit Kavita+. Dies gewährt dir Zugriff auf versteckte Kanäle, um Kavita mitzugestalten.",
+        "activate-discordId-label": "Discord Nutzer ID",
+        "no-license-key": "Kein Lizenz-Schlüssel",
+        "renew": "Erneuern",
+        "license-valid": "Lizenz ist valide",
+        "manage": "Verwalten",
+        "discord-validation": "Dies ist keine valide Discord-User-ID. Deine User ID ist nicht dein Discord-Benutzername.",
+        "invalid-license-tooltip": "Wenn dein Abonnement beendet ist, musst du den Support per E-Mail kontaktieren um ein neues Abonnement abzuschließen"
     },
     "book-line-overlay": {
         "copy": "Kopieren",
@@ -758,7 +784,6 @@
         "name-label": "Name",
         "name-validation": "Der Name muss einzigartig sein",
         "summary-label": "Zusammenfassung",
-        "series-title": "Gilt für die Serien",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -838,9 +863,47 @@
     },
     "age-rating-pipe": {
         "unknown": "Unbekannt",
-        "early-childhood": "Frühe Kindheit"
+        "early-childhood": "Frühe Kindheit",
+        "everyone": "Jeder"
     },
     "manga-format-pipe": {
-        "unknown": "Unbekannt"
+        "unknown": "Unbekannt",
+        "archive": "Archiv",
+        "pdf": "PDF",
+        "image": "Bild",
+        "epub": "EPUB"
+    },
+    "announcements": {
+        "title": "Ankündigungen"
+    },
+    "out-of-date-modal": {
+        "description-1": "Bitte erwäge ein Upgrade, sodass du die neueste Version von Kavita verwendest.",
+        "description-2": "Wird einen Blick auf <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> , um Anweisungen zu erhalten, wie du ein Update ausführen kannst.",
+        "description-3": "Gibt es einen spezifischen Grund, warum du noch kein Update ausgeführt hast? Wir würden uns freuen, herauszufinden, was dich dazu bringt, eine veraltete Version zu verwenden! Schau in unserem Discord vorbei und teile uns mit, was deinen Upgrade-Pfad blockiert.",
+        "close": "{{common.close}}",
+        "subtitle": "Es sieht so aus, als sei deine Installation mehr als {{count}} Versionen im Rückstand!"
+    },
+    "changelog": {
+        "installed": "Installiert",
+        "download": "Heruntergeladen",
+        "nightly": "Nightly: {{version}}",
+        "available": "Verfügbar",
+        "description-continued": "Tag, nutzt du einen Nighty-Release. Nur Major-Versionen werden als verfügbar angezeigt.",
+        "description": "Wenn du kein {{installed}} siehst"
+    },
+    "all-filters": {
+        "title": "Alle Smart-Filter",
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+    },
+    "publication-status-pipe": {
+        "cancelled": "Abgebrochen",
+        "ongoing": "Fortlaufend",
+        "completed": "Beendet"
+    },
+    "person-role-pipe": {
+        "artist": "Künstler",
+        "character": "Charakter",
+        "editor": "Bearbeiter",
+        "publisher": "Herausgeber"
     }
 }

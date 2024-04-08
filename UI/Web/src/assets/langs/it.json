@@ -42,7 +42,9 @@
         "rating": "Valutazione {{r}}",
         "not-applicable": "Non applicabile",
         "processed": "Elaborato",
-        "not-processed": "Non Elaborato"
+        "not-processed": "Non Elaborato",
+        "chapter-num": "Capitolo {{num}}",
+        "volume-num": "Volume {{num}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progressi di lettura",
@@ -410,7 +412,8 @@
         "side-story": "Storia parallela",
         "spin-off": "Spin Off",
         "parent": "Parente",
-        "edition": "Edizione"
+        "edition": "Edizione",
+        "annual": "Annuale"
     },
     "publication-status-pipe": {
         "ongoing": "In Corso",
@@ -430,7 +433,11 @@
         "penciller": "Disegnatore",
         "publisher": "Casa Editrice",
         "writer": "Scrittore",
-        "other": "Altro"
+        "other": "Altro",
+        "imprint": "Imprint",
+        "translator": "Traduttore",
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
     },
     "manga-format-pipe": {
         "epub": "EPUB",
@@ -442,7 +449,10 @@
     "library-type-pipe": {
         "book": "Libro",
         "comic": "Fumetto",
-        "manga": "Manga"
+        "manga": "Manga",
+        "comicVine": "ComicVine",
+        "image": "Immagine",
+        "lightNovel": "Romanzo Leggero"
     },
     "age-rating-pipe": {
         "unknown": "Sconosciuto",
@@ -491,7 +501,8 @@
         "published-label": "Pubblicato: ",
         "available": "Disponibile",
         "description": "Se non vedi un {{installed}}",
-        "description-continued": "tag, sei in una nightly release. Solo le versioni principali verranno visualizzate come disponibili."
+        "description-continued": "tag, sei in una nightly release. Solo le versioni principali verranno visualizzate come disponibili.",
+        "nightly": "Nightly: {{version}}"
     },
     "invite-user": {
         "title": "Invita utente",
@@ -666,7 +677,10 @@
         "promoted": "{{common.promoted}}",
         "see-more": "Vedi ancora",
         "see-less": "Vedi Meno",
-        "rating-title": "Valutazioni"
+        "rating-title": "Valutazioni",
+        "teams-title": "Gruppi",
+        "locations-title": "Posizioni",
+        "imprints-title": "Imprints"
     },
     "badge-expander": {
         "more-items": "e {{count}} ancora"
@@ -749,7 +763,9 @@
         "help": "{{common.help}}",
         "file-type-group-label": "Tipi di file",
         "file-type-group-tooltip": "Quali tipi di file dovrebbe scansionare Kavita. Ad esempio, Archivio includerà tutti i file cb*, zip, rar, ecc.",
-        "exclude-patterns-tooltip": "Configura una serie di modelli (sintassi Glob) che Kavita abbinerà durante la scansione delle directory ed escluderà dai risultati dello scanner."
+        "exclude-patterns-tooltip": "Configura una serie di modelli (sintassi Glob) che Kavita abbinerà durante la scansione delle directory ed escluderà dai risultati dello scanner.",
+        "kavitaplus-eligible-label": "Idoneo a Kavita+",
+        "kavitaplus-eligible-tooltip": "Kavita+ scaricherà informazioni o supporterà lo Scrobbling"
     },
     "reader-settings": {
         "general-settings-title": "Impostazioni Generali",
@@ -823,7 +839,10 @@
         "files": "File",
         "pages": "Pagine:",
         "added": "Aggiunto:",
-        "size": "Dimensione:"
+        "size": "Dimensione:",
+        "locations-title": "{{series-metadata-detail.locations-title}}",
+        "imprints-title": "{{series-metadata-detail.imprints-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}"
     },
     "card-detail-layout": {
         "total-items": "{{count}} articoli totali",
@@ -843,7 +862,9 @@
         "inkers-title": "{{series-metadata-detail.inkers-title}}",
         "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}"
+        "editors-title": "{{series-metadata-detail.editors-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}"
     },
     "cover-image-chooser": {
         "drag-n-drop": "Trascina e rilascia",
@@ -931,7 +952,7 @@
     },
     "entity-title": {
         "special": "Speciale",
-        "issue-num": "Problema #",
+        "issue-num": "Pubblicazione #",
         "chapter": "Capitolo"
     },
     "external-series-card": {
@@ -1087,7 +1108,8 @@
         "donations-title": "Donazioni:",
         "source-title": "Sorgente:",
         "feature-request-title": "Richieste di funzionalità:",
-        "localization-title": "Localizzazioni:"
+        "localization-title": "Localizzazioni:",
+        "updates-title": "Aggiorna cronologia"
     },
     "manage-tasks-settings": {
         "title": "Task ricorrenti",
@@ -1182,7 +1204,6 @@
         "promote-label": "Promuovi",
         "promote-tooltip": "La promozione significa che il tag può essere visto a livello di server, non solo per gli utenti amministratori. Su tutte le serie che hanno questo tag verranno comunque applicate restrizioni di accesso da parte degli utenti.",
         "summary-label": "Sommario",
-        "series-title": "Applica alle Serie",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -1213,7 +1234,9 @@
         "kavita+-tab": "Kavita+",
         "kavita+-desc-part-1": "Kavita+ è un servizio in abbonamento premium che sblocca funzionalità per tutti gli utenti su questa istanza Kavita. Acquista un abbonamento per sbloccare ",
         "kavita+-desc-part-2": "vantaggi premium",
-        "kavita+-desc-part-3": "oggi!"
+        "kavita+-desc-part-3": "oggi!",
+        "kavita+-releases": "Vedi versioni",
+        "kavita+-requirement": "Kavita+ è sviluppata per funzionare con l'ultima release - versione 2. Tutte le versioni precedenti non funzioneranno correttamente."
     },
     "collection-detail": {
         "no-data": "Non ci sono articoli. Prova ad aggiungere una serie.",
@@ -1325,7 +1348,7 @@
         "general-tab": "Generale",
         "cover-image-tab": "Immagine Copertina",
         "close": "{{common.close}}",
-        "save": "{common.save}}",
+        "save": "{{common.save}}",
         "year-validation": "Deve essere maggiore di 1000, 0 o vuoto",
         "month-validation": "Deve essere compreso tra 1 e 12 o vuoto",
         "name-unique-validation": "Il nome deve essere univoco",
@@ -1344,7 +1367,6 @@
         "import-description": "Per iniziare, importa un file .cbl. Kavita eseguirà più controlli prima dell'importazione. Alcuni passaggi bloccheranno l'avanzamento a causa di problemi con il file.",
         "validate-description": "Tutti i file sono stati convalidati per vedere se ci sono operazioni da fare nell'elenco. Eventuali elenchi non riusciti non passeranno al passaggio successivo. Correggi i file CBL e riprova.",
         "validate-warning": "Ci sono problemi con il CBL che impediscono l'importazione. Correggi questi problemi e riprova.",
-        "validate-no-issue": "Sembra buono",
         "validate-no-issue-description": "Nessun problema riscontrato con CBL, premi Avanti.",
         "dry-run-description": "Questa è una prova e mostra cosa accadrà se premi Avanti ed esegui l'importazione. Tutti gli errori non verranno importati.",
         "prev": "Prec",
@@ -1354,7 +1376,8 @@
         "import-step": "Importa CBL",
         "validate-cbl-step": "Convalidare CBL",
         "dry-run-step": "Fai una prova",
-        "final-import-step": "Passaggio Finale"
+        "final-import-step": "Passaggio Finale",
+        "comicvine-parsing-label": "Trova serie con ComicVine"
     },
     "pdf-reader": {
         "loading-message": "Caricamento... I PDF potrebbero richiedere più tempo del previsto",
@@ -1460,7 +1483,6 @@
         "cover-image-tab": "Immagine Copertina",
         "related-tab": "Relativo a",
         "info-tab": "Info",
-        "collections-label": "Collezioni",
         "genres-label": "Generi",
         "tags-label": "Tags",
         "cover-artist-label": "Artista Copertina",
@@ -1509,7 +1531,14 @@
         "chapter-title": "Capitolo:",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Conteggio più alto trovato in tutte le ComicInfo della serie",
-        "max-issue-tooltip": "Campo numero massimo o volume da tutti i ComicInfo della serie"
+        "max-issue-tooltip": "Campo numero massimo o volume da tutti i ComicInfo della serie",
+        "imprint-label": "Imprint",
+        "force-refresh": "Forza Aggiornamento",
+        "team-label": "{{filter-field-pipe.team}}",
+        "location-label": "{{filter-field-pipe.location}}",
+        "force-refresh-tooltip": "Forza aggiornamento metadata esterni da Kavita+",
+        "specials-volume": "Speciali",
+        "loose-leaf-volume": "Capitoli volanti"
     },
     "day-breakdown": {
         "title": "Ripartizione del giorno",
@@ -1684,11 +1713,13 @@
         "change-email-no-email": "L'email è stata aggiornata",
         "delete-review": "Sei sicuro di voler cancellare la tua recensione?",
         "review-deleted": "Recensione cancellata",
-        "email-not-sent-test": "Si è verificata un'eccezione durante l'invio dell'e-mail. Controlla i log per i dettagli. Ciò indica impostazioni errate.",
         "email-not-sent": "L'email in archivio non è un'email valida e non può essere inviata. Un collegamento è stato inserito nei log. L'amministratore può fornire questo collegamento per completare il flusso.",
         "delete-device": "Sei sicuro di voler eliminare questo dispositivo?",
         "anilist-token-expired": "Il tuo token AniList è scaduto. Lo scrobbling non verrà più elaborato finché non lo genererai di nuovo in Impostazioni utente > Account",
-        "k+-reset-key-success": "La tua licenza è stata annullata. Utilizza il pulsante Modifica per registrare nuovamente la tua istanza e riattivare Kavita+"
+        "k+-reset-key-success": "La tua licenza è stata annullata. Utilizza il pulsante Modifica per registrare nuovamente la tua istanza e riattivare Kavita+",
+        "force-kavita+-refresh-success": "I metadati esterni di Kavita+ sono stati invalidati",
+        "confirm-download-size-ios": "iOS ha problemi a scaricare file più grandi di 200MB, il download potrebbe non essere completo.",
+        "collection-tag-deleted": "Tag Collezione cancellato"
     },
     "actionable": {
         "scan-library": "Scansione libreria",
@@ -1835,7 +1866,10 @@
         "file-path": "Percorso File",
         "read-date": "Data di lettura",
         "want-to-read": "Voler leggere",
-        "average-rating": "Valutazione Media"
+        "average-rating": "Valutazione Media",
+        "imprint": "Imprint",
+        "location": "Posizione",
+        "team": "Gruppo"
     },
     "filter-comparison-pipe": {
         "not-equal": "Non uguale",
