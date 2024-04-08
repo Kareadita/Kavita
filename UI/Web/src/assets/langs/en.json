@@ -516,7 +516,7 @@
         "book": "Book",
         "comic": "Comic",
         "manga": "Manga",
-        "comicVine": "ComicVine",
+        "comicVine": "Comic Vine",
         "image": "Image",
         "lightNovel": "Light Novel"
     },
@@ -1612,7 +1612,7 @@
         "validate-cbl-step": "Validate CBL",
         "dry-run-step": "Dry Run",
         "final-import-step": "Final Step",
-        "comicvine-parsing-label": "Use ComicVine Series matching"
+        "comicvine-parsing-label": "Use Comic Vine Series matching"
     },
 
     "pdf-reader": {
