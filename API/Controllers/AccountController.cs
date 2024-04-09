@@ -37,7 +37,8 @@ namespace API.Controllers;
 /// </summary>
 public class AccountController : BaseApiController
 {
-    private static readonly string BadCredentialsMessage = "Your credentials are not correct";
+    // Hardcoded to avoid localization multiple enumeration: https://github.com/Kareadita/Kavita/issues/2829
+    private const string BadCredentialsMessage = "Your credentials are not correct";
 
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
