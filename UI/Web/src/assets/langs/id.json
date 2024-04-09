@@ -41,7 +41,8 @@
         "volume-and-chapter-num": "Volume {{v}} Bab {{n}}",
         "rating": "Penilaian {{r}}",
         "processed": "Telah Diproses",
-        "not-processed": "Belum Diproses"
+        "not-processed": "Belum Diproses",
+        "description": "Di sini Anda akan menemukan semua peristiwa scrobble yang ditautkan dengan akun Anda. Agar peristiwa dapat muncul, Anda harus memiliki penyedia scrobble yang aktif dan terkonfigurasi. Semua peristiwa yang telah diproses akan dihapus setelah satu bulan. Jika ada peristiwa yang tidak diproses, kemungkinan peristiwa tersebut tidak dapat membentuk pertandingan di hulu. Silakan hubungi admin Anda untuk memperbaikinya."
     },
     "user-preferences": {
         "locale-tooltip": "Bahasa yang seharusnya digunakan oleh Kavita",
@@ -99,12 +100,16 @@
         "score-updated": "Pembaruan Penilaian",
         "want-to-read-add": "Ingin Dibaca: Tambah",
         "want-to-read-remove": "Ingin Dibaca: Hapus",
-        "review": "Berikan ulasan"
+        "review": "Pembaruan ulasan"
     },
     "review-series-modal": {
         "close": "{{common.close}}",
         "title": "Ubah Ulasan",
-        "review-label": "Ulasan"
+        "review-label": "Ulasan",
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}",
+        "min-length": "Ulasan harus setidaknya terdiri dari {{count}} karakter",
+        "save": "{{common.save}}"
     },
     "spoiler": {
         "click-to-show": "Spoiler, klik untuk tampilkan"
@@ -120,5 +125,8 @@
         "anilist-token-updated": "Token AniList telah diperbarui",
         "confirm-delete-multiple-series": "Apakah Anda yakin ingin menghapus seri {{count}}? Tindakan ini tidak akan mengubah file pada disk.",
         "device-updated": "Perangkat diperbarui"
+    },
+    "review-card-modal": {
+        "close": "{{common.close}}"
     }
 }
