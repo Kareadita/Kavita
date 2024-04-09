@@ -491,7 +491,8 @@
         "published-label": "Publicado: ",
         "available": "Disponível",
         "description": "Se não vir uma etiqueta {{installed}}",
-        "description-continued": ", está numa versão em desenvolvimento. Apenas as versões principais aparecerão como disponíveis."
+        "description-continued": ", está numa versão em desenvolvimento. Apenas as versões principais aparecerão como disponíveis.",
+        "nightly": "Versão Diária: {{version}}"
     },
     "invite-user": {
         "title": "Convidar Utilizador",
@@ -1185,7 +1186,6 @@
         "promote-label": "Promover",
         "promote-tooltip": "A promoção significa que a etiqueta será vista ao nível do servidor, e não apenas pelos administradores. Todas as séries que tenham esta etiqueta continuarão a ter restrições de acesso dos utilizadores.",
         "summary-label": "Sumário",
-        "series-title": "Aplicável a Séries",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -1349,7 +1349,6 @@
         "import-description": "Importe um ficheiro .cbl para começar. O Kavita irá fazer várias verificações antes de importar. Alguns passos poderão impedir que se avance por haver problemas com o ficheiro.",
         "validate-description": "Todos os ficheiros foram validados para verificar se há operações pendentes na lista. As listas que tiverem falhado não passarão para o passo seguinte. Corrija o CBL e tente novamente.",
         "validate-warning": "Existem problemas com o CBL que impedem a importação. Corrija estes problemas e tente novamente.",
-        "validate-no-issue": "Parece bem",
         "validate-no-issue-description": "Não existem problemas com o CBL, pressione seguinte.",
         "dry-run-description": "Isto é uma simulação e mostra o que acontecerá se fizer a importação ao carregar em Seguinte. Todas as falhas serão importadas.",
         "prev": "Ant",
@@ -1465,7 +1464,6 @@
         "cover-image-tab": "Imagem de Capa",
         "related-tab": "Relacionado",
         "info-tab": "Info",
-        "collections-label": "Coleções",
         "genres-label": "Géneros",
         "tags-label": "Etiquetas",
         "cover-artist-label": "Artista de Capa",
@@ -1690,10 +1688,14 @@
         "k+-reset-key-success": "A sua licença foi desassociada. Use o botão Editar para voltar a registar a sua instância e voltar a ativar o Kavita+",
         "email-not-sent": "O email em ficheiro não é um email válido e não pode ser enviado. Foi colocado um link nos logs. O administrador pode disponibilizar este link para concluir o processo.",
         "k+-reset-key": "Isto irá desassociar a sua chave do servidor e permitir voltar a registar uma instância Kavita.",
-        "email-not-sent-test": "Ocorreu uma exceção ao enviar o email. Verifique os logs para mais detalhes. Este problema indica configurações erradas.",
         "change-email-no-email": "O Email foi atualizado",
         "anilist-token-expired": "O seu token AniList expirou. O processo de scrobbling não irá funcionar enquanto não voltar a gerar um novo token em Definições de Utilizador > Conta",
-        "delete-device": "Tem a certeza que deseja eliminar este dispositivo?"
+        "delete-device": "Tem a certeza que deseja eliminar este dispositivo?",
+        "delete-review": "Tem a certeza que quer eliminar esta crítica?",
+        "collection-tag-deleted": "Marcador de Coleção eliminado",
+        "review-deleted": "Crítica eliminada",
+        "force-kavita+-refresh-success": "Os metadados externos do Kavita+ foram invalidados",
+        "confirm-download-size-ios": "O iOS tem problemas a descarregar ficheiros maiores que 200MB, este download pode não ficar completo."
     },
     "actionable": {
         "scan-library": "Analisar Biblioteca",

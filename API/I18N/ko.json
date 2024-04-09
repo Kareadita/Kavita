@@ -1,6 +1,5 @@
 {
     "confirm-email": "먼저 이메일을 확인해야 합니다",
-    "bad-credentials": "자격 증명이 올바르지 않습니다",
     "locked-out": "너무 많은 인증 시도로 인해 잠겼습니다. 10분 동안 기다려 주십시오.",
     "invalid-password": "유효하지 않은 비밀번호",
     "user-already-registered": "사용자는 이미 {0}로 등록되어 있습니다",
@@ -69,7 +68,7 @@
     "generic-device-create": "장치를 생성하는 중에 오류가 발생했습니다",
     "device-doesnt-exist": "장치가 존재하지 않습니다",
     "generic-device-update": "장치를 업데이트 하는 중에 오류가 발생했습니다",
-    "send-to-kavita-email": "이메일 설정 없이는 기기로 전송할 수 없습니다.",
+    "send-to-kavita-email": "이메일 설정 없이는 기기로 전송할 수 없습니다",
     "no-cover-image": "표지 이미지 없음",
     "series-doesnt-exist": "시리즈가 존재하지 않습니다",
     "bookmarks-empty": "북마크는 비워둘 수 없습니다",
@@ -180,5 +179,17 @@
     "email-not-enabled": "이 서버에서는 이메일이 활성화되어 있지 않습니다. 이 작업을 수행할 수 없습니다.",
     "send-to-size-limit": "보내려고 하는 파일은 이메일 전송 용량을 초과했습니다",
     "send-to-unallowed": "본인 이외의 기기로는 전송할 수 없습니다",
-    "unable-to-reset-k+": "오류로 인해 Kavita+ 라이선스를 재설정할 수 없습니다. Kavita+ 지원팀에 문의하십시오"
+    "unable-to-reset-k+": "오류로 인해 Kavita+ 라이선스를 재설정할 수 없습니다. Kavita+ 지원팀에 문의하십시오",
+    "check-updates": "업데이트 확인",
+    "license-check": "라이센스 확인",
+    "process-scrobbling-events": "스크로블링 이벤트 처리",
+    "report-stats": "보고서 통계",
+    "check-scrobbling-tokens": "스크로블링 토큰 확인",
+    "cleanup": "청소",
+    "remove-from-want-to-read": "읽고 싶어요 정리",
+    "scan-libraries": "스캔 라이브러리",
+    "kavita+-data-refresh": "Kavita+ 데이터 새로 고침",
+    "backup": "백업",
+    "update-yearly-stats": "연간 통계 업데이트",
+    "process-processed-scrobbling-events": "처리된 스크로블링 이벤트 처리"
 }

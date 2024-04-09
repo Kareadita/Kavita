@@ -29,7 +29,7 @@
     "user-scrobble-history": {
         "title": "ประวัติการทำ Scrobble",
         "description": "ที่นี่คุณสามารถดูรายการ Scrobble ที่เกิดขึ้นภายใต้บัญชีคุณได้ โดยรายการจะเกิดขึ้นก็ต่อเมื่อคุณได้ตั้งค่า Scrobble เรียบร้อยแล้ว รายการต่างๆ จะถูกลบเมื่อผ่านไปหนึ่งเดือน ถ้ามีรายการที่ยังไม่ถูกประมวลผล นั่นหมายความว่าอาจเกิดปัญหาที่ต้นทาง กรุณาติดต่อผู้ดูแลระบบเพื่อแก้ไขปัญหานี้",
-        "filter-label": "ตัวกรอง",
+        "filter-label": "{{common.filter}}",
         "created-header": "สร้างแล้ว",
         "last-modified-header": "แก้ไขล่าสุด",
         "type-header": "ชนิด",
@@ -41,7 +41,9 @@
         "rating": "เรตติ้ง {{r}}",
         "not-applicable": "ไม่สามารถใช้ได้",
         "processed": "ดำเนินการ",
-        "not-processed": "ยังไม่ได้ประมวลผล"
+        "not-processed": "ยังไม่ได้ประมวลผล",
+        "volume-num": "เล่มที่ {{num}}",
+        "chapter-num": "บทที่ {{num}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "ความคืบหน้าการอ่าน",
@@ -57,7 +59,9 @@
         "title": "แก้ไขรีวิว",
         "review-label": "รีวิว",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -143,7 +147,9 @@
         "clients-api-key-tooltip": "คีย์ API เป็นเหมือนรหัสผ่าน เก็บเป็นความลับ เก็บไว้ให้ปลอดภัย",
         "clients-opds-url-tooltip": "URL ของ OPDS",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "ตัวกรองอัจฉริยะ",
+        "pdf-reader-settings-title": "โปรแกรมอ่าน PDF"
     },
     "user-holds": {
         "title": "Scrobble Holds",
@@ -386,9 +392,9 @@
         "never": "ไม่เคย"
     },
     "relationship-pipe": {
-        "adaptation": "Adaptation",
-        "alternative-setting": "Alternative Setting",
-        "alternative-version": "Alternative Version",
+        "adaptation": "การปรับตัว",
+        "alternative-setting": "การตั้งค่าสำรอง",
+        "alternative-version": "เวอร์ชันสำรอง",
         "character": "ตัวละคร",
         "contains": "ประกอบด้วย",
         "doujinshi": "โดจินชิ",
@@ -422,7 +428,7 @@
     },
     "manga-format-pipe": {
         "epub": "EPUB",
-        "archive": "Archive",
+        "archive": "เก็บถาวร",
         "image": "รูปภาพ",
         "pdf": "PDF",
         "unknown": "ไม่รู้จัก"

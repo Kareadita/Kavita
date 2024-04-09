@@ -1,0 +1,19 @@
+{
+    "confirm-email": "Esmalt pead oma e-posti kinnitama",
+    "locked-out": "Oled liiga paljude sisselogimiskatsete tõttu süsteemist keelatud. Palun oota 10 minutit.",
+    "disabled-account": "Su konto on keelatud. Võta ühendust serveri administraatoriga.",
+    "register-user": "Kasutaja registreerimisel läks midagi valesti",
+    "validate-email": "Teie e-posti kinnitamisel ilmnes probleem: {0}",
+    "denied": "Pole lubatud",
+    "permission-denied": "Sul ei ole selle toimingu jaoks luba",
+    "password-required": "Kui sa pole administraator, pead oma konto muutmiseks sisestama olemasoleva parooli",
+    "invalid-password": "Vale Parool",
+    "invalid-token": "Vale kinnituskood",
+    "unable-to-reset-key": "Midagi läks valesti, võtit ei saa lähtestada",
+    "invalid-payload": "Vigane saadetis",
+    "share-multiple-emails": "E-maili ei saa erinevate kontode vahel jagada",
+    "generate-token": "Kinnitusmeili koodi loomisel ilmnes probleem. Vaata logisid",
+    "confirm-token-gen": "Kinnituskoodi loomisel ilmnes probleem",
+    "nothing-to-do": "Pole midagi teha",
+    "age-restriction-update": "Vanusepiirangu värskendamisel ilmnes viga"
+}

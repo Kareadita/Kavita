@@ -29,7 +29,7 @@
     },
     "user-scrobble-history": {
         "title": "Scrobble geschiedenis",
-        "description": "Hier vindt u alle scrobble-evenementen die aan uw account zijn gekoppeld. Om evenementen te laten bestaan, moet u een actieve scrobble provider geconfigureerd hebben. Alle verwerkte gebeurtenissen worden na een maand gewist. Als er niet-verwerkte gebeurtenissen zijn, is het waarschijnlijk dat deze online geen matches kunnen vormen. Neem contact op met uw beheerder om ze te laten corrigeren.",
+        "description": "Hier vindt u alle scrobble-evenementen die aan uw account zijn gekoppeld. Om evenementen te hebben, moet u een actieve scrobble provider geconfigureerd hebben. Alle verwerkte gebeurtenissen worden na een maand gewist. Als er niet-verwerkte gebeurtenissen zijn, is het waarschijnlijk dat deze online geen matches kunnen vormen. Neem contact op met uw beheerder om ze te laten corrigeren.",
         "filter-label": "{{common.filter}}",
         "created-header": "Gemaakt",
         "last-modified-header": "Laatst gewijzigd",
@@ -59,7 +59,9 @@
         "review-label": "Beoordeling",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "min-length": "Review moet minimum {{count}} characters hebben"
+        "min-length": "Review moet minimum {{count}} characters hebben",
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -211,7 +213,6 @@
         "permission-error": "U heeft geen toestemming om uw wachtwoord te wijzigen. Neem contact op met de beheerder van de server."
     },
     "change-email": {
-        "email-label": "{{common.email}}",
         "current-password-label": "Huidig paswoord",
         "email-not-confirmed": "Deze e-mail is niet bevestigd",
         "email-updated-title": "E-mail bijgewerkt",
@@ -1114,7 +1115,6 @@
         "promote-label": "Promoot",
         "promote-tooltip": "Promotie betekent dat de tag serverbreed zichtbaar is, niet alleen voor beheerders. Alle series die deze tag hebben, hebben nog steeds beperkingen voor gebruikerstoegang.",
         "summary-label": "Samenvatting",
-        "series-title": "Geldt voor serie",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -1273,7 +1273,6 @@
         "import-description": "Importeer een .cbl-bestand om aan de slag te gaan. Kavita voert meerdere controles uit voordat het importeert. Sommige stappen blokkeren de voortgang vanwege problemen met het bestand.",
         "validate-description": "Alle bestanden zijn gevalideerd om te zien of er bewerkingen in de lijst moeten worden uitgevoerd. Lijsten die zijn mislukt, gaan niet naar de volgende stap. Herstel de CBL-bestanden en probeer het opnieuw.",
         "validate-warning": "Er zijn problemen met het CBL die een import verhinderen. Corrigeer deze problemen en probeer het opnieuw.",
-        "validate-no-issue": "Ziet er goed uit",
         "validate-no-issue-description": "Geen problemen gevonden met CBL, druk op Volgende.",
         "dry-run-description": "Dit is een testrun en laat zien wat er gebeurt als u op Volgende drukt en de import uitvoert. Niet alle fouten worden geïmporteerd.",
         "prev": "Vorige",
@@ -1386,7 +1385,6 @@
         "cover-image-tab": "Omslagfoto",
         "related-tab": "Verwant",
         "info-tab": "Info",
-        "collections-label": "Collecties",
         "genres-label": "Genres",
         "tags-label": "Labels",
         "cover-artist-label": "Coverartiest",

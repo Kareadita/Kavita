@@ -57,7 +57,8 @@
         "save": "{{common.save}}",
         "min-length": "レビューは最低 {{count}}文字以上である必要があります｡",
         "title": "レビューを編集する",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}"
     },
     "review-card": {
         "local-review": "ローカルレビュー",
@@ -556,7 +557,9 @@
         "allow-scrobbling-tooltip": "Kavitaは、Kavita+サブスクリプションがアクティブな場合に、読書イベント、読みたいステータス、評価、およびレビューを設定されたプロバイダに送信する",
         "include-in-dashboard-label": "ダッシュボードに含まれている",
         "next": "次へ",
-        "exclude-patterns-tooltip": "Kavitaがディレクトリをスキャンする際に一致させるためのパターン（Glob構文）を設定し、スキャナーの結果から除外します。"
+        "exclude-patterns-tooltip": "Kavitaがディレクトリをスキャンする際に一致させるためのパターン（Glob構文）を設定し、スキャナーの結果から除外します。",
+        "kavitaplus-eligible-tooltip": "Kavita+ は情報を取得するか、スクロブリングをサポートしますか",
+        "kavitaplus-eligible-label": "Kavita+ Eligible"
     },
     "restriction-selector": {
         "age-rating-label": "年齢制限",
@@ -802,7 +805,8 @@
         "description": "{{installed}}が表示されない場合",
         "available": "利用可能",
         "installed": "インストール済",
-        "description-continued": "深夜にリリースされます｡利用可能なのはメインバージョンのみです。"
+        "description-continued": "深夜にリリースされます｡利用可能なのはメインバージョンのみです。",
+        "nightly": "ナイトリー: {{バージョン}}"
     },
     "publication-status-pipe": {
         "completed": "完結",
@@ -899,7 +903,9 @@
         "statistics-tab": "統計データ",
         "kavita+-tab": "Kavita+",
         "tasks-tab": "タスク",
-        "kavita+-desc-part-2": "プレミアム特典"
+        "kavita+-desc-part-2": "プレミアム特典",
+        "kavita+-releases": "リリースを参照",
+        "kavita+-requirement": "Kavita+ は、最新リリース (2 つのバージョン) でのみ動作するように設計されています。それ以外のものは動作しない可能性があります。"
     },
     "carousel-reel": {
         "next-items": "次の項目",
@@ -963,7 +969,6 @@
     "edit-collection-tags": {
         "promote-tooltip": "「Promotion」は、そのタグがサーバー全体で見えるようになることを意味します。ただし、このタグを持つすべてのシリーズには引き続きユーザーアクセスの制限が適用されます。",
         "promote-label": "プロモーション",
-        "series-title": "シリーズへの適用",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
         "name-label": "名前",
@@ -1049,7 +1054,6 @@
         "nothing-to-remove": "削除しない",
         "k+-delete-key": "これはKavitaのライセンスキーのみを削除し、購入リンクを表示できるようにします。 サブスクリプションをキャンセルしません! サポートを指示すればこれだけを使う!",
         "email-service-reset": "メールサービスリセット",
-        "email-not-sent-test": "メールを送信する際に例外が発生しました。詳細はログを確認してください。これは不適切な設定を示しています｡",
         "k+-reset-key": "これにより、サーバーからキーを外し、Kavitaインスタンスを再登録することができます.",
         "confirm-delete-series": "本当にこのシリーズを削除してもよろしいですか？これはディスク上のファイルを変更しません",
         "library-created": "ライブラリは正常に作成されました。 スキャンが開始されました.",
@@ -1105,7 +1109,13 @@
         "confirm-delete-reading-list": "読み込みリストを削除したいですか? これは元に戻すことができません.",
         "item-removed": "削除される項目",
         "reading-list-deleted": "削除された読書リスト",
-        "reading-list-updated": "更新された読書リスト"
+        "reading-list-updated": "更新された読書リスト",
+        "confirm-download-size-ios": "iOS では 200MB を超えるファイルのダウンロードに問題があり、このダウンロードが完了しない可能性があります。",
+        "delete-review": "レビューを削除してもよろしいですか?",
+        "review-deleted": "レビューが削除されました",
+        "delete-device": "このデバイスを削除してもよろしいですか?",
+        "collection-tag-deleted": "コレクションタグが削除されました",
+        "force-kavita+-refresh-success": "Kavita+ の外部メタデータが無効になりました"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} の詳細",
@@ -1131,7 +1141,6 @@
         "last-modified-title": "最終更新日:",
         "web-link-description": "外部サービスにさまざまなリンクを追加できます.",
         "total-items-title": "合計項目:",
-        "collections-label": "コレクション",
         "genres-label": "ジャンル",
         "colorist-label": "カラーリスト",
         "last-added-title": "最後に追加した:",
@@ -1165,7 +1174,9 @@
         "view-files": "ファイルの表示",
         "pages-title": "ページ:",
         "chapter-title": "章:",
-        "highest-count-tooltip": "シリーズ内のすべてのComicInfoで見つかった最大カウント"
+        "highest-count-tooltip": "シリーズ内のすべてのComicInfoで見つかった最大カウント",
+        "force-refresh": "強制リフレッシュ",
+        "force-refresh-tooltip": "Kavita+ から外部メタデータを強制的に更新します"
     },
     "customize-sidenav-streams": {
         "save": "{{common.save}}",
@@ -1569,7 +1580,6 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "validate-no-issue": "よく見る",
         "validate-warning": "インポートを妨げるCBLの問題があります。これらの問題を修正してから再試行してください。",
         "validate-no-issue-description": "CBLで見つかった問題は、次を押します.",
         "dry-run-description": "これはドライランであり、Nextを押してインポートを実行した場合に何が起こるかを示しています。すべての失敗はインポートされません。",
@@ -1810,7 +1820,8 @@
         "home-page-title": "ホームページ:",
         "installId-title": "IDのインストール",
         "more-info-title": "さらなる詳細",
-        "source-title": "ソース:"
+        "source-title": "ソース:",
+        "updates-title": "更新履歴"
     },
     "default-date-pipe": {
         "never": "もう質問しない"
@@ -1847,7 +1858,8 @@
         "last-modified": "最終更新日",
         "time-to-read": "読む時間",
         "release-year": "出版年",
-        "last-chapter-added": "アイテムが追加された"
+        "last-chapter-added": "アイテムが追加された",
+        "average-rating": "平均評価"
     },
     "pdf-reader": {
         "light-theme-alt": "ライトテーマ",
@@ -1957,6 +1969,11 @@
         "required-field": "必須項目"
     },
     "out-of-date-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title": "遅れをとらないでください！",
+        "subtitle": "インストールが {{count}} バージョン以上遅れているようです!",
+        "description-1": "Kavita の最新バージョンを実行できるようにアップグレードすることを検討してください。",
+        "description-2": "更新方法については、<a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
+        "description-3": "まだ更新していない特別な理由がある場合は、古いバージョンを使用し続けている原因をぜひ知りたいと思います。 Discord にアクセスして、アップグレード パスを妨げているものをお知らせください。"
     }
 }

@@ -11,7 +11,6 @@
     "delete-library-while-scan": "Você não pode excluir uma biblioteca enquanto uma verificação estiver em andamento. Aguarde a conclusão da verificação ou reinicie o Kavita e tente excluir",
     "generic-library-update": "Ocorreu um problema crítico ao atualizar a biblioteca.",
     "confirm-email": "Você deve confirmar seu e-mail primeiro",
-    "bad-credentials": "Suas credenciais não estão corretas",
     "locked-out": "Você foi bloqueado por muitas tentativas de autorização. Aguarde 10 minutos.",
     "validate-email": "Ocorreu um problema ao validar seu e-mail: {0}",
     "denied": "Não permitido",
@@ -180,5 +179,19 @@
     "unable-to-reset-k+": "Não foi possível redefinir a licença Kavita+ devido a um erro. Entre em contato com o suporte Kavita +",
     "send-to-unallowed": "Você não pode enviar para um dispositivo que não seja seu",
     "email-not-enabled": "O e-mail não está ativado neste servidor. Você não pode executar esta ação.",
-    "send-to-size-limit": "Os arquivos que você está tentando enviar são muito grandes para o seu e-mail"
+    "send-to-size-limit": "Os arquivos que você está tentando enviar são muito grandes para o seu e-mail",
+    "check-updates": "Verificar por Atualizações",
+    "license-check": "Verificar Licença",
+    "process-scrobbling-events": "Eventos de Scrobbling de Processo",
+    "report-stats": "Estatísticas do Relatório",
+    "process-processed-scrobbling-events": "Processar eventos de Scrobbling processados",
+    "remove-from-want-to-read": "Limpar Quero Ler",
+    "scan-libraries": "Escanear Bibliotecas",
+    "backup": "Backup",
+    "update-yearly-stats": "Atualizar estatísticas anuais",
+    "check-scrobbling-tokens": "Verificar os Tokens de Scrobbling",
+    "cleanup": "Limpar",
+    "kavita+-data-refresh": "Atualização de dados Kavita+",
+    "account-email-invalid": "O e-mail registrado para a conta de administrador não é um e-mail válido. Não é possível enviar e-mail de teste.",
+    "email-settings-invalid": "Faltam informações nas configurações de e-mail. Certifique-se de que todas as configurações de e-mail estejam salvas."
 }

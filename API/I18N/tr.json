@@ -1,7 +1,6 @@
 {
     "denied": "İzin verilmedi",
     "permission-denied": "Bu operasyona izniniz yok",
-    "bad-credentials": "Kimlik bilgileriniz doğru değil",
     "confirm-email": "İlk olarak E-Posta'nı onaylaman gerek",
     "register-user": "Kullanıcıyı kayıt ederken bir şeyler yanlış gitti",
     "disabled-account": "Hesabınız devre dışı bırakıldı. Sunucu yöneticisiyle iletişime geçin.",

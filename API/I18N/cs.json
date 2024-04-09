@@ -18,7 +18,6 @@
     "age-restriction-update": "Při aktualizaci věkového omezení došlo k chybě",
     "no-user": "Uživatel neexistuje",
     "username-taken": "Uživatelské jméno je již používáno",
-    "bad-credentials": "Vaše přihlašovací údaje nejsou správné",
     "invalid-password": "Neplatné heslo",
     "invalid-token": "Neplatný token",
     "user-already-confirmed": "Uživatel je již potvrzen",

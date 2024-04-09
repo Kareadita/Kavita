@@ -5,7 +5,6 @@
     "disabled-account": "Votre compte a été désactivé. Veuillez contacter un administrateur.",
     "confirm-email": "Vous devez d'abord confirmer votre email",
     "locked-out": "Vous avez été bloqués suite à un nombre trop élevé de tentatives. Veuillez réessayer dans 10 minutes.",
-    "bad-credentials": "Vos codes d'accès sont invalides",
     "validate-email": "Une erreur est survenue lors de la validation de votre courriel : {0}",
     "confirm-token-gen": "Une erreur est survenue lors de la génération du jeton de confirmation",
     "password-required": "Vous devez entrer votre mot de passe actuel pour changer votre compte à moins que vous ne soyez administrateur",
@@ -180,5 +179,19 @@
     "unable-to-reset-k+": "Impossible de réinitialiser la licence Kavita+ en raison d'une erreur. Contactez le support Kavita+",
     "email-not-enabled": "E-mail non activé sur ce serveur. Vous ne pouvez pas lancer cette action.",
     "send-to-unallowed": "Vous ne pouvez envoyer à un appareil qui ne vous appartient pas",
-    "send-to-size-limit": "Le(s) fichier(s) que vous essayez d'envoyer sont trop lourds pour votre emailer"
+    "send-to-size-limit": "Le(s) fichier(s) que vous essayez d'envoyer sont trop lourds pour votre emailer",
+    "check-updates": "Vérifier les mises à jour",
+    "license-check": "Vérification de la licence",
+    "cleanup": "Nettoyage",
+    "report-stats": "Rapport des statistiques",
+    "process-scrobbling-events": "Traiter les événements de Scrobbling",
+    "check-scrobbling-tokens": "Vérifier les jetons de Scrobbling",
+    "remove-from-want-to-read": "Nettoyage de la liste d'envie (déjà lu)",
+    "scan-libraries": "Analyse des bibliothèques",
+    "kavita+-data-refresh": "Actualisation des données Kavita+",
+    "backup": "Sauvegarde",
+    "process-processed-scrobbling-events": "Traiter les événements de Scrobbling traités",
+    "update-yearly-stats": "Mettre à jour les statistiques annuelles",
+    "account-email-invalid": "L'adresse électronique figurant dans le fichier du compte administrateur n'est pas valide. Impossible d'envoyer un courriel de test.",
+    "email-settings-invalid": "Informations manquantes dans les paramètres de l'e-mail. Assurez-vous que tous les paramètres de l'email sont sauvegardés."
 }

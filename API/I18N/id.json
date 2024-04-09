@@ -60,7 +60,6 @@
     "generic-cover-library-save": "Tidak dapat menyimpan gambar sampul ke Pustaka",
     "generic-cover-chapter-save": "Tidak dapat menyimpan gambar sampul ke Bab",
     "reset-chapter-lock": "Tidak dapat mereset kunci sampul untuk Bab",
-    "bad-credentials": "Kredensial anda salah",
     "no-image-for-page": "Gambar untuk halaman {0} tidak ditemukan. Coba perbarui halaman untuk memperbaharui cache.",
     "encode-as-warning": "Anda tidak dapat mengonversi ke PNG. Untuk sampul, gunakan Perbarui Sampul. Penanda dan favicon tidak dapat diubah kembali.",
     "total-logs": "Total log harus diantara 1 dan 30",
@@ -96,5 +95,10 @@
     "age-restriction-not-applicable": "Tidak ada batasan",
     "generic-cover-collection-save": "Tidak dapat menyimpan gambar sampul ke Koleksi",
     "generic-cover-reading-list-save": "Tidak dapat menyimpan gambar sampul ke Daftar Baca",
-    "generic-user-delete": "Tidak dapat menghapus pengguna"
+    "generic-user-delete": "Tidak dapat menghapus pengguna",
+    "email-not-enabled": "Email tidak diaktifkan pada server ini. Anda tidak dapat melakukan tindakan ini.",
+    "generic-device-update": "Terjadi error saat memperbarui perangkat",
+    "generic-device-create": "Ada error saat membuat perangkat",
+    "generic-device-delete": "Terjadi error saat menghapus perangkat",
+    "greater-0": "{0} harus lebih besar dari 0"
 }

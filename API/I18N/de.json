@@ -29,7 +29,6 @@
     "user-already-invited": "Der Benutzer ist bereits unter dieser E-Mail eingeladen und hat die Einladung noch nicht angenommen.",
     "invalid-email-confirmation": "Ungültige E-Mail Bestätigung",
     "not-accessible": "Es kann von außen nicht auf Ihren Server zugegriffen werden",
-    "bad-credentials": "Ihre Anmeldedaten sind nicht korrekt",
     "unable-to-reset-key": "Etwas ist schief gelaufen, Schlüssel kann nicht zurückgesetzt werden",
     "invalid-token": "Ungültiger Token",
     "email-sent": "E-Mail versendet",
@@ -39,10 +38,10 @@
     "generic-error": "Es ist ein Fehler ist aufgetreten, bitte versuchen Sie es erneut",
     "device-doesnt-exist": "Das Gerät existiert nicht",
     "generic-device-create": "Beim Erstellen des Geräts ist ein Fehler aufgetreten",
-    "send-to-kavita-email": "Das Senden an Gerät kann nicht mit dem E-Mail-Dienst von Kavita durchgeführt werden. Bitte konfigurieren Sie Ihren eigenen.",
+    "send-to-kavita-email": "Das Senden an Gerät kann nicht ohne konfigurierten E-Mail-Dienst durchgeführt werden.",
     "send-to-device-status": "Übertrage Dateien auf Ihr Gerät",
     "series-doesnt-exist": "Die Serie existiert nicht",
-    "volume-doesnt-exist": "Das Band existiert nicht",
+    "volume-doesnt-exist": "Der Band existiert nicht",
     "no-cover-image": "Kein Coverbild",
     "bookmark-doesnt-exist": "Lesezeichen ist nicht vorhanden",
     "must-be-defined": "{0} muss definiert sein",
@@ -176,5 +175,9 @@
     "browse-more-in-genre": "Mehr in {0} stöbern",
     "recently-updated": "Zuletzt aktualisiert",
     "browse-recently-updated": "Zuletzt aktualisiert durchsuchen",
-    "unable-to-reset-k+": "Aufgrund eines Fehlers konnte die Kavita+ Lizenz nicht zurückgesetzt werden. Kontaktieren Sie den Kavita+ Support"
+    "unable-to-reset-k+": "Aufgrund eines Fehlers konnte die Kavita+ Lizenz nicht zurückgesetzt werden. Kontaktieren Sie den Kavita+ Support",
+    "email-not-enabled": "Der Mailversand ist auf diesem Server nicht aktiviert. Sie können diese Aktion nicht durchführen.",
+    "invalid-email": "Die für den Benutzer hinterlegte E-Mail ist ungültig. Links finden Sie in den Logs.",
+    "send-to-unallowed": "Sie können nicht an ein Gerät senden, das nicht Ihnen gehört.",
+    "send-to-size-limit": "Die Datei(en), die Sie senden möchten, ist/sind zu groß für Ihren E-Mail-Service"
 }
