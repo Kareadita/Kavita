@@ -544,45 +544,6 @@
 
                         <div class="row g-0">
                           <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                            <label for="settings-pdf-layout-mode" class="form-label">{{t('pdf-layout-mode-label')}}</label><i
-                            class="fa fa-info-circle ms-1" aria-hidden="true" placement="right"
-                            [ngbTooltip]="pdfLayoutModeTooltip" role="button" tabindex="0"></i>
-                            <ng-template #pdfLayoutModeTooltip>{{t('pdf-layout-mode-tooltip')}}
-                            </ng-template>
-                            <span class="visually-hidden" id="settings-pdf-layout-mode-help">
-                              <ng-container [ngTemplateOutlet]="pdfLayoutModeTooltip"></ng-container>
-                            </span>
-                            <select id="settings-pdf-layout-mode" class="form-select"
-                                    aria-describedby="settings-pdf-layout-mode-help"
-                                    formControlName="pdfLayoutMode">
-                              <option *ngFor="let opt of pdfLayoutModesTranslated" [value]="opt.value">
-                                {{opt.text | titlecase}}
-                              </option>
-                            </select>
-                          </div>
-
-
-                          <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                            <label for="settings-pdf-scroll-mode" class="form-label">{{t('pdf-scroll-mode-label')}}</label><i
-                            class="fa fa-info-circle ms-1" aria-hidden="true" placement="right"
-                            [ngbTooltip]="pdfScrollModeTooltip" role="button" tabindex="0"></i>
-                            <ng-template #pdfScrollModeTooltip>{{t('pdf-scroll-mode-tooltip')}}
-                            </ng-template>
-                            <span class="visually-hidden" id="settings-pdf-scroll-mode-help">
-                              <ng-container [ngTemplateOutlet]="pdfScrollModeTooltip"></ng-container>
-                            </span>
-                            <select id="settings-pdf-scroll-mode" class="form-select"
-                                    aria-describedby="settings-pdf-scroll-mode-help"
-                                    formControlName="pdfScrollMode">
-                              <option *ngFor="let opt of pdfScrollModesTranslated" [value]="opt.value">
-                                {{opt.text | titlecase}}
-                              </option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div class="row g-0">
-                          <div class="col-md-6 col-sm-12 pe-2 mb-3">
                             <label for="settings-pdf-spread-mode" class="form-label">{{t('pdf-spread-mode-label')}}</label><i
                             class="fa fa-info-circle ms-1" aria-hidden="true" placement="right"
                             [ngbTooltip]="pdfSpreadModeTooltip" role="button" tabindex="0"></i>
@@ -612,6 +573,25 @@
                           </div>
                         </div>
 
+                        <div class="row g-0">
+                          <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                            <label for="settings-pdf-scroll-mode" class="form-label">{{t('pdf-scroll-mode-label')}}</label><i
+                            class="fa fa-info-circle ms-1" aria-hidden="true" placement="right"
+                            [ngbTooltip]="pdfScrollModeTooltip" role="button" tabindex="0"></i>
+                            <ng-template #pdfScrollModeTooltip>{{t('pdf-scroll-mode-tooltip')}}
+                            </ng-template>
+                            <span class="visually-hidden" id="settings-pdf-scroll-mode-help">
+                              <ng-container [ngTemplateOutlet]="pdfScrollModeTooltip"></ng-container>
+                            </span>
+                            <select id="settings-pdf-scroll-mode" class="form-select"
+                                    aria-describedby="settings-pdf-scroll-mode-help"
+                                    formControlName="pdfScrollMode">
+                              <option *ngFor="let opt of pdfScrollModesTranslated" [value]="opt.value">
+                                {{opt.text | titlecase}}
+                              </option>
+                            </select>
+                          </div>
+                        </div>
 
                         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                           <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()"

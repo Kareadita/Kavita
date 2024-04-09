@@ -119,7 +119,6 @@ public class UsersController : BaseApiController
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
 
         existingPreferences.PdfTheme = preferencesDto.PdfTheme;
-        existingPreferences.PdfLayoutMode = preferencesDto.PdfLayoutMode;
         existingPreferences.PdfScrollMode = preferencesDto.PdfScrollMode;
         existingPreferences.PdfSpreadMode = preferencesDto.PdfSpreadMode;
 

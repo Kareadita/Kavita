@@ -136,7 +136,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   pageLayoutModesTranslated = pageLayoutModes.map(this.translatePrefOptions);
   bookWritingStylesTranslated = bookWritingStyles.map(this.translatePrefOptions);
-  pdfLayoutModesTranslated = pdfLayoutModes.map(this.translatePrefOptions);
+  // pdfLayoutModesTranslated = pdfLayoutModes.map(this.translatePrefOptions);
   pdfScrollModesTranslated = pdfScrollModes.map(this.translatePrefOptions);
   pdfSpreadModesTranslated = pdfSpreadModes.map(this.translatePrefOptions);
   pdfThemesTranslated = pdfThemes.map(this.translatePrefOptions);
@@ -253,7 +253,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.settingsForm.addControl('pdfTheme', new FormControl(this.user?.preferences.pdfTheme || PdfTheme.Dark, []));
       this.settingsForm.addControl('pdfScrollMode', new FormControl(this.user?.preferences.pdfScrollMode || PdfScrollMode.Vertical, []));
-      this.settingsForm.addControl('pdfLayoutMode', new FormControl(this.user?.preferences.pdfLayoutMode || PdfLayoutMode.Multiple, []));
       this.settingsForm.addControl('pdfSpreadMode', new FormControl(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, []));
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
@@ -318,7 +317,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     this.settingsForm.get('pdfTheme')?.setValue(this.user.preferences.pdfTheme);
     this.settingsForm.get('pdfScrollMode')?.setValue(this.user.preferences.pdfScrollMode);
-    this.settingsForm.get('pdfLayoutMode')?.setValue(this.user.preferences.pdfLayoutMode);
     this.settingsForm.get('pdfSpreadMode')?.setValue(this.user.preferences.pdfSpreadMode);
 
     this.cdRef.markForCheck();
@@ -359,7 +357,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       locale: modelSettings.locale,
       pdfTheme: parseInt(modelSettings.pdfTheme, 10),
       pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
-      pdfLayoutMode: parseInt(modelSettings.pdfLayoutMode, 10),
       pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
     };
 

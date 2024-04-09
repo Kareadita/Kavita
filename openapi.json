@@ -13619,15 +13619,6 @@
             "description": "PDF Reader: Scroll mode of the reader",
             "format": "int32"
           },
-          "pdfLayoutMode": {
-            "enum": [
-              0,
-              2
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Layout Mode of the reader",
-            "format": "int32"
-          },
           "pdfSpreadMode": {
             "enum": [
               0,

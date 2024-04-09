@@ -41,7 +41,6 @@ export interface Preferences {
     // PDF Reader
     pdfTheme: PdfTheme;
     pdfScrollMode: PdfScrollMode;
-    pdfLayoutMode: PdfLayoutMode;
     pdfSpreadMode: PdfSpreadMode;
 
     // Global
