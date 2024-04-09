@@ -22,7 +22,7 @@ import {catchError} from "rxjs";
   styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
+  imports: [NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
 })
 export class LicenseComponent implements OnInit {
 
@@ -36,7 +36,7 @@ export class LicenseComponent implements OnInit {
 
   hasValidLicense: boolean = false;
   hasLicense: boolean = false;
-  isChecking: boolean = false;
+  isChecking: boolean = true;
   isSaving: boolean = false;
 
   buyLink = environment.buyLink;
@@ -53,8 +53,11 @@ export class LicenseComponent implements OnInit {
       this.hasLicense = res;
       this.cdRef.markForCheck();
     });
+    this.isChecking = true;
+    this.cdRef.markForCheck();
     this.accountService.hasValidLicense().subscribe(res => {
       this.hasValidLicense = res;
+      this.isChecking = false;
       this.cdRef.markForCheck();
     });
   }
