@@ -1,6 +1,5 @@
 {
     "confirm-email": "You must confirm your email first",
-    "bad-credentials": "Your credentials are not correct",
     "locked-out": "You've been locked out from too many authorization attempts. Please wait 10 minutes.",
     "disabled-account": "Your account is disabled. Contact the server admin.",
     "register-user": "Something went wrong when registering user",
