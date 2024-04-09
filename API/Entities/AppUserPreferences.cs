@@ -118,7 +118,8 @@ public class AppUserPreferences
     /// <summary>
     /// PDF Reader: Layout Mode of the reader
     /// </summary>
-    public PdfLayoutMode PdfLayoutMode { get; set; } = PdfLayoutMode.Multiple;
+    /// Book mode is too buggy to include
+    //public PdfLayoutMode PdfLayoutMode { get; set; } = PdfLayoutMode.Multiple;
     /// <summary>
     /// PDF Reader: Spread Mode of the reader
     /// </summary>

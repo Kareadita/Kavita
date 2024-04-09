@@ -142,7 +142,7 @@ export class AccountService {
 
   login(model: {username: string, password: string, apiKey?: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
-      map((response: User) => {
+      tap((response: User) => {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
@@ -176,6 +176,8 @@ export class AccountService {
     this.stopRefreshTokenTimer();
 
     if (this.currentUser) {
+      // BUG: StopHubConnection has a promise in it, this needs to be async
+      // But that really messes everything up
       this.messageHub.stopHubConnection();
       this.messageHub.createHubConnection(this.currentUser);
       this.hasValidLicense().subscribe();

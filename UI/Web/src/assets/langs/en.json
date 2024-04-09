@@ -160,8 +160,6 @@
         "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
 
         "pdf-reader-settings-title": "PDF Reader",
-        "pdf-layout-mode-label": "Layout Mode",
-        "pdf-layout-mode-tooltip": "How the reader lays the pdf out. Default is pages stacked with scrolling and Book emulates a physical book",
         "pdf-scroll-mode-label": "Scroll Mode",
         "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",
         "pdf-spread-mode-label": "Spread Mode",
@@ -516,7 +514,7 @@
         "book": "Book",
         "comic": "Comic",
         "manga": "Manga",
-        "comicVine": "ComicVine",
+        "comicVine": "Comic Vine",
         "image": "Image",
         "lightNovel": "Light Novel"
     },
@@ -1612,7 +1610,7 @@
         "validate-cbl-step": "Validate CBL",
         "dry-run-step": "Dry Run",
         "final-import-step": "Final Step",
-        "comicvine-parsing-label": "Use ComicVine Series matching"
+        "comicvine-parsing-label": "Use Comic Vine Series matching"
     },
 
     "pdf-reader": {

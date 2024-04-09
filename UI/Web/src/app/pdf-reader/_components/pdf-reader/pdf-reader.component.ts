@@ -34,6 +34,7 @@ import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfLayoutModePipe} from "../../_pipe/pdf-layout-mode.pipe";
 import {PdfScrollModePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadModePipe} from "../../_pipe/pdf-spread-mode.pipe";
+import {HandtoolChanged} from "ngx-extended-pdf-viewer/lib/events/handtool-changed";
 
 @Component({
     selector: 'app-pdf-reader',
@@ -236,7 +237,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   init() {
 
-    this.pageLayoutMode = this.convertPdfLayoutMode(this.user.preferences.pdfLayoutMode || PdfLayoutMode.Multiple);
+    this.pageLayoutMode = this.convertPdfLayoutMode(PdfLayoutMode.Multiple);
     this.scrollMode = this.convertPdfScrollMode(this.user.preferences.pdfScrollMode || PdfScrollMode.Vertical);
     this.spreadMode = this.convertPdfSpreadMode(this.user.preferences.pdfSpreadMode || PdfSpreadMode.None);
     this.theme = this.convertPdfTheme(this.user.preferences.pdfTheme || PdfTheme.Dark);
@@ -348,6 +349,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   updateLoadProgress(event: ProgressBarEvent) {
     this.loadPercent = event.percent;
     this.cdRef.markForCheck();
+  }
+
+  updateHandTool(event: any) {
+     console.log('event.tool', event);
   }
 
   prevPage() {

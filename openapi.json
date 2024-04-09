@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.14.12"
+    "version": "0.7.14.13"
   },
   "servers": [
     {
@@ -13617,15 +13617,6 @@
             ],
             "type": "integer",
             "description": "PDF Reader: Scroll mode of the reader",
-            "format": "int32"
-          },
-          "pdfLayoutMode": {
-            "enum": [
-              0,
-              2
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Layout Mode of the reader",
             "format": "int32"
           },
           "pdfSpreadMode": {
