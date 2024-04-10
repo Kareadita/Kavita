@@ -47,7 +47,7 @@
             <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
           </div>
           <div class="col-2">
-            <button type="submit" class="btn btn-primary" (click)="create()">{{t('create')}}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isCreating" (click)="create()">{{t('create')}}</button>
           </div>
         </div>
       </div>
