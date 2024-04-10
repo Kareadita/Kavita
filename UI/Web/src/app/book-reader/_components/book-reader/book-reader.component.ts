@@ -78,11 +78,11 @@ const COLUMN_GAP = 20; // px
 /**
  * Styles that should be applied on the top level book-content tag
  */
-const pageLevelStyles = ['margin-left', 'margin-right', 'font-size'];
+const pageLevelStyles = ['margin-left', 'margin-right'];
 /**
  * Styles that should be applied on every element within book-content tag
  */
-const elementLevelStyles = ['line-height', 'font-family'];
+const elementLevelStyles = ['line-height', 'font-family', 'font-size'];
 
 @Component({
     selector: 'app-book-reader',
