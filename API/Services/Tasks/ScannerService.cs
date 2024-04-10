@@ -254,7 +254,7 @@ public class ScannerService : IScannerService
         // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
 
-        _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
+        _logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
 
         // We now technically have all scannedSeries, we could invoke each Series to be scanned
 

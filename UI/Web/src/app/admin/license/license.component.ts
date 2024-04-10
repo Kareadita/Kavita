@@ -49,16 +49,21 @@ export class LicenseComponent implements OnInit {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
     this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
+
+    this.isChecking = true;
+    this.cdRef.markForCheck();
+
     this.accountService.hasAnyLicense().subscribe(res => {
       this.hasLicense = res;
       this.cdRef.markForCheck();
-    });
-    this.isChecking = true;
-    this.cdRef.markForCheck();
-    this.accountService.hasValidLicense().subscribe(res => {
-      this.hasValidLicense = res;
-      this.isChecking = false;
-      this.cdRef.markForCheck();
+
+      if (this.hasLicense) {
+        this.accountService.hasValidLicense().subscribe(res => {
+          this.hasValidLicense = res;
+          this.isChecking = false;
+          this.cdRef.markForCheck();
+        });
+      }
     });
   }
 

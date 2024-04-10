@@ -147,6 +147,6 @@ public class TokenService : ITokenService
         if (string.IsNullOrEmpty(token)) return true;
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenContent = tokenHandler.ReadJwtToken(token);
-        return tokenContent.ValidTo <= DateTime.UtcNow;
+        return tokenContent.ValidTo >= DateTime.UtcNow;
     }
 }
