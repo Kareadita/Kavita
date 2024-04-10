@@ -8,8 +8,8 @@
         <div>{{t('no-data')}}</div>
       } @else {
         <ngb-progressbar-stacked>
-          <ngb-progressbar type="danger" [value]="errorPercent" [ngbTooltip]="t('errored-series-label') + ' ' + breakdown.erroredSeries"></ngb-progressbar>
-          <ngb-progressbar type="success" [value]="completedPercent" [ngbTooltip]="t('completed-series-label') + ' ' + breakdown.seriesCompleted"></ngb-progressbar>
+          <ngb-progressbar type="danger" [showValue]="true" [value]="errorPercent" [ngbTooltip]="t('errored-series-label') + ' ' + breakdown.erroredSeries"></ngb-progressbar>
+          <ngb-progressbar type="success" [showValue]="true" [value]="completedPercent" [ngbTooltip]="t('completed-series-label') + ' ' + breakdown.seriesCompleted"></ngb-progressbar>
         </ngb-progressbar-stacked>
         @if (breakdown.seriesCompleted >= breakdown.totalSeries) {
           <p>{{t('complete') }}
