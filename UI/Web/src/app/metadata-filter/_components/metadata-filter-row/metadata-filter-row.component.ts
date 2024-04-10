@@ -299,8 +299,8 @@ export class MetadataFilterRowComponent implements OnInit {
         case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
         case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
         case FilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
-        case FilterField.Team: return this.getPersonOptions(PersonRole.Imprint);
-        case FilterField.Location: return this.getPersonOptions(PersonRole.Imprint);
+        case FilterField.Team: return this.getPersonOptions(PersonRole.Team);
+        case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
         case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
         case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
       }
