@@ -205,14 +205,12 @@ public class LicenseService(
                     InstallId = HashUtil.ServerToken()
                 })
                 .ReceiveString();
+
             var result =  bool.Parse(response);
 
-            if (!result)
-            {
-                var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-                await provider.FlushAsync();
-                await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
-            }
+            var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+            await provider.FlushAsync();
+            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
 
             return result;
         }
@@ -229,6 +227,7 @@ public class LicenseService(
         serverSetting.Value = string.Empty;
         unitOfWork.SettingsRepository.Update(serverSetting);
         await unitOfWork.CommitAsync();
+
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         await provider.RemoveAsync(CacheKey);
     }

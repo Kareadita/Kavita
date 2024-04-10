@@ -60,7 +60,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   loaded: boolean = false;
 
   constructor() {
-    this.accountService.hasValidLicense().subscribe(res => {
+    this.accountService.hasValidLicense$.subscribe(res => {
       this.hasValidLicense = res;
       this.cdRef.markForCheck();
       if (this.hasValidLicense) {

@@ -169,12 +169,12 @@ public class TaskScheduler : ITaskScheduler
         {
             return;
         }
+
         RecurringJob.AddOrUpdate(CheckScrobblingTokensId, () => _scrobblingService.CheckExternalAccessTokens(),
             Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
         RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.HasActiveLicense(true),
             LicenseService.Cron, RecurringJobOptions);
-        BackgroundJob.Enqueue(() => _licenseService.HasActiveLicense(true));
 
         // KavitaPlus Scrobbling (every 4 hours)
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
