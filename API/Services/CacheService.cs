@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Reader;
@@ -50,6 +51,8 @@ public class CacheService : ICacheService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IBookmarkService _bookmarkService;
+
+    private static readonly SemaphoreSlim ExtractSemaphore = new SemaphoreSlim(1, 1);
 
     public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
         IDirectoryService directoryService, IReadingItemService readingItemService,
@@ -166,9 +169,18 @@ public class CacheService : ICacheService
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         var extractPath = GetCachePath(chapterId);
 
-        if (_directoryService.Exists(extractPath)) return chapter;
-        var files = chapter?.Files.ToList();
-        ExtractChapterFiles(extractPath, files, extractPdfToImages);
+        await ExtractSemaphore.WaitAsync();
+        try
+        {
+            if (_directoryService.Exists(extractPath)) return chapter;
+
+            var files = chapter?.Files.ToList();
+            ExtractChapterFiles(extractPath, files, extractPdfToImages);
+        }
+        finally
+        {
+            ExtractSemaphore.Release();
+        }
 
         return  chapter;
     }
