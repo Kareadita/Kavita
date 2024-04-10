@@ -931,6 +931,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.updateSingleImagePageStyles()
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
 
+        let cleanedContent = this.clearFontSettings(content); // Reset font settings to avoid conflicts with reader settings
+        this.page = this.domSanitizer.bypassSecurityTrustHtml(cleanedContent); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
 
       this.cdRef.markForCheck();
 
@@ -1022,6 +1024,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  clearFontSettings(content: string) {
+    const regCleaner = /font-(family|size):[^;]+;/g;
+    return content.replace(regCleaner, '');
+  }
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
