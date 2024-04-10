@@ -60,7 +60,6 @@
     "generic-cover-library-save": "Tidak dapat menyimpan gambar sampul ke Pustaka",
     "generic-cover-chapter-save": "Tidak dapat menyimpan gambar sampul ke Bab",
     "reset-chapter-lock": "Tidak dapat mereset kunci sampul untuk Bab",
-    "bad-credentials": "Kredensial anda salah",
     "no-image-for-page": "Gambar untuk halaman {0} tidak ditemukan. Coba perbarui halaman untuk memperbaharui cache.",
     "encode-as-warning": "Anda tidak dapat mengonversi ke PNG. Untuk sampul, gunakan Perbarui Sampul. Penanda dan favicon tidak dapat diubah kembali.",
     "total-logs": "Total log harus diantara 1 dan 30",

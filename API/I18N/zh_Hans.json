@@ -1,5 +1,4 @@
 {
-    "bad-credentials": "您的登录信息不正确",
     "validate-email": "验证你的邮件时出了点问题: {0}",
     "confirm-token-gen": "生成认证令牌时出现问题",
     "denied": "未被允许",
@@ -192,5 +191,7 @@
     "scan-libraries": "扫描资料库",
     "kavita+-data-refresh": "Kavita+ 数据刷新",
     "backup": "备份",
-    "update-yearly-stats": "更新年度统计数据"
+    "update-yearly-stats": "更新年度统计数据",
+    "email-settings-invalid": "电子邮件设置缺少信息。确保保存所有电子邮件设置。",
+    "account-email-invalid": "管理员帐户存档的电子邮件不是有效的电子邮件。无法发送测试电子邮件。"
 }

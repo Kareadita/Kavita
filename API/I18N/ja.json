@@ -3,7 +3,6 @@
     "invalid-token": "無効トークン",
     "invalid-password": "無効なパスワード",
     "validate-email": "メールの検証中に問題が発生しました: {0}",
-    "bad-credentials": "資格情報が正しくありません",
     "confirm-email": "最初にメールを確認する必要があります",
     "disabled-account": "あなたのアカウントは無効になりました。サーバー管理者に連絡してください。",
     "locked-out": "認証試行が多すぎるとロックアウトされました。 10分ほどお待ちください。",

@@ -1,6 +1,5 @@
 {
     "confirm-email": "먼저 이메일을 확인해야 합니다",
-    "bad-credentials": "자격 증명이 올바르지 않습니다",
     "locked-out": "너무 많은 인증 시도로 인해 잠겼습니다. 10분 동안 기다려 주십시오.",
     "invalid-password": "유효하지 않은 비밀번호",
     "user-already-registered": "사용자는 이미 {0}로 등록되어 있습니다",

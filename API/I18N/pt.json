@@ -1,5 +1,4 @@
 {
-    "bad-credentials": "As credenciais não estão corretas",
     "password-required": "Se não for administrador, tem de introduzir a sua palavra passe para alterar a sua conta",
     "confirm-token-gen": "Ocorreu um problema a gerar um token de confirmação",
     "age-restriction-update": "Ocorreu um erro ao atualizar a restrição de idade",

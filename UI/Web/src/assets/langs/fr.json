@@ -155,8 +155,6 @@
         "pdf-spread-mode-tooltip": "Comment les pages doivent être mises en page. Simple ou double (paire/impaire)",
         "pdf-theme-label": "Thème",
         "pdf-reader-settings-title": "Lecteur PDF",
-        "pdf-layout-mode-label": "Mode de présentation",
-        "pdf-layout-mode-tooltip": "La façon dont le lecteur présente le pdf. Par défaut, les pages sont empilées avec défilement et le livre émule un livre physique",
         "pdf-scroll-mode-label": "mode de défilement",
         "pdf-spread-mode-label": "Mode d'étalement"
     },

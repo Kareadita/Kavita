@@ -152,8 +152,6 @@
         "save": "保存",
         "smart-filters-tab": "智能筛选器",
         "pdf-reader-settings-title": "PDF 阅读器",
-        "pdf-layout-mode-label": "布局模式",
-        "pdf-layout-mode-tooltip": "读者如何布局 pdf。默认为滚动堆叠的页面，书籍模拟实体书籍",
         "pdf-spread-mode-tooltip": "页面应该如何布局。单或双（奇数/偶数）",
         "pdf-theme-label": "主题",
         "pdf-scroll-mode-label": "滚动模式",
@@ -1375,7 +1373,7 @@
         "ending-title": "结束",
         "starting-title": "开始",
         "promote-label": "推广",
-        "promote-tooltip": "推广意味着该标签能在整个服务器范围内可见，不仅仅限于管理员用户。拥有该标签的所有系列仍然会受到用户访问限制。"
+        "promote-tooltip": "推广意味着该收藏可以在整个服务器范围内看到，而不仅仅是您自己。此收藏中的所有系列仍将受到用户访问限制。"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1745,7 +1743,8 @@
         "collections-promoted": "收藏推广",
         "collections-unpromoted": "未推广的收藏",
         "confirm-delete-collections": "您确定要删除多个收藏吗？",
-        "collections-deleted": "收藏已删除"
+        "collections-deleted": "收藏已删除",
+        "pdf-book-mode-screen-size": "屏幕对于书籍模式来说太小"
     },
     "actionable": {
         "scan-library": "扫描资料库",

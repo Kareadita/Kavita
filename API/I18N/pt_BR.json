@@ -11,7 +11,6 @@
     "delete-library-while-scan": "Você não pode excluir uma biblioteca enquanto uma verificação estiver em andamento. Aguarde a conclusão da verificação ou reinicie o Kavita e tente excluir",
     "generic-library-update": "Ocorreu um problema crítico ao atualizar a biblioteca.",
     "confirm-email": "Você deve confirmar seu e-mail primeiro",
-    "bad-credentials": "Suas credenciais não estão corretas",
     "locked-out": "Você foi bloqueado por muitas tentativas de autorização. Aguarde 10 minutos.",
     "validate-email": "Ocorreu um problema ao validar seu e-mail: {0}",
     "denied": "Não permitido",

@@ -1326,8 +1326,6 @@
         "smart-filters-tab": "스마트 필터",
         "pdf-scroll-mode-label": "스크롤 모드",
         "pdf-reader-settings-title": "PDF리더",
-        "pdf-layout-mode-label": "레이아웃 모드",
-        "pdf-layout-mode-tooltip": "독자가 PDF를 배치하는 방법. 기본값은 스크롤이 포함된 페이지이며 Book은 실제 책을 에뮬레이트합니다",
         "pdf-scroll-mode-tooltip": "페이지를 스크롤하는 방법. 수직/수평 및 탭하여 페이지 매김(스크롤 없음)",
         "pdf-spread-mode-label": "스프레드 모드",
         "pdf-spread-mode-tooltip": "페이지를 배치하는 방법. 싱글 또는 더블(홀수/짝수)",

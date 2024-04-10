@@ -29,7 +29,7 @@
     },
     "user-scrobble-history": {
         "title": "Scrobble geschiedenis",
-        "description": "Hier vindt u alle scrobble-evenementen die aan uw account zijn gekoppeld. Om evenementen te laten bestaan, moet u een actieve scrobble provider geconfigureerd hebben. Alle verwerkte gebeurtenissen worden na een maand gewist. Als er niet-verwerkte gebeurtenissen zijn, is het waarschijnlijk dat deze online geen matches kunnen vormen. Neem contact op met uw beheerder om ze te laten corrigeren.",
+        "description": "Hier vindt u alle scrobble-evenementen die aan uw account zijn gekoppeld. Om evenementen te hebben, moet u een actieve scrobble provider geconfigureerd hebben. Alle verwerkte gebeurtenissen worden na een maand gewist. Als er niet-verwerkte gebeurtenissen zijn, is het waarschijnlijk dat deze online geen matches kunnen vormen. Neem contact op met uw beheerder om ze te laten corrigeren.",
         "filter-label": "{{common.filter}}",
         "created-header": "Gemaakt",
         "last-modified-header": "Laatst gewijzigd",

@@ -41,7 +41,6 @@
     "generic-create-temp-archive": "建立暫存檔案時遇到問題",
     "bookmark-save": "無法儲存書籤",
     "bookmark-dir-permissions": "書籤目錄沒有 Kavita 可以使用的正確權限",
-    "bad-credentials": "您的帳號或密碼不正確",
     "total-backups": "總備份數量必須在 1 到 30 之間",
     "book-num": "書本 {0}",
     "generic-cover-series-save": "無法將封面圖片儲存到系列作品",

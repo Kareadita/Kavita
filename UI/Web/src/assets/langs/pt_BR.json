@@ -151,8 +151,6 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "smart-filters-tab": "Filtros Inteligentes",
-        "pdf-layout-mode-label": "Modo do Layout",
-        "pdf-layout-mode-tooltip": "Como o leitor apresenta o PDF. O padrão são páginas empilhadas com rolagem e Livro emula um livro físico",
         "pdf-scroll-mode-label": "Modo de Rolagem",
         "pdf-reader-settings-title": "Leitor de PDF",
         "pdf-scroll-mode-tooltip": "Como você rola pelas páginas. Vertical/Horizontal e toque para paginar (sem rolagem)",

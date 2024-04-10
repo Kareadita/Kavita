@@ -29,7 +29,6 @@
     "user-already-invited": "Der Benutzer ist bereits unter dieser E-Mail eingeladen und hat die Einladung noch nicht angenommen.",
     "invalid-email-confirmation": "Ungültige E-Mail Bestätigung",
     "not-accessible": "Es kann von außen nicht auf Ihren Server zugegriffen werden",
-    "bad-credentials": "Ihre Anmeldedaten sind nicht korrekt",
     "unable-to-reset-key": "Etwas ist schief gelaufen, Schlüssel kann nicht zurückgesetzt werden",
     "invalid-token": "Ungültiger Token",
     "email-sent": "E-Mail versendet",

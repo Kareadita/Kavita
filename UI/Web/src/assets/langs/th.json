@@ -149,7 +149,6 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "smart-filters-tab": "ตัวกรองอัจฉริยะ",
-        "pdf-layout-mode-label": "โหมดเค้าโครง",
         "pdf-reader-settings-title": "โปรแกรมอ่าน PDF"
     },
     "user-holds": {

@@ -53,7 +53,6 @@
     "ip-address-invalid": "Indirizzo IP '{0}' non valido",
     "bookmark-dir-permissions": "La directory dei segnalibri non dispone delle autorizzazioni corrette per l'utilizzo da parte di Kavita",
     "confirm-email": "Prima devi confermare la tua email",
-    "bad-credentials": "Le tue credenziali non sono corrette",
     "register-user": "Qualcosa è andato storto nella registrazione dell'utente",
     "confirm-token-gen": "Si è verificato un problema durante la generazione di un token di conferma",
     "generic-user-email-update": "Impossibile aggiornare l'e-mail per l'utente. Controlla i log.",

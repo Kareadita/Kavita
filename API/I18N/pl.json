@@ -1,5 +1,4 @@
 {
-    "bad-credentials": "Twoje dane uwierzytelniające są nieprawidłowe",
     "disabled-account": "Twoje konto jest wyłączone. Skontaktuj się z administratorem serwera.",
     "register-user": "Coś poszło nie tak podczas rejestracji użytkownika",
     "validate-email": "Wystąpił problem z weryfikacją adresu e-mail: {0}",

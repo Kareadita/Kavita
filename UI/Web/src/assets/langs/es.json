@@ -276,8 +276,6 @@
         "scrobbling-tab": "Seguimiento",
         "smart-filters-tab": "Filtros inteligentes",
         "pdf-reader-settings-title": "Lector de PDF",
-        "pdf-layout-mode-label": "Estilo del diseño",
-        "pdf-layout-mode-tooltip": "Cómo se dispone el lector el pdf. Por defecto en páginas apiladas con desplazamiento y emulando a un libro físico",
         "pdf-scroll-mode-label": "Modo de desplazamiento",
         "pdf-scroll-mode-tooltip": "Cómo se desplaza por las páginas. Vertical/Horizontal y Toque para Paginar (sin desplazamiento)",
         "pdf-spread-mode-label": "Modo de propagación",
@@ -547,7 +545,7 @@
         "manga": "Manga",
         "book": "Libro",
         "comic": "Cómic",
-        "comicVine": "ComicVine",
+        "comicVine": "Comic Vine",
         "image": "Imagen",
         "lightNovel": "Novela ligera"
     },
