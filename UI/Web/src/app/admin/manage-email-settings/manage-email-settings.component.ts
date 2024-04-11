@@ -70,6 +70,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsForm.get('port')?.setValue(587);
     this.settingsForm.get('sizeLimit')?.setValue(26214400);
     this.settingsForm.get('enableSsl')?.setValue(true);
+    this.settingsForm.markAsDirty();
     this.cdRef.markForCheck();
   }
 
@@ -78,6 +79,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsForm.get('port')?.setValue(587 );
     this.settingsForm.get('sizeLimit')?.setValue(1048576);
     this.settingsForm.get('enableSsl')?.setValue(true);
+    this.settingsForm.markAsDirty();
     this.cdRef.markForCheck();
   }
 
