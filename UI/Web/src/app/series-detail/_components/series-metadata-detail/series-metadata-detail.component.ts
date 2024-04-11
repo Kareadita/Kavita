@@ -114,9 +114,6 @@ export class SeriesMetadataDetailComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-
-
-
     this.hasExtendedProperties = this.seriesMetadata.colorists.length > 0 ||
                                   this.seriesMetadata.editors.length > 0 ||
                                   this.seriesMetadata.coverArtists.length > 0 ||
