@@ -561,7 +561,7 @@ public class ReadingListService : IReadingListService
         // How can we match properly with ComicVine library when year is part of the series unless we do this in 2 passes and see which has a better match
 
 
-        if (!userSeries.Any())
+        if (userSeries.Count == 0)
         {
             // Report that no series exist in the reading list
             importSummary.Results.Add(new CblBookResult

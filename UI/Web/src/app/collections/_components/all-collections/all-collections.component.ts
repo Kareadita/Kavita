@@ -76,7 +76,7 @@ export class AllCollectionsComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
   isAdmin$: Observable<boolean> = of(false);
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}`;
+  trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}_${item.owner}_${item.promoted}`;
   user!: User;
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -146,13 +146,14 @@ export class AllCollectionsComponent implements OnInit {
 
     switch (action.action) {
       case Action.Promote:
-        this.collectionService.promoteMultipleCollections([collectionTag.id], true).subscribe();
+        this.collectionService.promoteMultipleCollections([collectionTag.id], true).subscribe(_ => this.loadPage());
         break;
       case Action.UnPromote:
-        this.collectionService.promoteMultipleCollections([collectionTag.id], false).subscribe();
+        this.collectionService.promoteMultipleCollections([collectionTag.id], false).subscribe(_ => this.loadPage());
         break;
       case(Action.Delete):
         this.collectionService.deleteTag(collectionTag.id).subscribe(res => {
+          this.loadPage();
           this.toastr.success(res);
         });
         break;

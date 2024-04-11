@@ -126,7 +126,7 @@ public class ScrobblingService : IScrobblingService
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in users)
         {
-            if (string.IsNullOrEmpty(user.AniListAccessToken) || !_tokenService.HasTokenExpired(user.AniListAccessToken)) continue;
+            if (string.IsNullOrEmpty(user.AniListAccessToken) || !TokenService.HasTokenExpired(user.AniListAccessToken)) continue;
             _logger.LogInformation("User {UserName}'s AniList token has expired! They need to regenerate it for scrobbling to work", user.UserName);
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
@@ -151,7 +151,7 @@ public class ScrobblingService : IScrobblingService
     private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
     {
         if (string.IsNullOrEmpty(token) ||
-            !_tokenService.HasTokenExpired(token)) return false;
+            !TokenService.HasTokenExpired(token)) return false;
 
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         if (string.IsNullOrEmpty(license.Value)) return true;
@@ -778,7 +778,7 @@ public class ScrobblingService : IScrobblingService
                 continue;
             }
 
-            if (_tokenService.HasTokenExpired(evt.AppUser.AniListAccessToken))
+            if (TokenService.HasTokenExpired(evt.AppUser.AniListAccessToken))
             {
                 _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                 {
