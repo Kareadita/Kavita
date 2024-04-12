@@ -20,6 +20,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {Title} from "@angular/platform-browser";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
     selector: 'app-reading-lists',
@@ -30,6 +31,8 @@ import {Title} from "@angular/platform-browser";
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective]
 })
 export class ReadingListsComponent implements OnInit {
+
+  protected readonly WikiLink = WikiLink;
 
   lists: ReadingList[] = [];
   loadingLists = false;

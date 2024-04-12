@@ -7,6 +7,7 @@ import { LibraryService } from '../../../_services/library.service';
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {WikiLink} from "../../../_models/wiki";
 
 
 export interface DirectoryPickerResult {
@@ -27,7 +28,7 @@ export class DirectoryPickerComponent implements OnInit {
   /**
    * Url to give more information about selecting directories. Passing nothing will suppress.
    */
-  @Input() helpUrl: string = 'https://wiki.kavitareader.com/en/guides/first-time-setup#adding-a-library-to-kavita';
+  @Input() helpUrl: string = WikiLink.Library;
 
   currentRoot = '';
   folders: DirectoryDto[] = [];

@@ -184,7 +184,7 @@
 
       <div class="mb-3 mt-3">
         <label for="stat-collection" class="form-label" aria-describedby="collection-info">{{t('allow-stats-label')}}</label>
-        <p class="accent" id="collection-info">{{t('allow-stats-tooltip-part-1')}}<a href="https://wiki.kavitareader.com/en/faq" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">wiki</a> {{t('allow-stats-tooltip-part-2')}}</p>
+        <p class="accent" id="collection-info">{{t('allow-stats-tooltip-part-1')}}<a [href]="WikiLink.DataCollection" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">wiki</a> {{t('allow-stats-tooltip-part-2')}}</p>
         <div class="form-check form-switch">
           <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
           <label for="stat-collection" class="form-check-label">{{t('send-data')}}</label>

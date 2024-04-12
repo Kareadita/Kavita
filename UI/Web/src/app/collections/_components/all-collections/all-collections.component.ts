@@ -41,6 +41,7 @@ import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {ActionService} from "../../../_services/action.service";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
+import {WikiLink} from "../../../_models/wiki";
 
 
 @Component({
@@ -69,6 +70,7 @@ export class AllCollectionsComponent implements OnInit {
   public readonly actionService = inject(ActionService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly WikiLink = WikiLink;
 
   isLoading: boolean = true;
   collections: UserCollection[] = [];

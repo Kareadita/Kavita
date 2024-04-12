@@ -17,6 +17,7 @@ import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {WikiLink} from "../../../_models/wiki";
 
 interface FileStep {
   fileName: string;
@@ -48,6 +49,7 @@ export class ImportCblModalComponent {
 
   protected readonly CblImportResult = CblImportResult;
   protected readonly Step = Step;
+  protected readonly WikiLink = WikiLink;
 
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
 

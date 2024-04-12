@@ -45,6 +45,7 @@ import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
+import {WikiLink} from "../../../_models/wiki";
 
 enum TabID {
   General = 'general-tab',
@@ -75,6 +76,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly LibraryType = LibraryType;
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
+  protected readonly WikiLink = WikiLink;
 
   public readonly utilityService = inject(UtilityService);
   public readonly modal = inject(NgbActiveModal);
@@ -361,5 +363,4 @@ export class LibrarySettingsModalComponent implements OnInit {
         return false; // Advanced are optional
     }
   }
-
 }

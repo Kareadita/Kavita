@@ -24,6 +24,7 @@ import {TypeaheadComponent} from "../../typeahead/_components/typeahead.componen
 import {CommonModule} from "@angular/common";
 import {TranslocoModule} from "@ngneat/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
+import {WikiLink} from "../../_models/wiki";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
@@ -55,6 +56,7 @@ export class EditSeriesRelationComponent implements OnInit {
   private readonly searchService = inject(SearchService);
   public readonly imageService = inject(ImageService);
   protected readonly RelationKind = RelationKind;
+  protected readonly WikiLink = WikiLink;
 
   @Input({required: true}) series!: Series;
   /**
@@ -188,5 +190,4 @@ export class EditSeriesRelationComponent implements OnInit {
     this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis, editions, annuals).subscribe(() => {});
 
   }
-
 }

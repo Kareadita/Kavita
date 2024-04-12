@@ -8,6 +8,7 @@ import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {WikiLink} from "../../_models/wiki";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -21,15 +22,17 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
 })
 export class ManageSettingsComponent implements OnInit {
 
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
+  protected readonly WikiLink = WikiLink;
+
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
-  private readonly translocoService = inject(TranslocoService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-
-  constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private serverService: ServerService) { }
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {

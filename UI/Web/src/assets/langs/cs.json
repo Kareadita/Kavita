@@ -576,7 +576,7 @@
         "title": "Nezůstaňte pozadu!",
         "subtitle": "Zdá se, že vaše instalace je více než {{počet}} verzí pozadu!",
         "description-1": "Zvažte prosím aktualizaci, abyste používali nejnovější verzi systému Kavita.",
-        "description-2": "Podívejte se na naši <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>, kde najdete pokyny k aktualizaci.",
+        "description-2": "Podívejte se na naši <a href='https://wiki.kavitareader.com/guides/updating' target='_blank' rel='noreferrer noopener'>wiki</a>, kde najdete pokyny k aktualizaci.",
         "description-3": "Pokud máte nějaký konkrétní důvod, proč jste ještě neaktualizovali, rádi bychom věděli, co vás drží na zastaralé verzi! Zastavte se na našem discordu a dejte nám vědět, co vám brání v aktualizaci."
     },
     "book-line-overlay": {
