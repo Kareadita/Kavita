@@ -461,7 +461,7 @@
         "book": "书籍",
         "comic": "美漫",
         "manga": "日漫",
-        "comicVine": "ComicVine",
+        "comicVine": "Comic Vine",
         "image": "图片",
         "lightNovel": "轻小说"
     },
@@ -1391,7 +1391,7 @@
         "validate-cbl-step": "验证CBL文件",
         "dry-run-step": "模拟运行",
         "final-import-step": "最后一步",
-        "comicvine-parsing-label": "使用 ComicVine 系列搭配"
+        "comicvine-parsing-label": "使用 Comic Vine 系列搭配"
     },
     "pdf-reader": {
         "loading-message": "加载中...PDF文件可能需要比预期更长的时间",

@@ -1,6 +1,5 @@
 {
     "confirm-email": "Esmalt pead oma e-posti kinnitama",
-    "bad-credentials": "Sisselogimise andmed pole õiged",
     "locked-out": "Oled liiga paljude sisselogimiskatsete tõttu süsteemist keelatud. Palun oota 10 minutit.",
     "disabled-account": "Su konto on keelatud. Võta ühendust serveri administraatoriga.",
     "register-user": "Kasutaja registreerimisel läks midagi valesti",
