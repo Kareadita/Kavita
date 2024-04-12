@@ -33,6 +33,7 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 import {
   ImportMalCollectionModalComponent
 } from "../../../collections/_components/import-mal-collection-modal/import-mal-collection-modal.component";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
   selector: 'app-side-nav',
@@ -44,8 +45,19 @@ import {
 })
 export class SideNavComponent implements OnInit {
 
+  protected readonly SideNavStreamType = SideNavStreamType;
+  private readonly router = inject(Router);
+  private readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly actionService = inject(ActionService);
+  public readonly navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly ngbModal = inject(NgbModal);
+  private readonly imageService = inject(ImageService);
+  public readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  protected readonly WikiLink = WikiLink;
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
@@ -62,18 +74,6 @@ export class SideNavComponent implements OnInit {
   }
   showAll: boolean = false;
   totalSize = 0;
-
-  protected readonly SideNavStreamType = SideNavStreamType;
-  private readonly router = inject(Router);
-  private readonly utilityService = inject(UtilityService);
-  private readonly messageHub = inject(MessageHubService);
-  private readonly actionService = inject(ActionService);
-  public readonly navService = inject(NavService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly ngbModal = inject(NgbModal);
-  private readonly imageService = inject(ImageService);
-  public readonly accountService = inject(AccountService);
-
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -230,5 +230,4 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
-
 }

@@ -21,6 +21,7 @@ import { FilterPipe } from '../../_pipes/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgIf, NgFor } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {WikiLink} from "../../_models/wiki";
 
 @Component({
     selector: 'app-manage-alerts',
@@ -34,10 +35,12 @@ export class ManageAlertsComponent implements OnInit {
 
   @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
+
   private readonly serverService = inject(ServerService);
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly WikiLink = WikiLink;
 
   messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
   currentSort = new BehaviorSubject<SortEvent<KavitaMediaError>>({column: 'extension', direction: 'asc'});
@@ -48,9 +51,6 @@ export class ManageAlertsComponent implements OnInit {
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
-
-
-  constructor() {}
 
   ngOnInit(): void {
 

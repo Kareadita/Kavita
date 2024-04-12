@@ -33,6 +33,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {Title} from "@angular/platform-browser";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
   selector: 'app-bookmarks',
@@ -58,6 +59,8 @@ export class BookmarksComponent implements OnInit {
   private readonly titleService = inject(Title);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly imageService = inject(ImageService);
+
+  protected readonly WikiLink = WikiLink;
 
   bookmarks: Array<PageBookmark> = [];
   series: Array<Series> = [];

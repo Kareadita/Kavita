@@ -27,7 +27,7 @@
     <ng-template #noData>
       {{t('no-data')}}
       @if(isAdmin$ | async) {
-        {{t('create-one-part-1')}} <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">{{t('create-one-part-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
+        {{t('create-one-part-1')}} <a [href]="WikiLink.Collections" rel="noopener noreferrer" target="_blank">{{t('create-one-part-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
       }
     </ng-template>
   </app-card-detail-layout>

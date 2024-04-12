@@ -15,6 +15,7 @@ import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {catchError} from "rxjs";
+import {WikiLink} from "../../_models/wiki";
 
 @Component({
   selector: 'app-license',
@@ -30,6 +31,7 @@ export class LicenseComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
+  protected readonly WikiLink = WikiLink;
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;

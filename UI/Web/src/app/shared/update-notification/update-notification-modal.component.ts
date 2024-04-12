@@ -4,6 +4,7 @@ import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event'
 import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {WikiLink} from "../../_models/wiki";
 
 
 @Component({
@@ -17,15 +18,15 @@ import {TranslocoDirective} from "@ngneat/transloco";
 export class UpdateNotificationModalComponent implements OnInit {
 
   @Input({required: true}) updateData!: UpdateVersionEvent;
-  updateUrl: string = 'https://wiki.kavitareader.com/en/install/windows-install#updating-kavita';
+  updateUrl: string = WikiLink.UpdateNative;
 
   constructor(public modal: NgbActiveModal) { }
 
   ngOnInit() {
     if (this.updateData.isDocker) {
-      this.updateUrl = 'https://wiki.kavitareader.com/en/install/docker-install#updating-kavita';
+      this.updateUrl = WikiLink.UpdateDocker;
     } else {
-      this.updateUrl = 'https://wiki.kavitareader.com/en/install/windows-install#updating-kavita';
+      this.updateUrl = WikiLink.UpdateNative;
     }
   }
 

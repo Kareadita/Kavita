@@ -74,10 +74,10 @@
               </button>
             </div>
             <div class="row mt-2">
-              <p>{{t('help-us-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
+              <p>{{t('help-us-part-1')}}<a [href]="WikiLink.ManagingFiles" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
             </div>
             <div class="row mt-2">
-              <p>{{t('naming-conventions-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner#introduction" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
+              <p>{{t('naming-conventions-part-1')}}<a [href]="WikiLink.Scanner" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
             </div>
           </ng-template>
         </li>
@@ -123,7 +123,7 @@
                     <div ngbAccordionCollapse>
                       <div ngbAccordionBody>
                         <ng-template>
-                          <span >{{t('exclude-patterns-tooltip')}}<a class="ms-1" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner/excluding-files-folders" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a></span>
+                          <span >{{t('exclude-patterns-tooltip')}}<a class="ms-1" [href]="WikiLink.ScannerExclude" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a></span>
                           <div class="mt-2">
                             <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
                           </div>
