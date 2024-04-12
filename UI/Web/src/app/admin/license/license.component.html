@@ -87,9 +87,11 @@
             <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off" [class.is-invalid]="formGroup.get('discordId')?.invalid && formGroup.get('discordId')?.touched"/>
             @if (formGroup.dirty || formGroup.touched) {
               <div id="inviteForm-validations" class="invalid-feedback">
-                <div *ngIf="formGroup.get('discordId')?.errors?.pattern">
-                  {{t('discord-validation')}}
-                </div>
+                @if (formGroup.get('discordId')?.errors?.pattern) {
+                  <div>
+                    {{t('discord-validation')}}
+                  </div>
+                }
               </div>
             }
           </div>
