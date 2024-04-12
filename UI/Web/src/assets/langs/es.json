@@ -1100,7 +1100,8 @@
         "collections-promoted": "Promoción de las colecciones",
         "collections-unpromoted": "Colecciones no promocionadas",
         "confirm-delete-collections": "¿Estás seguro de que deseas eliminar varias colecciones?",
-        "collections-deleted": "Colecciones borradas"
+        "collections-deleted": "Colecciones borradas",
+        "pdf-book-mode-screen-size": "Pantalla demasiado pequeña para el modo Libro"
     },
     "library-selector": {
         "title": "Bibliotecas",
