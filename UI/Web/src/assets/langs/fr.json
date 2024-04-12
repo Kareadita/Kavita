@@ -414,7 +414,7 @@
         "book": "Livre",
         "manga": "Manga",
         "comic": "Bande dessinée",
-        "comicVine": "ComicVine",
+        "comicVine": "Comic Vine",
         "image": "Image",
         "lightNovel": "Light Novel"
     },
@@ -1593,7 +1593,7 @@
         "import": "Importer",
         "next": "Suivant",
         "dry-run-step": "Simuler",
-        "comicvine-parsing-label": "Utiliser la correspondance des séries de ComicVine"
+        "comicvine-parsing-label": "Utiliser la correspondance des séries de Comic Vine"
     },
     "carousel-reel": {
         "next-items": "Éléments suivants",

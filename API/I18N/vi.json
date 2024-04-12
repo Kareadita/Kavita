@@ -11,7 +11,6 @@
     "generic-device-create": "Đã xảy ra lỗi khi tạo thiết bị này",
     "generic-invite-user": "Đã xảy ra sự cố khi mời người dùng này. Vui lòng kiểm tra nhật ký.",
     "email-not-enabled": "Chức năng email không được kích hoạt trên máy chủ. Bạn không thể thực hiện hành động này.",
-    "bad-credentials": "Thông tin đăng nhập của bạn không chính xác",
     "register-user": "Đã xảy ra lỗi khi đăng ký tài khoản",
     "confirm-token-gen": "Đã xảy ra sự cố khi tạo token xác minh",
     "denied": "Không có quyền",

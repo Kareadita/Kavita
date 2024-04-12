@@ -158,7 +158,7 @@
         "validate-cbl-step": "Validar CBL",
         "dry-run-step": "Prueba",
         "final-import-step": "Último paso",
-        "comicvine-parsing-label": "Utilice la combinación de la serie ComicVine"
+        "comicvine-parsing-label": "Utilice la combinación de la serie Comic Vine"
     },
     "pdf-reader": {
         "incognito-mode": "Modo incógnito",

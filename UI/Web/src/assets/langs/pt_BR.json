@@ -462,7 +462,7 @@
         "book": "Livro",
         "comic": "Quadrinhos",
         "manga": "Mangá",
-        "comicVine": "ComicVine",
+        "comicVine": "Comic Vine",
         "image": "Imagem",
         "lightNovel": "Light Novel"
     },
@@ -1392,7 +1392,7 @@
         "validate-cbl-step": "Validar CBL",
         "final-import-step": "Passo Final",
         "dry-run-step": "Funcionamento a Seco",
-        "comicvine-parsing-label": "Usar a correspondência da série ComicVine"
+        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine"
     },
     "pdf-reader": {
         "loading-message": "Carregando... PDFs podem demorar mais do que o esperado",

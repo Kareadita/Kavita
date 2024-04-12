@@ -284,10 +284,11 @@
         "name-validation": "이름은 고유해야 합니다",
         "promote-tooltip": "승격은 관리 사용자뿐만 아니라 서버 전체에서 태그를 볼 수 있음을 의미합니다. 이 태그가 있는 모든 시리즈에는 여전히 사용자 액세스 제한이 적용됩니다.",
         "summary-label": "요약",
-        "name-label": "이름"
+        "name-label": "이름",
+        "filter-label": "{{common.filter}}"
     },
     "nav-header": {
-        "promoted": "(승격)",
+        "promoted": "{{common.promoted}}",
         "skip-alt": "메인 콘텐츠로 건너뛰기",
         "no-data": "검색 결과가 없습니다",
         "server-settings": "서버 설정",
@@ -660,7 +661,7 @@
         "comic": "만화(Comic)",
         "image": "이미지",
         "lightNovel": "라이트 노벨",
-        "comicVine": "ComicVine"
+        "comicVine": "Comic Vine"
     },
     "age-rating-pipe": {
         "adults-only": "19세 미만 구독 불가",
@@ -1096,7 +1097,7 @@
         "create": "{{common.create}}",
         "title": "읽기 목록에 추가",
         "close": "{{common.close}}",
-        "promoted-alt": "승격",
+        "promoted-alt": "{{common.promoted}}",
         "no-data": "아직 생성된 목록이 없습니다",
         "reading-list-label": "읽기 목록",
         "loading": "{{common.loading}}"
@@ -1135,7 +1136,7 @@
         "validate-warning": "가져오기를 방해하는 CBL 문제가 있습니다. 이 문제를 수정한 후 다시 시도하십시오.",
         "import-description": "시작하려면 .cbl 파일을 가져옵니다. Kavita는 가져오기 전에 여러 검사를 수행합니다. 일부 단계는 파일 문제로 인해 진행이 차단됩니다.",
         "dry-run-step": "모의 실행",
-        "comicvine-parsing-label": "ComicVine 시리즈 매칭 사용"
+        "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용"
     },
     "pdf-reader": {
         "loading-message": "로딩 중……PDF가 예상보다 오래 걸릴 수 있습니다",
@@ -2072,5 +2073,8 @@
         "off": "스프레드 없음",
         "odd": "홀수 스프레드",
         "even": "짝수 스프레드"
+    },
+    "promoted-icon": {
+        "promoted": "{{common.promoted}}"
     }
 }
