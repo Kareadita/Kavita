@@ -15,8 +15,8 @@ export enum WikiLink {
   Updating = 'https://wiki.kavitareader.com/guides/updating',
   ManagingFiles = 'https://wiki.kavitareader.com/guides/scanner/managefiles',
   Scanner = 'https://wiki.kavitareader.com/guides/scanner',
-  ScannerExclude = 'http://localhost:3000/guides/admin-settings/libraries#exclude-patterns',
-  Library = 'http://localhost:3000/guides/admin-settings/libraries',
-  UpdateNative = 'http://localhost:3000/guides/updating/updating-native',
-  UpdateDocker = 'http://localhost:3000/guides/updating/updating-docker'
+  ScannerExclude = 'https://wiki.kavitareader.com/guides/admin-settings/libraries#exclude-patterns',
+  Library = 'https://wiki.kavitareader.com/guides/admin-settings/libraries',
+  UpdateNative = 'https://wiki.kavitareader.com/guides/updating/updating-native',
+  UpdateDocker = 'https://wiki.kavitareader.com/guides/updating/updating-docker'
 }
