@@ -116,7 +116,7 @@ export class AppComponent implements OnInit {
           tap(versionOutOfDate => {
             if (!this.ngbModal.hasOpenModals()) {
               const ref = this.ngbModal.open(OutOfDateModalComponent, {size: 'xl', fullscreen: 'md'});
-              ref.componentInstance.versionsOutOfDate = 3;
+              ref.componentInstance.versionsOutOfDate = versionOutOfDate;
             }
           })
         )
