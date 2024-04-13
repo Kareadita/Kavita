@@ -25,10 +25,10 @@ body:
   - type: dropdown
     id: version
     attributes:
-      label: Kavita Version Number - Don't see your version number listed? Then your install is out of date. Please update and see if your issue still persists.
+      label: Kavita Version Number - If you don not see your version number listed, please update Kavita and see if your issue still persists.
       multiple: false
       options:
-        - 0.7.14 - Stable
+        - 0.8.0 - Stable
         - Nightly Testing Branch
     validations:
       required: true
