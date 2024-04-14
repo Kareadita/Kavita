@@ -14,10 +14,10 @@
       <PackageReference Include="Flurl.Http" Version="3.2.4" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.1.88495">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.2.88755">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="xunit.assert" Version="2.7.0" />
+      <PackageReference Include="xunit.assert" Version="2.7.1" />
     </ItemGroup>
 </Project>
