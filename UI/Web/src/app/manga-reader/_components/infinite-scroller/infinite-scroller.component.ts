@@ -16,7 +16,7 @@ import {
   Renderer2,
   SimpleChanges, ViewChild
 } from '@angular/core';
-import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
+import {BehaviorSubject, filter, fromEvent, map, Observable, of, ReplaySubject} from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { ReaderService } from '../../../_services/reader.service';
@@ -27,6 +27,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {MangaReaderComponent} from "../manga-reader/manga-reader.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {ReaderSetting} from "../../_models/reader-setting";
+import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -61,7 +63,7 @@ const enum DEBUG_MODES {
     styleUrls: ['./infinite-scroller.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, TranslocoDirective, InfiniteScrollModule]
+  imports: [NgIf, NgFor, AsyncPipe, TranslocoDirective, InfiniteScrollModule, SafeStylePipe]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
 
@@ -70,6 +72,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   private readonly renderer = inject(Renderer2);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * Current page number aka what's recorded on screen
@@ -87,6 +90,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    * Method to generate the src for Image loading
    */
   @Input({required: true}) urlProvider!: (page: number) => string;
+  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
@@ -99,7 +103,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
     { threshold: 1.0 });
 
-  private readonly destroyRef = inject(DestroyRef);
+  darkness$: Observable<string> = of('brightness(100%)');
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -222,6 +226,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.initScrollHandler();
 
     this.recalculateImageWidth();
+
+    this.darkness$ = this.readerSettings$.pipe(
+      map(values => 'brightness(' + values.darkness + '%)'),
+      takeUntilDestroyed(this.destroyRef)
+    );
 
     if (this.goToPage) {
       this.goToPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
