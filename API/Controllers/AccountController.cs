@@ -82,6 +82,7 @@ public class AccountController : BaseApiController
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
+
         _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
         if (User.IsInRole(PolicyConstants.ReadOnlyRole))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));

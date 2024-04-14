@@ -463,7 +463,7 @@ public class ParseScannedFiles
                         chapter.IssueOrder = counter;
                         counter++;
                     }
-                    return;
+                    continue;
                 }
 
 
@@ -479,7 +479,7 @@ public class ParseScannedFiles
                         chapter.IssueOrder = counter;
                         counter++;
                     }
-                    return;
+                    continue;
                 }
 
                 chapters = infos

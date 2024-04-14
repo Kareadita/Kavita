@@ -30,7 +30,6 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(100vh - 85px);
   max-height: calc(var(--vh)*100 - 170px);
 }
 

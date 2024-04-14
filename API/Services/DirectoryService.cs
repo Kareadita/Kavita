@@ -596,14 +596,12 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
     {
-
-
-        var stopLookingForDirectories = false;
         var dirs = new Dictionary<string, string>();
-        foreach (var folder in libraryFolders.Select(Tasks.Scanner.Parser.Parser.NormalizePath))
+        var normalizedFilePaths = filePaths.Select(Parser.NormalizePath).ToList();
+
+        foreach (var folder in libraryFolders.Select(Parser.NormalizePath))
         {
-            if (stopLookingForDirectories) break;
-            foreach (var file in filePaths.Select(Tasks.Scanner.Parser.Parser.NormalizePath))
+            foreach (var file in normalizedFilePaths)
             {
                 if (!file.Contains(folder)) continue;
 
@@ -619,8 +617,16 @@ public class DirectoryService : IDirectoryService
         if (dirs.Keys.Count == 1) return dirs.Keys.First();
         if (dirs.Keys.Count > 1)
         {
-            return dirs.Keys.Last();
+            // For each key, validate that each file exists in the key path
+            foreach (var folder in dirs.Keys)
+            {
+                if (normalizedFilePaths.TrueForAll(filePath => filePath.Contains(Parser.NormalizePath(folder))))
+                {
+                    return folder;
+                }
+            }
         }
+
         return null;
     }
 

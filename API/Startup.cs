@@ -263,6 +263,9 @@ public class Startup
                     await MigrateMangaFilePath.Migrate(dataContext, logger);
                     await MigrateCollectionTagToUserCollections.Migrate(dataContext, unitOfWork, logger);
 
+                    // v0.8.1
+                    await MigrateLowestSeriesFolderPath.Migrate(dataContext, unitOfWork, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
