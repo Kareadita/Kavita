@@ -28,11 +28,13 @@
             <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
           </button>
-          <button *ngIf="!bookmarkMode && hasBookmarkRights" class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
-                  title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
-            <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
-          </button>
+          @if (!bookmarkMode && hasBookmarkRights) {
+            <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
+                    title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
+              <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
+            </button>
+          }
         </div>
       </div>
     </div>
@@ -118,7 +120,8 @@
                                  (loadNextChapter)="loadNextChapter()"
                                  (loadPrevChapter)="loadPrevChapter()"
                                  [bookmarkPage]="showBookmarkEffectEvent"
-                                 [fullscreenToggled]="fullscreenEvent">
+                                 [fullscreenToggled]="fullscreenEvent"
+                                 [readerSettings$]="readerSettings$">
           </app-infinite-scroller>
         </div>
       </ng-template>

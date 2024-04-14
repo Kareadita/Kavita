@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import {CommonModule} from "@angular/common";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {Chapter} from "../../_models/chapter";
 
 @Component({
   selector: 'app-chapter-metadata-detail',
@@ -14,5 +14,5 @@ import {TranslocoDirective} from "@ngneat/transloco";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterMetadataDetailComponent {
-  @Input() chapter: ChapterMetadata | undefined;
+  @Input() chapter: Chapter | undefined;
 }

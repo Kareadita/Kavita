@@ -5,8 +5,6 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
-import { ChapterMetadata } from '../_models/metadata/chapter-metadata';
-import { UserCollection } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
@@ -73,10 +71,6 @@ export class SeriesService {
 
   getChapter(chapterId: number) {
     return this.httpClient.get<Chapter>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
-  }
-
-  getChapterMetadata(chapterId: number) {
-    return this.httpClient.get<ChapterMetadata>(this.baseUrl + 'series/chapter-metadata?chapterId=' + chapterId);
   }
 
   delete(seriesId: number) {
