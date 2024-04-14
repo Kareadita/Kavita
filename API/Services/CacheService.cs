@@ -191,7 +191,14 @@ public class CacheService : ICacheService
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
         {
-            _readingItemService.Extract(files[0].FilePath, extractPath, MangaFormat.Image, files.Count);
+            foreach (var file in files)
+            {
+                if (fileCount > 1)
+                {
+                    extraPath = file.Id + string.Empty;
+                }
+                _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), MangaFormat.Image, files.Count);
+            }
             _directoryService.Flatten(extractDi.FullName);
         }
 
