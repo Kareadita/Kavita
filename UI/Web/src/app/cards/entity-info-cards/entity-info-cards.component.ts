@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { HourEstimateRange } from 'src/app/_models/series-detail/hour-estimate-range';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
@@ -51,10 +50,6 @@ export class EntityInfoCardsComponent implements OnInit {
 
   @Input({required: true}) entity!: Volume | Chapter;
   @Input({required: true}) libraryId!: number;
-  /**
-   * This will pull extra information
-   */
-  @Input() includeMetadata: boolean = false;
 
   /**
    * Hide more system based fields, like id or Date Added
@@ -64,7 +59,6 @@ export class EntityInfoCardsComponent implements OnInit {
   isChapter = false;
   chapter!: Chapter;
 
-  chapterMetadata!: ChapterMetadata;
   ageRating!: string;
   totalPages: number = 0;
   totalWordCount: number = 0;
@@ -94,12 +88,6 @@ export class EntityInfoCardsComponent implements OnInit {
       }, 0);
     }
 
-    if (this.includeMetadata) {
-      this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
-        this.chapterMetadata = metadata;
-        this.cdRef.markForCheck();
-      });
-    }
 
     this.totalPages = this.chapter.pages;
     if (!this.isChapter) {

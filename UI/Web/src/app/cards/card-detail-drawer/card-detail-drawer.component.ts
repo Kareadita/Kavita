@@ -21,7 +21,6 @@ import { Observable, of, map, shareReplay } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
-import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library/library';
 import { MangaFile } from 'src/app/_models/manga-file';
@@ -48,7 +47,7 @@ import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {EditChapterProgressComponent} from "../edit-chapter-progress/edit-chapter-progress.component";
 
@@ -113,9 +112,7 @@ export class CardDetailDrawerComponent implements OnInit {
   ];
   active = this.tabs[0];
 
-  chapterMetadata: ChapterMetadata | undefined;
   summary: string = '';
-
   downloadInProgress: boolean = false;
 
 
@@ -139,10 +136,6 @@ export class CardDetailDrawerComponent implements OnInit {
     this.isChapter = this.utilityService.isChapter(this.data);
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
 
-    this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
-      this.chapterMetadata = metadata;
-      this.cdRef.markForCheck();
-    });
 
     if (this.isChapter) {
       this.coverImageUrl = this.imageService.getChapterCoverImage(this.data.id);
