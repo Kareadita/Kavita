@@ -483,7 +483,7 @@
     "invite-user": {
         "title": "Gebruiker uitnodigen",
         "close": "{{common.close}}",
-        "description": "Nodig een gebruiker uit voor uw server. Voer hun e-mailadres in en we sturen ze een e-mail om een account aan te maken. Als u onze e-mailservice niet wilt gebruiken, kunt u <a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">uw eigen hosten</a> e-mailservice of gebruik een nep-e-mail (gebruiker vergeten werkt niet). Er wordt hoe dan ook een link gepresenteerd die kan worden gebruikt om het account handmatig in te stellen.",
+        "description": "Nodig een gebruiker uit voor uw server. Voer hun e-mailadres in en we sturen ze een e-mail om een account aan te maken. Als u onze e-mailservice niet wilt gebruiken, kunt u <a href=\"https://wiki.kavitareader.com/guides/admin-settings/email\" rel=\"noopener noreferrer\" target=\"_blank\">uw eigen hosten</a> e-mailservice of gebruik een nep-e-mail (gebruiker vergeten werkt niet). Er wordt hoe dan ook een link gepresenteerd die kan worden gebruikt om het account handmatig in te stellen.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Gebruiker uitgenodigd",
