@@ -49,7 +49,7 @@ Password: Demouser64
 ## Setup
 The easiest way to get started is to visit our Wiki which has up-to-date information on a variety of
 install methods and platforms.
-[https://wiki.kavitareader.com/en/install](https://wiki.kavitareader.com/en/install)
+[https://wiki.kavitareader.com/installation/getting-started](https://wiki.kavitareader.com/installation/getting-started)
 
 ## Feature Requests
 Got a great idea? Throw it up on [Discussions](https://github.com/Kareadita/Kavita/discussions/2529) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
@@ -65,7 +65,7 @@ expenses related to Kavita. Back us through [OpenCollective](https://opencollect
 option which provides funding and you get a benefit.
 
 ## Kavita+
-[Kavita+](https://wiki.kavitareader.com/en/kavita-plus) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
+[Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
 
 If you are interested, you can use the promo code `FIRSTTIME` for your initial signup for a 50% discount on the first month (2$). This can be thought of as donating to Kavita's development and getting some sweet features out of it.
 
