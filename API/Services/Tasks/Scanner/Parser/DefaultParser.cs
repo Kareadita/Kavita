@@ -64,16 +64,18 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         {
             var folder = fallbackFolders[i];
 
-            var parsedVolume = type is LibraryType.Manga ? Parser.ParseVolume(folder) : Parser.ParseComicVolume(folder);
-            var parsedChapter = type is LibraryType.Manga ? Parser.ParseChapter(folder) : Parser.ParseComicChapter(folder);
+            var parsedVolume = type is LibraryType.Comic or LibraryType.ComicVine ? Parser.ParseComicVolume(folder) : Parser.ParseVolume(folder);
+            var parsedChapter = type is LibraryType.Comic or LibraryType.ComicVine ? Parser.ParseComicChapter(folder) : Parser.ParseChapter(folder);
 
             if (!parsedVolume.Equals(Parser.LooseLeafVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
             {
-                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.LooseLeafVolume)) && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.LooseLeafVolume))
+                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.LooseLeafVolume))
+                    && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.LooseLeafVolume))
                 {
                     ret.Volumes = parsedVolume;
                 }
-                if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter)) && !string.IsNullOrEmpty(parsedChapter) && !parsedChapter.Equals(Parser.DefaultChapter))
+                if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter))
+                    && !string.IsNullOrEmpty(parsedChapter) && !parsedChapter.Equals(Parser.DefaultChapter))
                 {
                     ret.Chapters = parsedChapter;
                 }
