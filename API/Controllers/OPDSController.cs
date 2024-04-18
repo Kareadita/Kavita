@@ -961,7 +961,7 @@ public class OpdsController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
         if (!await _accountService.HasDownloadPermission(user))
         {
-            return BadRequest("User does not have download permissions");
+            return Forbid("User does not have download permissions");
         }
 
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
