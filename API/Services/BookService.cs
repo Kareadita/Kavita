@@ -551,7 +551,7 @@ public class BookService : IBookService
             }
 
             // If this is a single book and not a collection, set publication status to Completed
-            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.LooseLeafVolume))
+            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath, LibraryType.Manga).Equals(Parser.LooseLeafVolume))
             {
                 info.Count = 1;
             }
@@ -560,14 +560,14 @@ public class BookService : IBookService
             info.Writer = string.Join(",",
                 epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
 
-            var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
+            var hasVolumeInSeries = !Parser.ParseVolume(info.Title, LibraryType.Manga)
                 .Equals(Parser.LooseLeafVolume);
 
             if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
             {
                 // This is likely a light novel for which we can set series from parsed title
-                info.Series = Parser.ParseSeries(info.Title);
-                info.Volume = Parser.ParseVolume(info.Title);
+                info.Series = Parser.ParseSeries(info.Title, LibraryType.Manga);
+                info.Volume = Parser.ParseVolume(info.Title, LibraryType.Manga);
             }
 
             return info;
@@ -608,7 +608,6 @@ public class BookService : IBookService
                 item.Property == "display-seq" && item.Refines == metadataItem.Refines);
         if (count == null || count.Content == "0")
         {
-            // TODO: Rewrite this to use a StringBuilder
             // Treat this as a Collection
             info.SeriesGroup += (string.IsNullOrEmpty(info.StoryArc) ? string.Empty : ",") +
                                 readingListElem.Title.Replace(',', '_');
@@ -740,8 +739,6 @@ public class BookService : IBookService
 
     private static string EscapeTags(string content)
     {
-        // content = StartingScriptTag().Replace(content, "<script$1></script>");
-        // content = StartingTitleTag().Replace(content, "<title$1></title>");
         content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>", RegexOptions.None, Parser.RegexTimeout);
         content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>", RegexOptions.None, Parser.RegexTimeout);
         return content;
@@ -1043,8 +1040,6 @@ public class BookService : IBookService
 
         // TODO: We may want to check if there is a toc.ncs file to better handle nested toc
         // We could do a fallback first with ol/lis
-        //var sections = doc.DocumentNode.SelectNodes("//ol");
-        //if (sections == null)
 
 
 
@@ -1239,7 +1234,7 @@ public class BookService : IBookService
         {
             _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             _mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService,
-                "There was a critical error and prevented thumbnail generation", ex); // TODO: Localize this
+                "There was a critical error and prevented thumbnail generation", ex);
         }
 
         return string.Empty;

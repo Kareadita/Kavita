@@ -39,13 +39,13 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
     public void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
     {
         var fallbackFolders = directoryService.GetFoldersTillRoot(rootPath, filePath)
-            .Where(f => !Parser.IsMangaSpecial(f))
+            .Where(f => !Parser.IsSpecial(f, type))
             .ToList();
 
         if (fallbackFolders.Count == 0)
         {
             var rootFolderName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
-            var series = Parser.ParseSeries(rootFolderName);
+            var series = Parser.ParseSeries(rootFolderName, type);
 
             if (string.IsNullOrEmpty(series))
             {
@@ -64,8 +64,8 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         {
             var folder = fallbackFolders[i];
 
-            var parsedVolume = type is LibraryType.Comic or LibraryType.ComicVine ? Parser.ParseComicVolume(folder) : Parser.ParseVolume(folder);
-            var parsedChapter = type is LibraryType.Comic or LibraryType.ComicVine ? Parser.ParseComicChapter(folder) : Parser.ParseChapter(folder);
+            var parsedVolume = Parser.ParseVolume(folder, type);
+            var parsedChapter = Parser.ParseChapter(folder, type);
 
             if (!parsedVolume.Equals(Parser.LooseLeafVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
             {
@@ -84,7 +84,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
             // Generally users group in series folders. Let's try to parse series from the top folder
             if (!folder.Equals(ret.Series) && i == fallbackFolders.Count - 1)
             {
-                var series = Parser.ParseSeries(folder);
+                var series = Parser.ParseSeries(folder, type);
 
                 if (string.IsNullOrEmpty(series))
                 {

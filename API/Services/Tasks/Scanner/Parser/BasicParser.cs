@@ -35,17 +35,15 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         // This will be called if the epub is already parsed once then we call and merge the information, if the
         if (Parser.IsEpub(filePath))
         {
-            ret.Chapters = Parser.ParseChapter(fileName);
-            ret.Series = Parser.ParseSeries(fileName);
-            ret.Volumes = Parser.ParseVolume(fileName);
+            ret.Chapters = Parser.ParseChapter(fileName, type);
+            ret.Series = Parser.ParseSeries(fileName, type);
+            ret.Volumes = Parser.ParseVolume(fileName, type);
         }
         else
         {
-            ret.Chapters = type == LibraryType.Comic
-                ? Parser.ParseComicChapter(fileName)
-                : Parser.ParseChapter(fileName);
-            ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
-            ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
+            ret.Chapters = Parser.ParseChapter(fileName, type);
+            ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName, type);
+            ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName, type);
         }
 
         if (ret.Series == string.Empty || Parser.IsImage(filePath))
@@ -61,7 +59,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             ret.Edition = edition;
         }
 
-        var isSpecial = type == LibraryType.Comic ? Parser.IsComicSpecial(fileName) : Parser.IsMangaSpecial(fileName);
+        var isSpecial = Parser.IsSpecial(fileName, type);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && isSpecial)
