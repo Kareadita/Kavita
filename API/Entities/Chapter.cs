@@ -33,6 +33,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public float SortOrder { get; set; }
     /// <summary>
+    /// Can the sort order be updated on scan or is it locked from UI
+    /// </summary>
+    public bool SortOrderLocked { get; set; }
+    /// <summary>
     /// The files that represent this Chapter
     /// </summary>
     public ICollection<MangaFile> Files { get; set; } = null!;

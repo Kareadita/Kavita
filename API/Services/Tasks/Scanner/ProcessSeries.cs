@@ -705,7 +705,10 @@ public class ProcessSeries : IProcessSeries
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
-            chapter.SortOrder = info.IssueOrder;
+            if (!chapter.SortOrderLocked)
+            {
+                chapter.SortOrder = info.IssueOrder;
+            }
             chapter.Range = chapter.GetNumberTitle();
         }
 

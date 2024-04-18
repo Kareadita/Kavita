@@ -14365,6 +14365,10 @@
             "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
+          "sortOrderLocked": {
+            "type": "boolean",
+            "description": "Can the sort order be updated on scan or is it locked from UI"
+          },
           "files": {
             "type": "array",
             "items": {

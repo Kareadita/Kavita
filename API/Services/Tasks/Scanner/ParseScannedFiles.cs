@@ -421,6 +421,7 @@ public class ParseScannedFiles
         _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
+
         if (files.Count == 0)
         {
             _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", folder);
