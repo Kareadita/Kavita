@@ -751,7 +751,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     } else {
       if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
         if (this.chapters.length === 0) {
-          this.activeTabId = TabID.Specials;
+          if (this.specials.length > 0) {
+            this.activeTabId = TabID.Specials;
+          } else {
+            this.activeTabId = TabID.Volumes;
+          }
         } else {
           this.activeTabId = TabID.Chapters;
         }
