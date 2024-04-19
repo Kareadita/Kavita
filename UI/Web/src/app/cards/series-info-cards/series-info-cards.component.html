@@ -34,7 +34,7 @@
         <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
           <app-icon-and-title [label]="t('publication-status-title')" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === t('ongoing') ? 'empty' : 'end'}}"
                               (click)="handleGoTo(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
-                              [ngbTooltip]="t('publication-status-tooltip') + ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')'">
+                              [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
             {{pubStatus}}
           </app-icon-and-title>
         </ng-container>
