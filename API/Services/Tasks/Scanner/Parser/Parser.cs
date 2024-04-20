@@ -1062,7 +1062,7 @@ public static class Parser
                 return tokens.Min(t => t.AsFloat());
             }
 
-            return float.Parse(range);
+            return range.AsFloat();
         }
         catch (Exception)
         {
@@ -1089,7 +1089,7 @@ public static class Parser
                 return tokens.Max(t => t.AsFloat());
             }
 
-            return float.Parse(range);
+            return range.AsFloat();
         }
         catch (Exception)
         {
