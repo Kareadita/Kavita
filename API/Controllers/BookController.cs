@@ -153,8 +153,7 @@ public class BookController : BaseApiController
         if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var path = _cacheService.GetCachedFile(chapter);
 
-        string basePath = Configuration.BaseUrl;
-        basePath = basePath == Configuration.DefaultBaseUrl ? "" : basePath;
+        var basePath = Configuration.BaseUrl == Configuration.DefaultBaseUrl ? string.Empty : Configuration.BaseUrl;
         var baseUrl = "//" + Request.Host + Request.PathBase + basePath + "/api/";
 
         try
