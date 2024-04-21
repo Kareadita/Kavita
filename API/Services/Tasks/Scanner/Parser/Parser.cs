@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -815,6 +815,7 @@ public static class Parser
         return LooseLeafVolume;
     }
 
+
     private static string FormatValue(string value, bool hasPart)
     {
         if (!value.Contains('-'))
@@ -824,6 +825,7 @@ public static class Parser
 
         var tokens = value.Split("-");
         var from = RemoveLeadingZeroes(tokens[0]);
+
         if (tokens.Length != 2) return from;
 
         // Occasionally users will use c01-c02 instead of c01-02, clean any leftover c

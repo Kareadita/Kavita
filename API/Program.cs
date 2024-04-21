@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -37,6 +38,9 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()

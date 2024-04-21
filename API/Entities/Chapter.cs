@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -175,7 +176,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
                 return Parser.RemoveExtensionIfSupported(Title);
             }
 
-            if (MinNumber.Is(0) && !float.TryParse(Range, out _))
+            if (MinNumber.Is(0) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
             {
                 return $"{Range}";
             }
