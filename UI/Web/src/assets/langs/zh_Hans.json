@@ -155,7 +155,8 @@
         "pdf-spread-mode-tooltip": "页面应该如何布局。单或双（奇数/偶数）",
         "pdf-theme-label": "主题",
         "pdf-scroll-mode-label": "滚动模式",
-        "pdf-scroll-mode-tooltip": "您如何滚动页面。垂直/水平和点击翻页（无滚动）"
+        "pdf-scroll-mode-tooltip": "您如何滚动页面。垂直/水平和点击翻页（无滚动）",
+        "pdf-spread-mode-label": "页面传播模式"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -1778,7 +1779,8 @@
         "mark-invisible": "标记为隐藏",
         "mark-visible": "标记为可见",
         "import-mal-stack": "导入 MAL Stack",
-        "promote": "推广"
+        "promote": "推广",
+        "unpromote": "取消推广"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -1808,7 +1810,9 @@
         "pdf-none": "没有",
         "pdf-light": "明亮",
         "pdf-multiple": "默认",
-        "pdf-dark": "黑暗"
+        "pdf-dark": "黑暗",
+        "pdf-odd": "奇数",
+        "pdf-even": "偶数"
     },
     "validation": {
         "required-field": "必填项",
@@ -2070,7 +2074,8 @@
     "pdf-scroll-mode-pipe": {
         "vertical": "竖向",
         "horizontal": "横向",
-        "page": "点击翻页"
+        "page": "点击翻页",
+        "wrapped": "自动换行"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -2078,5 +2083,10 @@
     "collection-owner": {
         "collection-created-label": "创建者: {{owner}}",
         "collection-via-label": "通过 {{source}}"
+    },
+    "pdf-spread-mode-pipe": {
+        "off": "单页视图",
+        "even": "书籍视图",
+        "odd": "双页视图"
     }
 }
