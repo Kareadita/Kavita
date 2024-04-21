@@ -85,7 +85,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
 
         if (string.IsNullOrEmpty(info.Series))
         {
-            info.Series = Parser.CleanTitle(directoryName, true, true);
+            info.Series = Parser.CleanTitle(directoryName, true, false);
         }
 
 
