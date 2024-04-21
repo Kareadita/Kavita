@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -421,6 +422,7 @@ public class ParseScannedFiles
         _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
+
         if (files.Count == 0)
         {
             _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", folder);
@@ -483,17 +485,17 @@ public class ParseScannedFiles
                 }
 
                 chapters = infos
-                    .OrderByNatural(info => info.Chapters)
+                    .OrderByNatural(info => info.Chapters, StringComparer.InvariantCulture)
                     .ToList();
 
                 counter = 0f;
                 var prevIssue = string.Empty;
                 foreach (var chapter in chapters)
                 {
-                    if (float.TryParse(chapter.Chapters, out var parsedChapter))
+                    if (float.TryParse(chapter.Chapters, CultureInfo.InvariantCulture, out var parsedChapter))
                     {
                         counter = parsedChapter;
-                        if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
+                        if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, CultureInfo.InvariantCulture, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
                         {
                             // Bump by 0.1
                             counter += 0.1f;
@@ -565,7 +567,10 @@ public class ParseScannedFiles
         // Normalize this as many of the cases is a capitalization difference
         var nonLocalizedSeriesFound = infos
             .Where(i => !i.IsSpecial)
-            .Select(i => i.Series).DistinctBy(Parser.Parser.Normalize).ToList();
+            .Select(i => i.Series)
+            .DistinctBy(Parser.Parser.Normalize)
+            .ToList();
+
         if (nonLocalizedSeriesFound.Count == 1)
         {
             nonLocalizedSeries = nonLocalizedSeriesFound[0];

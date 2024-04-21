@@ -16,7 +16,8 @@
         </div>
 
         <div class="mb-3" style="width:100%">
-          <label for="email" class="form-label">{{t('email-label')}}</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
+          <label for="email" class="form-label">{{t('email-label')}}</label>
+          <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
           <ng-template #emailTooltip>{{t('email-tooltip')}}</ng-template>
           <span class="visually-hidden" id="email-help">
             <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
@@ -34,21 +35,24 @@
         </div>
 
         <div class="mb-3">
-          <label for="password" class="form-label">Password</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
+          <label for="password" class="form-label">Password</label>
+          <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
           <ng-template #passwordTooltip>
             {{t('password-validation')}}
           </ng-template>
           <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
           <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password" autocomplete="new-password"
                  type="password" aria-describedby="password-help" [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-          <div id="password-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-            <div *ngIf="registerForm.get('password')?.errors?.required">
-              {{t('required-field')}}
+          @if (registerForm.dirty || registerForm.touched) {
+            <div id="password-validations" class="invalid-feedback">
+              @if (registerForm.get('password')?.errors?.required) {
+                <div>{{t('required-field')}}</div>
+              }
+              @if (registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern) {
+                <div>{{t('password-validation')}}</div>
+              }
             </div>
-            <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern">
-              {{t('password-validation')}}
-            </div>
-          </div>
+          }
         </div>
 
         <div class="float-end">

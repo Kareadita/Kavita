@@ -705,7 +705,10 @@ public class ProcessSeries : IProcessSeries
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
-            chapter.SortOrder = info.IssueOrder;
+            if (!chapter.SortOrderLocked)
+            {
+                chapter.SortOrder = info.IssueOrder;
+            }
             chapter.Range = chapter.GetNumberTitle();
         }
 
@@ -725,7 +728,8 @@ public class ProcessSeries : IProcessSeries
                 // Ensure we remove any files that no longer exist AND order
                 existingChapter.Files = existingChapter.Files
                     .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-                    .OrderByNatural(f => f.FilePath).ToList();
+                    .OrderByNatural(f => f.FilePath)
+                    .ToList();
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
             }
         }

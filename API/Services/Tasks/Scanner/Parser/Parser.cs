@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -722,20 +722,37 @@ public static class Parser
         return int.Parse(match);
     }
 
-    public static bool IsMangaSpecial(string filePath)
+    public static bool IsSpecial(string? filePath, LibraryType type)
     {
-        filePath = ReplaceUnderscores(filePath);
-        return  MangaSpecialRegex.IsMatch(filePath);
+        return type switch
+        {
+            LibraryType.Manga => IsMangaSpecial(filePath),
+            LibraryType.Comic => IsComicSpecial(filePath),
+            LibraryType.Book => IsMangaSpecial(filePath),
+            LibraryType.Image => IsMangaSpecial(filePath),
+            LibraryType.LightNovel => IsMangaSpecial(filePath),
+            LibraryType.ComicVine => IsComicSpecial(filePath),
+            _ => false
+        };
     }
 
-    public static bool IsComicSpecial(string? filePath)
+    private static bool IsMangaSpecial(string? filePath)
+    {
+        if (string.IsNullOrEmpty(filePath)) return false;
+        filePath = ReplaceUnderscores(filePath);
+        return MangaSpecialRegex.IsMatch(filePath);
+    }
+
+    private static bool IsComicSpecial(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath)) return false;
         filePath = ReplaceUnderscores(filePath);
         return ComicSpecialRegex.IsMatch(filePath);
     }
 
-    public static string ParseSeries(string filename)
+
+
+    public static string ParseMangaSeries(string filename)
     {
         foreach (var regex in MangaSeriesRegex)
         {
@@ -762,7 +779,7 @@ public static class Parser
         return string.Empty;
     }
 
-    public static string ParseVolume(string filename)
+    public static string ParseMangaVolume(string filename)
     {
         foreach (var regex in MangaVolumeRegex)
         {
@@ -798,6 +815,7 @@ public static class Parser
         return LooseLeafVolume;
     }
 
+
     private static string FormatValue(string value, bool hasPart)
     {
         if (!value.Contains('-'))
@@ -807,6 +825,7 @@ public static class Parser
 
         var tokens = value.Split("-");
         var from = RemoveLeadingZeroes(tokens[0]);
+
         if (tokens.Length != 2) return from;
 
         // Occasionally users will use c01-c02 instead of c01-02, clean any leftover c
@@ -818,7 +837,49 @@ public static class Parser
         return $"{from}-{to}";
     }
 
-    public static string ParseChapter(string filename)
+    public static string ParseSeries(string filename, LibraryType type)
+    {
+        return type switch
+        {
+            LibraryType.Manga => ParseMangaSeries(filename),
+            LibraryType.Comic => ParseComicSeries(filename),
+            LibraryType.Book => ParseMangaSeries(filename),
+            LibraryType.Image => ParseMangaSeries(filename),
+            LibraryType.LightNovel => ParseMangaSeries(filename),
+            LibraryType.ComicVine => ParseComicSeries(filename),
+            _ => string.Empty
+        };
+    }
+
+    public static string ParseVolume(string filename, LibraryType type)
+    {
+        return type switch
+        {
+            LibraryType.Manga => ParseMangaVolume(filename),
+            LibraryType.Comic => ParseComicVolume(filename),
+            LibraryType.Book => ParseMangaVolume(filename),
+            LibraryType.Image => ParseMangaVolume(filename),
+            LibraryType.LightNovel => ParseMangaVolume(filename),
+            LibraryType.ComicVine => ParseComicVolume(filename),
+            _ => LooseLeafVolume
+        };
+    }
+
+    public static string ParseChapter(string filename, LibraryType type)
+    {
+        return type switch
+        {
+            LibraryType.Manga => ParseMangaChapter(filename),
+            LibraryType.Comic => ParseComicChapter(filename),
+            LibraryType.Book => ParseMangaChapter(filename),
+            LibraryType.Image => ParseMangaChapter(filename),
+            LibraryType.LightNovel => ParseMangaChapter(filename),
+            LibraryType.ComicVine => ParseComicChapter(filename),
+            _ => DefaultChapter
+        };
+    }
+
+    private static string ParseMangaChapter(string filename)
     {
         foreach (var regex in MangaChapterRegex)
         {
@@ -847,7 +908,7 @@ public static class Parser
         return $"{value}.5";
     }
 
-    public static string ParseComicChapter(string filename)
+    private static string ParseComicChapter(string filename)
     {
         foreach (var regex in ComicChapterRegex)
         {
@@ -1003,7 +1064,7 @@ public static class Parser
                 return tokens.Min(t => t.AsFloat());
             }
 
-            return float.Parse(range);
+            return range.AsFloat();
         }
         catch (Exception)
         {
@@ -1030,7 +1091,7 @@ public static class Parser
                 return tokens.Max(t => t.AsFloat());
             }
 
-            return float.Parse(range);
+            return range.AsFloat();
         }
         catch (Exception)
         {

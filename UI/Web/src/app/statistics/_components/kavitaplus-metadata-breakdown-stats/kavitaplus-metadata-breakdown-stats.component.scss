@@ -11,8 +11,12 @@
 }
 
 .error {
-  color: red;
+  color: var(--error-color);
 }
 .completed {
   color: var(--color-5);
+}
+
+.progress-bar-danger.progress-bar {
+  background-color: var(--error-color);
 }

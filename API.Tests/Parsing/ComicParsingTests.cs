@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
@@ -10,16 +11,6 @@ namespace API.Tests.Parsing;
 
 public class ComicParsingTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-    private readonly IDefaultParser _basicParser;
-
-    public ComicParsingTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-        var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
-        _basicParser = new BasicParser(directoryService, new ImageParser(directoryService));
-    }
-
     [Theory]
     [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
     [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "The First Asterix Frieze")]
@@ -188,7 +179,7 @@ public class ComicParsingTests
     [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     public void ParseComicChapterTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(filename));
+        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename, LibraryType.Comic));
     }
 
 
@@ -219,6 +210,6 @@ public class ComicParsingTests
     [InlineData("Blood Syndicate Annual #001", true)]
     public void IsComicSpecialTest(string input, bool expected)
     {
-        Assert.Equal(expected, Parser.IsComicSpecial(input));
+        Assert.Equal(expected, Parser.IsSpecial(input, LibraryType.Comic));
     }
 }

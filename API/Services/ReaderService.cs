@@ -489,7 +489,7 @@ public class ReaderService : IReaderService
                 currentChapter.SortOrder,
                 dto => dto.SortOrder);
             if (chapterId > 0) return chapterId;
-            currentVolume = volumes.FirstOrDefault(v => v.IsLooseLeaf());
+            currentVolume = volumes.Find(v => v.IsLooseLeaf());
         }
 
         if (currentVolume != null && currentVolume.IsLooseLeaf())
@@ -506,7 +506,7 @@ public class ReaderService : IReaderService
         // When we started as a special and there was no loose leafs, reset the currentVolume
         if (currentVolume == null)
         {
-            currentVolume = volumes.FirstOrDefault(v => !v.IsLooseLeaf() && !v.IsSpecial());
+            currentVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
             if (currentVolume == null) return -1;
             return currentVolume.Chapters.OrderBy(x => x.SortOrder).Last()?.Id ?? -1;
         }
@@ -786,7 +786,7 @@ public class ReaderService : IReaderService
             }
 
             var files = _directoryService.GetFilesWithExtension(outputDirectory,
-                Tasks.Scanner.Parser.Parser.ImageFileExtensions);
+                Parser.ImageFileExtensions);
             return CacheService.GetPageFromFiles(files, pageNum);
         }
         catch (Exception ex)

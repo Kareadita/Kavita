@@ -13,25 +13,25 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
         info.ComicInfo = comicInfo;
 
         // This catches when original library type is Manga/Comic and when parsing with non
-        if (Parser.ParseVolume(info.Series) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
+        if (Parser.ParseVolume(info.Series, type) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
         {
-            var hasVolumeInTitle = !Parser.ParseVolume(info.Title)
+            var hasVolumeInTitle = !Parser.ParseVolume(info.Title, type)
                 .Equals(Parser.LooseLeafVolume);
-            var hasVolumeInSeries = !Parser.ParseVolume(info.Series)
+            var hasVolumeInSeries = !Parser.ParseVolume(info.Series, type)
                 .Equals(Parser.LooseLeafVolume);
 
             if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
             {
                 // NOTE: I'm not sure the comment is true. I've never seen this triggered
                 // This is likely a light novel for which we can set series from parsed title
-                info.Series = Parser.ParseSeries(info.Title);
-                info.Volumes = Parser.ParseVolume(info.Title);
+                info.Series = Parser.ParseSeries(info.Title, type);
+                info.Volumes = Parser.ParseVolume(info.Title, type);
             }
             else
             {
                 var info2 = basicParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Book, comicInfo);
                 info.Merge(info2);
-                if (hasVolumeInSeries && info2 != null && Parser.ParseVolume(info2.Series)
+                if (hasVolumeInSeries && info2 != null && Parser.ParseVolume(info2.Series, type)
                         .Equals(Parser.LooseLeafVolume))
                 {
                     // Override the Series name so it groups appropriately

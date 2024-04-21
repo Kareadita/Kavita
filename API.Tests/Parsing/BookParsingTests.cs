@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using API.Entities.Enums;
+using Xunit;
 
 namespace API.Tests.Parsing;
 
@@ -10,7 +11,7 @@ public class BookParsingTests
     [InlineData("Faust - Volume 01 [Del Rey][Scans_Compressed]", "Faust")]
     public void ParseSeriesTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
+        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename, LibraryType.Book));
     }
 
     [Theory]
@@ -18,7 +19,7 @@ public class BookParsingTests
     [InlineData("Faust - Volume 01 [Del Rey][Scans_Compressed]", "1")]
     public void ParseVolumeTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
+        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename, LibraryType.Book));
     }
 
     // [Theory]

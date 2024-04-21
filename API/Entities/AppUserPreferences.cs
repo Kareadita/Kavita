@@ -116,11 +116,6 @@ public class AppUserPreferences
     /// </summary>
     public PdfScrollMode PdfScrollMode { get; set; } = PdfScrollMode.Vertical;
     /// <summary>
-    /// PDF Reader: Layout Mode of the reader
-    /// </summary>
-    /// Book mode is too buggy to include
-    //public PdfLayoutMode PdfLayoutMode { get; set; } = PdfLayoutMode.Multiple;
-    /// <summary>
     /// PDF Reader: Spread Mode of the reader
     /// </summary>
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;

@@ -382,6 +382,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // This is a lone chapter
       if (vol.length === 0) {
+        if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
+          return this.currentlyReadingChapter.titleName;
+        }
         return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range) and Localize it
       }
 
@@ -748,7 +751,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     } else {
       if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
         if (this.chapters.length === 0) {
-          this.activeTabId = TabID.Specials;
+          if (this.specials.length > 0) {
+            this.activeTabId = TabID.Specials;
+          } else {
+            this.activeTabId = TabID.Volumes;
+          }
         } else {
           this.activeTabId = TabID.Chapters;
         }

@@ -17,9 +17,7 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo,
-            Chapters = type == LibraryType.Comic
-                ? Parser.ParseComicChapter(fileName)
-                : Parser.ParseChapter(fileName)
+            Chapters = Parser.ParseChapter(fileName, type)
         };
 
         if (type == LibraryType.Book)
@@ -27,8 +25,8 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ret.Chapters = Parser.DefaultChapter;
         }
 
-        ret.Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName);
-        ret.Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName);
+        ret.Series = Parser.ParseSeries(fileName, type);
+        ret.Volumes = Parser.ParseVolume(fileName, type);
 
         if (ret.Series == string.Empty)
         {
@@ -43,7 +41,7 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ret.Edition = edition;
         }
 
-        var isSpecial = type == LibraryType.Comic ? Parser.IsComicSpecial(fileName) : Parser.IsMangaSpecial(fileName);
+        var isSpecial = Parser.IsSpecial(fileName, type);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && isSpecial)

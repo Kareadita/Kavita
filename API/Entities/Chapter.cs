@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -32,6 +33,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.
     /// </summary>
     public float SortOrder { get; set; }
+    /// <summary>
+    /// Can the sort order be updated on scan or is it locked from UI
+    /// </summary>
+    public bool SortOrderLocked { get; set; }
     /// <summary>
     /// The files that represent this Chapter
     /// </summary>
@@ -171,7 +176,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
                 return Parser.RemoveExtensionIfSupported(Title);
             }
 
-            if (MinNumber.Is(0) && !float.TryParse(Range, out _))
+            if (MinNumber.Is(0) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
             {
                 return $"{Range}";
             }
