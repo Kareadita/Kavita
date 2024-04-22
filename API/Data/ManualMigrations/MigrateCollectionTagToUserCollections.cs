@@ -18,7 +18,8 @@ public static class MigrateCollectionTagToUserCollections
 {
     public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
     {
-        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateCollectionTagToUserCollections"))
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateCollectionTagToUserCollections") ||
+            !await dataContext.AppUser.AnyAsync())
         {
             return;
         }
