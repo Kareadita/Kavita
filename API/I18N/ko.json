@@ -191,5 +191,7 @@
     "kavita+-data-refresh": "Kavita+ 데이터 새로 고침",
     "backup": "백업",
     "update-yearly-stats": "연간 통계 업데이트",
-    "process-processed-scrobbling-events": "처리된 스크로블링 이벤트 처리"
+    "process-processed-scrobbling-events": "처리된 스크로블링 이벤트 처리",
+    "account-email-invalid": "관리자 계정의 파일에 대한 이메일은 유효한 이메일이 아닙니다. 시험 이메일을 보낼 수 없습니다.",
+    "email-settings-invalid": "이메일 설정 누락 된 정보. 모든 이메일 설정을 저장합니다."
 }

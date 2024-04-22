@@ -30,7 +30,7 @@
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
         "description": "Hier finden Sie alle Scrobble-Ereignisse, die mit Ihrem Konto verknüpft sind. Damit es Ereignisse gibt, müssen Sie einen aktiven Scrobble-Anbieter konfiguriert haben. Alle Ereignisse, die verarbeitet wurden, werden nach einem Monat gelöscht. Wenn es nicht verarbeitete Ereignisse gibt, können diese wahrscheinlich keine Übereinstimmungen im Vorfeld finden. Wenden Sie sich bitte an Ihren Administrator, damit diese korrigiert werden.",
-        "filter-label": "Filtern",
+        "filter-label": "{{common.filter}}",
         "created-header": "Erstellt",
         "last-modified-header": "Zuletzt geändert",
         "type-header": "Typ",
