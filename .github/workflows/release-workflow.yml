@@ -58,7 +58,7 @@ jobs:
       - name: Parse PR body
         id: parse-body
         run: |
-          body="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest""
+          body="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
 
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
