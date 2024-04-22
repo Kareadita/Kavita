@@ -179,5 +179,19 @@
     "email-not-enabled": "L'email non è attivata in questo server. Non puoi compiere questa azione.",
     "send-to-unallowed": "Non puoi inviare ad un dispositivo non tuo",
     "send-to-size-limit": "Il/I file che stai cercando di mandare sono troppo grandi per l'email",
-    "unable-to-reset-k+": "Impossibile ripristinare la licenza Kavita+. Contatta il supporto Kavita+"
+    "unable-to-reset-k+": "Impossibile ripristinare la licenza Kavita+. Contatta il supporto Kavita+",
+    "check-updates": "Controlla aggiornamenti",
+    "license-check": "Controlla Licenza",
+    "process-scrobbling-events": "Elabora gli eventi di scrobbling",
+    "cleanup": "Pulizia",
+    "report-stats": "Rapporto Statistiche",
+    "check-scrobbling-tokens": "Controlla i Tokens per lo Scrobbling",
+    "process-processed-scrobbling-events": "Elabora gli eventi di scrobbling processati",
+    "remove-from-want-to-read": "Voglio per Pulizia Letture",
+    "scan-libraries": "Scansiona librerie",
+    "update-yearly-stats": "Aggiorna le statistiche annuali",
+    "kavita+-data-refresh": "Aggiornamento dati Kavita+",
+    "backup": "Backup",
+    "account-email-invalid": "L'e-mail in archivio per l'account amministratore non è un'e-mail valida. Impossibile inviare e-mail di prova.",
+    "email-settings-invalid": "Informazioni mancanti nelle impoastazioni email. Assicurati che tutte le impostazioni email siano salvate."
 }
