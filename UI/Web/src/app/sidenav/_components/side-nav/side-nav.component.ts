@@ -65,7 +65,7 @@ export class SideNavComponent implements OnInit {
   homeActions = [
     {action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.openCustomize.bind(this)},
     {action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)},
-    //{action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)}, // This requires the Collection Rework (https://github.com/Kareadita/Kavita/issues/2810)
+    {action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)}, // This requires the Collection Rework (https://github.com/Kareadita/Kavita/issues/2810)
   ];
 
   filterQuery: string = '';
