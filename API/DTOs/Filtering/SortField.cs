@@ -33,5 +33,9 @@ public enum SortField
     /// <summary>
     /// Kavita+ Only - External Average Rating
     /// </summary>
-    AverageRating = 8
+    AverageRating = 8,
+    /// <summary>
+    /// Randomise the order
+    /// </summary>
+    Random = 9
 }
