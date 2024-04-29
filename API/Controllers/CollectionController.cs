@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
+using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,15 +29,17 @@ public class CollectionController : BaseApiController
     private readonly ICollectionTagService _collectionService;
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
+    private readonly ISmartCollectionSyncService _collectionSyncService;
 
     /// <inheritdoc />
     public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
-        ILocalizationService localizationService, IExternalMetadataService externalMetadataService)
+        ILocalizationService localizationService, IExternalMetadataService externalMetadataService, ISmartCollectionSyncService collectionSyncService)
     {
         _unitOfWork = unitOfWork;
         _collectionService = collectionService;
         _localizationService = localizationService;
         _externalMetadataService = externalMetadataService;
+        _collectionSyncService = collectionSyncService;
     }
 
     /// <summary>
@@ -252,5 +255,37 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult<IList<MalStackDto>>> GetMalStacksForUser()
     {
         return Ok(await _externalMetadataService.GetStacksForUser(User.GetUserId()));
+    }
+
+    /// <summary>
+    /// Imports a MAL Stack into Kavita
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("import-stack")]
+    public async Task<ActionResult> ImportMalStack(MalStackDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+        if (user == null) return Unauthorized();
+
+        // Validation check to ensure stack doesn't exist already
+        if (await _unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id))
+        {
+            return BadRequest(_localizationService.Translate(user.Id, "collection-already-exists"));
+        }
+        // Create new collection
+        var newCollection = new AppUserCollectionBuilder(dto.Title)
+            .WithSource(ScrobbleProvider.Mal)
+            .WithSourceUrl(dto.Url)
+            .Build();
+        user.Collections.Add(newCollection);
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        // Trigger Stack Refresh for just one stack (not all)
+        BackgroundJob.Enqueue(() => _collectionSyncService.Sync(newCollection.Id));
+
+        return Ok();
     }
 }

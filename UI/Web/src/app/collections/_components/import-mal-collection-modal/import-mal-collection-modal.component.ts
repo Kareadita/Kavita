@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ReactiveFormsModule} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -8,6 +8,7 @@ import {MalStack} from "../../../_models/collection/mal-stack";
 import {UserCollection} from "../../../_models/collection-tag";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {forkJoin} from "rxjs";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-import-mal-collection-modal',
@@ -24,8 +25,9 @@ import {forkJoin} from "rxjs";
 export class ImportMalCollectionModalComponent {
 
   protected readonly ngbModal = inject(NgbActiveModal);
-  protected readonly collectionService = inject(CollectionTagService);
-  protected readonly cdRef = inject(ChangeDetectorRef);
+  private readonly collectionService = inject(CollectionTagService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
 
   stacks: Array<MalStack> = [];
   isLoading = true;
@@ -50,6 +52,12 @@ export class ImportMalCollectionModalComponent {
 
       this.cdRef.markForCheck();
     });
+  }
+
+  importStack(stack: MalStack) {
+    this.collectionService.importStack(stack).subscribe(() => {
+      this.toastr.success(translate('toasts.stack-imported'));
+    })
   }
 
 

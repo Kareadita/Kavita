@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.0.9"
+    "version": "0.8.1.0"
   },
   "servers": [
     {
@@ -1677,6 +1677,39 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Collection/import-stack": {
+      "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Imports a MAL Stack into Kavita",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalStackDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalStackDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MalStackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }

@@ -1,0 +1,127 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using API.Data;
+using API.Data.Repositories;
+using API.DTOs.Recommendation;
+using API.Entities;
+using API.Entities.Enums;
+using API.Helpers;
+using Flurl.Http;
+using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
+using Microsoft.Extensions.Logging;
+
+namespace API.Services.Plus;
+#nullable enable
+
+sealed class SeriesCollection
+{
+    public required IList<ExternalSeriesDto> Series { get; set; }
+    public required string Summary { get; set; }
+    public required string Title { get; set; }
+    /// <summary>
+    /// Total items in the source, not what was matched
+    /// </summary>
+    public int TotalItems { get; set; }
+}
+
+/// <summary>
+/// Responsible to synchronize Collection series from non-Kavita sources
+/// </summary>
+public interface ISmartCollectionSyncService
+{
+    /// <summary>
+    /// Synchronize all collections
+    /// </summary>
+    /// <returns></returns>
+    Task Sync();
+    /// <summary>
+    /// Synchronize a collection
+    /// </summary>
+    /// <param name="collectionId"></param>
+    /// <returns></returns>
+    Task Sync(int collectionId);
+}
+
+public class SmartCollectionSyncService : ISmartCollectionSyncService
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<SmartCollectionSyncService> _logger;
+    private const int SyncDelta = -2;
+    // Allow 50 requests per 24 hours
+    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
+
+
+    public SmartCollectionSyncService(IUnitOfWork unitOfWork, ILogger<SmartCollectionSyncService> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    public Task Sync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task Sync(int collectionId)
+    {
+        var collection = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionId, CollectionIncludes.Series);
+        if (!CanSync(collection)) return;
+        await SyncCollection(collection!);
+    }
+
+    private static bool CanSync(AppUserCollection? collection)
+    {
+        if (collection is not {Source: ScrobbleProvider.Mal}) return false;
+        if (string.IsNullOrEmpty(collection.SourceUrl)) return false;
+        if (collection.LastSyncUtc >= DateTime.UtcNow.AddDays(SyncDelta)) return false;
+        return true;
+    }
+
+    private async Task SyncCollection(AppUserCollection collection)
+    {
+        if (!RateLimiter.TryAcquire(string.Empty))
+        {
+            // Request not allowed due to rate limit
+            _logger.LogDebug("Rate Limit hit for Smart Collection Sync");
+            return;
+        }
+
+        var info = await GetStackInfo(GetStackId(collection.SourceUrl!));
+
+        // Check each series in the collection against what's in the target
+        // For everything that's not there, link it up for this user.
+        //var itemsToAdd = info.Series.Except(collection.Items);
+        _logger.LogInformation("Adding new series to collection");
+
+
+    }
+
+    private static long GetStackId(string url)
+    {
+        var tokens = url.Split("/");
+        return long.Parse(tokens[^1], CultureInfo.InvariantCulture);
+    }
+
+    private async Task<SeriesCollection?> GetStackInfo(long stackId)
+    {
+        _logger.LogDebug("Fetching Kavita+ for MAL Stack");
+
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+
+        var seriesForStack = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stack?stackId=" + stackId)
+            .WithHeader("Accept", "application/json")
+            .WithHeader("User-Agent", "Kavita")
+            .WithHeader("x-license-key", license)
+            .WithHeader("x-installId", HashUtil.ServerToken())
+            .WithHeader("x-kavita-version", BuildInfo.Version)
+            .WithHeader("Content-Type", "application/json")
+            .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+            .GetJsonAsync<SeriesCollection>();
+
+        return seriesForStack;
+    }
+}
