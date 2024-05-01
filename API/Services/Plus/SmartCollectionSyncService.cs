@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs.Recommendation;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using Flurl.Http;
 using Kavita.Common;
@@ -19,7 +20,7 @@ namespace API.Services.Plus;
 
 sealed class SeriesCollection
 {
-    public required IList<ExternalSeriesDto> Series { get; set; }
+    public required IList<ExternalMetadataIdsDto> Series { get; set; }
     public required string Summary { get; set; }
     public required string Title { get; set; }
     /// <summary>
@@ -61,9 +62,17 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         _logger = logger;
     }
 
-    public Task Sync()
+    /// <summary>
+    /// For every Sync-eligible collection, syncronize with upstream
+    /// </summary>
+    /// <returns></returns>
+    public async Task Sync()
     {
-        return Task.CompletedTask;
+        var collections = await _unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(DateTime.UtcNow.AddDays(SyncDelta));
+        foreach (var collection in collections.Where(CanSync))
+        {
+            await SyncCollection(collection);
+        }
     }
 
     public async Task Sync(int collectionId)
@@ -92,12 +101,55 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
 
         var info = await GetStackInfo(GetStackId(collection.SourceUrl!));
 
+        if (info == null) return;
+
         // Check each series in the collection against what's in the target
         // For everything that's not there, link it up for this user.
-        //var itemsToAdd = info.Series.Except(collection.Items);
+
+        // Check each series in the collection against what's in the target
+        // For everything that's not there, link it up for this user.
         _logger.LogInformation("Adding new series to collection");
 
+        var missingCount = 0;
+        foreach (var seriesInfo in info.Series)
+        {
+            // Normalize series name and localized name
+            var normalizedSeriesName = seriesInfo.SeriesName?.ToNormalized();
+            var normalizedLocalizedSeriesName = seriesInfo.LocalizedSeriesName?.ToNormalized();
 
+            // Search for existing series in the collection
+            var existingSeries = collection.Items.FirstOrDefault(s =>
+                s.Name.ToNormalized() == normalizedSeriesName ||
+                s.NormalizedName == normalizedSeriesName ||
+                s.LocalizedName.ToNormalized() == normalizedLocalizedSeriesName ||
+                s.NormalizedLocalizedName == normalizedLocalizedSeriesName);
+
+            if (existingSeries == null)
+            {
+                // Series not found in the collection, try to find it in the server
+                var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName);
+
+                if (newSeries != null)
+                {
+                    // Add the new series to the collection
+                    collection.Items.Add(newSeries);
+                }
+                else
+                {
+                    _logger.LogWarning("{Series} not found in the server", seriesInfo.SeriesName);
+                    // TODO: I probably want some sort of count on series that don't exist
+                    missingCount++;
+                }
+            }
+        }
+
+        // At this point, all series in the info have been checked and added if necessary
+        // You may want to commit changes to the database if needed
+        collection.LastSyncUtc = DateTime.UtcNow;
+        _unitOfWork.CollectionTagRepository.Update(collection);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series", collection.Title, missingCount);
     }
 
     private static long GetStackId(string url)

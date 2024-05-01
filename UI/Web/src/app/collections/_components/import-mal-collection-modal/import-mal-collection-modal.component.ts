@@ -9,6 +9,7 @@ import {UserCollection} from "../../../_models/collection-tag";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {forkJoin} from "rxjs";
 import {ToastrService} from "ngx-toastr";
+import {DecimalPipe} from "@angular/common";
 
 @Component({
   selector: 'app-import-mal-collection-modal',
@@ -16,7 +17,8 @@ import {ToastrService} from "ngx-toastr";
   imports: [
     TranslocoDirective,
     ReactiveFormsModule,
-    Select2Module
+    Select2Module,
+    DecimalPipe
   ],
   templateUrl: './import-mal-collection-modal.component.html',
   styleUrl: './import-mal-collection-modal.component.scss',
@@ -31,7 +33,7 @@ export class ImportMalCollectionModalComponent {
 
   stacks: Array<MalStack> = [];
   isLoading = true;
-  collectionMap!: {[key: string]: UserCollection};
+  collectionMap: {[key: string]: UserCollection | MalStack} = {};
 
   constructor() {
 
@@ -56,6 +58,8 @@ export class ImportMalCollectionModalComponent {
 
   importStack(stack: MalStack) {
     this.collectionService.importStack(stack).subscribe(() => {
+      this.collectionMap[stack.url] = stack;
+      this.cdRef.markForCheck();
       this.toastr.success(translate('toasts.stack-imported'));
     })
   }

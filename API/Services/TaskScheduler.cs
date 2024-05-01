@@ -57,6 +57,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IScrobblingService _scrobblingService;
     private readonly ILicenseService _licenseService;
     private readonly IExternalMetadataService _externalMetadataService;
+    private readonly ISmartCollectionSyncService _smartCollectionSyncService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -74,6 +75,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ProcessProcessedScrobblingEventsId = "process-processed-scrobbling-events";
     public const string LicenseCheckId = "license-check";
     public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
+    public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
@@ -91,7 +93,7 @@ public class TaskScheduler : ITaskScheduler
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
-        IExternalMetadataService externalMetadataService)
+        IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -109,6 +111,7 @@ public class TaskScheduler : ITaskScheduler
         _scrobblingService = scrobblingService;
         _licenseService = licenseService;
         _externalMetadataService = externalMetadataService;
+        _smartCollectionSyncService = smartCollectionSyncService;
     }
 
     public async Task ScheduleTasks()
@@ -185,6 +188,10 @@ public class TaskScheduler : ITaskScheduler
         // Backfilling/Freshening Reviews/Rating/Recommendations
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
             () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(Rnd.Next(1, 4)),
+            RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate(KavitaPlusStackSyncId,
+            () => _smartCollectionSyncService.Sync(), Cron.Daily(Rnd.Next(1, 4)),
             RecurringJobOptions);
     }
 

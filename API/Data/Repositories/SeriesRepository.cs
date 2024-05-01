@@ -138,6 +138,7 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
+    Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName);
     public Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
         MangaFormat format);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
@@ -1668,6 +1669,23 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery();
         return query.SingleOrDefaultAsync();
     #nullable enable
+    }
+
+    public async Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName)
+    {
+        var normalizedSeries = seriesName.ToNormalized();
+        var normalizedLocalized = localizedName.ToNormalized();
+        return await _context.Series
+            .Where(s =>
+                s.NormalizedName.Equals(normalizedSeries)
+                || s.NormalizedName.Equals(normalizedLocalized)
+
+                || s.NormalizedLocalizedName.Equals(normalizedSeries)
+                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
+
+                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
+            )
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,

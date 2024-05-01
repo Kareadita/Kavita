@@ -15,6 +15,7 @@ using API.Services.Plus;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -30,16 +31,19 @@ public class CollectionController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ISmartCollectionSyncService _collectionSyncService;
+    private readonly ILogger<CollectionController> _logger;
 
     /// <inheritdoc />
     public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
-        ILocalizationService localizationService, IExternalMetadataService externalMetadataService, ISmartCollectionSyncService collectionSyncService)
+        ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
+        ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger)
     {
         _unitOfWork = unitOfWork;
         _collectionService = collectionService;
         _localizationService = localizationService;
         _externalMetadataService = externalMetadataService;
         _collectionSyncService = collectionSyncService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -273,19 +277,28 @@ public class CollectionController : BaseApiController
         {
             return BadRequest(_localizationService.Translate(user.Id, "collection-already-exists"));
         }
-        // Create new collection
-        var newCollection = new AppUserCollectionBuilder(dto.Title)
-            .WithSource(ScrobbleProvider.Mal)
-            .WithSourceUrl(dto.Url)
-            .Build();
-        user.Collections.Add(newCollection);
 
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        try
+        {
+            // Create new collection
+            var newCollection = new AppUserCollectionBuilder(dto.Title)
+                .WithSource(ScrobbleProvider.Mal)
+                .WithSourceUrl(dto.Url)
+                .Build();
+            user.Collections.Add(newCollection);
 
-        // Trigger Stack Refresh for just one stack (not all)
-        BackgroundJob.Enqueue(() => _collectionSyncService.Sync(newCollection.Id));
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.CommitAsync();
 
-        return Ok();
+            // Trigger Stack Refresh for just one stack (not all)
+            BackgroundJob.Enqueue(() => _collectionSyncService.Sync(newCollection.Id));
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue importing MAL Stack");
+        }
+
+        return BadRequest(_localizationService.Translate(user.Id, "error-import-stack"));
     }
 }

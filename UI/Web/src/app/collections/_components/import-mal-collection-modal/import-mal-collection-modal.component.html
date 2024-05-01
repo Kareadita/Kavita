@@ -14,7 +14,7 @@
             <a [href]="stack.url" rel="noreferrer noopener" target="_blank">{{stack.title}}</a>
             <button class="btn btn-primary float-end" [disabled]="collectionMap && collectionMap.hasOwnProperty(stack.url)" (click)="importStack(stack)">Track</button>
           </div>
-          <div>by {{stack.author}} • {{t('series-count', {num: stack.seriesCount})}} • <span><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>{{t('restack-count', {num: stack.restackCount})}}</span></div>
+          <div>by {{stack.author}} • {{t('series-count', {num: stack.seriesCount | number})}} • <span><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>{{t('restack-count', {num: stack.restackCount | number})}}</span></div>
         </li>
       }
     </ul>
@@ -34,6 +34,9 @@
 <!--    <div class="col-auto">-->
 <!--      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>-->
 <!--    </div>-->
+    <div class="col-auto">
+      <button type="button" class="btn btn-secondary" (click)="ngbModal.dismiss()">{{t('close')}}</button>
+    </div>
   </div>
 
 </ng-container>
