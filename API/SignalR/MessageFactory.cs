@@ -428,7 +428,7 @@ public static class MessageFactory
     /// <param name="eventType"></param>
     /// <param name="seriesName"></param>
     /// <returns></returns>
-    public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "")
+    public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "", int? totalToProcess = null)
     {
         return new SignalRMessage()
         {
@@ -437,7 +437,12 @@ public static class MessageFactory
             SubTitle = seriesName,
             EventType = eventType,
             Progress = ProgressType.Indeterminate,
-            Body = null
+            Body = new
+            {
+                SeriesName = seriesName,
+                LibraryName = libraryName,
+                LeftToProcess = totalToProcess
+            }
         };
     }
 

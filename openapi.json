@@ -13329,6 +13329,11 @@
             "description": "For Non-Kavita sourced collections, the url to sync from",
             "nullable": true
           },
+          "totalSourceCount": {
+            "type": "integer",
+            "description": "Total number of items as of the last sync. Not applicable for Kavita managed collections.",
+            "format": "int32"
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },

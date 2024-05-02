@@ -147,7 +147,7 @@ public class ScannerService : IScannerService
         {
             if (ex.Message.Equals("Sequence contains more than one element."))
             {
-                _logger.LogCritical("[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
+                _logger.LogCritical(ex, "[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
             }
         }
 
@@ -245,7 +245,7 @@ public class ScannerService : IScannerService
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name, 1));
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, new []{ folderPath },
@@ -309,15 +309,18 @@ public class ScannerService : IScannerService
             await _processSeries.Prime();
         }
 
+        var seriesLeftToProcess = toProcess.Count;
         foreach (var pSeries in toProcess)
         {
             // Process Series
-            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, bypassFolderOptimizationChecks);
+            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
+            seriesLeftToProcess--;
         }
 
         _processSeries.Reset();
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name, 0));
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
@@ -543,7 +546,8 @@ public class ScannerService : IScannerService
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.CacheDirectory));
@@ -589,12 +593,14 @@ public class ScannerService : IScannerService
 
         var totalFiles = 0;
         //var tasks = new List<Task>();
+        var seriesLeftToProcess = toProcess.Count;
         foreach (var pSeries in toProcess)
         {
             totalFiles += parsedSeries[pSeries].Count;
             //tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
             // We can't do Task.WhenAll because of concurrency issues.
-            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate);
+            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, forceUpdate);
+            seriesLeftToProcess--;
         }
 
         //await Task.WhenAll(tasks);

@@ -41,6 +41,10 @@ export enum EVENTS {
    */
   FileScanProgress = 'FileScanProgress',
   /**
+   * A subtype of NotificationProgress that represents a single series being processed (into the DB)
+   */
+  ScanProgress = 'ScanProgress',
+  /**
    * A custom user site theme is added or removed during a scan
    */
   SiteThemeProgress = 'SiteThemeProgress',

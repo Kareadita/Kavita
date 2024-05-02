@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Recommendation;
+using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -127,7 +128,8 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
             if (existingSeries == null)
             {
                 // Series not found in the collection, try to find it in the server
-                var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName);
+                var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName,
+                    GetMangaFormats(seriesInfo.PlusMediaFormat), collection.AppUserId);
 
                 if (newSeries != null)
                 {
@@ -137,7 +139,6 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 else
                 {
                     _logger.LogWarning("{Series} not found in the server", seriesInfo.SeriesName);
-                    // TODO: I probably want some sort of count on series that don't exist
                     missingCount++;
                 }
             }
@@ -146,10 +147,27 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         // At this point, all series in the info have been checked and added if necessary
         // You may want to commit changes to the database if needed
         collection.LastSyncUtc = DateTime.UtcNow;
+        collection.TotalSourceCount = info.TotalItems;
+        collection.Summary = info.Summary;
         _unitOfWork.CollectionTagRepository.Update(collection);
+
         await _unitOfWork.CommitAsync();
 
         _logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series", collection.Title, missingCount);
+    }
+
+    private static IList<MangaFormat> GetMangaFormats(MediaFormat? mediaFormat)
+    {
+        if (mediaFormat == null) return [MangaFormat.Archive];
+        return mediaFormat switch
+        {
+            MediaFormat.Manga => [MangaFormat.Archive, MangaFormat.Image],
+            MediaFormat.Comic => [MangaFormat.Archive],
+            MediaFormat.LightNovel => [MangaFormat.Epub, MangaFormat.Pdf],
+            MediaFormat.Book => [MangaFormat.Epub, MangaFormat.Pdf],
+            MediaFormat.Unknown => [MangaFormat.Archive],
+            _ => [MangaFormat.Archive]
+        };
     }
 
     private static long GetStackId(string url)
