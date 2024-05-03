@@ -213,7 +213,7 @@ public class CollectionTagRepository : ICollectionTagRepository
     {
         return await _context.AppUserCollection
             .Where(c => c.Source == ScrobbleProvider.Mal)
-            .Where(c => c.LastSyncUtc < expirationTime)
+            .Where(c => c.LastSyncUtc <= expirationTime)
             .Include(c => c.Items)
             .ToListAsync();
     }

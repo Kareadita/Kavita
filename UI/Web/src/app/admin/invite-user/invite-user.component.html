@@ -5,37 +5,42 @@
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal">
-      <p *ngIf="!invited" [innerHTML]="t('description') | safeHtml"></p>
+      @if (!invited) {
+        <p [innerHTML]="t('description') | safeHtml"></p>
+      }
 
-      <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
-        <div class="row g-0">
-          <div class="mb-3" style="width:100%">
-            <label for="email" class="form-label">{{t('email')}}</label>
-            <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
-            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
-              <div *ngIf="email?.errors?.required">
-                {{t('required-field')}}
+      @if (emailLink === '') {
+        <form [formGroup]="inviteForm">
+          <div class="row g-0">
+            <div class="mb-3" style="width:100%">
+              <label for="email" class="form-label">{{t('email')}}</label>
+              <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
+                <div *ngIf="email?.errors?.required">
+                  {{t('required-field')}}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="row g-0">
-          <div class="col-md-6">
-            <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
+          <div class="row g-0">
+            <div class="col-md-6">
+              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
+            </div>
+
+            <div class="col-md-6">
+              <app-library-selector (selected)="updateLibrarySelection($event)"></app-library-selector>
+            </div>
           </div>
 
-          <div class="col-md-6">
-            <app-library-selector (selected)="updateLibrarySelection($event)"></app-library-selector>
+          <div class="row g-0">
+            <div class="col-md-12">
+              <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected"></app-restriction-selector>
+            </div>
           </div>
-        </div>
+        </form>
+      }
 
-        <div class="row g-0">
-          <div class="col-md-12">
-            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected"></app-restriction-selector>
-          </div>
-        </div>
-      </form>
 
       <ng-container *ngIf="emailLink !== ''">
         <h4>{{t('setup-user-title')}}</h4>

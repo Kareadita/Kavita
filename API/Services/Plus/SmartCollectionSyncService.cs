@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.SignalR;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -52,15 +53,18 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SmartCollectionSyncService> _logger;
+    private readonly IEventHub _eventHub;
+
     private const int SyncDelta = -2;
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
 
 
-    public SmartCollectionSyncService(IUnitOfWork unitOfWork, ILogger<SmartCollectionSyncService> logger)
+    public SmartCollectionSyncService(IUnitOfWork unitOfWork, ILogger<SmartCollectionSyncService> logger, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -69,7 +73,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
     /// <returns></returns>
     public async Task Sync()
     {
-        var collections = await _unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(DateTime.UtcNow.AddDays(SyncDelta));
+        var collections = await _unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(DateTime.UtcNow.AddDays(SyncDelta).Truncate(TimeSpan.TicksPerHour));
         foreach (var collection in collections.Where(CanSync))
         {
             await SyncCollection(collection);
@@ -87,7 +91,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
     {
         if (collection is not {Source: ScrobbleProvider.Mal}) return false;
         if (string.IsNullOrEmpty(collection.SourceUrl)) return false;
-        if (collection.LastSyncUtc >= DateTime.UtcNow.AddDays(SyncDelta)) return false;
+        if (collection.LastSyncUtc.Truncate(TimeSpan.TicksPerHour) >= DateTime.UtcNow.AddDays(SyncDelta).Truncate(TimeSpan.TicksPerHour)) return false;
         return true;
     }
 
@@ -112,7 +116,8 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         _logger.LogInformation("Adding new series to collection");
 
         var missingCount = 0;
-        foreach (var seriesInfo in info.Series)
+        var missingSeries = new StringBuilder();
+        foreach (var seriesInfo in info.Series.OrderBy(s => s.SeriesName))
         {
             // Normalize series name and localized name
             var normalizedSeriesName = seriesInfo.SeriesName?.ToNormalized();
@@ -140,18 +145,28 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 {
                     _logger.LogWarning("{Series} not found in the server", seriesInfo.SeriesName);
                     missingCount++;
+                    missingSeries.Append($"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
+                    missingSeries.Append("<br/>");
                 }
             }
         }
 
         // At this point, all series in the info have been checked and added if necessary
         // You may want to commit changes to the database if needed
-        collection.LastSyncUtc = DateTime.UtcNow;
+        collection.LastSyncUtc = DateTime.UtcNow.Truncate(TimeSpan.TicksPerHour);
         collection.TotalSourceCount = info.TotalItems;
         collection.Summary = info.Summary;
+
+        if (missingCount > 0)
+        {
+            collection.MissingSeriesFromSource = missingSeries.ToString();
+        }
         _unitOfWork.CollectionTagRepository.Update(collection);
 
         await _unitOfWork.CommitAsync();
+
+        await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
+            MessageFactory.CollectionUpdatedEvent(collection.Id), false);
 
         _logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series", collection.Title, missingCount);
     }

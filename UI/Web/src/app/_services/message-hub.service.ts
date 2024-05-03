@@ -17,7 +17,10 @@ export enum EVENTS {
   SeriesRemoved = 'SeriesRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
-  SeriesAddedToCollection = 'SeriesAddedToCollection',
+  /**
+   * When a Collection has been updated
+   */
+  CollectionUpdated = 'CollectionUpdated',
   /**
    * A generic error that occurs during operations on the server
    */
@@ -218,9 +221,9 @@ export class MessageHubService {
       });
     });
 
-    this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
+    this.hubConnection.on(EVENTS.CollectionUpdated, resp => {
       this.messagesSource.next({
-        event: EVENTS.SeriesAddedToCollection,
+        event: EVENTS.CollectionUpdated,
         payload: resp.body
       });
     });

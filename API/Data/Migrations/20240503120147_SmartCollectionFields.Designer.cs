@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240501181154_SmartCollectionFields")]
+    [Migration("20240503120147_SmartCollectionFields")]
     partial class SmartCollectionFields
     {
         /// <inheritdoc />
@@ -225,6 +225,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastSyncUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MissingSeriesFromSource")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedTitle")

@@ -41,9 +41,9 @@ public static class MessageFactory
     /// </summary>
     public const string OnlineUsers = "OnlineUsers";
     /// <summary>
-    /// When a series is added to a collection
+    /// When a Collection has been updated
     /// </summary>
-    public const string SeriesAddedToCollection = "SeriesAddedToCollection";
+    public const string CollectionUpdated = "CollectionUpdated";
     /// <summary>
     /// Event sent out during backing up the database
     /// </summary>
@@ -310,17 +310,17 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SeriesAddedToCollectionEvent(int tagId, int seriesId)
+
+    public static SignalRMessage CollectionUpdatedEvent(int collectionId)
     {
         return new SignalRMessage
         {
-            Name = SeriesAddedToCollection,
+            Name = CollectionUpdated,
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
             Body = new
             {
-                TagId = tagId,
-                SeriesId = seriesId
+                TagId = collectionId,
             }
         };
     }

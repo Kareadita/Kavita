@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
+using API.SignalR;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -32,11 +33,13 @@ public class CollectionController : BaseApiController
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ISmartCollectionSyncService _collectionSyncService;
     private readonly ILogger<CollectionController> _logger;
+    private readonly IEventHub _eventHub;
 
     /// <inheritdoc />
     public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
         ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
-        ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger)
+        ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger,
+        IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _collectionService = collectionService;
@@ -44,6 +47,7 @@ public class CollectionController : BaseApiController
         _externalMetadataService = externalMetadataService;
         _collectionSyncService = collectionSyncService;
         _logger = logger;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -54,6 +58,18 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false)
     {
         return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(User.GetUserId(), !ownedOnly));
+    }
+
+    /// <summary>
+    /// Returns a single Collection tag by Id for a given user
+    /// </summary>
+    /// <param name="collectionId"></param>
+    /// <returns></returns>
+    [HttpGet("single")]
+    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetTag(int collectionId)
+    {
+        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(User.GetUserId(), false);
+        return Ok(collections.FirstOrDefault(c => c.Id == collectionId));
     }
 
     /// <summary>
@@ -93,6 +109,8 @@ public class CollectionController : BaseApiController
         {
             if (await _collectionService.UpdateTag(updatedTag, User.GetUserId()))
             {
+                await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
+                    MessageFactory.CollectionUpdatedEvent(updatedTag.Id), false);
                 return Ok(await _localizationService.Translate(User.GetUserId(), "collection-updated-successfully"));
             }
         }
@@ -136,12 +154,12 @@ public class CollectionController : BaseApiController
 
 
     /// <summary>
-    /// Promote/UnPromote multiple collections in one go
+    /// Delete multiple collections in one go
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("delete-multiple")]
-    public async Task<ActionResult> DeleteMultipleCollections(PromoteCollectionsDto dto)
+    public async Task<ActionResult> DeleteMultipleCollections(DeleteCollectionsDto dto)
     {
         // This needs to take into account owner as I can select other users cards
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);

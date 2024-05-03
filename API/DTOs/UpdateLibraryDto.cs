@@ -36,5 +36,6 @@ public class UpdateLibraryDto
     /// <summary>
     /// A set of Glob patterns that the scanner will exclude processing
     /// </summary>
+    [Required]
     public ICollection<string> ExcludePatterns { get; init; }
 }

@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required.",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -1378,6 +1378,56 @@
         }
       }
     },
+    "/api/Collection/single": {
+      "get": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Returns a single Collection tag by Id for a given user",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserCollectionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Collection/all-series": {
       "get": {
         "tags": [
@@ -1548,23 +1598,23 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Promote/UnPromote multiple collections in one go",
+        "summary": "Delete multiple collections in one go",
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PromoteCollectionsDto"
+                "$ref": "#/components/schemas/DeleteCollectionsDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/PromoteCollectionsDto"
+                "$ref": "#/components/schemas/DeleteCollectionsDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/PromoteCollectionsDto"
+                "$ref": "#/components/schemas/DeleteCollectionsDto"
               }
             }
           }
@@ -13334,6 +13384,11 @@
             "description": "Total number of items as of the last sync. Not applicable for Kavita managed collections.",
             "format": "int32"
           },
+          "missingSeriesFromSource": {
+            "type": "string",
+            "description": "A <br /> separated string of all missing series",
+            "nullable": true
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
@@ -13417,6 +13472,16 @@
           "sourceUrl": {
             "type": "string",
             "description": "For Non-Kavita sourced collections, the url to sync from",
+            "nullable": true
+          },
+          "totalSourceCount": {
+            "type": "integer",
+            "description": "Total number of items as of the last sync. Not applicable for Kavita managed collections.",
+            "format": "int32"
+          },
+          "missingSeriesFromSource": {
+            "type": "string",
+            "description": "A <br /> separated string of all missing series",
             "nullable": true
           }
         },
@@ -15278,35 +15343,6 @@
         },
         "additionalProperties": false
       },
-      "CollectionTagDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "summary": {
-            "type": "string",
-            "nullable": true
-          },
-          "promoted": {
-            "type": "boolean"
-          },
-          "coverImage": {
-            "type": "string",
-            "description": "The cover image string. This is used on Frontend to show or hide the Cover Image",
-            "nullable": true
-          },
-          "coverImageLocked": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
       "ConfirmEmailDto": {
         "required": [
           "email",
@@ -15575,6 +15611,22 @@
         },
         "additionalProperties": false,
         "description": "For requesting an encoded filter to be decoded"
+      },
+      "DeleteCollectionsDto": {
+        "required": [
+          "collectionIds"
+        ],
+        "type": "object",
+        "properties": {
+          "collectionIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "additionalProperties": false
       },
       "DeleteSeriesDto": {
         "type": "object",
@@ -20385,6 +20437,7 @@
       "UpdateLibraryDto": {
         "required": [
           "allowScrobbling",
+          "excludePatterns",
           "fileGroupTypes",
           "folders",
           "folderWatching",
@@ -20466,8 +20519,7 @@
             "items": {
               "type": "string"
             },
-            "description": "A set of Glob patterns that the scanner will exclude processing",
-            "nullable": true
+            "description": "A set of Glob patterns that the scanner will exclude processing"
           }
         },
         "additionalProperties": false
@@ -20881,7 +20933,7 @@
         "type": "object",
         "properties": {
           "tag": {
-            "$ref": "#/components/schemas/CollectionTagDto"
+            "$ref": "#/components/schemas/AppUserCollectionDto"
           },
           "seriesIdsToRemove": {
             "type": "array",

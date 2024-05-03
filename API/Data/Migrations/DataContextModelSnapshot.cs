@@ -224,6 +224,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastSyncUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("MissingSeriesFromSource")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
