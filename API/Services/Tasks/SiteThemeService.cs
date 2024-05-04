@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -6,8 +7,10 @@ using API.Entities;
 using API.Entities.Enums.Theme;
 using API.Extensions;
 using API.SignalR;
+using Flurl.Http;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace API.Services.Tasks;
 #nullable enable
@@ -19,11 +22,35 @@ public interface IThemeService
     Task UpdateDefault(int themeId);
 }
 
+internal class GitHubContent
+{
+    [JsonProperty("name")]
+    public string Name { get; set; }
+
+    [JsonProperty("path")]
+    public string Path { get; set; }
+
+    [JsonProperty("type")]
+    public string Type { get; set; }
+
+    [JsonProperty("download_url")]
+    public string DownloadUrl { get; set; }
+}
+
+public class DownloadableThemeDto
+{
+    public string Name { get; set; }
+    public string CssUrl { get; set; }
+    public string PreviewUrl { get; set; }
+}
+
 public class ThemeService : IThemeService
 {
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
+
+    private readonly string _githubBaseUrl = "https://api.github.com";
 
     public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork, IEventHub eventHub)
     {
@@ -46,6 +73,48 @@ public class ThemeService : IThemeService
             throw new KavitaException("theme-doesnt-exist");
 
         return await _directoryService.FileSystem.File.ReadAllTextAsync(themeFile);
+    }
+
+    public async Task<List<DownloadableThemeDto>> GetThemes(string owner, string repo)
+    {
+        // Fetch contents of the Native Themes directory
+        var themesContents = await $"{_githubBaseUrl}/repos/Kareadita/Themes/contents/Native%20Themes"
+            .WithHeader("Accept", "application/vnd.github.v3+json")
+            .GetJsonAsync<List<GitHubContent>>();
+
+        // Filter out directories
+        var themeDirectories = themesContents.Where(c => c.Type == "dir").ToList();
+
+        var themeDtos = new List<DownloadableThemeDto>();
+
+        foreach (var themeDir in themeDirectories)
+        {
+            var themeName = themeDir.Name;
+
+            // Fetch contents of the theme directory
+            var themeContents = await $"{_githubBaseUrl}/repos/{owner}/{repo}/contents/{themeDir.Path}"
+                .WithHeader("Accept", "application/vnd.github.v3+json")
+                .GetJsonAsync<List<GitHubContent>>();
+
+            // Find css and preview files
+            var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
+            var previewFile = themeContents.FirstOrDefault(c => c.Name.ToLower().Contains("preview.jpg"));
+
+            if (cssFile != null && previewFile != null)
+            {
+                var cssUrl = cssFile.DownloadUrl;
+                var previewUrl = previewFile.DownloadUrl;
+
+                themeDtos.Add(new DownloadableThemeDto()
+                {
+                    Name = themeName,
+                    CssUrl = cssUrl,
+                    PreviewUrl = previewUrl
+                });
+            }
+        }
+
+        return themeDtos;
     }
 
     /// <summary>
