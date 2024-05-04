@@ -22,7 +22,7 @@ import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -58,6 +58,8 @@ import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {TranslocoDatePipe} from "@ngneat/transloco-locale";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
+import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 
 @Component({
   selector: 'app-collection-detail',
@@ -65,7 +67,7 @@ import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
   styleUrls: ['./collection-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip, SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip, SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
@@ -86,7 +88,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
 
@@ -332,4 +334,5 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly Breakpoint = Breakpoint;
 }

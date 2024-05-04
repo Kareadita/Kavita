@@ -41,3 +41,11 @@ h2 {
   margin-bottom: 0;
   word-break: break-all;
 }
+
+.under-image {
+  background-color: var(--breadcrumb-bg-color);
+  color: white;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  text-align: center;
+}

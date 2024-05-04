@@ -14,24 +14,22 @@
     @if (summary.length > 0 || collectionTag.source !== ScrobbleProvider.Kavita) {
       <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
-          <app-image maxWidth="481px" [imageUrl]="imageService.getCollectionCoverImage(collectionTag.id)"></app-image>
+          <app-image [styles]="{'max-width': '481px'}" [imageUrl]="imageService.getCollectionCoverImage(collectionTag.id)"></app-image>
+          @if (collectionTag.source !== ScrobbleProvider.Kavita && collectionTag.missingSeriesFromSource !== null
+          && series.length !== collectionTag.totalSourceCount && collectionTag.totalSourceCount > 0) {
+            <div class="under-image">
+              <app-image [imageUrl]="collectionTag.source | providerImage"
+                         width="16px" height="16px" [styles]="{'vertical-align': 'text-top'}"
+                         [ngbTooltip]="collectionTag.source | providerName" tabindex="0"></app-image>
+              <span class="ms-2 me-2">{{t('sync-progress', {title: series.length + ' / ' + collectionTag.totalSourceCount})}}</span>
+              <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag.lastSyncUtc | date: 'shortDate' | defaultDate })"></i>
+            </div>
+          }
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
           @if (summary.length > 0) {
             <div class="mb-2">
-              <h4>Summary</h4>
-              <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
-            </div>
-          }
-          @if (collectionTag.source !== ScrobbleProvider.Kavita && collectionTag.missingSeriesFromSource !== null) {
-            <h4>Missing Series
-              @if (series) {
-                <span class=" ms-2">{{series.length}} / {{collectionTag.totalSourceCount}}</span>
-              }
-            </h4>
-            <app-read-more [text]="collectionTag.missingSeriesFromSource" [maxLength]="100"></app-read-more>
-            <div class="float-end">
-              Last Sync: {{collectionTag.lastSyncUtc | date:'shortDate' | defaultDate}}
+              <app-read-more [text]="summary" [maxLength]="utilityService.getActiveBreakpoint() < Breakpoint.Tablet ? 250 : 600"></app-read-more>
             </div>
           }
         </div>

@@ -949,7 +949,7 @@
         "general-tab": "General",
         "metadata-tab": "Metadata",
         "cover-tab": "Cover",
-        "info-tab": "Info",
+        "info-tab": "{{edit-series-modal.info-tab}}",
         "progress-tab": "Progress",
         "no-summary": "No Summary available.",
         "writers-title": "{{series-metadata-detail.writers-title}}",
@@ -1167,7 +1167,7 @@
         "encode-as-description-part-2": "Can I Use WebP?",
         "encode-as-description-part-3": "Can I Use AVIF?",
         "encode-as-warning": "You cannot convert back to PNG once you've gone to WebP/AVIF. You would need to refresh covers on your libraries to regenerate all covers. Bookmarks and favicons cannot be converted.",
-        "media-warning": "You must trigger the media conversion task in Tasks Tab.,",
+        "media-warning": "You must trigger the media conversion task in Tasks Tab.",
         "encode-as-label": "Save Media As",
         "encode-as-tooltip": "All media Kavita manages (covers, bookmarks, favicons) will be encoded as this type.",
         "bookmark-dir-label": "Bookmarks Directory",
@@ -1373,6 +1373,7 @@
         "cancel": "{{common.cancel}}",
         "general-tab": "General",
         "cover-image-tab": "Cover Image",
+        "info-tab": "{{edit-series-modal.info-tab}}",
         "series-tab": "Series",
         "name-label": "Name",
         "name-validation": "Name must be unique",
@@ -1423,7 +1424,9 @@
         "no-data": "There are no items. Try adding a series.",
         "no-data-filtered": "No items match your current filter.",
         "title-alt": "Kavita - {{collectionName}} Collection",
-        "series-header": "Series"
+        "series-header": "Series",
+        "sync-progress": "Series Collected: {{title}}",
+        "last-sync": "Last Sync: {{date}}"
     },
 
     "all-collections": {

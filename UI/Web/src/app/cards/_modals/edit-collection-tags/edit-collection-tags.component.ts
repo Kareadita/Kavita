@@ -24,26 +24,29 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule, NgTemplateOutlet} from "@angular/common";
+import {CommonModule, DatePipe, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
 import {AccountService} from "../../../_services/account.service";
+import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
+import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 
 
 enum TabID {
   General = 'general-tab',
   CoverImage = 'cover-image-tab',
-  Series = 'series-tab'
+  Series = 'series-tab',
+  Info = 'info-tab'
 }
 
 @Component({
   selector: 'app-edit-collection-tags',
   standalone: true,
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
-    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe],
+    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
