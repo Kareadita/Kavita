@@ -3,7 +3,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.8.1.1</AssemblyVersion>
+        <AssemblyVersion>0.8.1.3</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <TieredPGO>true</TieredPGO>
     </PropertyGroup>
