@@ -87,9 +87,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         {
             try
             {
-                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(collection.AppUserId, AppUserIncludes.Collections);
-                if (user == null) continue;
-                await SyncCollection(user, collection); // user.Collections.First(c => c.Id == collection.Id)
+                await SyncCollection(collection);
             }
             catch (RateLimitException)
             {
@@ -104,13 +102,15 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
     {
         if (!await _licenseService.HasActiveLicense()) return;
         var collection = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionId, CollectionIncludes.Series);
-        if (!CanSync(collection)) return;
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(collection!.AppUserId, AppUserIncludes.Collections);
-        if (user == null) return;
-        _logger.LogInformation("Requested to sync {CollectionName} but not applicable to sync", collection!.Title);
+        if (!CanSync(collection))
+        {
+            _logger.LogInformation("Requested to sync {CollectionName} but not applicable to sync", collection!.Title);
+            return;
+        }
+
         try
         {
-            await SyncCollection(user, collection); // user.Collections.First(c => c.Id == collection.Id)
+            await SyncCollection(collection!);
         } catch (RateLimitException) {/* Swallow */}
     }
 
@@ -122,7 +122,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         return true;
     }
 
-    private async Task SyncCollection(AppUser user, AppUserCollection collection)
+    private async Task SyncCollection(AppUserCollection collection)
     {
         if (!RateLimiter.TryAcquire(string.Empty))
         {
@@ -134,7 +134,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         var info = await GetStackInfo(GetStackId(collection.SourceUrl!));
         if (info == null)
         {
-            _logger.LogInformation("Unable to find stack through Kavita+");
+            _logger.LogInformation("Unable to find collection through Kavita+");
             return;
         }
 
@@ -146,37 +146,53 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         var missingSeries = new StringBuilder();
         foreach (var seriesInfo in info.Series.OrderBy(s => s.SeriesName))
         {
-            // Normalize series name and localized name
-            var normalizedSeriesName = seriesInfo.SeriesName?.ToNormalized();
-            var normalizedLocalizedSeriesName = seriesInfo.LocalizedSeriesName?.ToNormalized();
-
-            // Search for existing series in the collection
-            var formats = GetMangaFormats(seriesInfo.PlusMediaFormat);
-            var existingSeries = collection.Items.FirstOrDefault(s =>
-                (s.Name.ToNormalized() == normalizedSeriesName ||
-                 s.NormalizedName == normalizedSeriesName ||
-                 s.LocalizedName.ToNormalized() == normalizedLocalizedSeriesName ||
-                 s.NormalizedLocalizedName == normalizedLocalizedSeriesName)
-            && formats.Contains(s.Format));
-
-            if (existingSeries != null) continue;
-
-            // Series not found in the collection, try to find it in the server
-            var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName,
-                formats, collection.AppUserId);
-
-            if (newSeries != null)
+            try
             {
-                // Add the new series to the collection
-                if (collection.Items.Contains(newSeries)) continue;
+                // Normalize series name and localized name
+                var normalizedSeriesName = seriesInfo.SeriesName?.ToNormalized();
+                var normalizedLocalizedSeriesName = seriesInfo.LocalizedSeriesName?.ToNormalized();
 
-                collection.Items.Add(newSeries);
+                // Search for existing series in the collection
+                var formats = GetMangaFormats(seriesInfo.PlusMediaFormat);
+                var existingSeries = collection.Items.FirstOrDefault(s =>
+                    (s.Name.ToNormalized() == normalizedSeriesName ||
+                     s.NormalizedName == normalizedSeriesName ||
+                     s.LocalizedName.ToNormalized() == normalizedLocalizedSeriesName ||
+                     s.NormalizedLocalizedName == normalizedLocalizedSeriesName ||
+
+                     s.NormalizedName == normalizedLocalizedSeriesName ||
+                     s.NormalizedLocalizedName == normalizedSeriesName)
+                    && formats.Contains(s.Format));
+
+                if (existingSeries != null) continue;
+
+                // Series not found in the collection, try to find it in the server
+                var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName,
+                    seriesInfo.LocalizedSeriesName,
+                    formats, collection.AppUserId);
+
+                collection.Items ??= new List<Series>();
+                if (newSeries != null)
+                {
+                    // Add the new series to the collection
+                    collection.Items.Add(newSeries);
+
+                }
+                else
+                {
+                    _logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
+                    missingCount++;
+                    missingSeries.Append(
+                        $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
+                    missingSeries.Append("<br/>");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
+                _logger.LogError(ex, "An exception occured when linking up a series to the collection. Skipping");
                 missingCount++;
-                missingSeries.Append($"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
+                missingSeries.Append(
+                    $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
                 missingSeries.Append("<br/>");
             }
 
@@ -189,7 +205,6 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         collection.Summary = info.Summary;
         collection.MissingSeriesFromSource = missingSeries.ToString();
 
-        // BUG: Collections have some issue with how they are tracked so saving series updates to them is convoluted.
         _unitOfWork.CollectionTagRepository.Update(collection);
 
         try
