@@ -97,7 +97,7 @@ public interface ISeriesRepository
     Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
     Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user);
-    Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
+    Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds, bool fullSeries = true);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
     /// <summary>
@@ -538,15 +538,19 @@ public class SeriesRepository : ISeriesRepository
     /// Returns Full Series including all external links
     /// </summary>
     /// <param name="seriesIds"></param>
+    /// <param name="fullSeries">Include all the includes or just the Series</param>
     /// <returns></returns>
-    public async Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds)
+    public async Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds, bool fullSeries = true)
     {
-        return await _context.Series
-            .Include(s => s.Volumes)
+        var query = _context.Series
+            .Where(s => seriesIds.Contains(s.Id))
+            .AsSplitQuery();
+
+        if (!fullSeries) return await query.ToListAsync();
+
+        return await query.Include(s => s.Volumes)
             .Include(s => s.Relations)
             .Include(s => s.Metadata)
-            .ThenInclude(m => m.CollectionTags)
-
 
             .Include(s => s.ExternalSeriesMetadata)
 
@@ -556,9 +560,6 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(e => e.ExternalReviews)
             .Include(s => s.ExternalSeriesMetadata)
             .ThenInclude(e => e.ExternalRecommendations)
-
-            .Where(s => seriesIds.Contains(s.Id))
-            .AsSplitQuery()
             .ToListAsync();
     }
 

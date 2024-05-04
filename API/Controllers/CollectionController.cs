@@ -203,7 +203,7 @@ public class CollectionController : BaseApiController
             return BadRequest(_localizationService.Translate(User.GetUserId(), "collection-doesnt-exists"));
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList());
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
         foreach (var s in series)
         {
             if (tag.Items.Contains(s)) continue;

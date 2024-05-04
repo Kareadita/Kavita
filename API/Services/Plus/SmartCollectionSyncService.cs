@@ -77,8 +77,8 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
     public async Task Sync()
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        var lastSync = DateTime.UtcNow.AddDays(SyncDelta).Truncate(TimeSpan.TicksPerHour);
-        var collections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(lastSync))
+        var expirationTime = DateTime.UtcNow.AddDays(SyncDelta).Truncate(TimeSpan.TicksPerHour);
+        var collections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(expirationTime))
             .Where(CanSync)
             .ToList();
 
@@ -137,9 +137,6 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
             _logger.LogInformation("Unable to find stack through Kavita+");
             return;
         }
-
-        // Check each series in the collection against what's in the target
-        // For everything that's not there, link it up for this user.
 
         // Check each series in the collection against what's in the target
         // For everything that's not there, link it up for this user.
