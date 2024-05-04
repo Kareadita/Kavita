@@ -24,7 +24,7 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule, DatePipe, NgTemplateOutlet} from "@angular/common";
+import {CommonModule, DatePipe, DecimalPipe, NgIf, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
@@ -34,6 +34,10 @@ import {AccountService} from "../../../_services/account.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 
 
 enum TabID {
@@ -47,7 +51,7 @@ enum TabID {
   selector: 'app-edit-collection-tags',
   standalone: true,
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
-    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent, SafeHtmlPipe],
+    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent, SafeHtmlPipe, SafeUrlPipe, MangaFormatPipe, NgIf, SentenceCasePipe, TagBadgeComponent, DecimalPipe],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

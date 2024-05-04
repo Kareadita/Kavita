@@ -1382,7 +1382,11 @@
         "summary-label": "Summary",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "last-sync-title": "Last Sync:",
+        "source-url-title": "Source Url:",
+        "total-series-title": "Total Series:",
+        "missing-series-title": "Missing Series:"
     },
 
     "library-detail": {

@@ -109,23 +109,34 @@
         <li [ngbNavItem]="TabID.Info">
           <a ngbNavLink>{{t(TabID.Info)}}</a>
           <ng-template ngbNavContent>
-            <div class="row g-0">
-              <span>Last Sync: </span><span>{{tag.lastSyncUtc | date:'shortDate' | defaultDate}}</span>
-            </div>
-            <div class="row g-0">
-              <span>Source Url: </span>{{tag.sourceUrl}}
-            </div>
-
-            @if (tag.missingSeriesFromSource !== null) {
-              <div class="row g-0">
-                <span>Missing Series: </span>{{tag.totalSourceCount - series.length}}
+            <div class="row g-0 mb-2">
+              <div class="col-md-6">
+                <div>{{t('last-sync-title')}}</div>
+                <div>{{tag.lastSyncUtc | date:'shortDate' | defaultDate}}</div>
               </div>
+              <div class="col-md-6">
+                <div>{{t('source-url-title')}}</div>
+                <a [href]="tag.sourceUrl | safeUrl" rel="noopener noreferrer" target="_blank">{{tag.sourceUrl}}</a>
+              </div>
+            </div>
+            <div class="row g-0 mb-2">
+              <div class="col-md-6">
+                <div>{{t('total-series-title')}}</div>
+                <div>{{tag.totalSourceCount | number}}</div>
+              </div>
+              <div class="col-md-6">
+                <div>{{t('missing-series-title')}}</div>
+                <div>{{tag.totalSourceCount - series.length}}</div>
+              </div>
+            </div>
 
+
+            @if (tag.missingSeriesFromSource !== null && (tag.totalSourceCount - series.length) > 0) {
+              <h6>{{t('missing-series-title')}}</h6>
               <div class="row g-0">
                 <p [innerHTML]="tag.missingSeriesFromSource | safeHtml"></p>
               </div>
             }
-
           </ng-template>
         </li>
       }
