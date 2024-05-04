@@ -82,7 +82,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Reviews = ArraySegment<UserReviewDto>.Empty
     };
     // Allow 50 requests per 24 hours
-    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(12), false);
+    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
     {

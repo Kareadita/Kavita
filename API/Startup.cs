@@ -139,7 +139,7 @@ public class Startup
             {
                 Version = BuildInfo.Version.ToString(),
                 Title = "Kavita",
-                Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
+                Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required.",
                 License = new OpenApiLicense
                 {
                     Name = "GPL-3.0",

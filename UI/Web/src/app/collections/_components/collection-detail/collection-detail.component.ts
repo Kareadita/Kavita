@@ -1,4 +1,4 @@
-import {DOCUMENT, NgIf, NgStyle} from '@angular/common';
+import {DatePipe, DOCUMENT, NgIf, NgStyle} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -15,14 +15,14 @@ import {
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -54,6 +54,12 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {TranslocoDatePipe} from "@ngneat/transloco-locale";
+import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
+import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
+import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 
 @Component({
   selector: 'app-collection-detail',
@@ -61,7 +67,7 @@ import {User} from "../../../_models/user";
   styleUrls: ['./collection-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip, SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
@@ -82,7 +88,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
 
@@ -213,7 +219,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
-      if (event.event == EVENTS.SeriesAddedToCollection) {
+      if (event.event == EVENTS.CollectionUpdated) {
         const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
         if (collectionEvent.tagId === this.collectionTag.id) {
           this.loadPage();
@@ -326,4 +332,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.loadPage();
     });
   }
+
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly Breakpoint = Breakpoint;
 }

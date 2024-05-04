@@ -898,8 +898,6 @@ public class AccountController : BaseApiController
     {
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (!settings.IsEmailSetup()) return Ok(await _localizationService.Get("en", "email-not-enabled"));
-
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
         if (user == null)
         {
@@ -914,11 +912,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
             return BadRequest(await _localizationService.Translate(user.Id, "confirm-email"));
 
-        if (!_emailService.IsValidEmail(user.Email))
-        {
-            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send. Admin must change it in UI", user.Email);
-            return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
-        }
+
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var emailLink = await _emailService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
@@ -926,6 +920,13 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
         _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+
+        if (!settings.IsEmailSetup()) return Ok(await _localizationService.Get("en", "email-not-enabled"));
+        if (!_emailService.IsValidEmail(user.Email))
+        {
+            _logger.LogCritical("[Forgot Password]: User is trying to do a forgot password flow, but their email ({Email}) isn't valid. No email will be send. Admin must change it in UI or from url above", user.Email);
+            return Ok(await _localizationService.Translate(user.Id, "invalid-email"));
+        }
 
         var installId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value;
         BackgroundJob.Enqueue(() => _emailService.SendForgotPasswordEmail(new PasswordResetEmailDto()

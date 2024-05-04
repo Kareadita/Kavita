@@ -49,6 +49,8 @@
     "collection-deleted": "Collection deleted",
     "generic-error": "Something went wrong, please try again",
     "collection-doesnt-exist": "Collection does not exist",
+    "collection-already-exists":"Collection already exists",
+    "error-import-stack": "There was an issue importing MAL stack",
 
     "device-doesnt-exist": "Device does not exist",
     "generic-device-create": "There was an error when creating the device",

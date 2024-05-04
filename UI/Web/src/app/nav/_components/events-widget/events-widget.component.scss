@@ -15,10 +15,10 @@
 }
 
 ::ng-deep .nav-events {
-    
+
     .popover-body {
-        min-width: 250px;
-        max-width: 250px;
+        min-width: 300px;
+        max-width: 300px;
         padding: 0px;
         box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
         max-height: calc(100vh - 60px);
@@ -42,7 +42,7 @@
     width: 100%;
     text-overflow: ellipsis;
     overflow:hidden;
-    white-space:nowrap; 
+    white-space:nowrap;
 }
 
 .btn:focus, .btn:hover {
@@ -76,7 +76,7 @@
 
 .update-available {
     cursor: pointer;
-    
+
     i.fa {
         color: var(--primary-color) !important;
     }

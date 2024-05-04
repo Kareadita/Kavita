@@ -2,9 +2,9 @@
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       @if (total > 0 || suppressArchiveWarning) {
-        <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px"  [imageUrl]="imageUrl"></app-image>
+        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
       } @else if (total === 0 && !suppressArchiveWarning) {
-        <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
+        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
       }
 
       <div class="progress-banner">

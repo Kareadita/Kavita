@@ -52,7 +52,14 @@ public class AppUserCollection : IEntityDate
     /// For Non-Kavita sourced collections, the url to sync from
     /// </summary>
     public string? SourceUrl { get; set; }
-
+    /// <summary>
+    /// Total number of items as of the last sync. Not applicable for Kavita managed collections.
+    /// </summary>
+    public int TotalSourceCount { get; set; }
+    /// <summary>
+    /// A <br/> separated string of all missing series
+    /// </summary>
+    public string? MissingSeriesFromSource { get; set; }
 
     // Relationship
     public AppUser AppUser { get; set; } = null!;

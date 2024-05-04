@@ -17,7 +17,10 @@ export enum EVENTS {
   SeriesRemoved = 'SeriesRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
-  SeriesAddedToCollection = 'SeriesAddedToCollection',
+  /**
+   * When a Collection has been updated
+   */
+  CollectionUpdated = 'CollectionUpdated',
   /**
    * A generic error that occurs during operations on the server
    */
@@ -40,6 +43,10 @@ export enum EVENTS {
    * A subtype of NotificationProgress that represents the underlying file being processed during a scan
    */
   FileScanProgress = 'FileScanProgress',
+  /**
+   * A subtype of NotificationProgress that represents a single series being processed (into the DB)
+   */
+  ScanProgress = 'ScanProgress',
   /**
    * A custom user site theme is added or removed during a scan
    */
@@ -141,7 +148,7 @@ export class MessageHubService {
         accessTokenFactory: () => user.token
       })
       .withAutomaticReconnect()
-      //.withStatefulReconnect() // Needs @microsoft/signalr@8
+      .withStatefulReconnect()
       .build();
 
     this.hubConnection
@@ -214,9 +221,9 @@ export class MessageHubService {
       });
     });
 
-    this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
+    this.hubConnection.on(EVENTS.CollectionUpdated, resp => {
       this.messagesSource.next({
-        event: EVENTS.SeriesAddedToCollection,
+        event: EVENTS.CollectionUpdated,
         payload: resp.body
       });
     });

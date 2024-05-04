@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Services.Plus;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,7 @@ public interface ICollectionTagRepository
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None);
     Task UpdateCollectionAgeRating(AppUserCollection tag);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None);
+    Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -203,6 +205,16 @@ public class CollectionTagRepository : ICollectionTagRepository
         return await _context.AppUserCollection
             .Where(c => tags.Contains(c.Id))
             .Includes(includes)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime)
+    {
+        return await _context.AppUserCollection
+            .Where(c => c.Source == ScrobbleProvider.Mal)
+            .Where(c => c.LastSyncUtc <= expirationTime)
+            .Include(c => c.Items)
             .AsSplitQuery()
             .ToListAsync();
     }

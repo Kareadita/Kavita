@@ -69,4 +69,10 @@ public class AppUserCollectionBuilder : IEntityBuilder<AppUserCollection>
         _collection.CoverImage = cover;
         return this;
     }
+
+    public AppUserCollectionBuilder WithSourceUrl(string url)
+    {
+        _collection.SourceUrl = url;
+        return this;
+    }
 }

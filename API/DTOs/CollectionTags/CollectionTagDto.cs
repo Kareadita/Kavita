@@ -1,5 +1,8 @@
-﻿namespace API.DTOs.CollectionTags;
+﻿using System;
 
+namespace API.DTOs.CollectionTags;
+
+[Obsolete("Use AppUserCollectionDto")]
 public class CollectionTagDto
 {
     public int Id { get; set; }

@@ -10,7 +10,7 @@
   <div class="offcanvas-body">
     <ng-container *ngIf="CoverUrl as coverUrl">
       <div style="width: 160px" class="mx-auto mb-3">
-        <app-image *ngIf="coverUrl" height="230px" width="160px" maxHeight="230px" objectFit="contain" [imageUrl]="coverUrl"></app-image>
+        <app-image *ngIf="coverUrl" height="230px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '230px'}" [imageUrl]="coverUrl"></app-image>
       </div>
     </ng-container>
 
@@ -55,7 +55,7 @@
               <div class="row g-0">
                 <div class="col-md-4">
                   <ng-container *ngIf="item.imageUrl && !item.imageUrl.endsWith('default.jpg'); else localPerson">
-                    <app-image height="24px" width="24px" objectFit="contain" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
+                    <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
                   </ng-container>
                   <ng-template #localPerson>
                     <i class="fa fa-user-circle align-self-center person-img" style="font-size: 28px;" aria-hidden="true"></i>

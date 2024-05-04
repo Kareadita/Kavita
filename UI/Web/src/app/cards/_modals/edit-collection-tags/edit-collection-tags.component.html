@@ -48,51 +48,53 @@
         </ng-template>
       </li>
 
-      <li [ngbNavItem]="TabID.Series">
-        <a ngbNavLink>{{t(TabID.Series)}}</a>
-        <ng-template ngbNavContent>
-          @if (!isLoading) {
-            <div class="list-group">
-              <form [formGroup]="formGroup">
-                <div class="row g-0 mb-3">
-                  <div class="col-md-12">
-                    <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
-                    <div class="input-group">
-                      <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+      @if (tag.source === ScrobbleProvider.Kavita) {
+        <li [ngbNavItem]="TabID.Series">
+          <a ngbNavLink>{{t(TabID.Series)}}</a>
+          <ng-template ngbNavContent>
+            @if (!isLoading) {
+              <div class="list-group">
+                <form [formGroup]="formGroup">
+                  <div class="row g-0 mb-3">
+                    <div class="col-md-12">
+                      <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+                      <div class="input-group">
+                        <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+                      </div>
                     </div>
                   </div>
+                </form>
+                <div class="form-check">
+                  <input id="select-all" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
+                         [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+                  <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
                 </div>
-              </form>
-              <div class="form-check">
-                <input id="select-all" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
-                       [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-                <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
-              </div>
-              <ul>
-                @for (item of series | filter: filterList; let i = $index; track item.id) {
-                  <li class="list-group-item">
-                    <div class="form-check">
-                      <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
-                             [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
-                      <label for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
-                    </div>
-                  </li>
+                <ul>
+                  @for (item of series | filter: filterList; let i = $index; track item.id) {
+                    <li class="list-group-item">
+                      <div class="form-check">
+                        <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
+                               [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
+                        <label for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
+                      </div>
+                    </li>
+                  }
+                </ul>
+                @if (pagination && series.length !== 0 && pagination.totalPages > 1) {
+                  <div class="d-flex justify-content-center">
+                    <ngb-pagination
+                      [(page)]="pagination.currentPage"
+                      [pageSize]="pagination.itemsPerPage"
+                      (pageChange)="onPageChange($event)"
+                      [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+                      [collectionSize]="pagination.totalItems"></ngb-pagination>
+                  </div>
                 }
-              </ul>
-              @if (pagination && series.length !== 0 && pagination.totalPages > 1) {
-                <div class="d-flex justify-content-center">
-                  <ngb-pagination
-                    [(page)]="pagination.currentPage"
-                    [pageSize]="pagination.itemsPerPage"
-                    (pageChange)="onPageChange($event)"
-                    [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
-                    [collectionSize]="pagination.totalItems"></ngb-pagination>
-                </div>
-              }
-            </div>
-          }
-        </ng-template>
-      </li>
+              </div>
+            }
+          </ng-template>
+        </li>
+      }
 
       <li [ngbNavItem]="TabID.CoverImage">
         <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
@@ -102,6 +104,43 @@
                                    (resetClicked)="handleReset()"></app-cover-image-chooser>
         </ng-template>
       </li>
+
+      @if (tag.source !== ScrobbleProvider.Kavita) {
+        <li [ngbNavItem]="TabID.Info">
+          <a ngbNavLink>{{t(TabID.Info)}}</a>
+          <ng-template ngbNavContent>
+            <div class="row g-0 mb-2">
+              <div class="col-md-6">
+                <div>{{t('last-sync-title')}}</div>
+                <div>{{tag.lastSyncUtc | date:'shortDate' | defaultDate}}</div>
+              </div>
+              <div class="col-md-6">
+                <div>{{t('source-url-title')}}</div>
+                <a [href]="tag.sourceUrl | safeUrl" rel="noopener noreferrer" target="_blank">{{tag.sourceUrl}}</a>
+              </div>
+            </div>
+            <div class="row g-0 mb-2">
+              <div class="col-md-6">
+                <div>{{t('total-series-title')}}</div>
+                <div>{{tag.totalSourceCount | number}}</div>
+              </div>
+              <div class="col-md-6">
+                <div>{{t('missing-series-title')}}</div>
+                <div>{{tag.totalSourceCount - series.length}}</div>
+              </div>
+            </div>
+
+
+            @if (tag.missingSeriesFromSource !== null && (tag.totalSourceCount - series.length) > 0) {
+              <h6>{{t('missing-series-title')}}</h6>
+              <div class="row g-0">
+                <p [innerHTML]="tag.missingSeriesFromSource | safeHtml"></p>
+              </div>
+            }
+          </ng-template>
+        </li>
+      }
+
     </ul>
 
     <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>

@@ -64,4 +64,8 @@ export class CollectionTagService {
     if (isPromotionAction) return canPromote;
     return true;
   }
+
+  importStack(stack: MalStack) {
+    return this.httpClient.post(this.baseUrl + 'collection/import-stack', stack, TextResonse);
+  }
 }

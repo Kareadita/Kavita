@@ -1,7 +1,7 @@
 <div class="tagbadge cursor clickable" *ngIf="person !== undefined">
     <div class="d-flex">
         <ng-container *ngIf="isStaff && staff.imageUrl && !staff.imageUrl.endsWith('default.jpg'); else localPerson">
-          <app-image height="24px" width="24px" objectFit="contain" [imageUrl]="staff.imageUrl"></app-image>
+          <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}"[imageUrl]="staff.imageUrl"></app-image>
         </ng-container>
         <ng-template #localPerson>
           <i class="fa fa-user-circle align-self-center me-2" aria-hidden="true"></i>
