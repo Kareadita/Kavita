@@ -113,7 +113,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
 
         // Check each series in the collection against what's in the target
         // For everything that's not there, link it up for this user.
-        _logger.LogInformation("Adding new series to collection");
+        _logger.LogInformation("Starting Sync on {CollectionName} with {SeriesCount} Series", info.Title, info.TotalItems);
 
         var missingCount = 0;
         var missingSeries = new StringBuilder();
@@ -143,7 +143,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 }
                 else
                 {
-                    _logger.LogWarning("{Series} not found in the server", seriesInfo.SeriesName);
+                    _logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
                     missingCount++;
                     missingSeries.Append($"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
                     missingSeries.Append("<br/>");

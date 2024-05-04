@@ -1,4 +1,4 @@
-<ng-container *ngIf="data$ | async as data">
+@if (data$ | async; as data) {
   <div class="card" style="width: 18rem;">
     <div class="card-header text-center">
       {{title}}
@@ -22,5 +22,6 @@
       }
     </ul>
   </div>
-</ng-container>
-<ng-template #tooltip></ng-template>
+}
+
+<ng-template #tooltip>{{description}}</ng-template>

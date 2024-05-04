@@ -110,23 +110,21 @@
           <a ngbNavLink>{{t(TabID.Info)}}</a>
           <ng-template ngbNavContent>
             <div class="row g-0">
-              Last Sync: {{tag.lastSyncUtc | date:'shortDate' | defaultDate}}
+              <span>Last Sync: </span><span>{{tag.lastSyncUtc | date:'shortDate' | defaultDate}}</span>
             </div>
             <div class="row g-0">
-              Source Url: {{tag.sourceUrl}}
+              <span>Source Url: </span>{{tag.sourceUrl}}
             </div>
 
-             <div class="row g-0">
-               @if (tag.missingSeriesFromSource !== null) {
-                 <h4>Missing Series
-                   @if (series) {
-                     <span class=" ms-2">{{series.length}} / {{tag.totalSourceCount}}</span>
-                   }
-                 </h4>
-                 <app-read-more [text]="tag.missingSeriesFromSource" [maxLength]="100"></app-read-more>
-               }
-             </div>
+            @if (tag.missingSeriesFromSource !== null) {
+              <div class="row g-0">
+                <span>Missing Series: </span>{{tag.totalSourceCount - series.length}}
+              </div>
 
+              <div class="row g-0">
+                <p [innerHTML]="tag.missingSeriesFromSource | safeHtml"></p>
+              </div>
+            }
 
           </ng-template>
         </li>

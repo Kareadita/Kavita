@@ -33,6 +33,7 @@ import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
 import {AccountService} from "../../../_services/account.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 
 enum TabID {
@@ -46,7 +47,7 @@ enum TabID {
   selector: 'app-edit-collection-tags',
   standalone: true,
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
-    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent],
+    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent, SafeHtmlPipe],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
