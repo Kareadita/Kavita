@@ -148,7 +148,7 @@ export class MessageHubService {
         accessTokenFactory: () => user.token
       })
       .withAutomaticReconnect()
-      .withStatefulReconnect()
+      //.withStatefulReconnect() // Requires signalr@8.0
       .build();
 
     this.hubConnection
