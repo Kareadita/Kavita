@@ -27,11 +27,10 @@ img {
   .full-height {
     width: auto;
     margin: auto;
-    max-height: calc(var(--vh)*100);
-    height: calc(var(--vh) * 100);
-    overflow: hidden; // This technically will crop and make it just fit
+    max-height: -webkit-fill-available;
+    height: -webkit-fill-available;
     vertical-align: top;
-    object-fit: contain;
+    object-fit: cover;
       &.wide {
         height: 100vh;
     }
