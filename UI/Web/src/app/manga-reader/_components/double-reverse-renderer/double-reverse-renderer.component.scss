@@ -29,8 +29,14 @@
     }
 }
 
-.image-container.full-height {
-    display: inline-block;
+.image-container {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+
+    .full-height {
+        margin: unset;
+    }
 }
 
 .full-width {
