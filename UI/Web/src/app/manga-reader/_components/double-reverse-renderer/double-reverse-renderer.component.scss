@@ -34,8 +34,10 @@
     align-content: center;
     justify-content: center;
 
+
     .full-height {
         margin: unset;
+        object-fit: contain;
     }
 }
 
