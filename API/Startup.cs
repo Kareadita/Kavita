@@ -398,7 +398,10 @@ public class Startup
             endpoints.MapControllers();
             endpoints.MapHub<MessageHub>("hubs/messages");
             endpoints.MapHub<LogHub>("hubs/logs");
-            endpoints.MapHangfireDashboard();
+            if (env.IsDevelopment())
+            {
+                endpoints.MapHangfireDashboard();
+            }
             endpoints.MapFallbackToController("Index", "Fallback");
         });
 
