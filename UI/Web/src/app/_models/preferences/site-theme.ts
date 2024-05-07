@@ -3,9 +3,10 @@
  */
  export enum ThemeProvider {
     System = 1,
-    User = 2
+    User = 2,
+    Downloaded
   }
-  
+
   /**
    * Theme for the whole instance
    */
@@ -20,4 +21,5 @@
      * The actual class the root is defined against. It is generated at the backend.
      */
     selector: string;
+    
   }

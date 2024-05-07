@@ -20,6 +20,7 @@ import { TextResonse } from '../_types/text-response';
 import { EVENTS, MessageHubService } from './message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate} from "@ngneat/transloco";
+import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 
 
 @Injectable({
@@ -62,6 +63,14 @@ export class ThemeService {
         });
       }
     });
+  }
+
+  getDownloadableThemes() {
+    return this.httpClient.get<Array<DownloadableSiteTheme>>(this.baseUrl + 'theme/browse');
+  }
+
+  downloadTheme(theme: DownloadableSiteTheme) {
+    return this.httpClient.post<SiteTheme>(this.baseUrl + 'theme/download-theme', theme);
   }
 
   getColorScheme() {

@@ -1,0 +1,50 @@
+<ng-container *transloco="let t; read: 'browse-themes-modal'">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="ngbModal.close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal">
+    <p>{{t('description')}}</p>
+
+    <ul>
+      @for(theme of downloadableThemes; track theme.name) {
+        <li class="mb-2">
+          <div>
+            <app-image width="106px" [styles]="{'max-height': '230px'}" class="img-top me-3" [imageUrl]="theme.previewUrl"></app-image>
+            <div>{{theme.name}}</div>
+          </div>
+          <div>
+            <button class="btn btn-primary float-end" (click)="download(theme)">Download</button>
+          </div>
+<!--          <div>by {{theme.author}} • {{theme.version}} Compatible</div>-->
+        </li>
+      } @empty {
+        <app-loading [loading]="isLoading"></app-loading>
+        @if(!isLoading) {
+          <p>{{t('nothing-found')}}</p>
+        }
+      }
+    </ul>
+
+  </div>
+
+  <div class="modal-footer">
+    <!--    <div class="col-auto">-->
+    <!--      <a class="btn btn-icon" href="https://wiki.kavitareader.com/guides/features/readinglists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>-->
+    <!--    </div>-->
+    <!--    <div class="col-auto">-->
+    <!--      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>-->
+    <!--    </div>-->
+    <!--    <div class="col-auto">-->
+    <!--      <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>-->
+    <!--    </div>-->
+    <!--    <div class="col-auto">-->
+    <!--      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>-->
+    <!--    </div>-->
+    <div class="col-auto">
+      <button type="button" class="btn btn-secondary" (click)="ngbModal.dismiss()">{{t('close')}}</button>
+    </div>
+  </div>
+
+</ng-container>

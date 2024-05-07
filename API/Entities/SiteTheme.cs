@@ -37,4 +37,15 @@ public class SiteTheme : IEntityDate, ITheme
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+    /// <summary>
+    /// The Url on the repo to download the file from
+    /// </summary>
+    public string? GitHubPath { get; set; }
+    /// <summary>
+    /// Hash of the Css File
+    /// </summary>
+    public string? ShaHash { get; set; }
+
+    // Might want to store primary and secondary color here (read from css) to make the UI a bit nicer
 }

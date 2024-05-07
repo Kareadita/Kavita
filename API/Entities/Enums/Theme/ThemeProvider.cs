@@ -13,5 +13,10 @@ public enum ThemeProvider
     /// Theme is provided by the User (ie it's custom)
     /// </summary>
     [Description("User")]
-    User = 2
+    User = 2,
+    /// <summary>
+    /// Theme was downloaded via Kavita Themes Repo
+    /// </summary>
+    [Description("Downloaded")]
+    Downloaded = 3
 }

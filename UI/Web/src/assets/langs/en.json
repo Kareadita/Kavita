@@ -182,15 +182,16 @@
 
     "theme-manager": {
         "title": "Theme Manager",
-        "looking-for-theme": "Looking for a light or e-ink theme? We have some custom themes you can use on our ",
-        "looking-for-theme-continued": "theme github.",
+        "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Start by browsing for a new theme and downloading it.",
         "scan": "Scan",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
         "apply": "{{common.apply}}",
         "applied": "Applied",
         "updated-toastr": "Site default has been updated to {{name}}",
-        "scan-queued": "A site theme scan has been queued"
+        "scan-queued": "A site theme scan has been queued",
+        "browse": "Browse",
+        "delete": "{{common.delete}}"
     },
 
     "theme": {
@@ -212,7 +213,8 @@
 
     "site-theme-provider-pipe": {
         "system": "System",
-        "user": "User"
+        "user": "User",
+        "downloaded": "Downloaded"
     },
 
     "manage-devices": {
@@ -1583,14 +1585,17 @@
         "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
     },
 
-
+    "browse-themes-modal": {
+        "title": "Browse Themes"
+    },
 
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
         "title": "MAL Interest Stack Import",
         "description": "Import your MAL Interest Stacks and create Collections within Kavita",
         "series-count": "{{common.series-count}}",
-        "restack-count": "{{num}} Restacks"
+        "restack-count": "{{num}} Restacks",
+        "nothing-found": ""
     },
 
     "edit-chapter-progress": {

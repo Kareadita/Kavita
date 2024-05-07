@@ -19,6 +19,7 @@ public interface ISiteThemeRepository
     Task<SiteThemeDto?> GetThemeDtoByName(string themeName);
     Task<SiteTheme> GetDefaultTheme();
     Task<IEnumerable<SiteTheme>> GetThemes();
+    Task<SiteTheme?> GetTheme(int themeId);
 }
 
 public class SiteThemeRepository : ISiteThemeRepository
@@ -86,6 +87,13 @@ public class SiteThemeRepository : ISiteThemeRepository
     {
         return await _context.SiteTheme
             .ToListAsync();
+    }
+
+    public async Task<SiteTheme> GetTheme(int themeId)
+    {
+        return await _context.SiteTheme
+            .Where(t => t.Id == themeId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<SiteThemeDto?> GetThemeDto(int themeId)
