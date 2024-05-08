@@ -150,14 +150,14 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
         if (mode !== FITTING_OPTION.HEIGHT) return '';
 
         const readingArea = this.document.querySelector('.reading-area');
-        if (!readingArea) return 'calc(100vh)';
+        if (!readingArea) return 'calc(100dvh)';
 
         // If you ever see fit to height and a bit of scrollbar, it's due to currentImage not being ready on first load
         if (this.currentImage?.width - readingArea.scrollWidth > 0) {
           // we also need to check if this is FF or Chrome. FF doesn't require the -34px as it doesn't render a scrollbar
-          return 'calc(100vh - 34px)';
+          return 'calc(100dvh)';
         }
-        return 'calc(100vh)';
+        return 'calc(100dvh)';
       }),
       filter(_ => this.isValid())
     );
