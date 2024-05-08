@@ -31,7 +31,7 @@ img {
     max-height: calc(100dvh);
     height: calc(100dvh);
     vertical-align: top;
-    object-fit: cover;
+    object-fit: contain;
       &.wide {
         height: calc(100dvh);
     }
