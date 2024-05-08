@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace API.DTOs.Theme;
 
@@ -17,7 +18,7 @@ public class DownloadableSiteThemeDto
     /// <summary>
     /// Url to preview image
     /// </summary>
-    public string PreviewUrl { get; set; }
+    public IList<string> PreviewUrls { get; set; }
     /// <summary>
     /// If Already downloaded
     /// </summary>

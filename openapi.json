@@ -15898,8 +15898,11 @@
             "type": "string",
             "nullable": true
           },
-          "previewUrl": {
-            "type": "string",
+          "previewUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "description": "Url to preview image",
             "nullable": true
           },

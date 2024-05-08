@@ -10,7 +10,10 @@ using API.Entities.Enums.Theme;
 using API.Extensions;
 using API.SignalR;
 using Flurl.Http;
+using HtmlAgilityPack;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
+using MarkdownDeep;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -49,6 +52,17 @@ internal class GitHubContent
     public string Sha { get; set; }
 }
 
+/// <summary>
+/// The readme of the Theme repo
+/// </summary>
+internal class ThemeMetadata
+{
+    public string Author { get; set; }
+    public string AuthorUrl { get; set; }
+    public string Description { get; set; }
+    public Version LastCompatible { get; set; }
+}
+
 
 public class ThemeService : IThemeService
 {
@@ -57,12 +71,13 @@ public class ThemeService : IThemeService
     private readonly IEventHub _eventHub;
     private readonly IFileService _fileService;
     private readonly ILogger<ThemeService> _logger;
+    private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 
     private readonly string _githubBaseUrl = "https://api.github.com";
     /// <summary>
     /// Used for refreshing metadata around themes
     /// </summary>
-    private readonly string _githubReadme = $"https://api.github.com/repos/Kareadita/Themes/contents/README.md";
+    private readonly string _githubReadme = "https://raw.githubusercontent.com/Kareadita/Themes/main/README.md";
 
     public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork,
         IEventHub eventHub, IFileService fileService, ILogger<ThemeService> logger)
@@ -95,38 +110,57 @@ public class ThemeService : IThemeService
         // Fetch contents of the Native Themes directory
         var themesContents = await GetDirectoryContent("Native%20Themes");
 
+        var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).ToDictionary(k => k.Name);
+
+
+
         // Filter out directories
         var themeDirectories = themesContents.Where(c => c.Type == "dir").ToList();
 
-        var themeDtos = new List<DownloadableSiteThemeDto>();
+        // Get the Readme and augment the theme data
+        var themeMetadata = await GetReadme();
 
+        var themeDtos = new List<DownloadableSiteThemeDto>();
         foreach (var themeDir in themeDirectories)
         {
-            var themeName = themeDir.Name;
+            var themeName = themeDir.Name.Trim();
 
             // Fetch contents of the theme directory
             var themeContents = await GetDirectoryContent(themeDir.Path);
 
             // Find css and preview files
             var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
-            var previewFile = themeContents.FirstOrDefault(c => c.Name.ToLower().Contains("preview.jpg"));
+            var previewFiles = themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg"));
 
-            if (cssFile != null && previewFile != null)
+            if (cssFile == null) continue;
+
+            var cssUrl = cssFile.DownloadUrl;
+
+
+            var dto = new DownloadableSiteThemeDto()
             {
-                var cssUrl = cssFile.DownloadUrl;
-                var previewUrl = previewFile.DownloadUrl;
+                Name = themeName,
+                CssUrl = cssUrl,
+                CssFile = cssFile.Name,
+                PreviewUrls = previewFiles.Select(p => p.DownloadUrl).ToList(),
+                Sha = cssFile.Sha,
+                Path = cssFile.Path,
+            };
 
-                themeDtos.Add(new DownloadableSiteThemeDto()
-                {
-                    Name = themeName,
-                    CssUrl = cssUrl,
-                    CssFile = cssFile.Name,
-                    PreviewUrl = previewUrl,
-                    Sha = cssFile.Sha,
-                    Path = cssFile.Path
-                });
+            if (themeMetadata.TryGetValue(themeName, out var metadata))
+            {
+                dto.Author = metadata.Author;
+                dto.LastCompatibleVersion = metadata.LastCompatible.ToString();
+                dto.IsCompatible = BuildInfo.Version <= metadata.LastCompatible;
+                dto.AlreadyDownloaded = existingThemes.ContainsKey(themeName);
             }
+
+            themeDtos.Add(dto);
         }
+
+
+
+
 
         return themeDtos;
     }
@@ -137,6 +171,57 @@ public class ThemeService : IThemeService
             .WithHeader("Accept", "application/vnd.github+json")
             .WithHeader("User-Agent", "Kavita")
             .GetJsonAsync<List<GitHubContent>>();
+    }
+
+    /// <summary>
+    /// Returns a map of all Native Themes names mapped to their metadata
+    /// </summary>
+    /// <returns></returns>
+    private async Task<IDictionary<string, ThemeMetadata>> GetReadme()
+    {
+        var tempDownloadFile = await _githubReadme.DownloadFileAsync(_directoryService.TempDirectory);
+
+        // Read file into Markdown
+        var htmlContent  = _markdown.Transform(await _directoryService.FileSystem.File.ReadAllTextAsync(tempDownloadFile));
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(htmlContent);
+
+        // Find the table of Native Themes
+        var tableContent = htmlDoc.DocumentNode
+            .SelectSingleNode("//h2[contains(text(),'Native Themes')]/following-sibling::p").InnerText;
+
+        // Initialize dictionary to store theme metadata
+        var themes = new Dictionary<string, ThemeMetadata>();
+
+
+        // Split the table content by rows
+        var rows = tableContent.Split("\r\n").Select(row => row.Trim()).Where(row => !string.IsNullOrWhiteSpace(row)).ToList();
+
+        // Parse each row in the Native Themes table
+        foreach (var row in rows.Skip(2))
+        {
+
+            var cells = row.Split('|').Skip(1).Select(cell => cell.Trim()).ToList();
+
+            // Extract information from each cell
+            var themeName = cells[0];
+            var authorName = cells[1];
+            var description = cells[2];
+            var compatibility = Version.Parse(cells[3]);
+
+            // Create ThemeMetadata object
+            var themeMetadata = new ThemeMetadata
+            {
+                Author = authorName,
+                Description = description,
+                LastCompatible = compatibility
+            };
+
+            // Add theme metadata to dictionary
+            themes.Add(themeName, themeMetadata);
+        }
+
+        return themes;
     }
 
 

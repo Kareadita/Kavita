@@ -11,13 +11,13 @@
       @for(theme of downloadableThemes; track theme.name) {
         <li class="mb-2">
           <div>
-            <app-image width="106px" [styles]="{'max-height': '230px'}" class="img-top me-3" [imageUrl]="theme.previewUrl"></app-image>
+            <app-image width="106px" [styles]="{'max-height': '230px'}" class="img-top me-3" [imageUrl]="theme.previewUrls[0]"></app-image>
             <div>{{theme.name}}</div>
           </div>
           <div>
             <button class="btn btn-primary float-end" (click)="download(theme)">Download</button>
           </div>
-<!--          <div>by {{theme.author}} • {{theme.version}} Compatible</div>-->
+          <div>by {{theme.author}} • {{theme.lastCompatibleVersion}} • <i class="fa-solid {{theme.isCompatible ? 'fa-check-circle' : 'fa-circle-exclamation'}}" [attr.aria-label]="theme.isCompatible ? 'Compatible' : 'Not Compatible'"></i></div>
         </li>
       } @empty {
         <app-loading [loading]="isLoading"></app-loading>

@@ -21,5 +21,5 @@
      * The actual class the root is defined against. It is generated at the backend.
      */
     selector: string;
-    
+
   }
