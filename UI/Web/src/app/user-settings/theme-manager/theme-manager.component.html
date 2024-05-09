@@ -4,15 +4,15 @@
       <div class="col-8"><h3>{{t('title')}}</h3></div>
       <div class="col-4">
         <div class="float-end">
-          <button class="btn btn-primary" (click)="browse()">
-            <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('browse')}}
-          </button>
+<!--          <button class="btn btn-primary" (click)="browse()">-->
+<!--            <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('browse')}}-->
+<!--          </button>-->
 
-          @if (isAdmin) {
-            <button class="btn btn-primary" (click)="scan()">
-              <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('scan')}}
-            </button>
-          }
+<!--          @if (isAdmin) {-->
+<!--            <button class="btn btn-primary" (click)="scan()">-->
+<!--              <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('scan')}}-->
+<!--            </button>-->
+<!--          }-->
         </div>
       </div>
     </div>
@@ -25,7 +25,7 @@
       <div class="col-md-3">
         <div class="pe-2">
           <div>
-            <label for="search">Search</label>
+            <label for="search">Filter</label>
             <input type="text" id="search" class="form-control" />
           </div>
           <div>
@@ -34,7 +34,7 @@
                 <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
               }
 
-              @for (theme of browseableThemes$ | async; track theme.name) {
+              @for (theme of downloadableThemes$ | async; track theme.name) {
                 <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
               }
             </ul>

@@ -46,8 +46,8 @@ export class ThemeManagerComponent {
   isAdmin: boolean = false;
   user: User | undefined;
   selectedTheme: DownloadableSiteTheme | undefined;
-  browseableThemes$ = this.themeService.getDownloadableThemes()
-    .pipe(takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}), tap(_ => console.log('calling browse api')));
+  downloadableThemes$ = this.themeService.getDownloadableThemes()
+    .pipe(takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}));
 
   constructor() {
 
