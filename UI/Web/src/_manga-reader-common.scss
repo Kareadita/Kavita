@@ -11,6 +11,8 @@ img {
   &.full-width {
     height: 100dvh;
     display: grid;
+    justify-content: center;
+    align-items: center;
   }
 
   &.full-height {
