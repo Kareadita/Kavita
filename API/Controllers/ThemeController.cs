@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.ReadingLists.CBL;
 using API.DTOs.Theme;
@@ -88,6 +89,7 @@ public class ThemeController : BaseApiController
     /// Browse themes that can be used on this server
     /// </summary>
     /// <returns></returns>
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [HttpGet("browse")]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {

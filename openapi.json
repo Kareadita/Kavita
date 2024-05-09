@@ -15933,6 +15933,11 @@
           "isCompatible": {
             "type": "boolean",
             "description": "If version compatible with version"
+          },
+          "description": {
+            "type": "string",
+            "description": "Small blurb about the Theme",
+            "nullable": true
           }
         },
         "additionalProperties": false

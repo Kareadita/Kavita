@@ -14,11 +14,17 @@ import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {tap} from "rxjs/operators";
+import {NgIf, NgFor, AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {shareReplay, tap} from "rxjs/operators";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {BrowseThemesComponent} from "../browse-themes/browse-themes.component";
+import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
+import {SeriesCardComponent} from "../../cards/series-card/series-card.component";
+import {ImageComponent} from "../../shared/image/image.component";
+import {DownloadableSiteTheme} from "../../_models/theme/downloadable-site-theme";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 
 @Component({
     selector: 'app-theme-manager',
@@ -26,7 +32,7 @@ import {BrowseThemesComponent} from "../browse-themes/browse-themes.component";
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective]
+  imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
@@ -39,6 +45,9 @@ export class ThemeManagerComponent {
   currentTheme: SiteTheme | undefined;
   isAdmin: boolean = false;
   user: User | undefined;
+  selectedTheme: DownloadableSiteTheme | undefined;
+  browseableThemes$ = this.themeService.getDownloadableThemes()
+    .pipe(takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}), tap(_ => console.log('calling browse api')));
 
   constructor() {
 
@@ -78,5 +87,25 @@ export class ThemeManagerComponent {
     this.themeService.scan().subscribe(() => {
       this.toastr.info(translate('theme-manager.scan-queued'));
     });
+  }
+
+  selectTheme(theme: SiteTheme | DownloadableSiteTheme) {
+    if (theme.hasOwnProperty('provider')) {
+      // Convert into DownloadableSiteTheme
+      this.selectedTheme = {
+        isCompatible: true,
+        previewUrls: [],
+        lastCompatibleVersion: '',
+        name: theme.name,
+        alreadyDownloaded: true,
+        author: 'N/A',
+        cssUrl: '',
+        description: 'System Provided'
+      } as DownloadableSiteTheme;
+    } else {
+      this.selectedTheme = theme as DownloadableSiteTheme;
+    }
+
+    this.cdRef.markForCheck();
   }
 }

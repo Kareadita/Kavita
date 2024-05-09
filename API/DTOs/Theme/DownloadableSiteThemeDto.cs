@@ -45,4 +45,8 @@ public class DownloadableSiteThemeDto
     /// If version compatible with version
     /// </summary>
     public bool IsCompatible { get; set; }
+    /// <summary>
+    /// Small blurb about the Theme
+    /// </summary>
+    public string Description { get; set; }
 }

@@ -22,22 +22,87 @@
 
     <div class="row g-0">
       <h4>{{t('site-themes')}}</h4>
-      <ng-container *ngFor="let theme of (themeService.themes$ | async)">
-        <div class="card col-auto me-3 mb-3" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">{{theme.name | sentenceCase}}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">{{theme.provider | siteThemeProvider}}</h6>
-            @if (isAdmin) {
-              <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" (click)="updateDefault(theme)">{{t('set-default')}}</button>
-            }
+      <div class="col-md-3">
+        <div class="pe-2">
+          <div>
+            <label for="search">Search</label>
+            <input type="text" id="search" class="form-control" />
+          </div>
+          <div>
+            <ul style="height: 100%">
+              @for (theme of themeService.themes$ | async; track theme.name) {
+                <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
+              }
 
-            <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? t('applied') : t('apply')}}</button>
-            <button class="btn btn-danger" [disabled]="theme.isDefault">{{t('delete')}}</button>
+              @for (theme of browseableThemes$ | async; track theme.name) {
+                <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
+              }
+            </ul>
           </div>
         </div>
-      </ng-container>
+      </div>
+
+      <div class="col-md-9">
+        @if (selectedTheme === undefined) {
+          <p>Select a theme first</p>
+        }
+        @else {
+          <h4>
+            {{selectedTheme.name | sentenceCase}}
+            <div class="float-end">
+              <button class="btn btn-danger me-1" [disabled]="selectedTheme.name === 'Dark'">Delete</button>
+              <button class="btn btn-primary me-1">Apply</button>
+              @if(selectedTheme.cssUrl !== '') {
+                <button class="btn btn-primary" [disabled]="selectedTheme.alreadyDownloaded">Download</button>
+              }
+            </div>
+          </h4>
+          <p>{{selectedTheme.description | defaultValue}}</p>
+
+          <app-carousel-reel [items]="selectedTheme.previewUrls" title="Preview">
+            <ng-template #carouselItem let-item>
+              <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
+                <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
+              </a>
+            </ng-template>
+          </app-carousel-reel>
+        }
+      </div>
+
+
+
+<!--      <ng-container *ngFor="let theme of (themeService.themes$ | async)">-->
+<!--        <div class="card col-auto me-3 mb-3" style="width: 18rem;">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title">{{theme.name | sentenceCase}}</h5>-->
+<!--            <h6 class="card-subtitle mb-2 text-muted">{{theme.provider | siteThemeProvider}}</h6>-->
+<!--            @if (isAdmin) {-->
+<!--              <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" (click)="updateDefault(theme)">{{t('set-default')}}</button>-->
+<!--            }-->
+
+<!--            <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? t('applied') : t('apply')}}</button>-->
+<!--            <button class="btn btn-danger" [disabled]="theme.isDefault">{{t('delete')}}</button>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </ng-container>-->
     </div>
   </div>
+
+  <ng-template #themeOption let-item>
+    @if (item !== undefined) {
+      <li (click)="selectTheme(item)">
+        {{item.name}}
+        @if (item.isDefault) {
+          <i class="fa-solid fa-star" aria-label="Default theme"></i>
+        }
+        <!-- cssUrl being blank implies this is actually a SiteTheme that's already downloaded. We have limited real
+        fields mocked into the DownloadableSiteTheme object -->
+        @if (item.cssUrl === '') {
+          <i class="fa-solid fa-download" aria-label="Downloaded"></i>
+        }
+      </li>
+    }
+  </ng-template>
 
 
 </ng-container>

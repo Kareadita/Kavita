@@ -5,5 +5,6 @@ export interface DownloadableSiteTheme {
   author: string;
   isCompatible: boolean;
   lastCompatibleVersion: string;
-  AlreadyDownloaded: boolean;
+  alreadyDownloaded: boolean;
+  description: string;
 }

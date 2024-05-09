@@ -130,7 +130,7 @@ public class ThemeService : IThemeService
 
             // Find css and preview files
             var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
-            var previewFiles = themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg"));
+            var previewFiles = themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg") || c.Name.ToLower().EndsWith(".png") );
 
             if (cssFile == null) continue;
 
@@ -153,6 +153,7 @@ public class ThemeService : IThemeService
                 dto.LastCompatibleVersion = metadata.LastCompatible.ToString();
                 dto.IsCompatible = BuildInfo.Version <= metadata.LastCompatible;
                 dto.AlreadyDownloaded = existingThemes.ContainsKey(themeName);
+                dto.Description = metadata.Description;
             }
 
             themeDtos.Add(dto);
