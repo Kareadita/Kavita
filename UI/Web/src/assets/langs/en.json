@@ -1954,7 +1954,9 @@
         "invalid-confirmation-url": "Invalid confirmation url",
         "invalid-confirmation-email": "Invalid confirmation email",
         "invalid-password-reset-url": "Invalid reset password url",
-        "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete"
+        "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
+        "theme-manual-upload": "There was an issue creating Theme from manual upload",
+        "theme-already-in-use": "Theme already exists by that name"
     },
 
     "metadata-builder": {

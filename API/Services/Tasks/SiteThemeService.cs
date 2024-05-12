@@ -64,6 +64,7 @@ public interface IThemeService
 
     Task<SiteTheme> DownloadRepoTheme(DownloadableSiteThemeDto dto);
     Task DeleteTheme(int siteThemeId);
+    Task<SiteTheme> CreateThemeFromFile(string tempFile, string username);
 }
 
 
@@ -390,6 +391,56 @@ public class ThemeService : IThemeService
     }
 
     /// <summary>
+    /// This assumes a file is already in temp directory and will be used for
+    /// </summary>
+    /// <param name="tempFile"></param>
+    /// <returns></returns>
+    public async Task<SiteTheme> CreateThemeFromFile(string tempFile, string username)
+    {
+        if (!_directoryService.FileSystem.File.Exists(tempFile))
+        {
+            _logger.LogInformation("Unable to create theme from manual upload as file not in temp");
+            throw new KavitaException("errors.theme-manual-upload");
+        }
+
+
+        var filename = _directoryService.FileSystem.FileInfo.New(tempFile).Name;
+        var themeName = Path.GetFileNameWithoutExtension(filename);
+
+        if (await _unitOfWork.SiteThemeRepository.GetThemeDtoByName(themeName) != null)
+        {
+            throw new KavitaException("errors.theme-already-in-use");
+        }
+
+        _directoryService.CopyFileToDirectory(tempFile, _directoryService.SiteThemeDirectory);
+        var finalLocation = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, filename);
+
+
+        // Create a new entry and note that this is downloaded
+        var theme = new SiteTheme()
+        {
+            Name = Path.GetFileNameWithoutExtension(filename),
+            NormalizedName = themeName.ToNormalized(),
+            FileName = _directoryService.FileSystem.Path.GetFileName(finalLocation),
+            Provider = ThemeProvider.Provided,
+            IsDefault = false,
+            Description = $"Manually uploaded via UI by {username}",
+            PreviewUrls = string.Empty,
+            Author = username,
+        };
+        _unitOfWork.SiteThemeRepository.Add(theme);
+
+        await _unitOfWork.CommitAsync();
+
+        // Inform about the new theme
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(theme.FileName), theme.Name,
+                ProgressEventType.Ended));
+        return theme;
+
+    }
+
+    /// <summary>
     /// Scans the site theme directory for custom css files and updates what the system has on store
     /// </summary>
     public async Task Scan()
@@ -524,15 +575,5 @@ public class ThemeService : IThemeService
             await _unitOfWork.RollbackAsync();
             throw;
         }
-    }
-
-    /// <summary>
-    /// Returns the naming convention for cover images for SiteThemes
-    /// </summary>
-    /// <param name="siteThemeId"></param>
-    /// <returns></returns>
-    public static string SiteThemeFormat(int siteThemeId)
-    {
-        return $"theme_{siteThemeId}";
     }
 }

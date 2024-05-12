@@ -12018,18 +12018,6 @@
         }
       }
     },
-    "/api/Theme/scan": {
-      "post": {
-        "tags": [
-          "Theme"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Theme/update-default": {
       "post": {
         "tags": [
@@ -12195,6 +12183,7 @@
         "tags": [
           "Theme"
         ],
+        "summary": "Uploads a new theme file",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -12217,7 +12206,24 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              }
+            }
           }
         }
       }

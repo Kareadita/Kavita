@@ -169,7 +169,7 @@ export class ThemeService {
       this.unsetThemes();
       this.renderer.addClass(this.document.querySelector('body'), theme.selector);
 
-      if (theme.provider === ThemeProvider.User && !this.hasThemeInHead(theme.name)) {
+      if ([ThemeProvider.User, ThemeProvider.Provided].includes(theme.provider) && !this.hasThemeInHead(theme.name)) {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {
           if (content === null) {

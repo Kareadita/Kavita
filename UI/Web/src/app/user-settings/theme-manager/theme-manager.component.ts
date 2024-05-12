@@ -100,11 +100,12 @@ export class ThemeManagerComponent {
   }
 
   applyTheme(theme: SiteTheme) {
-    if (!this.user) return;
-
-    const pref = Object.assign({}, this.user.preferences);
-    pref.theme = theme;
-    this.accountService.updatePreferences(pref).subscribe();
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (!user) return;
+      const pref = Object.assign({}, user.preferences);
+      pref.theme = theme;
+      this.accountService.updatePreferences(pref).subscribe();
+    });
   }
 
   updateDefault(theme: SiteTheme) {
