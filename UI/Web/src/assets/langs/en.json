@@ -193,7 +193,8 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "upload-continued": "a css file"
+        "upload-continued": "a css file",
+        "preview-default": "Select a theme first or upload one manually"
     },
 
     "theme": {

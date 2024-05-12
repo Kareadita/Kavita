@@ -38,7 +38,17 @@
 
       <div class="col-md-9">
         @if (selectedTheme === undefined) {
-          <p>Select a theme first or upload one manually</p>
+
+          <div class="row pb-4">
+            <div class="mx-auto">
+              <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-evenly">
+                  {{t('preview-default')}}
+                </div>
+              </div>
+            </div>
+          </div>
+
 
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingTheme"></app-loading>
