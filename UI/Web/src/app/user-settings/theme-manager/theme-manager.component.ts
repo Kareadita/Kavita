@@ -25,6 +25,10 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
+import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
+import {ReactiveFormsModule} from "@angular/forms";
+import {Select2Module} from "ng-select2-component";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;
@@ -39,7 +43,7 @@ interface ThemeContainer {
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe]
+  imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe, NgxFileDropModule, ReactiveFormsModule, Select2Module, LoadingComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
@@ -53,20 +57,21 @@ export class ThemeManagerComponent {
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
   currentTheme: SiteTheme | undefined;
-  isAdmin: boolean = false;
   user: User | undefined;
   selectedTheme: ThemeContainer | undefined;
   downloadableThemes: Array<DownloadableSiteTheme> = [];
-  downloadableThemes$ = this.themeService.getDownloadableThemes()
-    .pipe(takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}));
   hasAdmin$ = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}),
     map(c => c && this.accountService.hasAdminRole(c))
   );
 
+  files: NgxFileDropEntry[] = [];
+  acceptableExtensions = ['.css'].join(',');
+  isUploadingTheme: boolean = false;
+
   constructor() {
 
-    this.downloadableThemes$.subscribe(d => {
+    this.themeService.getDownloadableThemes().subscribe(d => {
       this.downloadableThemes = d;
       this.cdRef.markForCheck();
     });
@@ -76,13 +81,6 @@ export class ThemeManagerComponent {
       this.cdRef.markForCheck();
     });
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.isAdmin = this.accountService.hasAdminRole(user);
-        this.cdRef.markForCheck();
-      }
-    });
   }
 
   async deleteTheme(theme: SiteTheme) {
@@ -137,5 +135,23 @@ export class ThemeManagerComponent {
     this.themeService.downloadTheme(theme).subscribe(theme => {
       this.removeDownloadedTheme(theme);
     });
+  }
+
+  public dropped(files: NgxFileDropEntry[]) {
+    this.files = files;
+    for (const droppedFile of files) {
+      // Is it a file?
+      if (droppedFile.fileEntry.isFile) {
+        const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
+        fileEntry.file((file: File) => {
+          this.themeService.uploadTheme(file, droppedFile).subscribe(t => {
+            this.isUploadingTheme = false;
+            this.cdRef.markForCheck();
+          });
+        });
+      }
+    }
+    this.isUploadingTheme = true;
+    this.cdRef.markForCheck();
   }
 }

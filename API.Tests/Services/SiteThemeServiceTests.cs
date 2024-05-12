@@ -9,6 +9,7 @@ using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
 using Kavita.Common;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -44,7 +45,8 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
         _context.SiteTheme.Add(new SiteTheme()
         {
@@ -69,7 +71,8 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
@@ -84,7 +87,8 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
@@ -105,7 +109,8 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
@@ -127,7 +132,8 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
         _context.SiteTheme.Add(new SiteTheme()
         {
@@ -153,7 +159,8 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
         _context.SiteTheme.Add(new SiteTheme()
         {

@@ -21,21 +21,6 @@ using Newtonsoft.Json;
 namespace API.Services.Tasks;
 #nullable enable
 
-public interface IThemeService
-{
-    Task<string> GetContent(int themeId);
-    Task Scan();
-    Task UpdateDefault(int themeId);
-    /// <summary>
-    /// Browse theme repo for themes to download
-    /// </summary>
-    /// <returns></returns>
-    Task<List<DownloadableSiteThemeDto>> BrowseRepoThemes();
-
-    Task<SiteTheme> DownloadRepoTheme(DownloadableSiteThemeDto dto);
-    Task DeleteTheme(int siteThemeId);
-}
-
 internal class GitHubContent
 {
     [JsonProperty("name")]
@@ -66,6 +51,23 @@ internal class ThemeMetadata
 }
 
 
+public interface IThemeService
+{
+    Task<string> GetContent(int themeId);
+    Task Scan();
+    Task UpdateDefault(int themeId);
+    /// <summary>
+    /// Browse theme repo for themes to download
+    /// </summary>
+    /// <returns></returns>
+    Task<List<DownloadableSiteThemeDto>> GetDownloadableThemes();
+
+    Task<SiteTheme> DownloadRepoTheme(DownloadableSiteThemeDto dto);
+    Task DeleteTheme(int siteThemeId);
+}
+
+
+
 public class ThemeService : IThemeService
 {
     private readonly IDirectoryService _directoryService;
@@ -73,7 +75,7 @@ public class ThemeService : IThemeService
     private readonly IEventHub _eventHub;
     private readonly IFileService _fileService;
     private readonly ILogger<ThemeService> _logger;
-    private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+    private readonly Markdown _markdown = new();
     private readonly IMemoryCache _cache;
     private readonly MemoryCacheEntryOptions _cacheOptions;
 
@@ -105,8 +107,7 @@ public class ThemeService : IThemeService
     /// <returns></returns>
     public async Task<string> GetContent(int themeId)
     {
-        var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);
-        if (theme == null) throw new KavitaException("theme-doesnt-exist");
+        var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId) ?? throw new KavitaException("theme-doesnt-exist");
         var themeFile = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, theme.FileName);
         if (string.IsNullOrEmpty(themeFile) || !_directoryService.FileSystem.File.Exists(themeFile))
             throw new KavitaException("theme-doesnt-exist");
@@ -114,7 +115,7 @@ public class ThemeService : IThemeService
         return await _directoryService.FileSystem.File.ReadAllTextAsync(themeFile);
     }
 
-    public async Task<List<DownloadableSiteThemeDto>> BrowseRepoThemes()
+    public async Task<List<DownloadableSiteThemeDto>> GetDownloadableThemes()
     {
         var cacheKey = $"browse";
         var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).ToDictionary(k => k.Name);

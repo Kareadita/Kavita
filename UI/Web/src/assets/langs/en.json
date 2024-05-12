@@ -190,7 +190,10 @@
         "applied": "Applied",
         "updated-toastr": "Site default has been updated to {{name}}",
         "scan-queued": "A site theme scan has been queued",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "a css file"
     },
 
     "theme": {

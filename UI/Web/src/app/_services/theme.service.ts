@@ -21,6 +21,7 @@ import { EVENTS, MessageHubService } from './message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate} from "@ngneat/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
+import {NgxFileDropEntry} from "ngx-file-drop";
 
 
 @Injectable({
@@ -69,6 +70,13 @@ export class ThemeService {
 
   downloadTheme(theme: DownloadableSiteTheme) {
     return this.httpClient.post<SiteTheme>(this.baseUrl + 'theme/download-theme', theme);
+  }
+
+  uploadTheme(themeFile: File, fileEntry: NgxFileDropEntry) {
+    const formData = new FormData()
+    formData.append('formFile', themeFile, fileEntry.relativePath);
+
+    return this.httpClient.post<SiteTheme>(this.baseUrl + 'theme/upload-theme', formData);
   }
 
   getColorScheme() {

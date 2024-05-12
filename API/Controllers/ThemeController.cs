@@ -99,7 +99,7 @@ public class ThemeController : BaseApiController
     [HttpGet("browse")]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {
-        var themes = await _themeService.BrowseRepoThemes();
+        var themes = await _themeService.GetDownloadableThemes();
         return Ok(themes.Where(t => !t.AlreadyDownloaded));
     }
 

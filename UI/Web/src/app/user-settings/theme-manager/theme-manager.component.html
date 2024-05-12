@@ -24,6 +24,7 @@
       <div class="col-md-3">
         <div class="pe-2">
           <ul style="height: 100%" class="list-group list-group-flush">
+
             @for (theme of themeService.themes$ | async; track theme.name) {
               <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
             }
@@ -37,7 +38,36 @@
 
       <div class="col-md-9">
         @if (selectedTheme === undefined) {
-          <p>Select a theme first</p>
+          <p>Select a theme first or upload one manually</p>
+
+          @if (files && files.length > 0) {
+            <app-loading [loading]="isUploadingTheme"></app-loading>
+          } @else {
+            <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
+                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
+
+              <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+                <div class="row g-0 mt-3 pb-3">
+                  <div class="mx-auto">
+                    <div class="row g-0 mb-3">
+                      <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                      <div class="d-flex justify-content-evenly">
+                        <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                        <span class="ps-1 pe-1">•</span>
+                        <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </ng-template>
+
+            </ngx-file-drop>
+          }
+
         }
         @else {
           <h4>
