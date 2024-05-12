@@ -1,17 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
-using API.DTOs.ReadingLists.CBL;
 using API.DTOs.Theme;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
+using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace API.Controllers;
 
@@ -24,15 +27,18 @@ public class ThemeController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILocalizationService _localizationService;
     private readonly IDirectoryService _directoryService;
+    private readonly IMapper _mapper;
+
 
     public ThemeController(IUnitOfWork unitOfWork, IThemeService themeService, ITaskScheduler taskScheduler,
-        ILocalizationService localizationService, IDirectoryService directoryService)
+        ILocalizationService localizationService, IDirectoryService directoryService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _themeService = themeService;
         _taskScheduler = taskScheduler;
         _localizationService = localizationService;
         _directoryService = directoryService;
+        _mapper = mapper;
     }
 
     [ResponseCache(CacheProfileName = "10Minute")]
@@ -93,8 +99,22 @@ public class ThemeController : BaseApiController
     [HttpGet("browse")]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {
-        // await _unitOfWork.SiteThemeRepository.GetThemeDtos() to show which ones
-        return Ok(await _themeService.BrowseRepoThemes());
+        var themes = await _themeService.BrowseRepoThemes();
+        return Ok(themes.Where(t => !t.AlreadyDownloaded));
+    }
+
+    /// <summary>
+    /// Attempts to delete a theme. If already in use by users, will not allow
+    /// </summary>
+    /// <param name="themeId"></param>
+    /// <returns></returns>
+    [HttpDelete]
+    public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> DeleteTheme(int themeId)
+    {
+
+        await _themeService.DeleteTheme(themeId);
+
+        return Ok();
     }
 
     /// <summary>
@@ -103,16 +123,17 @@ public class ThemeController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("download-theme")]
-    public async Task<ActionResult> DownloadTheme(DownloadableSiteThemeDto dto)
+    public async Task<ActionResult<SiteThemeDto>> DownloadTheme(DownloadableSiteThemeDto dto)
     {
-        await _themeService.DownloadRepoTheme(dto);
-        return Ok();
+        return Ok(_mapper.Map<SiteThemeDto>(await _themeService.DownloadRepoTheme(dto)));
     }
 
     [HttpPost("upload-theme")]
     public async Task<ActionResult> DownloadTheme(IFormFile formFile)
     {
         var tempFile = await UploadToTemp(formFile);
+
+        // Set summary as "Uploaded by User.GetUsername() on DATE"
 
 
 

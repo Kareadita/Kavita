@@ -122,9 +122,10 @@ public class UsersController : BaseApiController
         existingPreferences.PdfScrollMode = preferencesDto.PdfScrollMode;
         existingPreferences.PdfSpreadMode = preferencesDto.PdfSpreadMode;
 
-        if (existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
+        if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {
-            existingPreferences.Theme = preferencesDto.Theme ?? await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+            var theme = await _unitOfWork.SiteThemeRepository.GetTheme(preferencesDto.Theme!.Id);
+            existingPreferences.Theme = theme ?? await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         }
 
 

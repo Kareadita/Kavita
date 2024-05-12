@@ -58,9 +58,7 @@ export class ThemeService {
       if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
 
       if (notificationEvent.eventType === 'ended') {
-        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe(() => {
-
-        });
+        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe();
       }
     });
   }
@@ -120,6 +118,12 @@ export class ThemeService {
    */
   clearThemes() {
     this.unsetThemes();
+  }
+
+  deleteTheme(themeId: number) {
+    return this.httpClient.delete(this.baseUrl + 'theme?themeId=' + themeId).pipe(map(() => {
+      this.getThemes().subscribe(() => {});
+    }));
   }
 
   setDefault(themeId: number) {

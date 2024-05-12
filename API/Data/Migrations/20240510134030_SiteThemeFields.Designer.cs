@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240505234138_ThemeSync")]
-    partial class ThemeSync
+    [Migration("20240510134030_SiteThemeFields")]
+    partial class SiteThemeFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1874,10 +1874,19 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Author")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CompatibleVersion")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
@@ -1899,6 +1908,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PreviewUrls")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Provider")

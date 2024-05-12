@@ -38,6 +38,8 @@ public class SiteTheme : IEntityDate, ITheme
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
+    #region ThemeBrowser
+
     /// <summary>
     /// The Url on the repo to download the file from
     /// </summary>
@@ -46,6 +48,19 @@ public class SiteTheme : IEntityDate, ITheme
     /// Hash of the Css File
     /// </summary>
     public string? ShaHash { get; set; }
+    /// <summary>
+    /// Pipe (|) separated urls of the images. Empty string if
+    /// </summary>
+    public string PreviewUrls { get; set; }
+    // /// <summary>
+    // /// A description about the theme
+    // /// </summary>
+    public string Description { get; set; }
+    // /// <summary>
+    // /// Author of the Theme
+    // /// </summary>
+    public string Author { get; set; }
+    public string CompatibleVersion { get; set; }
 
-    // Might want to store primary and secondary color here (read from css) to make the UI a bit nicer
+    #endregion
 }

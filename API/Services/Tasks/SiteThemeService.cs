@@ -14,6 +14,7 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using MarkdownDeep;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -32,6 +33,7 @@ public interface IThemeService
     Task<List<DownloadableSiteThemeDto>> BrowseRepoThemes();
 
     Task<SiteTheme> DownloadRepoTheme(DownloadableSiteThemeDto dto);
+    Task DeleteTheme(int siteThemeId);
 }
 
 internal class GitHubContent
@@ -72,6 +74,8 @@ public class ThemeService : IThemeService
     private readonly IFileService _fileService;
     private readonly ILogger<ThemeService> _logger;
     private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+    private readonly IMemoryCache _cache;
+    private readonly MemoryCacheEntryOptions _cacheOptions;
 
     private readonly string _githubBaseUrl = "https://api.github.com";
     /// <summary>
@@ -80,13 +84,18 @@ public class ThemeService : IThemeService
     private readonly string _githubReadme = "https://raw.githubusercontent.com/Kareadita/Themes/main/README.md";
 
     public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork,
-        IEventHub eventHub, IFileService fileService, ILogger<ThemeService> logger)
+        IEventHub eventHub, IFileService fileService, ILogger<ThemeService> logger, IMemoryCache cache)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _fileService = fileService;
         _logger = logger;
+        _cache = cache;
+
+        _cacheOptions = new MemoryCacheEntryOptions()
+            .SetSize(1)
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
     }
 
     /// <summary>
@@ -107,12 +116,19 @@ public class ThemeService : IThemeService
 
     public async Task<List<DownloadableSiteThemeDto>> BrowseRepoThemes()
     {
+        var cacheKey = $"browse";
+        var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).ToDictionary(k => k.Name);
+        if (_cache.TryGetValue(cacheKey, out List<DownloadableSiteThemeDto>? themes))
+        {
+            foreach (var t in themes)
+            {
+                t.AlreadyDownloaded = existingThemes.ContainsKey(t.Name);
+            }
+            return themes;
+        }
+
         // Fetch contents of the Native Themes directory
         var themesContents = await GetDirectoryContent("Native%20Themes");
-
-        var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).ToDictionary(k => k.Name);
-
-
 
         // Filter out directories
         var themeDirectories = themesContents.Where(c => c.Type == "dir").ToList();
@@ -159,9 +175,7 @@ public class ThemeService : IThemeService
             themeDtos.Add(dto);
         }
 
-
-
-
+        _cache.Set(themeDtos, themes, _cacheOptions);
 
         return themeDtos;
     }
@@ -233,6 +247,11 @@ public class ThemeService : IThemeService
             throw new ArgumentException("SHA cannot be null or empty for already downloaded themes.");
         }
 
+        _directoryService.ExistOrCreate(_directoryService.SiteThemeDirectory);
+        var existingTempFile = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory,
+            _directoryService.FileSystem.FileInfo.New(dto.CssUrl).Name);
+        _directoryService.DeleteFiles([existingTempFile]);
+
         var tempDownloadFile = await dto.CssUrl.DownloadFileAsync(_directoryService.TempDirectory);
 
         // Validate the hash on the downloaded file
@@ -243,6 +262,15 @@ public class ThemeService : IThemeService
 
         _directoryService.CopyFileToDirectory(tempDownloadFile, _directoryService.SiteThemeDirectory);
         var finalLocation = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, dto.CssFile);
+
+        // Download the preview images
+        // _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, "")
+        // foreach(var imgUrl in dto.PreviewUrls)
+        // {
+        //     var tempPreviewImage = await imgUrl.DownloadFileAsync(_directoryService.TempDirectory);
+        //     _directoryService.FileSystem.File.Move(tempPreviewImage, ImageService.SiteThemePreview());
+        //     _directoryService.CopyFileToDirectory(tempDownloadFile, _directoryService.SiteThemeDirectory);
+        // }
 
         return finalLocation;
     }
@@ -266,46 +294,79 @@ public class ThemeService : IThemeService
             Name = dto.Name,
             NormalizedName = dto.Name.ToNormalized(),
             FileName = _directoryService.FileSystem.Path.GetFileName(finalLocation),
-            Provider = ThemeProvider.Downloaded,
+            Provider = ThemeProvider.Provided,
             IsDefault = false,
             GitHubPath = dto.Path,
+            Description = dto.Description,
+            PreviewUrls = string.Join('|', dto.PreviewUrls),
+            Author = dto.Author,
+            ShaHash = dto.Sha,
+            CompatibleVersion = dto.LastCompatibleVersion,
         };
         _unitOfWork.SiteThemeRepository.Add(theme);
 
         await _unitOfWork.CommitAsync();
 
+        // Inform about the new theme
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(theme.FileName), theme.Name,
+                ProgressEventType.Ended));
         return theme;
     }
 
-    // public async Task CreateTheme(string fileInTemp)
-    // {
-    //
-    //     // temp css file,
-    // }
 
     public async Task SyncTheme(SiteTheme? theme)
     {
         // Given a theme, first validate that it is applicable
-        if (theme == null || theme.Provider != ThemeProvider.Downloaded || string.IsNullOrEmpty(theme.GitHubPath))
+        if (theme == null || theme.Provider != ThemeProvider.Provided || string.IsNullOrEmpty(theme.GitHubPath))
         {
             _logger.LogInformation("Cannot Sync theme as it is not valid");
             return;
         }
 
-        //theme.GitHubPath
+        var themeMetadata = await GetReadme();
         var themeContents = await GetDirectoryContent(theme.GitHubPath);
         var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
+        var hasUpdated = false;
 
         if (cssFile == null) return;
-        if (cssFile.Sha == theme.ShaHash)
+
+        // Update any metadata
+        if (themeMetadata.TryGetValue(theme.Name, out var metadata))
         {
-            _logger.LogInformation("Theme {ThemeName} is up to date", theme.Name);
-            // TODO: I might want to refresh data from the Readme
-            return;
+            theme.Description = metadata.Description;
+            theme.Author = metadata.Author;
+            theme.CompatibleVersion = metadata.LastCompatible.ToString();
+            //theme.PreviewUrls = metadata.PreviewUrls; // If we can pull this off in parsing
         }
 
-        var location = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, theme.FileName);
+        hasUpdated = cssFile.Sha != theme.ShaHash;
+        if (hasUpdated)
+        {
+            _logger.LogDebug("Theme {ThemeName} is out of date, updating", theme.Name);
+            var location = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, theme.FileName);
 
+
+
+        }
+
+        await _unitOfWork.CommitAsync();
+
+
+        if (hasUpdated)
+        {
+            // TODO: Send an update when the theme is updated so the clients can auto-update them (we need a new event likely)
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(theme.FileName), theme.Name,
+                    ProgressEventType.Ended));
+        }
+
+        // Send an update to refresh metadata around the themes
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(theme.FileName), theme.Name,
+                ProgressEventType.Ended));
+
+        _logger.LogInformation("Theme Sync complete");
     }
 
     /// <summary>
@@ -314,6 +375,13 @@ public class ThemeService : IThemeService
     /// <param name="siteThemeId"></param>
     public async Task DeleteTheme(int siteThemeId)
     {
+        // Validate no one else is using this theme
+        var inUse = await _unitOfWork.SiteThemeRepository.IsThemeInUse(siteThemeId);
+        if (inUse)
+        {
+            throw new KavitaException("errors.delete-theme-in-use");
+        }
+
         var siteTheme = await _unitOfWork.SiteThemeRepository.GetTheme(siteThemeId);
         if (siteTheme == null) return;
 
@@ -335,7 +403,7 @@ public class ThemeService : IThemeService
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
 
         // First remove any files from allThemes that are User Defined and not on disk
-        var userThemes = allThemes.Where(t => t.Provider == ThemeProvider.User).ToList();
+        var userThemes = allThemes.Where(t => t.Provider != ThemeProvider.System).ToList();
         foreach (var userTheme in userThemes)
         {
             var filepath = Scanner.Parser.Parser.NormalizePath(
@@ -360,7 +428,7 @@ public class ThemeService : IThemeService
                 Name = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile),
                 NormalizedName = themeName,
                 FileName = _directoryService.FileSystem.Path.GetFileName(themeFile),
-                Provider = ThemeProvider.User,
+                Provider = ThemeProvider.Provided,
                 IsDefault = false,
             });
 
@@ -419,6 +487,7 @@ public class ThemeService : IThemeService
             var newLocation =
                 _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, theme.FileName);
             _directoryService.CopyFileToDirectory(existingLocation, newLocation);
+            _directoryService.DeleteFiles([existingLocation]);
         }
         catch (Exception) { /* Swallow */ }
 

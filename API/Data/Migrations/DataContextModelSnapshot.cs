@@ -1871,10 +1871,19 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Author")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CompatibleVersion")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
@@ -1896,6 +1905,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PreviewUrls")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Provider")

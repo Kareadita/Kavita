@@ -182,15 +182,14 @@
 
     "theme-manager": {
         "title": "Theme Manager",
-        "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Start by browsing for a new theme and downloading it.",
-        "scan": "Scan",
+        "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
+        "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "applied": "Applied",
         "updated-toastr": "Site default has been updated to {{name}}",
         "scan-queued": "A site theme scan has been queued",
-        "browse": "Browse",
         "delete": "{{common.delete}}"
     },
 
@@ -214,7 +213,7 @@
     "site-theme-provider-pipe": {
         "system": "System",
         "user": "User",
-        "downloaded": "Downloaded"
+        "provided": "Provided"
     },
 
     "manage-devices": {
@@ -1951,7 +1950,8 @@
         "rejected-cover-upload": "The image could not be fetched due to server refusing request. Please download and upload from file instead.",
         "invalid-confirmation-url": "Invalid confirmation url",
         "invalid-confirmation-email": "Invalid confirmation email",
-        "invalid-password-reset-url": "Invalid reset password url"
+        "invalid-password-reset-url": "Invalid reset password url",
+        "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete"
     },
 
     "metadata-builder": {
@@ -2190,7 +2190,8 @@
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
-        "stack-imported": "Stack Imported"
+        "stack-imported": "Stack Imported",
+        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal"
 
     },
 

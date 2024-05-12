@@ -11968,6 +11968,54 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Theme"
+        ],
+        "summary": "Attempts to delete a theme. If already in use by users, will not allow",
+        "parameters": [
+          {
+            "name": "themeId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/Theme/scan": {
@@ -12120,7 +12168,24 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              }
+            }
           }
         }
       }
@@ -20293,6 +20358,23 @@
             "type": "string",
             "description": "Hash of the Css File",
             "nullable": true
+          },
+          "previewUrls": {
+            "type": "string",
+            "description": "Pipe (|) separated urls of the images. Empty string if",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "compatibleVersion": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -20333,6 +20415,28 @@
             "type": "integer",
             "description": "Where did the theme come from",
             "format": "int32"
+          },
+          "previewUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Information about the theme",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "description": "Author of the Theme (only applies to non-system provided themes)",
+            "nullable": true
+          },
+          "compatibleVersion": {
+            "type": "string",
+            "description": "Last compatible version. System provided will always be most current",
+            "nullable": true
           },
           "selector": {
             "type": "string",
@@ -21481,7 +21585,7 @@
             "format": "int32"
           },
           "theme": {
-            "$ref": "#/components/schemas/SiteTheme"
+            "$ref": "#/components/schemas/SiteThemeDto"
           },
           "bookReaderThemeName": {
             "minLength": 1,

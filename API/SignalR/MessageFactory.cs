@@ -485,7 +485,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SiteThemeProgress,
-            Title = "Scanning Site Theme",
+            Title = "Processing Site Theme", // TODO: Localize SignalRMessage titles
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Indeterminate,

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Data.Migrations;
 using API.DTOs;
@@ -241,7 +242,10 @@ public class AutoMapperProfiles : Profile
                         IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
                     }));
 
-        CreateMap<SiteTheme, SiteThemeDto>();
+        CreateMap<SiteTheme, SiteThemeDto>()
+            .ForMember(dest => dest.PreviewUrls,
+                opt =>
+                    opt.MapFrom(src => (src.PreviewUrls ?? string.Empty).Split('|', StringSplitOptions.TrimEntries)));
         CreateMap<AppUserPreferences, UserPreferencesDto>()
             .ForMember(dest => dest.Theme,
                 opt =>

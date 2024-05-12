@@ -18,8 +18,8 @@ export class SiteThemeProviderPipe implements PipeTransform {
         return this.translocoService.translate('site-theme-provider-pipe.system');
       case ThemeProvider.User:
         return this.translocoService.translate('site-theme-provider-pipe.user');
-      case ThemeProvider.Downloaded:
-        return this.translocoService.translate('site-theme-provider-pipe.downloaded');
+      case ThemeProvider.Provided:
+        return this.translocoService.translate('site-theme-provider-pipe.provided');
       default:
         return '';
     }

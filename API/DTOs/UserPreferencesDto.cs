@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
@@ -104,7 +105,7 @@ public class UserPreferencesDto
     /// </summary>
     /// <remarks>Should default to Dark</remarks>
     [Required]
-    public SiteTheme? Theme { get; set; }
+    public SiteThemeDto? Theme { get; set; }
 
     [Required] public string BookReaderThemeName { get; set; } = null!;
     [Required]
