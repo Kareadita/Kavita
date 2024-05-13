@@ -1,20 +1,7 @@
 <ng-container *transloco="let t; read:'theme-manager'">
   <div class="container-fluid">
     <div class="row mb-2">
-      <div class="col-8"><h3>{{t('title')}}</h3></div>
-      <div class="col-4">
-        <div class="float-end">
-<!--          <button class="btn btn-primary" (click)="browse()">-->
-<!--            <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('browse')}}-->
-<!--          </button>-->
-
-<!--          @if (isAdmin) {-->
-<!--            <button class="btn btn-primary" (click)="scan()">-->
-<!--              <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('scan')}}-->
-<!--            </button>-->
-<!--          }-->
-        </div>
-      </div>
+      <h3>{{t('title')}}</h3>
     </div>
 
     <p>{{t('description')}}</p>
@@ -132,14 +119,14 @@
           @if (item.hasOwnProperty('provider')) {
             {{item.provider | siteThemeProvider}}
           } @else if (item.hasOwnProperty('lastCompatibleVersion')) {
-            {{ThemeProvider.Provided | siteThemeProvider}} • v{{item.lastCompatibleVersion}}
+            {{ThemeProvider.Custom | siteThemeProvider}} • v{{item.lastCompatibleVersion}}
           }
           @if (currentTheme && item.name === currentTheme.name) {
-            • Active
+            • {{t('active-theme')}}
           }
         </div>
         @if (item.hasOwnProperty('isDefault') && item.isDefault) {
-          <i class="fa-solid fa-star" aria-label="Default theme"></i>
+          <i class="fa-solid fa-star" [attr.aria-label]="t('default-theme')"></i>
         }
       </li>
     }

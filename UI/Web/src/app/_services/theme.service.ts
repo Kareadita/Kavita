@@ -1,27 +1,20 @@
-import { DOCUMENT } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import {
-  DestroyRef,
-  inject,
-  Inject,
-  Injectable,
-  Renderer2,
-  RendererFactory2,
-  SecurityContext
-} from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ToastrService } from 'ngx-toastr';
-import { map, ReplaySubject, take } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { ConfirmService } from '../shared/confirm.service';
-import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
-import { TextResonse } from '../_types/text-response';
-import { EVENTS, MessageHubService } from './message-hub.service';
+import {DOCUMENT} from '@angular/common';
+import {HttpClient} from '@angular/common/http';
+import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, SecurityContext} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
+import {ToastrService} from 'ngx-toastr';
+import {map, ReplaySubject, take} from 'rxjs';
+import {environment} from 'src/environments/environment';
+import {ConfirmService} from '../shared/confirm.service';
+import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
+import {SiteTheme, ThemeProvider} from '../_models/preferences/site-theme';
+import {TextResonse} from '../_types/text-response';
+import {EVENTS, MessageHubService} from './message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate} from "@ngneat/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
+import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 
 
 @Injectable({
@@ -54,13 +47,27 @@ export class ThemeService {
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
-      if (message.event !== EVENTS.NotificationProgress) return;
-      const notificationEvent = (message.payload as NotificationProgressEvent);
-      if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
+      if (message.event === EVENTS.NotificationProgress) {
+        const notificationEvent = (message.payload as NotificationProgressEvent);
+        if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
 
-      if (notificationEvent.eventType === 'ended') {
-        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe();
+        if (notificationEvent.eventType === 'ended') {
+          if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe();
+        }
+        return;
       }
+
+      if (message.event === EVENTS.SiteThemeUpdated) {
+        const evt = (message.payload as SiteThemeUpdatedEvent);
+        this.currentTheme$.pipe(take(1)).subscribe(currentTheme => {
+          if (currentTheme && currentTheme.name !== EVENTS.SiteThemeProgress) return;
+          console.log('Active theme has been updated, refreshing theme');
+          this.setTheme(currentTheme.name);
+
+        });
+      }
+
+
     });
   }
 
@@ -169,7 +176,7 @@ export class ThemeService {
       this.unsetThemes();
       this.renderer.addClass(this.document.querySelector('body'), theme.selector);
 
-      if ([ThemeProvider.User, ThemeProvider.Provided].includes(theme.provider) && !this.hasThemeInHead(theme.name)) {
+      if (theme.provider !== ThemeProvider.System && !this.hasThemeInHead(theme.name)) {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {
           if (content === null) {

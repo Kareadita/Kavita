@@ -3,8 +3,7 @@
  */
  export enum ThemeProvider {
     System = 1,
-    User = 2,
-    Provided
+    Custom = 2,
   }
 
   /**

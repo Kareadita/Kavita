@@ -54,7 +54,6 @@ internal class ThemeMetadata
 public interface IThemeService
 {
     Task<string> GetContent(int themeId);
-    Task Scan();
     Task UpdateDefault(int themeId);
     /// <summary>
     /// Browse theme repo for themes to download
@@ -65,6 +64,7 @@ public interface IThemeService
     Task<SiteTheme> DownloadRepoTheme(DownloadableSiteThemeDto dto);
     Task DeleteTheme(int siteThemeId);
     Task<SiteTheme> CreateThemeFromFile(string tempFile, string username);
+    Task SyncThemes();
 }
 
 
@@ -80,11 +80,12 @@ public class ThemeService : IThemeService
     private readonly IMemoryCache _cache;
     private readonly MemoryCacheEntryOptions _cacheOptions;
 
-    private readonly string _githubBaseUrl = "https://api.github.com";
+    private const string GithubBaseUrl = "https://api.github.com";
+
     /// <summary>
     /// Used for refreshing metadata around themes
     /// </summary>
-    private readonly string _githubReadme = "https://raw.githubusercontent.com/Kareadita/Themes/main/README.md";
+    private const string GithubReadme = "https://raw.githubusercontent.com/Kareadita/Themes/main/README.md";
 
     public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork,
         IEventHub eventHub, IFileService fileService, ILogger<ThemeService> logger, IMemoryCache cache)
@@ -118,9 +119,9 @@ public class ThemeService : IThemeService
 
     public async Task<List<DownloadableSiteThemeDto>> GetDownloadableThemes()
     {
-        var cacheKey = $"browse";
+        const string cacheKey = "browse";
         var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).ToDictionary(k => k.Name);
-        if (_cache.TryGetValue(cacheKey, out List<DownloadableSiteThemeDto>? themes))
+        if (_cache.TryGetValue(cacheKey, out List<DownloadableSiteThemeDto>? themes) && themes != null)
         {
             foreach (var t in themes)
             {
@@ -148,7 +149,7 @@ public class ThemeService : IThemeService
 
             // Find css and preview files
             var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
-            var previewFiles = themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg") || c.Name.ToLower().EndsWith(".png") );
+            var previewUrls = GetPreviewUrls(themeContents);
 
             if (cssFile == null) continue;
 
@@ -160,9 +161,9 @@ public class ThemeService : IThemeService
                 Name = themeName,
                 CssUrl = cssUrl,
                 CssFile = cssFile.Name,
-                PreviewUrls = previewFiles.Select(p => p.DownloadUrl).ToList(),
+                PreviewUrls = previewUrls,
                 Sha = cssFile.Sha,
-                Path = cssFile.Path,
+                Path = themeDir.Path,
             };
 
             if (themeMetadata.TryGetValue(themeName, out var metadata))
@@ -182,9 +183,16 @@ public class ThemeService : IThemeService
         return themeDtos;
     }
 
-    private async Task<IList<GitHubContent>> GetDirectoryContent(string path)
+    private static IList<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
     {
-        return await $"{_githubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
+        return themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg") || c.Name.ToLower().EndsWith(".png") )
+            .Select(p => p.DownloadUrl)
+            .ToList();
+    }
+
+    private static async Task<IList<GitHubContent>> GetDirectoryContent(string path)
+    {
+        return await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
             .WithHeader("Accept", "application/vnd.github+json")
             .WithHeader("User-Agent", "Kavita")
             .GetJsonAsync<List<GitHubContent>>();
@@ -196,7 +204,7 @@ public class ThemeService : IThemeService
     /// <returns></returns>
     private async Task<IDictionary<string, ThemeMetadata>> GetReadme()
     {
-        var tempDownloadFile = await _githubReadme.DownloadFileAsync(_directoryService.TempDirectory);
+        var tempDownloadFile = await GithubReadme.DownloadFileAsync(_directoryService.TempDirectory);
 
         // Read file into Markdown
         var htmlContent  = _markdown.Transform(await _directoryService.FileSystem.File.ReadAllTextAsync(tempDownloadFile));
@@ -265,15 +273,6 @@ public class ThemeService : IThemeService
         _directoryService.CopyFileToDirectory(tempDownloadFile, _directoryService.SiteThemeDirectory);
         var finalLocation = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, dto.CssFile);
 
-        // Download the preview images
-        // _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, "")
-        // foreach(var imgUrl in dto.PreviewUrls)
-        // {
-        //     var tempPreviewImage = await imgUrl.DownloadFileAsync(_directoryService.TempDirectory);
-        //     _directoryService.FileSystem.File.Move(tempPreviewImage, ImageService.SiteThemePreview());
-        //     _directoryService.CopyFileToDirectory(tempDownloadFile, _directoryService.SiteThemeDirectory);
-        // }
-
         return finalLocation;
     }
 
@@ -282,7 +281,7 @@ public class ThemeService : IThemeService
     {
 
         // Validate we don't have a collision with existing or existing doesn't already exist
-        var existingThemes = _directoryService.ScanFiles(_directoryService.SiteThemeDirectory, "");
+        var existingThemes = _directoryService.ScanFiles(_directoryService.SiteThemeDirectory, string.Empty);
         if (existingThemes.Any(f => Path.GetFileName(f) == dto.CssFile))
         {
             throw new KavitaException("Cannot download file, file already on disk");
@@ -296,7 +295,7 @@ public class ThemeService : IThemeService
             Name = dto.Name,
             NormalizedName = dto.Name.ToNormalized(),
             FileName = _directoryService.FileSystem.Path.GetFileName(finalLocation),
-            Provider = ThemeProvider.Provided,
+            Provider = ThemeProvider.Custom,
             IsDefault = false,
             GitHubPath = dto.Path,
             Description = dto.Description,
@@ -316,20 +315,40 @@ public class ThemeService : IThemeService
         return theme;
     }
 
+    public async Task SyncThemes()
+    {
+        var themes = await _unitOfWork.SiteThemeRepository.GetThemes();
+        var themeMetadata = await GetReadme();
+        foreach (var theme in themes)
+        {
+            await SyncTheme(theme, themeMetadata);
+        }
+        _logger.LogInformation("Sync Themes complete");
+    }
 
-    public async Task SyncTheme(SiteTheme? theme)
+    /// <summary>
+    /// If the Theme is from the Theme repo, see if there is a new version that is compatible
+    /// </summary>
+    /// <param name="theme"></param>
+    /// <param name="themeMetadata">The Readme information</param>
+    private async Task SyncTheme(SiteTheme? theme, IDictionary<string, ThemeMetadata> themeMetadata)
     {
         // Given a theme, first validate that it is applicable
-        if (theme == null || theme.Provider != ThemeProvider.Provided || string.IsNullOrEmpty(theme.GitHubPath))
+        if (theme == null || theme.Provider == ThemeProvider.System || string.IsNullOrEmpty(theme.GitHubPath))
         {
-            _logger.LogInformation("Cannot Sync theme as it is not valid");
+            _logger.LogInformation("Cannot Sync {ThemeName} as it is not valid", theme?.Name);
             return;
         }
 
-        var themeMetadata = await GetReadme();
+        if (new Version(theme.CompatibleVersion) > BuildInfo.Version)
+        {
+            _logger.LogDebug("{ThemeName} theme supports a more up-to-date version ({Version}) of Kavita. Please update", theme.Name, theme.CompatibleVersion);
+            return;
+        }
+
+
         var themeContents = await GetDirectoryContent(theme.GitHubPath);
         var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
-        var hasUpdated = false;
 
         if (cssFile == null) return;
 
@@ -339,17 +358,23 @@ public class ThemeService : IThemeService
             theme.Description = metadata.Description;
             theme.Author = metadata.Author;
             theme.CompatibleVersion = metadata.LastCompatible.ToString();
-            //theme.PreviewUrls = metadata.PreviewUrls; // If we can pull this off in parsing
+            theme.PreviewUrls = string.Join('|', GetPreviewUrls(themeContents));
         }
 
-        hasUpdated = cssFile.Sha != theme.ShaHash;
+        var hasUpdated = cssFile.Sha != theme.ShaHash;
         if (hasUpdated)
         {
             _logger.LogDebug("Theme {ThemeName} is out of date, updating", theme.Name);
-            var location = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, theme.FileName);
+            var tempLocation = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, theme.FileName);
 
+            _directoryService.DeleteFiles([tempLocation]);
 
-
+            var location = await cssFile.DownloadUrl.DownloadFileAsync(_directoryService.TempDirectory);
+            if (_directoryService.FileSystem.File.Exists(location))
+            {
+                _directoryService.CopyFileToDirectory(location, _directoryService.SiteThemeDirectory);
+                _logger.LogInformation("Updated Theme on disk for {ThemeName}", theme.Name);
+            }
         }
 
         await _unitOfWork.CommitAsync();
@@ -357,10 +382,8 @@ public class ThemeService : IThemeService
 
         if (hasUpdated)
         {
-            // TODO: Send an update when the theme is updated so the clients can auto-update them (we need a new event likely)
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(theme.FileName), theme.Name,
-                    ProgressEventType.Ended));
+            await _eventHub.SendMessageAsync(MessageFactory.SiteThemeUpdated,
+                MessageFactory.SiteThemeUpdatedEvent(theme.Name));
         }
 
         // Send an update to refresh metadata around the themes
@@ -422,7 +445,7 @@ public class ThemeService : IThemeService
             Name = Path.GetFileNameWithoutExtension(filename),
             NormalizedName = themeName.ToNormalized(),
             FileName = _directoryService.FileSystem.Path.GetFileName(finalLocation),
-            Provider = ThemeProvider.Provided,
+            Provider = ThemeProvider.Custom,
             IsDefault = false,
             Description = $"Manually uploaded via UI by {username}",
             PreviewUrls = string.Empty,
@@ -438,80 +461,6 @@ public class ThemeService : IThemeService
                 ProgressEventType.Ended));
         return theme;
 
-    }
-
-    /// <summary>
-    /// Scans the site theme directory for custom css files and updates what the system has on store
-    /// </summary>
-    public async Task Scan()
-    {
-        _directoryService.ExistOrCreate(_directoryService.SiteThemeDirectory);
-        var reservedNames = Seed.DefaultThemes.Select(t => t.NormalizedName).ToList();
-        var themeFiles = _directoryService
-            .GetFilesWithExtension(Scanner.Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
-            .Where(name => !reservedNames.Contains(name.ToNormalized()) && !name.Contains(' '))
-            .ToList();
-
-        var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
-
-        // First remove any files from allThemes that are User Defined and not on disk
-        var userThemes = allThemes.Where(t => t.Provider != ThemeProvider.System).ToList();
-        foreach (var userTheme in userThemes)
-        {
-            var filepath = Scanner.Parser.Parser.NormalizePath(
-                _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, userTheme.FileName));
-            if (_directoryService.FileSystem.File.Exists(filepath)) continue;
-
-            // I need to do the removal different. I need to update all user preferences to use DefaultTheme
-            allThemes.Remove(userTheme);
-            await RemoveTheme(userTheme);
-        }
-
-        // Add new custom themes
-        var allThemeNames = allThemes.Select(t => t.NormalizedName).ToList();
-        foreach (var themeFile in themeFiles)
-        {
-            var themeName =
-                _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile).ToNormalized();
-            if (allThemeNames.Contains(themeName)) continue;
-
-            _unitOfWork.SiteThemeRepository.Add(new SiteTheme()
-            {
-                Name = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile),
-                NormalizedName = themeName,
-                FileName = _directoryService.FileSystem.Path.GetFileName(themeFile),
-                Provider = ThemeProvider.Provided,
-                IsDefault = false,
-            });
-
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName,
-                    ProgressEventType.Updated));
-        }
-
-
-        if (_unitOfWork.HasChanges())
-        {
-            await _unitOfWork.CommitAsync();
-        }
-
-        // if there are no default themes, reselect Dark as default
-        var postSaveThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
-        if (!postSaveThemes.Exists(t => t.IsDefault))
-        {
-            var defaultThemeName = Seed.DefaultThemes.Single(t => t.IsDefault).NormalizedName;
-            var theme = postSaveThemes.SingleOrDefault(t => t.NormalizedName == defaultThemeName);
-            if (theme != null)
-            {
-                theme.IsDefault = true;
-                _unitOfWork.SiteThemeRepository.Update(theme);
-                await _unitOfWork.CommitAsync();
-            }
-
-        }
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SiteThemeProgressEvent("", "", ProgressEventType.Ended));
     }
 
 

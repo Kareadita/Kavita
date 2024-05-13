@@ -16,10 +16,8 @@ export class SiteThemeProviderPipe implements PipeTransform {
     switch(provider) {
       case ThemeProvider.System:
         return this.translocoService.translate('site-theme-provider-pipe.system');
-      case ThemeProvider.User:
-        return this.translocoService.translate('site-theme-provider-pipe.user');
-      case ThemeProvider.Provided:
-        return this.translocoService.translate('site-theme-provider-pipe.provided');
+      case ThemeProvider.Custom:
+        return this.translocoService.translate('site-theme-provider-pipe.custom');
       default:
         return '';
     }

@@ -185,9 +185,11 @@
         "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
+        "default-theme": "Default theme",
         "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "applied": "Applied",
+        "active": "Active",
         "updated-toastr": "Site default has been updated to {{name}}",
         "scan-queued": "A site theme scan has been queued",
         "delete": "{{common.delete}}",
@@ -216,8 +218,7 @@
 
     "site-theme-provider-pipe": {
         "system": "System",
-        "user": "User",
-        "provided": "Provided"
+        "custom": "{{device-platform-pipe.custom}}"
     },
 
     "manage-devices": {

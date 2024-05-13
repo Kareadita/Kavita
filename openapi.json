@@ -20332,8 +20332,7 @@
           "provider": {
             "enum": [
               1,
-              2,
-              3
+              2
             ],
             "type": "integer",
             "description": "Where did the theme come from",
@@ -20415,8 +20414,7 @@
           "provider": {
             "enum": [
               1,
-              2,
-              3
+              2
             ],
             "type": "integer",
             "description": "Where did the theme come from",

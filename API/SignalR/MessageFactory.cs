@@ -130,6 +130,10 @@ public static class MessageFactory
     /// Order, Visibility, etc has changed on the Sidenav. UI will refresh the layout
     /// </summary>
     public const string SideNavUpdate = "SideNavUpdate";
+    /// <summary>
+    /// A Theme was updated and UI should refresh to get the latest version
+    /// </summary>
+    public const string SiteThemeUpdated = "SiteThemeUpdated";
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
     {
@@ -489,6 +493,25 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Indeterminate,
+            Body = new
+            {
+                ThemeName = themeName,
+            }
+        };
+    }
+
+    /// <summary>
+    /// Sends an event to the UI informing of a SiteTheme update and UI needs to refresh the content
+    /// </summary>
+    /// <param name="themeName"></param>
+    /// <returns></returns>
+    public static SignalRMessage SiteThemeUpdatedEvent(string themeName)
+    {
+        return new SignalRMessage()
+        {
+            Name = SiteThemeUpdated,
+            Title = "SiteTheme Update",
+            Progress = ProgressType.None,
             Body = new
             {
                 ThemeName = themeName,

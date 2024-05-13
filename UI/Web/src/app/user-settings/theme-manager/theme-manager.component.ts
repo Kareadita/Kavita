@@ -69,18 +69,24 @@ export class ThemeManagerComponent {
   acceptableExtensions = ['.css'].join(',');
   isUploadingTheme: boolean = false;
 
+
+
   constructor() {
 
-    this.themeService.getDownloadableThemes().subscribe(d => {
-      this.downloadableThemes = d;
-      this.cdRef.markForCheck();
-    });
+    this.loadDownloadableThemes();
 
     this.themeService.currentTheme$.pipe(takeUntilDestroyed(this.destroyRef), distinctUntilChanged()).subscribe(theme => {
       this.currentTheme = theme;
       this.cdRef.markForCheck();
     });
 
+  }
+
+  loadDownloadableThemes() {
+    this.themeService.getDownloadableThemes().subscribe(d => {
+      this.downloadableThemes = d;
+      this.cdRef.markForCheck();
+    });
   }
 
   async deleteTheme(theme: SiteTheme) {
@@ -90,6 +96,7 @@ export class ThemeManagerComponent {
 
     this.themeService.deleteTheme(theme.id).subscribe(_ => {
       this.removeDownloadedTheme(theme);
+      this.loadDownloadableThemes();
     });
   }
 
@@ -105,6 +112,8 @@ export class ThemeManagerComponent {
       const pref = Object.assign({}, user.preferences);
       pref.theme = theme;
       this.accountService.updatePreferences(pref).subscribe();
+      // Updating theme emits the new theme to load on the themes$
+
     });
   }
 

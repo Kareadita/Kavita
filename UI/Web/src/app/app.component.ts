@@ -13,7 +13,6 @@ import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.compon
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerService} from "./_services/server.service";
-import {ImportCblModalComponent} from "./reading-list/_modals/import-cbl-modal/import-cbl-modal.component";
 import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 
 @Component({
