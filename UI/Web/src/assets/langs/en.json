@@ -189,14 +189,15 @@
         "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "applied": "Applied",
-        "active": "Active",
+        "active-theme": "Active",
         "updated-toastr": "Site default has been updated to {{name}}",
         "scan-queued": "A site theme scan has been queued",
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a css file",
-        "preview-default": "Select a theme first or upload one manually"
+        "preview-default": "Select a theme first",
+        "preview-default-admin": "Select a theme first or upload one manually"
     },
 
     "theme": {

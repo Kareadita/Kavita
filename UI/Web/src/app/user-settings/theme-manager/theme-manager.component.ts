@@ -16,7 +16,7 @@ import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import {NgIf, NgFor, AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {filter, shareReplay} from "rxjs/operators";
+import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../../cards/series-card/series-card.component";
 import {ImageComponent} from "../../shared/image/image.component";

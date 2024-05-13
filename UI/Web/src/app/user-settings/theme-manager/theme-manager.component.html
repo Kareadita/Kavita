@@ -30,7 +30,12 @@
             <div class="mx-auto">
               <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-evenly">
-                  {{t('preview-default')}}
+                  @if (hasAdmin$ | async) {
+                    {{t('preview-default-admin')}}
+                  } @else {
+                    {{t('preview-default')}}
+                  }
+
                 </div>
               </div>
             </div>
@@ -39,7 +44,7 @@
 
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingTheme"></app-loading>
-          } @else {
+          } @else if (hasAdmin$ | async) {
             <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
                            dropZoneClassName="file-upload" contentClassName="file-upload-zone">
 
