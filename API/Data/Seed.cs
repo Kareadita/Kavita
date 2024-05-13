@@ -25,8 +25,8 @@ public static class Seed
     /// </summary>
     public static ImmutableArray<ServerSetting> DefaultSettings;
 
-    public static readonly ImmutableArray<SiteTheme> DefaultThemes = ImmutableArray.Create(
-        new List<SiteTheme>
+    public static readonly ImmutableArray<SiteTheme> DefaultThemes = [
+        ..new List<SiteTheme>
         {
             new()
             {
@@ -36,7 +36,8 @@ public static class Seed
                 FileName = "dark.scss",
                 IsDefault = true,
             }
-        }.ToArray());
+        }.ToArray()
+    ];
 
     public static readonly ImmutableArray<AppUserDashboardStream> DefaultStreams = ImmutableArray.Create(
         new List<AppUserDashboardStream>

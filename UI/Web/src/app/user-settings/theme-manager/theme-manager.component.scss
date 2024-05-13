@@ -1,0 +1,27 @@
+//.theme-container {
+//  max-height: calc(100 * var(--vh));
+//  overflow-y: auto;
+//}
+
+.chooser {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 158px);
+  grid-gap: 0.5rem;
+  justify-content: space-around;
+}
+
+ngx-file-drop ::ng-deep > div {
+  // styling for the outer drop box
+  width: 100%;
+  border: 2px solid var(--primary-color);
+  border-radius: 5px;
+  height: 100px;
+  margin: auto;
+
+  > div {
+    // styling for the inner box (template)
+    width: 100%;
+    display: inline-block;
+
+  }
+}

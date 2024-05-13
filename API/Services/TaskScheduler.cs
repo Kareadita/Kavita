@@ -32,7 +32,6 @@ public interface ITaskScheduler
     void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
-    void ScanSiteThemes();
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
     Task CheckForUpdate();
@@ -64,6 +63,7 @@ public class TaskScheduler : ITaskScheduler
     public const string DefaultQueue = "default";
     public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
     public const string UpdateYearlyStatsTaskId = "update-yearly-stats";
+    public const string SyncThemesTaskId = "sync-themes";
     public const string CheckForUpdateId = "check-updates";
     public const string CleanupDbTaskId = "cleanup-db";
     public const string CleanupTaskId = "cleanup";
@@ -161,6 +161,9 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(),
             Cron.Monthly, RecurringJobOptions);
 
+        RecurringJob.AddOrUpdate(SyncThemesTaskId, () => _themeService.SyncThemes(),
+            Cron.Weekly, RecurringJobOptions);
+
         await ScheduleKavitaPlusTasks();
     }
 
@@ -200,7 +203,7 @@ public class TaskScheduler : ITaskScheduler
 
     public async Task ScheduleStatsTasks()
     {
-        var allowStatCollection  = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
+        var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
         if (!allowStatCollection)
         {
             _logger.LogDebug("User has opted out of stat collection, not registering tasks");
@@ -239,18 +242,6 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
         BackgroundJob.Schedule(() => _statsService.Send(), DateTimeOffset.Now.AddDays(1));
-    }
-
-    public void ScanSiteThemes()
-    {
-        if (HasAlreadyEnqueuedTask("ThemeService", "Scan", Array.Empty<object>(), ScanQueue))
-        {
-            _logger.LogInformation("A Theme Scan is already running");
-            return;
-        }
-
-        _logger.LogInformation("Enqueueing Site Theme scan");
-        BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
     public void CovertAllCoversToEncoding()

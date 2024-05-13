@@ -9,6 +9,7 @@ import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { User } from '../_models/user';
 import {DashboardUpdateEvent} from "../_models/events/dashboard-update-event";
 import {SideNavUpdateEvent} from "../_models/events/sidenav-update-event";
+import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -98,7 +99,11 @@ export enum EVENTS {
   /**
    * User's sidenav needs to be re-rendered
    */
-  SideNavUpdate = 'SideNavUpdate'
+  SideNavUpdate = 'SideNavUpdate',
+  /**
+   * A Theme was updated and UI should refresh to get the latest version
+   */
+  SiteThemeUpdated= 'SiteThemeUpdated'
 }
 
 export interface Message<T> {
@@ -191,6 +196,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.LibraryModified,
         payload: resp.body as LibraryModifiedEvent
+      });
+    });
+
+    this.hubConnection.on(EVENTS.SiteThemeUpdated, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SiteThemeUpdated,
+        payload: resp.body as SiteThemeUpdatedEvent
       });
     });
 

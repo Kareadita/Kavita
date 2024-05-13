@@ -182,15 +182,22 @@
 
     "theme-manager": {
         "title": "Theme Manager",
-        "looking-for-theme": "Looking for a light or e-ink theme? We have some custom themes you can use on our ",
-        "looking-for-theme-continued": "theme github.",
-        "scan": "Scan",
+        "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
+        "default-theme": "Default theme",
+        "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "applied": "Applied",
+        "active-theme": "Active",
         "updated-toastr": "Site default has been updated to {{name}}",
-        "scan-queued": "A site theme scan has been queued"
+        "scan-queued": "A site theme scan has been queued",
+        "delete": "{{common.delete}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "a css file",
+        "preview-default": "Select a theme first",
+        "preview-default-admin": "Select a theme first or upload one manually"
     },
 
     "theme": {
@@ -212,7 +219,7 @@
 
     "site-theme-provider-pipe": {
         "system": "System",
-        "user": "User"
+        "custom": "{{device-platform-pipe.custom}}"
     },
 
     "manage-devices": {
@@ -1583,14 +1590,17 @@
         "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
     },
 
-
+    "browse-themes-modal": {
+        "title": "Browse Themes"
+    },
 
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
         "title": "MAL Interest Stack Import",
         "description": "Import your MAL Interest Stacks and create Collections within Kavita",
         "series-count": "{{common.series-count}}",
-        "restack-count": "{{num}} Restacks"
+        "restack-count": "{{num}} Restacks",
+        "nothing-found": ""
     },
 
     "edit-chapter-progress": {
@@ -1946,7 +1956,10 @@
         "rejected-cover-upload": "The image could not be fetched due to server refusing request. Please download and upload from file instead.",
         "invalid-confirmation-url": "Invalid confirmation url",
         "invalid-confirmation-email": "Invalid confirmation email",
-        "invalid-password-reset-url": "Invalid reset password url"
+        "invalid-password-reset-url": "Invalid reset password url",
+        "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
+        "theme-manual-upload": "There was an issue creating Theme from manual upload",
+        "theme-already-in-use": "Theme already exists by that name"
     },
 
     "metadata-builder": {
@@ -2185,7 +2198,8 @@
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
-        "stack-imported": "Stack Imported"
+        "stack-imported": "Stack Imported",
+        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal"
 
     },
 

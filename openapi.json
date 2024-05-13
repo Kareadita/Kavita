@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.1.0"
+    "version": "0.8.1.3"
   },
   "servers": [
     {
@@ -11968,16 +11968,52 @@
             }
           }
         }
-      }
-    },
-    "/api/Theme/scan": {
-      "post": {
+      },
+      "delete": {
         "tags": [
           "Theme"
         ],
+        "summary": "Attempts to delete a theme. If already in use by users, will not allow",
+        "parameters": [
+          {
+            "name": "themeId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -12046,6 +12082,145 @@
               "text/json": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Theme/browse": {
+      "get": {
+        "tags": [
+          "Theme"
+        ],
+        "summary": "Browse themes that can be used on this server",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Theme/download-theme": {
+      "post": {
+        "tags": [
+          "Theme"
+        ],
+        "summary": "Downloads a SiteTheme from upstream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadableSiteThemeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Theme/upload-theme": {
+      "post": {
+        "tags": [
+          "Theme"
+        ],
+        "summary": "Uploads a new theme file",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "formFile": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "formFile": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteThemeDto"
                 }
               }
             }
@@ -15773,6 +15948,67 @@
             "items": {
               "$ref": "#/components/schemas/BookmarkDto"
             }
+          }
+        },
+        "additionalProperties": false
+      },
+      "DownloadableSiteThemeDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Theme Name",
+            "nullable": true
+          },
+          "cssUrl": {
+            "type": "string",
+            "description": "Url to download css file",
+            "nullable": true
+          },
+          "cssFile": {
+            "type": "string",
+            "nullable": true
+          },
+          "previewUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Url to preview image",
+            "nullable": true
+          },
+          "alreadyDownloaded": {
+            "type": "boolean",
+            "description": "If Already downloaded"
+          },
+          "sha": {
+            "type": "string",
+            "description": "Sha of the file",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "description": "Path of the Folder the files reside in",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "description": "Author of the theme",
+            "nullable": true
+          },
+          "lastCompatibleVersion": {
+            "type": "string",
+            "description": "Last version tested against",
+            "nullable": true
+          },
+          "isCompatible": {
+            "type": "boolean",
+            "description": "If version compatible with version"
+          },
+          "description": {
+            "type": "string",
+            "description": "Small blurb about the Theme",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20117,6 +20353,33 @@
           "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
+          },
+          "gitHubPath": {
+            "type": "string",
+            "description": "The Url on the repo to download the file from",
+            "nullable": true
+          },
+          "shaHash": {
+            "type": "string",
+            "description": "Hash of the Css File",
+            "nullable": true
+          },
+          "previewUrls": {
+            "type": "string",
+            "description": "Pipe (|) separated urls of the images. Empty string if",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "compatibleVersion": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -20156,6 +20419,28 @@
             "type": "integer",
             "description": "Where did the theme come from",
             "format": "int32"
+          },
+          "previewUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Information about the theme",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "description": "Author of the Theme (only applies to non-system provided themes)",
+            "nullable": true
+          },
+          "compatibleVersion": {
+            "type": "string",
+            "description": "Last compatible version. System provided will always be most current",
+            "nullable": true
           },
           "selector": {
             "type": "string",
@@ -20239,7 +20524,8 @@
               5,
               6,
               7,
-              8
+              8,
+              9
             ],
             "type": "integer",
             "format": "int32"
@@ -21303,7 +21589,7 @@
             "format": "int32"
           },
           "theme": {
-            "$ref": "#/components/schemas/SiteTheme"
+            "$ref": "#/components/schemas/SiteThemeDto"
           },
           "bookReaderThemeName": {
             "minLength": 1,

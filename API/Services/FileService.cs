@@ -1,5 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.IO.Abstractions;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Unicode;
 using API.Extensions;
 
 namespace API.Services;
@@ -9,6 +14,7 @@ public interface IFileService
     IFileSystem GetFileSystem();
     bool HasFileBeenModifiedSince(string filePath, DateTime time);
     bool Exists(string filePath);
+    bool ValidateSha(string filepath, string sha);
 }
 
 public class FileService : IFileService
@@ -42,5 +48,29 @@ public class FileService : IFileService
     public bool Exists(string filePath)
     {
         return _fileSystem.File.Exists(filePath);
+    }
+
+    /// <summary>
+    /// Validates the Sha256 hash matches
+    /// </summary>
+    /// <param name="filepath"></param>
+    /// <param name="sha"></param>
+    /// <returns></returns>
+    public bool ValidateSha(string filepath, string sha)
+    {
+        if (!Exists(filepath)) return false;
+        if (string.IsNullOrEmpty(sha)) throw new ArgumentException("Sha cannot be null");
+
+        using var fs = _fileSystem.File.OpenRead(filepath);
+        fs.Position = 0;
+
+        using var reader = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+        var content = reader.ReadToEnd();
+
+        // Compute SHA hash
+        var checksum = SHA256.HashData(Encoding.UTF8.GetBytes(content));
+
+        return BitConverter.ToString(checksum).Replace("-", string.Empty).Equals(sha);
+
     }
 }

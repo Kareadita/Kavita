@@ -10,6 +10,7 @@ import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {forkJoin} from "rxjs";
 import {ToastrService} from "ngx-toastr";
 import {DecimalPipe} from "@angular/common";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-import-mal-collection-modal',
@@ -18,7 +19,8 @@ import {DecimalPipe} from "@angular/common";
     TranslocoDirective,
     ReactiveFormsModule,
     Select2Module,
-    DecimalPipe
+    DecimalPipe,
+    LoadingComponent
   ],
   templateUrl: './import-mal-collection-modal.component.html',
   styleUrl: './import-mal-collection-modal.component.scss',

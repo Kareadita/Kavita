@@ -1,32 +1,141 @@
 <ng-container *transloco="let t; read:'theme-manager'">
   <div class="container-fluid">
     <div class="row mb-2">
-      <div class="col-8"><h3>{{t('title')}}</h3></div>
-      <div class="col-4" *ngIf="isAdmin">
-        <button class="btn btn-primary float-end" (click)="scan()">
-          <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('scan')}}
-        </button>
+      <h3>{{t('title')}}</h3>
+    </div>
+
+    <p>{{t('description')}}</p>
+
+
+    <div class="row g-0 theme-container">
+      <div class="col-md-3">
+        <div class="pe-2">
+          <ul style="height: 100%" class="list-group list-group-flush">
+
+            @for (theme of themeService.themes$ | async; track theme.name) {
+              <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
+            }
+
+            @for (theme of downloadableThemes; track theme.name) {
+              <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-9">
+        @if (selectedTheme === undefined) {
+
+          <div class="row pb-4">
+            <div class="mx-auto">
+              <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-evenly">
+                  @if (hasAdmin$ | async) {
+                    {{t('preview-default-admin')}}
+                  } @else {
+                    {{t('preview-default')}}
+                  }
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          @if (files && files.length > 0) {
+            <app-loading [loading]="isUploadingTheme"></app-loading>
+          } @else if (hasAdmin$ | async) {
+            <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
+                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
+
+              <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+                <div class="row g-0 mt-3 pb-3">
+                  <div class="mx-auto">
+                    <div class="row g-0 mb-3">
+                      <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                      <div class="d-flex justify-content-evenly">
+                        <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                        <span class="ps-1 pe-1">•</span>
+                        <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </ng-template>
+
+            </ngx-file-drop>
+          }
+
+        }
+        @else {
+          <h4>
+            {{selectedTheme.name | sentenceCase}}
+            <div class="float-end">
+              @if (selectedTheme.isSiteTheme) {
+                @if (selectedTheme.name !== 'Dark') {
+                  <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
+                }
+                @if (hasAdmin$ | async) {
+                  <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
+                }
+                <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>
+              } @else {
+                <button class="btn btn-primary" [disabled]="selectedTheme.downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedTheme.downloadable!)">{{t('download')}}</button>
+              }
+            </div>
+          </h4>
+          @if(!selectedTheme.isSiteTheme) {
+            <p>{{selectedTheme.downloadable!.description | defaultValue}}</p>
+
+            <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" title="Preview">
+              <ng-template #carouselItem let-item>
+                <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
+                  <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
+                </a>
+              </ng-template>
+            </app-carousel-reel>
+          } @else {
+            <p>{{selectedTheme.site!.description | defaultValue}}</p>
+
+            <app-carousel-reel [items]="selectedTheme.site!.previewUrls" title="Preview">
+              <ng-template #carouselItem let-item>
+                <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
+                  <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
+                </a>
+              </ng-template>
+            </app-carousel-reel>
+          }
+        }
       </div>
     </div>
-
-    <p *ngIf="isAdmin">
-      {{t('looking-for-theme')}}<a href="https://github.com/Kareadita/Themes" target="_blank" rel="noopener noreferrer">{{t('looking-for-theme-continued')}}</a>
-    </p>
-
-    <div class="row g-0">
-      <h4>{{t('site-themes')}}</h4>
-      <ng-container *ngFor="let theme of (themeService.themes$ | async)">
-        <div class="card col-auto me-3 mb-3" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">{{theme.name | sentenceCase}}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">{{theme.provider | siteThemeProvider}}</h6>
-            <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" *ngIf="isAdmin" (click)="updateDefault(theme)">{{t('set-default')}}</button>
-            <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? t('applied') : t('apply')}}</button>
-          </div>
-        </div>
-      </ng-container>
-    </div>
   </div>
+
+  <ng-template #themeOption let-item>
+    @if (item !== undefined) {
+
+      <li class="list-group-item d-flex justify-content-between align-items-start {{selectedTheme && selectedTheme.name === item.name ? 'active' : ''}}" (click)="selectTheme(item)">
+        <div class="ms-2 me-auto">
+          <div class="fw-bold">{{item.name | sentenceCase}}</div>
+
+          @if (item.hasOwnProperty('provider')) {
+            {{item.provider | siteThemeProvider}}
+          } @else if (item.hasOwnProperty('lastCompatibleVersion')) {
+            {{ThemeProvider.Custom | siteThemeProvider}} • v{{item.lastCompatibleVersion}}
+          }
+          @if (currentTheme && item.name === currentTheme.name) {
+            • {{t('active-theme')}}
+          }
+        </div>
+        @if (item.hasOwnProperty('isDefault') && item.isDefault) {
+          <i class="fa-solid fa-star" [attr.aria-label]="t('default-theme')"></i>
+        }
+      </li>
+    }
+  </ng-template>
 
 
 </ng-container>
