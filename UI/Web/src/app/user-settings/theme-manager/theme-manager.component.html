@@ -8,7 +8,7 @@
 
 
     <div class="row g-0 theme-container">
-      <div class="col-md-3">
+      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7">
         <div class="pe-2">
           <ul style="height: 100%" class="list-group list-group-flush">
 
@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <div class="col-md-9">
+      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4">
         @if (selectedTheme === undefined) {
 
           <div class="row pb-4">
@@ -94,7 +94,7 @@
             <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" title="Preview">
               <ng-template #carouselItem let-item>
                 <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
-                  <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
+                  <app-image [imageUrl]="item" height="108px" width="260px"></app-image>
                 </a>
               </ng-template>
             </app-carousel-reel>
@@ -104,7 +104,7 @@
             <app-carousel-reel [items]="selectedTheme.site!.previewUrls" title="Preview">
               <ng-template #carouselItem let-item>
                 <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
-                  <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
+                  <app-image [imageUrl]="item" height="108px" width="260px"></app-image>
                 </a>
               </ng-template>
             </app-carousel-reel>
