@@ -2,7 +2,7 @@
 
 // Overrides for reverse
 .image-container {
-    height: calc(100vh); // override as on single, we -34px for the potential scrollbar
+    height: calc(100dvh); // override as on single, we -34px for the potential scrollbar
     
     &.reverse {
         overflow: unset;
@@ -29,8 +29,16 @@
     }
 }
 
-.image-container.full-height {
-    display: inline-block;
+.image-container {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+
+
+    .full-height {
+        margin: unset;
+        object-fit: contain;
+    }
 }
 
 .full-width {
@@ -62,7 +70,7 @@
 }
 
 .fit-to-height-double-offset {
-    height: 100vh;
+    height: calc(100dvh);
     object-fit: scale-down;
     top: 50%;
     left: 50%;
