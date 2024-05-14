@@ -47,7 +47,8 @@
         "rating": "Rating {{r}}",
         "not-applicable": "Not Applicable",
         "processed": "Processed",
-        "not-processed": "Not Processed"
+        "not-processed": "Not Processed",
+        "special": "{{entity-title.special}}"
     },
 
     "scrobble-event-type-pipe": {
