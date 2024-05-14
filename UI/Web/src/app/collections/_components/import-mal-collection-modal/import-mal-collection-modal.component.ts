@@ -6,11 +6,13 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {MalStack} from "../../../_models/collection/mal-stack";
 import {UserCollection} from "../../../_models/collection-tag";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {forkJoin} from "rxjs";
 import {ToastrService} from "ngx-toastr";
 import {DecimalPipe} from "@angular/common";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {AccountService} from "../../../_services/account.service";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 @Component({
   selector: 'app-import-mal-collection-modal',
@@ -32,13 +34,25 @@ export class ImportMalCollectionModalComponent {
   private readonly collectionService = inject(CollectionTagService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
+  private readonly scrobblingService = inject(ScrobblingService);
+  private readonly confirmService = inject(ConfirmService);
 
   stacks: Array<MalStack> = [];
   isLoading = true;
   collectionMap: {[key: string]: UserCollection | MalStack} = {};
 
   constructor() {
+    this.scrobblingService.getMalToken().subscribe(async token => {
+      if (token.accessToken === '') {
+       await this.confirmService.alert(translate('toasts.mal-token-required'));
+       this.ngbModal.dismiss();
+       return;
+      }
+      this.setup();
+    });
+  }
 
+  setup() {
     forkJoin({
       allCollections: this.collectionService.allCollections(true),
       malStacks: this.collectionService.getMalStacks()
