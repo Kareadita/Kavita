@@ -67,7 +67,11 @@
         @switch (item.scrobbleEventType) {
           @case (ScrobbleEventType.ChapterRead) {
             @if(item.volumeNumber === LooseLeafOrDefaultNumber) {
-              {{t('chapter-num', {num: item.chapterNumber})}}
+              @if (item.chapterNumber === LooseLeafOrDefaultNumber) {
+                {{t('special')}}
+              } @else {
+                {{t('chapter-num', {num: item.chapterNumber})}}
+              }
             }
             @else if (item.chapterNumber === LooseLeafOrDefaultNumber) {
               {{t('volume-num', {num: item.volumeNumber})}}
