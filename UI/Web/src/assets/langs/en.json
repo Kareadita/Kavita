@@ -2200,8 +2200,8 @@
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
-        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal"
-
+        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
+        "mal-token-required": "MAL Token is required, set in User Settings"
     },
 
     "actionable": {
