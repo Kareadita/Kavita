@@ -3,8 +3,12 @@
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
       <h4 id="email-header">{{t('title')}}</h4>
 
-      <p>You must fill out both Host Name and SMTP settings to use email-based functionality within Kavita.</p>
-
+      <p>{{t('setting-description')}}</p>
+      @if (settingsForm.dirty) {
+        <ngb-alert [type]="'warning'">
+          {{t('test-warning')}}
+        </ngb-alert>
+      }
       <div class="mb-3 pe-2 ps-2 ">
         <label for="settings-hostname" class="form-label">{{t('host-name-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
         <ng-template #hostNameTooltip>{{t('host-name-tooltip')}}</ng-template>

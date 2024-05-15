@@ -5,6 +5,7 @@ import {take} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
+  NgbAlert,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
@@ -19,7 +20,7 @@ import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageAlertsComponent, TitleCasePipe]
+    ManageAlertsComponent, TitleCasePipe, NgbAlert]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
