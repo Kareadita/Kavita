@@ -42,4 +42,10 @@
     max-width: 319px;
     justify-content: space-between;
     margin: 0 auto;
+    padding: .5rem 0;
+
+    & > * {
+        margin: 0 5px;
+        display: inline-flex;
+    }
 }
