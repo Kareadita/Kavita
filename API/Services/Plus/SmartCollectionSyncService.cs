@@ -142,10 +142,15 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         // For everything that's not there, link it up for this user.
         _logger.LogInformation("Starting Sync on {CollectionName} with {SeriesCount} Series", info.Title, info.TotalItems);
 
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, 0, info.TotalItems, ProgressEventType.Started));
+
         var missingCount = 0;
         var missingSeries = new StringBuilder();
+        var counter = -1;
         foreach (var seriesInfo in info.Series.OrderBy(s => s.SeriesName))
         {
+            counter++;
             try
             {
                 // Normalize series name and localized name
@@ -164,7 +169,12 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                      s.NormalizedLocalizedName == normalizedSeriesName)
                     && formats.Contains(s.Format));
 
-                if (existingSeries != null) continue;
+                if (existingSeries != null)
+                {
+                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                        MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated));
+                    continue;
+                }
 
                 // Series not found in the collection, try to find it in the server
                 var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName,
@@ -196,6 +206,8 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 missingSeries.Append("<br/>");
             }
 
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated));
         }
 
         // At this point, all series in the info have been checked and added if necessary
@@ -212,6 +224,9 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
             await _unitOfWork.CommitAsync();
 
             await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collection);
+
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, info.TotalItems, info.TotalItems, ProgressEventType.Ended));
 
             await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
                 MessageFactory.CollectionUpdatedEvent(collection.Id), false);
