@@ -134,6 +134,10 @@ public static class MessageFactory
     /// A Theme was updated and UI should refresh to get the latest version
     /// </summary>
     public const string SiteThemeUpdated = "SiteThemeUpdated";
+    /// <summary>
+    /// A Progress event when a smart collection is synchronizing
+    /// </summary>
+    public const string SmartCollectionSync = "SmartCollectionSync";
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
     {
@@ -421,6 +425,31 @@ public static class MessageFactory
                 Subtitle = folderPath,
                 Filename = folderPath,
                 EventTime = DateTime.Now,
+            }
+        };
+    }
+
+    /// <summary>
+    /// Represents a file being scanned by Kavita for processing and grouping
+    /// </summary>
+    /// <remarks>Does not have a progress as it's unknown how many files there are. Instead sends -1 to represent indeterminate</remarks>
+    /// <param name="folderPath"></param>
+    /// <param name="libraryName"></param>
+    /// <param name="eventType"></param>
+    /// <returns></returns>
+    public static SignalRMessage SmartCollectionProgressEvent(string collectionName, string seriesName, int currentItems, int totalItems, string eventType)
+    {
+        return new SignalRMessage()
+        {
+            Name = SmartCollectionSync,
+            Title = $"Synchronizing {collectionName}",
+            SubTitle = seriesName,
+            EventType = eventType,
+            Progress = ProgressType.Determinate,
+            Body = new
+            {
+                Progress = float.Min((currentItems / (totalItems * 1.0f)), 100f),
+                EventTime = DateTime.Now
             }
         };
     }

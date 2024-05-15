@@ -1748,12 +1748,12 @@ public class SeriesRepository : ISeriesRepository
             {
                 // This is due to v0.5.6 introducing bugs where we could have multiple series get duplicated and no way to delete them
                 // This here will delete the 2nd one as the first is the one to likely be used.
-                var sId = _context.Series
+                var sId = await _context.Series
                     .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
                                 s.LibraryId == libraryId)
                     .Select(s => s.Id)
                     .OrderBy(s => s)
-                    .Last();
+                    .LastAsync();
                 if (sId > 0)
                 {
                     ids.Add(sId);

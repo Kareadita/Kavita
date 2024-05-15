@@ -103,7 +103,11 @@ export enum EVENTS {
   /**
    * A Theme was updated and UI should refresh to get the latest version
    */
-  SiteThemeUpdated= 'SiteThemeUpdated'
+  SiteThemeUpdated = 'SiteThemeUpdated',
+  /**
+   * A Progress event when a smart collection is synchronizing
+   */
+  SmartCollectionSync = 'SmartCollectionSync'
 }
 
 export interface Message<T> {
@@ -196,6 +200,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.LibraryModified,
         payload: resp.body as LibraryModifiedEvent
+      });
+    });
+
+    this.hubConnection.on(EVENTS.SmartCollectionSync, resp => {
+      this.messagesSource.next({
+        event: EVENTS.NotificationProgress,
+        payload: resp.body
       });
     });
 

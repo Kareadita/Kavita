@@ -14,7 +14,7 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - [Git](https://git-scm.com/downloads)
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
 - .NET 8.0+
-- dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+- dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
 ### Getting started ###
 
