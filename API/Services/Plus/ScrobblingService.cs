@@ -60,7 +60,6 @@ public interface IScrobblingService
 public class ScrobblingService : IScrobblingService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ITokenService _tokenService;
     private readonly IEventHub _eventHub;
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
@@ -99,12 +98,10 @@ public class ScrobblingService : IScrobblingService
     private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
 
 
-    public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService,
-        IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService,
-        ILocalizationService localizationService)
+    public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
+        ILicenseService licenseService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
-        _tokenService = tokenService;
         _eventHub = eventHub;
         _logger = logger;
         _licenseService = licenseService;
