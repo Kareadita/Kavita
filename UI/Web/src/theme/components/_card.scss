@@ -15,6 +15,7 @@
 }
 
 $image-height: 230px;
+$image-filter-height: 160px;
 $image-width: 160px;
 
 .card-item-container {
@@ -61,6 +62,14 @@ $image-width: 160px;
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
         z-index: 10;
+
+        &.filter {
+            height: $image-filter-height;
+
+            .card-overlay {
+                height: $image-filter-height;
+            }
+        }
 
         &:hover {
             visibility: visible;
