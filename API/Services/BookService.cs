@@ -73,7 +73,8 @@ public class BookService : IBookService
     {
         PackageReaderOptions = new PackageReaderOptions
         {
-            IgnoreMissingToc = true
+            IgnoreMissingToc = true,
+            SkipInvalidManifestItems = true
         }
     };
 
