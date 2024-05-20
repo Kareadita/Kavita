@@ -197,7 +197,8 @@
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a css file",
         "preview-default": "Select a theme first",
-        "preview-default-admin": "Select a theme first or upload one manually"
+        "preview-default-admin": "Select a theme first or upload one manually",
+        "preview-title": "Preview"
     },
 
     "theme": {
