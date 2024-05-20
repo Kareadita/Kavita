@@ -19,7 +19,7 @@ public static class ManualMigrateSwitchToWal
             return;
         }
 
-        logger.LogCritical("Converting Database to WAL");
+        logger.LogCritical("Running ManualMigrateSwitchToWal migration - Please be patient, this may take some time. This is not an error");
         try
         {
             var connection = context.Database.GetDbConnection();
@@ -41,6 +41,8 @@ public static class ManualMigrateSwitchToWal
             RanAt = DateTime.UtcNow
         });
         await context.SaveChangesAsync();
+
+        logger.LogCritical("Running ManualMigrateSwitchToWal migration - Completed. This is not an error");
     }
 
 }
