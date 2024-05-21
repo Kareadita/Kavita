@@ -433,7 +433,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // This is for the pagination area
   get MaxHeight() {
     if (this.FittingOption ===  FITTING_OPTION.HEIGHT) {
-      return 'calc(var(--vh) * 100)';
+      return '100dvh';
     }
 
     const needsScrolling = this.readingArea?.nativeElement?.scrollHeight > this.readingArea?.nativeElement?.clientHeight;
