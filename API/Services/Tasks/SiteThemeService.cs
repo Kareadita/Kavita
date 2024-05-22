@@ -178,7 +178,7 @@ public class ThemeService : IThemeService
             themeDtos.Add(dto);
         }
 
-        _cache.Set(themeDtos, themes, _cacheOptions);
+        _cache.Set(cacheKey, themeDtos, _cacheOptions);
 
         return themeDtos;
     }

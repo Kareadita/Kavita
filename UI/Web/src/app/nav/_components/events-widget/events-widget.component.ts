@@ -118,7 +118,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
         break;
       case 'started':
-        // Sometimes we can receive 2 started on long running scans, so better to just treat as a merge then.
+        // Sometimes we can receive 2 started on long-running scans, so better to just treat as a merge then.
         data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
         this.progressEventsSource.next(data);
         break;

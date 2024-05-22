@@ -16,7 +16,6 @@ $pointer-offset: 5px;
 
 
 .reading-area {
-  position: relative;
   overflow: auto;
   text-align: center;
   //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller

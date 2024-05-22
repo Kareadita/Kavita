@@ -35,6 +35,7 @@ public static class Seed
                 Provider = ThemeProvider.System,
                 FileName = "dark.scss",
                 IsDefault = true,
+                Description = "Default theme shipped with Kavita"
             }
         }.ToArray()
     ];

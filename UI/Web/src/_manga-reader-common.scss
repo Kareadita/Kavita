@@ -1,4 +1,4 @@
-$scrollbarHeight: 34px;
+$scrollbarHeight: 35px;
 
 img {
   user-select: none;
@@ -9,29 +9,31 @@ img {
   align-items: center;
 
   &.full-width {
-    height: calc(var(--vh)*100);
+    height: 100dvh;
     display: grid;
   }
 
   &.full-height {
-    height: calc(100vh); // We need to  - $scrollbarHeight when there is a horizontal scroll on macos
+    height: calc(100dvh); // We need to  - $scrollbarHeight when there is a horizontal scroll on macos
     display: flex;
     align-content: center;
+    overflow-y: hidden;
   }
 
   &.original {
-    height: 100vh;
+    height: calc(100dvh);
     display: grid;
   }
 
   .full-height {
     width: auto;
     margin: auto;
-    max-height: calc(var(--vh)*100);
-    overflow: hidden; // This technically will crop and make it just fit
+    max-height: calc(100dvh);
+    height: calc(100dvh);
     vertical-align: top;
+    object-fit: cover;
       &.wide {
-        height: 100vh;
+        height: calc(100dvh);
     }
   }
 
@@ -46,12 +48,13 @@ img {
     width: 100%;
     margin: 0 auto;
     vertical-align: top;
-    max-width: fit-content;
+    object-fit: contain;
+    width: 100%;
   }
 
   .fit-to-screen.full-width {
     width: 100%;
-    max-height: calc(var(--vh)*100);
+    max-height: calc(100dvh);
   }
 }
 

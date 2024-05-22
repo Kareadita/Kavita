@@ -99,10 +99,13 @@ public class Program
                             // Apply all migrations on startup
                             logger.LogInformation("Running Migrations");
 
-                            // v0.7.14
                             try
                             {
+                                // v0.7.14
                                 await MigrateWantToReadExport.Migrate(context, directoryService, logger);
+
+                                // v0.8.2
+                                await ManualMigrateSwitchToWal.Migrate(context, logger);
                             }
                             catch (Exception ex)
                             {

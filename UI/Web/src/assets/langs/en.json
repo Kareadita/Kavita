@@ -33,6 +33,7 @@
     "user-scrobble-history": {
         "title": "Scrobble History",
         "description": "Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.",
+        "not-read-warning": "Upstream providers will always keep the highest number",
         "filter-label": "{{common.filter}}",
         "created-header": "Created",
         "last-modified-header": "Last Modified",
@@ -47,7 +48,8 @@
         "rating": "Rating {{r}}",
         "not-applicable": "Not Applicable",
         "processed": "Processed",
-        "not-processed": "Not Processed"
+        "not-processed": "Not Processed",
+        "special": "{{entity-title.special}}"
     },
 
     "scrobble-event-type-pipe": {
@@ -197,7 +199,8 @@
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a css file",
         "preview-default": "Select a theme first",
-        "preview-default-admin": "Select a theme first or upload one manually"
+        "preview-default-admin": "Select a theme first or upload one manually",
+        "preview-title": "Preview"
     },
 
     "theme": {
@@ -1122,6 +1125,8 @@
     "manage-email-settings": {
         "title": "Email Services (SMTP)",
         "description": "In order to use some functions of Kavita like Forgot Password and Send To Device, an email provider must be setup. Other features like Password change are less secure without Email setup.",
+        "setting-description": "You must fill out both Host Name and SMTP settings to use email-based functionality within Kavita.",
+        "test-warning": "You must save before using Test button.",
         "send-to-warning": "If you want Send to Device to work you must setup your email settings",
         "email-url-label": "Email Service URL",
         "email-url-tooltip": "Use fully qualified URL of the email service. Do not include ending slash.",
@@ -2199,8 +2204,8 @@
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
-        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal"
-
+        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
+        "mal-token-required": "MAL Token is required, set in User Settings"
     },
 
     "actionable": {

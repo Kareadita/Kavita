@@ -41,7 +41,7 @@
     <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true"></app-loading>
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
-         [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
+         [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
 
       <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
         <div (dblclick)="bookmarkPage($event)">
@@ -56,14 +56,14 @@
         <!-- Pagination controls and screen hints-->
         <div class="pagination-area">
           <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
-               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 'max-height': MaxHeight}">
+               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
             <div *ngIf="showClickOverlay">
               <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                  [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
             </div>
           </div>
           <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
-               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
+               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'),
                                 'left': 'inherit',
                                 'right': RightPaginationOffset + 'px',
                                 'max-height': MaxHeight}">

@@ -24,11 +24,11 @@
       <div class="card-footer bg-transparent text-muted">
         <div>
           @if (isMyReview) {
-            <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
-            <img class="me-1" [ngSrc]="ScrobbleProvider.Kavita | providerImage" width="20" height="20" alt="">
+            <i class="d-md-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
+            <img class="me-2" [ngSrc]="ScrobbleProvider.Kavita | providerImage" width="20" height="20" alt="">
             {{review.username}}
           } @else {
-            <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
+            <img class="me-2" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
           }
 
           {{(isMyReview ? '' : review.username | defaultValue:'')}}

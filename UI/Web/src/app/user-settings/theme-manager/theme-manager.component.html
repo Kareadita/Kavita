@@ -8,7 +8,7 @@
 
 
     <div class="row g-0 theme-container">
-      <div class="col-md-3">
+      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
         <div class="pe-2">
           <ul style="height: 100%" class="list-group list-group-flush">
 
@@ -23,93 +23,95 @@
         </div>
       </div>
 
-      <div class="col-md-9">
-        @if (selectedTheme === undefined) {
+      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
+        <div class="card p-3">
 
-          <div class="row pb-4">
-            <div class="mx-auto">
-              <div class="d-flex justify-content-center">
-                <div class="d-flex justify-content-evenly">
-                  @if (hasAdmin$ | async) {
-                    {{t('preview-default-admin')}}
-                  } @else {
-                    {{t('preview-default')}}
-                  }
+          @if (selectedTheme === undefined) {
 
+            <div class="row pb-4">
+              <div class="mx-auto">
+                <div class="d-flex justify-content-center">
+                  <div class="d-flex justify-content-evenly">
+                    @if (hasAdmin$ | async) {
+                      {{t('preview-default-admin')}}
+                    } @else {
+                      {{t('preview-default')}}
+                    }
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
 
-          @if (files && files.length > 0) {
-            <app-loading [loading]="isUploadingTheme"></app-loading>
-          } @else if (hasAdmin$ | async) {
-            <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
-                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
+            @if (files && files.length > 0) {
+              <app-loading [loading]="isUploadingTheme"></app-loading>
+            } @else if (hasAdmin$ | async) {
+              <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
+                            dropZoneClassName="file-upload" contentClassName="file-upload-zone">
 
-              <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                <div class="row g-0 mt-3 pb-3">
-                  <div class="mx-auto">
-                    <div class="row g-0 mb-3">
-                      <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
-                    </div>
+                <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+                  <div class="row g-0 mt-3 pb-3">
+                    <div class="mx-auto">
+                      <div class="row g-0 mb-3">
+                        <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                      </div>
 
-                    <div class="d-flex justify-content-center">
-                      <div class="d-flex justify-content-evenly">
-                        <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
-                        <span class="ps-1 pe-1">•</span>
-                        <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                      <div class="d-flex justify-content-center">
+                        <div class="d-flex justify-content-evenly">
+                          <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                          <span class="ps-1 pe-1">•</span>
+                          <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-              </ng-template>
+                </ng-template>
 
-            </ngx-file-drop>
+              </ngx-file-drop>
+            }
+
           }
-
-        }
-        @else {
-          <h4>
-            {{selectedTheme.name | sentenceCase}}
-            <div class="float-end">
-              @if (selectedTheme.isSiteTheme) {
-                @if (selectedTheme.name !== 'Dark') {
-                  <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
+          @else {
+            <h4>
+              {{selectedTheme.name | sentenceCase}}
+              <div class="float-end">
+                @if (selectedTheme.isSiteTheme) {
+                  @if (selectedTheme.name !== 'Dark') {
+                    <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
+                  }
+                  @if (hasAdmin$ | async) {
+                    <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
+                  }
+                  <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>
+                } @else {
+                  <button class="btn btn-primary" [disabled]="selectedTheme.downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedTheme.downloadable!)">{{t('download')}}</button>
                 }
-                @if (hasAdmin$ | async) {
-                  <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
-                }
-                <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>
-              } @else {
-                <button class="btn btn-primary" [disabled]="selectedTheme.downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedTheme.downloadable!)">{{t('download')}}</button>
-              }
-            </div>
-          </h4>
-          @if(!selectedTheme.isSiteTheme) {
-            <p>{{selectedTheme.downloadable!.description | defaultValue}}</p>
+              </div>
+            </h4>
+            @if(!selectedTheme.isSiteTheme) {
+              <p>{{selectedTheme.downloadable!.description | defaultValue}}</p>
 
-            <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" title="Preview">
-              <ng-template #carouselItem let-item>
-                <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
-                  <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
-                </a>
-              </ng-template>
-            </app-carousel-reel>
-          } @else {
-            <p>{{selectedTheme.site!.description | defaultValue}}</p>
+              <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" [title]="t('preview-title')">
+                <ng-template #carouselItem let-item>
+                  <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
+                    <app-image [imageUrl]="item" height="108px" width="260px"></app-image>
+                  </a>
+                </ng-template>
+              </app-carousel-reel>
+            } @else {
+              <p>{{selectedTheme.site!.description | defaultValue}}</p>
 
-            <app-carousel-reel [items]="selectedTheme.site!.previewUrls" title="Preview">
-              <ng-template #carouselItem let-item>
-                <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
-                  <app-image [imageUrl]="item" height="100px" width="160px"></app-image>
-                </a>
-              </ng-template>
-            </app-carousel-reel>
+              <app-carousel-reel [items]="selectedTheme.site!.previewUrls" [title]="t('preview-title')">
+                <ng-template #carouselItem let-item>
+                  <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
+                    <app-image [imageUrl]="item" height="108px" width="260px"></app-image>
+                  </a>
+                </ng-template>
+              </app-carousel-reel>
+            }
           }
-        }
+        </div>
       </div>
     </div>
   </div>
@@ -122,12 +124,12 @@
           <div class="fw-bold">{{item.name | sentenceCase}}</div>
 
           @if (item.hasOwnProperty('provider')) {
-            {{item.provider | siteThemeProvider}}
+            <span class="pill p-1 me-1 provider">{{item.provider | siteThemeProvider}}</span>
           } @else if (item.hasOwnProperty('lastCompatibleVersion')) {
-            {{ThemeProvider.Custom | siteThemeProvider}} • v{{item.lastCompatibleVersion}}
+            <span class="pill p-1 me-1 provider">{{ThemeProvider.Custom | siteThemeProvider}}</span><span class="pill p-1 me-1 version">v{{item.lastCompatibleVersion}}</span>
           }
           @if (currentTheme && item.name === currentTheme.name) {
-            • {{t('active-theme')}}
+            <span class="pill p-1 active">{{t('active-theme')}}</span>
           }
         </div>
         @if (item.hasOwnProperty('isDefault') && item.isDefault) {

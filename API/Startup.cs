@@ -266,6 +266,9 @@ public class Startup
                     // v0.8.1
                     await MigrateLowestSeriesFolderPath.Migrate(dataContext, unitOfWork, logger);
 
+                    // v0.8.2
+                    await ManualMigrateThemeDescription.Migrate(dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
