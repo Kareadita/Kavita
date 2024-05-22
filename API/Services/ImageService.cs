@@ -439,17 +439,12 @@ public class ImageService : IImageService
             rows = 1;
             cols = 2;
         }
-        else if (coverImages.Count == 3)
-        {
-            rows = 2;
-            cols = 2;
-        }
         else
         {
-            // Default to 2x2 layout for more than 3 images
             rows = 2;
             cols = 2;
         }
+
 
         var image = Image.Black(dims.Width, dims.Height);
 

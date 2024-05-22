@@ -10,7 +10,6 @@ import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 import { DeviceService } from './device.service';
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
-import {User} from "../_models/user";
 
 export enum Action {
   Submenu = -1,
