@@ -358,7 +358,14 @@ public class Startup
 
         app.UseStaticFiles(new StaticFileOptions
         {
-            ContentTypeProvider = new FileExtensionContentTypeProvider(),
+            // bcmap files needed for PDF reader localizations (https://github.com/Kareadita/Kavita/issues/2970)
+            ContentTypeProvider = new FileExtensionContentTypeProvider
+            {
+                Mappings =
+                {
+                    [".bcmap"] = "application/octet-stream"
+                }
+            },
             HttpsCompression = HttpsCompressionMode.Compress,
             OnPrepareResponse = ctx =>
             {
