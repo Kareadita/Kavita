@@ -847,7 +847,7 @@ public class BookService : IBookService
                         Filename = Path.GetFileName(filePath),
                         Title = specialName?.Trim() ?? string.Empty,
                         FullFilePath = Parser.NormalizePath(filePath),
-                        IsSpecial = false,
+                        IsSpecial = Parser.HasSpecialMarker(filePath),
                         Series = series.Trim(),
                         SeriesSort = series.Trim(),
                         Volumes = seriesIndex
@@ -869,7 +869,7 @@ public class BookService : IBookService
                 Filename = Path.GetFileName(filePath),
                 Title = epubBook.Title.Trim(),
                 FullFilePath = Parser.NormalizePath(filePath),
-                IsSpecial = false,
+                IsSpecial = Parser.HasSpecialMarker(filePath),
                 Series = epubBook.Title.Trim(),
                 Volumes = Parser.LooseLeafVolume,
             };
