@@ -710,6 +710,12 @@ public class ProcessSeries : IProcessSeries
                 chapter.SortOrder = info.IssueOrder;
             }
             chapter.Range = chapter.GetNumberTitle();
+            if (float.TryParse(chapter.Title, out var _))
+            {
+                // If we have float based chapters, first scan can have the chapter formatted as Chapter 0.2 - .2 as the title is wrong.
+                chapter.Title = chapter.GetNumberTitle();
+            }
+
         }
 
 
