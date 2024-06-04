@@ -1136,7 +1136,7 @@ public class OpdsController : BaseApiController
                     $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
                     $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
-                // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
+                // We MUST include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
                 accLink,
                 await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix)
             ],
@@ -1196,7 +1196,6 @@ public class OpdsController : BaseApiController
                 }, userId);
             }
 
-
             return File(content, MimeTypeMap.GetMimeType(format));
         }
         catch (Exception)
@@ -1228,8 +1227,7 @@ public class OpdsController : BaseApiController
     {
         try
         {
-            var user = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-            return user;
+            return await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         }
         catch
         {
@@ -1247,12 +1245,14 @@ public class OpdsController : BaseApiController
         var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg",
             $"{prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;
+        link.IsPageStream = true;
+
         if (progress != null)
         {
             link.LastRead = progress.PageNum;
             link.LastReadDate = progress.LastModifiedUtc.ToString("s"); // Adhere to ISO 8601
         }
-        link.IsPageStream = true;
+
         return link;
     }
 
@@ -1277,20 +1277,22 @@ public class OpdsController : BaseApiController
         {
             Title = title,
             Icon = $"{prefix}{apiKey}/favicon",
-            Links = new List<FeedLink>()
-            {
+            Links =
+            [
                 link,
                 CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}"),
                 CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, $"{prefix}{apiKey}/search")
-            },
+            ],
         };
     }
 
     private string SerializeXml(Feed? feed)
     {
         if (feed == null) return string.Empty;
+
         using var sm = new StringWriter();
         _xmlSerializer.Serialize(sm, feed);
+
         return sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
     }
 }
