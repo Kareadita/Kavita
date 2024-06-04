@@ -18,8 +18,9 @@ import { debounceTime } from 'rxjs/operators';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SearchResultGroup } from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 export interface SearchEvent {
   value: string;
@@ -32,7 +33,7 @@ export interface SearchEvent {
     styleUrls: ['./grouped-typeahead.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgIf, NgFor, NgTemplateOutlet, TranslocoDirective]
+  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -55,6 +56,10 @@ export class GroupedTypeaheadComponent implements OnInit {
    * Placeholder for the input
    */
   @Input() placeholder: string = '';
+  /**
+   * When the search is active
+   */
+  @Input() isLoading: boolean = false;
   /**
    * Number of milliseconds after typing before triggering inputChanged for data fetching
    */
@@ -94,7 +99,6 @@ export class GroupedTypeaheadComponent implements OnInit {
 
 
   hasFocus: boolean = false;
-  isLoading: boolean = false;
   typeaheadForm: FormGroup = new FormGroup({});
   includeChapterAndFiles: boolean = false;
 
@@ -135,7 +139,10 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
     this.cdRef.markForCheck();
 
-    this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntilDestroyed(this.destroyRef)).subscribe(change => {
+    this.typeaheadForm.valueChanges.pipe(
+      debounceTime(this.debounceTime),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(change => {
       const value = this.typeaheadForm.get('typeahead')?.value;
 
       if (value != undefined && value != '' && !this.hasFocus) {

@@ -7,21 +7,21 @@
                [attr.aria-expanded]="hasFocus && hasData"
                aria-autocomplete="list" (focusout)="close($event)" (focus)="open($event)" role="searchbox"
         >
-        @if (isLoading) {
-          <div class="spinner-border spinner-border-sm" role="status">
-            <span class="visually-hidden">{{t('loading')}}</span>
-          </div>
-        }
-
-
-        @if (typeaheadForm.get('typeahead')?.value && typeaheadForm.get('typeahead')!.value.length > 0) {
-          <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="resetField()"></button>
+        @if (searchTerm.length > 0) {
+          @if (isLoading) {
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">{{t('loading')}}</span>
+            </div>
+          } @else {
+            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="resetField()"></button>
+          }
         }
       </div>
     </div>
     @if (hasFocus) {
       <div class="dropdown">
         <ul class="list-group" role="listbox" id="dropdown">
+
           @if (seriesTemplate !== undefined && groupedData.series.length > 0) {
             <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
             <ul class="list-group results" role="group" aria-describedby="series-group">
@@ -145,7 +145,8 @@
             </ul>
           }
 
-          @if (!hasData && searchTerm.length > 0) {
+          @if (!hasData && searchTerm.length > 0 && !isLoading) {
+
             <ul class="list-group results">
               <li class="list-group-item">
                 <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
