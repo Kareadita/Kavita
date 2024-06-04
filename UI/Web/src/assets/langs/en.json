@@ -1537,8 +1537,8 @@
         "reading-lists": "Reading Lists",
         "collections": "Collections",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
-
+        "loading": "{{common.loading}}",
+        "include-extras": "Include Chapters & Files"
     },
 
     "nav-header": {

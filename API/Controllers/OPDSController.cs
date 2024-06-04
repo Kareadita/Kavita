@@ -1137,8 +1137,7 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
                     $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
                 // We MUST include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
-                accLink,
-                await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix)
+                accLink
             ],
             Content = new FeedEntryContent()
             {
@@ -1146,6 +1145,12 @@ public class OpdsController : BaseApiController
                 Type = "text"
             }
         };
+
+        var canPageStream = mangaFile.Extension != ".epub";
+        if (canPageStream)
+        {
+            entry.Links.Add(await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix));
+        }
 
         return entry;
     }

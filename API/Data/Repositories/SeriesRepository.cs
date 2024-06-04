@@ -91,8 +91,9 @@ public interface ISeriesRepository
     /// <param name="isAdmin"></param>
     /// <param name="libraryIds"></param>
     /// <param name="searchQuery"></param>
+    /// <param name="includeChapterAndFiles">Includes Files in the Search</param>
     /// <returns></returns>
-    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery);
+    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
@@ -353,7 +354,7 @@ public class SeriesRepository : ISeriesRepository
         return [libraryId];
     }
 
-    public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery)
+    public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true)
     {
         const int maxRecords = 15;
         var result = new SearchResultGroupDto();
@@ -452,42 +453,45 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var fileIds = _context.Series
-            .Where(s => seriesIds.Contains(s.Id))
-            .AsSplitQuery()
-            .SelectMany(s => s.Volumes)
-            .SelectMany(v => v.Chapters)
-            .SelectMany(c => c.Files.Select(f => f.Id));
+        result.Files = new List<MangaFileDto>();
+        result.Chapters = new List<ChapterDto>();
 
-        // Need to check if an admin
-        var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
-        if (await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+
+        if (includeChapterAndFiles)
         {
-            result.Files = await _context.MangaFile
-                .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
+            var fileIds = _context.Series
+                .Where(s => seriesIds.Contains(s.Id))
                 .AsSplitQuery()
-                .OrderBy(f => f.FilePath)
+                .SelectMany(s => s.Volumes)
+                .SelectMany(v => v.Chapters)
+                .SelectMany(c => c.Files.Select(f => f.Id));
+
+            // Need to check if an admin
+            var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
+            if (await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+            {
+                result.Files = await _context.MangaFile
+                    .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
+                    .AsSplitQuery()
+                    .OrderBy(f => f.FilePath)
+                    .Take(maxRecords)
+                    .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+            }
+
+            result.Chapters = await _context.Chapter
+                .Include(c => c.Files)
+                .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
+                            || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
+                            || EF.Functions.Like(c.Range, $"%{searchQuery}%")
+                )
+                .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
+                .AsSplitQuery()
+                .OrderBy(c => c.TitleName)
                 .Take(maxRecords)
-                .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
+                .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
-        else
-        {
-            result.Files = new List<MangaFileDto>();
-        }
-
-        result.Chapters = await _context.Chapter
-            .Include(c => c.Files)
-            .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
-                        || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
-                        || EF.Functions.Like(c.Range, $"%{searchQuery}%")
-                )
-            .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
-            .AsSplitQuery()
-            .OrderBy(c => c.TitleName)
-            .Take(maxRecords)
-            .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
 
         return result;
     }
