@@ -18,8 +18,14 @@ import { debounceTime } from 'rxjs/operators';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SearchResultGroup } from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
+
+export interface SearchEvent {
+  value: string;
+  includeFiles: boolean;
+}
 
 @Component({
     selector: 'app-grouped-typeahead',
@@ -27,9 +33,12 @@ import {TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./grouped-typeahead.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgIf, NgFor, NgTemplateOutlet, TranslocoDirective]
+  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent]
 })
 export class GroupedTypeaheadComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   /**
    * Unique id to tie with a label element
    */
@@ -48,13 +57,17 @@ export class GroupedTypeaheadComponent implements OnInit {
    */
   @Input() placeholder: string = '';
   /**
+   * When the search is active
+   */
+  @Input() isLoading: boolean = false;
+  /**
    * Number of milliseconds after typing before triggering inputChanged for data fetching
    */
   @Input() debounceTime: number = 200;
   /**
    * Emits when the input changes from user interaction
    */
-  @Output() inputChanged: EventEmitter<string> = new EventEmitter();
+  @Output() inputChanged: EventEmitter<SearchEvent> = new EventEmitter();
   /**
    * Emits when something is clicked/selected
    */
@@ -76,17 +89,18 @@ export class GroupedTypeaheadComponent implements OnInit {
   @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
   @ContentChild('genreTemplate') genreTemplate!: TemplateRef<any>;
   @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
+  @ContentChild('extraTemplate') extraTemplate!: TemplateRef<any>;
   @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
   @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
   @ContentChild('bookmarkTemplate') bookmarkTemplate!: TemplateRef<any>;
-  private readonly destroyRef = inject(DestroyRef);
+
 
 
   hasFocus: boolean = false;
-  isLoading: boolean = false;
   typeaheadForm: FormGroup = new FormGroup({});
+  includeChapterAndFiles: boolean = false;
 
   prevSearchTerm: string = '';
 
@@ -100,8 +114,6 @@ export class GroupedTypeaheadComponent implements OnInit {
       && !this.groupedData.files.length && !this.groupedData.chapters.length && !this.groupedData.bookmarks.length);
   }
 
-
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   @HostListener('window:click', ['$event'])
   handleDocumentClick(event: any) {
@@ -127,7 +139,10 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
     this.cdRef.markForCheck();
 
-    this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntilDestroyed(this.destroyRef)).subscribe(change => {
+    this.typeaheadForm.valueChanges.pipe(
+      debounceTime(this.debounceTime),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(change => {
       const value = this.typeaheadForm.get('typeahead')?.value;
 
       if (value != undefined && value != '' && !this.hasFocus) {
@@ -138,7 +153,7 @@ export class GroupedTypeaheadComponent implements OnInit {
       if (value != undefined && value.length >= this.minQueryLength) {
 
         if (this.prevSearchTerm === value) return;
-        this.inputChanged.emit(value);
+        this.inputChanged.emit({value, includeFiles: this.includeChapterAndFiles});
         this.prevSearchTerm = value;
         this.cdRef.markForCheck();
       }
@@ -164,8 +179,18 @@ export class GroupedTypeaheadComponent implements OnInit {
     });
   }
 
-  handleResultlick(item: any) {
+  handleResultClick(item: any) {
     this.selected.emit(item);
+  }
+
+  toggleIncludeFiles() {
+    this.includeChapterAndFiles = true;
+    this.inputChanged.emit({value: this.searchTerm, includeFiles: this.includeChapterAndFiles});
+
+    this.hasFocus = true;
+    this.inputElem.nativeElement.focus();
+    this.openDropdown();
+    this.cdRef.markForCheck();
   }
 
   resetField() {

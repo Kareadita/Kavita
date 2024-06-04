@@ -5,126 +5,166 @@
         <input #input [id]="id" type="text" inputmode="search" autocomplete="off" formControlName="typeahead" [placeholder]="placeholder"
                aria-haspopup="listbox" aria-owns="dropdown"
                [attr.aria-expanded]="hasFocus && hasData"
-               aria-autocomplete="list" (focusout)="close($event)" (focus)="open($event)" role="search"
+               aria-autocomplete="list" (focusout)="close($event)" (focus)="open($event)" role="searchbox"
         >
-        <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoading">
-          <span class="visually-hidden">{{t('loading')}}</span>
-        </div>
-        <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="resetField()" *ngIf="typeaheadForm.get('typeahead')?.value.length > 0"></button>
+        @if (searchTerm.length > 0) {
+          @if (isLoading) {
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">{{t('loading')}}</span>
+            </div>
+          } @else {
+            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="resetField()"></button>
+          }
+        }
       </div>
     </div>
-    <div class="dropdown" *ngIf="hasFocus">
-      <ul class="list-group" role="listbox" id="dropdown">
-        <ng-container *ngIf="seriesTemplate !== undefined && groupedData.series.length > 0">
-          <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
-          <ul class="list-group results" role="group" aria-describedby="series-group">
-            <li *ngFor="let option of groupedData.series; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" aria-labelledby="series-group" role="option">
-              <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+    @if (hasFocus) {
+      <div class="dropdown">
+        <ul class="list-group" role="listbox" id="dropdown">
 
-        <ng-container *ngIf="collectionTemplate !== undefined && groupedData.collections.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('collections')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.collections; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+          @if (seriesTemplate !== undefined && groupedData.series.length > 0) {
+            <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
+            <ul class="list-group results" role="group" aria-describedby="series-group">
+              @for(option of groupedData.series; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" aria-labelledby="series-group" role="option">
+                  <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        <ng-container *ngIf="readingListTemplate !== undefined && groupedData.readingLists.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('reading-lists')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.readingLists; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
 
-        <ng-container *ngIf="bookmarkTemplate !== undefined && groupedData.bookmarks.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('bookmarks')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.bookmarks; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+          @if (collectionTemplate !== undefined && groupedData.collections.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('collections')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.collections; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        <ng-container *ngIf="libraryTemplate !== undefined && groupedData.libraries.length > 0">
-          <li class="list-group-item section-header"><h5 id="libraries-group">{{t('libraries')}}</h5></li>
-          <ul class="list-group results" role="group" aria-describedby="libraries-group">
-            <li *ngFor="let option of groupedData.libraries; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" aria-labelledby="libraries-group" role="option">
-              <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
 
-        <ng-container *ngIf="genreTemplate !== undefined && groupedData.genres.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('genres')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.genres; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+          @if (readingListTemplate !== undefined && groupedData.readingLists.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('reading-lists')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.readingLists; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        <ng-container *ngIf="tagTemplate !== undefined && groupedData.tags.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('tags')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.tags; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+          @if (bookmarkTemplate !== undefined && groupedData.bookmarks.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('bookmarks')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.bookmarks; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        <ng-container *ngIf="personTemplate !== undefined && groupedData.persons.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('people')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.persons; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
 
-        <ng-container *ngIf="chapterTemplate !== undefined && groupedData.chapters.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('chapters')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.chapters; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+          @if (libraryTemplate !== undefined && groupedData.libraries.length > 0) {
+            <li class="list-group-item section-header"><h5 id="libraries-group">{{t('libraries')}}</h5></li>
+            <ul class="list-group results" role="group" aria-describedby="libraries-group">
+              @for(option of groupedData.libraries; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" aria-labelledby="libraries-group" role="option">
+                  <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        <ng-container *ngIf="fileTemplate !== undefined && groupedData.files.length > 0">
-          <li class="list-group-item section-header"><h5>{{t('files')}}</h5></li>
-          <ul class="list-group results">
-            <li *ngFor="let option of groupedData.files; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                class="list-group-item" role="option">
-              <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-            </li>
-          </ul>
-        </ng-container>
+          @if (genreTemplate !== undefined && groupedData.genres.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('genres')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.genres; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        <ng-container *ngIf="!hasData && searchTerm.length > 0">
-          <ul class="list-group results">
-            <li class="list-group-item">
-              <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
-            </li>
-          </ul>
+          @if (tagTemplate !== undefined && groupedData.tags.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('tags')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.tags; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
 
-        </ng-container>
-      </ul>
-    </div>
+          @if (personTemplate !== undefined && groupedData.persons.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('people')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.persons; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (chapterTemplate !== undefined && groupedData.chapters.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('chapters')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.chapters; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (fileTemplate !== undefined && groupedData.files.length > 0) {
+            <li class="list-group-item section-header"><h5>{{t('files')}}</h5></li>
+            <ul class="list-group results">
+              @for(option of groupedData.files; track option; let index = $index) {
+                <li (click)="handleResultClick(option)" tabindex="0"
+                    class="list-group-item" role="option">
+                  <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (!hasData && searchTerm.length > 0 && !isLoading) {
+
+            <ul class="list-group results">
+              <li class="list-group-item">
+                <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
+              </li>
+            </ul>
+          }
+
+          @if (hasData && !includeChapterAndFiles) {
+            <li class="list-group-item" style="min-height: 34px">
+              <ng-container [ngTemplateOutlet]="extraTemplate"></ng-container>
+              <a href="javascript:void(0)" (click)="toggleIncludeFiles()" class="float-end">
+                {{t('include-extras')}}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
 
   </form>
 

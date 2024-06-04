@@ -34,7 +34,6 @@ import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfLayoutModePipe} from "../../_pipe/pdf-layout-mode.pipe";
 import {PdfScrollModePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadModePipe} from "../../_pipe/pdf-spread-mode.pipe";
-import {HandtoolChanged} from "ngx-extended-pdf-viewer/lib/events/handtool-changed";
 
 @Component({
     selector: 'app-pdf-reader',

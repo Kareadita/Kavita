@@ -22,6 +22,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
+using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,7 @@ public class OpdsController : BaseApiController
     private readonly ISeriesService _seriesService;
     private readonly IAccountService _accountService;
     private readonly ILocalizationService _localizationService;
+    private readonly IMapper _mapper;
 
 
     private readonly XmlSerializer _xmlSerializer;
@@ -78,7 +80,8 @@ public class OpdsController : BaseApiController
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, ISeriesService seriesService,
-        IAccountService accountService, ILocalizationService localizationService)
+        IAccountService accountService, ILocalizationService localizationService,
+        IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -88,6 +91,7 @@ public class OpdsController : BaseApiController
         _seriesService = seriesService;
         _accountService = accountService;
         _localizationService = localizationService;
+        _mapper = mapper;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -289,7 +293,7 @@ public class OpdsController : BaseApiController
     {
         var baseUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl)).Value;
         var prefix = "/api/opds/";
-        if (!Configuration.DefaultBaseUrl.Equals(baseUrl))
+        if (!Configuration.DefaultBaseUrl.Equals(baseUrl, StringComparison.InvariantCultureIgnoreCase))
         {
             // We need to update the Prefix to account for baseUrl
             prefix = baseUrl + "api/opds/";
@@ -849,16 +853,15 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id))
-                .OrderBy(x => x.MinNumber, _chapterSortComparerDefaultLast);
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id, ChapterIncludes.Files);
 
-            foreach (var chapterId in chapters.Select(c => c.Id))
+            foreach (var chapter in chapters)
             {
-                var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-                var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
-                foreach (var mangaFile in files)
+                var chapterId = chapter.Id;
+                var chapterDto = _mapper.Map<ChapterDto>(chapter);
+                foreach (var mangaFile in chapter.Files)
                 {
-                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
                 }
             }
 
@@ -867,20 +870,20 @@ public class OpdsController : BaseApiController
         foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(storylineChapter.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(storylineChapter.Id);
+            var chapterDto = _mapper.Map<ChapterDto>(storylineChapter);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
             }
         }
 
         foreach (var special in seriesDetail.Specials)
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(special.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(special.Id);
+            var chapterDto = _mapper.Map<ChapterDto>(special);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, special.VolumeId, special.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, special.VolumeId, special.Id, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
             }
         }
 
@@ -1127,20 +1130,27 @@ public class OpdsController : BaseApiController
                 ? string.Empty
                 : $"     Summary: {chapter.Summary}"),
             Format = mangaFile.Format.ToString(),
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
-                // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
-                accLink,
-                await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix)
-            },
+            Links =
+            [
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
+                // We MUST include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
+                accLink
+            ],
             Content = new FeedEntryContent()
             {
                 Text = fileType,
                 Type = "text"
             }
         };
+
+        var canPageStream = mangaFile.Extension != ".epub";
+        if (canPageStream)
+        {
+            entry.Links.Add(await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix));
+        }
 
         return entry;
     }
@@ -1162,7 +1172,7 @@ public class OpdsController : BaseApiController
     {
         var userId = await GetUser(apiKey);
         if (pageNumber < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "Page"));
-        var chapter = await _cacheService.Ensure(chapterId);
+        var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "cache-file-find"));
 
         try
@@ -1188,9 +1198,8 @@ public class OpdsController : BaseApiController
                     SeriesId = seriesId,
                     VolumeId = volumeId,
                     LibraryId =libraryId
-                }, await GetUser(apiKey));
+                }, userId);
             }
-
 
             return File(content, MimeTypeMap.GetMimeType(format));
         }
@@ -1223,8 +1232,7 @@ public class OpdsController : BaseApiController
     {
         try
         {
-            var user = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-            return user;
+            return await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         }
         catch
         {
@@ -1242,12 +1250,14 @@ public class OpdsController : BaseApiController
         var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg",
             $"{prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;
+        link.IsPageStream = true;
+
         if (progress != null)
         {
             link.LastRead = progress.PageNum;
             link.LastReadDate = progress.LastModifiedUtc.ToString("s"); // Adhere to ISO 8601
         }
-        link.IsPageStream = true;
+
         return link;
     }
 
@@ -1272,20 +1282,22 @@ public class OpdsController : BaseApiController
         {
             Title = title,
             Icon = $"{prefix}{apiKey}/favicon",
-            Links = new List<FeedLink>()
-            {
+            Links =
+            [
                 link,
                 CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}"),
                 CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, $"{prefix}{apiKey}/search")
-            },
+            ],
         };
     }
 
     private string SerializeXml(Feed? feed)
     {
         if (feed == null) return string.Empty;
+
         using var sm = new StringWriter();
         _xmlSerializer.Serialize(sm, feed);
+
         return sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
     }
 }

@@ -200,6 +200,8 @@ public class ParsingTests
     [InlineData("카비타", "카비타")]
     [InlineData("06", "06")]
     [InlineData("", "")]
+    [InlineData("不安の種+", "不安の種+")]
+    [InlineData("不安の種*", "不安の種*")]
     public void NormalizeTest(string input, string expected)
     {
         Assert.Equal(expected, Normalize(input));

@@ -33,7 +33,7 @@ import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '
 import {EventsWidgetComponent} from '../events-widget/events-widget.component';
 import {SeriesFormatComponent} from '../../../shared/series-format/series-format.component';
 import {ImageComponent} from '../../../shared/image/image.component';
-import {GroupedTypeaheadComponent} from '../grouped-typeahead/grouped-typeahead.component';
+import {GroupedTypeaheadComponent, SearchEvent} from '../grouped-typeahead/grouped-typeahead.component';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -65,7 +65,6 @@ export class NavHeaderComponent implements OnInit {
   debounceTime = 300;
   searchResults: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
-
 
   backToTopNeeded = false;
   searchFocused: boolean = false;
@@ -121,12 +120,14 @@ export class NavHeaderComponent implements OnInit {
 
 
 
-  onChangeSearch(val: string) {
+
+
+  onChangeSearch(evt: SearchEvent) {
       this.isLoading = true;
-      this.searchTerm = val.trim();
+      this.searchTerm = evt.value.trim();
       this.cdRef.markForCheck();
 
-      this.searchService.search(val.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(results => {
+      this.searchService.search(this.searchTerm, evt.includeFiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();

@@ -1537,8 +1537,8 @@
         "reading-lists": "Reading Lists",
         "collections": "Collections",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
-
+        "loading": "{{common.loading}}",
+        "include-extras": "Include Chapters & Files"
     },
 
     "nav-header": {
@@ -1605,7 +1605,7 @@
         "description": "Import your MAL Interest Stacks and create Collections within Kavita",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
-        "nothing-found": ""
+        "nothing-found": "Nothing found"
     },
 
     "edit-chapter-progress": {

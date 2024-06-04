@@ -16,6 +16,7 @@
               #search
               id="nav-search"
               [minQueryLength]="2"
+              [isLoading]="isLoading"
               initialValue=""
               [placeholder]="t('search-alt')"
               [groupedData]="searchResults"
@@ -147,7 +148,6 @@
               <ng-template #noResultsTemplate let-notFound>
                 {{t('no-data')}}
               </ng-template>
-
             </app-grouped-typeahead>
           </div>
         </div>

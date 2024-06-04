@@ -12,8 +12,14 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
 
         info.ComicInfo = comicInfo;
 
+        // We need a special piece of code to override the Series IF there is a special marker in the filename for epub files
+        if (info.IsSpecial && info.Volumes == "0" && info.ComicInfo.Series != info.Series)
+        {
+            info.Series = info.ComicInfo.Series;
+        }
+
         // This catches when original library type is Manga/Comic and when parsing with non
-        if (Parser.ParseVolume(info.Series, type) != Parser.LooseLeafVolume) // Shouldn't this be info.Volume != DefaultVolume?
+        if (Parser.ParseVolume(info.Series, type) != Parser.LooseLeafVolume)
         {
             var hasVolumeInTitle = !Parser.ParseVolume(info.Title, type)
                 .Equals(Parser.LooseLeafVolume);

@@ -11,7 +11,6 @@ import {forkJoin} from "rxjs";
 import {ToastrService} from "ngx-toastr";
 import {DecimalPipe} from "@angular/common";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {AccountService} from "../../../_services/account.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 
 @Component({
