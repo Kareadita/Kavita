@@ -2094,6 +2094,7 @@ public class SeriesRepository : ISeriesRepository
                 LastScanned = s.LastFolderScanned,
                 SeriesName = s.Name,
                 FolderPath = s.FolderPath,
+                LowestFolderPath = s.LowestFolderPath,
                 Format = s.Format,
                 LibraryRoots = s.Library.Folders.Select(f => f.Path)
             }).ToListAsync();
@@ -2101,7 +2102,7 @@ public class SeriesRepository : ISeriesRepository
         var map = new Dictionary<string, IList<SeriesModified>>();
         foreach (var series in info)
         {
-            if (series.FolderPath == null) continue;
+            if (string.IsNullOrEmpty(series.FolderPath)) continue;
             if (!map.TryGetValue(series.FolderPath, out var value))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
@@ -2112,6 +2113,20 @@ public class SeriesRepository : ISeriesRepository
             else
             {
                 value.Add(series);
+            }
+
+
+            if (string.IsNullOrEmpty(series.LowestFolderPath)) continue;
+            if (!map.TryGetValue(series.LowestFolderPath, out var value2))
+            {
+                map.Add(series.LowestFolderPath, new List<SeriesModified>()
+                {
+                    series
+                });
+            }
+            else
+            {
+                value2.Add(series);
             }
         }
 
