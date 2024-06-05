@@ -68,7 +68,7 @@ import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {max, shareReplay} from "rxjs/operators";
+import {shareReplay} from "rxjs/operators";
 
 
 const PREFETCH_PAGES = 10;
