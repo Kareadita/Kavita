@@ -128,34 +128,27 @@ public class ParseScannedFiles
         string normalizedPath;
         var result = new List<ScanResult>();
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
+        var matcher = new GlobMatcher();
+        foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
+        {
+            matcher.AddExclude(pattern.Pattern);
+        }
         if (scanDirectoryByDirectory)
         {
-            // This is used in library scan, so we should check first for a ignore file and use that here as well
-            var matcher = new GlobMatcher();
-            foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
-            {
-                matcher.AddExclude(pattern.Pattern);
-            }
-
-            var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
+            var directories = _directoryService.GetDirectories(folderPath, matcher);
             foreach (var directory in directories)
             {
                 // Since this is a loop, we need a list return
                 normalizedPath = Parser.Parser.NormalizePath(directory);
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
                 {
-                    result.Add(new ScanResult()
-                    {
-                        Files = ArraySegment<string>.Empty,
-                        Folder = directory,
-                        LibraryRoot = folderPath,
-                        HasChanged = false
-                    });
+                    result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
                 }
                 else if (seriesPaths.TryGetValue(normalizedPath, out var series) && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
                 {
                     // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
                     // This is very helpful for ComicVine libraries by Publisher
+                    _logger.LogDebug("{Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", normalizedPath);
                     foreach (var seriesModified in series)
                     {
                         if (HasSeriesFolderNotChangedSinceLastScan(seriesModified, seriesModified.LowestFolderPath!))
@@ -173,7 +166,7 @@ public class ParseScannedFiles
                 {
                     // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
                     result.Add(CreateScanResult(directory, folderPath, true,
-                        _directoryService.ScanFiles(directory, fileExtensions)));
+                        _directoryService.ScanFiles(directory, fileExtensions, matcher)));
                 }
             }
 
@@ -183,7 +176,7 @@ public class ParseScannedFiles
         normalizedPath = Parser.Parser.NormalizePath(folderPath);
         var libraryRoot =
             library.Folders.FirstOrDefault(f =>
-                Parser.Parser.NormalizePath(folderPath).Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
+                normalizedPath.Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
             folderPath;
 
         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
@@ -193,7 +186,7 @@ public class ParseScannedFiles
         else
         {
             result.Add(CreateScanResult(folderPath, libraryRoot, true,
-                _directoryService.ScanFiles(folderPath, fileExtensions)));
+                _directoryService.ScanFiles(folderPath, fileExtensions, matcher)));
         }
 
 
@@ -243,7 +236,7 @@ public class ParseScannedFiles
                 NormalizedName = normalizedSeries
             };
 
-            scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
+            scannedSeries.AddOrUpdate(existingKey, [info], (_, oldValue) =>
             {
                 oldValue ??= new List<ParserInfo>();
                 if (!oldValue.Contains(info))
