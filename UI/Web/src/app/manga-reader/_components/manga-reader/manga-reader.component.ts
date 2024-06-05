@@ -68,7 +68,7 @@ import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {shareReplay} from "rxjs/operators";
+import {max, shareReplay} from "rxjs/operators";
 
 
 const PREFETCH_PAGES = 10;
@@ -513,6 +513,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         autoCloseMenu: new FormControl(this.autoCloseMenu),
         pageSplitOption: new FormControl(this.pageSplitOption),
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
+        widthSlider: new FormControl(70),
         layoutMode: new FormControl(this.layoutMode),
         darkness: new FormControl(100),
         emulateBook: new FormControl(this.user.preferences.emulateBook),
@@ -549,8 +550,31 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
+      this.generalSettingsForm.get('widthSlider')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+        //update the css width
+        const styleSheets = document.styleSheets;
+        for(let i = 0; i < styleSheets.length; i++){
+          const styleSheet = styleSheets[i];
+          const rules = styleSheet.cssRules;
+          for(let j = 0; j < rules.length; j++){
+            let rule = rules[j] as CSSStyleRule;
+            if(!rule ||
+              !(rule.cssText.includes("img[_ngcontent-"))) continue;
+            rule.style.width = val + "%";
+          }
+        }
+      });
 
-
+      this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+          let slider = document.getElementById("page-fitting-slider") as HTMLInputElement;
+          if (val != "manual") {
+            slider?.classList.add("visually-hidden");
+            this.generalSettingsForm.get('widthSlider')?.disable();
+            return;
+          }
+          this.generalSettingsForm.get('widthSlider')?.enable();
+          slider?.classList.remove("visually-hidden");
+        });
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
