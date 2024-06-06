@@ -10,6 +10,7 @@ import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 import { DeviceService } from './device.service';
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
+import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 
 export enum Action {
   Submenu = -1,
@@ -150,6 +151,7 @@ export class ActionFactoryService {
   bookmarkActions: Array<ActionItem<Series>> = [];
 
   sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
+  smartFilterActions: Array<ActionItem<SmartFilter>> = [];
 
   isAdmin = false;
 
@@ -176,6 +178,10 @@ export class ActionFactoryService {
 
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback);
+  }
+
+  getSmartFilterActions(callback: ActionCallback<SmartFilter>) {
+    return this.applyCallbackToList(this.smartFilterActions, callback);
   }
 
   getVolumeActions(callback: ActionCallback<Volume>) {
@@ -615,6 +621,16 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsInvisible,
         title: 'mark-invisible',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+    ];
+
+    this.smartFilterActions = [
+      {
+        action: Action.Delete,
+        title: 'delete',
         callback: this.dummyCallback,
         requiresAdmin: false,
         children: [],

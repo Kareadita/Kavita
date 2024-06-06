@@ -147,8 +147,10 @@ export class SideNavComponent implements OnInit {
     this.accountService.hasValidLicense$.subscribe(res =>{
       if (!res) return;
 
-      this.homeActions.push({action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)});
-      this.cdRef.markForCheck();
+      if (this.homeActions.filter(f => f.title === 'import-mal-stack').length === 0) {
+        this.homeActions.push({action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)});
+        this.cdRef.markForCheck();
+      }
     })
   }
 

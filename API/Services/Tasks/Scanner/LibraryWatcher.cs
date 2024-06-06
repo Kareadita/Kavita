@@ -273,6 +273,10 @@ public class LibraryWatcher : ILibraryWatcher
 
     private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
+        // TODO: I can optimize this to avoid a library scan and instead do a Series Scan by finding the series that has a lowestFolderPath higher or equal to the filePath
+
+
+
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
