@@ -73,6 +73,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly mangaReaderComponent = inject(MangaReaderComponent);
 
   /**
    * Current page number aka what's recorded on screen
@@ -174,6 +175,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
+  /**
+   * Width overwrite for maunal width control
+  */
+  widthOverride$ : string = 'none';
+
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
   }
@@ -231,6 +237,25 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       map(values => 'brightness(' + values.darkness + '%)'),
       takeUntilDestroyed(this.destroyRef)
     );
+
+    //handle manual width
+    this.mangaReaderComponent.generalSettingsForm.get("widthSlider")?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      val = (val < 0) ? 'none' : val + "%";
+      this.widthOverride$ = val;
+      this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
+
+      var images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
+      for(let i = 0; i < images.length; i++) {
+        var img = images[i];
+        if(this.widthOverride$ == 'none') img.style.width = this.mangaReaderService.maxWidth() + "";
+        else img.style.width = this.widthOverride$;
+      }
+
+      if(!this.currentPageElem) return;
+          this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
+
+      this.currentPageElem.scrollIntoView();
+    });
 
     if (this.goToPage) {
       this.goToPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
@@ -535,7 +560,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       this.webtoonImageWidth = event.target.width;
     }
 
-    this.renderer.setAttribute(event.target, 'width', this.mangaReaderService.maxWidth() + '');
+    var width = (this.widthOverride$ == 'none') ? this.mangaReaderService.maxWidth() : this.widthOverride$;
+    this.renderer.setAttribute(event.target, 'width', width + '');
     this.renderer.setAttribute(event.target, 'height', event.target.height + '');
 
     this.attachIntersectionObserverElem(event.target);

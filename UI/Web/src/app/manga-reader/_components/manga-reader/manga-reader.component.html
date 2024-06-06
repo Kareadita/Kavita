@@ -193,9 +193,9 @@
                 <option value="full-height">{{t('height')}}</option>
                 <option value="full-width">{{t('width')}}</option>
                 <option value="original">{{t('original')}}</option>
-                <option value="manual">{{t('manual')}}</option>
               </select>
-              <input id="page-fitting-slider" type="range" min=0 max=100 class="form-range visually-hidden" formControlName="widthSlider">
+              <label for="page-fitting-slider" class="form-label"></label>
+              <input id="page-fitting-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
             </div>
           </div>
 

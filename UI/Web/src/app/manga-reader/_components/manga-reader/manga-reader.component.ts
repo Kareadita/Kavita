@@ -513,7 +513,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         autoCloseMenu: new FormControl(this.autoCloseMenu),
         pageSplitOption: new FormControl(this.pageSplitOption),
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
-        widthSlider: new FormControl(70),
+        widthSlider: new FormControl('none'),
         layoutMode: new FormControl(this.layoutMode),
         darkness: new FormControl(100),
         emulateBook: new FormControl(this.user.preferences.emulateBook),
@@ -550,7 +550,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
-      this.generalSettingsForm.get('widthSlider')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      /*this.generalSettingsForm.get('widthSlider')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
         //update the css width
         const styleSheets = document.styleSheets;
         for(let i = 0; i < styleSheets.length; i++){
@@ -574,7 +574,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.generalSettingsForm.get('widthSlider')?.enable();
           slider?.classList.remove("visually-hidden");
-        });
+        });*/
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 

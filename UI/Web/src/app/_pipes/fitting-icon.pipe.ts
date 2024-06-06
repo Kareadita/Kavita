@@ -16,8 +16,6 @@ export class FittingIconPipe implements PipeTransform {
         return 'fa fa-arrows-alt-h';
       case FITTING_OPTION.ORIGINAL:
         return 'fa fa-expand-arrows-alt';
-      case FITTING_OPTION.MANUAL:
-        return 'fa fa-expand-arrows-alt';
     }
   }
 

@@ -2,7 +2,6 @@ export enum FITTING_OPTION {
     HEIGHT = 'full-height',
     WIDTH = 'full-width',
     ORIGINAL = 'original',
-    MANUAL = 'manual'
 }
 
 /**
