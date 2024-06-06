@@ -853,9 +853,9 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id, ChapterIncludes.Files);
+            var chaptersForVolume = await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id, ChapterIncludes.Files);
 
-            foreach (var chapter in chapters)
+            foreach (var chapter in chaptersForVolume)
             {
                 var chapterId = chapter.Id;
                 var chapterDto = _mapper.Map<ChapterDto>(chapter);
@@ -867,13 +867,19 @@ public class OpdsController : BaseApiController
 
         }
 
-        foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
+        var chapters = seriesDetail.StorylineChapters;
+        if (!seriesDetail.StorylineChapters.Any() && seriesDetail.Chapters.Any())
         {
-            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(storylineChapter.Id);
-            var chapterDto = _mapper.Map<ChapterDto>(storylineChapter);
+            chapters = seriesDetail.Chapters;
+        }
+
+        foreach (var chapter in chapters.Where(c => !c.IsSpecial))
+        {
+            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
+            var chapterDto = _mapper.Map<ChapterDto>(chapter);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, chapter.VolumeId, chapter.Id, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
             }
         }
 
