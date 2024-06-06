@@ -169,6 +169,9 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                      s.NormalizedLocalizedName == normalizedSeriesName)
                     && formats.Contains(s.Format));
 
+                _logger.LogDebug("Trying to find {SeriesName} with formats ({Formats}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
+                    seriesInfo.SeriesName, formats, existingSeries?.Name, existingSeries?.Id);
+
                 if (existingSeries != null)
                 {
                     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
