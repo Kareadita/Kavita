@@ -20,6 +20,7 @@ import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import { MangaReaderComponent } from '../manga-reader/manga-reader.component';
 
 @Component({
     selector: 'app-single-renderer',
@@ -39,6 +40,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly mangaReaderComponent = inject(MangaReaderComponent);
 
   imageFitClass$!: Observable<string>;
   imageContainerHeight$!: Observable<string>;
@@ -53,6 +55,11 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   pageNum: number = 0;
   maxPages: number = 1;
 
+  /**
+   * Width overwrite for maunal width control
+  */
+  widthOverride$ : string = 'none';
+
   get ReaderMode() {return ReaderMode;}
   get LayoutMode() {return LayoutMode;}
 
@@ -66,6 +73,28 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       filter(_ => this.isValid()),
       takeUntilDestroyed(this.destroyRef)
     );
+
+    //handle manual width
+    this.mangaReaderComponent.generalSettingsForm.get("widthSlider")?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      val = (val < 0) ? 'none' : val + "%";
+      this.widthOverride$ = val;
+
+      var img = this.document.getElementById('image-1');
+      if(!img) return;
+
+      var scaling = this.mangaReaderComponent.generalSettingsForm.get("fittingOption")?.value;
+      if (FITTING_OPTION.HEIGHT == scaling) return;
+
+      if(this.widthOverride$ == 'none') img.style.width = "";
+      else img.style.width = this.widthOverride$;
+    });
+    //reset manual width when fitting option changes
+    this.mangaReaderComponent.generalSettingsForm.get("fittingOption")?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      var img = this.document.getElementById('image-1');
+      if(!img) return;
+      img.style.width = "";
+    });
+
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),
