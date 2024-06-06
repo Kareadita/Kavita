@@ -1274,6 +1274,8 @@
         "version-title": "Version",
         "installId-title": "Install ID",
         "more-info-title": "More Info",
+        "first-install-version-title": "First Install Version",
+        "first-install-date-title": "First Install Date",
         "home-page-title": "Home page:",
         "wiki-title": "Wiki:",
         "discord-title": "Discord:",

@@ -186,5 +186,15 @@ public enum ServerSettingKey
     /// When the cleanup task should run - Critical to keeping Kavita working
     /// </summary>
     [Description("TaskCleanup")]
-    TaskCleanup = 37
+    TaskCleanup = 37,
+    /// <summary>
+    /// The Date Kavita was first installed
+    /// </summary>
+    [Description("FirstInstallDate")]
+    FirstInstallDate = 38,
+    /// <summary>
+    /// The Version of Kavita on the first run
+    /// </summary>
+    [Description("FirstInstallVersion")]
+    FirstInstallVersion = 39,
 }

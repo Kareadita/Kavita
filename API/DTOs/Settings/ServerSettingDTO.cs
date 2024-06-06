@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using System;
+using API.Entities.Enums;
 using API.Services;
 
 namespace API.DTOs.Settings;
@@ -88,6 +89,14 @@ public class ServerSettingDto
     /// SMTP Configuration
     /// </summary>
     public SmtpConfigDto SmtpConfig { get; set; }
+    /// <summary>
+    /// The Date Kavita was first installed
+    /// </summary>
+    public DateTime? FirstInstallDate { get; set; }
+    /// <summary>
+    /// The Version of Kavita on the first run
+    /// </summary>
+    public string? FirstInstallVersion { get; set; }
 
     /// <summary>
     /// Are at least some basics filled in

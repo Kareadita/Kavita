@@ -181,7 +181,9 @@ public class StatsService : IStatsService
         {
             InstallId = serverSettings.InstallId,
             KavitaVersion = serverSettings.InstallVersion,
-            IsDocker = OsInfo.IsDocker
+            IsDocker = OsInfo.IsDocker,
+            FirstInstallDate = serverSettings.FirstInstallDate,
+            FirstInstallVersion = serverSettings.FirstInstallVersion
         };
     }
 
