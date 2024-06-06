@@ -35,6 +35,12 @@ public class DownloadService : IDownloadService
         // Figures out what the content type should be based on the file name.
         if (!_fileTypeProvider.TryGetContentType(filepath, out var contentType))
         {
+            if (contentType == null)
+            {
+                // Get extension
+                contentType = Path.GetExtension(filepath);
+            }
+
             contentType = Path.GetExtension(filepath).ToLowerInvariant() switch
             {
                 ".cbz" => "application/x-cbz",
