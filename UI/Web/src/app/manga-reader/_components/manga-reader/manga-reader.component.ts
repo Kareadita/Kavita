@@ -550,6 +550,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
+      this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+        if(PageSplitOption.FitSplit == val) {
+          this.generalSettingsForm.get('widthSlider')?.enable();
+        } else {
+          this.generalSettingsForm.get('widthSlider')?.setValue(0);
+          this.generalSettingsForm.get('widthSlider')?.disable();
+        }
+      });
+
+    this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      if(FITTING_OPTION.HEIGHT == val) this.generalSettingsForm.get('widthSlider')?.disable();
+      else this.generalSettingsForm.get('widthSlider')?.enable();
+    });
+
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
         const changeOccurred = parseInt(val, 10) !== this.layoutMode;

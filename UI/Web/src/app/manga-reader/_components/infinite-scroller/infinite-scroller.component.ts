@@ -175,8 +175,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
   /**
    * Width overwrite for maunal width control
+   * 2 observables needed to avoid flickering, probably due to data races, when changing the width
+   * this allows to precicely define execution order
   */
   widthOverride$ : Observable<string> = new Observable<string>();
+  widthSliderValue$ : Observable<string> = new Observable<string>();
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -236,16 +239,23 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       takeUntilDestroyed(this.destroyRef)
     );
 
-    this.widthOverride$ = this.readerSettings$.pipe(
-      map(values => (parseInt(values.widthSlider) <= 0) ? 'none' : values.widthSlider + '%'),
+
+    this.widthSliderValue$ = this.readerSettings$.pipe(
+      map(values => (parseInt(values.widthSlider) <= 0) ? 'auto' : values.widthSlider + '%'),
       takeUntilDestroyed(this.destroyRef)
     );
 
     //perfom jump so the page stays in view
-    this.widthOverride$.subscribe(val => {
-      this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
-      if(!this.currentPageElem) return;
-      console.log(val)
+    this.widthSliderValue$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      this.currentPageElem= this.document.querySelector('img#page-' + this.pageNum);
+      if(!this.currentPageElem) return
+      var images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
+      for(let i = 0; i < images.length; i++) {
+        var img = images[i];
+        this.renderer.setStyle(img, "width", val);
+      }
+      this.widthOverride$ = this.widthSliderValue$;
+      this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
       this.currentPageElem.scrollIntoView();
     });
 

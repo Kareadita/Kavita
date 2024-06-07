@@ -74,7 +74,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
     //handle manual width
     this.widthOverride$ = this.readerSettings$.pipe(
-      map(values => (parseInt(values.widthSlider) <= 0) ? 'none' : values.widthSlider + '%'),
+      map(values => (parseInt(values.widthSlider) <= 0) ? 'auto' : values.widthSlider + '%'),
       takeUntilDestroyed(this.destroyRef)
     );
 
