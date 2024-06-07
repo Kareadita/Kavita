@@ -25,7 +25,6 @@ import { WebtoonImage } from '../../_models/webtoon-image';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@ngneat/transloco";
-import {MangaReaderComponent} from "../manga-reader/manga-reader.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {ReaderSetting} from "../../_models/reader-setting";
 import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
@@ -73,7 +72,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly mangaReaderComponent = inject(MangaReaderComponent);
 
   /**
    * Current page number aka what's recorded on screen
@@ -178,7 +176,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   /**
    * Width overwrite for maunal width control
   */
-  widthOverride$ : string = 'none';
+  widthOverride$ : Observable<string> = new Observable<string>();
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -238,22 +236,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       takeUntilDestroyed(this.destroyRef)
     );
 
-    //handle manual width
-    this.mangaReaderComponent.generalSettingsForm.get("widthSlider")?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      val = (val < 0) ? 'none' : val + "%";
-      this.widthOverride$ = val;
+    this.widthOverride$ = this.readerSettings$.pipe(
+      map(values => (parseInt(values.widthSlider) <= 0) ? 'none' : values.widthSlider + '%'),
+      takeUntilDestroyed(this.destroyRef)
+    );
+
+    //perfom jump so the page stays in view
+    this.widthOverride$.subscribe(val => {
       this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
-
-      var images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
-      for(let i = 0; i < images.length; i++) {
-        var img = images[i];
-        if(this.widthOverride$ == 'none') img.style.width = this.mangaReaderService.maxWidth() + "";
-        else img.style.width = this.widthOverride$;
-      }
-
       if(!this.currentPageElem) return;
-          this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
-
+      console.log(val)
       this.currentPageElem.scrollIntoView();
     });
 
@@ -560,8 +552,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       this.webtoonImageWidth = event.target.width;
     }
 
-    var width = (this.widthOverride$ == 'none') ? this.mangaReaderService.maxWidth() : this.widthOverride$;
-    this.renderer.setAttribute(event.target, 'width', width + '');
+    this.renderer.setAttribute(event.target, 'width', this.mangaReaderService.maxWidth() + '');
     this.renderer.setAttribute(event.target, 'height', event.target.height + '');
 
     this.attachIntersectionObserverElem(event.target);
