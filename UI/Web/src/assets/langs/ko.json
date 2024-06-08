@@ -528,12 +528,12 @@
         "collection-tag-deleted": "컬렉션 태그가 삭제되었습니다",
         "force-kavita+-refresh-success": "Kavita+ 외부 메타데이터가 무효화되었습니다",
         "confirm-download-size-ios": "iOS는 200MB보다 큰 파일을 다운로드하는 데 문제가 있습니다. 이 다운로드가 완료되지 않을 수 있습니다.",
-        "collection-not-owned": "이 컬렉션을 소유하지 않습니다",
-        "collections-promoted": "회사 소개",
-        "collections-unpromoted": "컬렉션 unpromoted",
+        "collection-not-owned": "이 컬렉션의 소유자가 아닙니다",
+        "collections-promoted": "컬렉션이 홍보되었습니다",
+        "collections-unpromoted": "컬렉션이 홍보되지 않음",
         "confirm-delete-collections": "여러 컬렉션을 삭제하시겠습니까?",
-        "collections-deleted": "관련 상품",
-        "pdf-book-mode-screen-size": "책 형태를 위해 너무 작은 스크린"
+        "collections-deleted": "컬렉션이 삭제되었습니다",
+        "pdf-book-mode-screen-size": "책 모드에 비해 화면이 너무 작음"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -567,8 +567,8 @@
         "mark-invisible": "표시하지 않음으로 표시",
         "mark-visible": "표시로 표시하기",
         "import-mal-stack": "MAL 스택 가져오기",
-        "unpromote": "지원하다",
-        "promote": "승격"
+        "unpromote": "홍보 취소",
+        "promote": "홍보"
     },
     "preferences": {
         "original": "원본",
@@ -1124,7 +1124,7 @@
         "save": "{{common.save}}",
         "name-unique-validation": "이름은 고유해야 합니다",
         "ending-title": "종료",
-        "promote-tooltip": "프로모션은 수집이 서버 전체를 볼 수 있음을 의미합니다. 이 컬렉션의 모든 시리즈는 여전히 사용자 접근 제한이 있습니다.",
+        "promote-tooltip": "프로모션은 컬렉션이 귀하뿐만 아니라 서버 전체에서 볼 수 있음을 의미합니다. 이 컬렉션 내의 모든 시리즈에는 여전히 사용자 액세스 제한이 적용됩니다.",
         "year-validation": "1000보다 커야 합니다. 0 또는 공백",
         "month-validation": "1에서 12 사이이거나 비어 있어야 합니다"
     },
@@ -1365,9 +1365,6 @@
     "theme-manager": {
         "updated-toastr": "사이트 기본값이 {{name}}(으)로 업데이트되었습니다",
         "title": "테마 관리자",
-        "looking-for-theme": "밝은 테마 또는 전자 잉크 테마를 찾고 계십니까? 우리에게는 당신이 사용할 수 있는 몇 가지 사용자 정의 테마가 있습니다 ",
-        "looking-for-theme-continued": "테마 github.",
-        "scan": "스캔",
         "site-themes": "사이트 테마",
         "set-default": "기본값으로 설정",
         "apply": "{{common.apply}}",
@@ -1762,8 +1759,7 @@
         "rating-percentage": "평점 {{r}}%"
     },
     "site-theme-provider-pipe": {
-        "system": "시스템",
-        "user": "사용자"
+        "system": "시스템"
     },
     "manage-devices": {
         "title": "장치 관리자",
@@ -2086,7 +2082,7 @@
         "promoted": "{{common.promoted}}"
     },
     "collection-owner": {
-        "collection-via-label": "{{source}}를 통해",
-        "collection-created-label": "에 의해 생성: {{owner}}"
+        "collection-via-label": "{{source}}을(를) 통해",
+        "collection-created-label": "작성자: {{owner}}"
     }
 }

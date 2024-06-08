@@ -13,7 +13,8 @@
         "recently-updated-title": "Ostatnio Zaktualizowane Serie",
         "recently-added-title": "Nowo Dodane Serie",
         "more-in-genre-title": "Więcej w {{genre}}",
-        "not-granted": "Nie przyznano ci dostępu do żadnych bibliotek."
+        "not-granted": "Nie przyznano ci dostępu do żadnych bibliotek.",
+        "on-deck-title": "Na półce"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -27,7 +28,7 @@
         "update": "Aktualizacja"
     },
     "user-scrobble-history": {
-        "filter-label": "Filtr",
+        "filter-label": "{{common.filter}}",
         "created-header": "Utworzono",
         "type-header": "Rodzaj",
         "series-header": "Serie",
@@ -127,15 +128,23 @@
         "tap-to-paginate-tooltip": "Czy boki ekranu czytnika książek powinny umożliwiać dotknięcie go w celu przejścia do poprzedniej/następnej strony?",
         "reading-direction-book-label": "Kierunek czytania",
         "clients-opds-description": "Wszystkie zewnętrzne aplikacje będą używać poniższego klucza API lub linku URL. Są one jak hasła, zachowa je je w tajemnicy.",
-        "layout-mode-book-tooltip": "Jak powinna być ułożona treść. Przewijanie jest takie, jak w książce. 1 lub 2 kolumny dopasowują się do wysokości urządzenia i mieszczą 1 lub 2 kolumny tekstu na stronie"
+        "layout-mode-book-tooltip": "Jak powinna być ułożona treść. Przewijanie jest takie, jak w książce. 1 lub 2 kolumny dopasowują się do wysokości urządzenia i mieszczą 1 lub 2 kolumny tekstu na stronie",
+        "blur-unread-summaries-label": "Rozmyj nieprzeczytane podsumowania",
+        "tap-to-paginate-label": "Stuknij aby wyświetlić stronę",
+        "swipe-to-paginate-label": "Przeciągnij, aby wyświetlić stronę",
+        "immersive-mode-tooltip": "Spowoduje to ukrycie menu za kliknięciem dokumentu czytnika i włączenie funkcji stuknij aby wyświetlić stronę",
+        "pdf-reader-settings-title": "Czytnik PDF",
+        "pdf-scroll-mode-tooltip": "Sposób przewijania stron. Pionowo/poziomo i dotknij, aby przejść do strony (bez przewijania)",
+        "3rd-party-clients-tab": "Aplikacje zewnętrzne",
+        "pdf-scroll-mode-label": "Tryb przewijania",
+        "pdf-spread-mode-tooltip": "Jak powinny być ułożone strony. Pojedyncze lub podwójne (nieparzyste/parzyste)",
+        "pdf-theme-label": "Motyw",
+        "page-splitting-tooltip": "Jak podzielić obraz o pełnej szerokości (tj. połączyć lewy i prawy obraz)"
     },
     "theme-manager": {
         "apply": "{{common.apply}}",
-        "looking-for-theme-continued": "githuba.",
-        "scan": "Skanuj",
         "site-themes": "Motywy strony",
         "title": "Menedżer motywów",
-        "looking-for-theme": "Szukasz jasnego motywu? Lub dla czytnika e-ink? Mamy kilka niestandardowych motywów, które możesz pobrać z naszego ",
         "set-default": "Ustaw domyślne",
         "applied": "Zastosowany",
         "updated-toastr": "Domyślna strona została zaktualizowana do {{name}}",
@@ -214,7 +223,13 @@
         "no-token-set": "Brak ustawionego Tokenu",
         "token-set": "Token ustawiony",
         "generate": "Wygeneruj",
-        "token-expired": "Token utracił ważność"
+        "token-expired": "Token utracił ważność",
+        "token-input-label": "{{service}} Token trafia tutaj",
+        "generic-instructions": "Wypełnij informacje o różnych usługach zewnętrznych, aby umożliwić Kavita+ interakcję z nimi.",
+        "mal-token-input-label": "Id Klienta MAL",
+        "mal-username-input-label": "Nazwa Użytkownika MAL",
+        "loading": "{{common.loading}}",
+        "mal-instructions": "Kavita używa identyfikatora klienta MAL do uwierzytelniania. Utwórz nowego klienta dla Kavita i po zatwierdzeniu podaj identyfikator klienta i swoją nazwę użytkownika."
     },
     "typeahead": {
         "close": "{{common.close}}",
@@ -278,7 +293,7 @@
     },
     "changelog": {
         "description": "Jeśli nie widzisz {{installed}}",
-        "description-continued": "oznacza, że korzystasz z wersji nightly. Tylko główne wersje będą wyświetlane jako dostępne.",
+        "description-continued": "oznacza, że korzystasz z wersji nightly. Tylko główne wersje będą wyświetlane jako dostępne. Tag nightly będzie wyświetlany podczas korzystania z wersji nightly",
         "download": "Pobrane",
         "published-label": "Opublikowano: ",
         "available": "Dostępne",
@@ -325,7 +340,8 @@
         "donate": "Przekaż darowiznę",
         "back": "Wstecz",
         "collections": "Kolekcje",
-        "bookmarks": "Zakładki"
+        "bookmarks": "Zakładki",
+        "reading-lists": "Listy czytelnicze"
     },
     "library-settings-modal": {
         "naming-conventions-part-1": "Kavita ma ",
@@ -369,7 +385,8 @@
         "file-type-group-label": "Typy plików",
         "file-type-group-tooltip": "Jakie typy plików Kavita będzie szukać podczas skanowania. Na przykład, Archiwa zawiera wszystkie cb*, zip, rar, itd. typy plików.",
         "exclude-patterns-tooltip": "Skonfiguruj zestaw wzorców (składnia Glob) które Kavita będzie dopasowywać podczas skanowania katalogów i wykluczać z wyników skanera.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "manage-reading-list-label": "Zarządzanie listami czytelniczymi"
     },
     "api-key": {
         "key-reset": "Reset klucza API",
@@ -638,7 +655,6 @@
         "include-unknowns-tooltip": "Jeśli zaznaczone, to nieznane będą dozwolone z ograniczeniem wiekowym. Może to prowadzić do wycieku nieoznakowanych multimediów do użytkowników z ograniczeniami wiekowymi."
     },
     "site-theme-provider-pipe": {
-        "user": "Użytkownik",
         "system": "System"
     },
     "time-periods": {
@@ -777,7 +793,9 @@
         "reader-settings-title": "Ustawienia czytnika",
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
         "writing-style-tooltip": "Zmienia kierunek tekstu. Poziomo od lewej do prawej, pionowo od góry do dołu.",
-        "fullscreen-label": "Pełny ekran"
+        "fullscreen-label": "Pełny ekran",
+        "tap-to-paginate-tooltip": "Kliknij na brzeg ekranu, aby przerzucić stronę",
+        "tap-to-paginate-label": "Stuknij aby przerzucić stronę"
     },
     "bookmarks": {
         "series-count": "{{common.series-count}}",
@@ -809,7 +827,8 @@
         "pages-count": "{{num}} Stron",
         "links-title": "{{series-metadata-detail.links-title}}",
         "id-title": "ID",
-        "release-date-tooltip": "Data wydania"
+        "release-date-tooltip": "Data wydania",
+        "sort-order-title": "Kolejność sortowania"
     },
     "manage-settings": {
         "host-name-label": "{{manage-email-settings.host-name-label}}",
@@ -914,7 +933,8 @@
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Ostatnio wykonano",
         "backup-database-task": "Utwórz kopię zapasową bazy danych",
-        "download-logs-task": "Pobierz logi"
+        "download-logs-task": "Pobierz logi",
+        "clear-reading-cache-task": "Wyczyść pamięć podręczną"
     },
     "manage-users": {
         "username-pattern": "Nazwa użytkownika może zawierać tylko następujące znaki i białe znaki: {{characters}}",
@@ -959,12 +979,13 @@
         "series-tab": "Serie",
         "name-label": "Nazwa",
         "name-validation": "Nazwa musi być unikatowa",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "filter-label": "{{common.filter}}"
     },
     "nav-header": {
         "search-series-alt": "Szukaj serii",
         "server-settings": "Ustawienia serwera",
-        "promoted": "(promowany)",
+        "promoted": "{{common.promoted}}",
         "settings": "Ustawienia",
         "help": "{{common.help}}",
         "search-alt": "Szukaj…",
@@ -1021,7 +1042,11 @@
         "image-splitting-label": "Podział obrazu",
         "no-next-chapter": "Brak następnego rozdziału",
         "series-progress": "Postęp serii: {{percentage}}",
-        "height": "Wysokość"
+        "height": "Wysokość",
+        "swipe-enabled-label": "Włączone przeciąganie",
+        "collapse": "Zwiń",
+        "reading-mode-tooltip": "Tryb czytania",
+        "reading-direction-tooltip": "Kierunek czytania: "
     },
     "bulk-add-to-collection": {
         "title": "Dodaj do kolekcji",
@@ -1193,12 +1218,14 @@
         "users-online-count": "{{num}} Użytkowników online"
     },
     "add-to-list-modal": {
-        "promoted-alt": "Promowany",
+        "promoted-alt": "{{common.promoted}}",
         "no-data": "Nie utworzono jeszcze żadnych list",
         "close": "{{common.close}}",
         "create": "{{common.create}}",
         "filter-label": "{{common.filter}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "title": "Dodaj do listy czytelniczej",
+        "reading-list-label": "Lista czytelnicza"
     },
     "manage-scrobble-errors": {
         "edit-header": "Edytuj",
@@ -1215,7 +1242,8 @@
         "close-reader-alt": "Zamknij czytnik",
         "incognito-mode": "Tryb incognito",
         "loading-message": "Ładowanie......PDF może trwać dłużej niż oczekiwano",
-        "dark-theme-alt": "Ciemny motyw"
+        "dark-theme-alt": "Ciemny motyw",
+        "toggle-incognito": "Wyłącz tryb incognito"
     },
     "file-type-group-pipe": {
         "pdf": "Pdf",
@@ -1242,7 +1270,8 @@
         "unread": "Nieprzeczytane",
         "files": "Pliki",
         "no-summary": "Brak dostępnego podsumowania.",
-        "writers-title": "{{series-metadata-detail.writers-title}}"
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "progress-tab": "Postęp"
     },
     "reading-list-detail": {
         "page-settings-title": "Ustawienia strony",
@@ -1276,7 +1305,8 @@
         "people": "Ludzie",
         "collections": "Kolekcje",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "reading-lists": "Listy czytelnicze"
     },
     "external-series-card": {
         "open-external": "Otwórz zewnętrzny"
@@ -1307,7 +1337,7 @@
         "relationship": "Związek"
     },
     "edit-reading-list-modal": {
-        "promote-tooltip": "Promocja oznacza, że tag może być widoczny na całym serwerze, a nie tylko dla administratorów. Wszystkie serie posiadające ten tag nadal będą miały nałożone ograniczenia dostępu dla użytkowników.",
+        "promote-tooltip": "Promocja oznacza, że kolekcja będzie widoczna na całym serwerze, a nie tylko dla Ciebie. Wszystkie serie w tej kolekcji nadal będą miały ograniczenia dostępu nałożone na użytkowników.",
         "general-tab": "Ogólne",
         "month-validation": "Musi mieć wartość od 1 do 12 lub być pusta",
         "required-field": "{{validation.required-field}}",
@@ -1319,7 +1349,8 @@
         "cover-image-tab": "Obraz na okładce",
         "save": "{{common.save}}",
         "name-unique-validation": "Nazwa musi być unikatowa",
-        "summary-label": "Podsumowanie"
+        "summary-label": "Podsumowanie",
+        "title": "Edytuj listę czytelniczą: {{name}}"
     },
     "admin-dashboard": {
         "kavita+-desc-part-1": "Kavita+ to usługa subskrypcji premium, która odblokowuje funkcje dla wszystkich użytkowników tej instancji Kavita. Kup subskrypcję, aby odblokować ",
@@ -1394,7 +1425,10 @@
         "never": "Nigdy"
     },
     "reading-lists": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "create-one-part-2": "jedną",
+        "create-one-part-1": "Spróbuj stworzyć",
+        "no-data": "Nie ma list czytelniczych."
     },
     "common": {
         "reset-to-default": "Przywróć ustawienia domyślne",
@@ -1466,7 +1500,8 @@
         "last-modified": "Ostatnia modyfikacja",
         "release-year": "Rok wydania",
         "sort-name": "Sortuj Nazwa",
-        "read-progress": "Ostatnio czytano"
+        "read-progress": "Ostatnio czytano",
+        "random": "Losowe"
     },
     "edit-series-modal": {
         "character-label": "Postać",
@@ -1624,7 +1659,16 @@
         "k+-reset-key-success": "Twoja licencja została wyrejestrowana. Użyj przycisku Edytuj, aby ponownie zarejestrować swoją instancję i ponownie aktywować Kavita+",
         "external-source-already-exists": "Zewnętrzne źródło już istnieje z tą samą nazwą/hostem/kluczem API",
         "collection-tag-deleted": "Usunięto tag kolekcji",
-        "mark-read": "Oznaczono jako przeczytane"
+        "mark-read": "Oznaczono jako przeczytane",
+        "confirm-delete-reading-list": "Czy na pewno chcesz usunąć listę czytelniczą? Nie można tego cofnąć.",
+        "nothing-to-remove": "Nic do usunięcia",
+        "reading-list-deleted": "Lista czytelnicza usunięta",
+        "reading-list-updated": "Lista czytelnicza zaktualizowana",
+        "multiple-added-to-reading-list": "Rozdziały i tomy dodane do listy czytelniczej",
+        "reading-list-imported": "Zaimportowano listę czytelniczą",
+        "series-added-to-reading-list": "Seria dodana do listy czytelniczej",
+        "volumes-added-to-reading-list": "Tom dodany do listy czytelniczej",
+        "chapter-added-to-reading-list": "Rozdział dodany do listy czytelniczej"
     },
     "actionable": {
         "details": "Detale",
@@ -1723,7 +1767,9 @@
     },
     "publication-status-stats": {
         "year-header": "Rok",
-        "title": "Status publikacji"
+        "title": "Status publikacji",
+        "data-table-label": "Tabela danych",
+        "visualisation-label": "Wizualizacja"
     },
     "series-preview-drawer": {
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
@@ -1731,7 +1777,8 @@
         "view-series": "Wyświetl serię",
         "tags-label": "{{filter-field-pipe.tags}}",
         "genres-label": "{{filter-field-pipe.genres}}",
-        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}"
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "provided-by-label": "Dostarczone przez"
     },
     "next-expected-card": {
         "title": "~{{date}}"
@@ -1801,7 +1848,10 @@
         "last-year": "{{time-periods.last-year}}",
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "y-axis-label": "Godziny czytania",
+        "no-data": "Brak postępu w czytaniu",
+        "title": "Aktywność czytelnicza"
     },
     "stream-pipe": {
         "bookmarks": "{{side-nav.bookmarks}}",
@@ -1821,7 +1871,9 @@
         "format-title": "Format",
         "extension-header": "Rozszerzenie",
         "total-size-header": "Całkowity rozmiar",
-        "not-classified": "Nie sklasyfikowano"
+        "not-classified": "Nie sklasyfikowano",
+        "total-files-header": "Łączna liczba plików",
+        "visualisation-label": "Wizualizacja"
     },
     "validation": {
         "required-field": "To pole jest wymagane",
@@ -1830,7 +1882,8 @@
     },
     "manga-format-stats": {
         "format-header": "Fomat",
-        "title": "Format"
+        "title": "Format",
+        "visualisation-label": "Wizualizacja"
     },
     "edit-external-source-item": {
         "not-unique": "Zewnętrzne źródło istnieje na tym hoście. Upewnij się, że nie masz duplikatów",
@@ -1852,5 +1905,41 @@
     "day-breakdown": {
         "no-data": "Brak postępów, przejdź do czytania",
         "x-axis-label": "Dzień tygodnia"
+    },
+    "pdf-scroll-mode-pipe": {
+        "wrapped": "Zawinięty",
+        "vertical": "Pionowy",
+        "horizontal": "Poziomo",
+        "page": "Stuknij aby przerzucić stronę"
+    },
+    "kavitaplus-metadata-breakdown-stats": {
+        "completed-series-label": "Zakończone serie"
+    },
+    "promoted-icon": {
+        "promoted": "{{common.promoted}}"
+    },
+    "collection-owner": {
+        "collection-created-label": "Stworzone przez: {{owner}}",
+        "collection-via-label": "z {{source}}"
+    },
+    "edit-chapter-progress": {
+        "edit-alt": "{{common.edit}}",
+        "date-created-header": "Utworzono (UTC)",
+        "user-header": "Użytkownik",
+        "date-updated-header": "Ostatnia aktualizacja (UTC)",
+        "action-header": "{{common.edit}}"
+    },
+    "pdf-layout-mode-pipe": {
+        "single": "Pojedyncza strona",
+        "book": "Tryb książki",
+        "multiple": "Domyślny",
+        "infinite-scroll": "Nieskończone przewijanie"
+    },
+    "pdf-spread-mode-pipe": {
+        "off": "Brak podziału stron"
+    },
+    "import-mal-collection-modal": {
+        "close": "{{common.close}}",
+        "series-count": "{{common.series-count}}"
     }
 }

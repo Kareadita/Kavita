@@ -156,9 +156,6 @@
     },
     "theme-manager": {
         "title": "Thema Beheerder",
-        "looking-for-theme": "Op zoek naar een licht of e-inkt thema? We hebben enkele aangepaste thema's die u kunt gebruiken ",
-        "looking-for-theme-continued": "thema github.",
-        "scan": "Scan",
         "site-themes": "Site Thema's",
         "set-default": "Stel de standaard in",
         "apply": "{{common.apply}}",
@@ -176,8 +173,7 @@
         "include-unknowns-tooltip": "Als dit waar is, zijn onbekenden toegestaan met leeftijdsbeperking. Dit kan ertoe leiden dat niet-gecodeerde media uitlekken naar gebruikers met leeftijdsbeperkingen."
     },
     "site-theme-provider-pipe": {
-        "system": "Systeem",
-        "user": "Gebruiker"
+        "system": "Systeem"
     },
     "manage-devices": {
         "title": "Apparaat beheerder",

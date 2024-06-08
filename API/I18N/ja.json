@@ -25,7 +25,7 @@
     "not-accessible": "サーバーが外部からアクセスできません",
     "email-sent": "Eメールの送信",
     "generic-password-update": "新しいパスワードの確認時に予期しないエラーが発生しました",
-    "user-already-confirmed": "ユーザーは既に確定しています",
+    "user-already-confirmed": "ユーザーは確認済みです",
     "user-migration-needed": "このユーザーは移行する必要があります。移行フローを実行するために、ログアウトしてからログインしてください",
     "generic-user-update": "ユーザーの更新時に例外が発生しました",
     "generic-user-email-update": "ユーザーの電子メールを更新できません。ログを確認してください。",

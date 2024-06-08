@@ -11,7 +11,7 @@
         "no-libraries": "Aucune bibliothèque configurée. Veuillez en ajouter une",
         "server-settings-link": "Paramètres serveur",
         "not-granted": "Vous n'avez accès à aucune bibliothèque.",
-        "on-deck-title": "En Cours",
+        "on-deck-title": "Continuer à lire",
         "recently-updated-title": "Séries mises à jour récemment",
         "recently-added-title": "Séries ajoutées récemment",
         "more-in-genre-title": "Plus dans {{genre}}"
@@ -44,13 +44,15 @@
         "processed": "Traité",
         "not-processed": "Non Traité",
         "chapter-num": "Chapitre {{num}}",
-        "volume-num": "Volume {{num}}"
+        "volume-num": "Volume {{num}}",
+        "not-read-warning": "Les fournisseurs upstream conserveront toujours le nombre le plus élevé",
+        "special": "{{entity-title.special}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progression de la lecture",
         "score-updated": "Mise à jour de l'évaluation",
-        "want-to-read-add": "À lire : Ajouter à la liste",
-        "want-to-read-remove": "À lire : Retirer de la liste",
+        "want-to-read-add": "À lire : ajouter à la liste",
+        "want-to-read-remove": "À lire : retirer de la liste",
         "review": "Mettre à jour la critique"
     },
     "spoiler": {
@@ -78,10 +80,10 @@
         "rating-percentage": "Évaluation {{r}}%"
     },
     "want-to-read": {
-        "title": "À Lire",
+        "title": "À lire",
         "series-count": "{{common.series-count}}",
         "no-items": "Il n'y a pas d'élément. Essayez d'ajouter une série.",
-        "no-items-filtered": "Aucun éléments correspondant aux critères."
+        "no-items-filtered": "Aucun élément correspondant aux critères."
     },
     "user-preferences": {
         "title": "Tableau de bord Utilisateur",
@@ -159,16 +161,24 @@
         "pdf-spread-mode-label": "Mode d'étalement"
     },
     "theme-manager": {
-        "title": "Gestionnaire de Theme",
-        "looking-for-theme": "Vous cherchez un thème clair ou E-ink ? Nous avons quelques thèmes personnalisés que vous pouvez utiliser. ",
-        "looking-for-theme-continued": "Github des Themes.",
-        "scan": "Analyser",
-        "site-themes": "Site des Themes",
-        "set-default": "Réinitialisation des paramètre par défaut",
+        "title": "Gestionnaire de thème",
+        "site-themes": "Site des thèmes",
+        "set-default": "Réinitialisation des paramètres par défaut",
         "applied": "Appliqué",
         "updated-toastr": "Site par défaut a été mise à jour vers {{name}}",
         "scan-queued": "Une analyse du thème du site a été mise en attente",
-        "apply": "{{common.apply}}"
+        "apply": "{{common.apply}}",
+        "download": "Télécharger",
+        "active-theme": "Actif",
+        "delete": "Supprimer",
+        "drag-n-drop": "Glisser-déposer",
+        "upload": "Téléverser",
+        "upload-continued": "un fichier CSS",
+        "preview-default-admin": "Sélectionnez d'abord un thème ou téléversez-en un manuellement",
+        "preview-default": "Sélectionnez d'abord un thème",
+        "default-theme": "Thème par défaut",
+        "preview-title": "Prévisualiser",
+        "description": "Kavita est disponible dans mes couleurs, trouvez une combinaison de couleurs qui réponde à vos besoins ou créez-en une vous-même et partagez-la. Les thèmes peuvent être appliqués à votre compte ou à tous les comptes."
     },
     "theme": {
         "theme-dark": "Sombre",
@@ -187,7 +197,7 @@
     },
     "site-theme-provider-pipe": {
         "system": "Système",
-        "user": "Utilisateur"
+        "custom": "Personnalisé"
     },
     "manage-devices": {
         "title": "Gestionnaire de périphérique",
@@ -295,13 +305,13 @@
         "open-filtered-search": "Ouvrez une recherche filtrée pour {{item}}"
     },
     "user-stats-info-cards": {
-        "total-pages-read-label": "Nombre de Pages lues",
+        "total-pages-read-label": "Nombre de pages lues",
         "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}} : {{value}}",
-        "total-words-read-label": "Nombre de Mots Lus",
+        "total-words-read-label": "Nombre de mots lus",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "Temps passé à lire",
         "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}} : {{value}}",
-        "chapters-read-label": "Chapitres Lu",
+        "chapters-read-label": "Chapitres lu",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "Lecture moyenne / semaine",
         "last-active-label": "Dernière activité",
@@ -309,10 +319,10 @@
     },
     "user-stats": {
         "library-read-progress-title": "Progrès de lecture de la bibliothèque",
-        "read-percentage": "% Lu"
+        "read-percentage": "% lu"
     },
     "top-readers": {
-        "title": "Meilleurs Lecteurs",
+        "title": "Meilleurs lecteurs",
         "time-selection-label": "Laps de temps",
         "comics-label": "BD : {{value}} hrs",
         "manga-label": "Manga : {{value}} hrs",
@@ -328,7 +338,7 @@
         "title": "Rôles"
     },
     "directory-picker": {
-        "title": "Sélectionner un Dossier",
+        "title": "Sélectionner un dossier",
         "close": "{{common.close}}",
         "path-label": "Chemin",
         "path-placeholder": "Commencer à écrire ou choisir le chemin",
@@ -342,20 +352,20 @@
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
-        "title": "Accès à la Bibliothèque",
+        "title": "Accès à la bibliothèque",
         "close": "{{common.close}}",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "no-data": "Il n'y a présentement aucune bibliothèque de configurée."
+        "no-data": "Il n'y a aucune bibliothèque de configurée pour l'instant."
     },
     "time-periods": {
-        "this-week": "Cette Semaine",
+        "this-week": "Cette semaine",
         "last-7-days": "7 derniers jours",
         "last-30-days": "30 derniers jours",
         "last-90-days": "90 derniers jours",
         "last-year": "L'année dernière",
-        "all-time": "En tout Temps"
+        "all-time": "Tout"
     },
     "device-platform-pipe": {
         "custom": "Personnalisé"
@@ -375,11 +385,11 @@
         "failure": "Échec"
     },
     "cbl-conflict-reason-pipe": {
-        "empty-file": "Le fichier cbl est vide, rien à faire.",
+        "empty-file": "Le fichier CBL est vide, rien à faire.",
         "series-collision": "La série, {{seriesLink}}, entre en conflit avec une autre série du même nom dans une autre bibliothèque.",
         "volume-missing": "{{series}} : Volume {{volume}} est manquant dans Kavita ou votre compte n'a pas les permissions nécessaires. Tous les éléments ayant ce numéro de volume seront ignorés.",
         "chapter-missing": "{{series}}: Le chapitre {{chapter}} est manquant dans Kavita. Celui-ci sera ignoré.",
-        "name-conflict": "Une liste de lecture ({{readingListName}}) correspondant au fichier cbl existe déjà dans votre compte.",
+        "name-conflict": "Une liste de lecture ({{readingListName}}) correspondant au fichier CBL existe déjà dans votre compte.",
         "series-missing": "La série, {{series}}, est absente de Kavita ou votre compte n'a pas les permissions requises. Tous les éléments de cette série seront ignorés lors de l'import.",
         "all-series-missing": "Votre compte n'a accès à aucune des séries de la liste ou Kavita n'a aucune série disponible dans la liste.",
         "invalid-file": "Le fichier est corrompu ou ne correspond pas aux étiquettes/spécifications attendues.",
@@ -427,7 +437,7 @@
         "required-field": "{{validation.required-field}}"
     },
     "all-series": {
-        "title": "Toutes les Séries",
+        "title": "Toutes les séries",
         "series-count": "{{common.series-count}}"
     },
     "series-metadata-detail": {
@@ -456,7 +466,7 @@
     },
     "side-nav": {
         "home": "Accueil",
-        "want-to-read": "À Lire",
+        "want-to-read": "À lire",
         "collections": "Collections",
         "reading-lists": "Listes de lecture",
         "bookmarks": "Marque-pages",
@@ -486,7 +496,8 @@
         "bookmarks": "{{side-nav.bookmarks}}",
         "genres": "Genres",
         "people": "Personnes",
-        "libraries": "Bibliothèques"
+        "libraries": "Bibliothèques",
+        "include-extras": "Inclure chapitres et fichiers"
     },
     "metadata-filter": {
         "collections-label": "Collections",
@@ -1139,7 +1150,7 @@
         "read": "Lire",
         "import-cbl": "Importer CBL",
         "mark-invisible": "Marquer comme invisible",
-        "remove-from-on-deck": "Retirer du tableau de bord",
+        "remove-from-on-deck": "Retirer de Continuer à lire",
         "clear": "{{common.clear}}",
         "customize": "Personnaliser",
         "remove-rule-group": "Retirer le groupe de règles",
@@ -1179,7 +1190,7 @@
         "unread": "Non lu",
         "cover-tab": "Couverture",
         "pages": "Pages :",
-        "info-tab": "Infos",
+        "info-tab": "{{edit-series-modal.info-tab}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
         "read": "{{common.read}}",
         "general-tab": "Général",
@@ -1324,7 +1335,9 @@
         "customized-templates-tooltip": "Kavita doit-il utiliser le répertoire \"config/templates\" pour les modèles plutôt que celui par défaut ? Vous êtes responsable de tenir à jour les changement des modèles.",
         "username-tooltip": "Le nom d'utilisateur utilisé pour s'authentifier auprès de l'hôte",
         "gmail-label": "Gmail",
-        "outlook-label": "Outlook"
+        "outlook-label": "Outlook",
+        "setting-description": "Vous devez remplir les paramètres Nom d'hôte et SMTP pour utiliser les fonctionnalités de messagerie électronique dans Kavita.",
+        "test-warning": "Vous devez enregistrer avant d'utiliser le bouton Test."
     },
     "bulk-add-to-collection": {
         "collection-label": "Collection",
@@ -1389,7 +1402,7 @@
         "enable-folder-watching": "Activer la surveillance des dossiers",
         "reset-to-default": "{{common.reset-to-default}}",
         "cache-size-label": "Taille du cache",
-        "on-deck-last-progress-label": "Tableau de bord Dernière progression (jours)",
+        "on-deck-last-progress-label": "Dernière progression de Continuer à lire (jours)",
         "base-url-tooltip": "Utilisez cela si vous souhaitez héberger Kavita sur une URL de base, i.e. votredomaine.com/kavita. Non pris en charge sur Docker en utilisant un utilisateur non root.",
         "backup-tooltip": "Le nombre de sauvegardes à maintenir. La valeur par défaut est 30, le minimum est 1, le maximum est 30.",
         "log-label": "Jours des journalisation",
@@ -1398,7 +1411,7 @@
         "folder-watching-tooltip": "Permet à Kavita de surveiller les dossiers de bibliothèque pour détecter les modifications et lancer un scan de ces modifications. Cela permet au contenu d'être mis à jour sans appeler manuellement des scans ni d'attendre des scans nocturnes. Attendra toujours 10 minutes avant de déclencher un scan.",
         "log-tooltip": "Le nombre de journalisation à conserver. La valeur par défaut est 30, le minimum est 1, le maximum est 30.",
         "opds-label": "OPDS",
-        "on-deck-last-chapter-add-label": "Tableau de bord Chapitres récents (jours)",
+        "on-deck-last-chapter-add-label": "Chapitres récents de Continuer à lire (jours)",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "min-cache-validation": "Doit être à 50 Mo.",
@@ -1439,7 +1452,7 @@
         "library-scan-tooltip": "À quelle fréquence Kavita analysera et actualisera les métadonnées des fichiers de bibliothèque.",
         "library-scan-label": "Scan de la bibliothèque",
         "reset-to-default": "{{common.reset-to-default}}",
-        "clean-up-want-to-read-task": "Nettoyer A lire",
+        "clean-up-want-to-read-task": "Nettoyer À lire",
         "analyze-files-task-success": "L'analyse du fichier a été mise en attente",
         "backup-database-task-success": "Une tâche de sauvegarde de la base de données a été mise en file d'attente",
         "library-database-backup-label": "Sauvegarde de Kavita",
@@ -1492,7 +1505,7 @@
         "cover-image-size-tooltip": "Quelle doit être la taille des images de couverture générées. Remarque : Tout ce qui est plus grand que la valeur par défaut entraînera des temps de chargement de page plus longs.",
         "encode-as-description-part-2": "Puis-je utiliser WebP ?",
         "reset": "{{common.reset}}",
-        "media-warning": "Vous devez déclencher la tâche de conversion des médias dans l'onglet Tâches.,",
+        "media-warning": "Vous devez déclencher la tâche de conversion des médias dans l'onglet Tâches.",
         "encode-as-tooltip": "Tous les médias gérés par Kavita (couvertures, marque-pages, favicons) seront encodés avec ce type.",
         "save": "{{common.save}}",
         "encode-as-description-part-1": "WebP/AVIF peut réduire considérablement l'espace requis pour les fichiers. WebP/AVIF n'est pas pris en charge sur tous les navigateurs ou versions. Pour savoir si ces paramètres sont appropriés à votre configuration, visitez ",
@@ -1529,7 +1542,8 @@
         "read-progress": "Dernière lecture",
         "sort-name": "Nom",
         "created": "Créé",
-        "average-rating": "Note moyenne"
+        "average-rating": "Note moyenne",
+        "random": "Aléatoire"
     },
     "manage-users": {
         "change-password-alt": "Modifier le mot de passe {{user}}",
@@ -1672,7 +1686,8 @@
         "users-online-count": "{{num}} Utilisateurs en ligne",
         "more-info": "Cliquez pour plus d'informations",
         "downloading-item": "Téléchargement {{item}}",
-        "title-alt": "Activité"
+        "title-alt": "Activité",
+        "left-to-process": "Reste à traiter : {{leftToProcess}}"
     },
     "library-recommended": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1710,7 +1725,12 @@
         "cover-image-tab": "Image de couverture",
         "save": "{{common.save}}",
         "series-tab": "Séries",
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "info-tab": "{{edit-series-modal.info-tab}}",
+        "source-url-title": "URL source :",
+        "total-series-title": "Total de séries :",
+        "missing-series-title": "Séries manquantes :",
+        "last-sync-title": "Dernière synchro :"
     },
     "stream-list-item": {
         "external-source": "Source externe",
@@ -1780,7 +1800,9 @@
         "series-header": "Séries",
         "no-data-filtered": "Aucun élément ne correspond à votre filtre actuel.",
         "no-data": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
-        "title-alt": "Kavita - Collection{{collectionName}}"
+        "title-alt": "Kavita - Collection{{collectionName}}",
+        "sync-progress": "Séries collectées : {{title}}",
+        "last-sync": "Dernière synchro : {{date}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Pourcentage",
@@ -1905,7 +1927,10 @@
         "collections-unpromoted": "Collections non promues",
         "confirm-delete-collections": "Êtes-vous sûr de vouloir supprimer plusieurs collections ?",
         "collections-deleted": "Collections supprimées",
-        "collections-promoted": "Promotion des collections"
+        "collections-promoted": "Promotion des collections",
+        "stack-imported": "Pile importée",
+        "confirm-delete-theme": "Supprimer ce thème l'effacera du disque. Vous pouvez le récupérer du dossier temp avant suppression",
+        "mal-token-required": "Le jeton MAL est requis, il est défini dans les paramètres de l'utilisateur"
     },
     "manga-format-stats": {
         "title": "Format",
@@ -2017,7 +2042,10 @@
         "rejected-cover-upload": "L'image n'a pas pu être récupérée car le serveur a refusé la demande. Veuillez la télécharger et la charger à partir d'un fichier.",
         "invalid-confirmation-url": "URL de confirmation invalide",
         "invalid-confirmation-email": "E-mail de confirmation invalide",
-        "not-found": "Cette URL n'existe pas"
+        "not-found": "Cette URL n'existe pas",
+        "delete-theme-in-use": "Le thème est actuellement utilisé par au moins un utilisateur, impossible de le supprimer",
+        "theme-manual-upload": "Il y a eu une erreur durant la création du thème à partir d'un téléversement manuel",
+        "theme-already-in-use": "Un thème avec le même nom existe déjà"
     },
     "manage-smart-filters": {
         "no-data": "Aucun filtre intelligent n'a été créé",
@@ -2047,7 +2075,8 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Rempilés",
         "title": "Importation de la pile d'intérêt MAL",
-        "description": "Importez vos piles d'intérêts MAL et créez des collections dans Kavita"
+        "description": "Importez vos piles d'intérêts MAL et créez des collections dans Kavita",
+        "nothing-found": "Aucun résultat"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -2088,5 +2117,8 @@
         "off": "Pas d'écart",
         "odd": "Ecarts étranges",
         "even": "Ecarts réguliers"
+    },
+    "browse-themes-modal": {
+        "title": "Parcourir les thèmes"
     }
 }

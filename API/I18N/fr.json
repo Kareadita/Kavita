@@ -121,7 +121,7 @@
     "generic-user-delete": "Impossible de supprimer l'utilisateur",
     "generic-user-pref": "Erreur lors de la sauvegarde des préférences",
     "opds-disabled": "OPDS n'est pas activé sur ce serveur",
-    "on-deck": "Continuez votre lecture",
+    "on-deck": "En Cours",
     "recently-added": "Récemment Ajouté",
     "browse-recently-added": "Parcourir Récemment Ajouté",
     "reading-lists": "Liste de Lecture",
@@ -193,5 +193,7 @@
     "process-processed-scrobbling-events": "Traiter les événements de Scrobbling traités",
     "update-yearly-stats": "Mettre à jour les statistiques annuelles",
     "account-email-invalid": "L'adresse électronique figurant dans le fichier du compte administrateur n'est pas valide. Impossible d'envoyer un courriel de test.",
-    "email-settings-invalid": "Informations manquantes dans les paramètres de l'e-mail. Assurez-vous que tous les paramètres de l'email sont sauvegardés."
+    "email-settings-invalid": "Informations manquantes dans les paramètres de l'e-mail. Assurez-vous que tous les paramètres de l'email sont sauvegardés.",
+    "collection-already-exists": "Collection déjà existante",
+    "error-import-stack": "Il y a eu un problème lors de l'importation de la pile MAL"
 }

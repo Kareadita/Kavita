@@ -1488,9 +1488,6 @@
         "external-sources": "Externé zdroje",
         "title-external-sources": "Externé zdroje"
     },
-    "site-theme-provider-pipe": {
-        "user": "Používateľ"
-    },
     "manage-devices": {
         "devices-title": "Zariadenia",
         "description": "Táto časť je určená na nastavenie zariadení, ktoré sa nemôžu pripojiť ku Kavite cez webový prehliadač a namiesto toho majú e-mailovú adresu, ktorá prijíma súbory.",
@@ -1575,9 +1572,6 @@
     },
     "theme-manager": {
         "title": "Správca tém",
-        "looking-for-theme": "Hľadáte svetlú alebo e-atramentovú tému vhodnú pre čítačky? Máme niekoľko používateľských tém, ktoré môžete použiť na našej stránke ",
-        "looking-for-theme-continued": "Github témy/motívy.",
-        "scan": "skenovať",
         "site-themes": "Témy/Motívy stránok",
         "set-default": "Nastaviť ako predvolené",
         "applied": "Aplikované"

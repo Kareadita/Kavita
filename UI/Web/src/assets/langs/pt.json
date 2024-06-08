@@ -164,9 +164,6 @@
     },
     "theme-manager": {
         "title": "Gestor de Temas",
-        "looking-for-theme": "À procura de um tema 'light' ou e-ink? Pode encontrar alguns temas customizados no nosso ",
-        "looking-for-theme-continued": "github de temas.",
-        "scan": "Analisar",
         "site-themes": "Temas do Site",
         "set-default": "Tema Por Defeito",
         "apply": "{{common.apply}}",
@@ -190,8 +187,7 @@
         "include-unknowns-tooltip": "Quando ativado, os Desconhecidos serão permitidos independentemente da Restrição de Faixa Etária. Com esta opção é possível que elementos que não estejam devidamente categorizados sejam mostrados a utilizadores com restrições etárias definidas."
     },
     "site-theme-provider-pipe": {
-        "system": "Sistema",
-        "user": "Utilizador"
+        "system": "Sistema"
     },
     "manage-devices": {
         "title": "Gestor de Dispositivos",
