@@ -22,6 +22,7 @@ public enum ChapterIncludes
     None = 1,
     Volumes = 2,
     Files = 4,
+    People = 8
 }
 
 public interface IChapterRepository

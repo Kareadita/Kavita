@@ -53,6 +53,12 @@ public static class IncludesExtensions
                 .Include(c => c.Files);
         }
 
+        if (includes.HasFlag(ChapterIncludes.People))
+        {
+            queryable = queryable
+                .Include(c => c.People);
+        }
+
         return queryable.AsSplitQuery();
     }
 
