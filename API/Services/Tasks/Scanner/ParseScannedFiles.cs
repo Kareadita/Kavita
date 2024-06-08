@@ -122,7 +122,7 @@ public class ParseScannedFiles
     /// <param name="seriesPaths">A dictionary mapping a normalized path to a list of <see cref="SeriesModified"/> to help scanner skip I/O</param>
     /// <param name="folderPath">A library folder or series folder</param>
     /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
-    public IList<ScanResult> ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
+    public async Task<IList<ScanResult>> ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
         IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false)
     {
         string normalizedPath;
@@ -140,6 +140,8 @@ public class ParseScannedFiles
             {
                 // Since this is a loop, we need a list return
                 normalizedPath = Parser.Parser.NormalizePath(directory);
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated));
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
                 {
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
@@ -178,6 +180,9 @@ public class ParseScannedFiles
             library.Folders.FirstOrDefault(f =>
                 normalizedPath.Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
             folderPath;
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated));
 
         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
         {
@@ -331,7 +336,7 @@ public class ParseScannedFiles
         {
             try
             {
-                var scanResults = ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
+                var scanResults = await ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
 
                 foreach (var scanResult in scanResults)
                 {

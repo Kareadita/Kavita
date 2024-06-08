@@ -262,20 +262,18 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            _taskScheduler.ScanFolder(fullPath, _queueWaitTime);
+            _taskScheduler.ScanFolder(fullPath, filePath, _queueWaitTime);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
         }
-        _logger.LogDebug("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogTrace("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
     private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
         // TODO: I can optimize this to avoid a library scan and instead do a Series Scan by finding the series that has a lowestFolderPath higher or equal to the filePath
-
-
 
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);

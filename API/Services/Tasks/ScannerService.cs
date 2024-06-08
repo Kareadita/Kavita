@@ -45,7 +45,7 @@ public interface IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
-    Task ScanFolder(string folder);
+    Task ScanFolder(string folder, string originalPath);
     Task AnalyzeFiles();
 
 }
@@ -135,30 +135,35 @@ public class ScannerService : IScannerService
     /// Given a generic folder path, will invoke a Series scan or Library scan.
     /// </summary>
     /// <remarks>This will Schedule the job to run 1 minute in the future to allow for any close-by duplicate requests to be dropped</remarks>
-    /// <param name="folder"></param>
-    public async Task ScanFolder(string folder)
+    /// <param name="folder">Normalized folder</param>
+    /// <param name="originalPath">If invoked from LibraryWatcher, this maybe a nested folder and can allow for optimization</param>
+    public async Task ScanFolder(string folder, string originalPath)
     {
         Series? series = null;
         try
         {
-            series = await _unitOfWork.SeriesRepository.GetSeriesByFolderPath(folder, SeriesIncludes.Library);
+            series = await _unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPath(originalPath,
+                         SeriesIncludes.Library) ??
+                     await _unitOfWork.SeriesRepository.GetSeriesByFolderPath(originalPath, SeriesIncludes.Library) ??
+                     await _unitOfWork.SeriesRepository.GetSeriesByFolderPath(folder, SeriesIncludes.Library);
         }
         catch (InvalidOperationException ex)
         {
             if (ex.Message.Equals("Sequence contains more than one element."))
             {
-                _logger.LogCritical(ex, "[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
+                _logger.LogCritical(ex, "[ScannerService] Multiple series map to this folder or folder is at library root. Library scan will be used for ScanFolder");
             }
         }
 
         // TODO: Figure out why we have the library type restriction here
-        if (series != null && (series.Library.Type != LibraryType.Book || series.Library.Type != LibraryType.LightNovel))
+        if (series != null && series.Library.Type is not (LibraryType.Book or LibraryType.LightNovel))
         {
             if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
+            _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
             BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }

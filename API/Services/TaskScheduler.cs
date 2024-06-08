@@ -20,7 +20,7 @@ public interface ITaskScheduler
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
     Task ScheduleKavitaPlusTasks();
-    void ScanFolder(string folderPath, TimeSpan delay);
+    void ScanFolder(string folderPath, string originalPath, TimeSpan delay);
     void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
     void ScanLibraries(bool force = false);
@@ -267,24 +267,38 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => CheckForUpdate());
     }
 
-    public void ScanFolder(string folderPath, TimeSpan delay)
+    /// <summary>
+    /// Queue up a Scan folder for a folder from Library Watcher.
+    /// </summary>
+    /// <param name="folderPath"></param>
+    /// <param name="originalPath"></param>
+    /// <param name="delay"></param>
+    public void ScanFolder(string folderPath, string originalPath, TimeSpan delay)
     {
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder]))
+        var normalizedOriginal = Tasks.Scanner.Parser.Parser.NormalizePath(originalPath);
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, normalizedOriginal]) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
             _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);
             return;
         }
 
+        // Not sure where we should put this code, but we can get a bunch of ScanFolders when original has slight variations, like
+        // create a folder, add a new file, etc. All of these can be merged into just 1 request.
+
+
+
+
         _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
-        BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder), delay);
+        BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder, normalizedOriginal), delay);
     }
 
     public void ScanFolder(string folderPath)
     {
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {normalizedFolder}))
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
             _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);
@@ -292,7 +306,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
-        _scannerService.ScanFolder(normalizedFolder);
+        _scannerService.ScanFolder(normalizedFolder, string.Empty);
     }
 
     #endregion
@@ -350,9 +364,9 @@ public class TaskScheduler : ITaskScheduler
     public void RefreshMetadata(int libraryId, bool forceUpdate = true)
     {
         var alreadyEnqueued = HasAlreadyEnqueuedTask(MetadataService.Name, "GenerateCoversForLibrary",
-                                  new object[] {libraryId, true}) ||
+                                  [libraryId, true]) ||
                               HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
-                                  new object[] {libraryId, false});
+                                  [libraryId, false]);
         if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
@@ -365,7 +379,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries",  new object[] {libraryId, seriesId, forceUpdate}))
+        if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries", [libraryId, seriesId, forceUpdate]))
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
@@ -377,7 +391,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, forceUpdate}, ScanQueue))
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, forceUpdate], ScanQueue))
         {
             _logger.LogInformation("A duplicate request to scan series occured. Skipping");
             return;
@@ -396,7 +410,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask("WordCountAnalyzerService", "ScanSeries", new object[] {libraryId, seriesId, forceUpdate}))
+        if (HasAlreadyEnqueuedTask("WordCountAnalyzerService", "ScanSeries", [libraryId, seriesId, forceUpdate]))
         {
             _logger.LogInformation("A duplicate request to scan series occured. Skipping");
             return;
@@ -426,13 +440,13 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasScanTaskRunningForLibrary(int libraryId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true, true}, ScanQueue,
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, true, true], ScanQueue,
                 checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false, true}, ScanQueue,
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, false, true], ScanQueue,
                 checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true, false}, ScanQueue,
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, true, false], ScanQueue,
                 checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false, false}, ScanQueue,
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, false, false], ScanQueue,
                 checkRunningJobs);
     }
 
@@ -445,8 +459,8 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasScanTaskRunningForSeries(int seriesId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue, checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue, checkRunningJobs);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, true], ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, false], ScanQueue, checkRunningJobs);
     }
 
     /// <summary>
@@ -487,6 +501,7 @@ public class TaskScheduler : ITaskScheduler
 
         return false;
     }
+
 
     /// <summary>
     /// Checks against any jobs that are running or about to run
