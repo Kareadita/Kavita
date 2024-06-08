@@ -142,6 +142,7 @@ public class ParseScannedFiles
                 normalizedPath = Parser.Parser.NormalizePath(directory);
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated));
+
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
                 {
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
@@ -153,6 +154,7 @@ public class ParseScannedFiles
                     _logger.LogDebug("{Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", normalizedPath);
                     foreach (var seriesModified in series)
                     {
+
                         if (HasSeriesFolderNotChangedSinceLastScan(seriesModified, seriesModified.LowestFolderPath!))
                         {
                             result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
