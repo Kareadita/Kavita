@@ -26,7 +26,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         {
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
-            Title = Parser.RemoveExtensionIfSupported(fileName),
+            Title = Parser.RemoveExtensionIfSupported(fileName)!,
             FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo
