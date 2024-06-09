@@ -155,9 +155,6 @@
     },
     "theme-manager": {
         "title": "Správce motivů",
-        "looking-for-theme": "Hledáte téma světla nebo e-ink? Máme několik vlastních motivů, které můžete použít u nás ",
-        "looking-for-theme-continued": "téma github.",
-        "scan": "Skenovat",
         "site-themes": "Témata stránek",
         "set-default": "Nastavit výchozí",
         "apply": "{{common.apply}}",
@@ -181,8 +178,7 @@
         "include-unknowns-tooltip": "Pokud je pravda, budou Neznámé povoleny s věkovým omezením. To by mohlo vést k úniku neoznačených médií k uživatelům s věkovým omezením."
     },
     "site-theme-provider-pipe": {
-        "system": "Systém",
-        "user": "Uživatel"
+        "system": "Systém"
     },
     "manage-devices": {
         "title": "Správce zařízení",

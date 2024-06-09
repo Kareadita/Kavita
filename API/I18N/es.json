@@ -193,5 +193,7 @@
     "scan-libraries": "Escanear la biblioteca",
     "check-updates": "Comprobar actualizaciones",
     "account-email-invalid": "El correo electrónico registrado para la cuenta de administrador no es un correo electrónico válido. No se puede enviar un correo electrónico de prueba.",
-    "email-settings-invalid": "Falta información en la configuración de correo electrónico. Asegúrese de que todas las configuraciones de correo electrónico estén guardadas."
+    "email-settings-invalid": "Falta información en la configuración de correo electrónico. Asegúrese de que todas las configuraciones de correo electrónico estén guardadas.",
+    "collection-already-exists": "La colección ya existe",
+    "error-import-stack": "Problema al importar la pila MAL"
 }

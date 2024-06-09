@@ -193,5 +193,7 @@
     "backup": "备份",
     "update-yearly-stats": "更新年度统计数据",
     "email-settings-invalid": "电子邮件设置缺少信息。确保保存所有电子邮件设置。",
-    "account-email-invalid": "管理员帐户存档的电子邮件不是有效的电子邮件。无法发送测试电子邮件。"
+    "account-email-invalid": "管理员帐户存档的电子邮件不是有效的电子邮件。无法发送测试电子邮件。",
+    "collection-already-exists": "收藏已存在",
+    "error-import-stack": "导入 MAL stack 时出现问题"
 }

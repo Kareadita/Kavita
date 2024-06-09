@@ -154,11 +154,8 @@
     "theme-manager": {
         "apply": "{{common.apply}}",
         "updated-toastr": "Сайт по умолчанию был обновлен до {{name}}",
-        "looking-for-theme-continued": "theme github.",
         "applied": "Прикладная",
         "set-default": "Установить по умолчанию",
-        "looking-for-theme": "Ищете светлую или электронную чернильную тему? У нас есть несколько пользовательских тем, которые вы можете использовать на нашем ",
-        "scan": "Сканирование",
         "site-themes": "Темы сайта",
         "title": "Менеджер темы",
         "scan-queued": "Сканирование темы сайта поставлено в очередь"
@@ -490,7 +487,6 @@
         "theme-dark": "Темнота"
     },
     "site-theme-provider-pipe": {
-        "user": "Пользователь",
         "system": "Система"
     },
     "entity-type": {

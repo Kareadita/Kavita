@@ -164,9 +164,6 @@
     },
     "theme-manager": {
         "title": "Gestore dei Temi",
-        "looking-for-theme": "Cerchi un tema leggero o e-ink? Abbiamo alcuni temi personalizzati che puoi utilizzare sul nostro ",
-        "looking-for-theme-continued": "tema github.",
-        "scan": "Scansione",
         "site-themes": "Temi del sito",
         "set-default": "Imposta default",
         "apply": "{{common.apply}}",
@@ -190,8 +187,7 @@
         "include-unknowns-tooltip": "Se vero, Sconosciuti verranno consentiti con le limitazioni di età. Ciò potrebbe portare a perdite di contenuti multimediali senza tag per gli utenti con limiti di età."
     },
     "site-theme-provider-pipe": {
-        "system": "Sistema",
-        "user": "Utente"
+        "system": "Sistema"
     },
     "manage-devices": {
         "title": "Gestore Dispositivi",

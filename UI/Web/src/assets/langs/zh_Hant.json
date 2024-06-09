@@ -151,9 +151,6 @@
     },
     "theme-manager": {
         "title": "主題管理器",
-        "looking-for-theme": "正在尋找淺色或電子墨水主題？ 我們有一些自定義主題，您可以在我們的 ",
-        "looking-for-theme-continued": "主題github。",
-        "scan": "掃描",
         "site-themes": "網站主題",
         "set-default": "預設設定",
         "apply": "{{common.apply}}",
@@ -177,8 +174,7 @@
         "include-unknowns-tooltip": "如果屬實，則允許未知人員參加，但有年齡限制。 這可能會導致未標記的媒體洩露給有年齡限制的用戶。"
     },
     "site-theme-provider-pipe": {
-        "system": "系統",
-        "user": "使用者"
+        "system": "系統"
     },
     "manage-devices": {
         "title": "裝置管理員",

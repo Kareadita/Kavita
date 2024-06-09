@@ -157,9 +157,6 @@
     },
     "theme-manager": {
         "title": "ตัวจัดการธีม",
-        "looking-for-theme": "กำลังมองหาธีมสว่างหรือ e-ink อยู่ใช่ไหม เรามีธีมแบบกำหนดเองที่คุณสามารถใช้กับของเราได้ ",
-        "looking-for-theme-continued": "ธีม GitHub",
-        "scan": "สแกน",
         "site-themes": "ธีมไซต์",
         "set-default": "ตั้งค่าเริ่มต้น",
         "apply": "{{common.apply}}",
@@ -183,8 +180,7 @@
         "include-unknowns-tooltip": "หากเป็นจริง จะอนุญาตให้ใช้ ไม่ระบุ ได้ด้วยการจำกัดอายุ ซึ่งอาจนำไปสู่การรั่วไหลของสื่อที่ไม่ติดแท็กไปยังผู้ใช้ที่มีการจำกัดอายุ"
     },
     "site-theme-provider-pipe": {
-        "system": "ระบบ",
-        "user": "ผู้ใช้"
+        "system": "ระบบ"
     },
     "manage-devices": {
         "title": "ตัวจัดการอุปกรณ์",

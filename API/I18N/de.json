@@ -179,5 +179,21 @@
     "email-not-enabled": "Der Mailversand ist auf diesem Server nicht aktiviert. Sie können diese Aktion nicht durchführen.",
     "invalid-email": "Die für den Benutzer hinterlegte E-Mail ist ungültig. Links finden Sie in den Logs.",
     "send-to-unallowed": "Sie können nicht an ein Gerät senden, das nicht Ihnen gehört.",
-    "send-to-size-limit": "Die Datei(en), die Sie senden möchten, ist/sind zu groß für Ihren E-Mail-Service"
+    "send-to-size-limit": "Die Datei(en), die Sie senden möchten, ist/sind zu groß für Ihren E-Mail-Service",
+    "check-updates": "Updates überprüfen",
+    "email-settings-invalid": "E-Mail-Einstellungen fehlen Informationen. Stellen Sie sicher, dass alle E-Mail-Einstellungen gespeichert sind.",
+    "account-email-invalid": "Die für das Admin-Konto gespeicherte E-Mail ist nicht gültig. Test-E-Mail kann nicht gesendet werden.",
+    "license-check": "Lizenzprüfung",
+    "process-scrobbling-events": "Verarbeite Scrobble-Events",
+    "report-stats": "Statistiken melden",
+    "check-scrobbling-tokens": "Überprüfe die Scrobbling-Tokens",
+    "cleanup": "Bereinigung",
+    "process-processed-scrobbling-events": "Verarbeitete Scrobbling Ereignisse verarbeiten",
+    "remove-from-want-to-read": "Möchte Lesen Liste Bereinigung",
+    "kavita+-data-refresh": "Kavita+ Daten Aktualisierung",
+    "backup": "Sichern",
+    "update-yearly-stats": "Aktualisiere Jahres Statistiken",
+    "error-import-stack": "Es gab Problem beim Importieren des MAL stack",
+    "scan-libraries": "Bibliotheken scannen",
+    "collection-already-exists": "Sammlung existiert schon"
 }

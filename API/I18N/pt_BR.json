@@ -193,5 +193,7 @@
     "cleanup": "Limpar",
     "kavita+-data-refresh": "Atualização de dados Kavita+",
     "account-email-invalid": "O e-mail registrado para a conta de administrador não é um e-mail válido. Não é possível enviar e-mail de teste.",
-    "email-settings-invalid": "Faltam informações nas configurações de e-mail. Certifique-se de que todas as configurações de e-mail estejam salvas."
+    "email-settings-invalid": "Faltam informações nas configurações de e-mail. Certifique-se de que todas as configurações de e-mail estejam salvas.",
+    "error-import-stack": "Ocorreu um problema ao importar a pilha MAL",
+    "collection-already-exists": "A coleção já existe"
 }
