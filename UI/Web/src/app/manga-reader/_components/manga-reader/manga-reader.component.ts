@@ -551,7 +551,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       ).subscribe(() => {});
 
       this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-        var fitting = this.generalSettingsForm.get('fittingOptiom')?.value;
+        var fitting = this.generalSettingsForm.get('fittingOption')?.value;
         if(PageSplitOption.FitSplit == val && FITTING_OPTION.WIDTH == fitting) {
           this.generalSettingsForm.get('widthSlider')?.enable();
         } else {
