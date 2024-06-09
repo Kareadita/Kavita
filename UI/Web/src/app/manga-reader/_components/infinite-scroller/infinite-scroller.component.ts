@@ -241,7 +241,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
 
     this.widthSliderValue$ = this.readerSettings$.pipe(
-      map(values => (parseInt(values.widthSlider) <= 0) ? 'auto' : values.widthSlider + '%'),
+      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
       takeUntilDestroyed(this.destroyRef)
     );
 
