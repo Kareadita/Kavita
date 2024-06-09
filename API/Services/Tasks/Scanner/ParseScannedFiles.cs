@@ -125,7 +125,7 @@ public class ParseScannedFiles
     public async Task<IList<ScanResult>> ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
         IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false)
     {
-        string normalizedPath;
+        //string normalizedPath;
         var result = new List<ScanResult>();
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
         var matcher = new GlobMatcher();
@@ -135,25 +135,29 @@ public class ParseScannedFiles
         }
         if (scanDirectoryByDirectory)
         {
-            var directories = _directoryService.GetDirectories(folderPath, matcher);
+            var directories = _directoryService.GetDirectories(folderPath, matcher).Select(Parser.Parser.NormalizePath);
             foreach (var directory in directories)
             {
                 // Since this is a loop, we need a list return
-                normalizedPath = Parser.Parser.NormalizePath(directory);
+                //normalizedPath = Parser.Parser.NormalizePath(directory);
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated));
+                    MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
-                if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
+                if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
                 {
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
                 }
-                else if (seriesPaths.TryGetValue(normalizedPath, out var series) && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
+                else if (seriesPaths.TryGetValue(directory, out var series) && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
                 {
                     // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
                     // This is very helpful for ComicVine libraries by Publisher
-                    _logger.LogDebug("{Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", normalizedPath);
+                    _logger.LogDebug("{Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
                     foreach (var seriesModified in series)
                     {
+                        if (result.Exists(r => r.Folder == directory))
+                        {
+                            continue;
+                        }
 
                         if (HasSeriesFolderNotChangedSinceLastScan(seriesModified, seriesModified.LowestFolderPath!))
                         {
@@ -177,7 +181,7 @@ public class ParseScannedFiles
             return result;
         }
 
-        normalizedPath = Parser.Parser.NormalizePath(folderPath);
+        var normalizedPath = Parser.Parser.NormalizePath(folderPath);
         var libraryRoot =
             library.Folders.FirstOrDefault(f =>
                 normalizedPath.Contains(Parser.Parser.NormalizePath(f.Path)))?.Path ??
@@ -414,6 +418,8 @@ public class ParseScannedFiles
     /// <param name="library"></param>
     private async Task ProcessScanResult(ScanResult result, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library)
     {
+        // TODO: This should return the result as we are modifying it as a side effect
+
         // If the folder hasn't changed, generate fake ParserInfos for the Series that were in that folder.
         if (!result.HasChanged)
         {

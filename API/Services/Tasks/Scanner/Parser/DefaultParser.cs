@@ -101,7 +101,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         }
     }
 
-    protected void UpdateFromComicInfo(ParserInfo info)
+    protected static void UpdateFromComicInfo(ParserInfo info)
     {
         if (info.ComicInfo == null) return;
 
