@@ -145,13 +145,15 @@ public class ParseScannedFiles
                     }
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
                 }
-                else if (seriesPaths.TryGetValue(directory, out var series) && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
+                else if (seriesPaths.TryGetValue(directory, out var series)&& series.Count > 1 && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
                 {
                     // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
                     // This is very helpful for ComicVine libraries by Publisher
                     _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
                     foreach (var seriesModified in series)
                     {
+
+                        // TODO: We can check directly against seriesModified.LastScanned instead of library scan
                         var hasFolderChangedSinceLastScan = library.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
                                                             _directoryService
                                                                 .GetLastWriteTime(seriesModified.LowestFolderPath!)
@@ -167,7 +169,7 @@ public class ParseScannedFiles
                         }
                         else
                         {
-                            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} changed, adding folders", directory, seriesModified.LowestFolderPath);
+                            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} changed for Series {SeriesName}", directory, seriesModified.LowestFolderPath, seriesModified.SeriesName);
                             result.Add(CreateScanResult(directory, folderPath, true,
                                 _directoryService.ScanFiles(seriesModified.LowestFolderPath!, fileExtensions, matcher)));
                         }
