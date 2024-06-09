@@ -853,27 +853,35 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id, ChapterIncludes.Files);
+            var chaptersForVolume = await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id, ChapterIncludes.Files | ChapterIncludes.People);
 
-            foreach (var chapter in chapters)
+            foreach (var chapter in chaptersForVolume)
             {
                 var chapterId = chapter.Id;
                 var chapterDto = _mapper.Map<ChapterDto>(chapter);
                 foreach (var mangaFile in chapter.Files)
                 {
-                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
+                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, _mapper.Map<MangaFileDto>(mangaFile), series,
+                        chapterDto, apiKey, prefix, baseUrl));
                 }
             }
 
         }
 
-        foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
+        var chapters = seriesDetail.StorylineChapters;
+        if (!seriesDetail.StorylineChapters.Any() && seriesDetail.Chapters.Any())
         {
-            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(storylineChapter.Id);
-            var chapterDto = _mapper.Map<ChapterDto>(storylineChapter);
+            chapters = seriesDetail.Chapters;
+        }
+
+        foreach (var chapter in chapters.Where(c => !c.IsSpecial))
+        {
+            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
+            var chapterDto = _mapper.Map<ChapterDto>(chapter);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, chapter.VolumeId, chapter.Id, _mapper.Map<MangaFileDto>(mangaFile), series,
+                    chapterDto, apiKey, prefix, baseUrl));
             }
         }
 
@@ -883,7 +891,8 @@ public class OpdsController : BaseApiController
             var chapterDto = _mapper.Map<ChapterDto>(special);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, special.VolumeId, special.Id, mangaFile, series, chapterDto, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, special.VolumeId, special.Id, _mapper.Map<MangaFileDto>(mangaFile), series,
+                    chapterDto, apiKey, prefix, baseUrl));
             }
         }
 
@@ -909,9 +918,9 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");
         foreach (var chapter in chapters)
         {
-            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
-            foreach (var mangaFile in files)
+            //var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
+            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id, ChapterIncludes.Files | ChapterIncludes.People);
+            foreach (var mangaFile in chapterDto.Files)
             {
                 feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapter.Id, mangaFile, series, chapterDto!, apiKey, prefix, baseUrl));
             }
@@ -928,17 +937,20 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
         var (baseUrl, prefix) = await GetPrefix();
+
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, ChapterIncludes.Files | ChapterIncludes.People);
+
         if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
+
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
-        var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
         var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{_seriesService.FormatChapterName(userId, libraryType)}-{chapterId}-files");
-        foreach (var mangaFile in files)
+
+        foreach (var mangaFile in chapter.Files)
         {
             feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey, prefix, baseUrl));
         }
@@ -1028,22 +1040,30 @@ public class OpdsController : BaseApiController
             Summary = $"Format: {seriesDto.Format}" + (string.IsNullOrWhiteSpace(metadata.Summary)
                 ? string.Empty
                 : $"     Summary: {metadata.Summary}"),
-            Authors = metadata.Writers.Select(p => new FeedAuthor()
-            {
-                Name = p.Name,
-                Uri = "http://opds-spec.org/author/" + p.Id
-            }).ToList(),
+            Authors = metadata.Writers.Select(CreateAuthor).ToList(),
             Categories = metadata.Genres.Select(g => new FeedCategory()
             {
                 Label = g.Title,
                 Term = string.Empty
             }).ToList(),
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/series/{seriesDto.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}")
-            }
+            Links =
+            [
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    $"{prefix}{apiKey}/series/{seriesDto.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}")
+            ]
+        };
+    }
+
+    private static FeedAuthor CreateAuthor(PersonDto person)
+    {
+        return new FeedAuthor()
+        {
+            Name = person.Name,
+            Uri = "http://opds-spec.org/author/" + person.Id
         };
     }
 
@@ -1070,6 +1090,7 @@ public class OpdsController : BaseApiController
             Id = chapterId.ToString(),
             Title = title,
             Summary = summary ?? string.Empty,
+
             Links = new List<FeedLink>()
             {
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
@@ -1082,7 +1103,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private async Task<FeedEntry> CreateChapterWithFile(int userId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey, string prefix, string baseUrl)
+    private async Task<FeedEntry> CreateChapterWithFile(int userId, int seriesId, int volumeId, int chapterId, MangaFileDto mangaFile, SeriesDto series, ChapterDto chapter, string apiKey, string prefix, string baseUrl)
     {
         var fileSize =
             mangaFile.Bytes > 0 ? DirectoryService.GetHumanReadableBytes(mangaFile.Bytes) :
@@ -1143,7 +1164,8 @@ public class OpdsController : BaseApiController
             {
                 Text = fileType,
                 Type = "text"
-            }
+            },
+            Authors = chapter.Writers.Select(CreateAuthor).ToList()
         };
 
         var canPageStream = mangaFile.Extension != ".epub";
@@ -1241,7 +1263,7 @@ public class OpdsController : BaseApiController
         throw new KavitaException(await _localizationService.Get("en", "user-doesnt-exist"));
     }
 
-    private async Task<FeedLink> CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey, string prefix)
+    private async Task<FeedLink> CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFileDto mangaFile, string apiKey, string prefix)
     {
         var userId = await GetUser(apiKey);
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);

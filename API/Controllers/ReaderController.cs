@@ -263,9 +263,9 @@ public class ReaderController : BaseApiController
             info.Title += " - " + info.ChapterTitle;
         }
 
-        if (info.IsSpecial && dto.VolumeNumber.Equals(Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume))
+        if (info.IsSpecial)
         {
-            info.Subtitle = info.FileName;
+            info.Subtitle = Path.GetFileNameWithoutExtension(info.FileName);
         } else if (!info.IsSpecial && info.VolumeNumber.Equals(Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume))
         {
             info.Subtitle = ReaderService.FormatChapterName(info.LibraryType, true, true) + info.ChapterNumber;

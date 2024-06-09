@@ -154,12 +154,17 @@
             </ul>
           }
 
-          @if (hasData && !includeChapterAndFiles) {
-            <li class="list-group-item" style="min-height: 34px">
+          @if (hasData && (isAdmin$ | async)) {
+            <li class="list-group-item" style="min-height: 34px" (click)="$event.stopPropagation()">
               <ng-container [ngTemplateOutlet]="extraTemplate"></ng-container>
-              <a href="javascript:void(0)" (click)="toggleIncludeFiles()" class="float-end">
-                {{t('include-extras')}}
-              </a>
+              <form [formGroup]="searchSettingsForm">
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="search-include-extras" role="switch" formControlName="includeExtras" class="form-check-input"
+                         aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                  <label class="form-check-label" for="search-include-extras">{{t('include-extras')}}</label>
+                </div>
+              </form>
+
             </li>
           }
         </ul>

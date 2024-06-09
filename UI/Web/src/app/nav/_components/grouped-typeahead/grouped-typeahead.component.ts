@@ -13,14 +13,16 @@ import {
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SearchResultGroup } from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {map, startWith, tap} from "rxjs";
+import {AccountService} from "../../../_services/account.service";
 
 export interface SearchEvent {
   value: string;
@@ -33,11 +35,12 @@ export interface SearchEvent {
     styleUrls: ['./grouped-typeahead.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent]
+  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent, AsyncPipe]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
 
   /**
    * Unique id to tie with a label element
@@ -97,12 +100,15 @@ export class GroupedTypeaheadComponent implements OnInit {
   @ContentChild('bookmarkTemplate') bookmarkTemplate!: TemplateRef<any>;
 
 
-
   hasFocus: boolean = false;
   typeaheadForm: FormGroup = new FormGroup({});
   includeChapterAndFiles: boolean = false;
-
   prevSearchTerm: string = '';
+  searchSettingsForm = new FormGroup(({'includeExtras': new FormControl(false)}));
+  isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
+    if (!u) return false;
+    return this.accountService.hasAdminRole(u);
+  }));
 
   get searchTerm() {
     return this.typeaheadForm.get('typeahead')?.value || '';
@@ -138,6 +144,17 @@ export class GroupedTypeaheadComponent implements OnInit {
   ngOnInit(): void {
     this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
     this.cdRef.markForCheck();
+
+    this.searchSettingsForm.get('includeExtras')!.valueChanges.pipe(
+      startWith(false),
+      map(val => {
+        if (val === null) return false;
+        return val;
+      }),
+      distinctUntilChanged(),
+      tap((val: boolean) => this.toggleIncludeFiles(val)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
 
     this.typeaheadForm.valueChanges.pipe(
       debounceTime(this.debounceTime),
@@ -183,13 +200,22 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.selected.emit(item);
   }
 
-  toggleIncludeFiles() {
-    this.includeChapterAndFiles = true;
+  toggleIncludeFiles(val: boolean) {
+    const firstRun = val === false && val === this.includeChapterAndFiles;
+
+    this.includeChapterAndFiles = val;
     this.inputChanged.emit({value: this.searchTerm, includeFiles: this.includeChapterAndFiles});
 
-    this.hasFocus = true;
-    this.inputElem.nativeElement.focus();
-    this.openDropdown();
+    if (!firstRun) {
+      this.hasFocus = true;
+      if (this.inputElem && this.inputElem.nativeElement) {
+        this.inputElem.nativeElement.focus();
+      }
+
+      this.openDropdown();
+    }
+
+
     this.cdRef.markForCheck();
   }
 

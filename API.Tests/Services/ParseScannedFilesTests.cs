@@ -244,7 +244,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var directoriesSeen = new HashSet<string>();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
-        var scanResults = psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        var scanResults = await psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
         foreach (var scanResult in scanResults)
         {
             directoriesSeen.Add(scanResult.Folder);
@@ -266,7 +266,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         Assert.NotNull(library);
 
         var directoriesSeen = new HashSet<string>();
-        var scanResults = psf.ProcessFiles("C:/Data/", false,
+        var scanResults = await psf.ProcessFiles("C:/Data/", false,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
         foreach (var scanResult in scanResults)
@@ -299,7 +299,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
-        var scanResults = psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        var scanResults = await psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
         Assert.Equal(2, scanResults.Count);
     }
@@ -328,7 +328,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
-        var scanResults = psf.ProcessFiles("C:/Data", false,
+        var scanResults = await psf.ProcessFiles("C:/Data", false,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
         Assert.Single(scanResults);

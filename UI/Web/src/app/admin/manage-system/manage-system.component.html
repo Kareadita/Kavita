@@ -9,6 +9,12 @@
 
         <dt>{{t('installId-title')}}</dt>
         <dd>{{serverInfo.installId}}</dd>
+
+        <dt>{{t('first-install-version-title')}}</dt>
+        <dd>{{serverInfo.firstInstallVersion | defaultValue}}</dd>
+
+        <dt>{{t('first-install-date-title')}}</dt>
+        <dd>{{serverInfo.firstInstallDate | date:'shortDate'}}</dd>
       </dl>
     </div>
 

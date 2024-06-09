@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -251,6 +252,9 @@ public static class Seed
             new() {Key = ServerSettingKey.EmailEnableSsl, Value = "true"},
             new() {Key = ServerSettingKey.EmailSizeLimit, Value = 26_214_400 + string.Empty},
             new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
+            new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
+            new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString()},
+
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

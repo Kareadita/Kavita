@@ -57,15 +57,18 @@
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-body">
         <div>
-        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-          <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
-          <app-series-format [format]="format"></app-series-format>
-          {{title}}
-        </span>
-          <span class="card-actions float-end" *ngIf="actions && actions.length > 0">
-          <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-        </span>
+          <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
+            <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
+            <app-series-format [format]="format"></app-series-format>
+            {{title}}
+          </span>
+          @if (actions && actions.length > 0) {
+            <span class="card-actions float-end">
+              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+            </span>
+          }
         </div>
+
         @if (subtitleTemplate) {
           <div style="text-align: center">
             <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>

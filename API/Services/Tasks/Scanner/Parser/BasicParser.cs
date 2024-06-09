@@ -26,7 +26,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         {
             Filename = Path.GetFileName(filePath),
             Format = Parser.ParseFormat(filePath),
-            Title = Parser.RemoveExtensionIfSupported(fileName),
+            Title = Parser.RemoveExtensionIfSupported(fileName)!,
             FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo
@@ -76,6 +76,9 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             ret.Chapters = Parser.DefaultChapter;
             ret.Volumes = Parser.SpecialVolume;
 
+            // NOTE: This uses rootPath. LibraryRoot works better for manga, but it's not always that way.
+            // It might be worth writing some logic if the file is a special, to take the folder above the Specials/
+            // if present
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 

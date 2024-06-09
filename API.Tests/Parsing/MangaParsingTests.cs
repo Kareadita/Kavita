@@ -210,6 +210,7 @@ public class MangaParsingTests
     [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1", "เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท")]
     [InlineData("Max Level Returner เล่มที่ 5", "Max Level Returner")]
     [InlineData("หนึ่งความคิด นิจนิรันดร์ เล่ม 2", "หนึ่งความคิด นิจนิรันดร์")]
+    [InlineData("不安の種\uff0b - 01", "不安の種\uff0b")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename, LibraryType.Manga));

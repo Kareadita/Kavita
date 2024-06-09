@@ -573,7 +573,8 @@
 
     "all-filters": {
         "title": "All Smart Filters",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
 
     "announcements": {
@@ -1273,6 +1274,8 @@
         "version-title": "Version",
         "installId-title": "Install ID",
         "more-info-title": "More Info",
+        "first-install-version-title": "First Install Version",
+        "first-install-date-title": "First Install Date",
         "home-page-title": "Home page:",
         "wiki-title": "Wiki:",
         "discord-title": "Discord:",
@@ -2022,7 +2025,8 @@
         "delete": "{{common.delete}}",
         "no-data": "No Smart Filters created",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "There is an encoding error in the filter. You need to recreate it."
     },
 
     "edit-external-source-item": {

@@ -101,13 +101,17 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         }
     }
 
-    protected void UpdateFromComicInfo(ParserInfo info)
+    protected static void UpdateFromComicInfo(ParserInfo info)
     {
         if (info.ComicInfo == null) return;
 
         if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
         {
             info.Volumes = info.ComicInfo.Volume;
+        }
+        if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+        {
+            info.Chapters = info.ComicInfo.Number;
         }
         if (!string.IsNullOrEmpty(info.ComicInfo.Series))
         {
@@ -123,16 +127,6 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
             info.IsSpecial = true;
             info.Chapters = Parser.DefaultChapter;
             info.Volumes = Parser.SpecialVolume;
-        }
-
-        if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-        {
-            info.Chapters = info.ComicInfo.Number;
-            if (info.IsSpecial && Parser.DefaultChapter != info.Chapters)
-            {
-                info.IsSpecial = false;
-                info.Volumes = Parser.SpecialVolume;
-            }
         }
 
         // Patch is SeriesSort from ComicInfo

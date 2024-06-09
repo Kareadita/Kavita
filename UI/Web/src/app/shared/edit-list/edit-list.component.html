@@ -1,6 +1,6 @@
 <form [formGroup]="form" *transloco="let t">
 
-  @for(item of Items; let i = $index; track item) {
+  @for(item of Items; let i = $index; track item; let isFirst = $first) {
     <div class="row g-0 mb-3">
       <div class="col-lg-10 col-md-12 pe-2">
         <div class="mb-3">
@@ -13,7 +13,7 @@
           <i class="fa-solid fa-plus" aria-hidden="true"></i>
           <span class="visually-hidden">{{t('common.add')}}</span>
         </button>
-        <button class="btn btn-secondary" (click)="remove(i)">
+        <button class="btn btn-secondary" (click)="remove(i)" [disabled]="isFirst">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           <span class="visually-hidden">{{t('common.remove')}}</span>
         </button>

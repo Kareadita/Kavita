@@ -122,6 +122,12 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.SmtpConfig ??= new SmtpConfigDto();
                     destination.SmtpConfig.CustomizedTemplates = bool.Parse(row.Value);
                     break;
+                case ServerSettingKey.FirstInstallDate:
+                    destination.FirstInstallDate = DateTime.Parse(row.Value);
+                    break;
+                case ServerSettingKey.FirstInstallVersion:
+                    destination.FirstInstallVersion = row.Value;
+                    break;
             }
         }
 

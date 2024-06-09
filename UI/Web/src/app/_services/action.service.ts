@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import {Subject, tap} from 'rxjs';
 import { take } from 'rxjs/operators';
 import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
@@ -19,9 +19,11 @@ import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
-import {translate, TranslocoService} from "@ngneat/transloco";
+import {translate} from "@ngneat/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
+import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {FilterService} from "./filter.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -46,7 +48,7 @@ export class ActionService implements OnDestroy {
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
     private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
-    private readonly collectionTagService: CollectionTagService) { }
+    private readonly collectionTagService: CollectionTagService, private filterService: FilterService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -651,6 +653,23 @@ export class ActionService implements OnDestroy {
       this.toastr.success(translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
+      }
+    });
+  }
+
+  async deleteFilter(filterId: number, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.filterService.deleteFilter(filterId).subscribe(_ => {
+      this.toastr.success(translate('toasts.smart-filter-deleted'));
+
+      if (callback) {
+        callback(true);
       }
     });
   }

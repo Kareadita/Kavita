@@ -57,7 +57,10 @@ public class StatisticService : IStatisticService
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
     {
         if (libraryIds.Count == 0)
+        {
             libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        }
+
 
         // Total Pages Read
         var totalPagesRead = await _context.AppUserProgresses
