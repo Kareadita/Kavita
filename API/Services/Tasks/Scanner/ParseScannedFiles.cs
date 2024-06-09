@@ -145,7 +145,7 @@ public class ParseScannedFiles
                     }
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
                 }
-                else if (seriesPaths.TryGetValue(directory, out var series)&& series.Count > 1 && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
+                else if (seriesPaths.TryGetValue(directory, out var series) && series.Count > 1 && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
                 {
                     // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
                     // This is very helpful for ComicVine libraries by Publisher
@@ -154,7 +154,7 @@ public class ParseScannedFiles
                     {
 
                         // TODO: We can check directly against seriesModified.LastScanned instead of library scan
-                        var hasFolderChangedSinceLastScan = library.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
+                        var hasFolderChangedSinceLastScan = forceCheck || library.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
                                                             _directoryService
                                                                 .GetLastWriteTime(seriesModified.LowestFolderPath!)
                                                                 .Truncate(TimeSpan.TicksPerSecond);
