@@ -114,7 +114,6 @@ public class ParseScannedFiles
         _eventHub = eventHub;
     }
 
-
     /// <summary>
     /// This will Scan all files in a folder path. For each folder within the folderPath, FolderAction will be invoked for all files contained
     /// </summary>
@@ -125,46 +124,50 @@ public class ParseScannedFiles
     public async Task<IList<ScanResult>> ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
         IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false)
     {
-        //string normalizedPath;
-        var result = new List<ScanResult>();
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
-        var matcher = new GlobMatcher();
-        foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
-        {
-            matcher.AddExclude(pattern.Pattern);
-        }
+        var matcher = BuildMatcher(library);
+
+        var result = new List<ScanResult>();
+
         if (scanDirectoryByDirectory)
         {
             var directories = _directoryService.GetDirectories(folderPath, matcher).Select(Parser.Parser.NormalizePath);
             foreach (var directory in directories)
             {
-                // Since this is a loop, we need a list return
-                //normalizedPath = Parser.Parser.NormalizePath(directory);
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
                 {
+                    if (result.Exists(r => r.Folder == directory))
+                    {
+                        continue;
+                    }
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
                 }
                 else if (seriesPaths.TryGetValue(directory, out var series) && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
                 {
                     // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
                     // This is very helpful for ComicVine libraries by Publisher
-                    _logger.LogDebug("{Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
+                    _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
                     foreach (var seriesModified in series)
                     {
-                        if (result.Exists(r => r.Folder == directory))
-                        {
-                            continue;
-                        }
+                        var hasFolderChangedSinceLastScan = library.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
+                                                            _directoryService
+                                                                .GetLastWriteTime(seriesModified.LowestFolderPath!)
+                                                                .Truncate(TimeSpan.TicksPerSecond);
 
-                        if (HasSeriesFolderNotChangedSinceLastScan(seriesModified, seriesModified.LowestFolderPath!))
+                        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                            MessageFactory.FileScanProgressEvent(seriesModified.LowestFolderPath!, library.Name, ProgressEventType.Updated));
+
+                        if (!hasFolderChangedSinceLastScan)
                         {
-                            result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
+                            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} did not change since last scan, adding entry to skip", directory, seriesModified.LowestFolderPath);
+                            result.Add(CreateScanResult(seriesModified.LowestFolderPath!, folderPath, false, ArraySegment<string>.Empty));
                         }
                         else
                         {
+                            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} changed, adding folders", directory, seriesModified.LowestFolderPath);
                             result.Add(CreateScanResult(directory, folderPath, true,
                                 _directoryService.ScanFiles(seriesModified.LowestFolderPath!, fileExtensions, matcher)));
                         }
@@ -202,6 +205,17 @@ public class ParseScannedFiles
 
 
         return result;
+    }
+
+    private static GlobMatcher BuildMatcher(Library library)
+    {
+        var matcher = new GlobMatcher();
+        foreach (var pattern in library.LibraryExcludePatterns.Where(p => !string.IsNullOrEmpty(p.Pattern)))
+        {
+            matcher.AddExclude(pattern.Pattern);
+        }
+
+        return matcher;
     }
 
     private static ScanResult CreateScanResult(string folderPath, string libraryRoot, bool hasChanged,
@@ -421,14 +435,16 @@ public class ParseScannedFiles
         // TODO: This should return the result as we are modifying it as a side effect
 
         // If the folder hasn't changed, generate fake ParserInfos for the Series that were in that folder.
+        var normalizedFolder = Parser.Parser.NormalizePath(result.Folder);
         if (!result.HasChanged)
         {
-            var normalizedFolder = Parser.Parser.NormalizePath(result.Folder);
-            result.ParserInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
-            {
-                Series = fp.SeriesName,
-                Format = fp.Format,
-            }).ToList();
+            result.ParserInfos = seriesPaths[normalizedFolder]
+                .Select(fp => new ParserInfo()
+                {
+                    Series = fp.SeriesName,
+                    Format = fp.Format,
+                })
+                .ToList();
 
             _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", normalizedFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -437,25 +453,24 @@ public class ParseScannedFiles
         }
 
         var files = result.Files;
-        var folder = result.Folder;
-        var libraryRoot = result.LibraryRoot;
 
         // When processing files for a folder and we do enter, we need to parse the information and combine parser infos
         // NOTE: We might want to move the merge step later in the process, like return and combine.
-        _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", library.Name, ProgressEventType.Updated));
 
         if (files.Count == 0)
         {
-            _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", folder);
+            _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", normalizedFolder);
             result.ParserInfos = ArraySegment<ParserInfo>.Empty;
             return;
         }
 
+        _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, normalizedFolder);
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent($"{files.Count} files in {normalizedFolder}", library.Name, ProgressEventType.Updated));
+
         // Multiple Series can exist within a folder. We should instead put these infos on the result and perform merging above
         IList<ParserInfo> infos = files
-            .Select(file => _readingItemService.ParseFile(file, folder, libraryRoot, library.Type))
+            .Select(file => _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type))
             .Where(info => info != null)
             .ToList()!;
 
