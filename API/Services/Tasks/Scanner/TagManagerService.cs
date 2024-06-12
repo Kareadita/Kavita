@@ -9,6 +9,8 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
 #nullable enable
@@ -39,6 +41,7 @@ public interface ITagManagerService
 public class TagManagerService : ITagManagerService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<TagManagerService> _logger;
     private Dictionary<string, Genre> _genres;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, Person> _people;
@@ -49,9 +52,10 @@ public class TagManagerService : ITagManagerService
     private readonly SemaphoreSlim _personSemaphore = new SemaphoreSlim(1, 1);
     private readonly SemaphoreSlim _collectionTagSemaphore = new SemaphoreSlim(1, 1);
 
-    public TagManagerService(IUnitOfWork unitOfWork)
+    public TagManagerService(IUnitOfWork unitOfWork, ILogger<TagManagerService> logger)
     {
         _unitOfWork = unitOfWork;
+        _logger = logger;
         Reset();
 
     }
@@ -132,6 +136,11 @@ public class TagManagerService : ITagManagerService
             _tags.Add(result.NormalizedTitle, result);
             return result;
         }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "There was an exception when creating a new Tag. Scan again to get this included: {Tag}", tag);
+            return null;
+        }
         finally
         {
             _tagSemaphore.Release();
@@ -163,6 +172,46 @@ public class TagManagerService : ITagManagerService
             await _unitOfWork.CommitAsync();
             _people.Add(key, result);
             return result;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                if (entry.Entity is Person)
+                {
+                    var proposedValues = entry.CurrentValues;
+                    var databaseValues = await entry.GetDatabaseValuesAsync();
+
+                    foreach (var property in proposedValues.Properties)
+                    {
+                        var proposedValue = proposedValues[property];
+                        var databaseValue = databaseValues[property];
+
+                        // TODO: decide which value should be written to database
+                        _logger.LogDebug(ex, "There was an exception when creating a new Person: {PersonName} ({Role})", name, role);
+                        _logger.LogDebug("Property conflict, proposed: {Proposed} vs db: {Database}", proposedValue, databaseValue);
+                        // proposedValues[property] = <value to be saved>;
+                    }
+
+                    // Refresh original values to bypass next concurrency check
+                    entry.OriginalValues.SetValues(databaseValues);
+                    //return (Person) entry.Entity;
+                    return null;
+                }
+                // else
+                // {
+                //     throw new NotSupportedException(
+                //         "Don't know how to handle concurrency conflicts for "
+                //         + entry.Metadata.Name);
+                // }
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "There was an exception when creating a new Person. Scan again to get this included: {PersonName} ({Role})", name, role);
+            return null;
         }
         finally
         {
@@ -204,6 +253,11 @@ public class TagManagerService : ITagManagerService
             _unitOfWork.UserRepository.Update(userWithCollections);
             await _unitOfWork.CommitAsync();
             _collectionTags.Add(result.NormalizedTitle, result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "There was an exception when creating a new Collection. Scan again to get this included: {Tag}", tag);
+            return Tuple.Create<AppUserCollection?, bool>(null, false);
         }
         finally
         {

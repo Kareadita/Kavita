@@ -137,10 +137,24 @@ public class ParseScannedFiles
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
+                // This is debug code to help understand why some installs aren't working correctly
+                if (!forceCheck && seriesPaths.TryGetValue(directory, out var series2) && series2.Count > 1 && series2.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
+                {
+                    _logger.LogDebug("[ProcessFiles] Dirty check passed, series list: {@SeriesModified}", series2);
+                    foreach (var s in series2)
+                    {
+                        _logger.LogDebug("[ProcessFiles] Last Scanned: {LastScanned} vs Directory Check: {DirectoryLastScanned}", s.LastScanned, _directoryService
+                                                                .GetLastWriteTime(s.LowestFolderPath!)
+                                                                .Truncate(TimeSpan.TicksPerSecond));
+                    }
+
+                }
+
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
                 {
                     if (result.Exists(r => r.Folder == directory))
                     {
+                        _logger.LogDebug("[ProcessFiles] Skipping adding {Directory} as it's already added", directory);
                         continue;
                     }
                     result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
@@ -152,9 +166,7 @@ public class ParseScannedFiles
                     _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
                     foreach (var seriesModified in series)
                     {
-
-                        // TODO: We can check directly against seriesModified.LastScanned instead of library scan
-                        var hasFolderChangedSinceLastScan = forceCheck || library.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
+                        var hasFolderChangedSinceLastScan = seriesModified.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
                                                             _directoryService
                                                                 .GetLastWriteTime(seriesModified.LowestFolderPath!)
                                                                 .Truncate(TimeSpan.TicksPerSecond);
@@ -226,7 +238,7 @@ public class ParseScannedFiles
         return new ScanResult()
         {
             Files = files,
-            Folder = folderPath,
+            Folder = Parser.Parser.NormalizePath(folderPath),
             LibraryRoot = libraryRoot,
             HasChanged = hasChanged
         };
