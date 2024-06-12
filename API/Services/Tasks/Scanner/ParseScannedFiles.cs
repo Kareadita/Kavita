@@ -137,19 +137,6 @@ public class ParseScannedFiles
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
-                // This is debug code to help understand why some installs aren't working correctly
-                if (!forceCheck && seriesPaths.TryGetValue(directory, out var series2) && series2.Count > 1 && series2.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
-                {
-                    _logger.LogDebug("[ProcessFiles] Dirty check passed, series list: {@SeriesModified}", series2);
-                    foreach (var s in series2)
-                    {
-                        _logger.LogDebug("[ProcessFiles] Last Scanned: {LastScanned} vs Directory Check: {DirectoryLastScanned}",
-                            s.LastScanned, _directoryService
-                                                                .GetLastWriteTime(s.LowestFolderPath!)
-                                                                .Truncate(TimeSpan.TicksPerSecond));
-                    }
-
-                }
 
                 if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
                 {
@@ -177,12 +164,12 @@ public class ParseScannedFiles
 
                         if (!hasFolderChangedSinceLastScan)
                         {
-                            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} did not change since last scan, adding entry to skip", directory, seriesModified.LowestFolderPath);
+                            _logger.LogTrace("[ProcessFiles] {Directory} subfolder {Folder} did not change since last scan, adding entry to skip", directory, seriesModified.LowestFolderPath);
                             result.Add(CreateScanResult(seriesModified.LowestFolderPath!, folderPath, false, ArraySegment<string>.Empty));
                         }
                         else
                         {
-                            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} changed for Series {SeriesName}", directory, seriesModified.LowestFolderPath, seriesModified.SeriesName);
+                            _logger.LogTrace("[ProcessFiles] {Directory} subfolder {Folder} changed for Series {SeriesName}", directory, seriesModified.LowestFolderPath, seriesModified.SeriesName);
                             result.Add(CreateScanResult(directory, folderPath, true,
                                 _directoryService.ScanFiles(seriesModified.LowestFolderPath!, fileExtensions, matcher)));
                         }
