@@ -3,7 +3,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
+using API.Entities;
 using API.Helpers;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +31,7 @@ public static class MigrateSmartFilterEncoding
 
         logger.LogCritical("Running MigrateSmartFilterEncoding migration - Please be patient, this may take some time. This is not an error");
 
-        var smartFilters = dataContext.AppUserSmartFilter.ToList();
+        var smartFilters = await dataContext.AppUserSmartFilter.ToListAsync();
         foreach (var filter in smartFilters)
         {
             if (!ShouldMigrateFilter(filter.Filter)) continue;
@@ -42,6 +44,14 @@ public static class MigrateSmartFilterEncoding
         {
             await unitOfWork.CommitAsync();
         }
+
+        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
+        {
+            Name = "MigrateSmartFilterEncoding",
+            ProductVersion = BuildInfo.Version.ToString(),
+            RanAt = DateTime.UtcNow
+        });
+        await dataContext.SaveChangesAsync();
 
         logger.LogCritical("Running MigrateSmartFilterEncoding migration - Completed. This is not an error");
     }

@@ -742,6 +742,9 @@ public class DirectoryServiceTests
     [InlineData(new [] {"C:/Manga/"},
         new [] {"C:/Manga/Love Hina/Vol. 01.cbz", "C:/Manga/Love Hina/Specials/Sp01.cbz"},
         "C:/Manga/Love Hina")]
+    [InlineData(new [] {"/manga"},
+        new [] {"/manga/Love Hina/Vol. 01.cbz", "/manga/Love Hina/Specials/Sp01.cbz"},
+        "/manga/Love Hina")]
     public void FindLowestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
     {
         var fileSystem = new MockFileSystem();
