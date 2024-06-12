@@ -211,7 +211,7 @@ export class LibraryDetailComponent implements OnInit {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
-          this.loadPage();
+          this.loadPage(); // TODO: This can be quite expensive when bulk deleting. We can refactor this to an ReplaySubject to debounce
           return;
         }
 
