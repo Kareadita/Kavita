@@ -143,7 +143,8 @@ public class ParseScannedFiles
                     _logger.LogDebug("[ProcessFiles] Dirty check passed, series list: {@SeriesModified}", series2);
                     foreach (var s in series2)
                     {
-                        _logger.LogDebug("[ProcessFiles] Last Scanned: {LastScanned} vs Directory Check: {DirectoryLastScanned}", s.LastScanned, _directoryService
+                        _logger.LogDebug("[ProcessFiles] Last Scanned: {LastScanned} vs Directory Check: {DirectoryLastScanned}",
+                            s.LastScanned, _directoryService
                                                                 .GetLastWriteTime(s.LowestFolderPath!)
                                                                 .Truncate(TimeSpan.TicksPerSecond));
                     }
