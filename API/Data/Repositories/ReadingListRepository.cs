@@ -206,13 +206,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId)
     {
-        var userLibraries = _context.Library
-            .Include(l => l.AppUsers)
-            .Where(library => library.AppUsers.Any(user => user.Id == userId))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(library => library.Id)
-            .ToList();
+        var userLibraries = _context.Library.GetUserLibraries(userId);
 
         var items = await _context.ReadingListItem
             .Where(s => s.ReadingListId == readingListId)
@@ -223,7 +217,8 @@ public class ReadingListRepository : IReadingListRepository
                 chapter.ReleaseDate,
                 ReadingListItem = data,
                 ChapterTitleName = chapter.TitleName,
-                FileSize = chapter.Files.Sum(f => f.Bytes)
+                FileSize = chapter.Files.Sum(f => f.Bytes),
+                chapter.Summary,
 
             })
             .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
@@ -234,6 +229,7 @@ public class ReadingListRepository : IReadingListRepository
                 data.ReleaseDate,
                 data.ChapterTitleName,
                 data.FileSize,
+                data.Summary,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
@@ -251,6 +247,7 @@ public class ReadingListRepository : IReadingListRepository
                     data.ReleaseDate,
                     data.ChapterTitleName,
                     data.FileSize,
+                    data.Summary,
                     LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
                     LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
@@ -272,7 +269,8 @@ public class ReadingListRepository : IReadingListRepository
                 LibraryType = data.LibraryType,
                 ChapterTitleName = data.ChapterTitleName,
                 LibraryName = data.LibraryName,
-                FileSize = data.FileSize
+                FileSize = data.FileSize,
+                Summary = data.Summary
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)

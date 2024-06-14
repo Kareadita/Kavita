@@ -10,6 +10,7 @@ import { DatePipe } from '@angular/common';
 import { ImageComponent } from '../../../shared/image/image.component';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
+import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 
 @Component({
     selector: 'app-reading-list-item',
@@ -17,7 +18,7 @@ import {SeriesFormatComponent} from "../../../shared/series-format/series-format
     styleUrls: ['./reading-list-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ImageComponent, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe, TranslocoDirective, SeriesFormatComponent]
+  imports: [ImageComponent, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe, TranslocoDirective, SeriesFormatComponent, ReadMoreComponent]
 })
 export class ReadingListItemComponent {
 
