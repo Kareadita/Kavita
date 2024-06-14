@@ -355,44 +355,7 @@ public class ProcessSeries : IProcessSeries
         // Set the AgeRating as highest in all the comicInfos
         if (!series.Metadata.AgeRatingLocked) series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
-        // Count (aka expected total number of chapters or volumes from metadata) across all chapters
-        series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
-        // The actual number of count's defined across all chapter's metadata
-        series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
-
-        var maxVolume = (int) series.Volumes.Max(v =>  v.MaxNumber);
-        var maxChapter = (int) chapters.Max(c => c.MaxNumber);
-
-        // Single books usually don't have a number in their Range (filename)
-        if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
-        {
-            series.Metadata.MaxCount = 1;
-        } else if (series.Metadata.TotalCount <= 1 && chapters.Count == 1 && chapters[0].IsSpecial)
-        {
-            // If a series has a TotalCount of 1 (or no total count) and there is only a Special, mark it as Complete
-            series.Metadata.MaxCount = series.Metadata.TotalCount;
-        } else if ((maxChapter == Parser.Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
-        {
-            series.Metadata.MaxCount = maxVolume;
-        } else if (maxVolume == series.Metadata.TotalCount)
-        {
-            series.Metadata.MaxCount = maxVolume;
-        } else
-        {
-            series.Metadata.MaxCount = maxChapter;
-        }
-
-        if (!series.Metadata.PublicationStatusLocked)
-        {
-            series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
-            if (series.Metadata.MaxCount == series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
-            {
-                series.Metadata.PublicationStatus = PublicationStatus.Completed;
-            } else if (series.Metadata.TotalCount > 0 && series.Metadata.MaxCount > 0)
-            {
-                series.Metadata.PublicationStatus = PublicationStatus.Ended;
-            }
-        }
+        DeterminePublicationStatus(series, chapters);
 
         if (!string.IsNullOrEmpty(firstChapter?.Summary) && !series.Metadata.SummaryLocked)
         {
@@ -614,6 +577,48 @@ public class ProcessSeries : IProcessSeries
 
         #endregion
 
+    }
+
+    private static void DeterminePublicationStatus(Series series, List<Chapter> chapters)
+    {
+        // Count (aka expected total number of chapters or volumes from metadata) across all chapters
+        series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
+        // The actual number of count's defined across all chapter's metadata
+        series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
+
+        var maxVolume = (int) series.Volumes.Where(v => v.MaxNumber.IsNot(Parser.Parser.SpecialVolumeNumber)).Max(v => v.MaxNumber);
+        var maxChapter = (int) chapters.Max(c => c.MaxNumber);
+
+        // Single books usually don't have a number in their Range (filename)
+        if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
+        {
+            series.Metadata.MaxCount = 1;
+        } else if (series.Metadata.TotalCount <= 1 && chapters.Count == 1 && chapters[0].IsSpecial)
+        {
+            // If a series has a TotalCount of 1 (or no total count) and there is only a Special, mark it as Complete
+            series.Metadata.MaxCount = series.Metadata.TotalCount;
+        } else if ((maxChapter == Parser.Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) && maxVolume <= series.Metadata.TotalCount)
+        {
+            series.Metadata.MaxCount = maxVolume;
+        } else if (maxVolume == series.Metadata.TotalCount)
+        {
+            series.Metadata.MaxCount = maxVolume;
+        } else
+        {
+            series.Metadata.MaxCount = maxChapter;
+        }
+
+        if (!series.Metadata.PublicationStatusLocked)
+        {
+            series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
+            if (series.Metadata.MaxCount == series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
+            {
+                series.Metadata.PublicationStatus = PublicationStatus.Completed;
+            } else if (series.Metadata.TotalCount > 0 && series.Metadata.MaxCount > 0)
+            {
+                series.Metadata.PublicationStatus = PublicationStatus.Ended;
+            }
+        }
     }
 
     private async Task UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)

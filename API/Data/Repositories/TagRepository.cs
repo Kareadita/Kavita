@@ -19,7 +19,7 @@ public interface ITagRepository
     Task<IList<Tag>> GetAllTagsByNameAsync(IEnumerable<string> normalizedNames);
     Task<IList<TagDto>> GetAllTagDtosAsync(int userId);
     Task RemoveAllTagNoLongerAssociated();
-    Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds, int userId);
+    Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null);
 }
 
 public class TagRepository : ITagRepository
@@ -57,11 +57,18 @@ public class TagRepository : ITagRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds, int userId)
+    public async Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null)
     {
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+
+        if (libraryIds is {Count: > 0})
+        {
+            userLibs = userLibs.Where(libraryIds.Contains).ToList();
+        }
+
         return await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => userLibs.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .SelectMany(s => s.Metadata.Tags)
             .AsSplitQuery()

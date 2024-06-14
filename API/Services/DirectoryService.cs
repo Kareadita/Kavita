@@ -605,7 +605,7 @@ public class DirectoryService : IDirectoryService
             {
                 if (!file.Contains(folder)) continue;
 
-                var lowestPath =   Path.GetDirectoryName(file)?.Replace(folder, string.Empty);
+                var lowestPath =   Path.GetDirectoryName(file);
                 if (!string.IsNullOrEmpty(lowestPath))
                 {
                     dirs.TryAdd(Parser.NormalizePath(lowestPath), string.Empty);

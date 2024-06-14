@@ -37,12 +37,14 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+
+        // NOTE: libraryIds isn't hooked up in the frontend
         if (ids is {Count: > 0})
         {
-            return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, User.GetUserId()));
+            return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids));
         }
 
-        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosAsync(User.GetUserId()));
+        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -71,9 +73,9 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, User.GetUserId()));
+            return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId(), ids));
         }
-        return Ok(await unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
+        return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -88,9 +90,9 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, User.GetUserId()));
+            return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(User.GetUserId(), ids));
         }
-        return Ok(await unitOfWork.TagRepository.GetAllTagDtosAsync(User.GetUserId()));
+        return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(User.GetUserId()));
     }
 
     /// <summary>
