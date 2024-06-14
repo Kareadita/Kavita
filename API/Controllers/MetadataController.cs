@@ -38,6 +38,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
 
+        // NOTE: libraryIds isn't hooked up in the frontend
         if (ids is {Count: > 0})
         {
             return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids));
