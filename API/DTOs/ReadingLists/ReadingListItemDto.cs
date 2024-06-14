@@ -39,4 +39,8 @@ public class ReadingListItemDto
     /// </summary>
     /// <remarks>This is only used for CDisplayEx</remarks>
     public long FileSize { get; set; }
+    /// <summary>
+    /// The chapter summary
+    /// </summary>
+    public string? Summary { get; set; }
 }

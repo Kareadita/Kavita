@@ -32,12 +32,13 @@
           </div>
 
         </h5>
-        <div class="ps-1 d-none d-md-inline-block">
+        <div class="ps-1 d-none d-md-inline-block mb-1">
           <app-series-format [format]="item.seriesFormat"></app-series-format>
           <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
         </div>
 
-        <!-- TODO: Let's add summary here-->
+        <app-read-more [text]="item.summary || ''"></app-read-more>
+
 
         @if (item.releaseDate !== '0001-01-01T00:00:00') {
           <div class="ps-1 mt-2">
