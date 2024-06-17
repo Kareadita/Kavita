@@ -284,6 +284,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.cdRef.markForCheck();
   }
 
+  //used to catch webtoons smaller than the viewport height
+  sizeLessthanView() {
+    return this.getTotalHeight() < this.getViewportHeight()
+  }
+
   getVerticalOffset() {
     const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
 
@@ -352,6 +357,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     let totalHeight = 0;
     document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
     return Math.round(totalHeight);
+  }
+
+  getViewportHeight() {
+    return window.innerHeight
   }
 
   getTotalScroll() {
@@ -563,7 +572,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
-    if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
+    // On small webtoons, the trigger will be caught on comic load, leading to all chapters being progressively skipped.
+    // Thus !this.sizeLessthanView() disables the autoscroll functionality on webtoons smaller than viewport height.  
+    if (!this.sizeLessthanView() && entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
       this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
       this.loadNextChapter.emit();
     }
