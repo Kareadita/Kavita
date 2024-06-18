@@ -285,9 +285,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   //used to catch webtoons smaller than the viewport height
-  sizeLessthanView() {
+  heightLessThanView() {
     return this.getTotalHeight() < this.getViewportHeight()
   }
+
+
 
   getVerticalOffset() {
     const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
@@ -305,6 +307,26 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       || 0);
   }
 
+
+  //could do with help for a cleaner implementation
+  onWheel(event: WheelEvent) {
+
+    if (!this.heightLessThanView()) {
+      //ensure this only executes on a small webtoon
+      return;
+    }
+
+    let deltaY = event.deltaY
+    
+    if (deltaY > 0) {
+      this.loadNextChapter.emit();
+    } else if (deltaY < 0) {
+      console.log("up")
+      this.loadPrevChapter.emit();
+
+    }
+  }
+
   /**
    * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely,
    * and calculate the direction the scrolling is occuring. This is not used for prefetching.
@@ -312,7 +334,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   handleScrollEvent(event?: any) {
     const verticalOffset = this.getVerticalOffset();
-
+    console.log("this is run")
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
@@ -573,8 +595,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
     // On small webtoons, the trigger will be caught on comic load, leading to all chapters being progressively skipped.
-    // Thus !this.sizeLessthanView() disables the autoscroll functionality on webtoons smaller than viewport height.  
-    if (!this.sizeLessthanView() && entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
+    // Thus !this.heightLessThanView() disables the autoscroll functionality on webtoons smaller than viewport height.  
+    if (!this.heightLessThanView() && entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
       this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
       this.loadNextChapter.emit();
     }
