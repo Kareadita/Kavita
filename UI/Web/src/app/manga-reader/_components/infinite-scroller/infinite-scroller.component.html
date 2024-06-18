@@ -1,4 +1,5 @@
 <ng-container *transloco="let t; read: 'infinite-scroller'">
+
   <div class="fixed-top overlay" *ngIf="showDebugBar()">
     <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
     <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
@@ -11,7 +12,7 @@
     <strong>Total Scroll:</strong> {{getTotalScroll()}}
     <strong>Scroll Top:</strong> {{getScrollTop()}}
   </div>
-  
+
   <div *ngIf="atTop || heightLessThanView()" #topSpacer [style.height]="heightLessThanView() ? 'inherit' : '300px'" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
     <div style="height: 200px"></div>
     <div>
@@ -25,14 +26,16 @@
       <span class="visually-hidden">{{t('continuous-reading-prev-chapter-alt')}}</span>
     </div>
   </div>
-  
+
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-      <img src="{{item.src}}" style="display: block" [style.filter]="(darkness$ | async)  ?? '' | safeStyle" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" rel="nofollow" alt="image"
-      (load)="onImageLoad($event)" id="page-{{item.page}}" (wheel)="onWheel($event)" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+      <img src="{{item.src}}" style="display: block"
+           [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
+           class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
+           rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" (wheel)="onWheel($event)" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
     </ng-container>
   </div>
-  
+
   <div #bottomSpacer class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
     <div>
       <button class="btn btn-icon mx-auto">
@@ -46,5 +49,5 @@
     </div>
     <div style="height: 200px"></div>
   </div>
-  
+
 </ng-container>

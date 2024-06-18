@@ -284,11 +284,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.cdRef.markForCheck();
   }
 
-  //used to catch webtoons smaller than the viewport height
+  // Used to catch webtoons smaller than the viewport height.
   heightLessThanView() {
-    return this.getTotalHeight() < this.getViewportHeight()
+    return this.getTotalHeight() < this.getViewportHeight();
   }
-
 
 
   getVerticalOffset() {
@@ -307,23 +306,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       || 0);
   }
 
-
-  //could do with help for a cleaner implementation
   onWheel(event: WheelEvent) {
-
     if (!this.heightLessThanView()) {
-      //ensure this only executes on a small webtoon
+      // Only execute on small webtoons.
       return;
     }
 
-    let deltaY = event.deltaY
-    
-    if (deltaY > 0) {
+    if (event.deltaY > 0) {
       this.loadNextChapter.emit();
-    } else if (deltaY < 0) {
-      console.log("up")
+    } else if (event.deltaY < 0) {
       this.loadPrevChapter.emit();
-
     }
   }
 
@@ -334,6 +326,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   handleScrollEvent(event?: any) {
     const verticalOffset = this.getVerticalOffset();
+
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
@@ -381,7 +374,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   getViewportHeight() {
-    return window.innerHeight
+    return window.innerHeight;
   }
 
   getTotalScroll() {
