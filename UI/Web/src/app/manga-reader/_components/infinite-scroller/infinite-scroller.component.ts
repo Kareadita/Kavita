@@ -289,7 +289,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     return this.getTotalHeight() < this.getViewportHeight();
   }
 
-
   getVerticalOffset() {
     const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
 
