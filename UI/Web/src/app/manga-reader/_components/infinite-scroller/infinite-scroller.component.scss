@@ -13,7 +13,7 @@
 
 .spacer {
     width: 100%;
-    // height: 300px; //inherit on small webtoons
+    height: 300px; //inherit on small webtoons
     cursor: pointer;
     .animate {
         animation: move-up-down 1s linear infinite;

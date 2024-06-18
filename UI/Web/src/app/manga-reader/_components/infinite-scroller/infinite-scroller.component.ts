@@ -334,7 +334,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   handleScrollEvent(event?: any) {
     const verticalOffset = this.getVerticalOffset();
-    console.log("this is run")
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
@@ -594,8 +593,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
-    // On small webtoons, the trigger will be caught on comic load, leading to all chapters being progressively skipped.
-    // Thus !this.heightLessThanView() disables the autoscroll functionality on webtoons smaller than viewport height.  
     if (!this.heightLessThanView() && entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
       this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
       this.loadNextChapter.emit();
