@@ -168,6 +168,14 @@ public class ScannerService : IScannerService
             return;
         }
 
+        if (TaskScheduler.HasAnyScanTaskRunning())
+        {
+            _logger.LogInformation("[ScannerService] Scan folder invoked but a task is already running/enqueued. Rescheduling request for 10 mins");
+            BackgroundJob.Schedule(() => ScanFolder(folder, originalPath), TimeSpan.FromMinutes(10));
+            return;
+        }
+
+
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
         if (string.IsNullOrEmpty(parentDirectory)) return;
@@ -202,6 +210,14 @@ public class ScannerService : IScannerService
 
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
+
+        if (TaskScheduler.HasScanTaskRunningForSeries(seriesId) || TaskScheduler.HasAnyScanTaskRunning())
+        {
+            _logger.LogInformation("[ScannerService] Scan series invoked but a task is already running/enqueued. Rescheduling request for 1 mins");
+            BackgroundJob.Schedule(() => ScanSeries(seriesId, bypassFolderOptimizationChecks), TimeSpan.FromMinutes(1));
+            return;
+        }
+
         var existingChapterIdsToClean = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
@@ -495,6 +511,25 @@ public class ScannerService : IScannerService
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
+
+        if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
+        {
+            _logger.LogInformation("[ScannerService] Scan library invoked but a task is already running for this Library: {LibraryName}. Rescheduling request for 10 mins", library.Name);
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.InfoEvent($"Scan library invoked but a task is already running for {library.Name}. Rescheduling request for 10 mins", string.Empty));
+            BackgroundJob.Schedule(() => ScanLibrary(libraryId, forceUpdate, isSingleScan), TimeSpan.FromMinutes(10));
+            return;
+        }
+
+        if (library != null && library.Series.Any(s => TaskScheduler.HasScanTaskRunningForSeries(s.Id)))
+        {
+            _logger.LogInformation("[ScannerService] Scan library invoked but a task is already running for a series in this library: {LibraryName}. Rescheduling request for 10 mins", library.Name);
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.InfoEvent($"Scan library invoked but a task is already running for a series in this library: {library.Name}. Rescheduling request for 10 mins", string.Empty));
+            BackgroundJob.Schedule(() => ScanLibrary(libraryId, forceUpdate, isSingleScan), TimeSpan.FromMinutes(10));
+            return;
+        }
+
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 

@@ -464,6 +464,17 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
+    /// Checks if any task is enqueued or running on the ScannerService
+    /// </summary>
+    /// <returns></returns>
+    public static bool HasAnyScanTaskRunning()
+    {
+        return
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [], ScanQueue, true, false) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [], ScanQueue, true, false);
+    }
+
+    /// <summary>
     /// Checks if this same invocation is already enqueued or scheduled
     /// </summary>
     /// <param name="methodName">Method name that was enqueued</param>
@@ -471,8 +482,9 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
+    /// <param name="checkArgs">Check against arguments. Defaults to true.</param>
     /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
+    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false, bool checkArgs = true)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
         var ret = enqueuedJobs.Exists(j => j.Value.InEnqueuedState &&
