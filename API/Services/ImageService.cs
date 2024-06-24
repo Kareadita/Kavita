@@ -125,14 +125,77 @@ public class ImageService : IImageService
         }
     }
 
+    /// <summary>
+    /// Tries to determine if there is a better mode for resizing
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="targetWidth"></param>
+    /// <param name="targetHeight"></param>
+    /// <returns></returns>
+    public static Enums.Size GetSizeForDimensions(Image image, int targetWidth, int targetHeight)
+    {
+        if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+        {
+            return Enums.Size.Force;
+        }
+
+        return Enums.Size.Both;
+    }
+
+    public static Enums.Interesting? GetCropForDimensions(Image image, int targetWidth, int targetHeight)
+    {
+
+        if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+        {
+            return null;
+        }
+
+        return Enums.Interesting.Attention;
+    }
+
+    public static bool WillScaleWell(Image sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
+    {
+        // Calculate the aspect ratios
+        var sourceAspectRatio = (double) sourceImage.Width / sourceImage.Height;
+        var targetAspectRatio = (double) targetWidth / targetHeight;
+
+        // Compare aspect ratios
+        if (Math.Abs(sourceAspectRatio - targetAspectRatio) > tolerance)
+        {
+            return false; // Aspect ratios differ significantly
+        }
+
+        // Calculate scaling factors
+        var widthScaleFactor = (double)targetWidth / sourceImage.Width;
+        var heightScaleFactor = (double)targetHeight / sourceImage.Height;
+
+        // Check resolution quality (example thresholds)
+        if (widthScaleFactor > 2.0 || heightScaleFactor > 2.0)
+        {
+            return false; // Scaling factor too large
+        }
+
+        return true; // Image will scale well
+    }
+
+    private static bool IsLikelyWideImage(int width, int height)
+    {
+        var aspectRatio = (double) width / height;
+        return aspectRatio > 1.25;
+    }
+
     public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
         try
         {
-            var dims = size.GetDimensions();
-            using var thumbnail = Image.Thumbnail(path, dims.Width, height: dims.Height, size: Enums.Size.Force);
+            var (width, height) = size.GetDimensions();
+            using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
+
+            using var thumbnail = Image.Thumbnail(path, width, height: height,
+                size: GetSizeForDimensions(sourceImage, width, height),
+                crop: GetCropForDimensions(sourceImage, width, height));
             var filename = fileName + encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
@@ -156,8 +219,14 @@ public class ImageService : IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        var dims = size.GetDimensions();
-        using var thumbnail = Image.ThumbnailStream(stream, dims.Width, height: dims.Height, size: Enums.Size.Force);
+        var (width, height) = size.GetDimensions();
+        stream.Position = 0;
+        using var sourceImage = Image.NewFromStream(stream);
+        stream.Position = 0;
+
+        using var thumbnail = Image.ThumbnailStream(stream, width, height: height,
+            size: GetSizeForDimensions(sourceImage, width, height),
+            crop: GetCropForDimensions(sourceImage, width, height));
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -170,8 +239,12 @@ public class ImageService : IImageService
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        var dims = size.GetDimensions();
-        using var thumbnail = Image.Thumbnail(sourceFile, dims.Width, height: dims.Height, size: Enums.Size.Force);
+        var (width, height) = size.GetDimensions();
+        using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
+
+        using var thumbnail = Image.Thumbnail(sourceFile, width, height: height,
+            size: GetSizeForDimensions(sourceImage, width, height),
+            crop: GetCropForDimensions(sourceImage, width, height));
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -426,7 +499,7 @@ public class ImageService : IImageService
 
     public static void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest)
     {
-        var dims = size.GetDimensions();
+        var (width, height) = size.GetDimensions();
         int rows, cols;
 
         if (coverImages.Count == 1)
@@ -446,7 +519,7 @@ public class ImageService : IImageService
         }
 
 
-        var image = Image.Black(dims.Width, dims.Height);
+        var image = Image.Black(width, height);
 
         var thumbnailWidth = image.Width / cols;
         var thumbnailHeight = image.Height / rows;
