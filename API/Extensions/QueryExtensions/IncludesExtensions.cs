@@ -65,22 +65,28 @@ public static class IncludesExtensions
     public static IQueryable<Volume> Includes(this IQueryable<Volume> queryable,
         VolumeIncludes includes)
     {
-        if (includes.HasFlag(VolumeIncludes.Chapters))
+        if (includes.HasFlag(VolumeIncludes.Files))
         {
-            queryable = queryable.Include(vol => vol.Chapters);
+            queryable = queryable
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .ThenInclude(c => c.Files);
+        } else if (includes.HasFlag(VolumeIncludes.Chapters))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder));
         }
 
         if (includes.HasFlag(VolumeIncludes.People))
         {
             queryable = queryable
-                .Include(vol => vol.Chapters)
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
                 .ThenInclude(c => c.People);
         }
 
         if (includes.HasFlag(VolumeIncludes.Tags))
         {
             queryable = queryable
-                .Include(vol => vol.Chapters)
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
                 .ThenInclude(c => c.Tags);
         }
 
@@ -104,7 +110,7 @@ public static class IncludesExtensions
         {
             query = query
                 .Include(s => s.Volumes)
-                .ThenInclude(v => v.Chapters);
+                .ThenInclude(v => v.Chapters.OrderBy(c => c.SortOrder));
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Related))
