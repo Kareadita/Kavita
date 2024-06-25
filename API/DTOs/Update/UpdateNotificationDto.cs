@@ -13,7 +13,7 @@ public class UpdateNotificationDto
     /// Semver of the release version
     /// <example>0.4.3</example>
     /// </summary>
-    public required string UpdateVersion { get; init; }
+    public required string UpdateVersion { get; set; }
     /// <summary>
     /// Release body in HTML
     /// </summary>

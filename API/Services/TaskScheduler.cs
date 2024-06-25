@@ -77,7 +77,7 @@ public class TaskScheduler : ITaskScheduler
     public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
     public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
 
-    private static readonly ImmutableArray<string> ScanTasks =
+    public static readonly ImmutableArray<string> ScanTasks =
         ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
 
     private static readonly Random Rnd = new Random();
@@ -123,7 +123,7 @@ public class TaskScheduler : ITaskScheduler
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(false),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), RecurringJobOptions);
         }
         else
@@ -345,6 +345,9 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
+        // await _eventHub.SendMessageAsync(MessageFactory.Info,
+        //     MessageFactory.InfoEvent($"Scan library invoked but a task is already running for {library.Name}. Rescheduling request for 10 mins", string.Empty));
+
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
         // When we do a scan, force cache to re-unpack in case page numbers change
@@ -463,6 +466,7 @@ public class TaskScheduler : ITaskScheduler
             HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, false], ScanQueue, checkRunningJobs);
     }
 
+
     /// <summary>
     /// Checks if this same invocation is already enqueued or scheduled
     /// </summary>
@@ -471,6 +475,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
+    /// <param name="checkArgs">Check against arguments. Defaults to true.</param>
     /// <returns></returns>
     public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {

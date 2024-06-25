@@ -76,6 +76,7 @@ public enum ScanCancelReason
 public class ScannerService : IScannerService
 {
     public const string Name = "ScannerService";
+    public const int Timeout = 60 * 60 * 60;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
     private readonly IMetadataService _metadataService;
@@ -168,6 +169,7 @@ public class ScannerService : IScannerService
             return;
         }
 
+
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
         if (string.IsNullOrEmpty(parentDirectory)) return;
@@ -202,6 +204,14 @@ public class ScannerService : IScannerService
 
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
+
+        // if (TaskScheduler.HasScanTaskRunningForSeries(seriesId))
+        // {
+        //     _logger.LogInformation("[ScannerService] Scan series invoked but a task is already running/enqueued. Rescheduling request for 1 mins");
+        //     BackgroundJob.Schedule(() => ScanSeries(seriesId, bypassFolderOptimizationChecks), TimeSpan.FromMinutes(1));
+        //     return;
+        // }
+
         var existingChapterIdsToClean = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
@@ -465,13 +475,22 @@ public class ScannerService : IScannerService
     }
 
     [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
+    [DisableConcurrentExecution(Timeout)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries(bool forceUpdate = false)
     {
         _logger.LogInformation("Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
         foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
+            if (TaskScheduler.RunningAnyTasksByMethod(TaskScheduler.ScanTasks, TaskScheduler.ScanQueue))
+            {
+                _logger.LogInformation("[ScannerService] Scan library invoked via nightly scan job but a task is already running. Rescheduling for 4 hours");
+                await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan libraries task delayed",
+                    $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for {DateTime.UtcNow.AddHours(4)} UTC"));
+                BackgroundJob.Schedule(() => ScanLibraries(forceUpdate), TimeSpan.FromHours(4));
+                return;
+            }
+
             await ScanLibrary(lib.Id, forceUpdate, true);
         }
         _processSeries.Reset();
@@ -488,13 +507,14 @@ public class ScannerService : IScannerService
     /// <param name="forceUpdate">Defaults to false</param>
     /// <param name="isSingleScan">Defaults to true. Is this a standalone invocation or is it in a loop?</param>
     [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
+    [DisableConcurrentExecution(Timeout)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true)
     {
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
+
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 

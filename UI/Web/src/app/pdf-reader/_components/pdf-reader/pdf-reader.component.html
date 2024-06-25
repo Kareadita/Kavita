@@ -57,7 +57,7 @@
       <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}">
         <div id="toolbarViewerLeft">
           <pdf-toggle-sidebar></pdf-toggle-sidebar>
-          <pdf-find-button></pdf-find-button>
+          <pdf-find-button [textLayer]='true'></pdf-find-button>
           <pdf-paging-area></pdf-paging-area>
 
           @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {

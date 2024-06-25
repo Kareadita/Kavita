@@ -23,6 +23,10 @@ public enum VolumeIncludes
     Chapters = 2,
     People = 4,
     Tags = 8,
+    /// <summary>
+    /// This will include Chapters by default
+    /// </summary>
+    Files = 16
 }
 
 public interface IVolumeRepository
@@ -34,7 +38,7 @@ public interface IVolumeRepository
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
     Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters);
-    Task<Volume?> GetVolumeAsync(int volumeId);
+    Task<Volume?> GetVolumeAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
@@ -173,11 +177,10 @@ public class VolumeRepository : IVolumeRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<Volume?> GetVolumeAsync(int volumeId)
+    public async Task<Volume?> GetVolumeAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files)
     {
         return await _context.Volume
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.Files)
+            .Includes(includes)
             .AsSplitQuery()
             .SingleOrDefaultAsync(vol => vol.Id == volumeId);
     }
