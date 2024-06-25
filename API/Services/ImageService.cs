@@ -220,9 +220,9 @@ public class ImageService : IImageService
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         var (width, height) = size.GetDimensions();
-        stream.Position = 0;
+        if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);
-        stream.Position = 0;
+        if (stream.CanSeek) stream.Position = 0;
 
         using var thumbnail = Image.ThumbnailStream(stream, width, height: height,
             size: GetSizeForDimensions(sourceImage, width, height),
