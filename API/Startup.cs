@@ -427,8 +427,8 @@ public class Startup
             catch (Exception)
             {
                 /* Swallow Exception */
+                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             }
-            Console.WriteLine($"Kavita - v{BuildInfo.Version}");
         });
 
         logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
