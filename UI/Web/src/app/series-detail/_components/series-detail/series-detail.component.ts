@@ -282,6 +282,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   });
 
   user: User | undefined;
+  showVolumeTab = true;
+  showStorylineTab = true;
+  showChapterTab = true;
 
   /**
    * This is the download we get from download service.
@@ -335,28 +338,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
     }
-  }
-
-  get ShowStorylineTab() {
-    if (this.libraryType === LibraryType.ComicVine) return false;
-    // Edge case for bad pdf parse
-    if (this.libraryType === LibraryType.Book && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
-
-    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
-      && (this.volumes.length > 0 || this.chapters.length > 0);
-  }
-
-  get ShowVolumeTab() {
-    if (this.libraryType === LibraryType.ComicVine) {
-      if (this.volumes.length > 1) return true;
-      if (this.specials.length === 0 && this.chapters.length === 0) return true;
-      return false;
-    }
-    return this.volumes.length > 0;
-  }
-
-  get ShowChaptersTab() {
-    return this.chapters.length > 0;
   }
 
   get UseBookLogic() {
@@ -416,7 +397,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+    this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.user = user;
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -432,6 +413,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
+  debugLog(message: string) {
+    console.log(message);
+  }
+
 
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
@@ -441,7 +426,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    // Setup the download in progress
+    // Set up the download in progress
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
       return this.downloadService.mapToEntityType(events, this.series);
     }));
@@ -669,12 +654,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
-      this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
-              .filter(action => action.action !== Action.Edit);
-
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-
+      this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
+              .filter(action => action.action !== Action.Edit);
 
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
@@ -694,6 +677,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
           ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
         ];
+
         if (this.relations.length > 0) {
           this.hasRelations = true;
           this.cdRef.markForCheck();
@@ -707,7 +691,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.router.navigateByUrl('/home');
         return of(null);
       })).subscribe(detail => {
-        if (detail == null) return;
+        if (detail == null) {
+          this.router.navigateByUrl('/home');
+          return;
+        }
+
         this.unreadCount = detail.unreadCount;
         this.totalCount = detail.totalCount;
 
@@ -717,6 +705,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.chapters = detail.chapters;
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
+
         this.storylineItems = [];
         const v = this.volumes.map(v => {
           return {volume: v, chapter: undefined, isChapter: false} as StoryLineItem;
@@ -727,10 +716,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         this.storylineItems.push(...c);
 
-
+        this.updateWhichTabsToShow();
         this.updateSelectedTab();
+
+
         this.isLoading = false;
         this.cdRef.markForCheck();
+        console.log('isLoading is now false')
       });
     }, err => {
       this.router.navigateByUrl('/home');
@@ -739,6 +731,35 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   createRelatedSeries(series: Series, relation: RelationKind) {
     return {series, relation} as RelatedSeriesPair;
+  }
+
+  shouldShowStorylineTab() {
+    if (this.libraryType === LibraryType.ComicVine) return false;
+    // Edge case for bad pdf parse
+    if (this.libraryType === LibraryType.Book && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
+
+    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
+      && (this.volumes.length > 0 || this.chapters.length > 0);
+  }
+
+  shouldShowVolumeTab() {
+    if (this.libraryType === LibraryType.ComicVine) {
+      if (this.volumes.length > 1) return true;
+      if (this.specials.length === 0 && this.chapters.length === 0) return true;
+      return false;
+    }
+    return this.volumes.length > 0;
+  }
+
+  shouldShowChaptersTab() {
+    return this.chapters.length > 0;
+  }
+
+  updateWhichTabsToShow() {
+    this.showVolumeTab = this.shouldShowVolumeTab();
+    this.showStorylineTab = this.shouldShowStorylineTab();
+    this.showChapterTab = this.shouldShowChaptersTab();
+    this.cdRef.markForCheck();
   }
 
   /**
@@ -788,10 +809,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   loadPlusMetadata(seriesId: number, libraryType: LibraryType) {
     this.isLoadingExtra = true;
     this.cdRef.markForCheck();
+
     this.metadataService.getSeriesMetadataFromPlus(seriesId, libraryType).subscribe(data => {
-      this.isLoadingExtra = false;
-      this.cdRef.markForCheck();
-      if (data === null) return;
+      if (data === null) {
+        this.isLoadingExtra = false;
+        this.cdRef.markForCheck();
+        console.log('isLoadingExtra is false')
+        return;
+      }
 
       // Reviews
       this.reviews = [...data.reviews];
@@ -807,7 +832,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.hasRecommendations = this.combinedRecs.length > 0;
 
+      this.isLoadingExtra = false;
       this.cdRef.markForCheck();
+      console.log('isLoadingExtra is false')
     });
   }
 
@@ -987,11 +1014,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   downloadSeries() {
     this.downloadService.download('series', this.series, (d) => {
-      if (d) {
-        this.downloadInProgress = true;
-      } else {
-        this.downloadInProgress = false;
-      }
+      this.downloadInProgress = !!d;
       this.cdRef.markForCheck();
     });
   }
