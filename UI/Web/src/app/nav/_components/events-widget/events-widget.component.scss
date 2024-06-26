@@ -14,6 +14,26 @@
     border-bottom-color: transparent;
 }
 
+.colored {
+  color: var(--primary-color) !important;
+}
+
+.widget-button--indicator {
+  position: absolute;
+  top: 30px;
+  color: var(--primary-color);
+
+  &.error {
+    color: var(--error-color) !important;
+  }
+  &.info {
+    color: var(--event-widget-info-bg-color) !important;
+  }
+  &.update {
+    color: var(--primary-color) !important;
+  }
+}
+
 ::ng-deep .nav-events {
 
     .popover-body {
@@ -57,21 +77,6 @@
 
 .btn-icon {
     color: white;
-}
-
-.colored {
-    background-color: var(--primary-color);
-    border-radius: 60px;
-}
-
-.colored-error {
-    background-color: var(--error-color) !important;
-    border-radius: 60px;
-}
-
-.colored-info {
-    background-color: var(--event-widget-info-bg-color) !important;
-    border-radius: 60px;
 }
 
 .update-available {

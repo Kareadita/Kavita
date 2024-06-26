@@ -37,8 +37,16 @@ import {TranslocoDirective} from "@ngneat/transloco";
   imports: [NgIf, NgClass, NgbPopover, NgStyle, CircularLoaderComponent, NgFor, AsyncPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
-  @Input({required: true}) user!: User;
+  public readonly downloadService = inject(DownloadService);
+  public readonly messageHub = inject(MessageHubService);
+  private readonly modalService = inject(NgbModal);
+  private readonly accountService = inject(AccountService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+
+  @Input({required: true}) user!: User;
+
 
   isAdmin$: Observable<boolean> = of(false);
 
@@ -60,17 +68,15 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEvents: number = 0;
+  /**
+   * Intercepts from Single Updates to show an extra indicator to the user
+   */
+  updateAvailable: boolean = false;
 
   debugMode: boolean = false;
 
   protected readonly EVENTS = EVENTS;
 
-  public readonly downloadService = inject(DownloadService);
-
-  constructor(public messageHub: MessageHubService, private modalService: NgbModal,
-    private accountService: AccountService, private confirmService: ConfirmService,
-    private readonly cdRef: ChangeDetectorRef) {
-    }
 
   ngOnDestroy(): void {
     this.progressEventsSource.complete();
@@ -115,6 +121,9 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         values.push(message);
         this.singleUpdateSource.next(values);
         this.activeEvents += 1;
+        if (event.payload.name === EVENTS.UpdateAvailable) {
+          this.updateAvailable = true;
+        }
         this.cdRef.markForCheck();
         break;
       case 'started':
