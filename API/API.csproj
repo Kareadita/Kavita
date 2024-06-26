@@ -190,6 +190,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="config\fonts\" />
     <Folder Include="config\themes" />
     <Content Include="EmailTemplates\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

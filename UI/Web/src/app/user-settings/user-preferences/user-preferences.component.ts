@@ -166,13 +166,17 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
 
   constructor() {
-    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
     this.accountService.getOpdsUrl().subscribe(res => {
       this.opdsUrl = res;
       this.cdRef.markForCheck();
     });
+
+    this.bookService.getEpubFonts().subscribe(res => {
+      this.fontFamilies = res.map(f => f.name);
+      this.cdRef.markForCheck();
+    })
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;

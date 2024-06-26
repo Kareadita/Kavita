@@ -35,6 +35,7 @@ public interface ITaskScheduler
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
     Task CheckForUpdate();
+    void ScanEpubFonts();
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -57,6 +58,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly ILicenseService _licenseService;
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ISmartCollectionSyncService _smartCollectionSyncService;
+    private readonly IFontService _fontService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -93,7 +95,8 @@ public class TaskScheduler : ITaskScheduler
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
-        IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService)
+        IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
+        IFontService fontService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -112,6 +115,7 @@ public class TaskScheduler : ITaskScheduler
         _licenseService = licenseService;
         _externalMetadataService = externalMetadataService;
         _smartCollectionSyncService = smartCollectionSyncService;
+        _fontService = fontService;
     }
 
     public async Task ScheduleTasks()
@@ -429,6 +433,13 @@ public class TaskScheduler : ITaskScheduler
         var update = await _versionUpdaterService.CheckForUpdate();
         if (update == null) return;
         await _versionUpdaterService.PushUpdate(update);
+    }
+
+    // TODO: Make this auto scan from time to time?
+    public void ScanEpubFonts()
+    {
+        _logger.LogInformation("Starting Epub Font scam");
+        BackgroundJob.Enqueue(() => _fontService.Scan());
     }
 
     /// <summary>

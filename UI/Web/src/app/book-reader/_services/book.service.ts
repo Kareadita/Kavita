@@ -4,16 +4,19 @@ import { TextResonse } from 'src/app/_types/text-response';
 import { environment } from 'src/environments/environment';
 import { BookChapterItem } from '../_models/book-chapter-item';
 import { BookInfo } from '../_models/book-info';
+import {Observable} from "rxjs";
 
-export interface FontFamily {
-  /**
-   * What the user should see
-   */
-  title: string;
-  /**
-   * The actual font face
-   */
-  family: string;
+export enum FontProvider {
+  System = 1,
+  User = 2,
+}
+
+export interface EpubFont {
+  id: number;
+  name: string;
+  provider: FontProvider;
+  created: Date;
+  lastModified: Date;
 }
 
 @Injectable({
@@ -25,10 +28,8 @@ export class BookService {
 
   constructor(private http: HttpClient) { }
 
-  getFontFamilies(): Array<FontFamily> {
-    return [{title: 'default', family: 'default'}, {title: 'EBGaramond', family: 'EBGaramond'}, {title: 'Fira Sans', family: 'Fira_Sans'},
-    {title: 'Lato', family: 'Lato'}, {title: 'Libre Baskerville', family: 'Libre_Baskerville'}, {title: 'Merriweather', family: 'Merriweather'},
-    {title: 'Nanum Gothic', family: 'Nanum_Gothic'}, {title: 'RocknRoll One', family: 'RocknRoll_One'}, {title: 'Open Dyslexic', family: 'OpenDyslexic2'}];
+  getEpubFonts(): Observable<EpubFont[]>  {
+    return this.http.get<Array<EpubFont>>(this.baseUrl + 'Font/GetFonts')
   }
 
   getBookChapters(chapterId: number) {

@@ -10,6 +10,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Device;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.Font;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Progress;
@@ -256,6 +257,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.BookReaderLayoutMode,
                 opt =>
                     opt.MapFrom(src => src.BookReaderLayoutMode));
+
+        CreateMap<EpubFont, EpubFontDto>();
 
 
         CreateMap<AppUserBookmark, BookmarkDto>();

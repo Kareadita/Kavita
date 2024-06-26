@@ -19,7 +19,7 @@ import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ThemeService } from 'src/app/_services/theme.service';
-import { FontFamily, BookService } from '../../_services/book.service';
+import {BookService, EpubFont} from '../../_services/book.service';
 import { BookBlackTheme } from '../../_models/book-black-theme';
 import { BookDarkTheme } from '../../_models/book-dark-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
@@ -131,7 +131,7 @@ export class ReaderSettingsComponent implements OnInit {
    * List of all font families user can select from
    */
   fontOptions: Array<string> = [];
-  fontFamilies: Array<FontFamily> = [];
+  fontFamilies: Array<EpubFont> = [];
   /**
    * Internal property used to capture all the different css properties to render on all elements
    */
@@ -174,10 +174,11 @@ export class ReaderSettingsComponent implements OnInit {
     private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-
-    this.fontFamilies = this.bookService.getFontFamilies();
-    this.fontOptions = this.fontFamilies.map(f => f.title);
-    this.cdRef.markForCheck();
+    this.bookService.getEpubFonts().subscribe(fonts => {
+      this.fontFamilies = fonts;
+      this.fontOptions = fonts.map(f => f.name);
+      this.cdRef.markForCheck();
+    })
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -208,11 +209,10 @@ export class ReaderSettingsComponent implements OnInit {
 
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(fontName => {
-          const familyName = this.fontFamilies.filter(f => f.title === fontName)[0].family;
-          if (familyName === 'default') {
+          if (fontName === 'default') {
             this.pageStyles['font-family'] = 'inherit';
           } else {
-            this.pageStyles['font-family'] = "'" + familyName + "'";
+            this.pageStyles['font-family'] = "'" + fontName + "'";
           }
 
           this.styleUpdate.emit(this.pageStyles);

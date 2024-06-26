@@ -583,6 +583,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.bookService.getEpubFonts().subscribe(fonts => {
+      fonts.forEach(font => {
+        const fontFace = new FontFace(font.name, `url(${this.bookService.baseUrl}Font/download-font?fontId=${font.id})`);
+        fontFace.load().then(loadedFace => {
+          (document as any).fonts.add(loadedFace);
+        });
+      })
+    })
+
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
