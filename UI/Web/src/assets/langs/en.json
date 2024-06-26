@@ -2326,7 +2326,10 @@
         "issue-hash-num": "Issue #",
         "issue-num": "Issue",
         "chapter-num": "Chapter",
-        "volume-num": "Volume"
+        "volume-num": "Volume",
+        "chapter-num-shorthand": "Ch {{num}}",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Vol {{num}}"
     }
 
 }

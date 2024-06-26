@@ -104,7 +104,7 @@ import {TagBadgeComponent} from '../../../shared/tag-badge/tag-badge.component';
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
 import {
@@ -380,22 +380,39 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (!this.currentlyReadingChapter.isSpecial) {
       const vol = this.volumes.filter(v => v.id === this.currentlyReadingChapter?.volumeId);
 
+      let chapterLocaleKey = 'common.chapter-num-shorthand';
+      let volumeLocaleKey = 'common.volume-num-shorthand';
+      switch (this.libraryType) {
+        case LibraryType.ComicVine:
+        case LibraryType.Comic:
+          chapterLocaleKey = 'common.issue-num-shorthand';
+          break;
+        case LibraryType.Book:
+        case LibraryType.Manga:
+        case LibraryType.LightNovel:
+        case LibraryType.Images:
+          chapterLocaleKey = 'common.chapter-num-shorthand';
+          break;
+      }
+
       // This is a lone chapter
       if (vol.length === 0) {
         if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
           return this.currentlyReadingChapter.titleName;
         }
-        return 'Ch ' + this.currentlyReadingChapter.minNumber; // TODO: Refactor this to use DisplayTitle (or Range) and Localize it
+        return translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
       }
 
       if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
-        return 'Vol ' + vol[0].minNumber;
+        return translate(chapterLocaleKey, {num: vol[0].minNumber});
       }
-      return 'Vol ' + vol[0].minNumber + ' Ch ' + this.currentlyReadingChapter.minNumber;
+      return translate(volumeLocaleKey, {num: vol[0].minNumber})
+        + ' ' + translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
     }
 
     return this.currentlyReadingChapter.title;
   }
+
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
