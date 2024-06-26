@@ -60,7 +60,7 @@
             </li>
             <li class="list-group-item dark-menu-item info">
               <div>
-                <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2"></i>Scan didn't run becasuse nothing to do</div>
+                <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2"></i>Scan didn't run because nothing to do</div>
                 <div class="accent-text mb-1">Click for more information</div>
               </div>
               <button type="button" class="btn-close float-end" aria-label="close" ></button>
@@ -103,11 +103,16 @@
             <ng-template #progressEvent>
               <li class="list-group-item dark-menu-item">
                 <div class="h6 mb-1">{{message.title}}</div>
-                <div class="accent-text mb-1" *ngIf="message.subTitle !== ''" [title]="message.subTitle">{{message.subTitle}}</div>
+                @if (message.subTitle !== '') {
+                  <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
+                }
                 <div class="progress-container row g-0 align-items-center">
                   <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
                   <div class="col-10 progress" style="height: 5px;">
-                    <div class="progress-bar" role="progressbar" [ngStyle]="{'width': message.body.progress * 100 + '%'}" [attr.aria-valuenow]="message.body.progress * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar" role="progressbar"
+                         [ngStyle]="{'width': message.body.progress * 100 + '%'}"
+                         [attr.aria-valuenow]="message.body.progress * 100"
+                         aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
               </li>
@@ -118,13 +123,19 @@
         <!-- Single updates (Informational/Update available)-->
         <ng-container *ngIf="singleUpdates$ | async as singleUpdates">
           <ng-container *ngFor="let singleUpdate of singleUpdates">
-            <li class="list-group-item dark-menu-item update-available" *ngIf="singleUpdate.name === EVENTS.UpdateAvailable" (click)="handleUpdateAvailableClick(singleUpdate)">
-              <i class="fa fa-chevron-circle-up me-1" aria-hidden="true"></i>{{t('update-available')}}
-            </li>
-            <li class="list-group-item dark-menu-item update-available" *ngIf="singleUpdate.name !== EVENTS.UpdateAvailable">
-              <div>{{singleUpdate.title}}</div>
-              <div class="accent-text" *ngIf="singleUpdate.subTitle !== ''">{{singleUpdate.subTitle}}</div>
-            </li>
+
+            @if (singleUpdate.name === EVENTS.UpdateAvailable) {
+              <li class="list-group-item dark-menu-item update-available" (click)="handleUpdateAvailableClick(singleUpdate)">
+                <i class="fa fa-chevron-circle-up me-1" aria-hidden="true"></i>{{t('update-available')}}
+              </li>
+            } @else {
+              <li class="list-group-item dark-menu-item update-available">
+                <div>{{singleUpdate.title}}</div>
+                @if (singleUpdate.subTitle !== '') {
+                  <div class="accent-text">{{singleUpdate.subTitle}}</div>
+                }
+              </li>
+            }
           </ng-container>
         </ng-container>
 
@@ -143,14 +154,14 @@
             </li>
           </ng-container>
           @if(activeDownloads.length > 1) {
-            <li class="list-group-item dark-menu-item">{{activeDownloads.length}} downloads in Queue</li>
+            <li class="list-group-item dark-menu-item">{{t('download-in-queue', {num: activeDownloads.length})}}</li>
           }
         </ng-container>
 
 
         <!-- Errors -->
-        <ng-container *ngIf="errors$ | async as errors">
-          <ng-container *ngFor="let error of errors">
+        @if (errors$ | async; as errors) {
+          @for (error of errors; track error) {
             <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMore(error)">
               <div>
                 <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</div>
@@ -158,8 +169,8 @@
               </div>
               <button type="button" class="btn-close float-end" [attr.aria-label]="t('close')" (click)="removeErrorOrInfo(error, $event)"></button>
             </li>
-          </ng-container>
-        </ng-container>
+          }
+        }
 
         <!-- Infos -->
         <ng-container *ngIf="infos$ | async as infos">
@@ -188,9 +199,14 @@
         }
 
         <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
-          <li class="list-group-item dark-menu-item" *ngIf="activeEvents === 0 && activeDownloads.length === 0">{{t('no-data')}}</li>
+          <ng-container *ngIf="errors$ | async as errors">
+            <ng-container *ngIf="infos$ | async as infos">
+              @if (infos.length === 0 && errors.length === 0 && activeDownloads.length === 0 && activeEvents === 0) {
+                <li class="list-group-item dark-menu-item">{{t('no-data')}}</li>
+              }
+            </ng-container>
+          </ng-container>
         </ng-container>
-
       </ul>
     </ng-template>
   </ng-container>

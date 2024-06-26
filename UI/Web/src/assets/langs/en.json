@@ -1513,7 +1513,8 @@
         "users-online-count": "{{num}} Users online",
         "active-events-title": "Active Events:",
         "no-data": "Not much going on here",
-        "left-to-process": "Left to Process: {{leftToProcess}}"
+        "left-to-process": "Left to Process: {{leftToProcess}}",
+        "download-in-queue": "{{num}} downloads in Queue"
     },
 
     "shortcuts-modal": {
