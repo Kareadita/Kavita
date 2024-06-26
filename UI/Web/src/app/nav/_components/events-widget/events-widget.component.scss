@@ -15,22 +15,22 @@
 }
 
 .colored {
-  color: var(--primary-color) !important;
+  color: var(--event-widget-activity-bg-color) !important;
 }
 
 .widget-button--indicator {
   position: absolute;
   top: 30px;
-  color: var(--primary-color);
+  color: var(--event-widget-activity-bg-color);
 
   &.error {
-    color: var(--error-color) !important;
+    color: var(--event-widget-error-bg-color) !important;
   }
   &.info {
     color: var(--event-widget-info-bg-color) !important;
   }
   &.update {
-    color: var(--primary-color) !important;
+    color: var(--event-widget-update-bg-color) !important;
   }
 }
 
@@ -76,52 +76,56 @@
 
 
 .btn-icon {
-    color: white;
+  color: var(--event-widget-text-color);
 }
 
-.update-available {
+
+.dark-menu-item {
+  &.update-available {
     cursor: pointer;
 
     i.fa {
-        color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
     }
     color: var(--primary-color);
-}
+  }
 
-.error {
+  &.error {
     cursor: pointer;
     position: relative;
     .h6 {
-        color: var(--error-color);
+      color: var(--event-widget-error-bg-color);
     }
 
     i.fa {
-        color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
     }
 
     .btn-close {
-        top: 5px;
-        right: 10px;
-        font-size: 11px;
-        position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 11px;
+      position: absolute;
     }
-}
+  }
 
-.info {
+  &.info {
     cursor: pointer;
     position: relative;
     .h6 {
-        color: var(--event-widget-info-bg-color);
+      color: var(--event-widget-info-bg-color);
     }
 
     i.fa {
-        color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
     }
 
     .btn-close {
-        top: 10px;
-        right: 10px;
-        font-size: 11px;
-        position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 11px;
+      position: absolute;
     }
+  }
+
 }
