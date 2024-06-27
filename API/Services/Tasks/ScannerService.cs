@@ -199,7 +199,7 @@ public class ScannerService : IScannerService
     /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 200, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true)
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries", [seriesId, bypassFolderOptimizationChecks], TaskScheduler.ScanQueue))
@@ -483,13 +483,14 @@ public class ScannerService : IScannerService
         _logger.LogInformation("[ScannerService] Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
         foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
-            if (TaskScheduler.RunningAnyTasksByMethod(TaskScheduler.ScanTasks, TaskScheduler.ScanQueue))
+            // BUG: This will trigger the first N libraries to scan over and over if there is always an interruption later in the chain
+            if (TaskScheduler.HasScanTaskRunningForLibrary(lib.Id))
             {
-                _logger.LogInformation("[ScannerService] Scan library invoked via nightly scan job but a task is already running. Rescheduling for 4 hours");
-                await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan libraries task delayed",
-                    $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for {DateTime.Now.AddHours(4)}"));
-                BackgroundJob.Schedule(() => ScanLibraries(forceUpdate), TimeSpan.FromHours(4));
-                return;
+                // We don't need to send SignalR event as this is a background job that user doesn't need insight into
+                _logger.LogInformation("[ScannerService] Scan library invoked via nightly scan job but a task is already running for {LibraryName}. Rescheduling for 4 hours", lib.Name);
+                await Task.Delay(TimeSpan.FromHours(4));
+                //BackgroundJob.Schedule(() => ScanLibraries(forceUpdate), TimeSpan.FromHours(4));
+                //return;
             }
 
             await ScanLibrary(lib.Id, forceUpdate, true);
