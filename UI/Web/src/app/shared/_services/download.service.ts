@@ -220,6 +220,7 @@ export class DownloadService {
     );
   }
 
+
   private getIdKey(entity: Chapter | Volume) {
     if (this.utilityService.isVolume(entity)) return 'volumeId';
     if (this.utilityService.isChapter(entity)) return 'chapterId';

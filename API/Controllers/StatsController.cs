@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -7,11 +10,15 @@ using API.DTOs.Statistics;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Tasks.Scanner.Parser;
+using CsvHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MimeTypes;
 
 namespace API.Controllers;
 
@@ -24,15 +31,18 @@ public class StatsController : BaseApiController
     private readonly UserManager<AppUser> _userManager;
     private readonly ILocalizationService _localizationService;
     private readonly ILicenseService _licenseService;
+    private readonly IDirectoryService _directoryService;
 
     public StatsController(IStatisticService statService, IUnitOfWork unitOfWork,
-        UserManager<AppUser> userManager, ILocalizationService localizationService, ILicenseService licenseService)
+        UserManager<AppUser> userManager, ILocalizationService localizationService,
+        ILicenseService licenseService, IDirectoryService directoryService)
     {
         _statService = statService;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _localizationService = localizationService;
         _licenseService = licenseService;
+        _directoryService = directoryService;
     }
 
     [HttpGet("user/{userId}/read")]
@@ -109,6 +119,34 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
         return Ok(await _statService.GetFileBreakdown());
+    }
+
+    /// <summary>
+    /// Generates a csv of all file paths for a given extension
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/file-extension")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult> DownloadFilesByExtension(string fileExtension)
+    {
+        if (!Regex.IsMatch(fileExtension, Parser.SupportedExtensions))
+        {
+            return BadRequest("Invalid file format");
+        }
+        var tempFile = Path.Join(_directoryService.TempDirectory,
+            $"file_breakdown_{fileExtension.Replace(".", string.Empty)}.csv");
+
+        if (!_directoryService.FileSystem.File.Exists(tempFile))
+        {
+            var results = await _statService.GetFilesByExtension(fileExtension);
+            await using var writer = new StreamWriter(tempFile);
+            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            await csv.WriteRecordsAsync(results);
+        }
+
+        return PhysicalFile(tempFile, MimeTypeMap.GetMimeType(Path.GetExtension(tempFile)),
+            System.Web.HttpUtility.UrlEncode(Path.GetFileName(tempFile)), true);
     }
 
 

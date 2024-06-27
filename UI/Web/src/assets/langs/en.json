@@ -1869,7 +1869,9 @@
         "total-size-header": "Total Size",
         "total-files-header": "Total Files",
         "not-classified": "Not Classified",
-        "total-file-size-title": "Total File Size:"
+        "total-file-size-title": "Total File Size:",
+        "download-file-for-extension-header": "Download Report",
+        "download-file-for-extension-alt": "Download files Report for {{extension}}"
     },
 
     "reading-activity": {

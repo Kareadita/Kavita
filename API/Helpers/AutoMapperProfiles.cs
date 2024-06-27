@@ -21,6 +21,7 @@ using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.DTOs.SideNav;
+using API.DTOs.Stats;
 using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
@@ -326,5 +327,8 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
 
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
+
+
+        CreateMap<MangaFile, FileExtensionExportDto>();
     }
 }
