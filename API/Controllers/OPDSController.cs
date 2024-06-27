@@ -868,6 +868,7 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, $"series-{series.Id}");
         feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesId}&apiKey={apiKey}"));
 
+        var chapterDict = new Dictionary<int, short>();
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
@@ -879,6 +880,7 @@ public class OpdsController : BaseApiController
                 var chapterDto = _mapper.Map<ChapterDto>(chapter);
                 foreach (var mangaFile in chapter.Files)
                 {
+                    chapterDict.Add(chapterId, 0);
                     feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, _mapper.Map<MangaFileDto>(mangaFile), series,
                         chapterDto, apiKey, prefix, baseUrl));
                 }
@@ -892,7 +894,7 @@ public class OpdsController : BaseApiController
             chapters = seriesDetail.Chapters;
         }
 
-        foreach (var chapter in chapters.Where(c => !c.IsSpecial))
+        foreach (var chapter in chapters.Where(c => !c.IsSpecial && !chapterDict.ContainsKey(c.Id)))
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
             var chapterDto = _mapper.Map<ChapterDto>(chapter);

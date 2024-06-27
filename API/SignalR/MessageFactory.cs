@@ -345,6 +345,7 @@ public static class MessageFactory
             EventType = ProgressEventType.Single,
             Body = new
             {
+                Name = Error,
                 Title = title,
                 SubTitle = subtitle,
             }
@@ -362,6 +363,7 @@ public static class MessageFactory
             EventType = ProgressEventType.Single,
             Body = new
             {
+                Name = Info,
                 Title = title,
                 SubTitle = subtitle,
             }

@@ -16,12 +16,11 @@ import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { MangaFormatPipe } from '../../../_pipes/manga-format.pipe';
 import { BytesPipe } from '../../../_pipes/bytes.pipe';
-import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {filter, tap} from "rxjs/operators";
-import {GenericTableModalComponent} from "../_modals/generic-table-modal/generic-table-modal.component";
+import {Pagination} from "../../../_models/pagination";
+import {DownloadService} from "../../../shared/_services/download.service";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 export interface StackedBarChartDataItem {
   name: string,
@@ -34,7 +33,7 @@ export interface StackedBarChartDataItem {
     styleUrls: ['./file-breakdown-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective]
+  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader]
 })
 export class FileBreakdownStatsComponent {
 
@@ -42,7 +41,7 @@ export class FileBreakdownStatsComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
-  @ViewChild('tablelayout') tableTemplate!: TemplateRef<any>;
+  @ViewChild('modalTable') modalTable!: TemplateRef<any>;
 
   rawData$!: Observable<FileExtensionBreakdown>;
   files$!: Observable<Array<FileExtension>>;
@@ -55,9 +54,10 @@ export class FileBreakdownStatsComponent {
 
   formControl: FormControl = new FormControl(true, []);
 
+  downloadInProgress: {[key: string]: boolean}  = {};
+
   private readonly statService = inject(StatisticsService);
   private readonly translocoService = inject(TranslocoService);
-  private readonly ngbModal = inject(NgbModal);
 
   constructor() {
     this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
@@ -80,17 +80,6 @@ export class FileBreakdownStatsComponent {
     this.vizData2$ = this.files$.pipe(takeUntilDestroyed(this.destroyRef), map(data => data.map(d => {
       return {name: d.extension || this.translocoService.translate('file-breakdown-stats.not-classified'), value: d.totalFiles, extra: d.totalSize};
     })));
-
-    // TODO: See if you can figure this out
-    // this.formControl.valueChanges.pipe(filter(v => !v), takeUntilDestroyed(this.destroyRef), switchMap(_ => {
-    //   const ref = this.ngbModal.open(GenericTableModalComponent);
-    //   ref.componentInstance.title = translate('file-breakdown-stats.format-title');
-    //   ref.componentInstance.bodyTemplate = this.tableTemplate;
-    //   return ref.dismissed;
-    // }, tap(_ => {
-    //   this.formControl.setValue(true);
-    //   this.cdRef.markForCheck();
-    // }))).subscribe();
   }
 
   onSort(evt: SortEvent<FileExtension>) {
@@ -102,6 +91,17 @@ export class FileBreakdownStatsComponent {
         header.direction = '';
       }
     });
+  }
+
+  export(format: string) {
+    this.downloadInProgress[format] = true;
+    this.cdRef.markForCheck();
+
+    this.statService.downloadFileBreakdown(format)
+      .subscribe(() => {
+        this.downloadInProgress[format] = false;
+        this.cdRef.markForCheck();
+      });
   }
 
 }

@@ -150,13 +150,28 @@ public class LibraryWatcher : ILibraryWatcher
     {
         _logger.LogTrace("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name))));
+
+        var isDirectoryChange = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
+
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, isDirectoryChange],
+                checkRunningJobs: true))
+        {
+            return;
+        }
+
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, isDirectoryChange));
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
         _logger.LogTrace("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name)));
+        var isDirectoryChange = !_directoryService.FileSystem.File.Exists(e.Name);
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, isDirectoryChange],
+                checkRunningJobs: true))
+        {
+            return;
+        }
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, isDirectoryChange));
     }
 
     /// <summary>
@@ -168,6 +183,11 @@ public class LibraryWatcher : ILibraryWatcher
         var isDirectory = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
         if (!isDirectory) return;
         _logger.LogTrace("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, true],
+                checkRunningJobs: true))
+        {
+            return;
+        }
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, true));
     }
 
@@ -298,7 +318,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// This is called via Hangfire to decrement the counter. Must work around a lock
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
-    public void UpdateLastBufferOverflow()
+    public static void UpdateLastBufferOverflow()
     {
         lock (Lock)
         {

@@ -134,9 +134,16 @@ public class ImageService : IImageService
     /// <returns></returns>
     public static Enums.Size GetSizeForDimensions(Image image, int targetWidth, int targetHeight)
     {
-        if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+        try
         {
-            return Enums.Size.Force;
+            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+            {
+                return Enums.Size.Force;
+            }
+        }
+        catch (Exception)
+        {
+            /* Swallow */
         }
 
         return Enums.Size.Both;
@@ -144,9 +151,15 @@ public class ImageService : IImageService
 
     public static Enums.Interesting? GetCropForDimensions(Image image, int targetWidth, int targetHeight)
     {
-
-        if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+        try
         {
+            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+            {
+                return null;
+            }
+        } catch (Exception)
+        {
+            /* Swallow */
             return null;
         }
 
@@ -166,8 +179,8 @@ public class ImageService : IImageService
         }
 
         // Calculate scaling factors
-        var widthScaleFactor = (double)targetWidth / sourceImage.Width;
-        var heightScaleFactor = (double)targetHeight / sourceImage.Height;
+        var widthScaleFactor = (double) targetWidth / sourceImage.Width;
+        var heightScaleFactor = (double) targetHeight / sourceImage.Height;
 
         // Check resolution quality (example thresholds)
         if (widthScaleFactor > 2.0 || heightScaleFactor > 2.0)
@@ -219,14 +232,15 @@ public class ImageService : IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        var (width, height) = size.GetDimensions();
-        stream.Position = 0;
+        var (targetWidth, targetHeight) = size.GetDimensions();
+        if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);
-        stream.Position = 0;
+        if (stream.CanSeek) stream.Position = 0;
 
-        using var thumbnail = Image.ThumbnailStream(stream, width, height: height,
-            size: GetSizeForDimensions(sourceImage, width, height),
-            crop: GetCropForDimensions(sourceImage, width, height));
+        using var thumbnail = sourceImage.ThumbnailImage(targetWidth, targetHeight,
+            size: GetSizeForDimensions(sourceImage, targetWidth, targetHeight),
+            crop: GetCropForDimensions(sourceImage, targetWidth, targetHeight));
+
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try

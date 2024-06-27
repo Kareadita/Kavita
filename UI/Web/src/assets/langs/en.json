@@ -1513,7 +1513,8 @@
         "users-online-count": "{{num}} Users online",
         "active-events-title": "Active Events:",
         "no-data": "Not much going on here",
-        "left-to-process": "Left to Process: {{leftToProcess}}"
+        "left-to-process": "Left to Process: {{leftToProcess}}",
+        "download-in-queue": "{{num}} downloads in Queue"
     },
 
     "shortcuts-modal": {
@@ -1868,7 +1869,9 @@
         "total-size-header": "Total Size",
         "total-files-header": "Total Files",
         "not-classified": "Not Classified",
-        "total-file-size-title": "Total File Size:"
+        "total-file-size-title": "Total File Size:",
+        "download-file-for-extension-header": "Download Report",
+        "download-file-for-extension-alt": "Download files Report for {{extension}}"
     },
 
     "reading-activity": {
@@ -2326,7 +2329,10 @@
         "issue-hash-num": "Issue #",
         "issue-num": "Issue",
         "chapter-num": "Chapter",
-        "volume-num": "Volume"
+        "volume-num": "Volume",
+        "chapter-num-shorthand": "Ch {{num}}",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Vol {{num}}"
     }
 
 }

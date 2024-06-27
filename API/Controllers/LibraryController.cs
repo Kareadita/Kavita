@@ -21,7 +21,6 @@ using AutoMapper;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -134,7 +133,7 @@ public class LibraryController : BaseApiController
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
         await _libraryWatcher.RestartWatching();
-        _taskScheduler.ScanLibrary(library.Id);
+        await _taskScheduler.ScanLibrary(library.Id);
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
@@ -292,7 +291,7 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
         if (libraryId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "libraryId"));
-        _taskScheduler.ScanLibrary(libraryId, force);
+        await _taskScheduler.ScanLibrary(libraryId, force);
         return Ok();
     }
 
@@ -500,7 +499,7 @@ public class LibraryController : BaseApiController
         if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
             await _libraryWatcher.RestartWatching();
-            _taskScheduler.ScanLibrary(library.Id);
+            await _taskScheduler.ScanLibrary(library.Id);
         }
 
         if (folderWatchingUpdate)
