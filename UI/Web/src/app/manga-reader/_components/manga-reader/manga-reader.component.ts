@@ -399,7 +399,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   debugMode: boolean = false;
   /**
-   * Width overwrite label for maunal width control
+   * Width override label for maunal width control
   */
   widthOverrideLabel$ : Observable<string> = new Observable<string>();
 
@@ -554,32 +554,53 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
-      this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-        const fitting = this.generalSettingsForm.get('fittingOption')?.value;
-        if(PageSplitOption.FitSplit == val && FITTING_OPTION.WIDTH == fitting) {
-          this.generalSettingsForm.get('widthSlider')?.enable();
-        } else {
-          this.generalSettingsForm.get('widthSlider')?.setValue(0);
-          this.generalSettingsForm.get('widthSlider')?.disable();
-        }
-      });
+      //only enable the width override slider under certain conditions
+      // width mode selected
+      // splitting is set to fit to screen, otherwise disable
+      // when disable set the value to 0
+      // to use the default of the current single page reader
+      this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(
+        tap(val => {
+          const fitting = this.generalSettingsForm.get('fittingOption')?.value;
+          const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
 
-    this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
-      if(PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == val){
-          this.generalSettingsForm.get('widthSlider')?.enable();
-      } else {
-        this.generalSettingsForm.get('widthSlider')?.setValue(0);
-        this.generalSettingsForm.get('widthSlider')?.disable();
-      }
+          if (PageSplitOption.FitSplit == val && FITTING_OPTION.WIDTH == fitting) {
+            widthOverrideControl?.enable();
+          } else {
+            widthOverrideControl?.setValue(0);
+            widthOverrideControl?.disable();
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => {});
 
-    this.widthOverrideLabel$ = this.readerSettings$?.pipe(
-      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
-      takeUntilDestroyed(this.destroyRef)
-    );
+      //only enable the width override slider under certain conditions
+      // width mode selected
+      // splitting is set to fit to screen, otherwise disable
+      // when disable set the value to 0
+      // to use the default of the current single page reader
+      this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(
+        tap(val => {
+          const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
+          const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
 
+          if (PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == val){
+            widthOverrideControl?.enable();
+          } else {
+            widthOverrideControl?.setValue(0);
+            widthOverrideControl?.disable();
+          }
 
-    });
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => {});
+
+      //send the current width override value to the label
+      this.widthOverrideLabel$ = this.readerSettings$?.pipe(
+        map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+        takeUntilDestroyed(this.destroyRef)
+      );
+
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 

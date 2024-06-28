@@ -54,7 +54,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   maxPages: number = 1;
 
   /**
-   * Width overwrite for maunal width control
+   * Width override for maunal width control
   */
   widthOverride$ : Observable<string> = new Observable<string>();
 

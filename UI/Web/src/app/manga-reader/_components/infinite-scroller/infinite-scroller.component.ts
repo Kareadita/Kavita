@@ -174,7 +174,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
   /**
-   * Width overwrite for maunal width control
+   * Width override for maunal width control
    * 2 observables needed to avoid flickering, probably due to data races, when changing the width
    * this allows to precicely define execution order
   */
