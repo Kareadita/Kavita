@@ -401,7 +401,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   checkIfShouldTriggerContinuousReader() {
-    this.widthOverride$ = this.widthSliderValue$;
     if (this.isScrolling) return;
 
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {

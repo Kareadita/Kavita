@@ -573,7 +573,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.generalSettingsForm.get('widthSlider')?.disable();
       }
 
-            this.widthOverrideLabel$ = this.readerSettings$?.pipe(
+    this.widthOverrideLabel$ = this.readerSettings$?.pipe(
       map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
       takeUntilDestroyed(this.destroyRef)
     );
