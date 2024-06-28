@@ -247,16 +247,19 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     //perfom jump so the page stays in view
     this.widthSliderValue$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.currentPageElem= this.document.querySelector('img#page-' + this.pageNum);
-      if(!this.currentPageElem) return
-      var images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
-      for(let i = 0; i < images.length; i++) {
-        var img = images[i];
+      this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
+      if(!this.currentPageElem)
+        return;
+
+      let images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
+      images.forEach((img) => {
         this.renderer.setStyle(img, "width", val);
-      }
+      });
+
       this.widthOverride$ = this.widthSliderValue$;
       this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
       this.currentPageElem.scrollIntoView();
+      this.cdRef.markForCheck();
     });
 
     if (this.goToPage) {
