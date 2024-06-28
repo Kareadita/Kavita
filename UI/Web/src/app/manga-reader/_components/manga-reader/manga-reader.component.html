@@ -277,10 +277,15 @@
             </div>
 
             <div class="col-md-6 col-sm-12">
-              <label for="page-fitting-slider" class="form-label">{{t('width_override')}}:
-                  {{ (widthOverrideLabel$ | async) ? (widthOverrideLabel$ | async) : t('width_override_off') }}
+              <label for="width-override-slider" class="form-label">{{t('width-override-label')}}:
+                @if (widthOverrideLabel$ | async; as widthOverrideLabel) {
+                  {{ widthOverrideLabel ? widthOverrideLabel : t('off') }}
+                  }
+                @else {
+                  {{t('off')}}
+                }
               </label>
-              <input id="page-fitting-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
+              <input id="width-override-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
             </div>
 
 
