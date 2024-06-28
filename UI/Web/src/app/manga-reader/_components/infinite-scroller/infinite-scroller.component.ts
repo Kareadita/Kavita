@@ -245,6 +245,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       takeUntilDestroyed(this.destroyRef)
     );
 
+    this.widthOverride$ = this.widthSliderValue$;
+
     //perfom jump so the page stays in view
     this.widthSliderValue$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
@@ -399,6 +401,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   checkIfShouldTriggerContinuousReader() {
+    this.widthOverride$ = this.widthSliderValue$;
     if (this.isScrolling) return;
 
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {

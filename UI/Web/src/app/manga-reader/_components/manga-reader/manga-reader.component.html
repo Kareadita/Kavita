@@ -194,8 +194,6 @@
                 <option value="full-width">{{t('width')}}</option>
                 <option value="original">{{t('original')}}</option>
               </select>
-              <label for="page-fitting-slider" class="form-label">{{t('manual_width')}}</label>
-              <input id="page-fitting-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
             </div>
           </div>
 
@@ -276,6 +274,13 @@
               <span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
               <input type="range" class="form-range" id="darkness"
                      min="10" max="100" step="1" formControlName="darkness">
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+              <label for="page-fitting-slider" class="form-label">{{t('width_override')}}:
+                  {{ (widthOverrideLabel$ | async) ? (widthOverrideLabel$ | async) : t('width_override_off') }}
+              </label>
+              <input id="page-fitting-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
             </div>
 
 

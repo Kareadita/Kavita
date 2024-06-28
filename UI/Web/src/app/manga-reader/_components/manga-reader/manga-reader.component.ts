@@ -398,6 +398,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Show and log debug information
    */
   debugMode: boolean = false;
+  /**
+   * Width overwrite label for maunal width control
+  */
+  widthOverrideLabel$ : Observable<string> = new Observable<string>();
 
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
@@ -568,6 +572,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.generalSettingsForm.get('widthSlider')?.setValue(0);
         this.generalSettingsForm.get('widthSlider')?.disable();
       }
+
+            this.widthOverrideLabel$ = this.readerSettings$?.pipe(
+      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+      takeUntilDestroyed(this.destroyRef)
+    );
+
+
     });
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
