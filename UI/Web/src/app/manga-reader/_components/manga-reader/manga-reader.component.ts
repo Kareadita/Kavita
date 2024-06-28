@@ -555,7 +555,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       ).subscribe(() => {});
 
       this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-        let fitting = this.generalSettingsForm.get('fittingOption')?.value;
+        const fitting = this.generalSettingsForm.get('fittingOption')?.value;
         if(PageSplitOption.FitSplit == val && FITTING_OPTION.WIDTH == fitting) {
           this.generalSettingsForm.get('widthSlider')?.enable();
         } else {
@@ -565,7 +565,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
     this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      let splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
+      const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
       if(PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == val){
           this.generalSettingsForm.get('widthSlider')?.enable();
       } else {
