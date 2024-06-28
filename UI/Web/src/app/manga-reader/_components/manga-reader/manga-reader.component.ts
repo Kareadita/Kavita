@@ -590,7 +590,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             widthOverrideControl?.setValue(0);
             widthOverrideControl?.disable();
           }
-
         }),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
