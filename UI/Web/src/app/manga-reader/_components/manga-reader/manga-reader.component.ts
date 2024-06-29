@@ -398,6 +398,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Show and log debug information
    */
   debugMode: boolean = false;
+  /**
+   * Width override label for maunal width control
+  */
+  widthOverrideLabel$ : Observable<string> = new Observable<string>();
 
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
@@ -513,6 +517,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         autoCloseMenu: new FormControl(this.autoCloseMenu),
         pageSplitOption: new FormControl(this.pageSplitOption),
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
+        widthSlider: new FormControl('none'),
         layoutMode: new FormControl(this.layoutMode),
         darkness: new FormControl(100),
         emulateBook: new FormControl(this.user.preferences.emulateBook),
@@ -549,7 +554,51 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
+      //only enable the width override slider under certain conditions
+      // width mode selected
+      // splitting is set to fit to screen, otherwise disable
+      // when disable set the value to 0
+      // to use the default of the current single page reader
+      this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(
+        tap(val => {
+          const fitting = this.generalSettingsForm.get('fittingOption')?.value;
+          const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
 
+          if (PageSplitOption.FitSplit == val && FITTING_OPTION.WIDTH == fitting) {
+            widthOverrideControl?.enable();
+          } else {
+            widthOverrideControl?.setValue(0);
+            widthOverrideControl?.disable();
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => {});
+
+      //only enable the width override slider under certain conditions
+      // width mode selected
+      // splitting is set to fit to screen, otherwise disable
+      // when disable set the value to 0
+      // to use the default of the current single page reader
+      this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(
+        tap(val => {
+          const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
+          const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
+
+          if (PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == val){
+            widthOverrideControl?.enable();
+          } else {
+            widthOverrideControl?.setValue(0);
+            widthOverrideControl?.disable();
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => {});
+
+      //send the current width override value to the label
+      this.widthOverrideLabel$ = this.readerSettings$?.pipe(
+        map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+        takeUntilDestroyed(this.destroyRef)
+      );
 
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
@@ -560,11 +609,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.layoutMode === LayoutMode.Single) {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
           this.generalSettingsForm.get('pageSplitOption')?.enable();
+          this.generalSettingsForm.get('widthSlider')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
           this.generalSettingsForm.get('emulateBook')?.enable();
         } else {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
+          this.generalSettingsForm.get('widthSlider')?.disable();
           this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
           this.generalSettingsForm.get('fittingOption')?.disable();
           this.generalSettingsForm.get('emulateBook')?.enable();
@@ -696,6 +747,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return {
       pageSplit: parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10),
       fitting: (this.generalSettingsForm.get('fittingOption')?.value as FITTING_OPTION),
+      widthSlider: this.generalSettingsForm.get('widthSlider')?.value,
       layoutMode: this.layoutMode,
       darkness: parseInt(this.generalSettingsForm.get('darkness')?.value + '', 10) || 100,
       pagingDirection: this.pagingDirection,

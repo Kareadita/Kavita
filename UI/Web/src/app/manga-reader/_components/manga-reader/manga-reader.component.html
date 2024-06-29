@@ -276,6 +276,18 @@
                      min="10" max="100" step="1" formControlName="darkness">
             </div>
 
+            <div class="col-md-6 col-sm-12">
+              <label for="width-override-slider" class="form-label">{{t('width-override-label')}}:
+                @if (widthOverrideLabel$ | async; as widthOverrideLabel) {
+                  {{ widthOverrideLabel ? widthOverrideLabel : t('off') }}
+                  }
+                @else {
+                  {{t('off')}}
+                }
+              </label>
+              <input id="width-override-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
+            </div>
+
 
             <div class="col-md-6 col-sm-12">
               <button class="btn btn-primary" (click)="savePref()">{{t('save-globally')}}</button>
