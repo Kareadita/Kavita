@@ -53,6 +53,11 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   pageNum: number = 0;
   maxPages: number = 1;
 
+  /**
+   * Width override for maunal width control
+  */
+  widthOverride$ : Observable<string> = new Observable<string>();
+
   get ReaderMode() {return ReaderMode;}
   get LayoutMode() {return LayoutMode;}
 
@@ -66,6 +71,13 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       filter(_ => this.isValid()),
       takeUntilDestroyed(this.destroyRef)
     );
+
+    //handle manual width
+    this.widthOverride$ = this.readerSettings$.pipe(
+      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+      takeUntilDestroyed(this.destroyRef)
+    );
+
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),

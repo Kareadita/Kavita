@@ -1699,6 +1699,8 @@
         "image-scaling-label": "Image Scaling",
         "height": "Height",
         "width": "Width",
+        "width-override-label": "Width Override",
+        "off": "Off",
         "original": "Original",
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "swipe-enabled-label": "Swipe Enabled",
