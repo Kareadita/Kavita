@@ -30,25 +30,25 @@ public class CblController : BaseApiController
     /// The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.
     /// If this returns errors, the cbl will always be rejected by Kavita.
     /// </summary>
-    /// <param name="file">FormBody with parameter name of cbl</param>
+    /// <param name="cbl">FormBody with parameter name of cbl</param>
+    /// <param name="comicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
     [HttpPost("validate")]
-    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl([FromForm(Name = "cbl")] IFormFile file,
-        [FromForm(Name = "comicVineMatching")] bool comicVineMatching = false)
+    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, bool comicVineMatching = false)
     {
         var userId = User.GetUserId();
         try
         {
-            var cbl = await SaveAndLoadCblFile(file);
-            var importSummary = await _readingListService.ValidateCblFile(userId, cbl, comicVineMatching);
-            importSummary.FileName = file.FileName;
+            var cblReadingList = await SaveAndLoadCblFile(cbl);
+            var importSummary = await _readingListService.ValidateCblFile(userId, cblReadingList, comicVineMatching);
+            importSummary.FileName = cbl.FileName;
             return Ok(importSummary);
         }
         catch (ArgumentNullException)
         {
             return Ok(new CblImportSummaryDto()
             {
-                FileName = file.FileName,
+                FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
                 Results = new List<CblBookResult>()
                 {
@@ -63,7 +63,7 @@ public class CblController : BaseApiController
         {
             return Ok(new CblImportSummaryDto()
             {
-                FileName = file.FileName,
+                FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
                 Results = new List<CblBookResult>()
                 {
@@ -80,25 +80,26 @@ public class CblController : BaseApiController
     /// <summary>
     /// Performs the actual import (assuming dryRun = false)
     /// </summary>
-    /// <param name="file">FormBody with parameter name of cbl</param>
+    /// <param name="cbl">FormBody with parameter name of cbl</param>
     /// <param name="dryRun">If true, will only emulate the import but not perform. This should be done to preview what will happen</param>
+    /// <param name="comicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
     [HttpPost("import")]
-    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file,
-        [FromForm(Name = "dryRun")] bool dryRun = false, [FromForm(Name = "comicVineMatching")] bool comicVineMatching = false)
+    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, bool dryRun = false, bool comicVineMatching = false)
     {
         try
         {
             var userId = User.GetUserId();
-            var cbl = await SaveAndLoadCblFile(file);
-            var importSummary = await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun, comicVineMatching);
-            importSummary.FileName = file.FileName;
+            var cblReadingList = await SaveAndLoadCblFile(cbl);
+            var importSummary = await _readingListService.CreateReadingListFromCbl(userId, cblReadingList, dryRun, comicVineMatching);
+            importSummary.FileName = cbl.FileName;
+
             return Ok(importSummary);
         } catch (ArgumentNullException)
         {
             return Ok(new CblImportSummaryDto()
             {
-                FileName = file.FileName,
+                FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
                 Results = new List<CblBookResult>()
                 {
@@ -113,7 +114,7 @@ public class CblController : BaseApiController
         {
             return Ok(new CblImportSummaryDto()
             {
-                FileName = file.FileName,
+                FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
                 Results = new List<CblBookResult>()
                 {

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.1.4"
+    "version": "0.8.1.14"
   },
   "servers": [
     {
@@ -55,7 +55,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -88,7 +88,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -138,7 +138,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -168,7 +168,7 @@
         "summary": "Returns an up-to-date user account",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -218,7 +218,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -248,7 +248,7 @@
         "summary": "Get All Roles back. See API.Constants.PolicyConstants",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -288,7 +288,7 @@
         "description": "This will log unauthorized requests to Security log",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -338,7 +338,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -369,7 +369,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -402,7 +402,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -434,7 +434,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -484,7 +484,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -534,7 +534,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -585,7 +585,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -616,7 +616,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -656,7 +656,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -685,7 +685,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -733,7 +733,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -774,7 +774,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -804,7 +804,7 @@
         "summary": "Returns the OPDS url for this user",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -834,7 +834,7 @@
         "summary": "Is the user's current email valid or not",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -864,7 +864,7 @@
         "summary": "Checks if an admin exists on the system. This is essentially a check to validate if the system has been setup.",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -913,7 +913,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -956,7 +956,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1006,7 +1006,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1032,7 +1032,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1092,7 +1092,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1120,63 +1120,31 @@
           "Cbl"
         ],
         "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
+        "parameters": [
+          {
+            "name": "comicVineMatching",
+            "in": "query",
+            "description": "Use comic vine matching or not. Defaults to false",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "ContentType": {
-                    "type": "string"
-                  },
-                  "ContentDisposition": {
-                    "type": "string"
-                  },
-                  "Headers": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "Length": {
-                    "type": "integer",
-                    "format": "int64"
-                  },
-                  "Name": {
-                    "type": "string"
-                  },
-                  "FileName": {
-                    "type": "string"
-                  },
-                  "comicVineMatching": {
-                    "type": "boolean",
-                    "default": false
+                  "cbl": {
+                    "type": "string",
+                    "format": "binary"
                   }
                 }
               },
               "encoding": {
-                "ContentType": {
-                  "style": "form"
-                },
-                "ContentDisposition": {
-                  "style": "form"
-                },
-                "Headers": {
-                  "style": "form"
-                },
-                "Length": {
-                  "style": "form"
-                },
-                "Name": {
-                  "style": "form"
-                },
-                "FileName": {
-                  "style": "form"
-                },
-                "comicVineMatching": {
+                "cbl": {
                   "style": "form"
                 }
               }
@@ -1185,7 +1153,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1213,70 +1181,40 @@
           "Cbl"
         ],
         "summary": "Performs the actual import (assuming dryRun = false)",
+        "parameters": [
+          {
+            "name": "dryRun",
+            "in": "query",
+            "description": "If true, will only emulate the import but not perform. This should be done to preview what will happen",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "comicVineMatching",
+            "in": "query",
+            "description": "Use comic vine matching or not. Defaults to false",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "ContentType": {
-                    "type": "string"
-                  },
-                  "ContentDisposition": {
-                    "type": "string"
-                  },
-                  "Headers": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "Length": {
-                    "type": "integer",
-                    "format": "int64"
-                  },
-                  "Name": {
-                    "type": "string"
-                  },
-                  "FileName": {
-                    "type": "string"
-                  },
-                  "dryRun": {
-                    "type": "boolean",
-                    "default": false
-                  },
-                  "comicVineMatching": {
-                    "type": "boolean",
-                    "default": false
+                  "cbl": {
+                    "type": "string",
+                    "format": "binary"
                   }
                 }
               },
               "encoding": {
-                "ContentType": {
-                  "style": "form"
-                },
-                "ContentDisposition": {
-                  "style": "form"
-                },
-                "Headers": {
-                  "style": "form"
-                },
-                "Length": {
-                  "style": "form"
-                },
-                "Name": {
-                  "style": "form"
-                },
-                "FileName": {
-                  "style": "form"
-                },
-                "dryRun": {
-                  "style": "form"
-                },
-                "comicVineMatching": {
+                "cbl": {
                   "style": "form"
                 }
               }
@@ -1285,7 +1223,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1325,7 +1263,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1373,7 +1311,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1397,7 +1335,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1456,7 +1394,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1505,7 +1443,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1555,7 +1493,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1588,7 +1526,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1621,7 +1559,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1654,7 +1592,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1687,7 +1625,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1700,7 +1638,7 @@
         "summary": "For the authenticated user, if they have an active Kavita+ subscription and a MAL username on record,\r\nfetch their Mal interest stacks (including restacks)",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1759,7 +1697,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1790,7 +1728,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1821,7 +1759,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1845,7 +1783,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       },
@@ -1855,7 +1793,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1914,7 +1852,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1945,7 +1883,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -1969,7 +1907,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2013,7 +1951,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2057,7 +1995,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2101,7 +2039,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2125,7 +2063,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2147,7 +2085,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2180,7 +2118,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2213,7 +2151,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2225,7 +2163,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2271,7 +2209,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2304,7 +2242,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2354,7 +2292,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2383,7 +2321,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2414,7 +2352,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2445,7 +2383,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2476,7 +2414,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2507,7 +2445,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2538,7 +2476,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2569,7 +2507,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2611,7 +2549,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2641,7 +2579,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2671,7 +2609,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2704,7 +2642,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2727,7 +2665,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2776,7 +2714,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2806,7 +2744,7 @@
         "summary": "Return all libraries in the Server",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2856,7 +2794,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2915,7 +2853,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2965,7 +2903,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -2989,7 +2927,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3019,7 +2957,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3041,7 +2979,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3074,7 +3012,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3096,7 +3034,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3136,7 +3074,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3187,7 +3125,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3211,7 +3149,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3278,7 +3216,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3308,7 +3246,7 @@
         "summary": "Has any license",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3337,7 +3275,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       },
@@ -3368,7 +3306,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3399,7 +3337,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3411,7 +3349,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3460,7 +3398,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3526,7 +3464,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3575,7 +3513,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3624,7 +3562,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3674,7 +3612,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3724,7 +3662,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3774,7 +3712,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3813,7 +3751,7 @@
         "summary": "Returns all languages Kavita can accept",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3863,7 +3801,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3904,7 +3842,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -3946,7 +3884,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3985,7 +3923,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       },
@@ -4005,12 +3943,12 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
     },
-    "/api/Opds/{apiKey}/smart-filter/{filterId}": {
+    "/api/Opds/{apiKey}/smart-filters/{filterId}": {
       "get": {
         "tags": [
           "Opds"
@@ -4046,7 +3984,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4068,7 +4006,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4090,7 +4028,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4112,7 +4050,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4143,7 +4081,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4165,7 +4103,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4205,7 +4143,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4236,7 +4174,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4267,7 +4205,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4307,7 +4245,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4338,7 +4276,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4377,7 +4315,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4408,7 +4346,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4439,7 +4377,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4468,7 +4406,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4490,7 +4428,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4521,7 +4459,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4561,7 +4499,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4610,7 +4548,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4673,7 +4611,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4751,7 +4689,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4773,7 +4711,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4816,7 +4754,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -4848,7 +4786,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -4899,7 +4837,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -4941,7 +4879,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -4980,7 +4918,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5028,7 +4966,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5079,7 +5017,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5120,7 +5058,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5162,7 +5100,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5196,7 +5134,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5265,7 +5203,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5315,7 +5253,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5365,7 +5303,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5398,7 +5336,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5431,7 +5369,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5464,7 +5402,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5497,7 +5435,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5530,7 +5468,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5563,7 +5501,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5596,7 +5534,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5620,7 +5558,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5670,7 +5608,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5693,7 +5631,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5734,7 +5672,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5775,7 +5713,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5834,7 +5772,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -5893,7 +5831,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5926,7 +5864,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -5950,7 +5888,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6000,7 +5938,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6060,7 +5998,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6093,7 +6031,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6135,7 +6073,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6197,7 +6135,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6242,7 +6180,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6283,7 +6221,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6344,7 +6282,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6378,7 +6316,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6402,7 +6340,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6452,7 +6390,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6500,7 +6438,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6550,7 +6488,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6600,7 +6538,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6651,7 +6589,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6710,7 +6648,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6743,7 +6681,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6767,7 +6705,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6800,7 +6738,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -6850,7 +6788,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6883,7 +6821,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6916,7 +6854,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6949,7 +6887,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -6980,7 +6918,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -7011,7 +6949,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -7035,7 +6973,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7094,7 +7032,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7147,7 +7085,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7190,7 +7128,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7248,7 +7186,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7315,7 +7253,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7382,7 +7320,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7458,7 +7396,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7525,7 +7463,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7584,7 +7522,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7622,7 +7560,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -7635,7 +7573,7 @@
         "summary": "Get the current user's AniList token",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7664,7 +7602,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7714,7 +7652,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -7747,7 +7685,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -7777,7 +7715,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7808,7 +7746,7 @@
         "description": "Requires admin",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7847,7 +7785,7 @@
         "summary": "Clears the scrobbling errors table",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -7899,7 +7837,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7938,7 +7876,7 @@
         "summary": "Returns all scrobble holds for the current user",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -7988,7 +7926,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8029,7 +7967,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8070,7 +8008,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -8094,7 +8032,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -8118,7 +8056,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8159,7 +8097,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8186,18 +8124,29 @@
         "tags": [
           "Search"
         ],
+        "summary": "Searches against different entities in the system against a query string",
         "parameters": [
           {
             "name": "queryString",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "includeChapterAndFiles",
+            "in": "query",
+            "description": "Include Chapter and Filenames in the entities. This can slow down the search on larger systems",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8276,7 +8225,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8355,7 +8304,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8406,7 +8355,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8446,7 +8395,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8494,7 +8443,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -8518,7 +8467,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8566,7 +8515,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8605,7 +8554,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8644,7 +8593,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8695,7 +8644,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -8728,7 +8677,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -8790,7 +8739,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8869,7 +8818,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8908,7 +8857,7 @@
         "summary": "Returns series that were recently updated, like adding or removing a chapter",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -8996,7 +8945,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9084,7 +9033,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9153,7 +9102,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9203,7 +9152,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9236,7 +9185,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9269,7 +9218,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9302,7 +9251,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9326,7 +9275,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9374,7 +9323,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9415,7 +9364,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9473,7 +9422,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9524,7 +9473,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9566,7 +9515,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9633,7 +9582,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9683,7 +9632,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9733,7 +9682,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9771,7 +9720,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9812,7 +9761,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9842,7 +9791,7 @@
         "summary": "Performs an ad-hoc cleanup of Cache",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9855,7 +9804,7 @@
         "summary": "Performs an ad-hoc cleanup of Want To Read, by removing want to read series for users, where the series are fully read and in Completed publication status.",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9868,7 +9817,7 @@
         "summary": "Performs an ad-hoc backup of the Database",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9881,7 +9830,7 @@
         "summary": "This is a one time task that needs to be ran for v0.7 statistics to work",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9894,7 +9843,7 @@
         "summary": "Returns non-sensitive information about the current system",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9925,7 +9874,7 @@
         "description": "This is just for the UI and is extremely lightweight",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9955,7 +9904,7 @@
         "summary": "Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9968,7 +9917,7 @@
         "summary": "Downloads all the log files via a zip",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9982,7 +9931,7 @@
         "description": "Some users have websocket issues so this is not always reliable to alert the user",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -9995,7 +9944,7 @@
         "summary": "Checks for updates, if no updates that are > current version installed, returns null",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10025,7 +9974,7 @@
         "summary": "Returns how many versions out of date this install is",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10058,7 +10007,7 @@
         "summary": "Pull the Changelog for Kavita from Github and display",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10097,7 +10046,7 @@
         "summary": "Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10136,7 +10085,7 @@
         "summary": "Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10175,7 +10124,7 @@
         "summary": "Deletes all media errors",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -10188,7 +10137,7 @@
         "summary": "Bust Kavita+ Cache",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -10200,7 +10149,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10230,7 +10179,7 @@
         "summary": "Returns the server settings",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10276,7 +10225,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10305,7 +10254,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10335,7 +10284,7 @@
         "summary": "Resets the IP Addresses",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10365,7 +10314,7 @@
         "summary": "Resets the Base url",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10395,7 +10344,7 @@
         "summary": "Is the minimum information setup for Email to work",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10425,7 +10374,7 @@
         "summary": "All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10463,7 +10412,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10501,7 +10450,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10539,7 +10488,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10579,7 +10528,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10609,7 +10558,7 @@
         "summary": "Sends a test email to see if email settings are hooked up correctly",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10649,7 +10598,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10678,7 +10627,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10707,7 +10656,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10745,7 +10694,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10783,7 +10732,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10821,7 +10770,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10872,7 +10821,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10911,7 +10860,7 @@
         "summary": "A breakdown of different files, their size, and format",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -10938,6 +10887,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/file-extension": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Generates a csv of all file paths for a given extension",
+        "parameters": [
+          {
+            "name": "fileExtension",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -10972,7 +10943,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11021,7 +10992,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11069,7 +11040,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11120,7 +11091,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11171,7 +11142,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11210,7 +11181,7 @@
         "summary": "Returns for Kavita+ the number of Series that have been processed, errored, and not processed",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11259,7 +11230,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11308,7 +11279,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11347,7 +11318,7 @@
         "summary": "Return's the user's external sources",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11406,7 +11377,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11456,7 +11427,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11510,7 +11481,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11551,7 +11522,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -11575,7 +11546,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11625,7 +11596,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -11658,7 +11629,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -11682,7 +11653,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11723,7 +11694,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11773,7 +11744,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -11806,7 +11777,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -11837,7 +11808,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -11861,7 +11832,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11910,7 +11881,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11939,7 +11910,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -11987,7 +11958,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12044,7 +12015,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12067,7 +12038,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12097,7 +12068,7 @@
         "summary": "Browse themes that can be used on this server",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12156,7 +12127,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12206,7 +12177,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12256,7 +12227,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12306,7 +12277,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12339,7 +12310,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12373,7 +12344,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12406,7 +12377,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12439,7 +12410,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12472,7 +12443,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12493,7 +12464,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -12517,7 +12488,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12555,7 +12526,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12603,7 +12574,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12642,7 +12613,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12690,7 +12661,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12720,7 +12691,7 @@
         "summary": "Returns the preferences of the user",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12750,7 +12721,7 @@
         "summary": "Returns a list of the user names within the system",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12829,7 +12800,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12876,7 +12847,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -12945,7 +12916,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -13004,7 +12975,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -13037,7 +13008,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -13046,6 +13017,9 @@
   "components": {
     "schemas": {
       "AgeRatingDto": {
+        "required": [
+          "title"
+        ],
         "type": "object",
         "properties": {
           "value": {
@@ -13079,6 +13053,10 @@
         "additionalProperties": false
       },
       "AgeRestrictionDto": {
+        "required": [
+          "ageRating",
+          "includeUnknowns"
+        ],
         "type": "object",
         "properties": {
           "ageRating": {
@@ -13457,6 +13435,11 @@
         "description": "Represents a saved page in a Chapter entity for a given user."
       },
       "AppUserCollection": {
+        "required": [
+          "ageRating",
+          "normalizedTitle",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -13561,7 +13544,7 @@
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A <br /> separated string of all missing series",
+            "description": "A \r\n separated string of all missing series",
             "nullable": true
           },
           "appUser": {
@@ -13656,13 +13639,16 @@
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A <br /> separated string of all missing series",
+            "description": "A \r\n separated string of all missing series",
             "nullable": true
           }
         },
         "additionalProperties": false
       },
       "AppUserDashboardStream": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -13711,6 +13697,11 @@
         "additionalProperties": false
       },
       "AppUserExternalSource": {
+        "required": [
+          "apiKey",
+          "host",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -13740,6 +13731,9 @@
         "additionalProperties": false
       },
       "AppUserPreferences": {
+        "required": [
+          "theme"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -14087,6 +14081,9 @@
         "additionalProperties": false
       },
       "AppUserSideNavStream": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -14150,6 +14147,10 @@
         "additionalProperties": false
       },
       "AppUserSmartFilter": {
+        "required": [
+          "filter",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -14177,6 +14178,12 @@
         "description": "Represents a Saved user Filter"
       },
       "AppUserTableOfContent": {
+        "required": [
+          "chapterId",
+          "pageNumber",
+          "seriesId",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -14249,6 +14256,9 @@
         "description": "A personal table of contents for a given user linked with a given book"
       },
       "AppUserWantToRead": {
+        "required": [
+          "seriesId"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -14501,6 +14511,10 @@
         "additionalProperties": false
       },
       "BulkUpdateSideNavStreamVisibilityDto": {
+        "required": [
+          "ids",
+          "visibility"
+        ],
         "type": "object",
         "properties": {
           "ids": {
@@ -14611,6 +14625,10 @@
         "description": "Represents the summary from the Import of a given CBL"
       },
       "Chapter": {
+        "required": [
+          "number",
+          "range"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -15443,6 +15461,10 @@
         "description": "Exclusively metadata about a given chapter"
       },
       "CollectionTag": {
+        "required": [
+          "normalizedTitle",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -15634,6 +15656,14 @@
         "additionalProperties": false
       },
       "CreatePersonalToCDto": {
+        "required": [
+          "chapterId",
+          "libraryId",
+          "pageNumber",
+          "seriesId",
+          "title",
+          "volumeId"
+        ],
         "type": "object",
         "properties": {
           "chapterId": {
@@ -15678,6 +15708,9 @@
         "additionalProperties": false
       },
       "DashboardStreamDto": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -16075,6 +16108,11 @@
         "additionalProperties": false
       },
       "ExternalRecommendation": {
+        "required": [
+          "coverUrl",
+          "name",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -16134,6 +16172,11 @@
         "additionalProperties": false
       },
       "ExternalReview": {
+        "required": [
+          "body",
+          "bodyJustText",
+          "provider"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -16207,6 +16250,11 @@
         "description": "Represents an Externally supplied Review for a given Series"
       },
       "ExternalSeriesDto": {
+        "required": [
+          "coverUrl",
+          "name",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -16312,6 +16360,12 @@
         "description": "External Metadata from Kavita+ for a Series"
       },
       "ExternalSourceDto": {
+        "required": [
+          "apiKey",
+          "host",
+          "id",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -16409,6 +16463,10 @@
         "additionalProperties": false
       },
       "FileFormatDto": {
+        "required": [
+          "extension",
+          "format"
+        ],
         "type": "object",
         "properties": {
           "extension": {
@@ -16763,6 +16821,9 @@
         "description": "Metadata filtering for v2 API only"
       },
       "FolderPath": {
+        "required": [
+          "path"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -16832,6 +16893,10 @@
         "description": "A full progress Record from the DB (not all data, only what's needed for API)"
       },
       "Genre": {
+        "required": [
+          "normalizedTitle",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -16864,6 +16929,9 @@
         "additionalProperties": false
       },
       "GenreTagDto": {
+        "required": [
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -17035,6 +17103,10 @@
         "description": "Represents an individual button in a Jump Bar"
       },
       "LanguageDto": {
+        "required": [
+          "isoCode",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "isoCode": {
@@ -17049,6 +17121,9 @@
         "additionalProperties": false
       },
       "Library": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -17343,6 +17418,14 @@
         "additionalProperties": false
       },
       "MalStackDto": {
+        "required": [
+          "author",
+          "restackCount",
+          "seriesCount",
+          "stackId",
+          "title",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "title": {
@@ -17379,6 +17462,10 @@
         "description": "Represents an Interest Stack from MAL"
       },
       "MalUserInfoDto": {
+        "required": [
+          "accessToken",
+          "username"
+        ],
         "type": "object",
         "properties": {
           "username": {
@@ -17395,6 +17482,9 @@
         "description": "Information about a User's MAL connection"
       },
       "MangaFile": {
+        "required": [
+          "filePath"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -17484,14 +17574,17 @@
           },
           "filePath": {
             "type": "string",
+            "description": "Absolute path to the archive file (normalized)",
             "nullable": true
           },
           "pages": {
             "type": "integer",
+            "description": "Number of pages for the given file",
             "format": "int32"
           },
           "bytes": {
             "type": "integer",
+            "description": "How many bytes make up this file",
             "format": "int64"
           },
           "format": {
@@ -17509,6 +17602,11 @@
           "created": {
             "type": "string",
             "format": "date-time"
+          },
+          "extension": {
+            "type": "string",
+            "description": "File extension",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -17603,6 +17701,10 @@
         "description": "This is used for bulk updating a set of volume and or chapters in one go"
       },
       "MediaErrorDto": {
+        "required": [
+          "extension",
+          "filePath"
+        ],
         "type": "object",
         "properties": {
           "extension": {
@@ -17710,6 +17812,11 @@
         "additionalProperties": false
       },
       "Person": {
+        "required": [
+          "name",
+          "normalizedName",
+          "role"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -17762,6 +17869,9 @@
         "additionalProperties": false
       },
       "PersonDto": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -17796,6 +17906,11 @@
         "additionalProperties": false
       },
       "PersonalToCDto": {
+        "required": [
+          "chapterId",
+          "pageNumber",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "chapterId": {
@@ -17926,6 +18041,11 @@
         "additionalProperties": false
       },
       "ReadHistoryEvent": {
+        "required": [
+          "chapterNumber",
+          "seriesName",
+          "userName"
+        ],
         "type": "object",
         "properties": {
           "userId": {
@@ -17981,6 +18101,11 @@
         "description": "Represents the Reading Status. This is a flag and allows multiple statues"
       },
       "ReadingList": {
+        "required": [
+          "ageRating",
+          "normalizedTitle",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -18284,6 +18409,11 @@
             "type": "integer",
             "description": "File size of underlying item",
             "format": "int64"
+          },
+          "summary": {
+            "type": "string",
+            "description": "The chapter summary",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -18926,6 +19056,14 @@
         "additionalProperties": false
       },
       "Series": {
+        "required": [
+          "localizedName",
+          "name",
+          "normalizedLocalizedName",
+          "normalizedName",
+          "originalName",
+          "sortName"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -19806,6 +19944,16 @@
         "description": "A relation flows between one series and another.\r\nSeries ---kind---> target"
       },
       "ServerInfoDto": {
+        "required": [
+          "dotnetVersion",
+          "fileFormats",
+          "installId",
+          "kavitaVersion",
+          "mangaReaderBackgroundColors",
+          "mangaReaderLayoutModes",
+          "mangaReaderPageSplittingModes",
+          "os"
+        ],
         "type": "object",
         "properties": {
           "installId": {
@@ -20139,6 +20287,17 @@
           },
           "smtpConfig": {
             "$ref": "#/components/schemas/SmtpConfigDto"
+          },
+          "firstInstallDate": {
+            "type": "string",
+            "description": "The Date Kavita was first installed",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstInstallVersion": {
+            "type": "string",
+            "description": "The Version of Kavita on the first run",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20223,6 +20382,9 @@
         "additionalProperties": false
       },
       "SideNavStreamDto": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -20304,6 +20466,11 @@
         "additionalProperties": false
       },
       "SiteTheme": {
+        "required": [
+          "fileName",
+          "name",
+          "normalizedName"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -20386,6 +20553,11 @@
         "description": "Represents a set of css overrides the user can upload to Kavita and will load into webui"
       },
       "SiteThemeDto": {
+        "required": [
+          "fileName",
+          "name",
+          "normalizedName"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -20452,6 +20624,10 @@
         "description": "Represents a set of css overrides the user can upload to Kavita and will load into webui"
       },
       "SmartFilterDto": {
+        "required": [
+          "filter",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -20538,6 +20714,10 @@
         "description": "Sorting Options for a query"
       },
       "Tag": {
+        "required": [
+          "normalizedTitle",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -20570,6 +20750,9 @@
         "additionalProperties": false
       },
       "TagDto": {
+        "required": [
+          "title"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -20811,6 +20994,10 @@
         "additionalProperties": false
       },
       "UpdateLibraryForUserDto": {
+        "required": [
+          "selectedLibraries",
+          "username"
+        ],
         "type": "object",
         "properties": {
           "username": {
@@ -20828,6 +21015,10 @@
         "additionalProperties": false
       },
       "UpdateLicenseDto": {
+        "required": [
+          "email",
+          "license"
+        ],
         "type": "object",
         "properties": {
           "license": {
@@ -20849,6 +21040,14 @@
         "additionalProperties": false
       },
       "UpdateNotificationDto": {
+        "required": [
+          "currentVersion",
+          "publishDate",
+          "updateBody",
+          "updateTitle",
+          "updateUrl",
+          "updateVersion"
+        ],
         "type": "object",
         "properties": {
           "currentVersion": {
@@ -21359,6 +21558,10 @@
         "description": "A list of Series to pass when working with Want To Read APIs"
       },
       "UploadFileDto": {
+        "required": [
+          "id",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -21420,6 +21623,635 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserPreferencesDto": {
+        "required": [
+          "autoCloseMenu",
+          "backgroundColor",
+          "blurUnreadSummaries",
+          "bookReaderFontFamily",
+          "bookReaderFontSize",
+          "bookReaderImmersiveMode",
+          "bookReaderLayoutMode",
+          "bookReaderLineSpacing",
+          "bookReaderMargin",
+          "bookReaderReadingDirection",
+          "bookReaderTapToPaginate",
+          "bookReaderThemeName",
+          "bookReaderWritingStyle",
+          "collapseSeriesRelationships",
+          "emulateBook",
+          "globalPageLayoutMode",
+          "layoutMode",
+          "locale",
+          "noTransitions",
+          "pageSplitOption",
+          "pdfLayoutMode",
+          "pdfScrollMode",
+          "pdfSpreadMode",
+          "pdfTheme",
+          "promptForDownloadSize",
+          "readerMode",
+          "readingDirection",
+          "scalingOption",
+          "shareReviews",
+          "showScreenHints",
+          "swipeToPaginate",
+          "theme"
+        ],
+        "type": "object",
+        "properties": {
+          "readingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
+          },
+          "scalingOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How should the image be scaled to screen",
+            "format": "int32"
+          },
+          "pageSplitOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: Which side of a split image should we show first",
+            "format": "int32"
+          },
+          "readerMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\r\n<example>\r\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\r\nby clicking top/bottom sides of reader.\r\n</example>",
+            "format": "int32"
+          },
+          "layoutMode": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How many pages to display in the reader at once",
+            "format": "int32"
+          },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+          },
+          "backgroundColor": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Manga Reader Option: Background color of the reader"
+          },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
+          },
+          "autoCloseMenu": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
+          },
+          "showScreenHints": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
+          },
+          "bookReaderMargin": {
+            "type": "integer",
+            "description": "Book Reader Option: Override extra Margin",
+            "format": "int32"
+          },
+          "bookReaderLineSpacing": {
+            "type": "integer",
+            "description": "Book Reader Option: Override line-height",
+            "format": "int32"
+          },
+          "bookReaderFontSize": {
+            "type": "integer",
+            "description": "Book Reader Option: Override font size",
+            "format": "int32"
+          },
+          "bookReaderFontFamily": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Book Reader Option: Maps to the default Kavita font-family (inherit) or an override"
+          },
+          "bookReaderTapToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+          },
+          "bookReaderReadingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
+          },
+          "bookReaderWritingStyle": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What writing style should be used, horizontal or vertical.",
+            "format": "int32"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/SiteThemeDto"
+          },
+          "bookReaderThemeName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "bookReaderLayoutMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderImmersiveMode": {
+            "type": "boolean",
+            "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+          },
+          "globalPageLayoutMode": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Global Site Option: If the UI should layout items as Cards or List items",
+            "format": "int32"
+          },
+          "blurUnreadSummaries": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already"
+          },
+          "promptForDownloadSize": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB."
+          },
+          "noTransitions": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
+          "locale": {
+            "minLength": 1,
+            "type": "string",
+            "description": "UI Site Global Setting: The language locale that should be used for the user"
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfLayoutMode": {
+            "enum": [
+              0,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Layout Mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserReadStatistics": {
+        "type": "object",
+        "properties": {
+          "totalPagesRead": {
+            "type": "integer",
+            "description": "Total number of pages read",
+            "format": "int64"
+          },
+          "totalWordsRead": {
+            "type": "integer",
+            "description": "Total number of words read",
+            "format": "int64"
+          },
+          "timeSpentReading": {
+            "type": "integer",
+            "description": "Total time spent reading based on estimates",
+            "format": "int64"
+          },
+          "chaptersRead": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "avgHoursPerWeekSpentReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "percentReadPerLibrary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleStatCount"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserReviewDto": {
+        "type": "object",
+        "properties": {
+          "tagline": {
+            "type": "string",
+            "description": "A tagline for the review",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "description": "The main review",
+            "nullable": true
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "The series this is for",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "The library this series belongs in",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "description": "The user who wrote this",
+            "nullable": true
+          },
+          "totalVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float"
+          },
+          "rawBody": {
+            "type": "string",
+            "nullable": true
+          },
+          "score": {
+            "type": "integer",
+            "description": "How many upvotes this review has gotten",
+            "format": "int32"
+          },
+          "siteUrl": {
+            "type": "string",
+            "description": "If External, the url of the review",
+            "nullable": true
+          },
+          "isExternal": {
+            "type": "boolean",
+            "description": "Does this review come from an external Source"
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "If this review is External, which Provider did it come from",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a User Review for a given Series"
+      },
+      "Volume": {
+        "required": [
+          "maxNumber",
+          "minNumber",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
+            "nullable": true
+          },
+          "lookupName": {
+            "type": "string",
+            "description": "This is just the original Parsed volume number for lookups",
+            "nullable": true
+          },
+          "number": {
+            "type": "integer",
+            "description": "The minimum number in the Name field in Int form",
+            "format": "int32",
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "The minimum number in the Name field",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
+            "format": "float"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chapter"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "Absolute path to the (managed) image file",
+            "nullable": true
+          },
+          "pages": {
+            "type": "integer",
+            "description": "Total pages of all chapters in this volume",
+            "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "description": "Total Word count of all chapters in this volume.",
+            "format": "int64"
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VolumeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "number": {
+            "type": "integer",
+            "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
+            "format": "int32",
+            "deprecated": true
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "description": "When chapter was created in local server time",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "When chapter was last modified in local server time",
+            "format": "date-time"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChapterDto"
+            },
+            "nullable": true
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Please insert JWT with Bearer into field",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Account",
+      "description": "All Account matters"
+    },
+    {
+      "name": "Cbl",
+      "description": "Responsible for the CBL import flow"
+    },
+    {
+      "name": "Collection",
+      "description": "APIs for Collections"
+    },
+    {
+      "name": "Device",
+      "description": "Responsible interacting and creating Devices"
+    },
+    {
+      "name": "Download",
+      "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
+    },
+    {
+      "name": "Image",
+      "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Panels",
+      "description": "For the Panels app explicitly"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
+    },
+    {
+      "name": "Reader",
+      "description": "For all things regarding reading, mainly focusing on non-Book related entities"
+    },
+    {
+      "name": "Search",
+      "description": "Responsible for the Search interface from the UI"
+    },
+    {
+      "name": "Stream",
+      "description": "Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)"
+    },
+    {
+      "name": "Tachiyomi",
+      "description": "All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any\r\nother purposes."
+    },
+    {
+      "name": "Upload",
+      "description": ""
+    },
+    {
+      "name": "WantToRead",
+      "description": "Responsible for all things Want To Read"
+    }
+  ]
+}    "nullable": true
           }
         },
         "additionalProperties": false
