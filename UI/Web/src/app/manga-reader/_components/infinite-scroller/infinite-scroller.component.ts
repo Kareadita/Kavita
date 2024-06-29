@@ -381,7 +381,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         this.cdRef.markForCheck();
       }
 
-      if (totalScroll === totalHeight && !this.atBottom) {
+      if (totalHeight != 0 && totalScroll >= totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.cdRef.markForCheck();
         this.setPageNum(this.totalPages);
@@ -392,6 +392,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
           document.body.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2);
           this.cdRef.markForCheck();
         });
+        this.checkIfShouldTriggerContinuousReader()
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) {
         // This if statement will fire once we scroll into the spacer at all
         this.loadNextChapter.emit();
