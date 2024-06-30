@@ -54,7 +54,7 @@
 
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.0.1" />
-      <PackageReference Include="MailKit" Version="4.6.0" />
+      <PackageReference Include="MailKit" Version="4.7.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -66,7 +66,7 @@
     <PackageReference Include="Flurl" Version="3.0.7" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="Hangfire" Version="1.8.14" />
-    <PackageReference Include="Hangfire.InMemory" Version="0.10.0" />
+    <PackageReference Include="Hangfire.InMemory" Version="0.10.3" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
@@ -95,7 +95,7 @@
     <PackageReference Include="Serilog.Sinks.SignalR.Core" Version="0.1.2" />
     <PackageReference Include="SharpCompress" Version="0.37.2" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.26.0.92422">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.28.0.94264">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -247,6 +247,7 @@ public class ImageService : IImageService
         {
             _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         } catch (Exception) {/* Swallow exception */}
+
         thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
     }
