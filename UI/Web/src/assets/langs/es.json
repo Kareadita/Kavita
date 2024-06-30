@@ -1725,7 +1725,9 @@
         "home-page-title": "Página de inicio:",
         "title": "Sobre el sistema",
         "localization-title": "Ubicaciones:",
-        "updates-title": "Historial de actualizaciones"
+        "updates-title": "Historial de actualizaciones",
+        "first-install-version-title": "Primera versión de instalación",
+        "first-install-date-title": "Fecha de la primera instalación"
     },
     "manage-tasks-settings": {
         "action-header": "Acción",
@@ -2023,7 +2025,8 @@
         "delete": "{{common.delete}}",
         "no-data": "No se han creado filtros inteligentes",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "Hay un error de codificación en el filtro. Debes volver a crearlo."
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -2060,7 +2063,8 @@
     },
     "all-filters": {
         "title": "Todos los filtros inteligentes",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "out-of-date-modal": {
         "close": "{{common.close}}",

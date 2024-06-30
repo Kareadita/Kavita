@@ -193,5 +193,7 @@
     "update-yearly-stats": "연간 통계 업데이트",
     "process-processed-scrobbling-events": "처리된 스크로블링 이벤트 처리",
     "account-email-invalid": "관리자 계정에 등록된 이메일이 유효한 이메일이 아닙니다. 테스트 이메일을 보낼 수 없습니다.",
-    "email-settings-invalid": "이메일 설정 누락 된 정보. 모든 이메일 설정을 저장합니다."
+    "email-settings-invalid": "이메일 설정 누락 된 정보. 모든 이메일 설정을 저장합니다.",
+    "collection-already-exists": "컬렉션은 이미 존재합니다",
+    "error-import-stack": "MAL 스택을 가져오는 데 문제가 있었습니다"
 }

@@ -45,7 +45,7 @@
         "not-processed": "Non Traité",
         "chapter-num": "Chapitre {{num}}",
         "volume-num": "Volume {{num}}",
-        "not-read-warning": "Les fournisseurs upstream conserveront toujours le nombre le plus élevé",
+        "not-read-warning": "Les fournisseurs en amont conserveront toujours le nombre le plus élevé",
         "special": "{{entity-title.special}}"
     },
     "scrobble-event-type-pipe": {
@@ -76,7 +76,7 @@
     "review-card": {
         "your-review": "Voici votre critique",
         "external-review": "Critique externe",
-        "local-review": "Critique locale",
+        "local-review": "Avis locale",
         "rating-percentage": "Évaluation {{r}}%"
     },
     "want-to-read": {
@@ -746,7 +746,7 @@
         "rating-pending": "Classification en attente",
         "everyone": "Tous publics",
         "ma15-plus": "15+",
-        "mature-17-plus": "Mature 17+"
+        "mature-17-plus": "Jeunes adultes 17+"
     },
     "server-stats": {
         "tags": "Étiquettes",
@@ -1445,7 +1445,8 @@
         "wiki-title": "Wiki :",
         "installId-title": "ID d'installation",
         "localization-title": "Localisations :",
-        "updates-title": "Historique des mises à jour"
+        "updates-title": "Historique des mises à jour",
+        "first-install-version-title": "Version de première installation"
     },
     "manage-tasks-settings": {
         "title": "Tâches récurrentes",

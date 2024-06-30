@@ -44,7 +44,9 @@
         "is-processed-header": "처리됨",
         "title": "스크로블 이력",
         "volume-num": "볼륨 {{num}}",
-        "chapter-num": "챕터 {{num}}"
+        "chapter-num": "챕터 {{num}}",
+        "not-read-warning": "업스트림 공급자는 항상 가장 높은 숫자를 유지합니다",
+        "special": "{{entity-title.special}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "읽기 진행률",
@@ -101,7 +103,10 @@
         "promoted": "승격",
         "clear": "삭제",
         "filter": "필터",
-        "remove": "제거"
+        "remove": "제거",
+        "chapter-num-shorthand": "Ch {{num}}",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Vol {{num}}"
     },
     "series-metadata-detail": {
         "characters-title": "캐릭터",
@@ -285,7 +290,12 @@
         "promote-tooltip": "승격은 관리 사용자뿐만 아니라 서버 전체에서 태그를 볼 수 있음을 의미합니다. 이 태그가 있는 모든 시리즈에는 여전히 사용자 액세스 제한이 적용됩니다.",
         "summary-label": "요약",
         "name-label": "이름",
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "info-tab": "{{edit-series-modal.info-tab}}",
+        "last-sync-title": "마지막 동기화:",
+        "source-url-title": "소스 URL:",
+        "total-series-title": "총 시리즈:",
+        "missing-series-title": "누락된 시리즈:"
     },
     "nav-header": {
         "promoted": "{{common.promoted}}",
@@ -375,7 +385,8 @@
         "time-to-read": "완독 예상 시간",
         "last-chapter-added": "추가된 항목",
         "read-progress": "마지막으로 읽음",
-        "average-rating": "평균 평점"
+        "average-rating": "평균 평점",
+        "random": "랜덤"
     },
     "manga-format-stats": {
         "title": "포맷",
@@ -436,7 +447,10 @@
         "rejected-cover-upload": "서버가 요청을 거부하여 이미지를 가져올 수 없습니다. 대신 파일에서 다운로드하여 업로드하세요.",
         "series-doesnt-exist": "이 시리즈는 더 이상 존재하지 않습니다",
         "collection-invalid-access": "이 태그가 속한 라이브러리에 액세스할 수 없거나 이 컬렉션이 유효하지 않습니다",
-        "user-not-auth": "사용자가 인증되지 않았습니다"
+        "user-not-auth": "사용자가 인증되지 않았습니다",
+        "theme-already-in-use": "해당 이름의 테마가 이미 존재합니다",
+        "theme-manual-upload": "수동 업로드로 테마를 생성하는 중에 문제가 발생했습니다",
+        "delete-theme-in-use": "현재 최소 한 명의 사용자가 테마를 사용 중이므로 삭제할 수 없습니다"
     },
     "toasts": {
         "no-updates": "사용 가능한 업데이트 없음",
@@ -533,7 +547,10 @@
         "collections-unpromoted": "컬렉션이 홍보되지 않음",
         "confirm-delete-collections": "여러 컬렉션을 삭제하시겠습니까?",
         "collections-deleted": "컬렉션이 삭제되었습니다",
-        "pdf-book-mode-screen-size": "책 모드에 비해 화면이 너무 작음"
+        "pdf-book-mode-screen-size": "책 모드에 비해 화면이 너무 작음",
+        "stack-imported": "가져온 스택",
+        "confirm-delete-theme": "이 테마를 제거하면 디스크에서 삭제됩니다. 제거하기 전에 임시 디렉토리에서 가져올 수 있습니다",
+        "mal-token-required": "MAL 토큰이 필요합니다. 사용자 설정에서 설정하세요"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -864,7 +881,7 @@
     "card-detail-drawer": {
         "general-tab": "일반",
         "metadata-tab": "메타데이터",
-        "info-tab": "정보",
+        "info-tab": "{{edit-series-modal.info-tab}}",
         "pages": "페이지:",
         "cover-tab": "표지",
         "no-summary": "사용 가능한 요약이 없습니다.",
@@ -986,7 +1003,9 @@
         "sender-address-tooltip": "이는 수신자가 이메일을 받을 때 볼 수 있는 이메일 주소입니다. 일반적으로 계정과 연결된 이메일 주소입니다.",
         "sender-displayname-tooltip": "수신자가 이메일을 받을 때 보게 될 이름",
         "username-tooltip": "호스트에 대해 인증하는 데 사용되는 사용자 이름",
-        "host-tooltip": "이메일 서버의 발신/SMTP 주소"
+        "host-tooltip": "이메일 서버의 발신/SMTP 주소",
+        "setting-description": "Kavita 내에서 이메일 기반 기능을 사용하려면 호스트 이름과 SMTP 설정을 모두 입력해야 합니다.",
+        "test-warning": "테스트 버튼을 사용하기 전에 반드시 저장해야 합니다."
     },
     "manage-scrobble-errors": {
         "edit-item-alt": "편집 {{seriesName}}",
@@ -1074,7 +1093,9 @@
         "no-data": "아무것도 없습니다",
         "close": "{{common.close}}",
         "users-online-count": "{{num}} 사용자 온라인",
-        "active-events-title": "활성 이벤트:"
+        "active-events-title": "활성 이벤트:",
+        "left-to-process": "처리할 남은 항목: {{leftToProcess}}",
+        "download-in-queue": "대기열에서 {{num}} 다운로드"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
@@ -1098,7 +1119,8 @@
         "people": "인물",
         "tags": "태그",
         "genres": "장르",
-        "bookmarks": "{{side-nav.bookmarks}}"
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "include-extras": "챕터 및 파일 포함"
     },
     "add-to-list-modal": {
         "filter-label": "{{common.filter}}",
@@ -1191,7 +1213,9 @@
         "unbookmark-page-tooltip": "페이지 북마크 해제",
         "bookmark-page-tooltip": "페이지 북마크",
         "series-progress": "시리즈 진행률: {{percentage}}",
-        "bookmarks-title": "북마크"
+        "bookmarks-title": "북마크",
+        "width-override-label": "너비 재지정",
+        "off": "끄기"
     },
     "metadata-filter": {
         "penciller-label": "펜슬러",
@@ -1348,7 +1372,7 @@
         "encode-as-description-part-2": "WebP를 사용할 수 있습니까?",
         "encode-as-description-part-3": "AVIF를 사용할 수 있습니까?",
         "encode-as-warning": "WebP/AVIF로 이동한 후에는 PNG로 다시 변환할 수 없습니다. 모든 표지를 재생성하려면 라이브러리의 표지를 새로 고쳐야 합니다. 북마크와 파비콘은 변환할 수 없습니다.",
-        "media-warning": "작업 탭에서 미디어 변환 작업을 트리거해야 합니다.,",
+        "media-warning": "작업 탭에서 미디어 변환 작업을 트리거해야 합니다.",
         "encode-as-label": "미디어를 다른 이름으로 저장",
         "encode-as-tooltip": "Kavita가 관리하는 모든 미디어(표지, 북마크, 파비콘)는 이 유형으로 인코딩됩니다.",
         "bookmark-dir-label": "북마크 디렉토리",
@@ -1369,7 +1393,18 @@
         "set-default": "기본값으로 설정",
         "apply": "{{common.apply}}",
         "applied": "적용됨",
-        "scan-queued": "사이트 테마 스캔을 대기 중입니다"
+        "scan-queued": "사이트 테마 스캔을 대기 중입니다",
+        "default-theme": "기본 테마",
+        "download": "{{changelog.download}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "CSS 파일",
+        "description": "Kavita는 내 색상으로 제공되며, 귀하의 필요에 맞는 색상 구성표를 찾거나 직접 만들어 공유할 수 있습니다. 테마는 귀하의 계정에 적용되거나 모든 계정에 적용될 수 있습니다.",
+        "active-theme": "활성",
+        "delete": "{{common.delete}}",
+        "preview-default": "먼저 테마를 선택하세요",
+        "preview-default-admin": "먼저 테마를 선택하거나 수동으로 업로드하세요",
+        "preview-title": "미리보기"
     },
     "change-email": {
         "invite-url-tooltip": "복사하여 새 탭에 붙여넣기",
@@ -1703,7 +1738,9 @@
         "donations-title": "기부:",
         "source-title": "소스:",
         "localization-title": "현지화:",
-        "updates-title": "업데이트 내역"
+        "updates-title": "업데이트 내역",
+        "first-install-version-title": "최초 설치 버전",
+        "first-install-date-title": "최초 설치 날짜"
     },
     "library-detail": {
         "library-tab": "라이브러리",
@@ -1744,7 +1781,9 @@
         "extension-header": "확장자",
         "total-size-header": "총 크기",
         "total-file-size-title": "총 파일 크기:",
-        "not-classified": "분류되지 않음"
+        "not-classified": "분류되지 않음",
+        "download-file-for-extension-alt": "{{extension}}에 대한 파일 보고서 다운로드",
+        "download-file-for-extension-header": "보고서 다운로드"
     },
     "want-to-read": {
         "series-count": "{{common.series-count}}",
@@ -1759,7 +1798,8 @@
         "rating-percentage": "평점 {{r}}%"
     },
     "site-theme-provider-pipe": {
-        "system": "시스템"
+        "system": "시스템",
+        "custom": "{{device-platform-pipe.custom}}"
     },
     "manage-devices": {
         "title": "장치 관리자",
@@ -1835,7 +1875,9 @@
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
         "no-data-filtered": "현재 필터와 일치하는 항목이 없습니다.",
         "title-alt": "Kavita - {{collectionName}} 컬렉션",
-        "series-header": "시리즈"
+        "series-header": "시리즈",
+        "sync-progress": "수집된 시리즈: {{title}}",
+        "last-sync": "마지막 동기화: {{date}}"
     },
     "all-collections": {
         "title": "컬렉션",
@@ -2015,14 +2057,16 @@
         "no-data": "스마트 필터가 생성되지 않았습니다",
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "필터에 인코딩 오류가 있습니다. 다시 생성해야 합니다."
     },
     "next-expected-card": {
         "title": "~{{date}}"
     },
     "all-filters": {
         "title": "모든 스마트 필터",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "file-type-group-pipe": {
         "epub": "Epub",
@@ -2059,7 +2103,8 @@
         "description": "MAL 관심 스택을 가져오고 Kavita 내에서 컬렉션을 생성하세요",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} 재정렬",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "nothing-found": "아무것도 찾을 수 없음"
     },
     "pdf-layout-mode-pipe": {
         "single": "단일 페이지",
@@ -2084,5 +2129,8 @@
     "collection-owner": {
         "collection-via-label": "{{source}}을(를) 통해",
         "collection-created-label": "작성자: {{owner}}"
+    },
+    "browse-themes-modal": {
+        "title": "테마 찾아보기"
     }
 }

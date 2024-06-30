@@ -1135,7 +1135,9 @@
         "source-title": "源代码：",
         "feature-request-title": "功能请求:",
         "localization-title": "本地化:",
-        "updates-title": "更新历史"
+        "updates-title": "更新历史",
+        "first-install-version-title": "首次安装版本",
+        "first-install-date-title": "首次安装日期"
     },
     "manage-tasks-settings": {
         "title": "周期性任务",
@@ -1328,7 +1330,8 @@
         "users-online-count": "{{num}}用户在线",
         "active-events-title": "活动事件：",
         "no-data": "无运行",
-        "left-to-process": "待处理：{{leftToProcess}}"
+        "left-to-process": "待处理：{{leftToProcess}}",
+        "download-in-queue": "{{num}} 队列中的下载"
     },
     "shortcuts-modal": {
         "title": "热键",
@@ -1594,7 +1597,9 @@
         "total-size-header": "总大小",
         "total-files-header": "文件总数",
         "not-classified": "未分类",
-        "total-file-size-title": "总文件大小："
+        "total-file-size-title": "总文件大小：",
+        "download-file-for-extension-header": "下载报告",
+        "download-file-for-extension-alt": "下载 {{extension}} 的文件报告"
     },
     "reading-activity": {
         "title": "阅读活动",
@@ -1884,7 +1889,10 @@
         "volume-num": "卷",
         "clear": "清空",
         "filter": "筛选",
-        "remove": "删除"
+        "remove": "删除",
+        "issue-num-shorthand": "#{{num}}",
+        "chapter-num-shorthand": "章节 {{num}}",
+        "volume-num-shorthand": "卷 {{num}}"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "向上滚动以返回上一章节",
@@ -2047,11 +2055,13 @@
         "no-data": "未创建智能筛选",
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "筛选器中存在编码错误。您需要重新创建它。"
     },
     "all-filters": {
         "title": "所有智能筛选器",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "next-expected-card": {
         "title": "~{{date}}"

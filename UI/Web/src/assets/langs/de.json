@@ -172,7 +172,12 @@
         "updated-toastr": "Der Standardwert der Seite wurde auf {{name}} aktualisiert",
         "scan-queued": "Eine Website-Motivsuche wurde in die Warteschlange gestellt",
         "preview-default-admin": "Wähle ein Design aus oder lade eines hoch",
-        "preview-title": "Vorschau"
+        "preview-title": "Vorschau",
+        "active-theme": "Aktiv",
+        "upload-continued": "eine css-Datei",
+        "description": "Kavita ist in meinen Farben erhältlich. Finden Sie ein Farbschema, das Ihren Bedürfnissen entspricht, oder erstellen Sie selbst eines und teilen Sie es. Die Themen können für Ihr Konto oder für alle Konten angewendet werden.",
+        "preview-default": "Wählen Sie zunächst ein Design",
+        "default-theme": "Standard-Design"
     },
     "theme": {
         "theme-dark": "dunkel",
@@ -421,7 +426,8 @@
         "doujinshi": "Doujinshi",
         "other": "Andere",
         "edition": "Ausgabe",
-        "parent": "Übergeordnet"
+        "parent": "Übergeordnet",
+        "annual": "Jährlich"
     },
     "reset-password": {
         "email-label": "{{common.email}}",
@@ -918,12 +924,17 @@
     "publication-status-pipe": {
         "cancelled": "Abgebrochen",
         "ongoing": "Fortlaufend",
-        "completed": "Beendet"
+        "completed": "Beendet",
+        "ended": "Beendet"
     },
     "person-role-pipe": {
         "artist": "Künstler",
         "character": "Charakter",
         "editor": "Bearbeiter",
-        "publisher": "Herausgeber"
+        "publisher": "Herausgeber",
+        "cover-artist": "Cover Künstler",
+        "translator": "Übersetzer",
+        "colorist": "Kolorist",
+        "imprint": "Impressum"
     }
 }
