@@ -1135,7 +1135,9 @@
         "source-title": "Fonte:",
         "feature-request-title": "Solicitações de recursos:",
         "localization-title": "Localizações:",
-        "updates-title": "Histórico de Atualizações"
+        "updates-title": "Histórico de Atualizações",
+        "first-install-version-title": "Primeira Versão de Instalação",
+        "first-install-date-title": "Data da Primeira Instalação"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
@@ -2036,7 +2038,8 @@
         "no-data": "Nenhum Filtro Inteligente criado",
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "Há um erro de codificação no filtro. Você precisa recriá-lo."
     },
     "stream-pipe": {
         "collections": "{{side-nav.collections}}",
@@ -2060,7 +2063,8 @@
     },
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "out-of-date-modal": {
         "close": "{{common.close}}",

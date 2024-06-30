@@ -111,7 +111,7 @@
     "user-no-access-library-from-series": "Der Benutzer hat keinen Zugang zu der Bibliothek, der zu dieser Serie gehört",
     "series-restricted-age-restriction": "Benutzer darf diese Serie aufgrund von Altersbeschränkungen nicht sehen",
     "book-num": "Buch {0}",
-    "issue-num": "Fehler {0}{1}",
+    "issue-num": "Ausgabe {0}{1}",
     "chapter-num": "Kapitel {0}",
     "reading-list-position": "Position konnte nicht aktualisiert werden",
     "libraries-restricted": "Benutzer hat keinen Zugriff auf jegliche Bibliothek",
