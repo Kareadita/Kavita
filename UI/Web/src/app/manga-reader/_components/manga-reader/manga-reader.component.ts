@@ -594,6 +594,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
+      //sets the default override to 0, fixing the none% bug
+      this.generalSettingsForm.get('widthSlider')!.setValue(0);
+
       //send the current width override value to the label
       this.widthOverrideLabel$ = this.readerSettings$?.pipe(
         map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
