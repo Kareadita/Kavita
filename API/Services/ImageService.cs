@@ -237,18 +237,40 @@ public class ImageService : IImageService
         using var sourceImage = Image.NewFromStream(stream);
         if (stream.CanSeek) stream.Position = 0;
 
+        var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
+        var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);
+
         using var thumbnail = sourceImage.ThumbnailImage(targetWidth, targetHeight,
-            size: GetSizeForDimensions(sourceImage, targetWidth, targetHeight),
-            crop: GetCropForDimensions(sourceImage, targetWidth, targetHeight));
+            size: scalingSize,
+            crop: scalingCrop);
 
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
+
         try
         {
             _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         } catch (Exception) {/* Swallow exception */}
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
-        return filename;
+
+        try
+        {
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+
+            return filename;
+        }
+        catch (VipsException)
+        {
+            // NetVips Issue: https://github.com/kleisauke/net-vips/issues/234
+            // Saving pdf covers from a stream can fail, so revert to old code
+
+            if (stream.CanSeek) stream.Position = 0;
+            using var thumbnail2 = Image.ThumbnailStream(stream, targetWidth, height: targetHeight,
+                size: scalingSize,
+                crop: scalingCrop);
+            thumbnail2.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+
+            return filename;
+        }
     }
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
