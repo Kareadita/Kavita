@@ -11,7 +11,6 @@ import {Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
-import {Router} from "@angular/router";
 import {SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";

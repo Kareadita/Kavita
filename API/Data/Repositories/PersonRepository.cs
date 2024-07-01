@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -24,6 +25,7 @@ public interface IPersonRepository
     Task<int> GetCountAsync();
 
     Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
+    Task<string> GetCoverImageAsync(int personId);
 }
 
 public class PersonRepository : IPersonRepository
@@ -93,6 +95,14 @@ public class PersonRepository : IPersonRepository
         return await _context.Person
             .Where(p => p.Role == role && normalizeNames.Contains(p.NormalizedName))
             .ToListAsync();
+    }
+
+    public async Task<string> GetCoverImageAsync(int personId)
+    {
+        return await _context.Person
+            .Where(c => c.Id == personId)
+            .Select(c => c.CoverImage)
+            .SingleOrDefaultAsync();
     }
 
 

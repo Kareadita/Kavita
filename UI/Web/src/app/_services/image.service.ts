@@ -59,6 +59,10 @@ export class ImageService {
     return part.substring(0, equalIndex).replace('Id', '');
   }
 
+  getPersonImage(personId: number) {
+    return `${this.baseUrl}image/person-cover?personId=${personId}&apiKey=${this.encodedKey}`;
+  }
+
   getLibraryCoverImage(libraryId: number) {
     return `${this.baseUrl}image/library-cover?libraryId=${libraryId}&apiKey=${this.encodedKey}`;
   }

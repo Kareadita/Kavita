@@ -1,0 +1,4 @@
+<p>person-detail works!</p>
+@if (person$ | async; as person) {
+  <app-image [imageUrl]="imageService.getPersonImage(personId)"></app-image>
+}
