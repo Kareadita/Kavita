@@ -316,6 +316,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.cdRef.markForCheck();
   }
 
+  // Used to catch webtoons smaller than the viewport height.
+  heightLessThanView() {
+    return this.getTotalHeight() < this.getViewportHeight();
+  }
+
   getVerticalOffset() {
     const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
 
@@ -330,6 +335,19 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       || document.body.scrollTop
       || document.documentElement.scrollTop
       || 0);
+  }
+
+  onWheel(event: WheelEvent) {
+    if (!this.heightLessThanView()) {
+      // Only execute on small webtoons.
+      return;
+    }
+
+    if (event.deltaY > 0) {
+      this.loadNextChapter.emit();
+    } else if (event.deltaY < 0) {
+      this.loadPrevChapter.emit();
+    }
   }
 
   /**
@@ -384,6 +402,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     let totalHeight = 0;
     document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
     return Math.round(totalHeight);
+  }
+
+  getViewportHeight() {
+    return window.innerHeight;
   }
 
   getTotalScroll() {
@@ -596,7 +618,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
-    if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
+    if (!this.heightLessThanView() && entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
       this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
       this.loadNextChapter.emit();
     }

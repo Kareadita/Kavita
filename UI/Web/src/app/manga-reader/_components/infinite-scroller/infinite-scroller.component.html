@@ -13,7 +13,7 @@
     <strong>Scroll Top:</strong> {{getScrollTop()}}
   </div>
 
-  <div *ngIf="atTop" #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+  <div *ngIf="atTop || heightLessThanView()" #topSpacer [style.height]="heightLessThanView() ? 'inherit' : '300px'" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
     <div style="height: 200px"></div>
     <div>
       <button class="btn btn-icon mx-auto">
@@ -32,7 +32,7 @@
       <img src="{{item.src}}" style="display: block; width: {{widthOverride$ | async}}"
            [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
            class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
-           rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+           rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" (wheel)="onWheel($event)" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
     </ng-container>
   </div>
 
