@@ -19,6 +19,7 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   forkJoin,
   fromEvent,
   map,
@@ -399,7 +400,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   debugMode: boolean = false;
   /**
-   * Width override label for maunal width control
+   * Width override label for manual width control
   */
   widthOverrideLabel$ : Observable<string> = new Observable<string>();
 
@@ -554,55 +555,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
-      //only enable the width override slider under certain conditions
-      // width mode selected
-      // splitting is set to fit to screen, otherwise disable
-      // when disable set the value to 0
-      // to use the default of the current single page reader
-      this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(
-        tap(val => {
-          const fitting = this.generalSettingsForm.get('fittingOption')?.value;
-          const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
-
-          if (PageSplitOption.FitSplit == val && FITTING_OPTION.WIDTH == fitting) {
-            widthOverrideControl?.enable();
-          } else {
-            widthOverrideControl?.setValue(0);
-            widthOverrideControl?.disable();
-          }
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(() => {});
-
-      //only enable the width override slider under certain conditions
-      // width mode selected
-      // splitting is set to fit to screen, otherwise disable
-      // when disable set the value to 0
-      // to use the default of the current single page reader
-      this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(
-        tap(val => {
-          const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
-          const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
-
-          if (PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == val){
-            widthOverrideControl?.enable();
-          } else {
-            widthOverrideControl?.setValue(0);
-            widthOverrideControl?.disable();
-          }
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(() => {});
-
-      //sets the default override to 0, fixing the none% bug
-      this.generalSettingsForm.get('widthSlider')!.setValue(0);
-
-      //send the current width override value to the label
-      this.widthOverrideLabel$ = this.readerSettings$?.pipe(
-        map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
-        takeUntilDestroyed(this.destroyRef)
-      );
-
+      this.setupWidthOverrideTriggers();
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
@@ -744,6 +697,68 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.H) {
       this.openShortcutModal();
     }
+  }
+
+  /**
+   * Width override is only valid under the following conditions:
+   *   Image Scaling is Width
+   *   Reader Mode is Webtoon
+   *
+   *   In all other cases, the form will be disabled and set to 0 which indicates default/off state.
+   */
+  setupWidthOverrideTriggers() {
+    const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
+
+    const enableWidthOverride = () => {
+      widthOverrideControl.enable();
+    };
+
+    const disableWidthOverride = () => {
+      widthOverrideControl.setValue(0);
+      widthOverrideControl.disable();
+    };
+
+    const handleControlChanges = () => {
+      const fitting = this.generalSettingsForm.get('fittingOption')?.value;
+      const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
+
+      if ((PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == fitting) || this.readerMode === ReaderMode.Webtoon) {
+        enableWidthOverride();
+      } else {
+        disableWidthOverride();
+      }
+    };
+
+    // Reader mode changes
+    this.readerModeSubject.asObservable()
+      .pipe(
+        filter(v => v === ReaderMode.Webtoon),
+        tap(enableWidthOverride),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+
+    // Page split option changes
+    this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(
+      distinctUntilChanged(),
+      tap(handleControlChanges),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    // Fitting option changes
+    this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(
+      tap(handleControlChanges),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    // Set the default override to 0
+    widthOverrideControl.setValue(0);
+
+    //send the current width override value to the label
+    this.widthOverrideLabel$ = this.readerSettings$?.pipe(
+      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+      takeUntilDestroyed(this.destroyRef)
+    );
   }
 
   createReaderSettingsUpdate() {
