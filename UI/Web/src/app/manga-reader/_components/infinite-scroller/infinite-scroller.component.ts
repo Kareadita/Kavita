@@ -1,4 +1,4 @@
-import { DOCUMENT, NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {DOCUMENT, AsyncPipe, NgStyle} from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -16,7 +16,7 @@ import {
   Renderer2,
   SimpleChanges, ViewChild
 } from '@angular/core';
-import {BehaviorSubject, filter, fromEvent, map, Observable, of, ReplaySubject} from 'rxjs';
+import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject} from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { ReaderService } from '../../../_services/reader.service';
@@ -62,7 +62,7 @@ const enum DEBUG_MODES {
     styleUrls: ['./infinite-scroller.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, TranslocoDirective, InfiniteScrollModule, SafeStylePipe]
+  imports: [AsyncPipe, TranslocoDirective, InfiniteScrollModule, SafeStylePipe, NgStyle]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
 

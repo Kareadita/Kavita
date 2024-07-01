@@ -489,8 +489,6 @@ public class ScannerService : IScannerService
                 // We don't need to send SignalR event as this is a background job that user doesn't need insight into
                 _logger.LogInformation("[ScannerService] Scan library invoked via nightly scan job but a task is already running for {LibraryName}. Rescheduling for 4 hours", lib.Name);
                 await Task.Delay(TimeSpan.FromHours(4));
-                //BackgroundJob.Schedule(() => ScanLibraries(forceUpdate), TimeSpan.FromHours(4));
-                //return;
             }
 
             await ScanLibrary(lib.Id, forceUpdate, true);
