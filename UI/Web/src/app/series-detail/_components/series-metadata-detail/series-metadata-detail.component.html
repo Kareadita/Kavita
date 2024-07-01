@@ -123,14 +123,14 @@
     </app-metadata-detail>
 
     <app-metadata-detail [tags]="seriesMetadata.teams" [libraryId]="series.libraryId" [queryParam]="FilterField.Team" [heading]="t('teams-title')">
-      <ng-template #itemTemplate let-item>
-        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      <ng-template #titleTemplate let-item>
+        {{item.name}}
       </ng-template>
     </app-metadata-detail>
 
     <app-metadata-detail [tags]="seriesMetadata.locations" [libraryId]="series.libraryId" [queryParam]="FilterField.Location" [heading]="t('locations-title')">
-      <ng-template #itemTemplate let-item>
-        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      <ng-template #titleTemplate let-item>
+        {{item.name}}
       </ng-template>
     </app-metadata-detail>
 
@@ -141,8 +141,8 @@
       </app-metadata-detail>
 
       <app-metadata-detail [tags]="seriesMetadata.imprints" [libraryId]="series.libraryId" [queryParam]="FilterField.Imprint" [heading]="t('imprints-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+        <ng-template #titleTemplate let-item>
+          {{item.name}}
         </ng-template>
       </app-metadata-detail>
 

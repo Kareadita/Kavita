@@ -137,14 +137,14 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo
             {
-                Version = BuildInfo.Version.ToString(),
+                Version = "2.0",
                 Title = "Kavita",
-                Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required.",
+                Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version.ToString()}",
                 License = new OpenApiLicense
                 {
                     Name = "GPL-3.0",
                     Url = new Uri("https://github.com/Kareadita/Kavita/blob/develop/LICENSE")
-                }
+                },
             });
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
