@@ -4716,86 +4716,6 @@
         }
       }
     },
-    "/api/opds/v2/{apiKey}": {
-      "post": {
-        "tags": [
-          "OPDS2"
-        ],
-        "summary": "Returns the entry point",
-        "parameters": [
-          {
-            "name": "apiKey",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "OPDS2"
-        ],
-        "summary": "Returns the entry point",
-        "parameters": [
-          {
-            "name": "apiKey",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Panels/save-progress": {
       "post": {
         "tags": [
@@ -22263,6 +22183,75 @@
         "in": "header"
       }
     }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Account",
+      "description": "All Account matters"
+    },
+    {
+      "name": "Cbl",
+      "description": "Responsible for the CBL import flow"
+    },
+    {
+      "name": "Collection",
+      "description": "APIs for Collections"
+    },
+    {
+      "name": "Device",
+      "description": "Responsible interacting and creating Devices"
+    },
+    {
+      "name": "Download",
+      "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
+    },
+    {
+      "name": "Image",
+      "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Panels",
+      "description": "For the Panels app explicitly"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
+    },
+    {
+      "name": "Reader",
+      "description": "For all things regarding reading, mainly focusing on non-Book related entities"
+    },
+    {
+      "name": "Search",
+      "description": "Responsible for the Search interface from the UI"
+    },
+    {
+      "name": "Stream",
+      "description": "Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)"
+    },
+    {
+      "name": "Tachiyomi",
+      "description": "All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any\r\nother purposes."
+    },
+    {
+      "name": "Upload",
+      "description": ""
+    },
+    {
+      "name": "WantToRead",
+      "description": "Responsible for all things Want To Read"
+    }
+  ]
+} }
   },
   "security": [
     {
