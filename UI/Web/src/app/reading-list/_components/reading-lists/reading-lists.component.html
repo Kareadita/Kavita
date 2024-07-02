@@ -4,8 +4,12 @@
       <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
       <span>{{t('title')}}</span>
     </h2>
-    <h6 subtitle class="subtitle-with-actionables" *ngIf="pagination">{{t('item-count', {num: pagination.totalItems | number})}}</h6>
+    @if (pagination) {
+      <h6 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination.totalItems | number})}}</h6>
+    }
+
   </app-side-nav-companion-bar>
+  <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
   <app-card-detail-layout
     [isLoading]="loadingLists"
@@ -18,7 +22,9 @@
     <ng-template #cardItem let-item let-position="idx" >
       <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]"
                      [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                     (clicked)="handleClick(item)"></app-card-item>
+                     (clicked)="handleClick(item)"
+                     (selection)="bulkSelectionService.handleCardSelection('readingList', position, lists.length, $event)"
+                     [selected]="bulkSelectionService.isCardSelected('readingList', position)" [allowSelection]="true"></app-card-item>
     </ng-template>
 
     <ng-template #noData>

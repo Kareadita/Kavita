@@ -550,7 +550,7 @@ export class ActionFactoryService {
           }
         ],
       },
-      // RBS will handle rendering this, so non-admins with download are appicable
+      // RBS will handle rendering this, so non-admins with download are applicable
       {
         action: Action.Download,
         title: 'download',
@@ -581,6 +581,20 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
         requiresAdmin: false,
         class: 'danger',
+        children: [],
+      },
+      {
+        action: Action.Promote,
+        title: 'promote',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.UnPromote,
+        title: 'unpromote',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
         children: [],
       },
     ];
