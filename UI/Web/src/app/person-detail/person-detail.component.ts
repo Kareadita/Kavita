@@ -31,6 +31,8 @@ import {SeriesService} from "../_services/series.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PaginatedResult} from "../_models/pagination";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
+import {AccountService} from "../_services/account.service";
+import {CardItemComponent} from "../cards/card-item/card-item.component";
 
 @Component({
   selector: 'app-person-detail',
@@ -44,7 +46,8 @@ import {FilterCombination} from "../_models/metadata/v2/filter-combination";
     TagBadgeComponent,
     PersonRolePipe,
     CarouselReelComponent,
-    SeriesCardComponent
+    SeriesCardComponent,
+    CardItemComponent
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -59,6 +62,7 @@ export class PersonDetailComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly personService = inject(PersonService);
   protected readonly imageService = inject(ImageService);
+  protected readonly accountService = inject(AccountService);
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -146,5 +150,9 @@ export class PersonDetailComponent {
         return loadPage(p);
       })).subscribe();
     }
+  }
+
+  navigateToSeries(series: Series) {
+    this.router.navigate(['library', series.libraryId, 'series', series.id]);
   }
 }
