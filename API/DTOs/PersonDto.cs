@@ -7,4 +7,6 @@ public class PersonDto
     public int Id { get; set; }
     public required string Name { get; set; }
     public PersonRole Role { get; set; }
+
+    public string Description { get; set; }
 }

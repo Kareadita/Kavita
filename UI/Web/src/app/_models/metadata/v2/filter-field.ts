@@ -47,3 +47,16 @@ enumArray.sort((a, b) => a.value.localeCompare(b.value));
 
 export const allFields = enumArray
     .map(key => parseInt(key.key, 10))as FilterField[];
+
+export const allPeople = [
+  FilterField.Characters,
+  FilterField.Colorist,
+  FilterField.CoverArtist,
+  FilterField.Editor,
+  FilterField.Inker,
+  FilterField.Letterer,
+  FilterField.Penciller,
+  FilterField.Publisher,
+  FilterField.Translators,
+  FilterField.Writers,
+];

@@ -20,4 +20,5 @@ export interface Person {
     id: number;
     name: string;
     role: PersonRole;
+    description: string;
 }

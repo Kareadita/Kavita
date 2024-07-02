@@ -17,18 +17,21 @@ export class ImageService {
   public errorImage = 'assets/images/error-placeholder2.dark-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
   public errorWebLinkImage = 'assets/images/broken-white-32x32.png';
-  public nextChapterImage = 'assets/images/image-placeholder.dark-min.png'
+  public nextChapterImage = 'assets/images/image-placeholder.dark-min.png';
+  public noPersonImage = 'assets/images/error-person-missing.dark.min.png';
 
   constructor(private accountService: AccountService, private themeService: ThemeService) {
     this.themeService.currentTheme$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(theme => {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
-        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
+        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
+        this.noPersonImage = 'assets/images/error-person-missing.dark.min.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
         this.errorImage = 'assets/images/error-placeholder2-min.png';
-        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
+        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
+        this.noPersonImage = 'assets/images/error-person-missing.min.png';
       }
     });
 

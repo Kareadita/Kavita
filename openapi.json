@@ -4839,7 +4839,7 @@
         }
       }
     },
-    "/api/Person/{:personId}": {
+    "/api/Person/{personId}": {
       "get": {
         "tags": [
           "Person"
@@ -4847,24 +4847,134 @@
         "parameters": [
           {
             "name": "personId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": ":personId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/{personId}/roles": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -17985,6 +18095,10 @@
             ],
             "type": "integer",
             "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22335,109 +22449,7 @@
       "description": "Responsible for all things Want To Read"
     }
   ]
-} "type": "string",
-            "nullable": true
-          },
-          "refreshToken": {
-            "type": "string",
-            "nullable": true
-          },
-          "apiKey": {
-            "type": "string",
-            "nullable": true
-          },
-          "preferences": {
-            "$ref": "#/components/schemas/UserPreferencesDto"
-          },
-          "ageRestriction": {
-            "$ref": "#/components/schemas/AgeRestrictionDto"
-          },
-          "kavitaVersion": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserDtoICount": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/UserDto"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserPreferencesDto": {
-        "required": [
-          "autoCloseMenu",
-          "backgroundColor",
-          "blurUnreadSummaries",
-          "bookReaderFontFamily",
-          "bookReaderFontSize",
-          "bookReaderImmersiveMode",
-          "bookReaderLayoutMode",
-          "bookReaderLineSpacing",
-          "bookReaderMargin",
-          "bookReaderReadingDirection",
-          "bookReaderTapToPaginate",
-          "bookReaderThemeName",
-          "bookReaderWritingStyle",
-          "collapseSeriesRelationships",
-          "emulateBook",
-          "globalPageLayoutMode",
-          "layoutMode",
-          "locale",
-          "noTransitions",
-          "pageSplitOption",
-          "pdfLayoutMode",
-          "pdfScrollMode",
-          "pdfSpreadMode",
-          "pdfTheme",
-          "promptForDownloadSize",
-          "readerMode",
-          "readingDirection",
-          "scalingOption",
-          "shareReviews",
-          "showScreenHints",
-          "swipeToPaginate",
-          "theme"
-        ],
-        "type": "object",
-        "properties": {
-          "readingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
-            "format": "int32"
-          },
-          "scalingOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How should the image be scaled to screen",
-            "format": "int32"
-          },
-          "pageSplitOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: Which side of a split image should we show first",
+}how first",
             "format": "int32"
           },
           "readerMode": {

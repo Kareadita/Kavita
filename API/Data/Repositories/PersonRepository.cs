@@ -26,6 +26,8 @@ public interface IPersonRepository
 
     Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
     Task<string> GetCoverImageAsync(int personId);
+    Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
+    Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId);
 }
 
 public class PersonRepository : IPersonRepository
@@ -105,6 +107,29 @@ public class PersonRepository : IPersonRepository
             .SingleOrDefaultAsync();
     }
 
+    public async Task<PersonDto> GetPersonDtoAsync(int personId, int userId)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        return await _context.Person
+            .Where(p => p.Id == personId)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        return await _context.Person
+            .Where(p => p.Id == personId)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .Select(p => p.Role)
+            .Distinct()
+            .ToListAsync();
+    }
+
 
     public async Task<IList<Person>> GetAllPeople()
     {
@@ -116,7 +141,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        //var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
         return await _context.Person
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)

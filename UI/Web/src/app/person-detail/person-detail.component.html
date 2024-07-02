@@ -1,4 +1,82 @@
-<p>person-detail works!</p>
 @if (person$ | async; as person) {
-  <app-image [imageUrl]="imageService.getPersonImage(personId)"></app-image>
+  <div #companionBar>
+    <app-side-nav-companion-bar>
+      <ng-container title>
+        <h2 class="title text-break">
+          <span>{{person.name}}</span>
+        </h2>
+      </ng-container>
+
+  <!--    @if (movie.title) {-->
+  <!--      <ng-container subtitle>-->
+  <!--        <h6 class="subtitle-with-actionables text-break">{{person.title}}</h6>-->
+  <!--      </ng-container>-->
+  <!--    }-->
+
+    </app-side-nav-companion-bar>
+  </div>
+
+  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+    <div class="row mb-0 mb-xl-3 info-container">
+      <div class="image-container col-auto d-none d-sm-block mt-2">
+        <app-image [styles]="{'background': 'none', 'max-height': '400px', 'height': '200px', 'width': '200px', 'border-radius': '50%'}"
+                   [imageUrl]="imageService.getPersonImage(personId)"
+                   [errorImage]="imageService.noPersonImage"></app-image>
+
+      </div>
+
+      <div class="col-auto mt-2">
+<!--        <div class="row g-0">-->
+<!--          <div class="col-auto">-->
+<!--            <button class="btn btn-secondary" (click)="scanMovie()" title="Scan Movie">-->
+<!--            <span>-->
+<!--                <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>-->
+<!--            </span>-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </div>-->
+
+        <div class="row g-0 mt-2">
+          <app-read-more [text]="person.description || defaultSummaryText"></app-read-more>
+
+          @if (roles$ | async; as roles) {
+            <div class="mt-1">
+              <h5>Roles in Libraries</h5>
+              @for(role of roles; track role) {
+                <app-tag-badge>{{role | personRole}}</app-tag-badge>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Works Carousel -->
+
+  @if (works$ | async; as works) {
+    <app-carousel-reel [items]="works" [title]="'Works'" (sectionClick)="loadFilterByPerson()">
+      <ng-template #carouselItem let-item>
+        <app-series-card [data]="item" [libraryId]="item.libraryId">
+          <ng-template #subtitle>
+
+          </ng-template>
+        </app-series-card>
+      </ng-template>
+    </app-carousel-reel>
+  }
+
+  <div class="row pt-3">
+
+  </div>
+
+  <!-- Collaborated In Carousel -->
+  <div class="row pt-3">
+
+  </div>
+
+  <!-- Might be Interested In... -->
+  <div class="row pt-3">
+
+  </div>
 }
