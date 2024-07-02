@@ -491,4 +491,59 @@ public class ReadingListController : BaseApiController
         if (string.IsNullOrEmpty(name)) return true;
         return Ok(await _unitOfWork.ReadingListRepository.ReadingListExists(name));
     }
+
+
+
+    /// <summary>
+    /// Promote/UnPromote multiple reading lists in one go. Will only update the authenticated user's reading lists and will only work if the user has promotion role
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("promote-multiple")]
+    public async Task<ActionResult> PromoteMultipleReadingLists(PromoteReadingListsDto dto)
+    {
+        // This needs to take into account owner as I can select other users cards
+        var userId = User.GetUserId();
+        if (!User.IsInRole(PolicyConstants.PromoteRole) && !User.IsInRole(PolicyConstants.AdminRole))
+        {
+            return BadRequest(await _localizationService.Translate(userId, "permission-denied"));
+        }
+
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListsByIds(dto.ReadingListIds);
+
+        foreach (var readingList in readingLists)
+        {
+            if (readingList.AppUserId != userId) continue;
+            readingList.Promoted = dto.Promoted;
+            _unitOfWork.ReadingListRepository.Update(readingList);
+        }
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
+
+
+    /// <summary>
+    /// Delete multiple reading lists in one go
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("delete-multiple")]
+    public async Task<ActionResult> DeleteMultipleReadingLists(DeleteReadingListsDto dto)
+    {
+        // This needs to take into account owner as I can select other users cards
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ReadingLists);
+        if (user == null) return Unauthorized();
+
+        user.ReadingLists = user.ReadingLists.Where(uc => !dto.ReadingListIds.Contains(uc.Id)).ToList();
+        _unitOfWork.UserRepository.Update(user);
+
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
 }
