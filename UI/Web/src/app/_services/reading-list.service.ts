@@ -8,7 +8,7 @@ import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
 import { CblImportSummary } from '../_models/reading-list/cbl/cbl-import-summary';
 import { TextResonse } from '../_types/text-response';
-import { ActionItem } from './action-factory.service';
+import {Action, ActionItem} from './action-factory.service';
 
 @Injectable({
   providedIn: 'root'
@@ -87,9 +87,15 @@ export class ReadingListService {
     return this.httpClient.post<string>(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, {}, TextResonse);
   }
 
-  actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {
-    if (readingList?.promoted && !isAdmin) return false;
+  actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, canPromote: boolean) {
+
+    const isPromotionAction = action.action == Action.Promote || action.action == Action.UnPromote;
+
+    if (isPromotionAction) return canPromote;
     return true;
+
+    // if (readingList?.promoted && !isAdmin) return false;
+    // return true;
   }
 
   nameExists(name: string) {
@@ -107,4 +113,14 @@ export class ReadingListService {
   getCharacters(readingListId: number) {
     return this.httpClient.get<Array<Person>>(this.baseUrl + 'readinglist/characters?readingListId=' + readingListId);
   }
+
+  promoteMultipleReadingLists(listIds: Array<number>, promoted: boolean) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/promote-multiple', {readingListIds: listIds, promoted}, TextResonse);
+  }
+
+  deleteMultipleReadingLists(listIds: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/delete-multiple', {readingListIds: listIds}, TextResonse);
+  }
+
+
 }

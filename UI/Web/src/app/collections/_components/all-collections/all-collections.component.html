@@ -4,6 +4,7 @@
     <h6 subtitle>{{t('item-count', {num: collections.length | number})}}</h6>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+
   <app-card-detail-layout
     [isLoading]="isLoading"
     [items]="collections"
