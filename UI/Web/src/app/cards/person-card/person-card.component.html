@@ -1,7 +1,9 @@
 <ng-container *transloco="let t; read: 'card-item'">
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
-      <app-image [imageUrl]="imageUrl" [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px"></app-image>
+      <app-image [imageUrl]="imageUrl"
+                 [errorImage]="imageService.noPersonImage"
+                 [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px"></app-image>
 
       @if (allowSelection) {
         <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">

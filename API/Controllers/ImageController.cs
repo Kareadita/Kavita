@@ -73,6 +73,24 @@ public class ImageController : BaseApiController
     }
 
     /// <summary>
+    /// Returns cover image for Person
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
+    [HttpGet("person-cover-by-name")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
+    public async Task<ActionResult> GetPersonCoverImageByName(string name, string apiKey)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
+        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.PersonRepository.GetCoverImageByNameAsync(name));
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+        var format = _directoryService.FileSystem.Path.GetExtension(path);
+
+        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+    }
+
+    /// <summary>
     /// Returns cover image for Library
     /// </summary>
     /// <param name="libraryId"></param>

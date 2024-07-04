@@ -4,14 +4,17 @@ import { MangaFile } from "../manga-file";
 import { SearchResult } from "./search-result";
 import { Tag } from "../tag";
 import {BookmarkSearchResult} from "./bookmark-search-result";
+import {Genre} from "../metadata/genre";
+import {ReadingList} from "../reading-list";
+import {UserCollection} from "../collection-tag";
 
 export class SearchResultGroup {
     libraries: Array<Library> = [];
     series: Array<SearchResult> = [];
-    collections: Array<Tag> = [];
-    readingLists: Array<Tag> = [];
-    persons: Array<Tag> = [];
-    genres: Array<Tag> = [];
+    collections: Array<UserCollection> = [];
+    readingLists: Array<ReadingList> = [];
+    persons: Array<string> = [];
+    genres: Array<Genre> = [];
     tags: Array<Tag> = [];
     files: Array<MangaFile> = [];
     chapters: Array<Chapter> = [];

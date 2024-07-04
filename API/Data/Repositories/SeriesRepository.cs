@@ -440,7 +440,9 @@ public class SeriesRepository : ISeriesRepository
             .SearchPeople(searchQuery, seriesIds)
             .Take(maxRecords)
             .OrderBy(t => t.NormalizedName)
-            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .Select(p => p.Name)
+            .Distinct()
+            //.ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Genres = await _context.SeriesMetadata

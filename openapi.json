@@ -2388,6 +2388,35 @@
         }
       }
     },
+    "/api/Image/person-cover-by-name": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns cover image for Person",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Image/library-cover": {
       "get": {
         "tags": [
@@ -4832,146 +4861,6 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProgressDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Person/{personId}": {
-      "get": {
-        "tags": [
-          "Person"
-        ],
-        "parameters": [
-          {
-            "name": "personId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/PersonDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PersonDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PersonDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Person/{personId}/roles": {
-      "get": {
-        "tags": [
-          "Person"
-        ],
-        "parameters": [
-          {
-            "name": "personId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "enum": [
-                      1,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      9,
-                      10,
-                      11,
-                      12,
-                      13,
-                      14,
-                      15
-                    ],
-                    "type": "integer",
-                    "format": "int32"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "enum": [
-                      1,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      9,
-                      10,
-                      11,
-                      12,
-                      13,
-                      14,
-                      15
-                    ],
-                    "type": "integer",
-                    "format": "int32"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "enum": [
-                      1,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      9,
-                      10,
-                      11,
-                      12,
-                      13,
-                      14,
-                      15
-                    ],
-                    "type": "integer",
-                    "format": "int32"
-                  }
                 }
               }
             }
@@ -14606,7 +14495,8 @@
               5,
               6,
               7,
-              8
+              8,
+              9
             ],
             "type": "integer",
             "description": "For system provided",
@@ -19549,7 +19439,7 @@
           "persons": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PersonDto"
+              "type": "string"
             },
             "nullable": true
           },
@@ -21000,7 +20890,8 @@
               5,
               6,
               7,
-              8
+              8,
+              9
             ],
             "type": "integer",
             "description": "For system provided",
@@ -22752,6 +22643,114 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "description": "When chapter was last modified in local server time",
+            "format": "date-time"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChapterDto"
+            },
+            "nullable": true
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Please insert JWT with Bearer into field",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Account",
+      "description": "All Account matters"
+    },
+    {
+      "name": "Cbl",
+      "description": "Responsible for the CBL import flow"
+    },
+    {
+      "name": "Collection",
+      "description": "APIs for Collections"
+    },
+    {
+      "name": "Device",
+      "description": "Responsible interacting and creating Devices"
+    },
+    {
+      "name": "Download",
+      "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
+    },
+    {
+      "name": "Image",
+      "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Panels",
+      "description": "For the Panels app explicitly"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
+    },
+    {
+      "name": "Reader",
+      "description": "For all things regarding reading, mainly focusing on non-Book related entities"
+    },
+    {
+      "name": "Search",
+      "description": "Responsible for the Search interface from the UI"
+    },
+    {
+      "name": "Stream",
+      "description": "Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)"
+    },
+    {
+      "name": "Tachiyomi",
+      "description": "All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any\r\nother purposes."
+    },
+    {
+      "name": "Upload",
+      "description": ""
+    },
+    {
+      "name": "WantToRead",
+      "description": "Responsible for all things Want To Read"
+    }
+  ]
+} {
             "type": "string",
             "description": "When chapter was last modified in local server time",
             "format": "date-time"

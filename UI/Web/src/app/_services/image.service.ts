@@ -65,6 +65,9 @@ export class ImageService {
   getPersonImage(personId: number) {
     return `${this.baseUrl}image/person-cover?personId=${personId}&apiKey=${this.encodedKey}`;
   }
+  getPersonImageByName(name: string) {
+    return `${this.baseUrl}image/person-cover-by-name?name=${name}&apiKey=${this.encodedKey}`;
+  }
 
   getLibraryCoverImage(libraryId: number) {
     return `${this.baseUrl}image/library-cover?libraryId=${libraryId}&apiKey=${this.encodedKey}`;

@@ -152,10 +152,9 @@ export class NavHeaderComponent implements OnInit {
     this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
-  goToPerson(role: PersonRole, filter: any) {
+  goToPerson(name: string) { // role: PersonRole, filter: any
     this.clearSearch();
-    // TODO: Need to resolve the name instead of Id
-    this.router.navigate(['person', filter]);
+    this.router.navigate(['person', name]);
   }
 
   clearSearch() {

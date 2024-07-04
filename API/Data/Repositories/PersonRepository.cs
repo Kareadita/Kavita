@@ -29,13 +29,14 @@ public interface IPersonRepository
 
     Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
     Task<string> GetCoverImageAsync(int personId);
+    Task<string?> GetCoverImageByNameAsync(string name);
     Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
     Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(string name, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
-
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
+
 }
 
 public class PersonRepository : IPersonRepository
@@ -116,6 +117,15 @@ public class PersonRepository : IPersonRepository
     {
         return await _context.Person
             .Where(c => c.Id == personId)
+            .Select(c => c.CoverImage)
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task<string> GetCoverImageByNameAsync(string name)
+    {
+        var normalized = name.ToNormalized();
+        return await _context.Person
+            .Where(c => c.NormalizedName == normalized)
             .Select(c => c.CoverImage)
             .SingleOrDefaultAsync();
     }

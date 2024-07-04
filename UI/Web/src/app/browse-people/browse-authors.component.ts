@@ -81,4 +81,8 @@ export class BrowseAuthorsComponent implements OnInit {
     });
   }
 
+  goToPerson(person: BrowsePerson) {
+    this.router.navigate(['person', person.name]);
+  }
+
 }

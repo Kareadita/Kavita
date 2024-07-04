@@ -53,6 +53,10 @@
               <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
             </ng-container>
 
+            <ng-container *ngSwitchCase="SideNavStreamType.BrowseAuthors">
+              <app-side-nav-item icon="fa-image-portrait" [title]="t('browse-authors')" link="/browse/authors"></app-side-nav-item>
+            </ng-container>
+
             <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">
               <app-side-nav-item icon="fa-bars-staggered" [title]="navStream.name" link="/all-series" [queryParams]="navStream.smartFilterEncoded"></app-side-nav-item>
             </ng-container>

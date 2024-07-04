@@ -14,8 +14,6 @@ import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
-import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
-import {CommonStream} from "../../../_models/common-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 
 @Component({

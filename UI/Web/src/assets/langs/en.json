@@ -826,6 +826,7 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
+        "browse-authors": "Browse Authors",
         "filter-label": "{{common.filter}}",
         "all-series": "All Series",
         "clear": "{{common.clear}}",
@@ -833,6 +834,11 @@
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
         "back": "Back",
         "more": "More"
+    },
+
+    "browse-authors": {
+        "title": "{{side-nav.browse-authors}}",
+        "author-count": "{{num}} Authors"
     },
 
     "library-settings-modal": {
@@ -2075,7 +2081,8 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
 
     "filter-field-pipe": {

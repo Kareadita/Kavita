@@ -1,9 +1,9 @@
-<ng-container *transloco="let t">
+<ng-container *transloco="let t; read:'browse-authors'" >
   <app-side-nav-companion-bar [hasFilter]="false">
     <h2 title>
-      <span>Browse Authors</span>
+      <span>{{t('browse-authors')}}</span>
     </h2>
-    <h6 subtitle>{{t('common.author-count', {num: pagination.totalItems | number})}} </h6>
+    <h6 subtitle>{{t('author-count', {num: pagination.totalItems | number})}} </h6>
 
   </app-side-nav-companion-bar>
 
@@ -17,7 +17,7 @@
     [refresh]="refresh"
   >
     <ng-template #cardItem let-item let-position="idx">
-      <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)">
+      <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">
         <ng-template #subtitle>
           <span style="font-size: 12px">{{item.issueCount}} works</span>
         </ng-template>

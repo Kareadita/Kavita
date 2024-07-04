@@ -2,8 +2,19 @@
 $image-height: 160px;
 @use '../../../card-item-common';
 
+// Override so we can have square cards
+
 .bulk-mode {
   &.always-show {
+    height: $image-height;
+  }
+}
+
+.card-item-container {
+  .overlay {
+    height: $image-height;
+  }
+  .card-overlay {
     height: $image-height;
   }
 }
