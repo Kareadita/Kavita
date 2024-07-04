@@ -2326,6 +2326,7 @@
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series",
+        "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "book-num": "Book",
         "issue-hash-num": "Issue #",

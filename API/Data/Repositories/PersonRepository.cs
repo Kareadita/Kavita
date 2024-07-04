@@ -7,6 +7,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ public interface IPersonRepository
     Task<string> GetCoverImageAsync(int personId);
     Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
     Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId);
+    Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
 }
 
 public class PersonRepository : IPersonRepository
@@ -128,6 +130,26 @@ public class PersonRepository : IPersonRepository
             .Select(p => p.Role)
             .Distinct()
             .ToListAsync();
+    }
+
+    public async Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        var query = _context.Person
+            .Where(p => p.Role == PersonRole.Writer)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .Select(p => new BrowsePersonDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Role = p.Role,
+                Description = p.Description,
+                SeriesCount = p.SeriesMetadatas.Count,
+                IssueCount = p.ChapterMetadatas.Count
+            });
+
+        return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
 

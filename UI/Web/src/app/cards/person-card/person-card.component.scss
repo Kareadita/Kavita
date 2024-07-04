@@ -1,0 +1,9 @@
+
+$image-height: 160px;
+@use '../../../card-item-common';
+
+.bulk-mode {
+  &.always-show {
+    height: $image-height;
+  }
+}

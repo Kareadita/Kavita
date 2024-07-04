@@ -4979,6 +4979,64 @@
         }
       }
     },
+    "/api/Person/authors": {
+      "post": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Returns a list of authors for browsing",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowsePersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowsePersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowsePersonDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Plugin/authenticate": {
       "post": {
         "tags": [
@@ -14667,6 +14725,58 @@
         },
         "additionalProperties": false
       },
+      "BrowsePersonDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "enum": [
+              1,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesCount": {
+            "type": "integer",
+            "description": "Number of Series this Person is the Writer for",
+            "format": "int32"
+          },
+          "issueCount": {
+            "type": "integer",
+            "description": "Number or Issues this Person is the Writer for",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Used to browse writers and click in to see their series"
+      },
       "BulkRemoveBookmarkForSeriesDto": {
         "type": "object",
         "properties": {
@@ -21824,6 +21934,632 @@
           }
         },
         "additionalProperties": false
+      },
+      "UserDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserPreferencesDto": {
+        "required": [
+          "autoCloseMenu",
+          "backgroundColor",
+          "blurUnreadSummaries",
+          "bookReaderFontFamily",
+          "bookReaderFontSize",
+          "bookReaderImmersiveMode",
+          "bookReaderLayoutMode",
+          "bookReaderLineSpacing",
+          "bookReaderMargin",
+          "bookReaderReadingDirection",
+          "bookReaderTapToPaginate",
+          "bookReaderThemeName",
+          "bookReaderWritingStyle",
+          "collapseSeriesRelationships",
+          "emulateBook",
+          "globalPageLayoutMode",
+          "layoutMode",
+          "locale",
+          "noTransitions",
+          "pageSplitOption",
+          "pdfLayoutMode",
+          "pdfScrollMode",
+          "pdfSpreadMode",
+          "pdfTheme",
+          "promptForDownloadSize",
+          "readerMode",
+          "readingDirection",
+          "scalingOption",
+          "shareReviews",
+          "showScreenHints",
+          "swipeToPaginate",
+          "theme"
+        ],
+        "type": "object",
+        "properties": {
+          "readingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
+          },
+          "scalingOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How should the image be scaled to screen",
+            "format": "int32"
+          },
+          "pageSplitOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: Which side of a split image should we show first",
+            "format": "int32"
+          },
+          "readerMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\r\n<example>\r\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\r\nby clicking top/bottom sides of reader.\r\n</example>",
+            "format": "int32"
+          },
+          "layoutMode": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How many pages to display in the reader at once",
+            "format": "int32"
+          },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+          },
+          "backgroundColor": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Manga Reader Option: Background color of the reader"
+          },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
+          },
+          "autoCloseMenu": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
+          },
+          "showScreenHints": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
+          },
+          "bookReaderMargin": {
+            "type": "integer",
+            "description": "Book Reader Option: Override extra Margin",
+            "format": "int32"
+          },
+          "bookReaderLineSpacing": {
+            "type": "integer",
+            "description": "Book Reader Option: Override line-height",
+            "format": "int32"
+          },
+          "bookReaderFontSize": {
+            "type": "integer",
+            "description": "Book Reader Option: Override font size",
+            "format": "int32"
+          },
+          "bookReaderFontFamily": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Book Reader Option: Maps to the default Kavita font-family (inherit) or an override"
+          },
+          "bookReaderTapToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+          },
+          "bookReaderReadingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
+          },
+          "bookReaderWritingStyle": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What writing style should be used, horizontal or vertical.",
+            "format": "int32"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/SiteThemeDto"
+          },
+          "bookReaderThemeName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "bookReaderLayoutMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderImmersiveMode": {
+            "type": "boolean",
+            "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+          },
+          "globalPageLayoutMode": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Global Site Option: If the UI should layout items as Cards or List items",
+            "format": "int32"
+          },
+          "blurUnreadSummaries": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already"
+          },
+          "promptForDownloadSize": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB."
+          },
+          "noTransitions": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
+          "locale": {
+            "minLength": 1,
+            "type": "string",
+            "description": "UI Site Global Setting: The language locale that should be used for the user"
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfLayoutMode": {
+            "enum": [
+              0,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Layout Mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserReadStatistics": {
+        "type": "object",
+        "properties": {
+          "totalPagesRead": {
+            "type": "integer",
+            "description": "Total number of pages read",
+            "format": "int64"
+          },
+          "totalWordsRead": {
+            "type": "integer",
+            "description": "Total number of words read",
+            "format": "int64"
+          },
+          "timeSpentReading": {
+            "type": "integer",
+            "description": "Total time spent reading based on estimates",
+            "format": "int64"
+          },
+          "chaptersRead": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "avgHoursPerWeekSpentReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "percentReadPerLibrary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleStatCount"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserReviewDto": {
+        "type": "object",
+        "properties": {
+          "tagline": {
+            "type": "string",
+            "description": "A tagline for the review",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "description": "The main review",
+            "nullable": true
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "The series this is for",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "The library this series belongs in",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "description": "The user who wrote this",
+            "nullable": true
+          },
+          "totalVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float"
+          },
+          "rawBody": {
+            "type": "string",
+            "nullable": true
+          },
+          "score": {
+            "type": "integer",
+            "description": "How many upvotes this review has gotten",
+            "format": "int32"
+          },
+          "siteUrl": {
+            "type": "string",
+            "description": "If External, the url of the review",
+            "nullable": true
+          },
+          "isExternal": {
+            "type": "boolean",
+            "description": "Does this review come from an external Source"
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "If this review is External, which Provider did it come from",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a User Review for a given Series"
+      },
+      "Volume": {
+        "required": [
+          "maxNumber",
+          "minNumber",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
+            "nullable": true
+          },
+          "lookupName": {
+            "type": "string",
+            "description": "This is just the original Parsed volume number for lookups",
+            "nullable": true
+          },
+          "number": {
+            "type": "integer",
+            "description": "The minimum number in the Name field in Int form",
+            "format": "int32",
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "The minimum number in the Name field",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
+            "format": "float"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chapter"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "coverImage": {
+            "type": "string",
+            "description": "Absolute path to the (managed) image file",
+            "nullable": true
+          },
+          "pages": {
+            "type": "integer",
+            "description": "Total pages of all chapters in this volume",
+            "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "description": "Total Word count of all chapters in this volume.",
+            "format": "int64"
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VolumeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "number": {
+            "type": "integer",
+            "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
+            "format": "int32",
+            "deprecated": true
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "description": "When chapter was created in local server time",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "When chapter was last modified in local server time",
+            "format": "date-time"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChapterDto"
+            },
+            "nullable": true
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Please insert JWT with Bearer into field",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Account",
+      "description": "All Account matters"
+    },
+    {
+      "name": "Cbl",
+      "description": "Responsible for the CBL import flow"
+    },
+    {
+      "name": "Collection",
+      "description": "APIs for Collections"
+    },
+    {
+      "name": "Device",
+      "description": "Responsible interacting and creating Devices"
+    },
+    {
+      "name": "Download",
+      "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
+    },
+    {
+      "name": "Image",
+      "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Panels",
+      "description": "For the Panels app explicitly"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
+    },
+    {
+      "name": "Reader",
+      "description": "For all things regarding reading, mainly focusing on non-Book related entities"
+    },
+    {
+      "name": "Search",
+      "description": "Responsible for the Search interface from the UI"
+    },
+    {
+      "name": "Stream",
+      "description": "Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)"
+    },
+    {
+      "name": "Tachiyomi",
+      "description": "All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any\r\nother purposes."
+    },
+    {
+      "name": "Upload",
+      "description": ""
+    },
+    {
+      "name": "WantToRead",
+      "description": "Responsible for all things Want To Read"
+    }
+  ]
+}rties": false
       },
       "UserDtoICount": {
         "type": "object",

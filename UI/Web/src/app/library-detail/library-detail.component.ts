@@ -87,12 +87,6 @@ export class LibraryDetailComponent implements OnInit {
   jumpKeys: Array<JumpKey> = [];
   bulkLoader: boolean = false;
 
-  tabs: Array<{title: string, fragment: string, icon: string}> = [
-    {title: 'library-tab', fragment: '', icon: 'fa-landmark'},
-    {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
-  ];
-  active = this.tabs[0];
-
   loadPageSource = new ReplaySubject(1);
   loadPage$ = this.loadPageSource.asObservable();
 

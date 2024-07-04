@@ -19,16 +19,6 @@
       </div>
 
       <div class="col-auto mt-2">
-<!--        <div class="row g-0">-->
-<!--          <div class="col-auto">-->
-<!--            <button class="btn btn-secondary" (click)="scanMovie()" title="Scan Movie">-->
-<!--            <span>-->
-<!--                <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>-->
-<!--            </span>-->
-<!--            </button>-->
-<!--          </div>-->
-<!--        </div>-->
-
         <div class="row g-0 mt-2">
           <app-read-more [text]="person.description || defaultSummaryText"></app-read-more>
 
@@ -46,7 +36,7 @@
   </div>
 
   <!-- Works Carousel -->
-
+  <!-- TODO: Works needs to be different. I think we need to show individual chapters -->
   @if (works$ | async; as works) {
     <div class="row mt-2">
       <app-carousel-reel [items]="works" [title]="'Works'" (sectionClick)="loadFilterByPerson()">
@@ -65,6 +55,23 @@
     </div>
   }
 
+  <!-- Individual Works Carousel -->
+    <div class="row mt-2">
+      <app-carousel-reel [items]="[]" [title]="'Individual Works'" (sectionClick)="loadFilterByPerson()">
+        <ng-template #carouselItem let-item>
+          <app-card-item [entity]="item"
+                         [imageUrl]="imageService.getSeriesCoverImage(item.id)"
+                         [title]="item.name"
+                         [suppressArchiveWarning]="true"
+                         (clicked)="navigateToSeries(item)">
+            <ng-template #subtitle>
+              Role here
+            </ng-template>
+          </app-card-item>
+        </ng-template>
+      </app-carousel-reel>
+  </div>
+
   <!-- Collaborated In Carousel -->
   <div class="row mt-2">
 
@@ -81,4 +88,5 @@
 
     </div>
   }
+
 }
