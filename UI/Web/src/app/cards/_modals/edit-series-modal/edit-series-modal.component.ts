@@ -54,7 +54,6 @@ import {TranslocoDatePipe} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
-import {LibraryType} from "../../../_models/library/library";
 import {ToastrService} from "ngx-toastr";
 import {Volume} from "../../../_models/volume";
 
@@ -491,7 +490,7 @@ export class EditSeriesModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, role: role, description: '' };
+      return {id: 0, name: title, role: role, description: '', coverImageLocked: false };
     });
 
     return personSettings;

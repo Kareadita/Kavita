@@ -15,6 +15,11 @@ public class Person
     public bool CoverImageLocked { get; set; }
     public string Description { get; set; }
     /// <summary>
+    /// ASIN for person
+    /// </summary>
+    /// <remarks>Can be used for Amazon author lookup</remarks>
+    public string? Asin { get; set; }
+    /// <summary>
     /// https://anilist.co/staff/{AniListId}/
     /// </summary>
     /// <remarks>Kavita+ Only</remarks>

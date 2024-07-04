@@ -1,0 +1,113 @@
+<ng-container *transloco="let t; read: 'edit-person-modal'">
+  @if (person !== undefined) {
+    <div class="modal-container">
+      <div class="modal-header">
+        <h4 class="modal-title">
+          {{t('title', {personName: this.person.name})}}</h4>
+        <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+      </div>
+      <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+        <form [formGroup]="editForm">
+          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+
+            <li [ngbNavItem]="tabs[TabID.General]">
+              <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
+              <ng-template ngbNavContent>
+                <div class="row g-0">
+                  <div class="col-md-8 pe-2 mb-3">
+                    <label for="name" class="form-label">{{t('name-label')}}</label>
+                    <div class="input-group">
+                      <input id="name" class="form-control" formControlName="name" type="text" readonly
+                             [class.is-invalid]="editForm.get('name')?.invalid && editForm.get('name')?.touched">
+                      @if (editForm.get('name')?.errors; as errors) {
+                        @if (errors.required) {
+                          <div class="invalid-feedback">
+                            {{t('required-field')}}
+                          </div>
+                        }
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-auto">
+                    <div class="mb-3" style="width: 100%">
+                      <span class="form-label">{{t('role-label')}}</span>
+                      <div class="mt-3">
+                        {{person.role | personRole}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="mb-3 col-md-6 col-xs-12 pe-2">
+                    <label for="mal-id" class="form-label">{{t('mal-id-label')}}</label>
+                    <div class="input-group">
+                      <input id="mal-id" class="form-control" formControlName="malId" type="number">
+                    </div>
+                  </div>
+
+                  <div class="mb-3 col-md-6 col-xs-12">
+                    <label for="anilist-id" class="form-label">{{t('anilist-id-label')}}</label>
+                    <div class="input-group">
+                      <input id="anilist-id" class="form-control" formControlName="anilistId" type="number">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="mb-3 col-md-6 col-xs-12 pe-2">
+                    <label for="hardcover-id" class="form-label">{{t('hardcover-id-label')}}</label>
+                    <div class="input-group">
+                      <input id="hardcover-id" class="form-control" formControlName="hardcoverId" type="text">
+                    </div>
+                  </div>
+
+                  <div class="mb-3 col-md-6 col-xs-12">
+                    <label for="asin" class="form-label">{{t('asin-label')}}</label>
+                    <div class="input-group">
+                      <input id="asin" class="form-control" formControlName="asin" type="text">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="mb-3" style="width: 100%">
+                    <label for="description" class="form-label">{{t('description-label')}}</label>
+                    <div class="input-group">
+                      <textarea id="description" class="form-control" formControlName="description" rows="4"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+              </ng-template>
+            </li>
+
+
+            <li [ngbNavItem]="tabs[TabID.CoverImage]">
+              <a ngbNavLink>{{t(tabs[TabID.CoverImage])}}</a>
+              <ng-template ngbNavContent>
+                <p class="alert alert-primary" role="alert">
+                  {{t('cover-image-description')}}
+                </p>
+                <!--              <app-cover-image-chooser [(imageUrls)]="imageUrls"-->
+                <!--                                       (imageSelected)="updateSelectedIndex($event)"-->
+                <!--                                       (selectedBase64Url)="updateSelectedImage($event)"-->
+                <!--                                       [showReset]="person.coverImageLocked"-->
+                <!--                                       (resetClicked)="handleReset()">-->
+                <!--              </app-cover-image-chooser>-->
+              </ng-template>
+            </li>
+
+          </ul>
+        </form>
+
+        <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid" (click)="save()">{{t('save')}}</button>
+      </div>
+    </div>
+  }
+</ng-container>

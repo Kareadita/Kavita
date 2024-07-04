@@ -33,6 +33,11 @@ import {PaginatedResult} from "../_models/pagination";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {AccountService} from "../_services/account.service";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
+import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {Chapter} from "../_models/chapter";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
 
 @Component({
   selector: 'app-person-detail',
@@ -47,7 +52,8 @@ import {CardItemComponent} from "../cards/card-item/card-item.component";
     PersonRolePipe,
     CarouselReelComponent,
     SeriesCardComponent,
-    CardItemComponent
+    CardItemComponent,
+    CardActionablesComponent
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -61,6 +67,8 @@ export class PersonDetailComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly personService = inject(PersonService);
+  private readonly actionService = inject(ActionFactoryService);
+  private readonly modalService = inject(NgbModal);
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
 
@@ -75,17 +83,7 @@ export class PersonDetailComponent {
   works$: Observable<Series[]> | null = null;
   defaultSummaryText = 'No information about this Person';
   filter: SeriesFilterV2 | null = null;
-
-  get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
-    const navbar = this.document.querySelector('.navbar') as HTMLElement;
-    if (navbar === null) return 'calc(var(--vh)*100)';
-
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
-    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
-  }
+  personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.route.paramMap.subscribe(_ => {
@@ -155,4 +153,26 @@ export class PersonDetailComponent {
   navigateToSeries(series: Series) {
     this.router.navigate(['library', series.libraryId, 'series', series.id]);
   }
+
+  handleAction(action: ActionItem<Person>, person: Person) {
+    switch (action.action) {
+      case(Action.Edit):
+          const ref = this.modalService.open(EditPersonModalComponent, {scrollable: true, size: 'lg', fullscreen: 'md'});
+          ref.componentInstance.person = this.person;
+
+          ref.closed.subscribe(r => {
+            // Probably nothing to do as the cover update will push from backend to component. We can only take in new summary
+          });
+        break;
+      default:
+        break;
+    }
+  }
+
+  performAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, this.person);
+    }
+  }
+
 }

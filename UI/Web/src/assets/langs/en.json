@@ -1845,6 +1845,24 @@
         "specials-volume": "Specials"
     },
 
+    "edit-person-modal": {
+        "title": "{{personName}} Details",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "Role",
+        "mal-id-label": "MAL Id",
+        "anilist-id-label": "AniList Id",
+        "hardcover-id-label": "Hardcover Id",
+        "asin-label": "ASIN",
+        "description-label": "Description",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "save": "{{common.save}}"
+    },
+
     "day-breakdown": {
         "title": "Day Breakdown",
         "no-data": "No progress, get to reading",

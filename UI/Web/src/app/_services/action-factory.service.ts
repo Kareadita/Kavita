@@ -11,6 +11,7 @@ import { AccountService } from './account.service';
 import { DeviceService } from './device.service';
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {Person} from "../_models/metadata/person";
 
 export enum Action {
   Submenu = -1,
@@ -136,24 +137,26 @@ export interface ActionItem<T> {
   providedIn: 'root',
 })
 export class ActionFactoryService {
-  libraryActions: Array<ActionItem<Library>> = [];
+  private libraryActions: Array<ActionItem<Library>> = [];
 
-  seriesActions: Array<ActionItem<Series>> = [];
+  private seriesActions: Array<ActionItem<Series>> = [];
 
-  volumeActions: Array<ActionItem<Volume>> = [];
+  private volumeActions: Array<ActionItem<Volume>> = [];
 
-  chapterActions: Array<ActionItem<Chapter>> = [];
+  private chapterActions: Array<ActionItem<Chapter>> = [];
 
-  collectionTagActions: Array<ActionItem<UserCollection>> = [];
+  private collectionTagActions: Array<ActionItem<UserCollection>> = [];
 
-  readingListActions: Array<ActionItem<ReadingList>> = [];
+  private readingListActions: Array<ActionItem<ReadingList>> = [];
 
-  bookmarkActions: Array<ActionItem<Series>> = [];
+  private bookmarkActions: Array<ActionItem<Series>> = [];
 
-  sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
-  smartFilterActions: Array<ActionItem<SmartFilter>> = [];
+  private personActions: Array<ActionItem<Person>> = [];
 
-  isAdmin = false;
+  private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
+  private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
+
+  private isAdmin = false;
 
   constructor(private accountService: AccountService, private deviceService: DeviceService) {
     this.accountService.currentUser$.subscribe((user) => {
@@ -202,6 +205,10 @@ export class ActionFactoryService {
 
   getBookmarkActions(callback: ActionCallback<Series>) {
     return this.applyCallbackToList(this.bookmarkActions, callback);
+  }
+
+  getPersonActions(callback: ActionCallback<Person>) {
+    return this.applyCallbackToList(this.personActions, callback);
   }
 
   getMetadataFilterActions(callback: ActionCallback<any>) {
@@ -583,6 +590,16 @@ export class ActionFactoryService {
         class: 'danger',
         children: [],
       },
+    ];
+
+    this.personActions = [
+      {
+        action: Action.Edit,
+        title: 'edit',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      }
     ];
 
     this.bookmarkActions = [

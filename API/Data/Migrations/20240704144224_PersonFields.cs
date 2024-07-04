@@ -5,7 +5,7 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class PersonMetadata : Migration
+    public partial class PersonFields : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,10 +18,23 @@ namespace API.Data.Migrations
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
+                name: "Asin",
+                table: "Person",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
                 name: "CoverImage",
                 table: "Person",
                 type: "TEXT",
                 nullable: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "CoverImageLocked",
+                table: "Person",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
 
             migrationBuilder.AddColumn<string>(
                 name: "Description",
@@ -51,7 +64,15 @@ namespace API.Data.Migrations
                 table: "Person");
 
             migrationBuilder.DropColumn(
+                name: "Asin",
+                table: "Person");
+
+            migrationBuilder.DropColumn(
                 name: "CoverImage",
+                table: "Person");
+
+            migrationBuilder.DropColumn(
+                name: "CoverImageLocked",
                 table: "Person");
 
             migrationBuilder.DropColumn(
