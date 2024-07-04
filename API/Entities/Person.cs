@@ -12,6 +12,7 @@ public class Person
     public required PersonRole Role { get; set; }
 
     public string? CoverImage { get; set; }
+    public bool CoverImageLocked { get; set; }
     public string Description { get; set; }
     /// <summary>
     /// https://anilist.co/staff/{AniListId}/

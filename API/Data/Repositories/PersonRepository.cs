@@ -18,6 +18,8 @@ public interface IPersonRepository
 {
     void Attach(Person person);
     void Remove(Person person);
+    void Update(Person person);
+
     Task<IList<Person>> GetAllPeople();
     Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId);
     Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role);
@@ -30,6 +32,8 @@ public interface IPersonRepository
     Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
     Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
+    Task<Person?> GetPersonById(int personId);
+
 }
 
 public class PersonRepository : IPersonRepository
@@ -51,6 +55,11 @@ public class PersonRepository : IPersonRepository
     public void Remove(Person person)
     {
         _context.Person.Remove(person);
+    }
+
+    public void Update(Person person)
+    {
+        _context.Person.Update(person);
     }
 
     public async Task RemoveAllPeopleNoLongerAssociated()
@@ -150,6 +159,12 @@ public class PersonRepository : IPersonRepository
             });
 
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<Person?> GetPersonById(int personId)
+    {
+        return await _context.Person.Where(p => p.Id == personId)
+            .FirstOrDefaultAsync();
     }
 
 
