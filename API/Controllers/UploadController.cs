@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Uploads;
 using API.Entities.Enums;
 using API.Extensions;
@@ -292,6 +294,65 @@ public class UploadController : BaseApiController
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-chapter-save"));
     }
+
+    /// <summary>
+    /// Replaces volume cover image and locks it with a base64 encoded image.
+    /// </summary>
+    /// <remarks>This is a helper API for Komf - Kavita UI does not use. Volume will find first chapter to update.</remarks>
+    /// <param name="uploadFileDto"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
+    [HttpPost("volume")]
+    public async Task<ActionResult> UploadVolumeCoverImageFromUrl(UploadFileDto uploadFileDto)
+    {
+        // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+        // See if we can do this all in memory without touching underlying system
+        if (string.IsNullOrEmpty(uploadFileDto.Url))
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
+        }
+
+        try
+        {
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(uploadFileDto.Id, VolumeIncludes.Chapters);
+            if (volume == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+
+            // Find the first chapter of the volume
+            var chapter = volume.Chapters[0];
+
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetChapterFormat(chapter.Id, uploadFileDto.Id)}");
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                chapter.CoverImage = filePath;
+                chapter.CoverImageLocked = true;
+                _unitOfWork.ChapterRepository.Update(chapter);
+
+                volume.CoverImage = chapter.CoverImage;
+                _unitOfWork.VolumeRepository.Update(volume);
+            }
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync();
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false);
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Chapter), false);
+                return Ok();
+            }
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "There was an issue uploading cover image for Volume {Id}", uploadFileDto.Id);
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-volume-save"));
+    }
+
 
     /// <summary>
     /// Replaces library cover image with a base64 encoded image. If empty string passed, will reset to null.
