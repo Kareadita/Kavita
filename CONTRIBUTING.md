@@ -65,4 +65,7 @@ If you just want to play with Swagger, you can just
 - dotnet run -c Debug
 - Go to http://localhost:5000/swagger/index.html
 
+If you have a build issue around swagger run:
+` swagger tofile --output ../openapi.json API/bin/Debug/net8.0/API.dll v1` to see the error and correct it
+
 If you have any questions about any of this, please let us know.

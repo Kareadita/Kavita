@@ -154,6 +154,7 @@ export class NavHeaderComponent implements OnInit {
 
   goToPerson(role: PersonRole, filter: any) {
     this.clearSearch();
+    // TODO: Need to resolve the name instead of Id
     this.router.navigate(['person', filter]);
   }
 

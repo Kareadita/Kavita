@@ -75,7 +75,7 @@ export class PersonDetailComponent {
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
-  personId!: number;
+  personName!: string;
   person$: Observable<Person> | null = null;
   person: Person | null = null;
   roles$: Observable<PersonRole[]> | null = null;
@@ -87,20 +87,20 @@ export class PersonDetailComponent {
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.route.paramMap.subscribe(_ => {
-      const routeId = this.route.snapshot.paramMap.get('personId');
-      if (routeId === null || undefined) {
+      const personName = this.route.snapshot.paramMap.get('name');
+      if (personName === null || undefined) {
         this.router.navigateByUrl('/home');
         return;
       }
 
-      this.personId = parseInt(routeId, 10);
-      this.person$ = this.personService.get(this.personId).pipe(tap(p => {
+      this.personName = personName;
+      this.person$ = this.personService.get(this.personName).pipe(tap(p => {
         this.person = p;
 
         this.cdRef.markForCheck();
       }), takeUntilDestroyed(this.destroyRef));
 
-      this.roles$ = this.personService.getRolesForPerson(this.personId).pipe(tap(roles => {
+      this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(tap(roles => {
         this.roles = roles;
         this.filter = this.createFilter(roles);
 
@@ -121,7 +121,7 @@ export class PersonDetailComponent {
 
     // I might want to use roles$ to do all this
     allPeople.forEach(f => {
-      filter.statements.push({comparison: FilterComparison.Contains, value: this.personId + '', field: f});
+      filter.statements.push({comparison: FilterComparison.Contains, value: this.person!.id + '', field: f});
     });
 
     return filter;

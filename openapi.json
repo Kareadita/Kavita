@@ -4979,6 +4979,142 @@
         }
       }
     },
+    "/api/Person": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/roles": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Person/authors": {
       "post": {
         "tags": [
@@ -22723,98 +22859,7 @@
       "description": "Responsible for all things Want To Read"
     }
   ]
-}   "swipeToPaginate",
-          "theme"
-        ],
-        "type": "object",
-        "properties": {
-          "readingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
-            "format": "int32"
-          },
-          "scalingOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How should the image be scaled to screen",
-            "format": "int32"
-          },
-          "pageSplitOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: Which side of a split image should we show first",
-            "format": "int32"
-          },
-          "readerMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\r\n<example>\r\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\r\nby clicking top/bottom sides of reader.\r\n</example>",
-            "format": "int32"
-          },
-          "layoutMode": {
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How many pages to display in the reader at once",
-            "format": "int32"
-          },
-          "emulateBook": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
-          },
-          "backgroundColor": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Manga Reader Option: Background color of the reader"
-          },
-          "swipeToPaginate": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Should swiping trigger pagination"
-          },
-          "autoCloseMenu": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
-          },
-          "showScreenHints": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
-          },
-          "bookReaderMargin": {
-            "type": "integer",
-            "description": "Book Reader Option: Override extra Margin",
-            "format": "int32"
-          },
-          "bookReaderLineSpacing": {
-            "type": "integer",
-            "description": "Book Reader Option: Override line-height",
-            "format": "int32"
-          },
-          "bookReaderFontSize": {
-            "type": "integer",
-            "description": "Book Reader Option: Override font size",
-            "format": "int32"
-          },
+}  },
           "bookReaderFontFamily": {
             "minLength": 1,
             "type": "string",

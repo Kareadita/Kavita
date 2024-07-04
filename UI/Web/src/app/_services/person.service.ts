@@ -18,12 +18,20 @@ export class PersonService {
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
-  get(personId: number) {
-    return this.httpClient.get<Person>(this.baseUrl + 'person/' + personId);
+  // get(personId: number) {
+  //   return this.httpClient.get<Person>(this.baseUrl + 'person/' + personId);
+  // }
+  //
+  // getRolesForPerson(personId: number) {
+  //   return this.httpClient.get<Array<PersonRole>>(this.baseUrl + 'person/' + personId + '/roles');
+  // }
+
+  get(name: string) {
+    return this.httpClient.get<Person>(this.baseUrl + `person?name=${name}`);
   }
 
-  getRolesForPerson(personId: number) {
-    return this.httpClient.get<Array<PersonRole>>(this.baseUrl + 'person/' + personId + '/roles');
+  getRolesForPerson(name: string) {
+    return this.httpClient.get<Array<PersonRole>>(this.baseUrl + `person/roles?name=${name}`);
   }
 
 

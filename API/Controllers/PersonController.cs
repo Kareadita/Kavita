@@ -23,16 +23,28 @@ public class PersonController : BaseApiController
         _localizationService = localizationService;
     }
 
-    [HttpGet("{personId}")]
-    public async Task<ActionResult<PersonDto>> GetPerson(int personId)
+    // [HttpGet("{personId}")]
+    // public async Task<ActionResult<PersonDto>> GetPerson(int personId)
+    // {
+    //     return Ok(await _unitOfWork.PersonRepository.GetPersonDtoAsync(personId, User.GetUserId()));
+    // }
+    //
+    // [HttpGet("{personId}/roles")]
+    // public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPerson(int personId)
+    // {
+    //     return Ok(await _unitOfWork.PersonRepository.GetRolesForPerson(personId, User.GetUserId()));
+    // }
+
+    [HttpGet]
+    public async Task<ActionResult<PersonDto>> GetPersonByName(string name)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetPersonDtoAsync(personId, User.GetUserId()));
+        return Ok(await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId()));
     }
 
-    [HttpGet("{personId}/roles")]
-    public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPerson(int personId)
+    [HttpGet("roles")]
+    public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPersonByName(string name)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetRolesForPerson(personId, User.GetUserId()));
+        return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(name, User.GetUserId()));
     }
 
     /// <summary>

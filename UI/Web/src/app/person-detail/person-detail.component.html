@@ -14,7 +14,7 @@
     <div class="row mb-0 mb-xl-3 info-container">
       <div class="image-container col-auto d-none d-sm-block mt-2">
         <app-image [styles]="{'background': 'none', 'max-height': '400px', 'height': '200px', 'width': '200px', 'border-radius': '50%'}"
-                   [imageUrl]="imageService.getPersonImage(personId)"
+                   [imageUrl]="imageService.getPersonImage(person.id)"
                    [errorImage]="imageService.noPersonImage"></app-image>
 
       </div>
