@@ -181,7 +181,8 @@ public class PersonRepository : IPersonRepository
                 Description = p.Description,
                 SeriesCount = p.SeriesMetadatas.Count,
                 IssueCount = p.ChapterMetadatas.Count
-            });
+            })
+            .OrderBy(p => p.Name);
 
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }

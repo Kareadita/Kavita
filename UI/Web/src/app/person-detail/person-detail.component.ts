@@ -161,7 +161,10 @@ export class PersonDetailComponent {
           ref.componentInstance.person = this.person;
 
           ref.closed.subscribe(r => {
-            // Probably nothing to do as the cover update will push from backend to component. We can only take in new summary
+            if (r.success) {
+              this.person = {...r.person};
+              this.cdRef.markForCheck();
+            }
           });
         break;
       default:

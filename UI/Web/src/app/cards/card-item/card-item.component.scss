@@ -33,7 +33,7 @@ $image-width: 160px;
     pointer-events: none;
     position: absolute;
     top: 0;
-    width: calc($image-height - 2px);
+    width: calc($image-width - 2px);
 }
 
 .not-read-badge {

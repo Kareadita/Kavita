@@ -14,7 +14,7 @@
               <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
               <ng-template ngbNavContent>
                 <div class="row g-0">
-                  <div class="col-md-8 pe-2 mb-3">
+                  <div class="mb-3">
                     <label for="name" class="form-label">{{t('name-label')}}</label>
                     <div class="input-group">
                       <input id="name" class="form-control" formControlName="name" type="text" readonly
@@ -26,15 +26,6 @@
                           </div>
                         }
                       }
-                    </div>
-                  </div>
-
-                  <div class="col-auto">
-                    <div class="mb-3" style="width: 100%">
-                      <span class="form-label">{{t('role-label')}}</span>
-                      <div class="mt-3">
-                        {{person.role | personRole}}
-                      </div>
                     </div>
                   </div>
                 </div>

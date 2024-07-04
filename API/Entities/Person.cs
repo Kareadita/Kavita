@@ -35,6 +35,9 @@ public class Person
     /// <remarks>Kavita+ Only</remarks>
     public string HardcoverId { get; set; }
 
+    // TODO: I need to rearchcitect this whole system unfortunately.
+    // The relationship itself needs to have the role and the person needs to be unique
+
 
     // Relationships
     public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
