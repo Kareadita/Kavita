@@ -68,9 +68,9 @@ public class PersonRepository : IPersonRepository
     public async Task RemoveAllPeopleNoLongerAssociated()
     {
         var peopleWithNoConnections = await _context.Person
-            .Include(p => p.SeriesMetadatas)
-            .Include(p => p.ChapterMetadatas)
-            .Where(p => p.SeriesMetadatas.Count == 0 && p.ChapterMetadatas.Count == 0)
+            .Include(p => p.SeriesMetadataPeople)
+            .Include(p => p.ChapterPeople)
+            .Where(p => p.SeriesMetadataPeople.Count == 0 && p.ChapterPeople.Count == 0)
             .AsSplitQuery()
             .ToListAsync();
 
@@ -78,6 +78,7 @@ public class PersonRepository : IPersonRepository
 
         await _context.SaveChangesAsync();
     }
+
 
     public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null)
     {
@@ -92,7 +93,7 @@ public class PersonRepository : IPersonRepository
         return await _context.Series
             .Where(s => userLibs.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(ageRating)
-            .SelectMany(s => s.Metadata.People)
+            .SelectMany(s => s.Metadata.People.Select(p => p.Person))
             .Distinct()
             .OrderBy(p => p.Name)
             .AsNoTracking()
@@ -179,8 +180,8 @@ public class PersonRepository : IPersonRepository
                 Name = p.Name,
                 Role = p.Role,
                 Description = p.Description,
-                SeriesCount = p.SeriesMetadatas.Count,
-                IssueCount = p.ChapterMetadatas.Count
+                SeriesCount = p.SeriesMetadataPeople.Count,
+                IssueCount = p.ChapterPeople.Count
             })
             .OrderBy(p => p.Name);
 

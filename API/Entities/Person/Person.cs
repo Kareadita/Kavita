@@ -40,6 +40,8 @@ public class Person
 
 
     // Relationships
-    public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
-    public ICollection<Chapter> ChapterMetadatas { get; set; } = null!;
+//     public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
+//     public ICollection<Chapter> ChapterMetadatas { get; set; } = null!;
+    public ICollection<ChapterPeople> ChapterPeople { get; set; } = new List<ChapterPeople>();
+    public ICollection<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = new List<SeriesMetadataPeople>();
 }

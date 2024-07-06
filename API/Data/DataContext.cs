@@ -66,6 +66,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
     public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
     public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
+    public DbSet<ChapterPeople> ChapterPeople { get; set; } = null!;
+    public DbSet<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -155,6 +157,33 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserCollection>()
             .Property(b => b.AgeRating)
             .HasDefaultValue(AgeRating.Unknown);
+
+        // Configure the many-to-many relationship for Movie and Person (Actor)
+        builder.Entity<ChapterPeople>()
+            .HasKey(cp => new { cp.ChapterId, cp.PersonId });
+
+        builder.Entity<ChapterPeople>()
+            .HasOne(cp => cp.Chapter)
+            .WithMany(c => c.People)
+            .HasForeignKey(cp => cp.ChapterId);
+
+        builder.Entity<ChapterPeople>()
+            .HasOne(cp => cp.Person)
+            .WithMany(p => p.ChapterPeople)
+            .HasForeignKey(cp => cp.PersonId);
+
+        builder.Entity<SeriesMetadataPeople>()
+            .HasKey(smp => new { smp.SeriesMetadataId, smp.PersonId });
+
+        builder.Entity<SeriesMetadataPeople>()
+            .HasOne(smp => smp.SeriesMetadata)
+            .WithMany(sm => sm.People)
+            .HasForeignKey(smp => smp.SeriesMetadataId);
+
+        builder.Entity<SeriesMetadataPeople>()
+            .HasOne(smp => smp.Person)
+            .WithMany(p => p.SeriesMetadataPeople)
+            .HasForeignKey(smp => smp.PersonId);
     }
 
     #nullable enable
