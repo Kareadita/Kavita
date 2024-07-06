@@ -1,6 +1,6 @@
 {
     "confirm-email": "Esmalt pead oma e-posti kinnitama",
-    "locked-out": "Oled liiga paljude sisselogimiskatsete tõttu süsteemist keelatud. Palun oota 10 minutit.",
+    "locked-out": "Sinu konto on liiga paljude ebaõnnestunud sisselogimiskatsete tõttu süsteemis piiratud. Palun oota 10 minutit.",
     "disabled-account": "Su konto on keelatud. Võta ühendust serveri administraatoriga.",
     "register-user": "Kasutaja registreerimisel läks midagi valesti",
     "validate-email": "Teie e-posti kinnitamisel ilmnes probleem: {0}",

@@ -550,7 +550,11 @@
         "pdf-book-mode-screen-size": "책 모드에 비해 화면이 너무 작음",
         "stack-imported": "가져온 스택",
         "confirm-delete-theme": "이 테마를 제거하면 디스크에서 삭제됩니다. 제거하기 전에 임시 디렉토리에서 가져올 수 있습니다",
-        "mal-token-required": "MAL 토큰이 필요합니다. 사용자 설정에서 설정하세요"
+        "mal-token-required": "MAL 토큰이 필요합니다. 사용자 설정에서 설정하세요",
+        "reading-lists-deleted": "읽기 목록 삭제",
+        "reading-lists-promoted": "관심 목록",
+        "confirm-delete-reading-lists": "읽기 목록을 삭제하시겠습니까? 이것은 취소가 불가능 합니다.",
+        "reading-lists-unpromoted": "관심 리스트 등록 해제"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",

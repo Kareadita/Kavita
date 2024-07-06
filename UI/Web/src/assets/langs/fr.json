@@ -634,7 +634,10 @@
         "promoted": "Promu",
         "clear": "Effacer",
         "filter": "Filtre",
-        "remove": "Retirer"
+        "remove": "Retirer",
+        "chapter-num-shorthand": "Ch {{num}}",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Vol {{num}}"
     },
     "filter-comparison-pipe": {
         "must-contains": "Doit contenir",
@@ -1094,7 +1097,8 @@
     },
     "all-filters": {
         "title": "Tous les filtres intelligents",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "personal-table-of-contents": {
         "delete": "Supprimer {{bookmarkName}}",
@@ -1446,7 +1450,8 @@
         "installId-title": "ID d'installation",
         "localization-title": "Localisations :",
         "updates-title": "Historique des mises à jour",
-        "first-install-version-title": "Version de première installation"
+        "first-install-version-title": "Version de première installation",
+        "first-install-date-title": "Date de la première installation"
     },
     "manage-tasks-settings": {
         "title": "Tâches récurrentes",
@@ -1676,7 +1681,9 @@
         "incognito-title": "Mode incognito :",
         "bookmark-page-tooltip": "Page des marque-pages",
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
-        "reading-direction-tooltip": "Sens de lecture : "
+        "reading-direction-tooltip": "Sens de lecture : ",
+        "off": "Désactivé",
+        "width-override-label": "Remplacement de la largeur"
     },
     "events-widget": {
         "active-events-title": "Événements actifs :",
@@ -1688,7 +1695,8 @@
         "more-info": "Cliquez pour plus d'informations",
         "downloading-item": "Téléchargement {{item}}",
         "title-alt": "Activité",
-        "left-to-process": "Reste à traiter : {{leftToProcess}}"
+        "left-to-process": "Reste à traiter : {{leftToProcess}}",
+        "download-in-queue": "{{num}} féléchargements dans la file d'attente"
     },
     "library-recommended": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1820,7 +1828,9 @@
         "data-table-label": "Tableau de données",
         "total-file-size-title": "Taille totale du fichier :",
         "extension-header": "Extension",
-        "format-tooltip": "Non classé signifie que Kavita n'a pas analysé certains fichiers. Cela se produit pour les anciens fichiers antérieurs à la version 0.7. Il se peut que vous deviez lancer une analyse forcée via la fenêtre modale des paramètres de la bibliothèque."
+        "format-tooltip": "Non classé signifie que Kavita n'a pas analysé certains fichiers. Cela se produit pour les anciens fichiers antérieurs à la version 0.7. Il se peut que vous deviez lancer une analyse forcée via la fenêtre modale des paramètres de la bibliothèque.",
+        "download-file-for-extension-alt": "Télécharger les fichiers Rapport pour {{extension}}",
+        "download-file-for-extension-header": "Rapport de téléchargement"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -1931,7 +1941,11 @@
         "collections-promoted": "Promotion des collections",
         "stack-imported": "Pile importée",
         "confirm-delete-theme": "Supprimer ce thème l'effacera du disque. Vous pouvez le récupérer du dossier temp avant suppression",
-        "mal-token-required": "Le jeton MAL est requis, il est défini dans les paramètres de l'utilisateur"
+        "mal-token-required": "Le jeton MAL est requis, il est défini dans les paramètres de l'utilisateur",
+        "reading-lists-unpromoted": "Listes de lecture non promues",
+        "reading-lists-deleted": "Listes de lecture supprimées",
+        "confirm-delete-reading-lists": "Êtes-vous sûr de vouloir supprimer les listes de lecture? Cela ne peut pas être annulé.",
+        "reading-lists-promoted": "Listes de lecture promues"
     },
     "manga-format-stats": {
         "title": "Format",
@@ -2052,7 +2066,8 @@
         "no-data": "Aucun filtre intelligent n'a été créé",
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "Il y a une erreur d'encodage dans le filtre. Vous devez le recréer."
     },
     "day-breakdown": {
         "x-axis-label": "Jour de la semaine",
