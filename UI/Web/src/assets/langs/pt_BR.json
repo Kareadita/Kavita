@@ -1330,7 +1330,8 @@
         "users-online-count": "{{num}} Usuários online",
         "active-events-title": "Eventos Ativos:",
         "no-data": "Não há muita coisa acontecendo aqui",
-        "left-to-process": "Resta para Processar: {{leftToProcess}}"
+        "left-to-process": "Resta para Processar: {{leftToProcess}}",
+        "download-in-queue": "{{num}} downloads na Fila"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",
@@ -1462,7 +1463,9 @@
         "unbookmark-page-tooltip": "Desmarcar Página",
         "bookmark-page-tooltip": "Marcar Página",
         "series-progress": "Progresso das Séries: {{percentage}}",
-        "bookmarks-title": "Marcadores"
+        "bookmarks-title": "Marcadores",
+        "off": "Desligado",
+        "width-override-label": "Substituição de Largura"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1596,7 +1599,9 @@
         "total-size-header": "Tamanho Total",
         "total-files-header": "Total de Arquivos",
         "not-classified": "Não Classificado",
-        "total-file-size-title": "Tamanho Total do Arquivo:"
+        "total-file-size-title": "Tamanho Total do Arquivo:",
+        "download-file-for-extension-header": "Baixar Relatório",
+        "download-file-for-extension-alt": "Baixe o Relatório de arquivos para {{extension}}"
     },
     "reading-activity": {
         "title": "Atividade de Leitura",
@@ -1775,7 +1780,11 @@
         "pdf-book-mode-screen-size": "Tela muito pequena para o modo Livro",
         "stack-imported": "Pilha Importada",
         "confirm-delete-theme": "A remoção deste tema irá excluí-lo do disco. Você pode obtê-lo do diretório temporário antes da remoção",
-        "mal-token-required": "O token MAL é obrigatório, definido nas Configurações do Usuário"
+        "mal-token-required": "O token MAL é obrigatório, definido nas Configurações do Usuário",
+        "reading-lists-deleted": "Listas de leitura excluídas",
+        "confirm-delete-reading-lists": "Tem certeza de que deseja excluir as listas de leitura? Isto não pode ser desfeito.",
+        "reading-lists-unpromoted": "Listas de leitura não promovidas",
+        "reading-lists-promoted": "Listas de leitura promovidas"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1886,7 +1895,10 @@
         "volume-num": "Volume",
         "clear": "Limpar",
         "filter": "Filtro",
-        "remove": "Remover"
+        "remove": "Remover",
+        "chapter-num-shorthand": "Cap. {{num}}",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Vol. {{num}}"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Role para cima para ir para o capítulo anterior",

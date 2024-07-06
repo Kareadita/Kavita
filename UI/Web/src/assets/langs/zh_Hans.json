@@ -1463,7 +1463,9 @@
         "unbookmark-page-tooltip": "取消书签页面",
         "bookmark-page-tooltip": "书签页面",
         "series-progress": "系列进度： {{percentage}}",
-        "bookmarks-title": "书签"
+        "bookmarks-title": "书签",
+        "width-override-label": "宽度覆盖",
+        "off": "关"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1771,14 +1773,18 @@
         "force-kavita+-refresh-success": "Kavita+ 外部元数据已失效",
         "confirm-download-size-ios": "iOS 在下载大于 200MB 的文件时出现问题，此下载可能无法完成。",
         "collection-not-owned": "您没有该收藏",
-        "collections-promoted": "收藏推广",
+        "collections-promoted": "推广收藏",
         "collections-unpromoted": "未推广的收藏",
         "confirm-delete-collections": "您确定要删除多个收藏吗？",
         "collections-deleted": "收藏已删除",
         "pdf-book-mode-screen-size": "屏幕对于书籍模式来说太小",
         "stack-imported": "Stack 导入",
         "confirm-delete-theme": "删除该主题将从磁盘中删除它。您可以在删除之前从临时目录中获取它",
-        "mal-token-required": "需要 MAL 令牌，在用户设置中设置"
+        "mal-token-required": "需要 MAL 令牌，在用户设置中设置",
+        "reading-lists-deleted": "阅读列表已删除",
+        "reading-lists-unpromoted": "未推广的阅读清单",
+        "confirm-delete-reading-lists": "您确定要删除阅读列表吗？此操作无法撤消。",
+        "reading-lists-promoted": "推广阅读清单"
     },
     "actionable": {
         "scan-library": "扫描资料库",
