@@ -97,7 +97,7 @@ public class Program
                     Task.Run(async () =>
                         {
                             // Apply all migrations on startup
-                            logger.LogInformation("Running Migrations");
+                            logger.LogInformation("Running Manual Migrations");
 
                             try
                             {
@@ -113,7 +113,7 @@ public class Program
                             }
 
                             await unitOfWork.CommitAsync();
-                            logger.LogInformation("Running Migrations - complete");
+                            logger.LogInformation("Running Manual Migrations - complete");
                         }).GetAwaiter()
                         .GetResult();
                 }

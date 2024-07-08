@@ -1,39 +1,49 @@
 <ng-container *transloco="let t; read: 'infinite-scroller'">
 
-  <div class="fixed-top overlay" *ngIf="showDebugBar()">
-    <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
-    <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
-    <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
-    <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}}
-    <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
-    <strong>At Top:</strong> {{atTop}}
-    <strong>At Bottom:</strong> {{atBottom}}
-    <strong>Total Height:</strong> {{getTotalHeight()}}
-    <strong>Total Scroll:</strong> {{getTotalScroll()}}
-    <strong>Scroll Top:</strong> {{getScrollTop()}}
-  </div>
-
-  <div *ngIf="atTop" #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
-    <div style="height: 200px"></div>
-    <div>
-      <button class="btn btn-icon mx-auto">
-        <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-      </button>
-      <span class="mx-auto text">{{t('continuous-reading-prev-chapter')}}</span>
-      <button class="btn btn-icon mx-auto">
-        <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-      </button>
-      <span class="visually-hidden">{{t('continuous-reading-prev-chapter-alt')}}</span>
+  @if (showDebugBar()) {
+    <div class="fixed-top overlay">
+      <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
+      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
+      <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
+      <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}}
+      <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
+      <strong>At Top:</strong> {{atTop}}
+      <strong>At Bottom:</strong> {{atBottom}}
+      <strong>Total Height:</strong> {{getTotalHeight()}}
+      <strong>Total Scroll:</strong> {{getTotalScroll()}}
+      <strong>Scroll Top:</strong> {{getScrollTop()}}
     </div>
-  </div>
+  }
+
+  @if (atTop) {
+    <div #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+      <div class="empty-space"></div>
+      <div>
+        <button class="btn btn-icon mx-auto">
+          <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+        </button>
+        <span class="mx-auto text">{{t('continuous-reading-prev-chapter')}}</span>
+        <button class="btn btn-icon mx-auto">
+          <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+        </button>
+        <span class="visually-hidden">{{t('continuous-reading-prev-chapter-alt')}}</span>
+      </div>
+    </div>
+  }
 
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
-    <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-      <img src="{{item.src}}" style="display: block"
+    @for(item of webtoonImages | async; let index = $index; track item.src) {
+      <img src="{{item.src}}" style="display: block;" [ngStyle]="{'width': widthOverride$ | async}"
            [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
            class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
-           rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
-    </ng-container>
+           rel="nofollow"
+           alt="image"
+           (load)="onImageLoad($event)"
+           id="page-{{item.page}}"
+           [attr.page]="item.page"
+           ondragstart="return false;"
+           onselectstart="return false;">
+    }
   </div>
 
   <div #bottomSpacer class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
@@ -47,7 +57,7 @@
       </button>
       <span class="visually-hidden">{{t('continuous-reading-next-chapter-alt')}}</span>
     </div>
-    <div style="height: 200px"></div>
+    <div class="empty-space"></div>
   </div>
 
 </ng-container>

@@ -1,1 +1,78 @@
-{}
+{
+    "login": {
+        "forgot-password": "Unustasid parooli?",
+        "title": "Meldimine"
+    },
+    "dashboard": {
+        "no-libraries": "Siin pole veel ühtegi raamatukogumit üles seatud. Seadista mõned",
+        "not-granted": "Sulle ei ole antud juurdepääsu ühelegi kogule.",
+        "recently-updated-title": "Hiljuti uuendatud sarjad",
+        "recently-added-title": "Viimati lisatud sarjad",
+        "more-in-genre-title": "Rohkem žanris {{genre}}",
+        "server-settings-link": "Serveri seaded",
+        "on-deck-title": "Laual"
+    },
+    "edit-user": {
+        "saving": "Salvestan…",
+        "update": "Uuendus"
+    },
+    "user-scrobble-history": {
+        "title": "Scrobble ajalugu",
+        "description": "Siit leiad oma kontoga seotud scrobble juhtumid. Selleks, et juhtumid tekiks, pead seadistama scrobble serveri seaded. Kõik scrobble juhtumid, mis on serverisse ära saadetud, kustuvad peale ühte kuud. Kui on üleslaadimata juhtumeid, on tõenäoline, et need ei klapi üleslaetud scrobble juhtumitega - palun võta ühendust enda administraatoriga, et need korda saada.",
+        "is-processed-header": "On töödeldud",
+        "data-header": "Andmed",
+        "series-header": "Sari",
+        "type-header": "Tüüp",
+        "last-modified-header": "Viimati muudetud",
+        "not-read-warning": "Allavoolu teenusepakkujad hoiavad alati alles kõrgeima arvu",
+        "created-header": "Loodud",
+        "no-data": "Andmed puuduvad",
+        "volume-and-chapter-num": "Raamat {{v}} peatükk {{n}}",
+        "volume-num": "Raamat {{num}}",
+        "chapter-num": "peatükk {{num}}",
+        "not-processed": "Töötlemata",
+        "rating": "Hinnang {{r}}",
+        "not-applicable": "Ei rakendu",
+        "processed": "Töödeldud"
+    },
+    "scrobble-event-type-pipe": {
+        "want-to-read-add": "Lugemissoov: lisa",
+        "chapter-read": "Järg",
+        "score-updated": "Hinnangu uuendus",
+        "want-to-read-remove": "Lugemissoov: eemalda",
+        "review": "Ülevaate uuendus"
+    },
+    "spoiler": {
+        "click-to-show": "Potentsiaalselt mittesoovitav eelinfo sisu kohta - kliki seda, et näidata"
+    },
+    "review-series-modal": {
+        "title": "Muuda ülevaade",
+        "review-label": "Ülevaade",
+        "min-length": "Ülevaade peab olema vähemalt {{count}} märki pikk"
+    },
+    "review-card": {
+        "local-review": "Süsteemisisene (kohalik) ülevaade",
+        "your-review": "See on sinu ülevaade",
+        "external-review": "Süsteemiväline ülevaade",
+        "rating-percentage": "Hinnang {{r}}%"
+    },
+    "want-to-read": {
+        "title": "Lugemissoov",
+        "no-items": "Siin ei ole midagi. Proovi sari lisada.",
+        "no-items-filtered": "Hetkefiltrile ei vasta ühtegi eset."
+    },
+    "user-preferences": {
+        "title": "Kasutaja kiirlinkide töölaud",
+        "3rd-party-clients-tab": "Kolmanda osapoole klientprogrammid",
+        "theme-tab": "Teema",
+        "devices-tab": "Seaded",
+        "pref-description": "Need on süsteemiülesed seaded, mis rakenduvad sinu kontole.",
+        "account-tab": "Konto",
+        "preferences-tab": "Eelistused"
+    },
+    "review-card-modal": {
+        "user-review": "{{username}} ülevaade",
+        "external-mod": "(väline)",
+        "go-to-review": "Ülevaate juurde"
+    }
+}

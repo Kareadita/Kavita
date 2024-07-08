@@ -351,14 +351,17 @@ public class ParseScannedFiles
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count());
         var processedScannedSeries = new List<ScannedSeriesResult>();
         //var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
         foreach (var folderPath in folders)
         {
             try
             {
+                _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
                 var scanResults = await ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
 
+                _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
                 foreach (var scanResult in scanResults)
                 {
                     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);

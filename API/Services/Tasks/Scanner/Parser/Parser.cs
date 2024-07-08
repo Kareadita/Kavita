@@ -235,7 +235,7 @@ public static class Parser
         // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz,
         // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.30 Omake
         new Regex(
-            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+Vol(ume)?\.?(\d+|tbd|\s\d).+?",
+            @"^(?<Series>.+?)(?:\s*|_|\-\s*)+(?:Ch(?:apter|\.|)\s*\d+(?:\.\d+)?(?:\s*|_|\-\s*)+)?Vol(?:ume|\.|)\s*(?:\d+|tbd)(?:\s|_|\-\s*).+",
             MatchOptions, RegexTimeout),
         // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
         new Regex(
@@ -764,7 +764,10 @@ public static class Parser
             var group = matches
                 .Select(match => match.Groups["Series"])
                 .FirstOrDefault(group => group.Success && group != Match.Empty);
-            if (group != null) return CleanTitle(group.Value);
+            if (group != null)
+            {
+                return CleanTitle(group.Value);
+            }
         }
 
         return string.Empty;

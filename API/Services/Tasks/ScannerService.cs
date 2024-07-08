@@ -76,6 +76,7 @@ public enum ScanCancelReason
 public class ScannerService : IScannerService
 {
     public const string Name = "ScannerService";
+    private const int Timeout = 60 * 60 * 60; // 2.5 days
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
     private readonly IMetadataService _metadataService;
@@ -156,17 +157,18 @@ public class ScannerService : IScannerService
         }
 
         // TODO: Figure out why we have the library type restriction here
-        if (series != null && series.Library.Type is not (LibraryType.Book or LibraryType.LightNovel))
+        if (series != null)//  && series.Library.Type is not (LibraryType.Book or LibraryType.LightNovel)
         {
             if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {
-                _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
+                _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
             _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
             BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }
+
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
@@ -183,7 +185,7 @@ public class ScannerService : IScannerService
         {
             if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
             {
-                _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
+                _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
             }
             BackgroundJob.Schedule(() => ScanLibrary(library.Id, false, true), TimeSpan.FromMinutes(1));
@@ -196,12 +198,21 @@ public class ScannerService : IScannerService
     /// <param name="seriesId"></param>
     /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>
     [Queue(TaskScheduler.ScanQueue)]
+    [DisableConcurrentExecution(Timeout)]
+    [AutomaticRetry(Attempts = 200, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true)
     {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries", [seriesId, bypassFolderOptimizationChecks], TaskScheduler.ScanQueue))
+        {
+            _logger.LogInformation("[ScannerService] Scan series invoked but a task is already running/enqueued. Dropping request");
+            return;
+        }
+
         var sw = Stopwatch.StartNew();
 
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
+
         var existingChapterIdsToClean = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
@@ -434,7 +445,7 @@ public class ScannerService : IScannerService
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
         {
-            _logger.LogCritical("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+            _logger.LogCritical("[ScannerService] Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
 
             await _eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.ErrorEvent("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
@@ -448,7 +459,7 @@ public class ScannerService : IScannerService
         if (folders.Any(f => _directoryService.IsDirectoryEmpty(f)))
         {
             // That way logging and UI informing is all in one place with full context
-            _logger.LogError("Some of the root folders for the library are empty. " +
+            _logger.LogError("[ScannerService] Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                              "Scan has be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
@@ -465,17 +476,25 @@ public class ScannerService : IScannerService
     }
 
     [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
+    [DisableConcurrentExecution(Timeout)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries(bool forceUpdate = false)
     {
-        _logger.LogInformation("Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
+        _logger.LogInformation("[ScannerService] Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
         foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
+            // BUG: This will trigger the first N libraries to scan over and over if there is always an interruption later in the chain
+            if (TaskScheduler.HasScanTaskRunningForLibrary(lib.Id))
+            {
+                // We don't need to send SignalR event as this is a background job that user doesn't need insight into
+                _logger.LogInformation("[ScannerService] Scan library invoked via nightly scan job but a task is already running for {LibraryName}. Rescheduling for 4 hours", lib.Name);
+                await Task.Delay(TimeSpan.FromHours(4));
+            }
+
             await ScanLibrary(lib.Id, forceUpdate, true);
         }
         _processSeries.Reset();
-        _logger.LogInformation("Scan of All Libraries Finished");
+        _logger.LogInformation("[ScannerService] Scan of All Libraries Finished");
     }
 
 
@@ -488,13 +507,14 @@ public class ScannerService : IScannerService
     /// <param name="forceUpdate">Defaults to false</param>
     /// <param name="isSingleScan">Defaults to true. Is this a standalone invocation or is it in a loop?</param>
     [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
+    [DisableConcurrentExecution(Timeout)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true)
     {
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
+
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
@@ -506,23 +526,27 @@ public class ScannerService : IScannerService
         var shouldUseLibraryScan = !(await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)
         {
-            _logger.LogError("Library {LibraryName} consists of one or more Series folders, using series scan", library.Name);
+            _logger.LogError("[ScannerService] Library {LibraryName} consists of one or more Series folders, using series scan", library.Name);
         }
 
 
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan Files", library.Name);
         var (scanElapsedTime, processedSeries) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Track Found Series", library.Name);
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
 
         // We need to remove any keys where there is no actual parser info
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Process Parsed Series", library.Name);
         var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime);
 
         UpdateLastScanned(library);
 
 
         _unitOfWork.LibraryRepository.Update(library);
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 4: Save Library", library.Name);
         if (await _unitOfWork.CommitAsync())
         {
             if (isSingleScan)
@@ -543,6 +567,7 @@ public class ScannerService : IScannerService
                     totalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
 
+            _logger.LogDebug("[ScannerService] Library {LibraryName} Step 5: Remove Deleted Series", library.Name);
             await RemoveSeriesNotFound(parsedSeries, library);
         }
         else

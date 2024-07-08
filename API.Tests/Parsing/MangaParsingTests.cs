@@ -211,6 +211,7 @@ public class MangaParsingTests
     [InlineData("Max Level Returner เล่มที่ 5", "Max Level Returner")]
     [InlineData("หนึ่งความคิด นิจนิรันดร์ เล่ม 2", "หนึ่งความคิด นิจนิรันดร์")]
     [InlineData("不安の種\uff0b - 01", "不安の種\uff0b")]
+    [InlineData("Giant Ojou-sama - Ch. 33.5 - Volume 04 Bonus Chapter", "Giant Ojou-sama")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename, LibraryType.Manga));

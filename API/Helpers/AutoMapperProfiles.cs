@@ -22,6 +22,7 @@ using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.DTOs.SideNav;
+using API.DTOs.Stats;
 using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
@@ -117,6 +118,10 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(src =>
                         src.People.Where(p => p.Role == PersonRole.Inker).OrderBy(p => p.NormalizedName)))
+            .ForMember(dest => dest.Imprints,
+                opt =>
+                    opt.MapFrom(src =>
+                        src.People.Where(p => p.Role == PersonRole.Imprint).OrderBy(p => p.NormalizedName)))
             .ForMember(dest => dest.Letterers,
                 opt =>
                     opt.MapFrom(src =>
@@ -329,5 +334,8 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
 
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
+
+
+        CreateMap<MangaFile, FileExtensionExportDto>();
     }
 }

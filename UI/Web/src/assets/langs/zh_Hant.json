@@ -13,7 +13,8 @@
         "not-granted": "您沒有任何資料庫的訪問權限。",
         "on-deck-title": "準備就緒",
         "recently-updated-title": "最近更新系列",
-        "recently-added-title": "新增系列"
+        "recently-added-title": "新增系列",
+        "more-in-genre-title": "{{genre}} 更多的內容分類"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -23,13 +24,13 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "儲存",
+        "saving": "儲存…",
         "update": "更新"
     },
     "user-scrobble-history": {
         "title": "Scrobble歷史",
         "description": "在這裡您可以找到與您帳號關聯的所有Scrobble事件。為了使事件存在，您必須設定scrobble事件提供程式，所有已處理的事件將在一個月後清除。如果存在未處理的事件，這些事件很可能無法在上游形成匹配。請聯繫您的管理員進行修正。",
-        "filter-label": "篩選",
+        "filter-label": "{{common.filter}}",
         "created-header": "已創建",
         "last-modified-header": "上一次修改",
         "type-header": "類型",
@@ -41,7 +42,11 @@
         "rating": "評分{{r}}",
         "not-applicable": "不適用",
         "processed": "處理",
-        "not-processed": "未處理"
+        "not-processed": "未處理",
+        "volume-num": "{{num}} 卷",
+        "chapter-num": "章節 {{num}}",
+        "not-read-warning": "遠端將始終保持最高數量",
+        "special": "{{entity-title.special}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "閱讀進度",
@@ -57,7 +62,10 @@
         "title": "編輯評論",
         "review-label": "評論",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "評論至少需有 {{count}} 個字元",
+        "required": "{{validation.required-field}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -68,7 +76,7 @@
     "review-card": {
         "your-review": "這是您的評論",
         "external-review": "外部評論",
-        "local-review": "評論",
+        "local-review": "本地評論",
         "rating-percentage": "評分{{r}}%"
     },
     "want-to-read": {
@@ -143,10 +151,17 @@
         "clients-api-key-tooltip": "API 密鑰就像一個密碼。 保守秘密，保證安全。",
         "clients-opds-url-tooltip": "OPDS連結",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "智慧篩選",
+        "pdf-scroll-mode-label": "全螢幕模式",
+        "pdf-scroll-mode-tooltip": "當您瀏覽頁面時，可以選擇垂直/水平滾動，或者點擊分頁(無需滾動)",
+        "pdf-spread-mode-label": "傳播模式",
+        "pdf-spread-mode-tooltip": "頁面應該如何排列。單頁或雙頁(奇數/偶數)",
+        "pdf-theme-label": "主題",
+        "pdf-reader-settings-title": "PDF 閱讀器"
     },
     "user-holds": {
-        "title": "Scrobble Holds",
+        "title": "記錄保留",
         "description": "這是用戶管理的系列列表，不會被記錄到上游提供商。 您可以隨時刪除系列，下一個可亂碼事件(閱讀進度、評分、想要閱讀狀態)將觸發事件。"
     },
     "theme-manager": {
@@ -156,7 +171,18 @@
         "apply": "{{common.apply}}",
         "applied": "應用",
         "updated-toastr": "網站預設值已更新為{{name}}",
-        "scan-queued": "掃描網站主題已進入列隊"
+        "scan-queued": "掃描網站主題已進入列隊",
+        "default-theme": "預設主題",
+        "description": "Kavita 支援變更自訂顏色，找到一個符合您需求的配色方案，或者自己創建一個並分享。主題可以應用於您的帳戶，或應用於所有帳戶中。",
+        "active-theme": "活動",
+        "upload-continued": "一個 CSS 檔案",
+        "preview-default": "首先選擇一個主題",
+        "download": "{{changelog.download}}",
+        "delete": "{{common.delete}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "preview-default-admin": "首先選擇一個主題，或手動上傳一個",
+        "preview-title": "預覽"
     },
     "theme": {
         "theme-dark": "黑暗",
@@ -174,7 +200,8 @@
         "include-unknowns-tooltip": "如果屬實，則允許未知人員參加，但有年齡限制。 這可能會導致未標記的媒體洩露給有年齡限制的用戶。"
     },
     "site-theme-provider-pipe": {
-        "system": "系統"
+        "system": "系統",
+        "custom": "{{device-platform-pipe.custom}}"
     },
     "manage-devices": {
         "title": "裝置管理員",
@@ -185,7 +212,8 @@
         "email-label": "電子信箱： ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "email-setup-alert": "想要將文件傳送至您的設備嗎？ 請先進入管理員設置電子郵件設定！"
     },
     "edit-device": {
         "device-name-label": "裝置名稱",
@@ -210,7 +238,7 @@
         "permission-error": "您無權更改您的密碼。聯繫服務器管理員。"
     },
     "change-email": {
-        "email-label": "{{common.email}}",
+        "email-label": "新電子郵件",
         "current-password-label": "當前密碼",
         "email-not-confirmed": "此電子信箱未得到確認",
         "email-updated-title": "電子信箱已更新",
@@ -223,7 +251,11 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-title": "電子郵件",
+        "has-invalid-email": "看起來您沒有設置有效的電子郵件。更改電子郵件將需要管理員向您發送一個連結，以完成此操作。",
+        "valid-email": "{{validation.valid-email}}",
+        "email-confirmed": "已確認電子郵件"
     },
     "change-age-restriction": {
         "age-restriction-label": "年齡限制",
@@ -239,7 +271,8 @@
         "regen-warning": "重新生成 API 密鑰將使現有使用端失效。",
         "no-key": "錯誤 - 未設置密鑰",
         "confirm-reset": "這將使您設置的任何 OPDS 配置無效。 你確定要繼續嗎？",
-        "key-reset": "API密鑰重置"
+        "key-reset": "API密鑰重置",
+        "hide": "隱藏"
     },
     "scrobbling-providers": {
         "title": "Scrobbling供應商",
@@ -252,13 +285,20 @@
         "token-input-label": "Token：{{service}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "token-valid": "Token 有效",
+        "generic-instructions": "填寫有關不同外部服務的信息，以便讓 Kavita+ 能夠與它們互動。",
+        "mal-instructions": "Kavita 使用 MAL 客戶端 ID 進行身份驗證。為 Kavita 創建一個新的客戶端，一旦批准，提供客戶端 ID 和您的使用者名稱。",
+        "scrobbling-applicable-label": "可以進行 Scrobbling",
+        "mal-token-input-label": "MAL 客戶端 ID",
+        "mal-username-input-label": "MAL 使用者名稱",
+        "loading": "{{common.loading}}"
     },
     "typeahead": {
         "locked-field": "已鎖定",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "add-item": "新增{{item}}",
+        "add-item": "新增 {{item}}…",
         "no-data": "沒有資料",
         "add-custom-item": "，輸入以添加自定義項目"
     },
@@ -391,7 +431,8 @@
         "side-story": "番外",
         "spin-off": "拆分",
         "parent": "家長",
-        "edition": "編輯"
+        "edition": "編輯",
+        "annual": "年度"
     },
     "publication-status-pipe": {
         "ongoing": "進行中",
@@ -485,10 +526,20 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}"
     },
     "side-nav": {
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "reading-lists": "閱讀清單"
     },
     "library-settings-modal": {
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "naming-conventions-part-1": "Kavita 具有 ",
+        "help-us-part-3": "來命名和組織您的媒體。",
+        "cover-description": "可自訂 library 縮圖",
+        "manage-collection-label": "管理收藏",
+        "naming-conventions-part-2": "需要資料夾。",
+        "naming-conventions-part-3": "請確認這個連結，否則文件可能無法在掃描中顯示。",
+        "manage-collection-tooltip": "Kavita是否應該從 ComicInfo.xml/opf 文件中找到的 SeriesGroup 標籤並創建收藏",
+        "manage-reading-list-label": "管理閱讀清單",
+        "cover-description-extra": "圖示不應過大。建議使用小文件，大小為 32x32 像素。Kavita 不對大小進行驗證。"
     },
     "reader-settings": {
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}"
@@ -515,5 +566,60 @@
     },
     "series-preview-drawer": {
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}"
+    },
+    "reading-activity": {
+        "all-users": "所有使用者",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "no-data": "沒有閱讀進度",
+        "last-year": "{{time-periods.last-year}}",
+        "title": "閱讀記錄",
+        "legend-label": "格式",
+        "x-axis-label": "時間",
+        "y-axis-label": "閱讀時數",
+        "time-frame-label": "時間範圍",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "all-time": "{{time-periods.all-time}}"
+    },
+    "customize-dashboard-modal": {
+        "smart-filters": "智慧篩選",
+        "title-smart-filters": "智慧篩選"
+    },
+    "manga-format-stats": {
+        "title": "格式",
+        "data-table-label": "數據表",
+        "format-header": "格式"
+    },
+    "errors": {
+        "user-not-auth": "使用者未經認證"
+    },
+    "filter-field-pipe": {
+        "want-to-read": "待讀清單"
+    },
+    "file-breakdown-stats": {
+        "total-file-size-title": "總文件大小:",
+        "not-classified": "未分類"
+    },
+    "grouped-typeahead": {
+        "reading-lists": "閱讀清單"
+    },
+    "device-platform-pipe": {
+        "custom": "自訂"
+    },
+    "publication-status-stats": {
+        "title": "出版狀態"
+    },
+    "customize-sidenav-streams": {
+        "smart-filters-title": "智慧篩選"
+    },
+    "common": {
+        "volume-num": "卷"
+    },
+    "nav-header": {
+        "all-filters": "智慧篩選"
+    },
+    "reading-lists": {
+        "title": "閱讀清單"
     }
 }

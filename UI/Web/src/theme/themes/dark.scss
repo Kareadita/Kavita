@@ -242,6 +242,10 @@
     --event-widget-item-border-color: rgba(53, 53, 53, 0.5);
     --event-widget-border-color: rgba(1, 4, 9, 0.5);
     --event-widget-info-bg-color: #b6d4fe;
+    --event-widget-error-bg-color: var(--error-color);
+    --event-widget-update-bg-color: var(--primary-color);
+    --event-widget-activity-bg-color: var(--primary-color);
+
 
     /* Search */
     --search-result-text-lite-color: initial;

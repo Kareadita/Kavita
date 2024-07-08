@@ -91,10 +91,37 @@ public class VersionUpdaterService : IVersionUpdaterService
 
         // Find the latest dto
         var latestRelease = updateDtos[0]!;
+        var updateVersion = new Version(latestRelease.UpdateVersion);
         var isNightly = BuildInfo.Version > new Version(latestRelease.UpdateVersion);
+
+        // isNightly can be true when we compare something like v0.8.1 vs v0.8.1.0
+        if (IsVersionEqualToBuildVersion(updateVersion))
+        {
+            //latestRelease.UpdateVersion = BuildInfo.Version.ToString();
+            isNightly = false;
+        }
+
+
         latestRelease.IsOnNightlyInRelease = isNightly;
 
         return updateDtos;
+    }
+
+    private static bool IsVersionEqualToBuildVersion(Version updateVersion)
+    {
+        return updateVersion.Revision < 0 && BuildInfo.Version.Revision == 0 &&
+               CompareWithoutRevision(BuildInfo.Version, updateVersion);
+    }
+
+    private static bool CompareWithoutRevision(Version v1, Version v2)
+    {
+        if (v1.Major != v2.Major)
+            return v1.Major == v2.Major;
+        if (v1.Minor != v2.Minor)
+            return v1.Minor == v2.Minor;
+        if (v1.Build != v2.Build)
+            return v1.Build == v2.Build;
+        return true;
     }
 
     public async Task<int> GetNumberOfReleasesBehind()
@@ -109,6 +136,7 @@ public class VersionUpdaterService : IVersionUpdaterService
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
         var currentVersion = BuildInfo.Version.ToString(4);
 
+
         return new UpdateNotificationDto()
         {
             CurrentVersion = currentVersion,
@@ -118,7 +146,7 @@ public class VersionUpdaterService : IVersionUpdaterService
             UpdateUrl = update.Html_Url,
             IsDocker = OsInfo.IsDocker,
             PublishDate = update.Published_At,
-            IsReleaseEqual = BuildInfo.Version == updateVersion,
+            IsReleaseEqual = IsVersionEqualToBuildVersion(updateVersion),
             IsReleaseNewer = BuildInfo.Version < updateVersion,
         };
     }

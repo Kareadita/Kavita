@@ -24,6 +24,7 @@ import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {FilterService} from "./filter.service";
+import {ReadingListService} from "./reading-list.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -48,7 +49,8 @@ export class ActionService implements OnDestroy {
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
     private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
-    private readonly collectionTagService: CollectionTagService, private filterService: FilterService) { }
+    private readonly collectionTagService: CollectionTagService, private filterService: FilterService,
+              private readonly readingListService: ReadingListService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -386,7 +388,7 @@ export class ActionService implements OnDestroy {
   }
 
   /**
-   * Mark all series as Unread.
+   * Mark all collections as promoted/unpromoted.
    * @param collections UserCollection, should have id, pagesRead populated
    * @param promoted boolean, promoted state
    * @param callback Optional callback to perform actions after API completes
@@ -415,6 +417,43 @@ export class ActionService implements OnDestroy {
 
     this.collectionTagService.deleteMultipleCollections(collections.map(v => v.id)).pipe(take(1)).subscribe(() => {
       this.toastr.success(translate('toasts.collections-deleted'));
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Mark all reading lists as promoted/unpromoted.
+   * @param readingLists UserCollection, should have id, pagesRead populated
+   * @param promoted boolean, promoted state
+   * @param callback Optional callback to perform actions after API completes
+   */
+  promoteMultipleReadingLists(readingLists: Array<ReadingList>, promoted: boolean, callback?: BooleanActionCallback) {
+    this.readingListService.promoteMultipleReadingLists(readingLists.map(v => v.id), promoted).pipe(take(1)).subscribe(() => {
+      if (promoted) {
+        this.toastr.success(translate('toasts.reading-list-promoted'));
+      } else {
+        this.toastr.success(translate('toasts.reading-list-unpromoted'));
+      }
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Deletes multiple collections
+   * @param readingLists ReadingList, should have id
+   * @param callback Optional callback to perform actions after API completes
+   */
+  async deleteMultipleReadingLists(readingLists: Array<ReadingList>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-reading-list'))) return;
+
+    this.readingListService.deleteMultipleReadingLists(readingLists.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      this.toastr.success(translate('toasts.reading-lists-deleted'));
 
       if (callback) {
         callback(true);

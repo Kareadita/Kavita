@@ -25,7 +25,7 @@ import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hu
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
-import { NgIf, NgClass, NgStyle, NgFor, AsyncPipe } from '@angular/common';
+import { NgClass, NgStyle, AsyncPipe } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
@@ -34,11 +34,19 @@ import {TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./events-widget.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgClass, NgbPopover, NgStyle, CircularLoaderComponent, NgFor, AsyncPipe, SentenceCasePipe, TranslocoDirective]
+  imports: [NgClass, NgbPopover, NgStyle, CircularLoaderComponent, AsyncPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
-  @Input({required: true}) user!: User;
+  public readonly downloadService = inject(DownloadService);
+  public readonly messageHub = inject(MessageHubService);
+  private readonly modalService = inject(NgbModal);
+  private readonly accountService = inject(AccountService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+
+  @Input({required: true}) user!: User;
+
 
   isAdmin$: Observable<boolean> = of(false);
 
@@ -60,17 +68,15 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEvents: number = 0;
+  /**
+   * Intercepts from Single Updates to show an extra indicator to the user
+   */
+  updateAvailable: boolean = false;
 
   debugMode: boolean = false;
 
   protected readonly EVENTS = EVENTS;
 
-  public readonly downloadService = inject(DownloadService);
-
-  constructor(public messageHub: MessageHubService, private modalService: NgbModal,
-    private accountService: AccountService, private confirmService: ConfirmService,
-    private readonly cdRef: ChangeDetectorRef) {
-    }
 
   ngOnDestroy(): void {
     this.progressEventsSource.complete();
@@ -115,6 +121,9 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         values.push(message);
         this.singleUpdateSource.next(values);
         this.activeEvents += 1;
+        if (event.payload.name === EVENTS.UpdateAvailable) {
+          this.updateAvailable = true;
+        }
         this.cdRef.markForCheck();
         break;
       case 'started':

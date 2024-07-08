@@ -1135,7 +1135,9 @@
         "source-title": "源代码：",
         "feature-request-title": "功能请求:",
         "localization-title": "本地化:",
-        "updates-title": "更新历史"
+        "updates-title": "更新历史",
+        "first-install-version-title": "首次安装版本",
+        "first-install-date-title": "首次安装日期"
     },
     "manage-tasks-settings": {
         "title": "周期性任务",
@@ -1328,7 +1330,8 @@
         "users-online-count": "{{num}}用户在线",
         "active-events-title": "活动事件：",
         "no-data": "无运行",
-        "left-to-process": "待处理：{{leftToProcess}}"
+        "left-to-process": "待处理：{{leftToProcess}}",
+        "download-in-queue": "{{num}} 队列中的下载"
     },
     "shortcuts-modal": {
         "title": "热键",
@@ -1460,7 +1463,9 @@
         "unbookmark-page-tooltip": "取消书签页面",
         "bookmark-page-tooltip": "书签页面",
         "series-progress": "系列进度： {{percentage}}",
-        "bookmarks-title": "书签"
+        "bookmarks-title": "书签",
+        "width-override-label": "宽度覆盖",
+        "off": "关"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1594,7 +1599,9 @@
         "total-size-header": "总大小",
         "total-files-header": "文件总数",
         "not-classified": "未分类",
-        "total-file-size-title": "总文件大小："
+        "total-file-size-title": "总文件大小：",
+        "download-file-for-extension-header": "下载报告",
+        "download-file-for-extension-alt": "下载 {{extension}} 的文件报告"
     },
     "reading-activity": {
         "title": "阅读活动",
@@ -1766,14 +1773,18 @@
         "force-kavita+-refresh-success": "Kavita+ 外部元数据已失效",
         "confirm-download-size-ios": "iOS 在下载大于 200MB 的文件时出现问题，此下载可能无法完成。",
         "collection-not-owned": "您没有该收藏",
-        "collections-promoted": "收藏推广",
+        "collections-promoted": "推广收藏",
         "collections-unpromoted": "未推广的收藏",
         "confirm-delete-collections": "您确定要删除多个收藏吗？",
         "collections-deleted": "收藏已删除",
         "pdf-book-mode-screen-size": "屏幕对于书籍模式来说太小",
         "stack-imported": "Stack 导入",
         "confirm-delete-theme": "删除该主题将从磁盘中删除它。您可以在删除之前从临时目录中获取它",
-        "mal-token-required": "需要 MAL 令牌，在用户设置中设置"
+        "mal-token-required": "需要 MAL 令牌，在用户设置中设置",
+        "reading-lists-deleted": "阅读列表已删除",
+        "reading-lists-unpromoted": "未推广的阅读清单",
+        "confirm-delete-reading-lists": "您确定要删除阅读列表吗？此操作无法撤消。",
+        "reading-lists-promoted": "推广阅读清单"
     },
     "actionable": {
         "scan-library": "扫描资料库",
@@ -1884,7 +1895,10 @@
         "volume-num": "卷",
         "clear": "清空",
         "filter": "筛选",
-        "remove": "删除"
+        "remove": "删除",
+        "issue-num-shorthand": "#{{num}}",
+        "chapter-num-shorthand": "章节 {{num}}",
+        "volume-num-shorthand": "卷 {{num}}"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "向上滚动以返回上一章节",
@@ -2047,11 +2061,13 @@
         "no-data": "未创建智能筛选",
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "筛选器中存在编码错误。您需要重新创建它。"
     },
     "all-filters": {
         "title": "所有智能筛选器",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "next-expected-card": {
         "title": "~{{date}}"

@@ -1513,7 +1513,8 @@
         "users-online-count": "{{num}} Users online",
         "active-events-title": "Active Events:",
         "no-data": "Not much going on here",
-        "left-to-process": "Left to Process: {{leftToProcess}}"
+        "left-to-process": "Left to Process: {{leftToProcess}}",
+        "download-in-queue": "{{num}} downloads in Queue"
     },
 
     "shortcuts-modal": {
@@ -1698,6 +1699,8 @@
         "image-scaling-label": "Image Scaling",
         "height": "Height",
         "width": "Width",
+        "width-override-label": "Width Override",
+        "off": "Off",
         "original": "Original",
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "swipe-enabled-label": "Swipe Enabled",
@@ -1868,7 +1871,9 @@
         "total-size-header": "Total Size",
         "total-files-header": "Total Files",
         "not-classified": "Not Classified",
-        "total-file-size-title": "Total File Size:"
+        "total-file-size-title": "Total File Size:",
+        "download-file-for-extension-header": "Download Report",
+        "download-file-for-extension-alt": "Download files Report for {{extension}}"
     },
 
     "reading-activity": {
@@ -2129,8 +2134,10 @@
         "no-series-collection-warning": "Warning! No series are selected, saving will delete the Collection. Are you sure you want to continue?",
         "collection-updated": "Collection updated",
         "reading-list-deleted": "Reading list deleted",
+        "reading-lists-deleted": "Reading lists deleted",
         "reading-list-updated": "Reading list updated",
         "confirm-delete-reading-list": "Are you sure you want to delete the reading list? This cannot be undone.",
+        "confirm-delete-reading-lists": "Are you sure you want to delete the reading lists? This cannot be undone.",
         "item-removed": "Item removed",
         "nothing-to-remove": "Nothing to remove",
         "series-added-to-reading-list": "Series added to reading list",
@@ -2204,6 +2211,8 @@
         "collection-not-owned": "You do not own this collection",
         "collections-promoted": "Collections promoted",
         "collections-unpromoted": "Collections un-promoted",
+        "reading-lists-promoted": "Reading Lists promoted",
+        "reading-lists-unpromoted": "Reading Lists un-promoted",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
@@ -2326,7 +2335,10 @@
         "issue-hash-num": "Issue #",
         "issue-num": "Issue",
         "chapter-num": "Chapter",
-        "volume-num": "Volume"
+        "volume-num": "Volume",
+        "chapter-num-shorthand": "Ch {{num}}",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Vol {{num}}"
     }
 
 }

@@ -21,9 +21,10 @@ public static class MigrateEmailTemplates
         var files = directoryService.GetFiles(directoryService.CustomizedTemplateDirectory);
         if (files.Any())
         {
-            logger.LogCritical("Running MigrateEmailTemplates migration - Completed. This is not an error");
             return;
         }
+
+        logger.LogCritical("Running MigrateEmailTemplates migration - Please be patient, this may take some time. This is not an error");
 
         // Write files to directory
         await DownloadAndWriteToFile(EmailChange, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailChange.html"), logger);
@@ -33,8 +34,7 @@ public static class MigrateEmailTemplates
         await DownloadAndWriteToFile(EmailTest, Path.Join(directoryService.CustomizedTemplateDirectory, "EmailTest.html"), logger);
 
 
-
-        logger.LogCritical("Running MigrateEmailTemplates migration - Please be patient, this may take some time. This is not an error");
+        logger.LogCritical("Running MigrateEmailTemplates migration - Completed. This is not an error");
     }
 
     private static async Task DownloadAndWriteToFile(string url, string filePath, ILogger<Program> logger)

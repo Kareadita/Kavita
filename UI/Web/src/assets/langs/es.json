@@ -142,7 +142,9 @@
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "bookmark-page-tooltip": "Marcar página",
         "series-progress": "Progreso de la serie: {{porcentage}}",
-        "bookmarks-title": "Marcadores"
+        "bookmarks-title": "Marcadores",
+        "width-override-label": "Anulación de ancho",
+        "off": "Apagado"
     },
     "import-cbl-modal": {
         "import": "Importar",
@@ -207,7 +209,10 @@
         "issue-num": "Número",
         "clear": "Limpiar",
         "filter": "Filtrar",
-        "remove": "Eliminar"
+        "remove": "Eliminar",
+        "issue-num-shorthand": "#{{num}}",
+        "chapter-num-shorthand": "Ch {{num}}",
+        "volume-num-shorthand": "Vol {{num}}"
     },
     "user-preferences": {
         "share-series-reviews-label": "Compartir reseñas de series",
@@ -1114,7 +1119,11 @@
         "pdf-book-mode-screen-size": "Pantalla demasiado pequeña para el modo Libro",
         "stack-imported": "Pila importada",
         "confirm-delete-theme": "Al eliminar este tema, se borrará del disco. Puedes cogerlo del directorio temporal antes de eliminarlo",
-        "mal-token-required": "Se requiere un token MAL, establecido en la configuración del usuario"
+        "mal-token-required": "Se requiere un token MAL, establecido en la configuración del usuario",
+        "reading-lists-deleted": "Listas de lectura eliminadas",
+        "confirm-delete-reading-lists": "¿Estás seguro de que deseas eliminar las listas de lectura? Esta acción no se puede deshacer.",
+        "reading-lists-promoted": "Listas de lectura promovidas",
+        "reading-lists-unpromoted": "Listas de lectura no promovidas"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -1281,7 +1290,8 @@
         "users-online-count": "{{num}} Usuarios en línea",
         "active-events-title": "Eventos activos:",
         "no-data": "No hay mucha actividad por aquí",
-        "left-to-process": "Queda por procesar: {{leftToProcess}}"
+        "left-to-process": "Queda por procesar: {{leftToProcess}}",
+        "download-in-queue": "{{num}} descargas en cola"
     },
     "reader-settings": {
         "reset-to-defaults": "Restablecer los valores predeterminados",
@@ -1659,7 +1669,9 @@
         "total-file-size-title": "Tamaño del fichero:",
         "extension-header": "Extensión",
         "data-table-label": "Tabla de datos",
-        "format-tooltip": "No clasificado significa que Kavita no ha escaneado algunos archivos. Esto ocurre en archivos antiguos anteriores a la v0.7. Es posible que tenga que ejecutar una exploración forzada a través de la configuración de la biblioteca."
+        "format-tooltip": "No clasificado significa que Kavita no ha escaneado algunos archivos. Esto ocurre en archivos antiguos anteriores a la v0.7. Es posible que tenga que ejecutar una exploración forzada a través de la configuración de la biblioteca.",
+        "download-file-for-extension-alt": "Descargar informe de archivo para {{extension}}",
+        "download-file-for-extension-header": "Descargar informe"
     },
     "filter-field-pipe": {
         "colorist": "Colorista",
@@ -1725,7 +1737,9 @@
         "home-page-title": "Página de inicio:",
         "title": "Sobre el sistema",
         "localization-title": "Ubicaciones:",
-        "updates-title": "Historial de actualizaciones"
+        "updates-title": "Historial de actualizaciones",
+        "first-install-version-title": "Primera versión de instalación",
+        "first-install-date-title": "Fecha de la primera instalación"
     },
     "manage-tasks-settings": {
         "action-header": "Acción",
@@ -2023,7 +2037,8 @@
         "delete": "{{common.delete}}",
         "no-data": "No se han creado filtros inteligentes",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "errored": "Hay un error de codificación en el filtro. Debes volver a crearlo."
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -2060,7 +2075,8 @@
     },
     "all-filters": {
         "title": "Todos los filtros inteligentes",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "out-of-date-modal": {
         "close": "{{common.close}}",

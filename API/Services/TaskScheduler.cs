@@ -4,11 +4,13 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
+using API.SignalR;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -22,12 +24,12 @@ public interface ITaskScheduler
     Task ScheduleKavitaPlusTasks();
     void ScanFolder(string folderPath, string originalPath, TimeSpan delay);
     void ScanFolder(string folderPath);
-    void ScanLibrary(int libraryId, bool force = false);
-    void ScanLibraries(bool force = false);
+    Task ScanLibrary(int libraryId, bool force = false);
+    Task ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
-    void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
     void CancelStatsTasks();
@@ -59,6 +61,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ISmartCollectionSyncService _smartCollectionSyncService;
     private readonly IFontService _fontService;
+    private readonly IEventHub _eventHub;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -79,7 +82,7 @@ public class TaskScheduler : ITaskScheduler
     public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
     public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
 
-    private static readonly ImmutableArray<string> ScanTasks =
+    public static readonly ImmutableArray<string> ScanTasks =
         ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
 
     private static readonly Random Rnd = new Random();
@@ -95,7 +98,7 @@ public class TaskScheduler : ITaskScheduler
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
-        IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
+        IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService, IEventHub eventHub,
         IFontService fontService)
     {
         _cacheService = cacheService;
@@ -116,6 +119,7 @@ public class TaskScheduler : ITaskScheduler
         _externalMetadataService = externalMetadataService;
         _smartCollectionSyncService = smartCollectionSyncService;
         _fontService = fontService;
+        _eventHub = eventHub;
     }
 
     public async Task ScheduleTasks()
@@ -127,7 +131,7 @@ public class TaskScheduler : ITaskScheduler
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(false),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), RecurringJobOptions);
         }
         else
@@ -324,18 +328,21 @@ public class TaskScheduler : ITaskScheduler
     /// Attempts to call ScanLibraries on ScannerService, but if another scan task is in progress, will reschedule the invocation for 3 hours in future.
     /// </summary>
     /// <param name="force"></param>
-    public void ScanLibraries(bool force = false)
+    public async Task ScanLibraries(bool force = false)
     {
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibraries in 3 hours");
+            // Send InfoEvent to UI as this is invoked my API
             BackgroundJob.Schedule(() => ScanLibraries(force), TimeSpan.FromHours(3));
+            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan libraries task delayed",
+                $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for 3 hours: {DateTime.Now.AddHours(3)}"));
             return;
         }
         BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
     }
 
-    public void ScanLibrary(int libraryId, bool force = false)
+    public async Task ScanLibrary(int libraryId, bool force = false)
     {
         if (HasScanTaskRunningForLibrary(libraryId))
         {
@@ -344,15 +351,18 @@ public class TaskScheduler : ITaskScheduler
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
+            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan library task delayed",
+                $"A scan was ongoing during processing of the {library!.Name} scan task. Task has been rescheduled for 3 hours: {DateTime.Now.AddHours(3)}"));
             BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
             return;
         }
 
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
+        var jobId = BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
         // When we do a scan, force cache to re-unpack in case page numbers change
-        BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
+        BackgroundJob.ContinueJobWith(jobId, () => _cleanupService.CleanupCacheDirectory());
     }
 
     public void TurnOnScrobbling(int userId = 0)
@@ -393,7 +403,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
     }
 
-    public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
+    public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, forceUpdate], ScanQueue))
         {
@@ -403,7 +413,10 @@ public class TaskScheduler : ITaskScheduler
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
             // BUG: This can end up triggering a ton of scan series calls (but i haven't seen in practice)
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
             _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
+            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan series task delayed: {series!.Name}",
+                $"A scan was ongoing during processing of the scan series task. Task has been rescheduled for 10 minutes: {DateTime.Now.AddMinutes(10)}"));
             BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), TimeSpan.FromMinutes(10));
             return;
         }
@@ -474,6 +487,7 @@ public class TaskScheduler : ITaskScheduler
             HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, false], ScanQueue, checkRunningJobs);
     }
 
+
     /// <summary>
     /// Checks if this same invocation is already enqueued or scheduled
     /// </summary>
@@ -482,6 +496,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
+    /// <param name="checkArgs">Check against arguments. Defaults to true.</param>
     /// <returns></returns>
     public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {

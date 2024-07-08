@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Statistics;
+using API.DTOs.Stats;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
@@ -35,6 +37,7 @@ public interface IStatisticService
     Task UpdateServerStatistics();
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
     Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown();
+    Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
 }
 
 /// <summary>
@@ -557,6 +560,16 @@ public class StatisticService : IStatisticService
             SeriesCompleted = seriesWithMetadata
         };
 
+    }
+
+    public async Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension)
+    {
+        var query = _context.MangaFile
+            .Where(f => f.Extension == fileExtension)
+            .ProjectTo<FileExtensionExportDto>(_mapper.ConfigurationProvider)
+            .OrderBy(f => f.FilePath);
+
+        return await query.ToListAsync();
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
