@@ -2,6 +2,7 @@
     background-color: var(--login-input-background-color);
     color: var(--login-input-color);
     border-color: var(--login-input-border-color);
+    font-family: var(--login-input-font-family);
 
     &.is-invalid {
         border-color: var(--bs-form-invalid-border-color);
@@ -15,19 +16,20 @@
     &::placeholder {
         opacity: 0.5;
         color: var(--login-input-placeholder-color);
+        font-family: var(--login-input-font-family);
       }
 }
 
 label {
-    font-family: "League Spartan", sans-serif;
+    font-family: var(--login-input-font-family);
     margin-bottom: 0;
 }
 
 p {
-    font-family: "League Spartan", sans-serif;
+    font-family: var(--login-input-font-family);
 }
 
 .btn {
     width: 100%;
-    font-family: "League Spartan", sans-serif;
+    font-family: var(--login-input-font-family);
 }

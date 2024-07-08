@@ -14,7 +14,7 @@ a {
     background-color: #343A40 !important;
     color: #fff !important;
     border-color: var(--login-input-border-color);
-    font-family: "League Spartan", sans-serif;
+    font-family: var(--login-input-font-family);
 
     &:focus {
         border-color: var(--login-input-border-color-focus);
@@ -24,25 +24,25 @@ a {
     &::placeholder {
         opacity: 0.5;
         color: #cecece;
-        font-family: "League Spartan", sans-serif;
+        font-family: var(--login-input-font-family);
       }
 }
 
 .invalid-feedback {
     display: inline-block;
     color: var(--bs-form-invalid-color);
-    font-family: "League Spartan", sans-serif;
+    font-family: var(--login-input-font-family);
 }
 
 .forgot-password {
     a {
         color: var(--login-forgot-password-color);
-        font-family: "League Spartan", sans-serif;
+        font-family: var(--login-input-font-family);
     }
 }
 
 .sign-in {
     .btn {
-        font-family: 'League Spartan', sans-serif;
+        font-family: var(--login-input-font-family);
     }
 }
