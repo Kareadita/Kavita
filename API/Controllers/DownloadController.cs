@@ -103,7 +103,7 @@ public class DownloadController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series!.Name} - Volume {volume.Number}.zip");
+            return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series!.Name} - Volume {volume.Name}.zip");
         }
         catch (KavitaException ex)
         {
@@ -140,7 +140,7 @@ public class DownloadController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series!.Name} - Chapter {chapter.Number}.zip");
+            return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.zip");
         }
         catch (KavitaException ex)
         {
@@ -233,7 +233,7 @@ public class DownloadController : BaseApiController
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}", 1F));
 
 
-        return PhysicalFile(filePath, DefaultContentType, System.Web.HttpUtility.UrlEncode(filename), true);
+        return PhysicalFile(filePath, DefaultContentType, Uri.EscapeDataString(filename), true);
     }
 
 }

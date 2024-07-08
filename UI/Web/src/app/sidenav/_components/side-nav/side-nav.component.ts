@@ -30,6 +30,10 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
+import {
+  ImportMalCollectionModalComponent
+} from "../../../collections/_components/import-mal-collection-modal/import-mal-collection-modal.component";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
   selector: 'app-side-nav',
@@ -41,21 +45,6 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 })
 export class SideNavComponent implements OnInit {
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
-
-  cachedData: SideNavStream[] | null = null;
-  actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
-  homeActions = [{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.handleHomeActions.bind(this)}];
-
-  filterQuery: string = '';
-  filterLibrary = (stream: SideNavStream) => {
-    return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
-  }
-  showAll: boolean = false;
-  totalSize = 0;
-
   protected readonly SideNavStreamType = SideNavStreamType;
   private readonly router = inject(Router);
   private readonly utilityService = inject(UtilityService);
@@ -66,7 +55,24 @@ export class SideNavComponent implements OnInit {
   private readonly ngbModal = inject(NgbModal);
   private readonly imageService = inject(ImageService);
   public readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  protected readonly WikiLink = WikiLink;
 
+  cachedData: SideNavStream[] | null = null;
+  actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+  readingListActions = [];
+  homeActions = [
+    {action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.openCustomize.bind(this)},
+    {action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)},
+  ];
+
+  filterQuery: string = '';
+  filterLibrary = (stream: SideNavStream) => {
+    return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
+  }
+  showAll: boolean = false;
+  totalSize = 0;
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -137,6 +143,15 @@ export class SideNavComponent implements OnInit {
         this.navService.toggleSideNav();
         this.cdRef.markForCheck();
     });
+
+    this.accountService.hasValidLicense$.subscribe(res =>{
+      if (!res) return;
+
+      if (this.homeActions.filter(f => f.title === 'import-mal-stack').length === 0) {
+        this.homeActions.push({action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)});
+        this.cdRef.markForCheck();
+      }
+    })
   }
 
   ngOnInit(): void {
@@ -157,6 +172,9 @@ export class SideNavComponent implements OnInit {
       case (Action.AnalyzeFiles):
         await this.actionService.analyzeFiles(library);
         break;
+      case (Action.Delete):
+        await this.actionService.deleteLibrary(library);
+        break;
       case (Action.Edit):
         this.actionService.editLibrary(library, () => window.scrollTo(0, 0));
         break;
@@ -165,12 +183,20 @@ export class SideNavComponent implements OnInit {
     }
   }
 
-  handleHomeActions() {
+  handleHomeActions(action: ActionItem<void>) {
+    action.callback(action, undefined);
+  }
+
+  openCustomize() {
     this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   importCbl() {
     this.ngbModal.open(ImportCblModalComponent, {size: 'xl', fullscreen: 'md'});
+  }
+
+  importMalCollection() {
+    this.ngbModal.open(ImportMalCollectionModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   performAction(action: ActionItem<Library>, library: Library) {
@@ -182,8 +208,10 @@ export class SideNavComponent implements OnInit {
   getLibraryTypeIcon(format: LibraryType) {
     switch (format) {
       case LibraryType.Book:
+      case LibraryType.LightNovel:
         return 'fa-book';
       case LibraryType.Comic:
+      case LibraryType.ComicVine:
       case LibraryType.Manga:
         return 'fa-book-open';
       case LibraryType.Images:
@@ -210,5 +238,4 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
-
 }

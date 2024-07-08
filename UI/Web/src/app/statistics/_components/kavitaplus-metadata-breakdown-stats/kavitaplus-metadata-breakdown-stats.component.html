@@ -1,0 +1,24 @@
+<ng-container *transloco="let t; read: 'kavitaplus-metadata-breakdown-stats'">
+  <div class="dashboard-card-content">
+    <h4>{{t('title')}}</h4>
+    <p>{{t('description')}}</p>
+
+    @if(breakdown) {
+      @if(breakdown.totalSeries === 0 || breakdown.seriesCompleted === 0) {
+        <div>{{t('no-data')}}</div>
+      } @else {
+        <ngb-progressbar-stacked>
+          <ngb-progressbar class="progress-bar-danger" type="danger" [showValue]="true" [value]="20" [ngbTooltip]="t('errored-series-label') + ' ' + breakdown.erroredSeries"></ngb-progressbar>
+          <ngb-progressbar type="success" [showValue]="true" [value]="80" [ngbTooltip]="t('completed-series-label') + ' ' + breakdown.seriesCompleted"></ngb-progressbar>
+        </ngb-progressbar-stacked>
+        @if (breakdown.seriesCompleted >= breakdown.totalSeries) {
+          <p>{{t('complete') }}
+            @if (breakdown.erroredSeries > 0) {
+              {{t('errored-series-label') }} {{breakdown.erroredSeries}}
+            }
+          </p>
+        }
+      }
+    }
+  </div>
+</ng-container>

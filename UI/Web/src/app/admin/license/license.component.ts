@@ -15,6 +15,7 @@ import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {catchError} from "rxjs";
+import {WikiLink} from "../../_models/wiki";
 
 @Component({
   selector: 'app-license',
@@ -22,7 +23,7 @@ import {catchError} from "rxjs";
   styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
+  imports: [NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
 })
 export class LicenseComponent implements OnInit {
 
@@ -30,13 +31,14 @@ export class LicenseComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
+  protected readonly WikiLink = WikiLink;
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
 
   hasValidLicense: boolean = false;
   hasLicense: boolean = false;
-  isChecking: boolean = false;
+  isChecking: boolean = true;
   isSaving: boolean = false;
 
   buyLink = environment.buyLink;
@@ -49,13 +51,21 @@ export class LicenseComponent implements OnInit {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
     this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
+
+    this.isChecking = true;
+    this.cdRef.markForCheck();
+
     this.accountService.hasAnyLicense().subscribe(res => {
       this.hasLicense = res;
       this.cdRef.markForCheck();
-    });
-    this.accountService.hasValidLicense().subscribe(res => {
-      this.hasValidLicense = res;
-      this.cdRef.markForCheck();
+
+      if (this.hasLicense) {
+        this.accountService.hasValidLicense().subscribe(res => {
+          this.hasValidLicense = res;
+          this.isChecking = false;
+          this.cdRef.markForCheck();
+        });
+      }
     });
   }
 

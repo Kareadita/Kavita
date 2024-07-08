@@ -44,12 +44,29 @@ public class ScrobblingController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("anilist-token")]
-    public async Task<ActionResult> GetAniListToken()
+    public async Task<ActionResult<string>> GetAniListToken()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
         return Ok(user.AniListAccessToken);
+    }
+
+    /// <summary>
+    /// Get the current user's MAL token & username
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("mal-token")]
+    public async Task<ActionResult<MalUserInfoDto>> GetMalToken()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+
+        return Ok(new MalUserInfoDto()
+        {
+            Username = user.MalUserName,
+            AccessToken = user.MalAccessToken
+        });
     }
 
     /// <summary>
@@ -72,6 +89,26 @@ public class ScrobblingController : BaseApiController
         {
             BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(user.Id));
         }
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Update the current user's MAL token (Client ID) and Username
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update-mal-token")]
+    public async Task<ActionResult> UpdateMalToken(MalUserInfoDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+
+        user.MalAccessToken = dto.AccessToken;
+        user.MalUserName = dto.Username;
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
 
         return Ok();
     }

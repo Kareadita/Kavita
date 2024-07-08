@@ -17,12 +17,18 @@
                 >{{t('renew')}}</a>
               }
               <button class="btn btn-secondary btn-sm me-1" style="width: 58px" (click)="validateLicense()">
-                <span *ngIf="!isChecking">{{t('check')}}</span>
-                <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
+                @if (isChecking) {
+                  <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
+                } @else {
+                  <span>{{t('check')}}</span>
+                }
               </button>
               <button class="btn btn-secondary btn-sm" style="width: 62px" (click)="toggleViewMode()">
-                <span *ngIf="!isViewMode">{{t('cancel')}}</span>
-                <span *ngIf="isViewMode">{{t('edit')}}</span>
+                @if (isViewMode) {
+                  <span>{{t('edit')}}</span>
+                } @else {
+                  <span>{{t('cancel')}}</span>
+                }
               </button>
             } @else {
               <a class="btn btn-secondary btn-sm me-1" [href]="buyLink" target="_blank" rel="noreferrer nofollow">{{t('buy')}}</a>
@@ -35,24 +41,29 @@
       @if (isViewMode) {
         <div class="container-fluid row">
           <span class="col-12">
-              <ng-container *ngIf="hasLicense; else noToken">
-                <span class="me-1">*********</span>
-                <ng-container *ngIf="!isChecking; else checking">
-                  <i *ngIf="hasValidLicense" [ngbTooltip]="t('license-valid')" class="fa-solid fa-check-circle successful-validation ms-1">
+            @if (hasLicense) {
+              <span class="me-1">*********</span>
+              @if (isChecking) {
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">{{t('loading')}}</span>
+                </div>
+              } @else {
+                @if (hasValidLicense) {
+                  <i [ngbTooltip]="t('license-valid')" class="fa-solid fa-check-circle successful-validation ms-1">
                     <span class="visually-hidden">{{t('license-valid')}}</span>
                   </i>
-                  <i class="error fa-solid fa-exclamation-circle ms-1" [ngbTooltip]="t('license-not-valid')" *ngIf="!hasValidLicense">
-                    <span class="visually-hidden">{{t('license-not-valid')}}</span>
-                  </i>
-                </ng-container>
-                <ng-template #checking>
-                  <div class="spinner-border spinner-border-sm text-primary" role="status">
-                    <span class="visually-hidden">{{t('loading')}}</span>
-                  </div>
-                </ng-template>
+                }
 
-              </ng-container>
-              <ng-template #noToken>{{t('no-license-key')}}</ng-template>
+                @if (!hasValidLicense) {
+                  <i class="error fa-solid fa-exclamation-circle ms-1" [ngbTooltip]="t('license-not-valid')">
+                      <span class="visually-hidden">{{t('license-not-valid')}}</span>
+                    </i>
+                }
+              }
+            }
+            @else {
+              {{t('no-license-key')}}
+            }
           </span>
         </div>
       }
@@ -72,13 +83,17 @@
           <div class="form-group mb-3">
             <label for="discordId">{{t('activate-discordId-label')}}</label>
             <i class="fa fa-circle-info ms-1" aria-hidden="true" [ngbTooltip]="t('activate-discordId-tooltip')"></i>
-            <a class="ms-1" href="https://wiki.kavitareader.com/en/kavita-plus#discord-id" target="_blank" rel="noopener noreferrer">Help</a>
+            <a class="ms-1" [href]="WikiLink.KavitaPlusDiscordId" target="_blank" rel="noopener noreferrer">Help</a>
             <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off" [class.is-invalid]="formGroup.get('discordId')?.invalid && formGroup.get('discordId')?.touched"/>
-            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="formGroup.dirty || formGroup.touched">
-              <div *ngIf="formGroup.get('discordId')?.errors?.pattern">
-                {{t('discord-validation')}}
+            @if (formGroup.dirty || formGroup.touched) {
+              <div id="inviteForm-validations" class="invalid-feedback">
+                @if (formGroup.get('discordId')?.errors?.pattern) {
+                  <div>
+                    {{t('discord-validation')}}
+                  </div>
+                }
               </div>
-            </div>
+            }
           </div>
         </form>
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
@@ -93,7 +108,10 @@
           </button>
           <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header"
                   [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="saveForm()">
-            <span *ngIf="!isSaving">{{t('activate-save')}}</span>
+            @if (!isSaving) {
+              <span>{{t('activate-save')}}</span>
+            }
+
             <app-loading [loading]="isSaving" size="spinner-border-sm"></app-loading>
           </button>
         </div>

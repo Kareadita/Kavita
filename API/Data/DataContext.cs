@@ -36,6 +36,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
+    [Obsolete]
     public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
     public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
     public DbSet<ReadingList> ReadingList { get; set; } = null!;
@@ -58,6 +59,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
     public DbSet<AppUserSideNavStream> AppUserSideNavStream { get; set; } = null!;
     public DbSet<AppUserExternalSource> AppUserExternalSource { get; set; } = null!;
+    public DbSet<ExternalReview> ExternalReview { get; set; } = null!;
+    public DbSet<ExternalRating> ExternalRating { get; set; } = null!;
+    public DbSet<ExternalSeriesMetadata> ExternalSeriesMetadata { get; set; } = null!;
+    public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
+    public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
+    public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
+    public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -137,17 +145,32 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);
+
+        builder.Entity<ExternalSeriesMetadata>()
+            .HasOne(em => em.Series)
+            .WithOne(s => s.ExternalSeriesMetadata)
+            .HasForeignKey<ExternalSeriesMetadata>(em => em.SeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AppUserCollection>()
+            .Property(b => b.AgeRating)
+            .HasDefaultValue(AgeRating.Unknown);
     }
 
-
+    #nullable enable
     private static void OnEntityTracked(object? sender, EntityTrackedEventArgs e)
     {
         if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
 
-        entity.Created = DateTime.Now;
         entity.LastModified = DateTime.Now;
-        entity.CreatedUtc = DateTime.UtcNow;
         entity.LastModifiedUtc = DateTime.UtcNow;
+
+        // This allows for mocking
+        if (entity.Created == DateTime.MinValue)
+        {
+            entity.Created = DateTime.Now;
+            entity.CreatedUtc = DateTime.UtcNow;
+        }
     }
 
     private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)
@@ -156,6 +179,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         entity.LastModified = DateTime.Now;
         entity.LastModifiedUtc = DateTime.UtcNow;
     }
+    #nullable disable
 
     private void OnSaveChanges()
     {

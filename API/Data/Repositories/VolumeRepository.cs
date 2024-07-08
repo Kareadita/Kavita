@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -13,6 +15,19 @@ using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+
+[Flags]
+public enum VolumeIncludes
+{
+    None = 1,
+    Chapters = 2,
+    People = 4,
+    Tags = 8,
+    /// <summary>
+    /// This will include Chapters by default
+    /// </summary>
+    Files = 16
+}
 
 public interface IVolumeRepository
 {
@@ -22,8 +37,8 @@ public interface IVolumeRepository
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
-    Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
-    Task<Volume?> GetVolumeAsync(int volumeId);
+    Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters);
+    Task<Volume?> GetVolumeAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
@@ -129,6 +144,7 @@ public class VolumeRepository : IVolumeRepository
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
+            .OrderBy(v => v.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(vol => vol.Id == volumeId);
 
@@ -152,7 +168,7 @@ public class VolumeRepository : IVolumeRepository
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
-            .OrderBy(vol => vol.Number)
+            .OrderBy(vol => vol.MinNumber)
             .ToListAsync();
     }
 
@@ -161,11 +177,10 @@ public class VolumeRepository : IVolumeRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<Volume?> GetVolumeAsync(int volumeId)
+    public async Task<Volume?> GetVolumeAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files)
     {
         return await _context.Volume
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.Files)
+            .Includes(includes)
             .AsSplitQuery()
             .SingleOrDefaultAsync(vol => vol.Id == volumeId);
     }
@@ -177,22 +192,22 @@ public class VolumeRepository : IVolumeRepository
     /// <param name="seriesId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
+    public async Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters)
     {
         var volumes =  await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.People)
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.Tags)
-            .OrderBy(volume => volume.Number)
+            .Includes(includes)
+            .OrderBy(volume => volume.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-            .AsNoTracking()
             .AsSplitQuery()
             .ToListAsync();
 
         await AddVolumeModifiers(userId, volumes);
-        SortSpecialChapters(volumes);
+
+        foreach (var volume in volumes)
+        {
+            volume.Chapters = volume.Chapters.OrderBy(c => c.SortOrder).ToList();
+        }
 
         return volumes;
     }
@@ -210,15 +225,6 @@ public class VolumeRepository : IVolumeRepository
             .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .AsSplitQuery()
             .ToListAsync();
-    }
-
-
-    private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
-    {
-        foreach (var v in volumes.Where(vDto => vDto.Number == 0))
-        {
-            v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
-        }
     }
 
 
@@ -241,7 +247,9 @@ public class VolumeRepository : IVolumeRepository
                 c.LastReadingProgress = progresses.Max(p => p.LastModified);
             }
 
-            v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
+            v.PagesRead = userProgress
+                .Where(p => p.VolumeId == v.Id)
+                .Sum(p => p.PagesRead);
         }
     }
 }

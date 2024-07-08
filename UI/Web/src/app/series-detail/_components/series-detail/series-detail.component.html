@@ -1,330 +1,393 @@
 <ng-container *transloco="let t; read: 'series-detail'">
   <div #companionBar>
-    <app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
-      <ng-container title>
-        <h2 class="title text-break">
-          <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
-          <span>{{series.name}}</span>
-        </h2>
-      </ng-container>
-      <ng-container subtitle *ngIf="series.localizedName !== series.name">
-        <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
-      </ng-container>
+    @if (series) {
+      <app-side-nav-companion-bar [hasExtras]="true" [extraDrawer]="extrasDrawer">
+        <ng-container title>
+          <h2 class="title text-break">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+            <span>{{series.name}}
+              @if(isLoadingExtra || isLoading) {
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">loading...</span>
+              </div>
+              }
+          </span>
+          </h2>
+        </ng-container>
+        @if (series.localizedName !== series.name) {
+          <ng-container subtitle>
+            <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
+          </ng-container>
+        }
 
 
+        <ng-template #extrasDrawer let-offcanvas>
+          <div style="margin-top: 56px">
+            <div class="offcanvas-header">
+              <h4 class="offcanvas-title" id="offcanvas-basic-title">{{t('page-settings-title')}}</h4>
+              <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="offcanvas.dismiss()"></button>
+            </div>
+            <div class="offcanvas-body">
+              <form [formGroup]="pageExtrasGroup">
+                <div class="row g-0">
+                  <div class="col-md-12 col-sm-12 pe-2 mb-3">
+                    <label id="list-layout-mode-label" class="form-label">{{t('layout-mode-label')}}</label>
+                    <br/>
+                    <div class="btn-group d-flex justify-content-center" role="group" [attr.aria-label]="t('page-settings-title')">
+                      <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
+                      <label class="btn btn-outline-primary" for="layout-mode-default">{{t('layout-mode-option-card')}}</label>
 
-      <ng-template #extrasDrawer let-offcanvas>
-        <div style="margin-top: 56px">
-          <div class="offcanvas-header">
-            <h4 class="offcanvas-title" id="offcanvas-basic-title">{{t('page-settings-title')}}</h4>
-            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="offcanvas.dismiss()"></button>
-          </div>
-          <div class="offcanvas-body">
-            <form [formGroup]="pageExtrasGroup">
-              <div class="row g-0">
-                <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                  <label id="list-layout-mode-label" class="form-label">{{t('layout-mode-label')}}</label>
-                  <br/>
-                  <div class="btn-group d-flex justify-content-center" role="group" [attr.aria-label]="t('page-settings-title')">
-                    <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="layout-mode-default">{{t('layout-mode-option-card')}}</label>
-
-                    <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="layout-mode-col1">{{t('layout-mode-option-list')}}</label>
+                      <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
+                      <label class="btn btn-outline-primary" for="layout-mode-col1">{{t('layout-mode-option-list')}}</label>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
-      </ng-template>
+        </ng-template>
 
 
-    </app-side-nav-companion-bar>
+      </app-side-nav-companion-bar>
+    }
+
   </div>
 
   <app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>
 
+  @if (series) {
+    <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+      <div class="row mb-0 mb-xl-3 info-container">
+        <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block mt-2">
+          @if (unreadCount > 0 && unreadCount !== totalCount) {
+            <div class="to-read-counter">
+              <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed" fillStyle="filled">{{unreadCount}}</app-tag-badge>
+            </div>
+          }
 
-  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
-    <div class="row mb-0 mb-xl-3 info-container">
-      <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block mt-2">
-        <div class="to-read-counter" *ngIf="unreadCount > 0 && unreadCount !== totalCount">
-          <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed" fillStyle="filled">{{unreadCount}}</app-tag-badge>
+          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}"  [imageUrl]="seriesImage"></app-image>
+          @if (series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial) {
+            <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">
+              <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
+            </div>
+            <div class="under-image">
+              {{t('continue-from', {title: ContinuePointTitle})}}
+            </div>
+          }
         </div>
-        <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
-        <ng-container *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
-          <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">
-            <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
-          </div>
-          <div class="under-image">
-            {{t('continue-from', {title: ContinuePointTitle})}}
-          </div>
-        </ng-container>
-      </div>
-      <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
-        <div class="row g-0">
-          <div class="col-auto">
-            <div class="btn-group">
-              <button type="button" class="btn btn-primary" (click)="read()">
+        <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
+          <div class="row g-0">
+            <div class="col-auto">
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" (click)="read()">
               <span>
                 <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                 <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
               </span>
-              </button>
-              <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
-                <div class="dropdown-menu" ngbDropdownMenu>
-                  <button ngbDropdownItem (click)="read(true)">
+                </button>
+                <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
+                  <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                  <div class="dropdown-menu" ngbDropdownMenu>
+                    <button ngbDropdownItem (click)="read(true)">
                   <span>
                     <i class="fa fa-glasses" aria-hidden="true"></i>
                     <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
                   </span>
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-auto ms-2">
-            <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
+            <div class="col-auto ms-2">
+              <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
             <span>
                 <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
             </span>
-            </button>
-          </div>
-          <div class="col-auto ms-2" *ngIf="isAdmin">
-            <button class="btn btn-secondary" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
-              <span><i class="fa fa-pen" aria-hidden="true"></i></span>
-            </button>
-          </div>
-          <div class="col-auto ms-2 d-none d-md-block">
-            <div class="card-actions">
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+              </button>
             </div>
-          </div>
-
-          <div class="col-auto ms-2 d-none d-md-block" *ngIf="isAdmin || hasDownloadingRole">
-            <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')" [disabled]="downloadInProgress">
-              <ng-container *ngIf="downloadInProgress; else notDownloading">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span class="visually-hidden">{{t('downloading-status')}}</span>
-              </ng-container>
-              <ng-template #notDownloading>
-                <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
-              </ng-template>
-            </button>
-          </div>
-        </div>
-        <div *ngIf="seriesMetadata" class="mt-2">
-          <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
-                                      [libraryType]="libraryType"
-                                      [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
-        </div>
-      </div>
-
-      <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata?.summary?.length === 0}">
-        <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
-                           iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                           [clickableTitle]="true" (sectionClick)="openReviewModal()">
-          <ng-template #carouselItem let-item let-position="idx">
-            <app-review-card [review]="item"></app-review-card>
-          </ng-template>
-        </app-carousel-reel>
-      </div>
-    </div>
-
-    <ng-container *ngIf="series">
-
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
-        <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
-          <a ngbNavLink>{{t('storyline-tab')}}</a>
-          <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
-              <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
-                <div class="card-container row g-0" #container>
-                  <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
-                    {{item.id}}
-                    <ng-container [ngSwitch]="item.isChapter">
-                      <ng-container *ngSwitchCase="false" [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
-                      <ng-container *ngSwitchCase="true" [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
-                    </ng-container>
-                  </ng-container>
-                  <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
-                </div>
-              </ng-container>
-              <ng-template #storylineListLayout>
-                <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
-                  <ng-container [ngSwitch]="item.isChapter">
-                    <ng-container *ngSwitchCase="false" [ngTemplateOutlet]="nonSpecialVolumeListItem" [ngTemplateOutletContext]="{$implicit: item.volume}"></ng-container>
-                    <ng-container *ngSwitchCase="true" [ngTemplateOutlet]="nonSpecialChapterListItem" [ngTemplateOutletContext]="{$implicit: item.chapter}"></ng-container>
-                  </ng-container>
-                </ng-container>
-              </ng-template>
-            </virtual-scroller>
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
-          <a ngbNavLink>{{libraryType === LibraryType.Book ? t('books-tab') : t('volumes-tab')}}</a>
-          <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
-              <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
-                <div class="card-container row g-0" #container>
-                  <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
-                    <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
-                  </ng-container>
-                  <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
-                </div>
-              </ng-container>
-              <ng-template #volumeListLayout>
-                <ng-container *ngFor="let volume of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
-                  <ng-container [ngTemplateOutlet]="nonSpecialVolumeListItem" [ngTemplateOutletContext]="{$implicit: volume}"></ng-container>
-                </ng-container>
-              </ng-template>
-            </virtual-scroller>
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
-          <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
-          <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
-              <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else chapterListLayout">
-                <div class="card-container row g-0" #container>
-                  <div *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                    <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
-                  </div>
-                  <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
-                </div>
-              </ng-container>
-              <ng-template #chapterListLayout>
-                <div *ngFor="let chapter of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                  <ng-container [ngTemplateOutlet]="nonSpecialChapterListItem" [ngTemplateOutletContext]="{$implicit: chapter}"></ng-container>
-                </div>
-              </ng-template>
-            </virtual-scroller>
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
-          <a ngbNavLink>{{t('specials-tab')}}</a>
-          <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
-              <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else specialListLayout">
-                <div class="card-container row g-0" #container>
-                  <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                    <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
-                  </ng-container>
-                </div>
-              </ng-container>
-              <ng-template #specialListLayout>
-                <ng-container *ngFor="let chapter of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                  <ng-container [ngTemplateOutlet]="specialChapterListItem" [ngTemplateOutletContext]="{$implicit: chapter}"></ng-container>
-                </ng-container>
-              </ng-template>
-            </virtual-scroller>
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
-          <a ngbNavLink>{{t('related-tab')}}</a>
-          <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
-              <div class="card-container row g-0" #container>
-                <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentify">
-                  <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
-                </ng-container>
+            @if (isAdmin) {
+              <div class="col-auto ms-2">
+                <button class="btn btn-secondary" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
+                  <span><i class="fa fa-pen" aria-hidden="true"></i></span>
+                </button>
               </div>
-            </virtual-scroller>
-          </ng-template>
-        </li>
+            }
 
-        <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations">
-          <a ngbNavLink>{{t('recommendations-tab')}}</a>
-          <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
-              <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else recListLayout">
-                <div class="card-container row g-0" #container>
-                  <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
-                    <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
-                      <app-series-card class="col-auto mt-2 mb-2" [data]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
-                    </ng-container>
-                    <ng-template #externalRec>
-                      <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
-                    </ng-template>
-                  </ng-container>
-                </div>
-              </ng-container>
-              <ng-template #recListLayout>
-                <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
-                  <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
-                    <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">
-                      <ng-container title>
-                        <span (click)="previewSeries(item, false); $event.stopPropagation(); $event.preventDefault();">
-                          <a href="/library/{{item.libraryId}}/series/{{item.id}}">{{item.name}}</a>
-                        </span>
-                      </ng-container>
-                    </app-external-list-item>
-                  </ng-container>
-                  <ng-template #externalRec>
-                    <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
-                      <ng-container title>
-                        <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
-                          <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
-                        </span>
-                      </ng-container>
-                    </app-external-list-item>
-                  </ng-template>
-                </ng-container>
+            <div class="col-auto ms-2 d-none d-md-block">
+              <div class="card-actions">
+                <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+              </div>
+            </div>
+
+            @if (isAdmin || hasDownloadingRole) {
+              <div class="col-auto ms-2 d-none d-md-block">
+                @if (download$ | async; as download) {
+                  <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')" [disabled]="download !== null">
+                    @if (download !== null) {
+                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      <span class="visually-hidden">{{t('downloading-status')}}</span>
+                    } @else {
+                      <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                    }
+                  </button>
+                } @else {
+                  <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')">
+                    <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            }
+
+          </div>
+
+          @if (seriesMetadata) {
+            <div class="mt-2">
+              <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
+                                          [libraryType]="libraryType" [ratings]="ratings"
+                                          [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
+            </div>
+          }
+
+        </div>
+
+        <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata.summary.length === 0}">
+          <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
+                             iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
+                             [clickableTitle]="true" (sectionClick)="openReviewModal()">
+            <ng-template #carouselItem let-item let-position="idx">
+              <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+            </ng-template>
+          </app-carousel-reel>
+        </div>
+      </div>
+
+      @if (series) {
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+
+          @if (showStorylineTab) {
+            <li [ngbNavItem]="TabID.Storyline">
+              <a ngbNavLink>{{t('storyline-tab')}}</a>
+              <ng-template ngbNavContent>
+                <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+
+                  @switch (renderMode) {
+                    @case (PageLayoutMode.Cards) {
+                      <div class="card-container row g-0" #container>
+                        @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                          @if (item.isChapter) {
+                            <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
+                          } @else {
+                            <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                          }
+                        }
+
+                        <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
+                      </div>
+                    }
+                    @case (PageLayoutMode.List) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        @if (item.isChapter) {
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterListItem" [ngTemplateOutletContext]="{$implicit: item.chapter}"></ng-container>
+                        } @else {
+                          <ng-container [ngTemplateOutlet]="nonSpecialVolumeListItem" [ngTemplateOutletContext]="{$implicit: item.volume}"></ng-container>
+                        }
+                      }
+                    }
+                  }
+
+                </virtual-scroller>
               </ng-template>
+            </li>
+          }
 
-            </virtual-scroller>
-          </ng-template>
-        </li>
-      </ul>
-      <div [ngbNavOutlet]="nav"></div>
-    </ng-container>
 
-    <app-loading [loading]="isLoading"></app-loading>
-  </div>
-  <ng-template #estimatedNextCard let-tabId="tabId">
-    <ng-container *ngIf="nextExpectedChapter">
-      <ng-container [ngSwitch]="tabId">
-        <ng-container *ngSwitchCase="TabID.Volumes">
-          <app-next-expected-card *ngIf="nextExpectedChapter.volumeNumber > 0 && nextExpectedChapter.chapterNumber === 0"
-               class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
-                                  [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
-        </ng-container>
-        <ng-container *ngSwitchCase="TabID.Chapters">
-          <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
-        </ng-container>
-        <ng-container *ngSwitchCase="TabID.Storyline">
-          <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
-        </ng-container>
-      </ng-container>
-    </ng-container>
-  </ng-template>
+          @if (showVolumeTab) {
+            <li [ngbNavItem]="TabID.Volumes">
+              <a ngbNavLink>{{UseBookLogic ? t('books-tab') : t('volumes-tab')}}</a>
+              <ng-template ngbNavContent>
+
+                <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
+
+                  @switch (renderMode) {
+                    @case (PageLayoutMode.Cards) {
+                      <div class="card-container row g-0" #container>
+                        @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
+                        }
+                        <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
+                      </div>
+                    }
+                    @case (PageLayoutMode.List) {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="nonSpecialVolumeListItem" [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+                      }
+                    }
+                  }
+                </virtual-scroller>
+              </ng-template>
+            </li>
+          }
+
+          @if (showChapterTab) {
+            <li [ngbNavItem]="TabID.Chapters">
+              <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
+              <ng-template ngbNavContent>
+                <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  @switch (renderMode) {
+                    @case (PageLayoutMode.Cards) {
+                      <div class="card-container row g-0" #container>
+                        @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
+                        }
+                        <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
+                      </div>
+                    }
+                    @case (PageLayoutMode.List) {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="nonSpecialChapterListItem" [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+                      }
+                    }
+                  }
+                </virtual-scroller>
+              </ng-template>
+            </li>
+          }
+
+          @if (hasSpecials) {
+            <li [ngbNavItem]="TabID.Specials">
+              <a ngbNavLink>{{t('specials-tab')}}</a>
+              <ng-template ngbNavContent>
+                <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
+                  @switch (renderMode) {
+                    @case (PageLayoutMode.Cards) {
+                      <div class="card-container row g-0" #container>
+                        @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                          <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
+                        }
+                      </div>
+                    }
+                    @case (PageLayoutMode.List) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="specialChapterListItem" [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+                      }
+                    }
+                  }
+                </virtual-scroller>
+              </ng-template>
+            </li>
+          }
+
+          @if (hasRelations) {
+            <li [ngbNavItem]="TabID.Related">
+              <a ngbNavLink>{{t('related-tab')}}</a>
+              <ng-template ngbNavContent>
+                <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <div class="card-container row g-0" #container>
+                    @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
+                      <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                    }
+                  </div>
+                </virtual-scroller>
+              </ng-template>
+            </li>
+          }
+
+          @if (hasRecommendations) {
+            <li [ngbNavItem]="TabID.Recommendations">
+              <a ngbNavLink>{{t('recommendations-tab')}}</a>
+              <ng-template ngbNavContent>
+                <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  @switch (renderMode) {
+                    @case (PageLayoutMode.Cards) {
+                      <div class="card-container row g-0" #container>
+                        @for(item of scroll.viewPortItems; let idx = $index; track idx) {
+                          @if (!item.hasOwnProperty('coverUrl')) {
+                            <app-series-card class="col-auto mt-2 mb-2" [data]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
+                          } @else {
+                            <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
+                          }
+                        }
+                      </div>
+                    }
+                    @case (PageLayoutMode.List) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track idx) {
+                        @if (!item.hasOwnProperty('coverUrl')) {
+                          <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                            <ng-container title>
+                            <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
+                              <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                            </span>
+                            </ng-container>
+                          </app-external-list-item>
+                        } @else {
+                          <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                            <ng-container title>
+                            <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
+                              <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                            </span>
+                            </ng-container>
+                          </app-external-list-item>
+                        }
+                      }
+                    }
+                  }
+                </virtual-scroller>
+              </ng-template>
+            </li>
+          }
+
+
+        </ul>
+        <div [ngbNavOutlet]="nav"></div>
+      }
+
+      <app-loading [loading]="isLoading"></app-loading>
+    </div>
+    <ng-template #estimatedNextCard let-tabId="tabId">
+      @if (nextExpectedChapter) {
+        @switch (tabId) {
+          @case (TabID.Volumes) {
+            @if (nextExpectedChapter.volumeNumber !== SpecialVolumeNumber && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber) {
+              <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
+                                      [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
+            }
+          }
+          @case (TabID.Chapters) {
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
+          }
+          @case (TabID.Storyline) {
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
+          }
+        }
+      }
+    </ng-template>
+  }
+
 
 </ng-container>
 
 <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
-                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                 [count]="item.files.length"
-                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                 [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-card-item>
+  @if (!item.isSpecial) {
+    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="openChapter(item)"
+                   [imageUrl]="imageService.getChapterCoverImage(item.id)"
+                   [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                   [count]="item.files.length"
+                   (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                   [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+    </app-card-item>
+  }
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-card-item *ngIf="item.number !== 0" class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
-                 [imageUrl]="imageService.getVolumeCoverImage(item.id)"
-                 [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
-                 (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                 [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-card-item>
+  @if (item.number !== LooseLeafOrSpecialNumber) {
+    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
+                   [imageUrl]="imageService.getVolumeCoverImage(item.id)"
+                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
+                   (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+    </app-card-item>
+  }
 </ng-template>
 
 <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
@@ -338,27 +401,32 @@
 </ng-template>
 
 <ng-template #nonSpecialChapterListItem let-item>
-  <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
-                 [seriesName]="series.name" [entity]="item" *ngIf="!item.isSpecial"
-                 [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                 [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openChapter(item)"
-                 [blur]="user?.preferences?.blurUnreadSummaries || false">
-    <ng-container title>
-      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-    </ng-container>
-  </app-list-item>
+  @if (!item.isSpecial) {
+    <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
+                   [seriesName]="series.name" [entity]="item"
+                   [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                   [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openChapter(item)"
+                   [blur]="user?.preferences?.blurUnreadSummaries || false">
+      <ng-container title>
+        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+      </ng-container>
+    </app-list-item>
+  }
 </ng-template>
 
 <ng-template #nonSpecialVolumeListItem let-item>
-  <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
-                 [seriesName]="series.name" [entity]="item" *ngIf="item.number !== 0"
-                 [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                 [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
-                 [blur]="user?.preferences?.blurUnreadSummaries || false">
-    <ng-container title>
-      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-    </ng-container>
-  </app-list-item>
+  @if (item.number !== LooseLeafOrSpecialNumber) {
+    <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
+                   [seriesName]="series.name" [entity]="item"
+                   [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                   [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
+                   [blur]="user?.preferences?.blurUnreadSummaries || false">
+      <ng-container title>
+        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+      </ng-container>
+    </app-list-item>
+  }
+
 
 </ng-template><ng-template #specialChapterListItem let-item>
   <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"

@@ -30,7 +30,6 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(100vh - 85px);
   max-height: calc(var(--vh)*100 - 170px);
 }
 
@@ -48,6 +47,7 @@
 
 .image-container {
   max-height: 400px;
+  max-width: 280px;
 }
 
 .info-container {

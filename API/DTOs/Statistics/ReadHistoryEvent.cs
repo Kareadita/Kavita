@@ -14,5 +14,5 @@ public class ReadHistoryEvent
     public required string SeriesName { get; set; } = default!;
     public DateTime ReadDate { get; set; }
     public int ChapterId { get; set; }
-    public required string ChapterNumber { get; set; } = default!;
+    public required float ChapterNumber { get; set; } = default!;
 }

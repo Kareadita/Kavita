@@ -4,7 +4,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Run `npm run start` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 Your backend must be served on port 5000.
 
 ## Code scaffolding
@@ -25,11 +25,16 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 Run `npx playwright test --reporter=line` or `npx playwright test` to run e2e tests. 
 
-## Connecting to your dev server via your phone
+## Connecting to your dev server via your phone or any other compatible client on local network
 
-ng serve --host 0.0.0.0
-and update environment.ts to your local ip. 
+Update `IP` constant in `src/environments/environment.ts` to your dev machine's ip instead of `localhost`.
+
+Run `npm run start`
 
 ## Notes:
 - injected services should be at the top of the file
 - all components must be standalone
+
+# Update latest angular
+`ng update @angular/core @angular/cli @typescript-es
+lint/parser @angular/localize @angular/compiler-cli @angular/cli @angular-devkit/build-angular @angular/cdk`

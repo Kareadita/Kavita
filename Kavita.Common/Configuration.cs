@@ -13,7 +13,6 @@ public static class Configuration
     public const string DefaultBaseUrl = "/";
     public const int DefaultHttpPort = 5000;
     public const int DefaultTimeOutSecs = 90;
-    public const string DefaultXFrameOptions = "SAMEORIGIN";
     public const long DefaultCacheMemory = 75;
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
@@ -49,7 +48,7 @@ public static class Configuration
         set => SetCacheSize(GetAppSettingFilename(), value);
     }
 
-    public static string XFrameOptions => GetXFrameOptions(GetAppSettingFilename());
+    public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
 
     private static string GetAppSettingFilename()
     {
@@ -293,26 +292,21 @@ public static class Configuration
 
     #endregion
 
-    #region XFrameOrigins
-    private static string GetXFrameOptions(string filePath)
+    #region AllowIFraming
+    private static bool GetAllowIFraming(string filePath)
     {
-        if (OsInfo.IsDocker)
-        {
-            return DefaultBaseUrl;
-        }
-
         try
         {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-            return !string.IsNullOrEmpty(jsonObj.XFrameOrigins) ? jsonObj.XFrameOrigins : DefaultXFrameOptions;
+            return jsonObj.AllowIFraming;
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error reading app settings: " + ex.Message);
         }
 
-        return DefaultXFrameOptions;
+        return false;
     }
     #endregion
 
@@ -328,6 +322,6 @@ public static class Configuration
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public string XFrameOrigins { get; set; } = DefaultXFrameOptions;
+        public bool AllowIFraming { get; set; } = false;
     }
 }

@@ -4,15 +4,18 @@
       <div class="card-title">
         <div class="container-fluid row mb-2">
           <div class="col-10 col-sm-11">
-            <h4 id="email-card">{{t('email-label')}}
-              <ng-container *ngIf="!emailConfirmed">
-                <i class="fa-solid fa-circle ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-not-confirmed')"></i>
+            <h4 id="email-card">{{t('email-title')}}
+              @if(emailConfirmed) {
+                <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
+                <span class="visually-hidden">{{t('email-confirmed')}}</span>
+              } @else {
+                <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('email-not-confirmed')"></i>
                 <span class="visually-hidden">{{t('email-not-confirmed')}}</span>
-              </ng-container>
+              }
             </h4>
           </div>
           <div class="col-1 text-end">
-            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()" [disabled]="!canEdit">{{isViewMode ? t('edit') : t('cancel')}}</button>
           </div>
         </div>
       </div>
@@ -35,7 +38,7 @@
               </div>
             }
             <div class="mb-3">
-              <label for="email" class="form-label visually-hidden">{{t('email-label')}}</label>
+              <label for="email" class="form-label">{{t('email-label')}}</label>
               <input class="form-control custom-input" type="email" id="email" formControlName="email"
                      [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
               <div id="email-validations" class="invalid-feedback" *ngIf="form.get('email')?.errors">

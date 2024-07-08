@@ -8,9 +8,7 @@ import {
 } from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { HourEstimateRange } from 'src/app/_models/series-detail/hour-estimate-range';
-import { LibraryType } from 'src/app/_models/library/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
@@ -29,54 +27,43 @@ import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({
   selector: 'app-entity-info-cards',
   standalone: true,
-    imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent, TranslocoModule, CompactNumberPipe, TranslocoLocaleModule, UtcToLocalTimePipe],
+  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe,
+    AgeRatingPipe, NgbTooltip, MetadataDetailComponent, TranslocoModule, CompactNumberPipe, TranslocoLocaleModule,
+    UtcToLocalTimePipe, ImageComponent],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityInfoCardsComponent implements OnInit {
 
+  protected readonly AgeRating = AgeRating;
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly FilterField = FilterField;
+
+  public readonly imageService = inject(ImageService);
+
+
   @Input({required: true}) entity!: Volume | Chapter;
   @Input({required: true}) libraryId!: number;
-  /**
-   * This will pull extra information
-   */
-  @Input() includeMetadata: boolean = false;
 
   /**
-   * Hide more system based fields, like Id or Date Added
+   * Hide more system based fields, like id or Date Added
    */
   @Input() showExtendedProperties: boolean = true;
 
   isChapter = false;
   chapter!: Chapter;
 
-  chapterMetadata!: ChapterMetadata;
   ageRating!: string;
   totalPages: number = 0;
   totalWordCount: number = 0;
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
   size: number = 0;
-
-  imageService = inject(ImageService);
-
-  get LibraryType() {
-    return LibraryType;
-  }
-
-  get MangaFormat() {
-    return MangaFormat;
-  }
-
-  get AgeRating() {
-    return AgeRating;
-  }
-
-  get FilterField() { return FilterField; }
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];
@@ -101,12 +88,6 @@ export class EntityInfoCardsComponent implements OnInit {
       }, 0);
     }
 
-    if (this.includeMetadata) {
-      this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
-        this.chapterMetadata = metadata;
-        this.cdRef.markForCheck();
-      });
-    }
 
     this.totalPages = this.chapter.pages;
     if (!this.isChapter) {

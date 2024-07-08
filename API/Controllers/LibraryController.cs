@@ -21,7 +21,6 @@ using AutoMapper;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -112,6 +111,13 @@ public class LibraryController : BaseApiController
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
         _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
 
+        // Restart Folder watching if on
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (settings.EnableFolderWatching)
+        {
+            await _libraryWatcher.RestartWatching();
+        }
+
         // Assign all the necessary users with this library side nav
         var userIds = admins.Select(u => u.Id).Append(User.GetUserId()).ToList();
         var userNeedingNewLibrary = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams))
@@ -127,7 +133,7 @@ public class LibraryController : BaseApiController
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
         await _libraryWatcher.RestartWatching();
-        _taskScheduler.ScanLibrary(library.Id);
+        await _taskScheduler.ScanLibrary(library.Id);
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
@@ -160,10 +166,35 @@ public class LibraryController : BaseApiController
     }
 
     /// <summary>
+    /// Return a specific library
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet]
+    public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
+    {
+        var username = User.GetUsername();
+        if (string.IsNullOrEmpty(username)) return Unauthorized();
+
+        var cacheKey = CacheKey + username;
+        var result = await _libraryCacheProvider.GetAsync<IEnumerable<LibraryDto>>(cacheKey);
+        if (result.HasValue)
+        {
+            return Ok(result.Value.FirstOrDefault(l => l.Id == libraryId));
+        }
+
+        var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username).ToList();
+        await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
+        _logger.LogDebug("Caching libraries for {Key}", cacheKey);
+
+        return Ok(ret.Find(l => l.Id == libraryId));
+    }
+
+    /// <summary>
     /// Return all libraries in the Server
     /// </summary>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet("libraries")]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
         var username = User.GetUsername();
@@ -260,7 +291,7 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
         if (libraryId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "libraryId"));
-        _taskScheduler.ScanLibrary(libraryId, force);
+        await _taskScheduler.ScanLibrary(libraryId, force);
         return Ok();
     }
 
@@ -468,7 +499,7 @@ public class LibraryController : BaseApiController
         if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
             await _libraryWatcher.RestartWatching();
-            _taskScheduler.ScanLibrary(library.Id);
+            await _taskScheduler.ScanLibrary(library.Id);
         }
 
         if (folderWatchingUpdate)

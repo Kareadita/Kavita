@@ -17,6 +17,7 @@ export interface ReadingListItem {
     title: string;
     libraryType: LibraryType;
     libraryName: string;
+    summary?: string;
 }
 
 export interface ReadingList {

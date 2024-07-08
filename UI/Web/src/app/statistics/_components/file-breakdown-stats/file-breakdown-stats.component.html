@@ -23,11 +23,12 @@
       <ng-container *ngIf="formControl.value; else tableLayout">
         <ngx-charts-advanced-pie-chart [results]="vizData2$ | async"></ngx-charts-advanced-pie-chart>
       </ng-container>
+
       <ng-template #tableLayout>
         <table class="table table-striped table-striped table-hover table-sm scrollable">
           <thead>
           <tr>
-            <th scope="col" sortable="extension" (sort)="onSort($event)">
+            <th scope="col" sortable="extension" direction="asc" (sort)="onSort($event)">
               {{t('extension-header')}}
             </th>
             <th scope="col" sortable="format" (sort)="onSort($event)">
@@ -39,6 +40,7 @@
             <th scope="col" sortable="totalFiles" (sort)="onSort($event)">
               {{t('total-files-header')}}
             </th>
+            <th scope="col">{{t('download-file-for-extension-header')}}</th>
           </tr>
           </thead>
           <tbody>
@@ -54,6 +56,16 @@
             </td>
             <td>
               {{item.totalFiles | number:'1.0-0'}}
+            </td>
+            <td>
+              <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
+                @if (downloadInProgress[item.extension]) {
+                  <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                } @else {
+                  <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                }
+                <span class="visually-hidden">{{t('download-file-for-extension-alt"', {extension: item.extension})}}</span>
+              </button>
             </td>
           </tr>
           </tbody>
@@ -72,6 +84,8 @@
 
   </div>
 
+  <ng-template #modalTable>
 
+  </ng-template>
 
 </ng-container>

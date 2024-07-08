@@ -19,6 +19,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {WikiLink} from "../../_models/wiki";
 
 enum TabID {
   General = '',
@@ -51,6 +52,7 @@ export class DashboardComponent implements OnInit {
   protected readonly navService = inject(NavService);
   private readonly titleService = inject(Title);
   protected readonly TabID = TabID;
+  protected readonly WikiLink = WikiLink;
 
 
   tabs: Array<{title: string, fragment: string}> = [

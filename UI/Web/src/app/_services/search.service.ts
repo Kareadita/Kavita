@@ -14,11 +14,11 @@ export class SearchService {
 
   constructor(private httpClient: HttpClient) { }
 
-  search(term: string) {
+  search(term: string, includeChapterAndFiles: boolean = false) {
     if (term === '') {
       return of(new SearchResultGroup());
     }
-    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'search/search?queryString=' + encodeURIComponent(term));
+    return this.httpClient.get<SearchResultGroup>(this.baseUrl + `search/search?includeChapterAndFiles=${includeChapterAndFiles}&queryString=${encodeURIComponent(term)}`);
   }
 
   getSeriesForMangaFile(mangaFileId: number) {

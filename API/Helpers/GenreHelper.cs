@@ -12,24 +12,27 @@ namespace API.Helpers;
 
 public static class GenreHelper
 {
-    public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, Action<Genre> action)
+
+    public static void UpdateGenre(Dictionary<string, Genre> allGenres,
+        IEnumerable<string> names, Action<Genre, bool> action)
     {
         foreach (var name in names)
         {
-            if (string.IsNullOrEmpty(name.Trim())) continue;
-
             var normalizedName = name.ToNormalized();
-            var genre = allGenres.FirstOrDefault(p => p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName));
-            if (genre == null)
+            if (string.IsNullOrEmpty(normalizedName)) continue;
+
+            if (allGenres.TryGetValue(normalizedName, out var genre))
+            {
+                action(genre, false);
+            }
+            else
             {
                 genre = new GenreBuilder(name).Build();
-                allGenres.Add(genre);
+                allGenres.Add(normalizedName, genre);
+                action(genre, true);
             }
-
-            action(genre);
         }
     }
-
 
     public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre>? action = null)
     {
@@ -64,6 +67,7 @@ public static class GenreHelper
     public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Series series,
         IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
     {
+        // TODO: Write some unit tests
         if (tags == null) return;
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different

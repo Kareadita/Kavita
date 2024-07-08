@@ -50,20 +50,26 @@ public class SearchController : BaseApiController
         return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, User.GetUserId()));
     }
 
+    /// <summary>
+    /// Searches against different entities in the system against a query string
+    /// </summary>
+    /// <param name="queryString"></param>
+    /// <param name="includeChapterAndFiles">Include Chapter and Filenames in the entities. This can slow down the search on larger systems</param>
+    /// <returns></returns>
     [HttpGet("search")]
-    public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString)
+    public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString, [FromQuery] bool includeChapterAndFiles = true)
     {
         queryString = Services.Tasks.Scanner.Parser.Parser.CleanQuery(queryString);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
         var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search).ToList();
-        if (!libraries.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "libraries-restricted"));
+        if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "libraries-restricted"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin,
-            libraries, queryString);
+            libraries, queryString, includeChapterAndFiles);
 
         return Ok(series);
     }

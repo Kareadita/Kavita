@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using API.DTOs;
+using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Services.Plus;
 

@@ -3,13 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs.CollectionTags;
+using API.DTOs.Collection;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
-using API.Tests.Helpers;
 using NSubstitute;
 using Xunit;
 
@@ -25,7 +25,7 @@ public class CollectionTagServiceTests : AbstractDbTest
 
     protected override async Task ResetDb()
     {
-        _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
+        _context.AppUserCollection.RemoveRange(_context.AppUserCollection.ToList());
         _context.Library.RemoveRange(_context.Library.ToList());
 
         await _unitOfWork.CommitAsync();
@@ -33,119 +33,148 @@ public class CollectionTagServiceTests : AbstractDbTest
 
     private async Task SeedSeries()
     {
-        if (_context.CollectionTag.Any()) return;
+        if (_context.AppUserCollection.Any()) return;
 
+        var s1 = new SeriesBuilder("Series 1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Mature).Build()).Build();
+        var s2 = new SeriesBuilder("Series 2").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.G).Build()).Build();
         _context.Library.Add(new LibraryBuilder("Library 2", LibraryType.Manga)
-            .WithSeries(new SeriesBuilder("Series 1").Build())
-            .WithSeries(new SeriesBuilder("Series 2").Build())
+            .WithSeries(s1)
+            .WithSeries(s2)
             .Build());
 
-        _context.CollectionTag.Add(new CollectionTagBuilder("Tag 1").Build());
-        _context.CollectionTag.Add(new CollectionTagBuilder("Tag 2").WithIsPromoted(true).Build());
+        var user = new AppUserBuilder("majora2007", "majora2007", Seed.DefaultThemes.First()).Build();
+        user.Collections = new List<AppUserCollection>()
+        {
+            new AppUserCollectionBuilder("Tag 1").WithItems(new []{s1}).Build(),
+            new AppUserCollectionBuilder("Tag 2").WithItems(new []{s1, s2}).WithIsPromoted(true).Build()
+        };
+        _unitOfWork.UserRepository.Add(user);
+
         await _unitOfWork.CommitAsync();
     }
 
-
-    [Fact]
-    public async Task TagExistsByName_ShouldFindTag()
-    {
-        await SeedSeries();
-        Assert.True(await _service.TagExistsByName("Tag 1"));
-        Assert.True(await _service.TagExistsByName("tag 1"));
-        Assert.False(await _service.TagExistsByName("tag5"));
-    }
+    #region UpdateTag
 
     [Fact]
     public async Task UpdateTag_ShouldUpdateFields()
     {
         await SeedSeries();
 
-        _context.CollectionTag.Add(new CollectionTagBuilder("UpdateTag_ShouldUpdateFields").WithId(3).WithIsPromoted(true).Build());
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        Assert.NotNull(user);
+
+        user.Collections.Add(new AppUserCollectionBuilder("UpdateTag_ShouldUpdateFields").WithIsPromoted(true).Build());
+        _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
-        await _service.UpdateTag(new CollectionTagDto()
+        await _service.UpdateTag(new AppUserCollectionDto()
         {
             Title = "UpdateTag_ShouldUpdateFields",
             Id = 3,
             Promoted = true,
             Summary = "Test Summary",
-        });
+            AgeRating = AgeRating.Unknown
+        }, 1);
 
-        var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(3);
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(3);
         Assert.NotNull(tag);
         Assert.True(tag.Promoted);
-        Assert.True(!string.IsNullOrEmpty(tag.Summary));
+        Assert.False(string.IsNullOrEmpty(tag.Summary));
     }
 
+    /// <summary>
+    /// UpdateTag should not change any title if non-Kavita source
+    /// </summary>
     [Fact]
-    public async Task AddTagToSeries_ShouldAddTagToAllSeries()
+    public async Task UpdateTag_ShouldNotChangeTitle_WhenNotKavitaSource()
     {
         await SeedSeries();
-        var ids = new[] {1, 2};
-        await _service.AddTagToSeries(await _unitOfWork.CollectionTagRepository.GetTagAsync(1, CollectionTagIncludes.SeriesMetadata), ids);
 
-        var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(ids);
-        Assert.Contains(metadatas.ElementAt(0).CollectionTags, t => t.Title.Equals("Tag 1"));
-        Assert.Contains(metadatas.ElementAt(1).CollectionTags, t => t.Title.Equals("Tag 1"));
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        Assert.NotNull(user);
+
+        user.Collections.Add(new AppUserCollectionBuilder("UpdateTag_ShouldNotChangeTitle_WhenNotKavitaSource").WithSource(ScrobbleProvider.Mal).Build());
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        await _service.UpdateTag(new AppUserCollectionDto()
+        {
+            Title = "New Title",
+            Id = 3,
+            Promoted = true,
+            Summary = "Test Summary",
+            AgeRating = AgeRating.Unknown
+        }, 1);
+
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(3);
+        Assert.NotNull(tag);
+        Assert.Equal("UpdateTag_ShouldNotChangeTitle_WhenNotKavitaSource", tag.Title);
+        Assert.False(string.IsNullOrEmpty(tag.Summary));
+    }
+    #endregion
+
+
+    #region RemoveTagFromSeries
+
+    [Fact]
+    public async Task RemoveTagFromSeries_RemoveSeriesFromTag()
+    {
+        await SeedSeries();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        Assert.NotNull(user);
+
+        // Tag 2 has 2 series
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        Assert.NotNull(tag);
+
+        await _service.RemoveTagFromSeries(tag, new[] {1});
+        var userCollections = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        Assert.Equal(2, userCollections!.Collections.Count);
+        Assert.Equal(1, tag.Items.Count);
+        Assert.Equal(2, tag.Items.First().Id);
     }
 
+    /// <summary>
+    /// Ensure the rating of the tag updates after a series change
+    /// </summary>
     [Fact]
-    public async Task RemoveTagFromSeries_ShouldRemoveMultiple()
+    public async Task RemoveTagFromSeries_RemoveSeriesFromTag_UpdatesRating()
     {
         await SeedSeries();
-        var ids = new[] {1, 2};
-        var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(2, CollectionTagIncludes.SeriesMetadata);
-        await _service.AddTagToSeries(tag, ids);
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        Assert.NotNull(user);
+
+        // Tag 2 has 2 series
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        Assert.NotNull(tag);
 
         await _service.RemoveTagFromSeries(tag, new[] {1});
 
-        var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(new[] {1});
-
-        Assert.Single(metadatas);
-        Assert.Empty(metadatas.First().CollectionTags);
-        Assert.NotEmpty(await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(new[] {2}));
+        Assert.Equal(AgeRating.G, tag.AgeRating);
     }
 
+    /// <summary>
+    /// Should remove the tag when there are no items left on the tag
+    /// </summary>
     [Fact]
-    public async Task GetTagOrCreate_ShouldReturnNewTag()
+    public async Task RemoveTagFromSeries_RemoveSeriesFromTag_DeleteTagWhenNoSeriesLeft()
     {
         await SeedSeries();
-        var tag = await _service.GetTagOrCreate(0, "GetTagOrCreate_ShouldReturnNewTag");
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        Assert.NotNull(user);
+
+        // Tag 1 has 1 series
+        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
-        Assert.Equal(0, tag.Id);
-    }
-
-    [Fact]
-    public async Task GetTagOrCreate_ShouldReturnExistingTag()
-    {
-        await SeedSeries();
-        var tag = await _service.GetTagOrCreate(1, "Some new tag");
-        Assert.NotNull(tag);
-        Assert.Equal(1, tag.Id);
-        Assert.Equal("Tag 1", tag.Title);
-    }
-
-    [Fact]
-    public async Task RemoveTagsWithoutSeries_ShouldRemoveAbandonedEntries()
-    {
-        await SeedSeries();
-        // Setup a tag with one series
-        var tag = await _service.GetTagOrCreate(0, "Tag with a series");
-        await _unitOfWork.CommitAsync();
-
-        var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(new[] {1});
-        tag.SeriesMetadatas.Add(metadatas.First());
-        var tagId = tag.Id;
-        await _unitOfWork.CommitAsync();
-
-        // Validate it doesn't remove tags it shouldn't
-        await _service.RemoveTagsWithoutSeries();
-        Assert.NotNull(await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId));
 
         await _service.RemoveTagFromSeries(tag, new[] {1});
-
-        // Validate it does remove tags it should
-        await _service.RemoveTagsWithoutSeries();
-        Assert.Null(await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId));
+        var tag2 = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        Assert.Null(tag2);
     }
+
+    #endregion
+
 }

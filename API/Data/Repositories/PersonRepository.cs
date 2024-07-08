@@ -20,7 +20,7 @@ public interface IPersonRepository
     Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId);
     Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role);
     Task RemoveAllPeopleNoLongerAssociated();
-    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId);
+    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null);
     Task<int> GetCountAsync();
 
     Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
@@ -61,11 +61,18 @@ public class PersonRepository : IPersonRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId)
+    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+
+        if (libraryIds is {Count: > 0})
+        {
+            userLibs = userLibs.Where(libraryIds.Contains).ToList();
+        }
+
         return await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => userLibs.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(ageRating)
             .SelectMany(s => s.Metadata.People)
             .Distinct()
@@ -99,6 +106,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
         return await _context.Person
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)

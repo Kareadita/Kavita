@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using API.DTOs.System;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +27,8 @@ public interface IDirectoryService
     string SiteThemeDirectory { get; }
     string FaviconDirectory { get; }
     string LocalizationDirectory { get; }
+    string CustomizedTemplateDirectory { get; }
+    string TemplateDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
@@ -50,6 +53,8 @@ public interface IDirectoryService
     string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
     bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "");
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
+        IList<string> filePaths);
+    string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
@@ -81,6 +86,8 @@ public class DirectoryService : IDirectoryService
     public string SiteThemeDirectory { get; }
     public string FaviconDirectory { get; }
     public string LocalizationDirectory { get; }
+    public string CustomizedTemplateDirectory { get; }
+    public string TemplateDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
@@ -114,6 +121,10 @@ public class DirectoryService : IDirectoryService
         FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
         ExistOrCreate(FaviconDirectory);
         LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
+        CustomizedTemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "templates");
+        ExistOrCreate(CustomizedTemplateDirectory);
+        TemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "EmailTemplates");
+        ExistOrCreate(TemplateDirectory);
     }
 
     /// <summary>
@@ -577,6 +588,49 @@ public class DirectoryService : IDirectoryService
     }
 
     /// <summary>
+    /// Finds the lowest directory from a set of file paths. Does not return the root path, will always select the lowest non-root path.
+    /// </summary>
+    /// <remarks>If the file paths do not contain anything from libraryFolders, this returns an empty dictionary back</remarks>
+    /// <param name="libraryFolders">List of top level folders which files belong to</param>
+    /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
+    /// <returns></returns>
+    public string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
+    {
+        var dirs = new Dictionary<string, string>();
+        var normalizedFilePaths = filePaths.Select(Parser.NormalizePath).ToList();
+
+        foreach (var folder in libraryFolders.Select(Parser.NormalizePath))
+        {
+            foreach (var file in normalizedFilePaths)
+            {
+                if (!file.Contains(folder)) continue;
+
+                var lowestPath =   Path.GetDirectoryName(file);
+                if (!string.IsNullOrEmpty(lowestPath))
+                {
+                    dirs.TryAdd(Parser.NormalizePath(lowestPath), string.Empty);
+                }
+
+            }
+        }
+
+        if (dirs.Keys.Count == 1) return dirs.Keys.First();
+        if (dirs.Keys.Count > 1)
+        {
+            // For each key, validate that each file exists in the key path
+            foreach (var folder in dirs.Keys)
+            {
+                if (normalizedFilePaths.TrueForAll(filePath => filePath.Contains(Parser.NormalizePath(folder))))
+                {
+                    return folder;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
     /// </summary>
     /// <param name="folderPath"></param>
@@ -649,7 +703,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null)
     {
-        _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
+        _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
         if (!Exists(folderPath)) return files;
 
@@ -691,12 +745,12 @@ public class DirectoryService : IDirectoryService
     /// <summary>
     /// Recursively scans a folder and returns the max last write time on any folders and files
     /// </summary>
-    /// <remarks>If the folder is empty, this will return MaxValue for a DateTime</remarks>
+    /// <remarks>If the folder is empty or non-existant, this will return MaxValue for a DateTime</remarks>
     /// <param name="folderPath"></param>
     /// <returns>Max Last Write Time</returns>
     public DateTime GetLastWriteTime(string folderPath)
     {
-        if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
+        if (!FileSystem.Directory.Exists(folderPath)) return DateTime.MaxValue;
         var fileEntries = FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
         if (fileEntries.Length == 0) return DateTime.MaxValue;
         return fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));

@@ -134,7 +134,7 @@ public class StatsService : IStatsService
 
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
-            NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
+            NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsAsync()).Count(),
             NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
             OPDSEnabled = serverSettings.EnableOpds,
             NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Count(),
@@ -181,7 +181,9 @@ public class StatsService : IStatsService
         {
             InstallId = serverSettings.InstallId,
             KavitaVersion = serverSettings.InstallVersion,
-            IsDocker = OsInfo.IsDocker
+            IsDocker = OsInfo.IsDocker,
+            FirstInstallDate = serverSettings.FirstInstallDate,
+            FirstInstallVersion = serverSettings.FirstInstallVersion
         };
     }
 
@@ -283,7 +285,7 @@ public class StatsService : IStatsService
             .AsNoTracking()
             .AsSplitQuery()
             .MaxAsync(s => s.Volumes!
-                .Where(v => v.Number == 0)
+                .Where(v => v.MinNumber == 0)
                 .SelectMany(v => v.Chapters!)
                 .Count());
     }

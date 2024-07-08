@@ -20,7 +20,10 @@ export enum Role {
   ChangePassword = 'Change Password',
   Bookmark = 'Bookmark',
   Download = 'Download',
-  ChangeRestriction = 'Change Restriction'
+  ChangeRestriction = 'Change Restriction',
+  ReadOnly = 'Read Only',
+  Login = 'Login',
+  Promote = 'Promote',
 }
 
 @Injectable({
@@ -51,6 +54,8 @@ export class AccountService {
    */
   private refreshTokenTimeout: ReturnType<typeof setTimeout> | undefined;
 
+  private isOnline: boolean = true;
+
   constructor(private httpClient: HttpClient, private router: Router,
     private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
@@ -58,6 +63,15 @@ export class AccountService {
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
+
+    window.addEventListener("offline", (e) => {
+      this.isOnline = false;
+    });
+
+    window.addEventListener("online", (e) => {
+      this.isOnline = true;
+      this.refreshToken().subscribe();
+    });
   }
 
   hasAdminRole(user: User) {
@@ -80,6 +94,14 @@ export class AccountService {
     return user && user.roles.includes(Role.Bookmark);
   }
 
+  hasReadOnlyRole(user: User) {
+    return user && user.roles.includes(Role.ReadOnly);
+  }
+
+  hasPromoteRole(user: User) {
+    return user && user.roles.includes(Role.Promote) || user.roles.includes(Role.Admin);
+  }
+
   getRoles() {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
@@ -93,6 +115,7 @@ export class AccountService {
   }
 
   hasValidLicense(forceCheck: boolean = false) {
+    console.log('hasValidLicense being called: ', forceCheck);
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(
         map(res => res === "true"),
@@ -120,7 +143,7 @@ export class AccountService {
 
   login(model: {username: string, password: string, apiKey?: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
-      map((response: User) => {
+      tap((response: User) => {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
@@ -138,6 +161,7 @@ export class AccountService {
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
+
       if (user.preferences && user.preferences.theme) {
         this.themeService.setTheme(user.preferences.theme.name);
       } else {
@@ -153,6 +177,8 @@ export class AccountService {
     this.stopRefreshTokenTimer();
 
     if (this.currentUser) {
+      // BUG: StopHubConnection has a promise in it, this needs to be async
+      // But that really messes everything up
       this.messageHub.stopHubConnection();
       this.messageHub.createHubConnection(this.currentUser);
       this.hasValidLicense().subscribe();
@@ -199,7 +225,7 @@ export class AccountService {
   }
 
   resendConfirmationEmail(userId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, TextResonse);
+    return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {});
   }
 
   inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRestriction}) {
@@ -310,7 +336,7 @@ export class AccountService {
   }
 
 
-  private refreshAccount() {
+  refreshAccount() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
       if (user) {
@@ -324,7 +350,7 @@ export class AccountService {
 
 
   private refreshToken() {
-    if (this.currentUser === null || this.currentUser === undefined) return of();
+    if (this.currentUser === null || this.currentUser === undefined || !this.isOnline) return of();
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
      {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {

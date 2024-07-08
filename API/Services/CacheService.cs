@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Reader;
@@ -50,6 +52,8 @@ public class CacheService : ICacheService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IBookmarkService _bookmarkService;
+
+    private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
 
     public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
         IDirectoryService directoryService, IReadingItemService readingItemService,
@@ -166,11 +170,19 @@ public class CacheService : ICacheService
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         var extractPath = GetCachePath(chapterId);
 
-        if (_directoryService.Exists(extractPath)) return chapter;
-        var files = chapter?.Files.ToList();
-        ExtractChapterFiles(extractPath, files, extractPdfToImages);
+        SemaphoreSlim extractLock = ExtractLocks.GetOrAdd(chapterId, id => new SemaphoreSlim(1,1));
 
-        return  chapter;
+        await extractLock.WaitAsync();
+        try {
+            if(_directoryService.Exists(extractPath)) return chapter;
+
+            var files = chapter?.Files.ToList();
+            ExtractChapterFiles(extractPath, files, extractPdfToImages);
+        } finally {
+            extractLock.Release();
+        }
+
+        return chapter;
     }
 
     /// <summary>
@@ -191,8 +203,25 @@ public class CacheService : ICacheService
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
         {
-            _readingItemService.Extract(files[0].FilePath, extractPath, MangaFormat.Image, files.Count);
-            _directoryService.Flatten(extractDi.FullName);
+            // Check if all the files are Images. If so, do a directory copy, else do the normal copy
+            if (files.All(f => f.Format == MangaFormat.Image))
+            {
+                _directoryService.ExistOrCreate(extractPath);
+                _directoryService.CopyFilesToDirectory(files.Select(f => f.FilePath), extractPath);
+            }
+            else
+            {
+                foreach (var file in files)
+                {
+                    if (fileCount > 1)
+                    {
+                        extraPath = file.Id + string.Empty;
+                    }
+                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), MangaFormat.Image, files.Count);
+                }
+                _directoryService.Flatten(extractDi.FullName);
+            }
+
         }
 
         foreach (var file in files)
@@ -293,7 +322,7 @@ public class CacheService : ICacheService
         var path = GetCachePath(chapterId);
         // NOTE: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
         var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
-            .OrderByNatural(Path.GetFileNameWithoutExtension)
+            //.OrderByNatural(Path.GetFileNameWithoutExtension) // This is already done in GetPageFromFiles
             .ToArray();
 
         return GetPageFromFiles(files, page);

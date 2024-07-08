@@ -14,6 +14,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 [Flags]
 public enum ChapterIncludes
@@ -21,6 +22,7 @@ public enum ChapterIncludes
     None = 1,
     Volumes = 2,
     Files = 4,
+    People = 8
 }
 
 public interface IChapterRepository
@@ -33,7 +35,7 @@ public interface IChapterRepository
     Task<ChapterDto?> GetChapterDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
-    Task<IList<Chapter>> GetChaptersAsync(int volumeId);
+    Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None);
     Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds);
     Task<string?> GetChapterCoverImageAsync(int chapterId);
     Task<IList<string>> GetAllCoverImagesAsync();
@@ -77,7 +79,7 @@ public class ChapterRepository : IChapterRepository
             .Where(c => c.Id == chapterId)
             .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
             {
-                ChapterNumber = chapter.Range,
+                ChapterNumber = chapter.MinNumber,
                 VolumeNumber = volume.Name,
                 VolumeId = volume.Id,
                 chapter.IsSpecial,
@@ -101,8 +103,8 @@ public class ChapterRepository : IChapterRepository
             })
             .Select(data => new ChapterInfoDto()
             {
-                ChapterNumber = data.ChapterNumber,
-                VolumeNumber = data.VolumeNumber + string.Empty,
+                ChapterNumber = data.ChapterNumber + string.Empty, // TODO: Fix this
+                VolumeNumber = data.VolumeNumber + string.Empty, // TODO: Fix this
                 VolumeId = data.VolumeId,
                 IsSpecial = data.IsSpecial,
                 SeriesId = data.SeriesId,
@@ -174,6 +176,7 @@ public class ChapterRepository : IChapterRepository
     {
         return await _context.Chapter
             .Includes(includes)
+            .OrderBy(c => c.SortOrder)
             .FirstOrDefaultAsync(c => c.Id == chapterId);
     }
 
@@ -182,10 +185,12 @@ public class ChapterRepository : IChapterRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<IList<Chapter>> GetChaptersAsync(int volumeId)
+    public async Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None)
     {
         return await _context.Chapter
             .Where(c => c.VolumeId == volumeId)
+            .Includes(includes)
+            .OrderBy(c => c.SortOrder)
             .ToListAsync();
     }
 
@@ -266,10 +271,16 @@ public class ChapterRepository : IChapterRepository
         return chapter;
     }
 
+    /// <summary>
+    /// Includes Volumes
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     public IEnumerable<Chapter> GetChaptersForSeries(int seriesId)
     {
         return _context.Chapter
             .Where(c => c.Volume.SeriesId == seriesId)
+            .OrderBy(c => c.SortOrder)
             .Include(c => c.Volume)
             .AsEnumerable();
     }

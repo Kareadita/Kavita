@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.SignalR;
 using Flurl.Http;
-using HtmlAgilityPack;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using MarkdownDeep;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -47,7 +45,8 @@ public interface IVersionUpdaterService
 {
     Task<UpdateNotificationDto?> CheckForUpdate();
     Task PushUpdate(UpdateNotificationDto update);
-    Task<IEnumerable<UpdateNotificationDto>> GetAllReleases();
+    Task<IList<UpdateNotificationDto>> GetAllReleases();
+    Task<int> GetNumberOfReleasesBehind();
 }
 
 public class VersionUpdaterService : IVersionUpdaterService
@@ -81,10 +80,54 @@ public class VersionUpdaterService : IVersionUpdaterService
         return CreateDto(update);
     }
 
-    public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()
+    public async Task<IList<UpdateNotificationDto>> GetAllReleases()
     {
         var updates = await GetGithubReleases();
-        return updates.Select(CreateDto).Where(d => d != null)!;
+        var updateDtos = updates.Select(CreateDto)
+            .Where(d => d != null)
+            .OrderByDescending(d => d!.PublishDate)
+            .Select(d => d!)
+            .ToList();
+
+        // Find the latest dto
+        var latestRelease = updateDtos[0]!;
+        var updateVersion = new Version(latestRelease.UpdateVersion);
+        var isNightly = BuildInfo.Version > new Version(latestRelease.UpdateVersion);
+
+        // isNightly can be true when we compare something like v0.8.1 vs v0.8.1.0
+        if (IsVersionEqualToBuildVersion(updateVersion))
+        {
+            //latestRelease.UpdateVersion = BuildInfo.Version.ToString();
+            isNightly = false;
+        }
+
+
+        latestRelease.IsOnNightlyInRelease = isNightly;
+
+        return updateDtos;
+    }
+
+    private static bool IsVersionEqualToBuildVersion(Version updateVersion)
+    {
+        return updateVersion.Revision < 0 && BuildInfo.Version.Revision == 0 &&
+               CompareWithoutRevision(BuildInfo.Version, updateVersion);
+    }
+
+    private static bool CompareWithoutRevision(Version v1, Version v2)
+    {
+        if (v1.Major != v2.Major)
+            return v1.Major == v2.Major;
+        if (v1.Minor != v2.Minor)
+            return v1.Minor == v2.Minor;
+        if (v1.Build != v2.Build)
+            return v1.Build == v2.Build;
+        return true;
+    }
+
+    public async Task<int> GetNumberOfReleasesBehind()
+    {
+        var updates = await GetAllReleases();
+        return updates.TakeWhile(update => update.UpdateVersion != update.CurrentVersion).Count();
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)
@@ -92,6 +135,7 @@ public class VersionUpdaterService : IVersionUpdaterService
         if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
         var currentVersion = BuildInfo.Version.ToString(4);
+
 
         return new UpdateNotificationDto()
         {
@@ -101,7 +145,9 @@ public class VersionUpdaterService : IVersionUpdaterService
             UpdateTitle = update.Name,
             UpdateUrl = update.Html_Url,
             IsDocker = OsInfo.IsDocker,
-            PublishDate = update.Published_At
+            PublishDate = update.Published_At,
+            IsReleaseEqual = IsVersionEqualToBuildVersion(updateVersion),
+            IsReleaseNewer = BuildInfo.Version < updateVersion,
         };
     }
 
@@ -110,17 +156,11 @@ public class VersionUpdaterService : IVersionUpdaterService
     {
         if (update == null) return;
 
-        var updateVersion = new Version(update.CurrentVersion);
+        var updateVersion = new Version(update.UpdateVersion);
 
         if (BuildInfo.Version < updateVersion)
         {
             _logger.LogWarning("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
-            await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
-                true);
-        }
-        else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development)
-        {
-            _logger.LogWarning("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
             await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
                 true);
         }

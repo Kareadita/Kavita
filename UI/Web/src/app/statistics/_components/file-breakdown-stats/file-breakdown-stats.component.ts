@@ -1,14 +1,14 @@
 import {
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
-  QueryList,
+  QueryList, TemplateRef, ViewChild,
   ViewChildren
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { PieChartModule } from '@swimlane/ngx-charts';
-import { Observable, BehaviorSubject, combineLatest, map, shareReplay } from 'rxjs';
+import {Observable, BehaviorSubject, combineLatest, map, shareReplay, switchMap} from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
@@ -16,10 +16,11 @@ import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { MangaFormatPipe } from '../../../_pipes/manga-format.pipe';
 import { BytesPipe } from '../../../_pipes/bytes.pipe';
-import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {Pagination} from "../../../_models/pagination";
+import {DownloadService} from "../../../shared/_services/download.service";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 export interface StackedBarChartDataItem {
   name: string,
@@ -32,11 +33,15 @@ export interface StackedBarChartDataItem {
     styleUrls: ['./file-breakdown-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective]
+  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader]
 })
 export class FileBreakdownStatsComponent {
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
+  @ViewChild('modalTable') modalTable!: TemplateRef<any>;
 
   rawData$!: Observable<FileExtensionBreakdown>;
   files$!: Observable<Array<FileExtension>>;
@@ -45,14 +50,16 @@ export class FileBreakdownStatsComponent {
   currentSort = new BehaviorSubject<SortEvent<FileExtension>>({column: 'extension', direction: 'asc'});
   currentSort$: Observable<SortEvent<FileExtension>> = this.currentSort.asObservable();
 
-  private readonly destroyRef = inject(DestroyRef);
-
   view: [number, number] = [700, 400];
 
   formControl: FormControl = new FormControl(true, []);
 
+  downloadInProgress: {[key: string]: boolean}  = {};
 
-  constructor(private statService: StatisticsService, private translocoService: TranslocoService) {
+  private readonly statService = inject(StatisticsService);
+  private readonly translocoService = inject(TranslocoService);
+
+  constructor() {
     this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
 
     this.files$ = combineLatest([this.currentSort$, this.rawData$]).pipe(
@@ -84,6 +91,17 @@ export class FileBreakdownStatsComponent {
         header.direction = '';
       }
     });
+  }
+
+  export(format: string) {
+    this.downloadInProgress[format] = true;
+    this.cdRef.markForCheck();
+
+    this.statService.downloadFileBreakdown(format)
+      .subscribe(() => {
+        this.downloadInProgress[format] = false;
+        this.cdRef.markForCheck();
+      });
   }
 
 }

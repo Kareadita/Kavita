@@ -33,17 +33,18 @@ import {SentenceCasePipe} from '../_pipes/sentence-case.pipe';
 import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
 import {SeriesCardComponent} from '../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
-import {DecimalPipe, NgFor, NgIf} from '@angular/common';
+import {DecimalPipe} from '@angular/common';
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
 import {
   SideNavCompanionBarComponent
 } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
-import {MetadataService} from "../_services/metadata.service";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
+import {LoadingComponent} from "../shared/loading/loading.component";
+import {debounceTime, ReplaySubject, tap} from "rxjs";
 
 @Component({
     selector: 'app-library-detail',
@@ -51,10 +52,25 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
     styleUrls: ['./library-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf
-    , CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent,
+    CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective, LoadingComponent]
 })
 export class LibraryDetailComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly seriesService = inject(SeriesService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly titleService = inject(Title);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
+  private readonly hubService = inject(MessageHubService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  public readonly navService = inject(NavService);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
 
   libraryId!: number;
   libraryName = '';
@@ -69,18 +85,18 @@ export class LibraryDetailComponent implements OnInit {
   filterActiveCheck!: SeriesFilterV2;
   refresh: EventEmitter<void> = new EventEmitter();
   jumpKeys: Array<JumpKey> = [];
+  bulkLoader: boolean = false;
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'library-tab', fragment: '', icon: 'fa-landmark'},
     {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly metadataService = inject(MetadataService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
+  loadPageSource = new ReplaySubject(1);
+  loadPage$ = this.loadPageSource.asObservable();
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
+  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
@@ -123,7 +139,14 @@ export class LibraryDetailComponent implements OnInit {
         });
         break;
       case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+        if (selectedSeries.length > 25) {
+          this.bulkLoader = true;
+          this.cdRef.markForCheck();
+        }
+
+        await this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+          this.bulkLoader = false;
+          this.cdRef.markForCheck();
           if (!successful) return;
           this.bulkSelectionService.deselectAll();
           this.loadPage();
@@ -132,10 +155,8 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService,
-    private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService,
-    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
+
+  constructor() {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
       this.router.navigateByUrl('/home');
@@ -170,6 +191,8 @@ export class LibraryDetailComponent implements OnInit {
 
       this.filterSettings.presetsV2 =  this.filter;
 
+      this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100), tap(_ => this.loadPage())).subscribe();
+
       this.cdRef.markForCheck();
     });
   }
@@ -181,7 +204,7 @@ export class LibraryDetailComponent implements OnInit {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
-          this.loadPage();
+          this.loadPageSource.next(true);
           return;
         }
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
@@ -201,7 +224,7 @@ export class LibraryDetailComponent implements OnInit {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
-          this.loadPage();
+          this.loadPageSource.next(true);
           return;
         }
 
@@ -231,7 +254,22 @@ export class LibraryDetailComponent implements OnInit {
   async handleAction(action: ActionItem<Library>, library: Library) {
     let lib: Partial<Library> = library;
     if (library === undefined) {
-      lib = {id: this.libraryId, name: this.libraryName};
+      this.libraryService.getLibrary(this.libraryId).subscribe(async library => {
+        switch (action.action) {
+          case(Action.Scan):
+            await this.actionService.scanLibrary(library);
+            break;
+          case(Action.RefreshMetadata):
+            await this.actionService.refreshMetadata(library);
+            break;
+          case(Action.Edit):
+            this.actionService.editLibrary(library);
+            break;
+          default:
+            break;
+        }
+      });
+      return
     }
     switch (action.action) {
       case(Action.Scan):
@@ -261,12 +299,12 @@ export class LibraryDetailComponent implements OnInit {
     this.filter = data.filterV2;
 
     if (data.isFirst) {
-      this.loadPage();
+      this.loadPageSource.next(true);
       return;
     }
 
     this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
-      this.loadPage();
+      this.loadPageSource.next(true);
     });
   }
 

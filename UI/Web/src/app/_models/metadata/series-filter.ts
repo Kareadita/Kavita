@@ -21,6 +21,11 @@ export enum SortField {
   TimeToRead = 5,
   ReleaseYear = 6,
   ReadProgress = 7,
+  /**
+   * Kavita+ only
+   */
+  AverageRating = 8,
+  Random = 9
 }
 
 export const allSortFields = Object.keys(SortField)

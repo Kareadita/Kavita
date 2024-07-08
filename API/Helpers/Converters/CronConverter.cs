@@ -12,18 +12,21 @@ public static class CronConverter
         "daily",
         "weekly",
     };
-    public static string ConvertToCronNotation(string source)
+    /// <summary>
+    /// Converts to Cron Notation
+    /// </summary>
+    /// <param name="source">Defaults to daily</param>
+    /// <returns></returns>
+    public static string ConvertToCronNotation(string? source)
     {
-        var destination = string.Empty;
-        destination = source.ToLower() switch
+        if (string.IsNullOrEmpty(source)) return Cron.Daily();
+        return source.ToLower() switch
         {
             "daily" => Cron.Daily(),
             "weekly" => Cron.Weekly(),
             "disabled" => Cron.Never(),
             "" => Cron.Never(),
-            _ => destination
+            _ => source
         };
-
-        return destination;
     }
 }

@@ -7,7 +7,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents the progress a single user has on a given Chapter.
 /// </summary>
-public class AppUserProgress : IEntityDate
+public class AppUserProgress
 {
     /// <summary>
     /// Id of Entity
@@ -59,4 +59,10 @@ public class AppUserProgress : IEntityDate
     /// User this progress belongs to
     /// </summary>
     public int AppUserId { get; set; }
+
+    public void MarkModified()
+    {
+        LastModified = DateTime.Now;
+        LastModifiedUtc = DateTime.UtcNow;
+    }
 }

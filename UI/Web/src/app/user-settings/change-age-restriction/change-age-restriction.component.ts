@@ -50,7 +50,7 @@ export class ChangeAgeRestrictionComponent implements OnInit {
     });
 
     this.hasChangeAgeRestrictionAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
-      return user !== undefined && (!this.accountService.hasAdminRole(user) && this.accountService.hasChangeAgeRestrictionRole(user));
+      return user !== undefined && !this.accountService.hasReadOnlyRole(user) && (!this.accountService.hasAdminRole(user) && this.accountService.hasChangeAgeRestrictionRole(user));
     }));
     this.cdRef.markForCheck();
   }

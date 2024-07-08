@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.DTOs.Metadata;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 
@@ -13,13 +14,24 @@ public class ChapterDto : IHasReadTimeEstimate
 {
     public int Id { get; init; }
     /// <summary>
-    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
+    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If special, will be special name.
     /// </summary>
+    /// <remarks>This can be something like 19.HU or Alpha as some comics are like this</remarks>
     public string Range { get; init; } = default!;
     /// <summary>
     /// Smallest number of the Range.
     /// </summary>
+    [Obsolete("Use MinNumber and MaxNumber instead")]
     public string Number { get; init; } = default!;
+    /// <summary>
+    /// This may be 0 under the circumstance that the Issue is "Alpha" or other non-standard numbers.
+    /// </summary>
+    public float MinNumber { get; init; }
+    public float MaxNumber { get; init; }
+    /// <summary>
+    /// The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.
+    /// </summary>
+    public float SortOrder { get; set; }
     /// <summary>
     /// Total number of pages in all MangaFiles
     /// </summary>
@@ -109,4 +121,42 @@ public class ChapterDto : IHasReadTimeEstimate
     /// </summary>
     /// <remarks>This is guaranteed to be Valid</remarks>
     public string ISBN { get; set; }
+
+    #region Metadata
+
+    public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> CoverArtists { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Inkers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Imprints { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Teams { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Locations { get; set; } = new List<PersonDto>();
+
+    public ICollection<GenreTagDto> Genres { get; set; } = new List<GenreTagDto>();
+
+    /// <summary>
+    /// Collection of all Tags from underlying chapters for a Series
+    /// </summary>
+    public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
+    public PublicationStatus PublicationStatus { get; set; }
+    /// <summary>
+    /// Language for the Chapter/Issue
+    /// </summary>
+    public string? Language { get; set; }
+    /// <summary>
+    /// Number in the TotalCount of issues
+    /// </summary>
+    public int Count { get; set; }
+    /// <summary>
+    /// Total number of issues for the series
+    /// </summary>
+    public int TotalCount { get; set; }
+
+    #endregion
 }

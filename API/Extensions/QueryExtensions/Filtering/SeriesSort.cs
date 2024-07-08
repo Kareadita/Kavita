@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using API.DTOs.Filtering;
 using API.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions.Filtering;
 #nullable enable
@@ -31,8 +32,11 @@ public static class SeriesSort
             SortField.TimeToRead => query.DoOrderBy(s => s.AvgHoursToRead, sortOptions),
             SortField.ReleaseYear => query.DoOrderBy(s => s.Metadata.ReleaseYear, sortOptions),
             SortField.ReadProgress => query.DoOrderBy(s => s.Progress.Where(p => p.SeriesId == s.Id && p.AppUserId == userId)
-                .Select(p => p.LastModified)
+                .Select(p => p.LastModified) // TODO: Migrate this to UTC
                 .Max(), sortOptions),
+            SortField.AverageRating => query.DoOrderBy(s => s.ExternalSeriesMetadata.ExternalRatings
+                .Where(p => p.SeriesId == s.Id).Average(p => p.AverageScore), sortOptions),
+            SortField.Random => query.DoOrderBy(s => EF.Functions.Random(), sortOptions),
             _ => query
         };
 

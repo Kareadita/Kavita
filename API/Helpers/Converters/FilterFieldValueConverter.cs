@@ -58,6 +58,15 @@ public static class FilterFieldValueConverter
             FilterField.Inker => value.Split(',')
                 .Select(int.Parse)
                 .ToList(),
+            FilterField.Imprint => value.Split(',')
+                .Select(int.Parse)
+                .ToList(),
+            FilterField.Team => value.Split(',')
+                .Select(int.Parse)
+                .ToList(),
+            FilterField.Location => value.Split(',')
+                .Select(int.Parse)
+                .ToList(),
             FilterField.Penciller => value.Split(',')
                 .Select(int.Parse)
                 .ToList(),
@@ -77,6 +86,7 @@ public static class FilterFieldValueConverter
                 .Select(x => (MangaFormat) Enum.Parse(typeof(MangaFormat), x))
                 .ToList(),
             FilterField.ReadTime => int.Parse(value),
+            FilterField.AverageRating => value.AsFloat(),
             _ => throw new ArgumentException("Invalid field type")
         };
     }

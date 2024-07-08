@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities.Enums;
 
@@ -9,11 +8,6 @@ public class SeriesMetadataDto
 {
     public int Id { get; set; }
     public string Summary { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Collections the Series belongs to
-    /// </summary>
-    public ICollection<CollectionTagDto> CollectionTags { get; set; } = new List<CollectionTagDto>();
 
     /// <summary>
     /// Genres for the Series
@@ -30,10 +24,14 @@ public class SeriesMetadataDto
     public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Inkers { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Imprints { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Teams { get; set; } = new List<PersonDto>();
+    public ICollection<PersonDto> Locations { get; set; } = new List<PersonDto>();
+
     /// <summary>
     /// Highest Age Rating from all Chapters
     /// </summary>
@@ -80,10 +78,13 @@ public class SeriesMetadataDto
     public bool ColoristLocked { get; set; }
     public bool EditorLocked { get; set; }
     public bool InkerLocked { get; set; }
+    public bool ImprintLocked { get; set; }
     public bool LettererLocked { get; set; }
     public bool PencillerLocked { get; set; }
     public bool PublisherLocked { get; set; }
     public bool TranslatorLocked { get; set; }
+    public bool TeamLocked { get; set; }
+    public bool LocationLocked { get; set; }
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
 

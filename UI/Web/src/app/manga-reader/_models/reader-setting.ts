@@ -6,6 +6,7 @@ import { FITTING_OPTION, PAGING_DIRECTION } from "./reader-enums";
 export interface ReaderSetting {
     pageSplit: PageSplitOption;
     fitting: FITTING_OPTION;
+    widthSlider: string;
     layoutMode: LayoutMode;
     darkness: number;
     pagingDirection: PAGING_DIRECTION;

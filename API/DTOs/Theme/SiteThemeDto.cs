@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using API.Entities.Enums.Theme;
 using API.Services;
 
@@ -30,5 +31,21 @@ public class SiteThemeDto
     /// Where did the theme come from
     /// </summary>
     public ThemeProvider Provider { get; set; }
+
+    public IList<string> PreviewUrls { get; set; }
+    /// <summary>
+    /// Information about the theme
+    /// </summary>
+    public string Description { get; set; }
+    /// <summary>
+    /// Author of the Theme (only applies to non-system provided themes)
+    /// </summary>
+    public string Author { get; set; }
+    /// <summary>
+    /// Last compatible version. System provided will always be most current
+    /// </summary>
+    public string CompatibleVersion { get; set; }
+
+
     public string Selector => "bg-" + Name.ToLower();
 }

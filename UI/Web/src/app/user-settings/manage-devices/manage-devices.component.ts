@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit
+} from '@angular/core';
 import { Device } from 'src/app/_models/device/device';
 import { DeviceService } from 'src/app/_services/device.service';
 import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
@@ -8,7 +12,9 @@ import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { NgIf, NgFor } from '@angular/common';
 import { EditDeviceComponent } from '../edit-device/edit-device.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {SettingsService} from "../../admin/settings.service";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
     selector: 'app-manage-devices',
@@ -18,26 +24,26 @@ import {TranslocoDirective} from "@ngneat/transloco";
     standalone: true,
     imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective]
 })
-export class ManageDevicesComponent implements OnInit, OnDestroy {
+export class ManageDevicesComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly deviceService = inject(DeviceService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly confirmService = inject(ConfirmService);
 
   devices: Array<Device> = [];
   addDeviceIsCollapsed: boolean = true;
   device: Device | undefined;
-
-
-  private readonly onDestroy = new Subject<void>();
-
-  constructor(public deviceService: DeviceService, private toastr: ToastrService,
-    private readonly cdRef: ChangeDetectorRef) { }
+  hasEmailSetup = false;
 
   ngOnInit(): void {
+    this.settingsService.isEmailSetup().subscribe(res => {
+      this.hasEmailSetup = res;
+      this.cdRef.markForCheck();
+    });
     this.loadDevices();
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   loadDevices() {
     this.addDeviceIsCollapsed = true;
@@ -49,7 +55,8 @@ export class ManageDevicesComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteDevice(device: Device) {
+  async deleteDevice(device: Device) {
+    if (!await this.confirmService.confirm(translate('toasts.delete-device'))) return;
     this.deviceService.deleteDevice(device.id).subscribe(() => {
       const index = this.devices.indexOf(device);
       this.devices.splice(index, 1);

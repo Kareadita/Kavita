@@ -6,6 +6,7 @@ import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { Job } from '../_models/job/job';
 import { KavitaMediaError } from '../admin/_models/media-error';
 import {TextResonse} from "../_types/text-response";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -14,62 +15,63 @@ export class ServerService {
 
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private http: HttpClient) { }
 
 
   getServerInfo() {
-    return this.httpClient.get<ServerInfoSlim>(this.baseUrl + 'server/server-info-slim');
+    return this.http.get<ServerInfoSlim>(this.baseUrl + 'server/server-info-slim');
   }
 
   clearCache() {
-    return this.httpClient.post(this.baseUrl + 'server/clear-cache', {});
+    return this.http.post(this.baseUrl + 'server/clear-cache', {});
   }
 
   cleanupWantToRead() {
-    return this.httpClient.post(this.baseUrl + 'server/cleanup-want-to-read', {});
+    return this.http.post(this.baseUrl + 'server/cleanup-want-to-read', {});
   }
 
   backupDatabase() {
-    return this.httpClient.post(this.baseUrl + 'server/backup-db', {});
+    return this.http.post(this.baseUrl + 'server/backup-db', {});
   }
 
   analyzeFiles() {
-    return this.httpClient.post(this.baseUrl + 'server/analyze-files', {});
+    return this.http.post(this.baseUrl + 'server/analyze-files', {});
   }
 
   checkForUpdate() {
-    return this.httpClient.get<UpdateVersionEvent>(this.baseUrl + 'server/check-update', {});
+    return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update');
+  }
+
+  checkHowOutOfDate() {
+    return this.http.get<string>(this.baseUrl + 'server/checkHowOutOfDate', TextResonse)
+      .pipe(map(r => parseInt(r, 10)));
+  }
+
+  checkForUpdates() {
+    return this.http.get<UpdateVersionEvent>(this.baseUrl + 'server/check-for-updates', {});
   }
 
   getChangelog() {
-    return this.httpClient.get<UpdateVersionEvent[]>(this.baseUrl + 'server/changelog', {});
-  }
-
-  isServerAccessible() {
-    return this.httpClient.get<boolean>(this.baseUrl + 'server/accessible');
+    return this.http.get<UpdateVersionEvent[]>(this.baseUrl + 'server/changelog', {});
   }
 
   getRecurringJobs() {
-    return this.httpClient.get<Job[]>(this.baseUrl + 'server/jobs');
+    return this.http.get<Job[]>(this.baseUrl + 'server/jobs');
   }
 
   convertMedia() {
-    return this.httpClient.post(this.baseUrl + 'server/convert-media', {});
+    return this.http.post(this.baseUrl + 'server/convert-media', {});
   }
 
   bustCache() {
-    return this.httpClient.post(this.baseUrl + 'server/bust-review-and-rec-cache', {});
+    return this.http.post(this.baseUrl + 'server/bust-kavitaplus-cache', {});
   }
 
   getMediaErrors() {
-    return this.httpClient.get<Array<KavitaMediaError>>(this.baseUrl + 'server/media-errors', {});
+    return this.http.get<Array<KavitaMediaError>>(this.baseUrl + 'server/media-errors', {});
   }
 
   clearMediaAlerts() {
-    return this.httpClient.post(this.baseUrl + 'server/clear-media-alerts', {});
-  }
-
-  getEmailVersion() {
-    return this.httpClient.get<string>(this.baseUrl + 'server/email-version', TextResonse);
+    return this.http.post(this.baseUrl + 'server/clear-media-alerts', {});
   }
 }

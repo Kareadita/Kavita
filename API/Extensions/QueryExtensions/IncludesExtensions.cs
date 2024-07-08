@@ -19,6 +19,23 @@ public static class IncludesExtensions
             queryable = queryable.Include(c => c.SeriesMetadatas);
         }
 
+        if (includes.HasFlag(CollectionTagIncludes.SeriesMetadataWithSeries))
+        {
+            queryable = queryable.Include(c => c.SeriesMetadatas).ThenInclude(s => s.Series);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
+    public static IQueryable<AppUserCollection> Includes(this IQueryable<AppUserCollection> queryable,
+        CollectionIncludes includes)
+    {
+        if (includes.HasFlag(CollectionIncludes.Series))
+        {
+            queryable = queryable.Include(c => c.Items);
+        }
+
+
         return queryable.AsSplitQuery();
     }
 
@@ -36,6 +53,42 @@ public static class IncludesExtensions
                 .Include(c => c.Files);
         }
 
+        if (includes.HasFlag(ChapterIncludes.People))
+        {
+            queryable = queryable
+                .Include(c => c.People);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
+    public static IQueryable<Volume> Includes(this IQueryable<Volume> queryable,
+        VolumeIncludes includes)
+    {
+        if (includes.HasFlag(VolumeIncludes.Files))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .ThenInclude(c => c.Files);
+        } else if (includes.HasFlag(VolumeIncludes.Chapters))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder));
+        }
+
+        if (includes.HasFlag(VolumeIncludes.People))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .ThenInclude(c => c.People);
+        }
+
+        if (includes.HasFlag(VolumeIncludes.Tags))
+        {
+            queryable = queryable
+                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .ThenInclude(c => c.Tags);
+        }
 
         return queryable.AsSplitQuery();
     }
@@ -57,7 +110,7 @@ public static class IncludesExtensions
         {
             query = query
                 .Include(s => s.Volumes)
-                .ThenInclude(v => v.Chapters);
+                .ThenInclude(v => v.Chapters.OrderBy(c => c.SortOrder));
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Related))
@@ -65,6 +118,33 @@ public static class IncludesExtensions
             query = query.Include(s => s.Relations)
                 .ThenInclude(r => r.TargetSeries)
                 .Include(s => s.RelationOf);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.ExternalReviews))
+        {
+            query = query
+                .Include(s => s.ExternalSeriesMetadata)
+                .ThenInclude(s => s.ExternalReviews);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.ExternalRatings))
+        {
+            query = query
+                .Include(s => s.ExternalSeriesMetadata)
+                .ThenInclude(s => s.ExternalRatings);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.ExternalMetadata))
+        {
+            query = query
+                .Include(s => s.ExternalSeriesMetadata);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.ExternalRecommendations))
+        {
+            query = query
+                .Include(s => s.ExternalSeriesMetadata)
+                .ThenInclude(s => s.ExternalRecommendations);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Metadata))
@@ -113,7 +193,9 @@ public static class IncludesExtensions
 
         if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
         {
-            query = query.Include(u => u.UserPreferences);
+            query = query
+                .Include(u => u.UserPreferences)
+                .ThenInclude(p => p.Theme);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
@@ -151,6 +233,12 @@ public static class IncludesExtensions
         if (includeFlags.HasFlag(AppUserIncludes.ExternalSources))
         {
             query = query.Include(u => u.ExternalSources);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Collections))
+        {
+            query = query.Include(u => u.Collections)
+                .ThenInclude(c => c.Items);
         }
 
         return query.AsSplitQuery();

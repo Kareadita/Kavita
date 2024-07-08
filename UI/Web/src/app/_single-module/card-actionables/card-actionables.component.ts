@@ -1,11 +1,20 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {CommonModule} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-card-actionables',
@@ -17,6 +26,10 @@ import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 })
 export class CardActionablesComponent implements OnInit {
 
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
+
   @Input() iconClass = 'fa-ellipsis-v';
   @Input() btnClass = '';
   @Input() actions: ActionItem<any>[] = [];
@@ -27,20 +40,22 @@ export class CardActionablesComponent implements OnInit {
 
   isAdmin: boolean = false;
   canDownload: boolean = false;
+  canPromote: boolean = false;
   submenu: {[key: string]: NgbDropdown} = {};
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private accountService: AccountService) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((user) => {
       if (!user) return;
       this.isAdmin = this.accountService.hasAdminRole(user);
       this.canDownload = this.accountService.hasDownloadRole(user);
+      this.canPromote = this.accountService.hasPromoteRole(user);
 
       // We want to avoid an empty menu when user doesn't have access to anything
       if (!this.isAdmin && this.actions.filter(a => !a.requiresAdmin).length === 0) {
         this.actions = [];
       }
+
       this.cdRef.markForCheck();
     });
   }
@@ -61,7 +76,10 @@ export class CardActionablesComponent implements OnInit {
   willRenderAction(action: ActionItem<any>) {
     return (action.requiresAdmin && this.isAdmin)
         || (action.action === Action.Download && (this.canDownload || this.isAdmin))
-        || (!action.requiresAdmin && action.action !== Action.Download);
+        || (!action.requiresAdmin && action.action !== Action.Download)
+        || (action.action === Action.Promote && (this.canPromote || this.isAdmin))
+        || (action.action === Action.UnPromote && (this.canPromote || this.isAdmin))
+      ;
   }
 
   shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {

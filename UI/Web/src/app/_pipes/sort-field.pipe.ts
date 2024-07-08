@@ -27,6 +27,10 @@ export class SortFieldPipe implements PipeTransform {
         return this.translocoService.translate('sort-field-pipe.release-year');
       case SortField.ReadProgress:
         return this.translocoService.translate('sort-field-pipe.read-progress');
+      case SortField.AverageRating:
+        return this.translocoService.translate('sort-field-pipe.average-rating');
+      case SortField.Random:
+        return this.translocoService.translate('sort-field-pipe.random');
     }
 
   }

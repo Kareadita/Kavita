@@ -7,7 +7,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
@@ -16,7 +16,8 @@ import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {WikiLink} from "../../../_models/wiki";
 
 interface FileStep {
   fileName: string;
@@ -46,7 +47,12 @@ enum Step {
 })
 export class ImportCblModalComponent {
 
+  protected readonly CblImportResult = CblImportResult;
+  protected readonly Step = Step;
+  protected readonly WikiLink = WikiLink;
+
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
+
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
     FileUploadValidators.accept(['.cbl']),
@@ -54,6 +60,9 @@ export class ImportCblModalComponent {
 
   uploadForm = new FormGroup({
     files: this.fileUploadControl
+  });
+  cblSettingsForm = new FormGroup({
+    comicVineMatching: new FormControl(true, [])
   });
 
   isLoading: boolean = false;
@@ -69,10 +78,6 @@ export class ImportCblModalComponent {
   filesToProcess: Array<FileStep> = [];
   failedFiles: Array<FileStep> = [];
 
-
-  get Breakpoint() { return Breakpoint; }
-  get Step() { return Step; }
-  get CblImportResult() { return CblImportResult; }
 
   get NextButtonLabel() {
     switch(this.currentStepIndex) {
@@ -105,11 +110,12 @@ export class ImportCblModalComponent {
           return;
         }
         // Load each file into filesToProcess and group their data
-        let pages = [];
+        const pages = [];
         for (let i = 0; i < files.length; i++) {
           const formData = new FormData();
             formData.append('cbl', files[i]);
-            formData.append('dryRun', true + '');
+            formData.append('dryRun', 'true');
+            formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
             pages.push(this.readingListService.validateCbl(formData));
         }
         forkJoin(pages).subscribe(results => {
@@ -195,12 +201,13 @@ export class ImportCblModalComponent {
     const filenamesAllowedToProcess = this.filesToProcess.map(p => p.fileName);
     const files = (this.uploadForm.get('files')?.value || []).filter(f => filenamesAllowedToProcess.includes(f.name));
 
-    let pages = [];
+    const pages = [];
     for (let i = 0; i < files.length; i++) {
       const formData = new FormData();
-        formData.append('cbl', files[i]);
-        formData.append('dryRun', 'true');
-        pages.push(this.readingListService.importCbl(formData));
+      formData.append('cbl', files[i]);
+      formData.append('dryRun', 'true');
+      formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
+      pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {
         results.forEach(cblImport => {
@@ -224,6 +231,7 @@ export class ImportCblModalComponent {
       const formData = new FormData();
       formData.append('cbl', files[i]);
       formData.append('dryRun', 'false');
+      formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
       pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {

@@ -1,0 +1,22 @@
+.dashboard-card-content {
+  max-width: 400px;
+  height: auto;
+  box-sizing:border-box;
+}
+
+.day-breakdown-chart {
+  width: 100%;
+  margin: 0 auto;
+  max-width: 400px;
+}
+
+.error {
+  color: var(--error-color);
+}
+.completed {
+  color: var(--color-5);
+}
+
+.progress-bar-danger.progress-bar {
+  background-color: var(--error-color);
+}

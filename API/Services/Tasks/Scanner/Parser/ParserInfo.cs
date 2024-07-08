@@ -60,6 +60,10 @@ public class ParserInfo
     /// If the file contains no volume/chapter information or contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
     /// </summary>
     public bool IsSpecial { get; set; }
+    /// <summary>
+    /// If the file has a Special Marker explicitly, this will contain the index
+    /// </summary>
+    public int SpecialIndex { get; set; } = 0;
 
     /// <summary>
     /// Used for specials or books, stores what the UI should show.
@@ -68,12 +72,18 @@ public class ParserInfo
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
+    /// This can be filled in from ComicInfo.xml during scanning. Will update the SortOrder field on <see cref="Entities.Chapter"/>.
+    /// Falls back to Parsed Chapter number
+    /// </summary>
+    public float IssueOrder { get; set; }
+
+    /// <summary>
     /// If the ParserInfo has the IsSpecial tag or both volumes and chapters are default aka 0
     /// </summary>
     /// <returns></returns>
     public bool IsSpecialInfo()
     {
-        return (IsSpecial || (Volumes == Parser.DefaultVolume && Chapters == Parser.DefaultChapter));
+        return (IsSpecial || (Volumes == Parser.LooseLeafVolume && Chapters == Parser.DefaultChapter));
     }
 
     /// <summary>
@@ -91,7 +101,7 @@ public class ParserInfo
     {
         if (info2 == null) return;
         Chapters = string.IsNullOrEmpty(Chapters) || Chapters == Parser.DefaultChapter ? info2.Chapters: Chapters;
-        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == Parser.DefaultVolume ? info2.Volumes : Volumes;
+        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == Parser.LooseLeafVolume ? info2.Volumes : Volumes;
         Edition = string.IsNullOrEmpty(Edition) ? info2.Edition : Edition;
         Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
         Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;

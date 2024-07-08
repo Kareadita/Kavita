@@ -45,5 +45,12 @@ public enum FilterField
     /// Last time User Read
     /// </summary>
     ReadingDate = 27,
+    /// <summary>
+    /// Average rating from Kavita+ - Not usable for non-licensed users
+    /// </summary>
+    AverageRating = 28,
+    Imprint = 29,
+    Team = 30,
+    Location = 31
 
 }

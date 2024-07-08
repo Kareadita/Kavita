@@ -24,6 +24,7 @@ import {TypeaheadComponent} from "../../typeahead/_components/typeahead.componen
 import {CommonModule} from "@angular/common";
 import {TranslocoModule} from "@ngneat/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
+import {WikiLink} from "../../_models/wiki";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
@@ -55,6 +56,7 @@ export class EditSeriesRelationComponent implements OnInit {
   private readonly searchService = inject(SearchService);
   public readonly imageService = inject(ImageService);
   protected readonly RelationKind = RelationKind;
+  protected readonly WikiLink = WikiLink;
 
   @Input({required: true}) series!: Series;
   /**
@@ -71,7 +73,7 @@ export class EditSeriesRelationComponent implements OnInit {
   focusTypeahead = new EventEmitter();
 
   ngOnInit(): void {
-    this.seriesService.getRelatedForSeries(this.series.id).subscribe(async relations => {
+    this.seriesService.getRelatedForSeries(this.series.id).subscribe( relations => {
         this.setupRelationRows(relations.prequels, RelationKind.Prequel);
         this.setupRelationRows(relations.sequels, RelationKind.Sequel);
         this.setupRelationRows(relations.sideStories, RelationKind.SideStory);
@@ -85,6 +87,7 @@ export class EditSeriesRelationComponent implements OnInit {
         this.setupRelationRows(relations.contains, RelationKind.Contains);
         this.setupRelationRows(relations.parent, RelationKind.Parent);
         this.setupRelationRows(relations.editions, RelationKind.Edition);
+        this.setupRelationRows(relations.annuals, RelationKind.Annual);
         this.cdRef.detectChanges();
     });
 
@@ -181,10 +184,10 @@ export class EditSeriesRelationComponent implements OnInit {
     const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
     const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
     const editions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Edition && item.series !== undefined).map(item => item.series!.id);
+    const annuals = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Annual && item.series !== undefined).map(item => item.series!.id);
 
     // NOTE: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
-    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis, editions).subscribe(() => {});
+    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis, editions, annuals).subscribe(() => {});
 
   }
-
 }

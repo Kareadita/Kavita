@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -37,6 +38,9 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
@@ -86,6 +90,35 @@ public class Program
                         logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
                     }
                 }
+
+                // Apply Before manual migrations that need to run before actual migrations
+                if (isDbCreated)
+                {
+                    Task.Run(async () =>
+                        {
+                            // Apply all migrations on startup
+                            logger.LogInformation("Running Manual Migrations");
+
+                            try
+                            {
+                                // v0.7.14
+                                await MigrateWantToReadExport.Migrate(context, directoryService, logger);
+
+                                // v0.8.2
+                                await ManualMigrateSwitchToWal.Migrate(context, logger);
+                            }
+                            catch (Exception ex)
+                            {
+                                /* Swallow */
+                            }
+
+                            await unitOfWork.CommitAsync();
+                            logger.LogInformation("Running Manual Migrations - complete");
+                        }).GetAwaiter()
+                        .GetResult();
+                }
+
+
 
                 await context.Database.MigrateAsync();
 

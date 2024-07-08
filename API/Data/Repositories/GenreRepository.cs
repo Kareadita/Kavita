@@ -19,9 +19,8 @@ public interface IGenreRepository
     Task<Genre?> FindByNameAsync(string genreName);
     Task<IList<Genre>> GetAllGenresAsync();
     Task<IList<Genre>> GetAllGenresByNamesAsync(IEnumerable<string> normalizedNames);
-    Task<IList<GenreTagDto>> GetAllGenreDtosAsync(int userId);
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
-    Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(IList<int> libraryIds, int userId);
+    Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null);
     Task<int> GetCountAsync();
     Task<GenreTagDto> GetRandomGenre();
     Task<GenreTagDto> GetGenreById(int id);
@@ -69,27 +68,6 @@ public class GenreRepository : IGenreRepository
         await _context.SaveChangesAsync();
     }
 
-    /// <summary>
-    /// Returns a set of Genre tags for a set of library Ids. UserId will restrict returned Genres based on user's age restriction.
-    /// </summary>
-    /// <param name="libraryIds"></param>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(IList<int> libraryIds, int userId)
-    {
-        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        return await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .RestrictAgainstAgeRestriction(userRating)
-            .SelectMany(s => s.Metadata.Genres)
-            .AsSplitQuery()
-            .Distinct()
-            .OrderBy(p => p.NormalizedTitle)
-            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-    }
-
-
     public async Task<int> GetCountAsync()
     {
         return await _context.Genre.CountAsync();
@@ -128,13 +106,30 @@ public class GenreRepository : IGenreRepository
             .ToListAsync();
     }
 
-    public async Task<IList<GenreTagDto>> GetAllGenreDtosAsync(int userId)
+    /// <summary>
+    /// Returns a set of Genre tags for a set of library Ids.
+    /// UserId will restrict returned Genres based on user's age restriction and library access.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryIds"></param>
+    /// <returns></returns>
+    public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null)
     {
-        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        return await _context.Genre
-            .RestrictAgainstAgeRestriction(ageRating)
-            .OrderBy(g => g.NormalizedTitle)
-            .AsNoTracking()
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+
+        if (libraryIds is {Count: > 0})
+        {
+            userLibs = userLibs.Where(libraryIds.Contains).ToList();
+        }
+
+        return await _context.Series
+            .Where(s => userLibs.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .SelectMany(s => s.Metadata.Genres)
+            .AsSplitQuery()
+            .Distinct()
+            .OrderBy(p => p.NormalizedTitle)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

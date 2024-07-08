@@ -1,5 +1,12 @@
 import { MangaFile } from './manga-file';
 import { AgeRating } from './metadata/age-rating';
+import {PublicationStatus} from "./metadata/publication-status";
+import {Genre} from "./metadata/genre";
+import {Tag} from "./tag";
+import {Person} from "./metadata/person";
+
+export const LooseLeafOrDefaultNumber = -100000;
+export const SpecialVolumeNumber = 100000;
 
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
@@ -7,7 +14,12 @@ import { AgeRating } from './metadata/age-rating';
 export interface Chapter {
     id: number;
     range: string;
+    /**
+     * @deprecated Use minNumber/maxNumber
+     */
     number: string;
+    minNumber: number;
+    maxNumber: number;
     files: Array<MangaFile>;
     /**
      * This is used in the UI, it is not updated or sent to Backend
@@ -42,4 +54,29 @@ export interface Chapter {
     webLinks: string;
     isbn: string;
     lastReadingProgress: string;
+    sortOrder: number;
+
+  // originally in ChapterMetadata but now inlined with Chapter data
+
+  year: string;
+  language: string;
+  publicationStatus: PublicationStatus;
+  count: number;
+  totalCount: number;
+
+  genres: Array<Genre>;
+  tags: Array<Tag>;
+  writers: Array<Person>;
+  coverArtists: Array<Person>;
+  publishers: Array<Person>;
+  characters: Array<Person>;
+  pencillers: Array<Person>;
+  inkers: Array<Person>;
+  imprints: Array<Person>;
+  colorists: Array<Person>;
+  letterers: Array<Person>;
+  editors: Array<Person>;
+  translators: Array<Person>;
+  teams: Array<Person>;
+  locations: Array<Person>;
 }

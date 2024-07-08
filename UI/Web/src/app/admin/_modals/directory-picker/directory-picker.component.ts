@@ -7,14 +7,13 @@ import { LibraryService } from '../../../_services/library.service';
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {WikiLink} from "../../../_models/wiki";
 
 
 export interface DirectoryPickerResult {
   success: boolean;
   folderPath: string;
 }
-
-
 
 @Component({
   selector: 'app-directory-picker',
@@ -29,7 +28,7 @@ export class DirectoryPickerComponent implements OnInit {
   /**
    * Url to give more information about selecting directories. Passing nothing will suppress.
    */
-  @Input() helpUrl: string = 'https://wiki.kavitareader.com/en/guides/first-time-setup#adding-a-library-to-kavita';
+  @Input() helpUrl: string = WikiLink.Library;
 
   currentRoot = '';
   folders: DirectoryDto[] = [];
@@ -129,33 +128,12 @@ export class DirectoryPickerComponent implements OnInit {
     });
   }
 
-  shareFolder(fullPath: string, event: any) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.modal.close({success: true, folderPath: fullPath});
-  }
-
   share() {
     this.modal.close({success: true, folderPath: this.path});
   }
 
   close() {
     this.modal.close({success: false, folderPath: undefined});
-  }
-
-  getStem(path: string): string {
-
-    const lastPath = this.routeStack.peek();
-    if (lastPath && lastPath != path) {
-      let replaced = path.replace(lastPath, '');
-      if (replaced.startsWith('/') || replaced.startsWith('\\')) {
-        replaced = replaced.substring(1, replaced.length);
-      }
-      return replaced;
-    }
-
-    return path;
   }
 
   navigateTo(index: number) {

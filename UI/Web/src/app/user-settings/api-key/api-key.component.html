@@ -10,9 +10,12 @@
           <button class="btn btn-outline-secondary" type="button" (click)="copy()" [title]="t('copy')">
               <span class="visually-hidden">Copy</span><i class="fa fa-copy" aria-hidden="true"></i>
           </button>
-          <button class="btn btn-danger" type="button" [ngbTooltip]="tipContent" (click)="refresh()" *ngIf="showRefresh">
-              <span class="visually-hidden">Regenerate</span><i class="fa fa-sync-alt" aria-hidden="true"></i>
+        @if (showRefresh) {
+          <button class="btn btn-danger" type="button" [ngbTooltip]="tipContent" (click)="refresh()">
+            <span class="visually-hidden">Regenerate</span><i class="fa fa-sync-alt" aria-hidden="true"></i>
           </button>
+        }
+
           <ng-template #tipContent>
               {{t('regen-warning')}}
           </ng-template>

@@ -10,7 +10,9 @@ public static class OsInfo
     public static bool IsLinux => Os is Os.Linux or Os.LinuxMusl or Os.Bsd;
     public static bool IsOsx => Os == Os.Osx;
     public static bool IsWindows => Os == Os.Windows;
-    public static bool IsDocker => Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+    public static bool IsDocker =>
+        Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true" ||
+        Environment.GetEnvironmentVariable("LSIO_FIRST_PARTY") == "true";
 
     static OsInfo()
     {

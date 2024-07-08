@@ -22,4 +22,5 @@ public class RelatedSeriesDto
     public IEnumerable<SeriesDto> Doujinshis { get; set; } = default!;
     public IEnumerable<SeriesDto> Parent { get; set; } = default!;
     public IEnumerable<SeriesDto> Editions { get; set; } = default!;
+    public IEnumerable<SeriesDto> Annuals { get; set; } = default!;
 }

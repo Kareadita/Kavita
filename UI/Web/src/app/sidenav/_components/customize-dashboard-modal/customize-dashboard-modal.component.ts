@@ -15,6 +15,7 @@ import {CustomizeDashboardStreamsComponent} from "../customize-dashboard-streams
 import {CustomizeSidenavStreamsComponent} from "../customize-sidenav-streams/customize-sidenav-streams.component";
 import {ManageExternalSourcesComponent} from "../manage-external-sources/manage-external-sources.component";
 import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-filters.component";
+import {WikiLink} from "../../../_models/wiki";
 
 enum TabID {
   Dashboard = 'dashboard',
@@ -35,13 +36,15 @@ enum TabID {
 })
 export class CustomizeDashboardModalComponent {
 
-  activeTab = TabID.SideNav;
-
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly utilityService = inject(UtilityService);
   private readonly modal = inject(NgbActiveModal);
+
   protected readonly TabID = TabID;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly WikiLink = WikiLink;
+
+  activeTab = TabID.SideNav;
 
   close() {
     this.modal.close();

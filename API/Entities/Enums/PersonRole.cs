@@ -24,7 +24,11 @@ public enum PersonRole
     /// <summary>
     /// The Translator
     /// </summary>
-    Translator = 12
-
-
+    Translator = 12,
+    /// <summary>
+    /// The publisher before another Publisher bought
+    /// </summary>
+    Imprint = 13,
+    Team = 14,
+    Location = 15
 }

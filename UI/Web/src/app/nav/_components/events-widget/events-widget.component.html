@@ -1,129 +1,118 @@
 <ng-container *transloco="let t; read: 'events-widget'">
-  <ng-container *ngIf="isAdmin$ | async">
-    <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
-      <ng-container *ngIf="errors$ | async as errors">
-        <ng-container *ngIf="infos$ | async as infos">
-          <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0, 'colored-error': errors.length > 0,
-                    'colored-info': infos.length > 0 && errors.length === 0}"
-                  [ngbPopover]="popContent" [title]="t('title-alt')" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
-            <i aria-hidden="true" class="fa fa-wave-square nav"></i>
-          </button>
-        </ng-container>
-      </ng-container>
-    </ng-container>
 
+  @if (isAdmin$ | async) {
+    @if (downloadService.activeDownloads$ | async; as activeDownloads) {
+      @if (errors$ | async; as errors) {
+        @if (infos$ | async; as infos) {
+          @if (messageHub.onlineUsers$ | async; as onlineUsers) {
+            <button type="button" class="btn btn-icon"
+                    [ngbPopover]="popContent" [title]="t('title-alt')"
+                    placement="bottom" [popoverClass]="'nav-events'"
+                    [autoClose]="'outside'">
+
+              @if (onlineUsers.length > 1) {
+                <span class="me-2" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0 || updateAvailable}">{{onlineUsers.length}}</span>
+              }
+              <i aria-hidden="true" class="fa fa-wave-square nav" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0 || updateAvailable}"></i>
+
+
+              @if (errors.length > 0) {
+                <i aria-hidden="true" class="fa fa-circle-exclamation nav widget-button--indicator error"></i>
+              } @else if (infos.length > 0) {
+                <i aria-hidden="true" class="fa fa-circle-info nav widget-button--indicator info"></i>
+              } @else if (activeEvents > 0 || activeDownloads.length > 0) {
+                <div class="nav widget-button--indicator spinner-border spinner-border-sm"></div>
+              } @else if (updateAvailable) {
+                <i aria-hidden="true" class="fa fa-circle-arrow-up nav widget-button--indicator update"></i>
+              }
+            </button>
+          }
+        }
+      }
+    }
 
     <ng-template #popContent>
-
       <ul class="list-group list-group-flush dark-menu">
-        <ng-container *ngIf="errors$ | async as errors">
-          <ng-container *ngIf="infos$ | async as infos">
-            <li class="list-group-item dark-menu-item clickable" *ngIf="errors.length > 0 || infos.length > 0" (click)="clearAllErrorOrInfos()">
-              {{t('dismiss-all')}}
-            </li>
-          </ng-container>
-        </ng-container>
-        <ng-container *ngIf="debugMode">
-          <li class="list-group-item dark-menu-item">
-            <div class="h6 mb-1">Title goes here</div>
-            <div class="accent-text mb-1">Subtitle goes here</div>
-            <div class="progress-container row g-0 align-items-center">
-              <div class="progress" style="height: 5px;">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-          </li>
-          <li class="list-group-item dark-menu-item">
-            <div class="h6 mb-1">Title goes here</div>
-            <div class="accent-text mb-1">Subtitle goes here</div>
-          </li>
-          <li class="list-group-item dark-menu-item">
-            <div>
-              <div class="h6 mb-1">Scanning Books</div>
-              <div class="accent-text mb-1">E:\\Books\\Demon King Daimaou\\Demon King Daimaou - Volume 11.epub</div>
-              <div class="progress-container row g-0 align-items-center">
-                <div class="col-2">{{prettyPrintProgress(0.1)}}%</div>
-                <div class="col-10 progress" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" [ngStyle]="{'width': 0.1 * 100 + '%'}" [attr.aria-valuenow]="0.1 * 100" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-              </div>
-
-            </div>
-          </li>
-          <li class="list-group-item dark-menu-item error">
-            <div>
-              <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>There was some library scan error</div>
-              <div class="accent-text mb-1">Click for more information</div>
-            </div>
-            <button type="button" class="btn-close float-end" aria-label="close" ></button>
-          </li>
-          <li class="list-group-item dark-menu-item info">
-            <div>
-              <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2"></i>Scan didn't run becasuse nothing to do</div>
-              <div class="accent-text mb-1">Click for more information</div>
-            </div>
-            <button type="button" class="btn-close float-end" aria-label="close" ></button>
-          </li>
-          <li class="list-group-item dark-menu-item">
-            <div class="d-inline-flex">
-                        <span class="download">
-                            <app-circular-loader [currentValue]="25" fontSize="16px" [showIcon]="true" width="25px" height="unset" [center]="false"></app-circular-loader>
-                            <span class="visually-hidden" role="status">
-                              10% downloaded
-                            </span>
-                          </span>
-              <span class="h6 mb-1">Downloading {{'series' | sentenceCase}}</span>
-            </div>
-            <div class="accent-text">PDFs</div>
-          </li>
-        </ng-container>
+        @if(errors$ | async; as errors) {
+          @if(infos$ | async; as infos) {
+            @if (errors.length > 0 || infos.length > 0) {
+              <li class="list-group-item dark-menu-item clickable" (click)="clearAllErrorOrInfos()">
+                {{t('dismiss-all')}}
+              </li>
+            }
+          }
+        }
 
         <!-- Progress Events-->
-        <ng-container *ngIf="progressEvents$ | async as progressUpdates">
-          <ng-container *ngFor="let message of progressUpdates">
-            <li class="list-group-item dark-menu-item" *ngIf="message.progress === 'indeterminate' || message.progress === 'none'; else progressEvent">
-              <div class="h6 mb-1">{{message.title}}</div>
-              <div class="accent-text mb-1" *ngIf="message.subTitle !== ''" [title]="message.subTitle">{{message.subTitle}}</div>
-              <div class="progress-container row g-0 align-items-center">
-                <div class="progress" style="height: 5px;" *ngIf="message.progress === 'indeterminate'">
-                  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-              </div>
-            </li>
-            <ng-template #progressEvent>
+        @if (progressEvents$ | async; as progressUpdates) {
+          @for (message of progressUpdates; track message) {
+            @if (message.progress === 'indeterminate' || message.progress === 'none') {
               <li class="list-group-item dark-menu-item">
                 <div class="h6 mb-1">{{message.title}}</div>
-                <div class="accent-text mb-1" *ngIf="message.subTitle !== ''" [title]="message.subTitle">{{message.subTitle}}</div>
+                @if (message.subTitle !== '') {
+                  <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
+                }
+                @if (message.name === EVENTS.ScanProgress && message.body.leftToProcess > 0) {
+                  <div class="accent-text mb-1" [title]="t('left-to-process', {leftToProcess: message.body.leftToProcess})">
+                    {{t('left-to-process', {leftToProcess: message.body.leftToProcess})}}
+                  </div>
+                }
+                <div class="progress-container row g-0 align-items-center">
+                  @if(message.progress === 'indeterminate') {
+                    <div class="progress" style="height: 5px;">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  }
+                </div>
+              </li>
+            } @else {
+              <li class="list-group-item dark-menu-item">
+                <div class="h6 mb-1">{{message.title}}</div>
+                @if (message.subTitle !== '') {
+                  <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
+                }
                 <div class="progress-container row g-0 align-items-center">
                   <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
                   <div class="col-10 progress" style="height: 5px;">
-                    <div class="progress-bar" role="progressbar" [ngStyle]="{'width': message.body.progress * 100 + '%'}" [attr.aria-valuenow]="message.body.progress * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar" role="progressbar"
+                         [ngStyle]="{'width': message.body.progress * 100 + '%'}"
+                         [attr.aria-valuenow]="message.body.progress * 100"
+                         aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
               </li>
-            </ng-template>
-          </ng-container>
-        </ng-container>
+            }
+          }
+        }
 
         <!-- Single updates (Informational/Update available)-->
-        <ng-container *ngIf="singleUpdates$ | async as singleUpdates">
-          <ng-container *ngFor="let singleUpdate of singleUpdates">
-            <li class="list-group-item dark-menu-item update-available" *ngIf="singleUpdate.name === EVENTS.UpdateAvailable" (click)="handleUpdateAvailableClick(singleUpdate)">
-              <i class="fa fa-chevron-circle-up me-1" aria-hidden="true"></i>{{t('update-available')}}
-            </li>
-            <li class="list-group-item dark-menu-item update-available" *ngIf="singleUpdate.name !== EVENTS.UpdateAvailable">
-              <div>{{singleUpdate.title}}</div>
-              <div class="accent-text" *ngIf="singleUpdate.subTitle !== ''">{{singleUpdate.subTitle}}</div>
-            </li>
-          </ng-container>
-        </ng-container>
+        @if (singleUpdates$ | async; as singleUpdates) {
+          @for(singleUpdate of singleUpdates; track singleUpdate) {
+            @if (singleUpdate.name === EVENTS.UpdateAvailable) {
+              <li class="list-group-item dark-menu-item update-available" (click)="handleUpdateAvailableClick(singleUpdate)">
+                <i class="fa fa-chevron-circle-up me-1" aria-hidden="true"></i>{{t('update-available')}}
+              </li>
+            } @else {
+              <li class="list-group-item dark-menu-item update-available">
+                <div>{{singleUpdate.title}}</div>
+                @if (singleUpdate.subTitle !== '') {
+                  <div class="accent-text">{{singleUpdate.subTitle}}</div>
+                }
+              </li>
+            }
+          }
+        }
 
         <!-- Active Downloads by the user-->
-        <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
-          <ng-container *ngFor="let download of activeDownloads">
+        @if (downloadService.activeDownloads$ | async; as activeDownloads) {
+          @for(download of activeDownloads; track download) {
             <li class="list-group-item dark-menu-item">
               <div class="h6 mb-1">{{t('downloading-item', {item: download.entityType | sentenceCase})}}</div>
-              <div class="accent-text mb-1" *ngIf="download.subTitle !== ''" [title]="download.subTitle">{{download.subTitle}}</div>
+
+              @if (download.subTitle !== '') {
+                <div class="accent-text mb-1" [title]="download.subTitle">{{download.subTitle}}</div>
+              }
+
               <div class="progress-container row g-0 align-items-center">
                 <div class="col-2">{{download.progress}}%</div>
                 <div class="col-10 progress" style="height: 5px;">
@@ -131,49 +120,49 @@
                 </div>
               </div>
             </li>
-          </ng-container>
-        </ng-container>
-
+          }
+          @if(activeDownloads.length > 1) {
+            <li class="list-group-item dark-menu-item">{{t('download-in-queue', {num: activeDownloads.length})}}</li>
+          }
+        }
 
         <!-- Errors -->
-        <ng-container *ngIf="errors$ | async as errors">
-          <ng-container *ngFor="let error of errors">
+        @if (errors$ | async; as errors) {
+          @for (error of errors; track error) {
             <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMore(error)">
               <div>
-                <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</div>
+                <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>{{error.title}}</div>
                 <div class="accent-text mb-1">{{t('more-info')}}</div>
               </div>
               <button type="button" class="btn-close float-end" [attr.aria-label]="t('close')" (click)="removeErrorOrInfo(error, $event)"></button>
             </li>
-          </ng-container>
-        </ng-container>
+          }
+        }
 
         <!-- Infos -->
-        <ng-container *ngIf="infos$ | async as infos">
-          <ng-container *ngFor="let info of infos">
+        @if (infos$ | async; as infos) {
+          @for (info of infos; track info) {
             <li class="list-group-item dark-menu-item info" role="alert" (click)="seeMore(info)">
               <div>
-                <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2"></i>{{info.title}}</div>
+                <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>{{info.title}}</div>
                 <div class="accent-text mb-1">{{t('more-info')}}</div>
               </div>
               <button type="button" class="btn-close float-end" [attr.aria-label]="t('close')" (click)="removeErrorOrInfo(info, $event)"></button>
             </li>
-          </ng-container>
-        </ng-container>
+          }
+        }
 
-        <!-- Online Users -->
-        <ng-container *ngIf="messageHub.onlineUsers$ | async as onlineUsers">
-          <li class="list-group-item dark-menu-item" *ngIf="onlineUsers.length > 1">
-            <div>{{t('users-online-count', {num: onlineUsers.length})}}</div>
-          </li>
-          <li class="list-group-item dark-menu-item" *ngIf="debugMode">{{t('active-events-title')}} {{activeEvents}}</li>
-        </ng-container>
-
-        <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
-          <li class="list-group-item dark-menu-item" *ngIf="activeEvents === 0 && activeDownloads.length === 0">{{t('no-data')}}</li>
-        </ng-container>
-
+        @if (downloadService.activeDownloads$ | async; as activeDownloads) {
+          @if (errors$ | async; as errors) {
+            @if (infos$ | async; as infos) {
+              @if (infos.length === 0 && errors.length === 0 && activeDownloads.length === 0 && activeEvents === 0) {
+                <li class="list-group-item dark-menu-item">{{t('no-data')}}</li>
+              }
+            }
+          }
+        }
       </ul>
     </ng-template>
-  </ng-container>
+  }
+
 </ng-container>

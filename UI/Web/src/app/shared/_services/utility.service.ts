@@ -43,7 +43,7 @@ export class UtilityService {
 
 
   sortChapters = (a: Chapter, b: Chapter) => {
-    return parseFloat(a.number) - parseFloat(b.number);
+    return a.minNumber - b.minNumber;
   }
 
   mangaFormatToText(format: MangaFormat): string {
@@ -64,8 +64,10 @@ export class UtilityService {
    formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false) {
     switch(libraryType) {
       case LibraryType.Book:
+      case LibraryType.LightNovel:
         return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
+      case LibraryType.ComicVine:
         if (includeHash) {
           return this.translocoService.translate('common.issue-hash-num');
         }
@@ -131,7 +133,7 @@ export class UtilityService {
     );
   }
 
-  deepEqual(object1: any, object2: any) {
+  deepEqual(object1: any | undefined | null, object2: any | undefined | null) {
     if ((object1 === null || object1 === undefined) && (object2 !== null || object2 !== undefined)) return false;
     if ((object2 === null || object2 === undefined) && (object1 !== null || object1 !== undefined)) return false;
     if (object1 === null && object2 === null) return true;

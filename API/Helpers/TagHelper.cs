@@ -1,43 +1,37 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers;
 #nullable enable
 
 public static class TagHelper
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="allTags"></param>
-    /// <param name="names"></param>
-    /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
-    public static void UpdateTag(ICollection<Tag> allTags, IEnumerable<string> names, Action<Tag, bool> action)
+    public static void UpdateTag(Dictionary<string, Tag> allTags, IEnumerable<string> names, Action<Tag, bool> action)
     {
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var added = false;
             var normalizedName = name.ToNormalized();
+            allTags.TryGetValue(normalizedName, out var tag);
 
-            var genre = allTags.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName));
-            if (genre == null)
+            var added = tag == null;
+            if (tag == null)
             {
-                added = true;
-                genre = new TagBuilder(name).Build();
-                allTags.Add(genre);
+                tag = new TagBuilder(name).Build();
+                allTags.Add(normalizedName, tag);
             }
 
-            action(genre, added);
+            action(tag, added);
         }
     }
 
@@ -78,6 +72,22 @@ public static class TagHelper
             metadataTags.Add(tag);
         }
     }
+
+    public static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
+    {
+        // TODO: Unit tests needed
+        if (string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
+        {
+            return ImmutableList<string>.Empty;
+        }
+
+        return comicInfoTagSeparatedByComma.Split(",")
+            .Select(s => s.Trim())
+            .DistinctBy(Parser.Normalize)
+            .ToList();
+    }
+
+
 
     /// <summary>
     /// Remove tags on a list

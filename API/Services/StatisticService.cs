@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Statistics;
+using API.DTOs.Stats;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
+using API.Services.Plus;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +36,8 @@ public interface IStatisticService
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
     Task UpdateServerStatistics();
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
+    Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown();
+    Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
 }
 
 /// <summary>
@@ -54,7 +60,10 @@ public class StatisticService : IStatisticService
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
     {
         if (libraryIds.Count == 0)
+        {
             libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        }
+
 
         // Total Pages Read
         var totalPagesRead = await _context.AppUserProgresses
@@ -269,7 +278,6 @@ public class StatisticService : IStatisticService
 
 
         var distinctPeople = _context.Person
-            .AsSplitQuery()
             .AsEnumerable()
             .GroupBy(sm => sm.NormalizedName)
             .Select(sm => sm.Key)
@@ -287,7 +295,7 @@ public class StatisticService : IStatisticService
             TotalPeople = distinctPeople,
             TotalSize = await _context.MangaFile.SumAsync(m => m.Bytes),
             TotalTags = await _context.Tag.CountAsync(),
-            VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync(),
+            VolumeCount = await _context.Volume.Where(v => Math.Abs(v.MinNumber - Parser.LooseLeafVolumeNumber) > 0.001f).CountAsync(),
             MostActiveUsers = mostActiveUsers,
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
@@ -336,7 +344,7 @@ public class StatisticService : IStatisticService
                 LibraryId = u.LibraryId,
                 ReadDate = u.LastModified,
                 ChapterId = u.ChapterId,
-                ChapterNumber = _context.Chapter.Single(c => c.Id == u.ChapterId).Number
+                ChapterNumber = _context.Chapter.Single(c => c.Id == u.ChapterId).MinNumber
             })
             .OrderByDescending(d => d.ReadDate)
             .ToListAsync();
@@ -531,6 +539,39 @@ public class StatisticService : IStatisticService
                 p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
     }
 
+    public async Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown()
+    {
+        // We need to count number of Series that have an external series record
+        // Then count how many series are blacklisted
+        // Then get total count of series that are Kavita+ eligible
+        var plusLibraries = await _context.Library
+            .Where(l => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(l.Type))
+            .Select(l => l.Id)
+            .ToListAsync();
+
+        var countOfBlacklisted = await _context.SeriesBlacklist.CountAsync();
+        var totalSeries = await _context.Series.Where(s => plusLibraries.Contains(s.LibraryId)).CountAsync();
+        var seriesWithMetadata = await _context.ExternalSeriesMetadata.CountAsync();
+
+        return new KavitaPlusMetadataBreakdownDto()
+        {
+            TotalSeries = totalSeries,
+            ErroredSeries = countOfBlacklisted,
+            SeriesCompleted = seriesWithMetadata
+        };
+
+    }
+
+    public async Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension)
+    {
+        var query = _context.MangaFile
+            .Where(f => f.Extension == fileExtension)
+            .ProjectTo<FileExtensionExportDto>(_mapper.ConfigurationProvider)
+            .OrderBy(f => f.FilePath);
+
+        return await query.ToListAsync();
+    }
+
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
@@ -595,7 +636,8 @@ public class StatisticService : IStatisticService
             {
                 UserId = userId,
                 Username = users.First(u => u.Id == userId).UserName,
-                BooksTime = user[userId].TryGetValue(LibraryType.Book, out var bookTime) ? bookTime : 0,
+                BooksTime = user[userId].TryGetValue(LibraryType.Book, out var bookTime) ? bookTime : 0 +
+                    (user[userId].TryGetValue(LibraryType.LightNovel, out var bookTime2) ? bookTime2 : 0),
                 ComicsTime = user[userId].TryGetValue(LibraryType.Comic, out var comicTime) ? comicTime : 0,
                 MangaTime = user[userId].TryGetValue(LibraryType.Manga, out var mangaTime) ? mangaTime : 0,
             })

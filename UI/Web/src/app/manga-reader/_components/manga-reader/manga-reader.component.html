@@ -28,18 +28,20 @@
             <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
           </button>
-          <button *ngIf="!bookmarkMode && hasBookmarkRights" class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
-                  title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
-            <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
-          </button>
+          @if (!bookmarkMode && hasBookmarkRights) {
+            <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
+                    title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
+              <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
+            </button>
+          }
         </div>
       </div>
     </div>
     <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true"></app-loading>
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
-         [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
+         [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
 
       <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
         <div (dblclick)="bookmarkPage($event)">
@@ -54,14 +56,14 @@
         <!-- Pagination controls and screen hints-->
         <div class="pagination-area">
           <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
-               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 'max-height': MaxHeight}">
+               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
             <div *ngIf="showClickOverlay">
               <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                  [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
             </div>
           </div>
           <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
-               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
+               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'),
                                 'left': 'inherit',
                                 'right': RightPaginationOffset + 'px',
                                 'max-height': MaxHeight}">
@@ -118,7 +120,8 @@
                                  (loadNextChapter)="loadNextChapter()"
                                  (loadPrevChapter)="loadPrevChapter()"
                                  [bookmarkPage]="showBookmarkEffectEvent"
-                                 [fullscreenToggled]="fullscreenEvent">
+                                 [fullscreenToggled]="fullscreenEvent"
+                                 [readerSettings$]="readerSettings$">
           </app-infinite-scroller>
         </div>
       </ng-template>
@@ -271,6 +274,18 @@
               <span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
               <input type="range" class="form-range" id="darkness"
                      min="10" max="100" step="1" formControlName="darkness">
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+              <label for="width-override-slider" class="form-label">{{t('width-override-label')}}:
+                @if (widthOverrideLabel$ | async; as widthOverrideLabel) {
+                  {{ widthOverrideLabel ? widthOverrideLabel : t('off') }}
+                  }
+                @else {
+                  {{t('off')}}
+                }
+              </label>
+              <input id="width-override-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
             </div>
 
 

@@ -10,8 +10,8 @@ public enum ThemeProvider
     [Description("System")]
     System = 1,
     /// <summary>
-    /// Theme is provided by the User (ie it's custom)
+    /// Theme is provided by the User (ie it's custom) or Downloaded via Themes Repo
     /// </summary>
-    [Description("User")]
-    User = 2
+    [Description("Custom")]
+    Custom = 2,
 }

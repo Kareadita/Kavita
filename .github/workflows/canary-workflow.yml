@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
             fetch-depth: 0
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj
@@ -26,12 +26,12 @@ jobs:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
             dotnet-version: 8.0.x
 
@@ -59,14 +59,14 @@ jobs:
                 github-token: ${{ secrets.GITHUB_TOKEN }}
 
           - name: Check Out Repo
-            uses: actions/checkout@v3
+            uses: actions/checkout@v4
             with:
                 ref: canary
 
           - name: NodeJS to Compile WebUI
-            uses: actions/setup-node@v3
+            uses: actions/setup-node@v4
             with:
-                node-version: '18.13.x'
+                node-version: 20
           - run: |
                 cd UI/Web || exit
                 echo 'Installing web dependencies'
@@ -81,7 +81,7 @@ jobs:
                 cd ../ || exit
 
           - name: Get csproj Version
-            uses: kzrnm/get-net-sdk-project-versions-action@v1
+            uses: kzrnm/get-net-sdk-project-versions-action@v2
             id: get-version
             with:
                 proj-path: Kavita.Common/Kavita.Common.csproj
@@ -96,7 +96,7 @@ jobs:
             run: echo "${{steps.get-version.outputs.assembly-version}}"
 
           - name: Compile dotnet app
-            uses: actions/setup-dotnet@v3
+            uses: actions/setup-dotnet@v4
             with:
                 dotnet-version: 8.0.x
 
@@ -106,28 +106,28 @@ jobs:
           - run: ./monorepo-build.sh
 
           - name: Login to Docker Hub
-            uses: docker/login-action@v2
+            uses: docker/login-action@v3
             with:
                 username: ${{ secrets.DOCKER_HUB_USERNAME }}
                 password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
           - name: Login to GitHub Container Registry
-            uses: docker/login-action@v2
+            uses: docker/login-action@v3
             with:
                 registry: ghcr.io
                 username: ${{ github.actor }}
                 password: ${{ secrets.GITHUB_TOKEN }}
 
           - name: Set up QEMU
-            uses: docker/setup-qemu-action@v2
+            uses: docker/setup-qemu-action@v3
 
           - name: Set up Docker Buildx
             id: buildx
-            uses: docker/setup-buildx-action@v2
+            uses: docker/setup-buildx-action@v3
 
           - name: Build and push
             id: docker_build
-            uses: docker/build-push-action@v4
+            uses: docker/build-push-action@v5
             with:
                 context: .
                 platforms: linux/amd64,linux/arm/v7,linux/arm64

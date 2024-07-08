@@ -2,6 +2,9 @@
     font-size: 19px;
 }
 
+.btn-icon {
+  border: none;
+}
 
 .book-title {
     margin: 8px 0 4px !important;
@@ -24,3 +27,79 @@
     // NOTE: We have to override due to theme variables not being available
     background-color: #3B9E76;
 }
+
+$pagination-color: transparent;
+$pagination-opacity: 0;
+
+//$pagination-color: red;
+//$pagination-opacity: 0.7;
+$action-bar-height: 36px;
+$loading-bar-height: 24px;
+
+// Tap to Paginate
+
+
+.right {
+  position: absolute;
+  right: 0px;
+  top: $action-bar-height;
+  width: 20vw;
+  z-index: 3;
+  background: $pagination-color;
+  border-color: transparent;
+  border: none !important;
+  opacity: $pagination-opacity;
+  outline: none;
+  height: 100%;
+
+  &.immersive {
+    top: 0px;
+  }
+
+  &.no-pointer-events {
+    pointer-events: none;
+  }
+}
+
+
+
+// This class pushes the click area to the left a bit to let users click the scrollbar
+.right-with-scrollbar {
+  position: absolute;
+  right: 17px;
+  top: $action-bar-height;
+  width: 18vw;
+  z-index: 3;
+  background: $pagination-color;
+  opacity: $pagination-opacity;
+  border-color: transparent;
+  border: none !important;
+  outline: none;
+  height: 100%;
+  cursor: pointer;
+
+  &.immersive {
+    top: 0px;
+  }
+}
+
+.left {
+  position: absolute;
+  left: 0px;
+  top: $action-bar-height;
+  width: 20vw;
+  background: $pagination-color;
+  opacity: $pagination-opacity;
+  border-color: transparent;
+  border: none !important;
+  z-index: 3;
+  outline: none;
+  height: 100%;
+  cursor: pointer;
+
+  &.immersive {
+    top: 0px;
+  }
+}
+
+

@@ -3,11 +3,15 @@
     padding-right: 0px;
 }
 
+.badge {
+  color: var(--badge-text-color);
+}
+
 .sm-popover {
   width: 150px;
 
   > .popover-body {
-    padding-top: 0px;
+    padding-top: 10px;
   }
 }
 
@@ -15,7 +19,7 @@
   width: 214px;
 
   > .popover-body {
-    padding-top: 0px;
+    padding-top: 10px;
   }
 }
 
@@ -23,7 +27,7 @@
   width: 320px;
 
   > .popover-body {
-    padding-top: 0px;
+    padding-top: 10px;
   }
 }
 

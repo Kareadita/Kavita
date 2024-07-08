@@ -13,12 +13,13 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase, PercentPipe, NgClass, AsyncPipe} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass, NgFor, NgIf, NgStyle, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   forkJoin,
   fromEvent,
   map,
@@ -29,9 +30,9 @@ import {
   take,
   tap
 } from 'rxjs';
-import { ChangeContext, LabelType, Options, NgxSliderModule } from 'ngx-slider-v2';
+import {ChangeContext, LabelType, NgxSliderModule, Options} from 'ngx-slider-v2';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbModal, NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
@@ -61,12 +62,12 @@ import {ChapterInfo} from '../../_models/chapter-info';
 import {DoubleNoCoverRendererComponent} from '../double-renderer-no-cover/double-no-cover-renderer.component';
 import {SwipeEvent} from 'src/app/ng-swipe/ag-swipe.core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { FullscreenIconPipe } from '../../../_pipes/fullscreen-icon.pipe';
-import { ReaderModeIconPipe } from '../../../_pipes/reader-mode-icon.pipe';
-import { FittingIconPipe } from '../../../_pipes/fitting-icon.pipe';
-import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
-import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
-import { LoadingComponent } from '../../../shared/loading/loading.component';
+import {FullscreenIconPipe} from '../../../_pipes/fullscreen-icon.pipe';
+import {ReaderModeIconPipe} from '../../../_pipes/reader-mode-icon.pipe';
+import {FittingIconPipe} from '../../../_pipes/fitting-icon.pipe';
+import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.component';
+import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
+import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {shareReplay} from "rxjs/operators";
 
@@ -398,6 +399,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Show and log debug information
    */
   debugMode: boolean = false;
+  /**
+   * Width override label for manual width control
+  */
+  widthOverrideLabel$ : Observable<string> = new Observable<string>();
 
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
@@ -432,17 +437,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is for the pagination area
   get MaxHeight() {
-    if (this.FittingOption ===  FITTING_OPTION.HEIGHT) {
-      return 'calc(var(--vh) * 100)';
-    }
-
-    const needsScrolling = this.readingArea?.nativeElement?.scrollHeight > this.readingArea?.nativeElement?.clientHeight;
-    if (this.readingArea?.nativeElement?.clientHeight <= this.mangaReaderService.getPageDimensions(this.pageNum)?.height!) {
-      if (needsScrolling) {
-        return Math.min(this.readingArea?.nativeElement?.scrollHeight, this.mangaReaderService.getPageDimensions(this.pageNum)?.height!) + 'px';
-      }
-    }
-    return this.readingArea?.nativeElement?.clientHeight + 'px';
+    return '100dvh';
   }
 
   get RightPaginationOffset() {
@@ -523,6 +518,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         autoCloseMenu: new FormControl(this.autoCloseMenu),
         pageSplitOption: new FormControl(this.pageSplitOption),
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
+        widthSlider: new FormControl('none'),
         layoutMode: new FormControl(this.layoutMode),
         darkness: new FormControl(100),
         emulateBook: new FormControl(this.user.preferences.emulateBook),
@@ -559,8 +555,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
-
-
+      this.setupWidthOverrideTriggers();
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
@@ -570,11 +565,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.layoutMode === LayoutMode.Single) {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
           this.generalSettingsForm.get('pageSplitOption')?.enable();
+          this.generalSettingsForm.get('widthSlider')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
           this.generalSettingsForm.get('emulateBook')?.enable();
         } else {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
+          this.generalSettingsForm.get('widthSlider')?.disable();
           this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
           this.generalSettingsForm.get('fittingOption')?.disable();
           this.generalSettingsForm.get('emulateBook')?.enable();
@@ -676,11 +673,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         break;
       case ReaderMode.Webtoon:
-        if (event.key === KEY_CODES.DOWN_ARROW) {
-          this.nextPage()
-        } else if (event.key === KEY_CODES.UP_ARROW) {
-          this.prevPage()
-        }
         break;
     }
 
@@ -707,10 +699,73 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Width override is only valid under the following conditions:
+   *   Image Scaling is Width
+   *   Reader Mode is Webtoon
+   *
+   *   In all other cases, the form will be disabled and set to 0 which indicates default/off state.
+   */
+  setupWidthOverrideTriggers() {
+    const widthOverrideControl = this.generalSettingsForm.get('widthSlider')!;
+
+    const enableWidthOverride = () => {
+      widthOverrideControl.enable();
+    };
+
+    const disableWidthOverride = () => {
+      widthOverrideControl.setValue(0);
+      widthOverrideControl.disable();
+    };
+
+    const handleControlChanges = () => {
+      const fitting = this.generalSettingsForm.get('fittingOption')?.value;
+      const splitting = this.generalSettingsForm.get('pageSplitOption')?.value;
+
+      if ((PageSplitOption.FitSplit == splitting && FITTING_OPTION.WIDTH == fitting) || this.readerMode === ReaderMode.Webtoon) {
+        enableWidthOverride();
+      } else {
+        disableWidthOverride();
+      }
+    };
+
+    // Reader mode changes
+    this.readerModeSubject.asObservable()
+      .pipe(
+        filter(v => v === ReaderMode.Webtoon),
+        tap(enableWidthOverride),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+
+    // Page split option changes
+    this.generalSettingsForm.get('pageSplitOption')?.valueChanges.pipe(
+      distinctUntilChanged(),
+      tap(handleControlChanges),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    // Fitting option changes
+    this.generalSettingsForm.get('fittingOption')?.valueChanges.pipe(
+      tap(handleControlChanges),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    // Set the default override to 0
+    widthOverrideControl.setValue(0);
+
+    //send the current width override value to the label
+    this.widthOverrideLabel$ = this.readerSettings$?.pipe(
+      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+      takeUntilDestroyed(this.destroyRef)
+    );
+  }
+
   createReaderSettingsUpdate() {
     return {
       pageSplit: parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10),
       fitting: (this.generalSettingsForm.get('fittingOption')?.value as FITTING_OPTION),
+      widthSlider: this.generalSettingsForm.get('widthSlider')?.value,
       layoutMode: this.layoutMode,
       darkness: parseInt(this.generalSettingsForm.get('darkness')?.value + '', 10) || 100,
       pagingDirection: this.pagingDirection,
@@ -1220,14 +1275,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
 
-    const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+    const pageAmount = this.readerMode === ReaderMode.Webtoon ? 1 : Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.doubleNoCoverRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
                                 this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS)
                               );
 
-    const notInSplit = this.canvasRenderer.shouldMovePrev();
+    const notInSplit = this.readerMode === ReaderMode.Webtoon ? true : this.canvasRenderer.shouldMovePrev();
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
       // Move to next volume/chapter automatically

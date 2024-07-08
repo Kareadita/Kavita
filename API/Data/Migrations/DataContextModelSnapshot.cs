@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.13");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -95,6 +95,12 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MalAccessToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MalUserName")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
@@ -181,6 +187,72 @@ namespace API.Data.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("AppUserBookmark");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserCollection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AgeRating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastSyncUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MissingSeriesFromSource")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Promoted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalSourceCount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AppUserCollection");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserDashboardStream", b =>
@@ -347,6 +419,15 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PdfScrollMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PdfSpreadMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PdfTheme")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("PromptForDownloadSize")
@@ -602,6 +683,27 @@ namespace API.Data.Migrations
                     b.ToTable("AppUserTableOfContent");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserWantToRead", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("AppUserWantToRead");
+                });
+
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
                     b.Property<int>("Id")
@@ -658,8 +760,14 @@ namespace API.Data.Migrations
                     b.Property<int>("MaxHoursToRead")
                         .HasColumnType("INTEGER");
 
+                    b.Property<float>("MaxNumber")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("MinHoursToRead")
                         .HasColumnType("INTEGER");
+
+                    b.Property<float>("MinNumber")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Number")
                         .HasColumnType("TEXT");
@@ -675,6 +783,12 @@ namespace API.Data.Migrations
 
                     b.Property<string>("SeriesGroup")
                         .HasColumnType("TEXT");
+
+                    b.Property<float>("SortOrder")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool>("SortOrderLocked")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("StoryArc")
                         .HasColumnType("TEXT");
@@ -952,6 +1066,9 @@ namespace API.Data.Migrations
                     b.Property<string>("Extension")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FilePath")
                         .HasColumnType("TEXT");
 
@@ -978,6 +1095,26 @@ namespace API.Data.Migrations
                     b.HasIndex("ChapterId");
 
                     b.ToTable("MangaFile");
+                });
+
+            modelBuilder.Entity("API.Entities.ManualMigrationHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductVersion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RanAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ManualMigrationHistory");
                 });
 
             modelBuilder.Entity("API.Entities.MediaError", b =>
@@ -1015,6 +1152,164 @@ namespace API.Data.Migrations
                     b.ToTable("MediaError");
                 });
 
+            modelBuilder.Entity("API.Entities.Metadata.ExternalRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AverageScore")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FavoriteCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProviderUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalRating");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.ExternalRecommendation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("AniListId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CoverUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("MalId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("ExternalRecommendation");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.ExternalReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Body")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BodyJustText")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RawBody")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SiteUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tagline")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalVotes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalReview");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.ExternalSeriesMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AniListId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AverageExternalRating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("GoogleBooksId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("MalId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ValidUntilUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId")
+                        .IsUnique();
+
+                    b.ToTable("ExternalSeriesMetadata");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.SeriesBlacklist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastChecked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("SeriesBlacklist");
+                });
+
             modelBuilder.Entity("API.Entities.Metadata.SeriesMetadata", b =>
                 {
                     b.Property<int>("Id")
@@ -1042,6 +1337,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("GenresLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ImprintLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("InkerLocked")
                         .HasColumnType("INTEGER");
 
@@ -1052,6 +1350,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("LettererLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LocationLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxCount")
@@ -1089,6 +1390,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("TagsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TeamLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TotalCount")
@@ -1323,7 +1627,13 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ErrorDetails")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Format")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsErrored")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsProcessed")
@@ -1359,8 +1669,8 @@ namespace API.Data.Migrations
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("VolumeNumber")
-                        .HasColumnType("INTEGER");
+                    b.Property<float?>("VolumeNumber")
+                        .HasColumnType("REAL");
 
                     b.HasKey("Id");
 
@@ -1412,9 +1722,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("AvgHoursToRead")
                         .HasColumnType("INTEGER");
 
@@ -1463,6 +1770,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("LocalizedNameLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("LowestFolderPath")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("MaxHoursToRead")
                         .HasColumnType("INTEGER");
 
@@ -1494,8 +1804,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("LibraryId");
 
@@ -1563,13 +1871,25 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Author")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CompatibleVersion")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GitHubPath")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDefault")
@@ -1587,8 +1907,14 @@ namespace API.Data.Migrations
                     b.Property<string>("NormalizedName")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PreviewUrls")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Provider")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ShaHash")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -1639,11 +1965,20 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("LookupName")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("MaxHoursToRead")
                         .HasColumnType("INTEGER");
 
+                    b.Property<float>("MaxNumber")
+                        .HasColumnType("REAL");
+
                     b.Property<int>("MinHoursToRead")
                         .HasColumnType("INTEGER");
+
+                    b.Property<float>("MinNumber")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -1665,6 +2000,21 @@ namespace API.Data.Migrations
                     b.HasIndex("SeriesId");
 
                     b.ToTable("Volume");
+                });
+
+            modelBuilder.Entity("AppUserCollectionSeries", b =>
+                {
+                    b.Property<int>("CollectionsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionsId", "ItemsId");
+
+                    b.HasIndex("ItemsId");
+
+                    b.ToTable("AppUserCollectionSeries");
                 });
 
             modelBuilder.Entity("AppUserLibrary", b =>
@@ -1740,6 +2090,51 @@ namespace API.Data.Migrations
                     b.HasIndex("SeriesMetadatasId");
 
                     b.ToTable("CollectionTagSeriesMetadata");
+                });
+
+            modelBuilder.Entity("ExternalRatingExternalSeriesMetadata", b =>
+                {
+                    b.Property<int>("ExternalRatingsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ExternalSeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ExternalRatingsId", "ExternalSeriesMetadatasId");
+
+                    b.HasIndex("ExternalSeriesMetadatasId");
+
+                    b.ToTable("ExternalRatingExternalSeriesMetadata");
+                });
+
+            modelBuilder.Entity("ExternalRecommendationExternalSeriesMetadata", b =>
+                {
+                    b.Property<int>("ExternalRecommendationsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ExternalSeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ExternalRecommendationsId", "ExternalSeriesMetadatasId");
+
+                    b.HasIndex("ExternalSeriesMetadatasId");
+
+                    b.ToTable("ExternalRecommendationExternalSeriesMetadata");
+                });
+
+            modelBuilder.Entity("ExternalReviewExternalSeriesMetadata", b =>
+                {
+                    b.Property<int>("ExternalReviewsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ExternalSeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ExternalReviewsId", "ExternalSeriesMetadatasId");
+
+                    b.HasIndex("ExternalSeriesMetadatasId");
+
+                    b.ToTable("ExternalReviewExternalSeriesMetadata");
                 });
 
             modelBuilder.Entity("GenreSeriesMetadata", b =>
@@ -1875,6 +2270,17 @@ namespace API.Data.Migrations
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
                         .WithMany("Bookmarks")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserCollection", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("Collections")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2062,6 +2468,25 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserWantToRead", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("WantToRead")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Series");
+                });
+
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
                     b.HasOne("API.Entities.Volume", "Volume")
@@ -2126,6 +2551,28 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Chapter");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.ExternalSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithOne("ExternalSeriesMetadata")
+                        .HasForeignKey("API.Entities.Metadata.ExternalSeriesMetadata", "SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.SeriesBlacklist", b =>
+                {
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.Metadata.SeriesMetadata", b =>
@@ -2269,10 +2716,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany("WantToRead")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("API.Entities.Library", "Library")
                         .WithMany("Series")
                         .HasForeignKey("LibraryId")
@@ -2291,6 +2734,21 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("AppUserCollectionSeries", b =>
+                {
+                    b.HasOne("API.Entities.AppUserCollection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AppUserLibrary", b =>
@@ -2364,6 +2822,51 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
                         .WithMany()
                         .HasForeignKey("SeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ExternalRatingExternalSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Metadata.ExternalRating", null)
+                        .WithMany()
+                        .HasForeignKey("ExternalRatingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Metadata.ExternalSeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("ExternalSeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ExternalRecommendationExternalSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Metadata.ExternalRecommendation", null)
+                        .WithMany()
+                        .HasForeignKey("ExternalRecommendationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Metadata.ExternalSeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("ExternalSeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ExternalReviewExternalSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Metadata.ExternalReview", null)
+                        .WithMany()
+                        .HasForeignKey("ExternalReviewsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Metadata.ExternalSeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("ExternalSeriesMetadatasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -2458,6 +2961,8 @@ namespace API.Data.Migrations
                 {
                     b.Navigation("Bookmarks");
 
+                    b.Navigation("Collections");
+
                     b.Navigation("DashboardStreams");
 
                     b.Navigation("Devices");
@@ -2510,6 +3015,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
+                    b.Navigation("ExternalSeriesMetadata");
+
                     b.Navigation("Metadata");
 
                     b.Navigation("Progress");

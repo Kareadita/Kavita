@@ -3,18 +3,25 @@
 .image-container {
     #image-1 {
         &.double {
-            margin: 0 0 0 auto;
         }
     }
 }
 
-.image-container.full-height {
-    display: inline-block !important;
+.image-container {
+    &.full-height {
+        display: flex;
+        align-content: center;
+        justify-content: center;
+    }
+
+    .full-height {
+        margin: unset;
+        object-fit: contain;
+    }
 }
 
 .full-width {
     width: 100%;
-    margin: 0 auto;
     vertical-align: top;
     max-width: fit-content;
 
@@ -41,7 +48,7 @@
 }
 
 .fit-to-height-double-offset {
-    height: 100vh;
+    height: calc(100dvh);
     object-fit: scale-down;
     top: 50%;
     left: 50%;

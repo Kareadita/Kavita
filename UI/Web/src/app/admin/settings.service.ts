@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs';
+import {map, of} from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TextResonse } from '../_types/text-response';
 import { ServerSettings } from './_models/server-settings';
@@ -11,6 +11,7 @@ import { ServerSettings } from './_models/server-settings';
 export interface EmailTestResult {
   successful: boolean;
   errorMessage: string;
+  emailAddress: string;
 }
 
 @Injectable({
@@ -24,10 +25,6 @@ export class SettingsService {
 
   getServerSettings() {
     return this.http.get<ServerSettings>(this.baseUrl + 'settings');
-  }
-
-  getBaseUrl() {
-    return this.http.get<string>(this.baseUrl + 'settings/base-url', TextResonse);
   }
 
   updateServerSettings(model: ServerSettings) {
@@ -46,12 +43,12 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-base-url', {});
   }
 
-  resetEmailServerSettings() {
-    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-email-url', {});
+  testEmailServerSettings() {
+    return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {});
   }
 
-  testEmailServerSettings(emailUrl: string) {
-    return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {url: emailUrl});
+  isEmailSetup() {
+    return this.http.get<string>(this.baseUrl + 'server/is-email-setup', TextResonse).pipe(map(d => d == "true"));
   }
 
   getTaskFrequencies() {
@@ -68,5 +65,11 @@ export class SettingsService {
 
   getOpdsEnabled() {
     return this.http.get<string>(this.baseUrl + 'settings/opds-enabled', TextResonse).pipe(map(d => d === 'true'));
+  }
+
+  isValidCronExpression(val: string) {
+    if (val === '' || val === undefined || val === null) return of(false);
+    return this.http.get<string>(this.baseUrl + 'settings/is-valid-cron?cronExpression=' + val, TextResonse).pipe(map(d => d === 'true'));
+
   }
 }

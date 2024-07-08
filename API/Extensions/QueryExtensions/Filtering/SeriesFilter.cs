@@ -246,6 +246,7 @@ public static class SeriesFilter
                     .Where(p => p != null && p.AppUserId == userId)
                     .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100)
             })
+            .AsSplitQuery()
             .AsEnumerable();
 
         switch (comparison)
@@ -287,6 +288,61 @@ public static class SeriesFilter
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
+    public static IQueryable<Series> HasAverageRating(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, float rating)
+    {
+        if (!condition) return queryable;
+
+        var subQuery = queryable
+            .Where(s => s.ExternalSeriesMetadata != null)
+            .Include(s => s.ExternalSeriesMetadata)
+            .Select(s => new
+            {
+                Series = s,
+                AverageRating = s.ExternalSeriesMetadata.AverageExternalRating
+            })
+            .AsSplitQuery()
+            .AsEnumerable();
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) < FloatingPointTolerance);
+                break;
+            case FilterComparison.GreaterThan:
+                subQuery = subQuery.Where(s => s.AverageRating > rating);
+                break;
+            case FilterComparison.GreaterThanEqual:
+                subQuery = subQuery.Where(s => s.AverageRating >= rating);
+                break;
+            case FilterComparison.LessThan:
+                subQuery = subQuery.Where(s => s.AverageRating < rating);
+                break;
+            case FilterComparison.LessThanEqual:
+                subQuery = subQuery.Where(s => s.AverageRating <= rating);
+                break;
+            case FilterComparison.NotEqual:
+                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) > FloatingPointTolerance);
+                break;
+            case FilterComparison.Matches:
+            case FilterComparison.Contains:
+            case FilterComparison.NotContains:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
+                throw new KavitaException($"{comparison} not applicable for Series.AverageRating");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+
+        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        return queryable.Where(s => ids.Contains(s.Id));
+    }
+
     public static IQueryable<Series> HasReadingDate(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, DateTime? date, int userId)
     {
@@ -304,6 +360,7 @@ public static class SeriesFilter
                     .Max()
             })
             .Where(s => s.MaxDate != null)
+            .AsSplitQuery()
             .AsEnumerable();
 
         switch (comparison)
@@ -494,25 +551,26 @@ public static class SeriesFilter
     }
 
     public static IQueryable<Series> HasCollectionTags(this IQueryable<Series> queryable, bool condition,
-        FilterComparison comparison, IList<int> collectionTags)
+        FilterComparison comparison, IList<int> collectionTags, IList<int> collectionSeries)
     {
         if (!condition || collectionTags.Count == 0) return queryable;
+
 
         switch (comparison)
         {
             case FilterComparison.Equal:
             case FilterComparison.Contains:
-                return queryable.Where(s => s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+                return queryable.Where(s => collectionSeries.Contains(s.Id));
             case FilterComparison.NotContains:
             case FilterComparison.NotEqual:
-                return queryable.Where(s => !s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+                return queryable.Where(s => !collectionSeries.Contains(s.Id));
             case FilterComparison.MustContains:
-                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
+                // // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
                 var queries = new List<IQueryable<Series>>()
                 {
                     queryable
                 };
-                queries.AddRange(collectionTags.Select(gId => queryable.Where(s => s.Metadata.CollectionTags.Any(p => p.Id == gId))));
+                queries.AddRange(collectionSeries.Select(gId => queryable.Where(s => collectionSeries.Any(p => p == s.Id))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.GreaterThan:

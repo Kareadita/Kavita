@@ -14,11 +14,31 @@
     border-bottom-color: transparent;
 }
 
+.colored {
+  color: var(--event-widget-activity-bg-color) !important;
+}
+
+.widget-button--indicator {
+  position: absolute;
+  top: 30px;
+  color: var(--event-widget-activity-bg-color);
+
+  &.error {
+    color: var(--event-widget-error-bg-color) !important;
+  }
+  &.info {
+    color: var(--event-widget-info-bg-color) !important;
+  }
+  &.update {
+    color: var(--event-widget-update-bg-color) !important;
+  }
+}
+
 ::ng-deep .nav-events {
-    
+
     .popover-body {
-        min-width: 250px;
-        max-width: 250px;
+        min-width: 300px;
+        max-width: 300px;
         padding: 0px;
         box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
         max-height: calc(100vh - 60px);
@@ -42,7 +62,7 @@
     width: 100%;
     text-overflow: ellipsis;
     overflow:hidden;
-    white-space:nowrap; 
+    white-space:nowrap;
 }
 
 .btn:focus, .btn:hover {
@@ -56,67 +76,56 @@
 
 
 .btn-icon {
-    color: white;
+  color: var(--event-widget-text-color);
 }
 
-.colored {
-    background-color: var(--primary-color);
-    border-radius: 60px;
-}
 
-.colored-error {
-    background-color: var(--error-color) !important;
-    border-radius: 60px;
-}
-
-.colored-info {
-    background-color: var(--event-widget-info-bg-color) !important;
-    border-radius: 60px;
-}
-
-.update-available {
+.dark-menu-item {
+  &.update-available {
     cursor: pointer;
-    
+
     i.fa {
-        color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
     }
     color: var(--primary-color);
-}
+  }
 
-.error {
+  &.error {
     cursor: pointer;
     position: relative;
     .h6 {
-        color: var(--error-color);
+      color: var(--event-widget-error-bg-color);
     }
 
     i.fa {
-        color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
     }
 
     .btn-close {
-        top: 5px;
-        right: 10px;
-        font-size: 11px;
-        position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 11px;
+      position: absolute;
     }
-}
+  }
 
-.info {
+  &.info {
     cursor: pointer;
     position: relative;
     .h6 {
-        color: var(--event-widget-info-bg-color);
+      color: var(--event-widget-info-bg-color);
     }
 
     i.fa {
-        color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
     }
 
     .btn-close {
-        top: 10px;
-        right: 10px;
-        font-size: 11px;
-        position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 11px;
+      position: absolute;
     }
+  }
+
 }

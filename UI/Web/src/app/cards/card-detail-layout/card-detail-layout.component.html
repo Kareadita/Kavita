@@ -26,6 +26,7 @@
 
         <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
           <div class="grid row g-0" #container>
+            <!-- TODO: @for (item of scroll.viewPortItems; track trackByIdentity; let i = $index;) { works -->
             <div class="card col-auto mt-2 mb-2"
                  (click)="tryToSaveJumpKey(item)"
                  *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}"

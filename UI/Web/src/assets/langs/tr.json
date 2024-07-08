@@ -116,9 +116,6 @@
     },
     "theme-manager": {
         "title": "Tema Yöneticisi",
-        "looking-for-theme": "Hafif ya da e-kitap okuyucu temasına mı bakıyorsunuz? Size önerebileceğimiz özel temalarımız var. ",
-        "looking-for-theme-continued": "Github teması.",
-        "scan": "Tara",
         "site-themes": "Site Teması",
         "set-default": "Varsayılan olarak ayarla",
         "applied": "Uygulanmış",
@@ -138,8 +135,7 @@
         "include-unknowns-label": "Bilinmeyenleri ekle"
     },
     "site-theme-provider-pipe": {
-        "system": "Sistem",
-        "user": "Kullanıcı"
+        "system": "Sistem"
     },
     "manage-devices": {
         "title": "Aygıt Yöneticisi",

@@ -25,7 +25,7 @@ public class TestBenchmark
         {
             list.Add(new VolumeDto()
             {
-                Number = random.Next(10) > 5 ? 1 : 0,
+                MinNumber = random.Next(10) > 5 ? 1 : 0,
                 Chapters = GenerateChapters()
             });
         }
@@ -49,7 +49,7 @@ public class TestBenchmark
 
     private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
     {
-        foreach (var v in volumes.Where(vDto => vDto.Number == 0))
+        foreach (var v in volumes.WhereNotLooseLeaf())
         {
             v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
         }

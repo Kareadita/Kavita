@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import {Subject, tap} from 'rxjs';
 import { take } from 'rxjs/operators';
 import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
@@ -19,7 +19,12 @@ import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
-import {translate, TranslocoService} from "@ngneat/transloco";
+import {translate} from "@ngneat/transloco";
+import {UserCollection} from "../_models/collection-tag";
+import {CollectionTagService} from "./collection-tag.service";
+import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {FilterService} from "./filter.service";
+import {ReadingListService} from "./reading-list.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -43,7 +48,9 @@ export class ActionService implements OnDestroy {
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService) { }
+    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
+    private readonly collectionTagService: CollectionTagService, private filterService: FilterService,
+              private readonly readingListService: ReadingListService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -129,6 +136,26 @@ export class ActionService implements OnDestroy {
 
     this.libraryService.analyze(library?.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info(translate('toasts.library-file-analysis-queued', {name: library.name}));
+      if (callback) {
+        callback(library);
+      }
+    });
+  }
+
+  async deleteLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
+    if (!library.hasOwnProperty('id') || library.id === undefined) {
+      return;
+    }
+
+    if (!await this.confirmService.alert(translate('toasts.confirm-library-delete'))) {
+      if (callback) {
+        callback(library);
+      }
+      return;
+    }
+
+    this.libraryService.delete(library?.id).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info(translate('toasts.library-deleted', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -360,6 +387,80 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  /**
+   * Mark all collections as promoted/unpromoted.
+   * @param collections UserCollection, should have id, pagesRead populated
+   * @param promoted boolean, promoted state
+   * @param callback Optional callback to perform actions after API completes
+   */
+  promoteMultipleCollections(collections: Array<UserCollection>, promoted: boolean, callback?: BooleanActionCallback) {
+    this.collectionTagService.promoteMultipleCollections(collections.map(v => v.id), promoted).pipe(take(1)).subscribe(() => {
+      if (promoted) {
+        this.toastr.success(translate('toasts.collections-promoted'));
+      } else {
+        this.toastr.success(translate('toasts.collections-unpromoted'));
+      }
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Deletes multiple collections
+   * @param collections UserCollection, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes
+   */
+  async deleteMultipleCollections(collections: Array<UserCollection>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-collections'))) return;
+
+    this.collectionTagService.deleteMultipleCollections(collections.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      this.toastr.success(translate('toasts.collections-deleted'));
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Mark all reading lists as promoted/unpromoted.
+   * @param readingLists UserCollection, should have id, pagesRead populated
+   * @param promoted boolean, promoted state
+   * @param callback Optional callback to perform actions after API completes
+   */
+  promoteMultipleReadingLists(readingLists: Array<ReadingList>, promoted: boolean, callback?: BooleanActionCallback) {
+    this.readingListService.promoteMultipleReadingLists(readingLists.map(v => v.id), promoted).pipe(take(1)).subscribe(() => {
+      if (promoted) {
+        this.toastr.success(translate('toasts.reading-list-promoted'));
+      } else {
+        this.toastr.success(translate('toasts.reading-list-unpromoted'));
+      }
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
+  /**
+   * Deletes multiple collections
+   * @param readingLists ReadingList, should have id
+   * @param callback Optional callback to perform actions after API completes
+   */
+  async deleteMultipleReadingLists(readingLists: Array<ReadingList>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-reading-list'))) return;
+
+    this.readingListService.deleteMultipleReadingLists(readingLists.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      this.toastr.success(translate('toasts.reading-lists-deleted'));
+
+      if (callback) {
+        callback(true);
+      }
+    });
+  }
+
   addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
@@ -532,11 +633,9 @@ export class ActionService implements OnDestroy {
   }
 
   /**
-   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
-   * @param seriesId Series Id
-   * @param volumes Volumes, should have id, chapters and pagesRead populated
-   * @param chapters? Chapters, should have id
-   * @param callback Optional callback to perform actions after API completes
+   * Deletes all series
+   * @param seriesIds - List of series
+   * @param callback - Optional callback once complete
    */
    async deleteMultipleSeries(seriesIds: Array<Series>, callback?: BooleanActionCallback) {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-series', {count: seriesIds.length}))) {
@@ -545,11 +644,15 @@ export class ActionService implements OnDestroy {
       }
       return;
     }
-    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
-      this.toastr.success(translate('toasts.series-deleted'));
+    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(res => {
+      if (res) {
+        this.toastr.success(translate('toasts.series-deleted'));
+      } else {
+        this.toastr.error(translate('errors.generic'));
+      }
 
       if (callback) {
-        callback(true);
+        callback(res);
       }
     });
   }
@@ -564,7 +667,12 @@ export class ActionService implements OnDestroy {
 
     this.seriesService.delete(series.id).subscribe((res: boolean) => {
       if (callback) {
-        this.toastr.success(translate('toasts.series-deleted'));
+        if (res) {
+          this.toastr.success(translate('toasts.series-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
         callback(res);
       }
     });
@@ -584,6 +692,23 @@ export class ActionService implements OnDestroy {
       this.toastr.success(translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
+      }
+    });
+  }
+
+  async deleteFilter(filterId: number, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.filterService.deleteFilter(filterId).subscribe(_ => {
+      this.toastr.success(translate('toasts.smart-filter-deleted'));
+
+      if (callback) {
+        callback(true);
       }
     });
   }

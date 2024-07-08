@@ -28,6 +28,12 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.genres');
       case FilterField.Inker:
         return translate('filter-field-pipe.inker');
+      case FilterField.Imprint:
+        return translate('filter-field-pipe.imprint');
+      case FilterField.Team:
+        return translate('filter-field-pipe.team');
+      case FilterField.Location:
+        return translate('filter-field-pipe.location');
       case FilterField.Languages:
         return translate('filter-field-pipe.languages');
       case FilterField.Libraries:
@@ -64,8 +70,10 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.file-path');
       case FilterField.WantToRead:
         return translate('filter-field-pipe.want-to-read');
-        case FilterField.ReadingDate:
+      case FilterField.ReadingDate:
         return translate('filter-field-pipe.read-date');
+      case FilterField.AverageRating:
+        return translate('filter-field-pipe.average-rating');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);
     }

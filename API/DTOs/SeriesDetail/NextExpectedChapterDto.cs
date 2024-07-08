@@ -5,7 +5,7 @@ namespace API.DTOs.SeriesDetail;
 public class NextExpectedChapterDto
 {
     public float ChapterNumber { get; set; }
-    public int VolumeNumber { get; set; }
+    public float VolumeNumber { get; set; }
     /// <summary>
     /// Null if not applicable
     /// </summary>

@@ -20,42 +20,12 @@ using Microsoft.Extensions.Logging;
 namespace API.Services.Plus;
 #nullable enable
 
-public record PlusSeriesDto
-{
-    public int? AniListId { get; set; }
-    public long? MalId { get; set; }
-    public string? GoogleBooksId { get; set; }
-    public string? MangaDexId { get; set; }
-    public string SeriesName { get; set; }
-    public string? AltSeriesName { get; set; }
-    public MediaFormat MediaFormat { get; set; }
-    /// <summary>
-    /// Optional but can help with matching
-    /// </summary>
-    public int? ChapterCount { get; set; }
-    /// <summary>
-    /// Optional but can help with matching
-    /// </summary>
-    public int? VolumeCount { get; set; }
-    public int? Year { get; set; }
-}
-
-internal record MediaRecommendationDto
-{
-    public int Rating { get; set; }
-    public IEnumerable<string> RecommendationNames { get; set; } = null!;
-    public string Name { get; set; }
-    public string CoverUrl { get; set; }
-    public string SiteUrl { get; set; }
-    public string? Summary { get; set; }
-    public int? AniListId { get; set; }
-    public long? MalId { get; set; }
-}
 
 public interface IRecommendationService
 {
-    Task<RecommendationDto> GetRecommendationsForSeries(int userId, int seriesId);
+    //Task<RecommendationDto> GetRecommendationsForSeries(int userId, int seriesId);
 }
+
 
 public class RecommendationService : IRecommendationService
 {
@@ -93,7 +63,7 @@ public class RecommendationService : IRecommendationService
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsForUser(userId, rec.RecommendationNames,
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIds(rec.RecommendationNames,
                 series.Library.Type, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
                 ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
 
@@ -126,7 +96,7 @@ public class RecommendationService : IRecommendationService
     }
 
 
-    private async Task<IEnumerable<MediaRecommendationDto>> GetRecommendations(string license, Series series)
+    protected async Task<IEnumerable<MediaRecommendationDto>> GetRecommendations(string license, Series series)
     {
         try
         {

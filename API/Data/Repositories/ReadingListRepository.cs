@@ -49,6 +49,7 @@ public interface IReadingListRepository
     Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<int> RemoveReadingListsWithoutSeries();
     Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items);
+    Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids, ReadingListIncludes includes = ReadingListIncludes.Items);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -156,6 +157,15 @@ public class ReadingListRepository : IReadingListRepository
             .FirstOrDefaultAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized) && x.AppUserId == userId);
     }
 
+    public async Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids, ReadingListIncludes includes = ReadingListIncludes.Items)
+    {
+        return await _context.ReadingList
+            .Where(c => ids.Contains(c.Id))
+            .Includes(includes)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
     public void Remove(ReadingListItem item)
     {
         _context.ReadingListItem.Remove(item);
@@ -206,13 +216,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId)
     {
-        var userLibraries = _context.Library
-            .Include(l => l.AppUsers)
-            .Where(library => library.AppUsers.Any(user => user.Id == userId))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(library => library.Id)
-            .ToList();
+        var userLibraries = _context.Library.GetUserLibraries(userId);
 
         var items = await _context.ReadingListItem
             .Where(s => s.ReadingListId == readingListId)
@@ -223,7 +227,8 @@ public class ReadingListRepository : IReadingListRepository
                 chapter.ReleaseDate,
                 ReadingListItem = data,
                 ChapterTitleName = chapter.TitleName,
-                FileSize = chapter.Files.Sum(f => f.Bytes)
+                FileSize = chapter.Files.Sum(f => f.Bytes),
+                chapter.Summary,
 
             })
             .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
@@ -234,6 +239,7 @@ public class ReadingListRepository : IReadingListRepository
                 data.ReleaseDate,
                 data.ChapterTitleName,
                 data.FileSize,
+                data.Summary,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
@@ -251,6 +257,7 @@ public class ReadingListRepository : IReadingListRepository
                     data.ReleaseDate,
                     data.ChapterTitleName,
                     data.FileSize,
+                    data.Summary,
                     LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
                     LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
@@ -272,7 +279,8 @@ public class ReadingListRepository : IReadingListRepository
                 LibraryType = data.LibraryType,
                 ChapterTitleName = data.ChapterTitleName,
                 LibraryName = data.LibraryName,
-                FileSize = data.FileSize
+                FileSize = data.FileSize,
+                Summary = data.Summary
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)

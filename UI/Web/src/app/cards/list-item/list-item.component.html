@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'list-item'">
   <div class="list-item-container d-flex flex-row g-0 mb-2 p-2">
     <div class="pe-2">
-      <app-image [imageUrl]="imageUrl" [height]="imageHeight" maxHeight="200px" [width]="imageWidth"></app-image>
+      <app-image [imageUrl]="imageUrl" [height]="imageHeight" [styles]="{'max-height': '200px'}" [width]="imageWidth"></app-image>
       <div class="not-read-badge" *ngIf="pagesRead === 0 && totalPages > 0"></div>
       <span class="download">
             <app-download-indicator [download$]="download$"></app-download-indicator>
@@ -31,7 +31,7 @@
           </div>
         </ng-container>
         <div class="ps-2 d-none d-md-inline-block" style="width: 100%">
-          <app-entity-info-cards [entity]="entity" [libraryId]="libraryId" [includeMetadata]="ShowExtended" [showExtendedProperties]="ShowExtended"></app-entity-info-cards>
+          <app-entity-info-cards [entity]="entity" [libraryId]="libraryId" [showExtendedProperties]="ShowExtended"></app-entity-info-cards>
         </div>
       </div>
     </div>

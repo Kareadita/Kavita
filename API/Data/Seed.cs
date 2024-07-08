@@ -26,8 +26,8 @@ public static class Seed
     /// </summary>
     public static ImmutableArray<ServerSetting> DefaultSettings;
 
-    public static readonly ImmutableArray<SiteTheme> DefaultThemes = ImmutableArray.Create(
-        new List<SiteTheme>
+    public static readonly ImmutableArray<SiteTheme> DefaultThemes = [
+        ..new List<SiteTheme>
         {
             new()
             {
@@ -36,8 +36,10 @@ public static class Seed
                 Provider = ThemeProvider.System,
                 FileName = "dark.scss",
                 IsDefault = true,
+                Description = "Default theme shipped with Kavita"
             }
-        }.ToArray());
+        }.ToArray()
+    ];
 
     public static readonly ImmutableArray<AppUserDashboardStream> DefaultStreams = ImmutableArray.Create(
         new List<AppUserDashboardStream>
@@ -208,8 +210,9 @@ public static class Seed
         {
             new() {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
             new() {Key = ServerSettingKey.TaskScan, Value = "daily"},
-            new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
             new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
+            new() {Key = ServerSettingKey.TaskCleanup, Value = "daily"},
+            new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
             new()
             {
                 Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)
@@ -223,12 +226,10 @@ public static class Seed
             }, // Not used from DB, but DB is sync with appSettings.json
             new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
             new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
-            new() {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
             new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
             new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
             new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
             new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
-            new() {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
             new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
             new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
@@ -241,6 +242,19 @@ public static class Seed
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
+
+            new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
+            new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},
+            new() {Key = ServerSettingKey.EmailAuthPassword, Value = string.Empty},
+            new() {Key = ServerSettingKey.EmailAuthUserName, Value = string.Empty},
+            new() {Key = ServerSettingKey.EmailSenderAddress, Value = string.Empty},
+            new() {Key = ServerSettingKey.EmailSenderDisplayName, Value = string.Empty},
+            new() {Key = ServerSettingKey.EmailEnableSsl, Value = "true"},
+            new() {Key = ServerSettingKey.EmailSizeLimit, Value = 26_214_400 + string.Empty},
+            new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
+            new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
+            new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString()},
+
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

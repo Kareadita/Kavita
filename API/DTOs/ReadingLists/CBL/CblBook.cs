@@ -1,4 +1,5 @@
 ﻿using System.Xml.Serialization;
+using API.Data.Metadata;
 
 namespace API.DTOs.ReadingLists.CBL;
 
@@ -20,6 +21,12 @@ public class CblBook
     public string Volume { get; set; }
     [XmlAttribute("Year")]
     public string Year { get; set; }
+    /// <summary>
+    /// Main Series, Annual, Limited Series
+    /// </summary>
+    /// <remarks>This maps to <see cref="ComicInfo">Format</see> tag</remarks>
+    [XmlAttribute("Format")]
+    public string Format { get; set; }
     /// <summary>
     /// The underlying filetype
     /// </summary>

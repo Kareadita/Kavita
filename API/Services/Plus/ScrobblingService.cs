@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
-using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Scrobble;
+using API.Extensions;
 using API.Helpers;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Flurl.Http;
 using Hangfire;
@@ -59,7 +60,6 @@ public interface IScrobblingService
 public class ScrobblingService : IScrobblingService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ITokenService _tokenService;
     private readonly IEventHub _eventHub;
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
@@ -78,9 +78,12 @@ public class ScrobblingService : IScrobblingService
         {MangaDexWeblinkWebsite, 0},
     };
 
-    private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
+    private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
     private static readonly IList<ScrobbleProvider> BookProviders = new List<ScrobbleProvider>()
+    {
+    };
+    private static readonly IList<ScrobbleProvider> LightNovelProviders = new List<ScrobbleProvider>()
     {
         ScrobbleProvider.AniList
     };
@@ -91,12 +94,14 @@ public class ScrobblingService : IScrobblingService
     };
 
 
-    public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService,
-        IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService,
-        ILocalizationService localizationService)
+    private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
+    private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
+
+
+    public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
+        ILicenseService licenseService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
-        _tokenService = tokenService;
         _eventHub = eventHub;
         _logger = logger;
         _licenseService = licenseService;
@@ -118,7 +123,7 @@ public class ScrobblingService : IScrobblingService
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in users)
         {
-            if (string.IsNullOrEmpty(user.AniListAccessToken) || !_tokenService.HasTokenExpired(user.AniListAccessToken)) continue;
+            if (string.IsNullOrEmpty(user.AniListAccessToken) || !TokenService.HasTokenExpired(user.AniListAccessToken)) continue;
             _logger.LogInformation("User {UserName}'s AniList token has expired! They need to regenerate it for scrobbling to work", user.UserName);
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
@@ -143,7 +148,7 @@ public class ScrobblingService : IScrobblingService
     private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
     {
         if (string.IsNullOrEmpty(token) ||
-            !_tokenService.HasTokenExpired(token)) return false;
+            !TokenService.HasTokenExpired(token)) return false;
 
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         if (string.IsNullOrEmpty(license.Value)) return true;
@@ -223,7 +228,7 @@ public class ScrobblingService : IScrobblingService
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.Review,
             AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
+            MalId = GetMalId(series),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             ReviewBody = reviewBody,
@@ -245,7 +250,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling rating event for {UserId} on {SeriesName}", userId, series.Name);
@@ -269,22 +274,34 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
-            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
+            AniListId = GetAniListId(series),
+            MalId = GetMalId(series),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             Rating = rating
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
-        _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {UserId} ", series.Name, userId);
+        _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {UserId}", series.Name, userId);
+    }
+
+    private static long? GetMalId(Series series)
+    {
+        var malId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite);
+        return malId ?? series.ExternalSeriesMetadata.MalId;
+    }
+
+    private static int? GetAniListId(Series series)
+    {
+        var aniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite);
+        return aniListId ?? series.ExternalSeriesMetadata.AniListId;
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
     {
         if (!await _licenseService.HasActiveLicense()) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling reading event for {UserId} on {SeriesName}", userId, series.Name);
@@ -299,7 +316,7 @@ public class ScrobblingService : IScrobblingService
             var prevVol = $"{existingEvt.VolumeNumber}";
 
             existingEvt.VolumeNumber =
-                await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
+                (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
             existingEvt.ChapterNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
@@ -316,15 +333,16 @@ public class ScrobblingService : IScrobblingService
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
-                AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
-                MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
+                AniListId = GetAniListId(series),
+                MalId = GetMalId(series),
                 AppUserId = userId,
                 VolumeNumber =
-                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
+                    (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
                 ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
                 Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             };
+
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} with Userid {UserId} ", series.Name, userId);
@@ -339,7 +357,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         _logger.LogInformation("Processing Scrobbling want-to-read event for {UserId} on {SeriesName}", userId, series.Name);
@@ -354,8 +372,8 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
-            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
+            AniListId = GetAniListId(series),
+            MalId = GetMalId(series),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
         };
@@ -375,7 +393,7 @@ public class ScrobblingService : IScrobblingService
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return true;
-        if (library.Type == LibraryType.Comic) return true;
+        if (!ExternalMetadataService.IsPlusEligible(library.Type)) return true;
         return false;
     }
 
@@ -424,9 +442,25 @@ public class ScrobblingService : IScrobblingService
                 // Might want to log this under ScrobbleError
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
                 {
-                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests");
-                    await Task.Delay(TimeSpan.FromMinutes(1));
-                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
+                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
+                    await Task.Delay(TimeSpan.FromMinutes(10));
+                    return await PostScrobbleUpdate(data, license, evt);
+                }
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unauthorized"))
+                {
+                    _logger.LogCritical("Kavita+ responded with Unauthorized. Please check your subscription");
+                    await _licenseService.HasActiveLicense(true);
+                    evt.IsErrored = true;
+                    evt.ErrorDetails = "Kavita+ subscription no longer active";
+                    throw new KavitaException("Kavita+ responded with Unauthorized. Please check your subscription");
+                }
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Access token is invalid"))
+                {
+                    evt.IsErrored = true;
+                    evt.ErrorDetails = AccessTokenErrorMessage;
+                    throw new KavitaException("Access token is invalid");
+                }
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
                     _logger.LogInformation("Kavita+ was unable to match the series");
@@ -434,12 +468,16 @@ public class ScrobblingService : IScrobblingService
                     {
                         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                         {
-                            Comment = "Unknown Series",
+                            Comment = UnknownSeriesErrorMessage,
                             Details = data.SeriesName,
                             LibraryId = evt.LibraryId,
                             SeriesId = evt.SeriesId
                         });
+                        await _unitOfWork.ExternalSeriesMetadataRepository.CreateBlacklistedSeries(evt.SeriesId, false);
                     }
+
+                    evt.IsErrored = true;
+                    evt.ErrorDetails = UnknownSeriesErrorMessage;
                 } else if (response.ErrorMessage != null && response.ErrorMessage.StartsWith("Review"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
@@ -454,10 +492,9 @@ public class ScrobblingService : IScrobblingService
                             SeriesId = evt.SeriesId
                         });
                     }
+                    evt.IsErrored = true;
+                    evt.ErrorDetails = "Review was unable to be saved due to upstream requirements";
                 }
-
-                _logger.LogError("Scrobbling failed due to {ErrorMessage}: {SeriesName}", response.ErrorMessage, data.SeriesName);
-                throw new KavitaException($"Scrobbling failed due to {response.ErrorMessage}: {data.SeriesName}");
             }
 
             return response.RateLeft;
@@ -471,12 +508,14 @@ public class ScrobblingService : IScrobblingService
                 {
                     _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                     {
-                        Comment = "Unknown Series",
+                        Comment = UnknownSeriesErrorMessage,
                         Details = data.SeriesName,
                         LibraryId = evt.LibraryId,
                         SeriesId = evt.SeriesId
                     });
                 }
+                evt.IsErrored = true;
+                evt.ErrorDetails = "Bad payload from Scrobble Provider";
                 throw new KavitaException("Bad payload from Scrobble Provider");
             }
             throw;
@@ -594,10 +633,9 @@ public class ScrobblingService : IScrobblingService
             .ToImmutableHashSet();
 
         var errors = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors())
-            .Where(e => e.Comment == "Unknown Series")
+            .Where(e => e.Comment == "Unknown Series" || e.Comment == UnknownSeriesErrorMessage || e.Comment == AccessTokenErrorMessage)
             .Select(e => e.SeriesId)
             .ToList();
-
 
         var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
@@ -615,10 +653,7 @@ public class ScrobblingService : IScrobblingService
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
-        // var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
-        //     .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-        //     .Where(e => !errors.Contains(e.SeriesId))
-        //     .ToList();
+
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
             .Select(group => new
@@ -638,6 +673,7 @@ public class ScrobblingService : IScrobblingService
             .Concat(addToWantToRead.Select(r => r.AppUser))
             .Concat(removeWantToRead.Select(r => r.AppUser))
             .Concat(ratingEvents.Select(r => r.AppUser))
+            .Where(user => !string.IsNullOrEmpty(user.AniListAccessToken))
             .DistinctBy(u => u.Id)
             .ToList();
         foreach (var user in usersToScrobble)
@@ -645,7 +681,7 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count;// + reviewEvents.Count;
+        var totalProgress = readEvents.Count + decisions.Count + ratingEvents.Count + decisions.Count;
 
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
@@ -654,7 +690,7 @@ public class ScrobblingService : IScrobblingService
             foreach (var readEvt in readEvents)
             {
                 readEvt.VolumeNumber =
-                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
+                    (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
                         readEvt.AppUser.Id);
                 readEvt.ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(readEvt.SeriesId,
@@ -668,7 +704,7 @@ public class ScrobblingService : IScrobblingService
                 MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
-                VolumeNumber = evt.VolumeNumber,
+                VolumeNumber = (int?) evt.VolumeNumber,
                 AniListToken = evt.AppUser.AniListAccessToken,
                 SeriesName = evt.Series.Name,
                 LocalizedSeriesName = evt.Series.LocalizedName,
@@ -692,22 +728,6 @@ public class ScrobblingService : IScrobblingService
                 Year = evt.Series.Metadata.ReleaseYear
             }));
 
-            // progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
-            //     totalProgress, evt => Task.FromResult(new ScrobbleDto()
-            // {
-            //     Format = evt.Format,
-            //     AniListId = evt.AniListId,
-            //     MALId = (int?) evt.MalId,
-            //     ScrobbleEventType = evt.ScrobbleEventType,
-            //     AniListToken = evt.AppUser.AniListAccessToken,
-            //     SeriesName = evt.Series.Name,
-            //     LocalizedSeriesName = evt.Series.LocalizedName,
-            //     Rating = evt.Rating,
-            //     Year = evt.Series.Metadata.ReleaseYear,
-            //     ReviewBody = evt.ReviewBody,
-            //     ReviewTitle = evt.ReviewTitle
-            // }));
-
             progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter,
                 totalProgress, evt => Task.FromResult(new ScrobbleDto()
                 {
@@ -716,7 +736,7 @@ public class ScrobblingService : IScrobblingService
                     MALId = (int?) evt.MalId,
                     ScrobbleEventType = evt.ScrobbleEventType,
                     ChapterNumber = evt.ChapterNumber,
-                    VolumeNumber = evt.VolumeNumber,
+                    VolumeNumber = (int?) evt.VolumeNumber,
                     AniListToken = evt.AppUser.AniListAccessToken,
                     SeriesName = evt.Series.Name,
                     LocalizedSeriesName = evt.Series.LocalizedName,
@@ -766,7 +786,39 @@ public class ScrobblingService : IScrobblingService
             {
                 continue;
             }
+
+            if (TokenService.HasTokenExpired(evt.AppUser.AniListAccessToken))
+            {
+                _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                {
+                    Comment = "AniList token has expired and needs rotating. Scrobbles wont work until then",
+                    Details = $"User: {evt.AppUser.UserName}",
+                    LibraryId = evt.LibraryId,
+                    SeriesId = evt.SeriesId
+                });
+                await _unitOfWork.CommitAsync();
+                return 0;
+            }
+
+            if (await _unitOfWork.ExternalSeriesMetadataRepository.IsBlacklistedSeries(evt.SeriesId))
+            {
+                _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                {
+                    Comment = UnknownSeriesErrorMessage,
+                    Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
+                    LibraryId = evt.LibraryId,
+                    SeriesId = evt.SeriesId
+                });
+                evt.IsErrored = true;
+                evt.ErrorDetails = UnknownSeriesErrorMessage;
+                evt.ProcessDateUtc = DateTime.UtcNow;
+                _unitOfWork.ScrobbleRepository.Update(evt);
+                await _unitOfWork.CommitAsync();
+                return 0;
+            }
+
             var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser, license.Value);
+            userRateLimits[evt.AppUserId] = count;
             if (count == 0)
             {
                 if (usersToScrobble == 1) break;
@@ -776,6 +828,20 @@ public class ScrobblingService : IScrobblingService
             try
             {
                 var data = await createEvent(evt);
+                // We need to handle the encoding and changing it to the old one until we can update the API layer to handle these
+                // which could happen in v0.8.3
+                if (data.VolumeNumber is Parser.SpecialVolumeNumber)
+                {
+                    data.VolumeNumber = 0;
+                }
+                if (data.VolumeNumber is Parser.DefaultChapterNumber)
+                {
+                    data.VolumeNumber = 0;
+                }
+                if (data.ChapterNumber is Parser.DefaultChapterNumber)
+                {
+                    data.ChapterNumber = 0;
+                }
                 userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, license.Value, evt);
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
@@ -785,6 +851,17 @@ public class ScrobblingService : IScrobblingService
             {
                 // If a flurl exception occured, the API is likely down. Kill processing
                 throw;
+            }
+            catch (KavitaException ex)
+            {
+                if (ex.Message.Contains("Access token is invalid"))
+                {
+                    _logger.LogCritical("Access Token for UserId: {UserId} needs to be rotated to continue scrobbling", evt.AppUser.Id);
+                    evt.IsErrored = true;
+                    evt.ErrorDetails = AccessTokenErrorMessage;
+                    _unitOfWork.ScrobbleRepository.Update(evt);
+                    return progressCounter;
+                }
             }
             catch (Exception)
             {
@@ -809,6 +886,7 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+
     private static bool DoesUserHaveProviderAndValid(ScrobbleEvent readEvent)
     {
         var userProviders = GetUserProviders(readEvent.AppUser);
@@ -825,6 +903,12 @@ public class ScrobblingService : IScrobblingService
 
         if (readEvent.Series.Library.Type == LibraryType.Book &&
             BookProviders.Intersect(userProviders).Any())
+        {
+            return true;
+        }
+
+        if (readEvent.Series.Library.Type == LibraryType.LightNovel &&
+            LightNovelProviders.Intersect(userProviders).Any())
         {
             return true;
         }
@@ -874,6 +958,7 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user, string license)
     {
+        if (string.IsNullOrEmpty(user.AniListAccessToken)) return 0;
         try
         {
             if (!userRateLimits.ContainsKey(user.Id))

@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import {inject, Injectable} from '@angular/core';
+import {Inject, inject, Injectable} from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { UserReadStatistics } from '../statistics/_models/user-read-statistics';
 import { PublicationStatusPipe } from '../_pipes/publication-status.pipe';
-import { map } from 'rxjs';
+import {asyncScheduler, finalize, map, tap} from 'rxjs';
 import { MangaFormatPipe } from '../_pipes/manga-format.pipe';
 import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
 import { TopUserRead } from '../statistics/_models/top-reads';
@@ -14,6 +14,11 @@ import { PublicationStatus } from '../_models/metadata/publication-status';
 import { MangaFormat } from '../_models/manga-format';
 import { TextResonse } from '../_types/text-response';
 import {TranslocoService} from "@ngneat/transloco";
+import {KavitaPlusMetadataBreakdown} from "../statistics/_models/kavitaplus-metadata-breakdown";
+import {throttleTime} from "rxjs/operators";
+import {DEBOUNCE_TIME} from "../shared/_services/download.service";
+import {download} from "../shared/_models/download";
+import {Saver, SAVER} from "../_providers/saver.provider";
 
 export enum DayOfWeek
 {
@@ -36,7 +41,7 @@ export class StatisticsService {
   publicationStatusPipe = new PublicationStatusPipe(this.translocoService);
   mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, @Inject(SAVER) private save: Saver) { }
 
   getUserStatistics(userId: number, libraryIds: Array<number> = []) {
     // TODO: Convert to httpParams object
@@ -108,11 +113,29 @@ export class StatisticsService {
     return this.httpClient.get<FileExtensionBreakdown>(this.baseUrl + 'stats/server/file-breakdown');
   }
 
+  downloadFileBreakdown(extension: string) {
+    return this.httpClient.get(this.baseUrl + 'stats/server/file-extension?fileExtension=' + encodeURIComponent(extension),
+      {observe: 'events', responseType: 'blob', reportProgress: true}
+    ).pipe(
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+      download((blob, filename) => {
+        this.save(blob, decodeURIComponent(filename));
+      }),
+      // tap((d) => this.updateDownloadState(d, downloadType, subtitle, 0)),
+      // finalize(() => this.finalizeDownloadState(downloadType, subtitle))
+    );
+
+  }
+
   getReadCountByDay(userId: number = 0, days: number = 0) {
     return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId + '&days=' + days);
   }
 
   getDayBreakdown( userId = 0) {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
+  }
+
+  getKavitaPlusMetadataBreakdown() {
+    return this.httpClient.get<KavitaPlusMetadataBreakdown>(this.baseUrl + 'stats/kavitaplus-metadata-breakdown');
   }
 }

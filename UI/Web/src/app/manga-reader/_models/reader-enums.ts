@@ -1,7 +1,7 @@
 export enum FITTING_OPTION {
     HEIGHT = 'full-height',
     WIDTH = 'full-width',
-    ORIGINAL = 'original'
+    ORIGINAL = 'original',
 }
 
 /**
@@ -12,9 +12,9 @@ export enum SPLIT_PAGE_PART {
     LEFT_PART = 'left',
     RIGHT_PART = 'right'
 }
-  
+
 export enum PAGING_DIRECTION {
     FORWARD = 1,
     BACKWARDS = -1,
 }
-  
+

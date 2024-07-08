@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.Stats;
+﻿using System;
+
+namespace API.DTOs.Stats;
 
 /// <summary>
 /// This is just for the Server tab on UI
@@ -17,5 +19,13 @@ public class ServerInfoSlimDto
     /// Version of Kavita
     /// </summary>
     public required string KavitaVersion { get; set; }
+    /// <summary>
+    /// The Date Kavita was first installed
+    /// </summary>
+    public DateTime? FirstInstallDate { get; set; }
+    /// <summary>
+    /// The Version of Kavita on the first run
+    /// </summary>
+    public string? FirstInstallVersion { get; set; }
 
 }

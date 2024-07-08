@@ -20,8 +20,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, of, map, shareReplay } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
-import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
+import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
 import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library/library';
 import { MangaFile } from 'src/app/_models/manga-file';
@@ -48,32 +47,40 @@ import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {EditChapterProgressComponent} from "../edit-chapter-progress/edit-chapter-progress.component";
 
 enum TabID {
   General = 0,
   Metadata = 1,
   Cover = 2,
-  Files = 3
+  Progress = 3,
+  Files = 4
 }
 
 @Component({
   selector: 'app-card-detail-drawer',
   standalone: true,
-  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective],
+  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective, EditChapterProgressComponent],
   templateUrl: './card-detail-drawer.component.html',
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardDetailDrawerComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly LibraryType = LibraryType;
+  protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+
   @Input() parentName = '';
   @Input() seriesId: number = 0;
   @Input() libraryId: number = 0;
   @Input({required: true}) data!: Volume | Chapter;
-  private readonly destroyRef = inject(DestroyRef);
-
 
   /**
    * If this is a volume, this will be first chapter for said volume.
@@ -100,30 +107,16 @@ export class CardDetailDrawerComponent implements OnInit {
     {title: 'general-tab', disabled: false},
     {title: 'metadata-tab', disabled: false},
     {title: 'cover-tab', disabled: false},
+    {title: 'progress-tab', disabled: false},
     {title: 'info-tab', disabled: false}
   ];
   active = this.tabs[0];
 
-  chapterMetadata!: ChapterMetadata;
   summary: string = '';
-
   downloadInProgress: boolean = false;
 
-  get MangaFormat() {
-    return MangaFormat;
-  }
 
-  get Breakpoint() {
-    return Breakpoint;
-  }
 
-  get LibraryType() {
-    return LibraryType;
-  }
-
-  get TabID() {
-    return TabID;
-  }
 
   constructor(public utilityService: UtilityService,
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService,
@@ -143,10 +136,6 @@ export class CardDetailDrawerComponent implements OnInit {
     this.isChapter = this.utilityService.isChapter(this.data);
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
 
-    this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
-      this.chapterMetadata = metadata;
-      this.cdRef.markForCheck();
-    });
 
     if (this.isChapter) {
       this.coverImageUrl = this.imageService.getChapterCoverImage(this.data.id);
@@ -160,7 +149,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
-    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
+    this.chapterActions.push({title: 'read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
     if (this.isChapter) {
       const chapter = this.utilityService.asChapter(this.data);
       this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, chapter);
@@ -190,10 +179,10 @@ export class CardDetailDrawerComponent implements OnInit {
   }
 
   formatChapterNumber(chapter: Chapter) {
-    if (chapter.number === '0') {
+    if (chapter.minNumber === LooseLeafOrDefaultNumber) {
       return '1';
     }
-    return chapter.number;
+    return chapter.range + '';
   }
 
   performAction(action: ActionItem<any>, chapter: Chapter) {
@@ -289,5 +278,4 @@ export class CardDetailDrawerComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
 }

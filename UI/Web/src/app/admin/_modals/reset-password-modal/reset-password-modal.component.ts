@@ -1,11 +1,12 @@
-import { Component, Input } from '@angular/core';
+import {Component, inject, Input} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { NgIf } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
     selector: 'app-reset-password-modal',
@@ -16,16 +17,21 @@ import {TranslocoDirective} from "@ngneat/transloco";
 })
 export class ResetPasswordModalComponent {
 
+  private readonly toastr = inject(ToastrService);
+  private readonly accountService = inject(AccountService);
+  public readonly modal = inject(NgbActiveModal);
+
   @Input({required: true}) member!: Member;
+
   errorMessage = '';
   resetPasswordForm: FormGroup = new FormGroup({
     password: new FormControl('', [Validators.required]),
   });
 
-  constructor(public modal: NgbActiveModal, private accountService: AccountService) { }
 
   save() {
     this.accountService.resetPassword(this.member.username, this.resetPasswordForm.value.password,'').subscribe(() => {
+      this.toastr.success(translate('toasts.password-updated'))
       this.modal.close();
     });
   }

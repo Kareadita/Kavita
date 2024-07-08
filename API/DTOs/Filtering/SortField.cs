@@ -30,4 +30,12 @@ public enum SortField
     /// Last time the user had any reading progress
     /// </summary>
     ReadProgress = 7,
+    /// <summary>
+    /// Kavita+ Only - External Average Rating
+    /// </summary>
+    AverageRating = 8,
+    /// <summary>
+    /// Randomise the order
+    /// </summary>
+    Random = 9
 }

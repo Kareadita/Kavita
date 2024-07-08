@@ -19,12 +19,13 @@
       <app-card-item [entity]="item" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
                      [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true"
                      [actions]="actions"
-                     [selected]="bulkSelectionService.isCardSelected('bookmark', position)" (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
+                     [selected]="bulkSelectionService.isCardSelected('bookmark', position)"
+                     (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
       ></app-card-item>
     </ng-template>
 
     <ng-template #noData>
-      {{t('no-data')}} <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/bookmarks" rel="noopener noreferrer" target="_blank">{{t('no-data-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
+      {{t('no-data')}} <a [href]="WikiLink.Bookmarks" rel="noopener noreferrer" target="_blank">{{t('no-data-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
     </ng-template>
   </app-card-detail-layout>
 </ng-container>

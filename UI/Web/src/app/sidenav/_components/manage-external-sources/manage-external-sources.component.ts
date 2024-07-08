@@ -10,6 +10,7 @@ import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
   selector: 'app-manage-external-sources',
@@ -24,6 +25,7 @@ export class ManageExternalSourcesComponent {
   externalSources: Array<ExternalSource> = [];
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly externalSourceService = inject(ExternalSourceService);
+  protected readonly WikiLink = WikiLink;
 
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])

@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'manage-alerts'">
-  <p>{{t('description-part-1')}} <a rel="noopener noreferrer" target="_blank" href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner#media-errors">{{t('description-part-2')}}</a></p>
+  <p>{{t('description-part-1')}} <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.MediaIssues">{{t('description-part-2')}}</a></p>
 
   <form [formGroup]="formGroup">
     <div class="row g-0 mb-3">

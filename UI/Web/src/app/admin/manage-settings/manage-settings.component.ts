@@ -8,6 +8,7 @@ import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {WikiLink} from "../../_models/wiki";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -21,15 +22,17 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
 })
 export class ManageSettingsComponent implements OnInit {
 
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
+  protected readonly WikiLink = WikiLink;
+
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
-  private readonly translocoService = inject(TranslocoService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-
-  constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private serverService: ServerService) { }
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -45,6 +48,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('taskCleanup', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
       this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
@@ -77,6 +81,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
+    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup);
     this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
     this.settingsForm.get('port')?.setValue(this.serverSettings.port);
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);
@@ -99,6 +104,9 @@ export class ManageSettingsComponent implements OnInit {
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
+    modelSettings.smtpConfig = this.serverSettings.smtpConfig;
+
+
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();

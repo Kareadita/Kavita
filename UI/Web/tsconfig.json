@@ -19,6 +19,7 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
+    "allowSyntheticDefaultImports": true,
     "lib": [
       "ES2022",
       "dom"
@@ -31,9 +32,10 @@
     "strictTemplates": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "extendedDiagnostics": {
       "nullishCoalescingNotNullable": "warning",
     }
-    
+
   }
 }

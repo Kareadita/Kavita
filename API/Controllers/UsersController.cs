@@ -112,12 +112,23 @@ public class UsersController : BaseApiController
         existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
         existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
         existingPreferences.LayoutMode = preferencesDto.LayoutMode;
-        existingPreferences.Theme = preferencesDto.Theme ?? await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
+
+        existingPreferences.PdfTheme = preferencesDto.PdfTheme;
+        existingPreferences.PdfScrollMode = preferencesDto.PdfScrollMode;
+        existingPreferences.PdfSpreadMode = preferencesDto.PdfSpreadMode;
+
+        if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
+        {
+            var theme = await _unitOfWork.SiteThemeRepository.GetTheme(preferencesDto.Theme!.Id);
+            existingPreferences.Theme = theme ?? await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+        }
+
+
         if (_localizationService.GetLocales().Contains(preferencesDto.Locale))
         {
             existingPreferences.Locale = preferencesDto.Locale;

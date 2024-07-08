@@ -56,9 +56,9 @@ public class LibraryWatcher : ILibraryWatcher
     /// <summary>
     /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
     /// </summary>
-    private int _bufferFullCounter;
-    private int _restartCounter;
-    private DateTime _lastErrorTime = DateTime.MinValue;
+    private static int _bufferFullCounter;
+    private static int _restartCounter;
+    private static DateTime _lastErrorTime = DateTime.MinValue;
     /// <summary>
     /// Used to lock buffer Full Counter
     /// </summary>
@@ -148,15 +148,30 @@ public class LibraryWatcher : ILibraryWatcher
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
+        _logger.LogTrace("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name))));
+
+        var isDirectoryChange = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
+
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, isDirectoryChange],
+                checkRunningJobs: true))
+        {
+            return;
+        }
+
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, isDirectoryChange));
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        _logger.LogDebug("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name)));
+        _logger.LogTrace("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
+        var isDirectoryChange = !_directoryService.FileSystem.File.Exists(e.Name);
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, isDirectoryChange],
+                checkRunningJobs: true))
+        {
+            return;
+        }
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, isDirectoryChange));
     }
 
     /// <summary>
@@ -167,7 +182,12 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnDeleted(object sender, FileSystemEventArgs e) {
         var isDirectory = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
         if (!isDirectory) return;
-        _logger.LogDebug("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
+        _logger.LogTrace("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, true],
+                checkRunningJobs: true))
+        {
+            return;
+        }
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, true));
     }
 
@@ -262,17 +282,19 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            _taskScheduler.ScanFolder(fullPath, _queueWaitTime);
+            _taskScheduler.ScanFolder(fullPath, filePath, _queueWaitTime);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
         }
-        _logger.LogDebug("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogTrace("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
     private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
+        // TODO: I can optimize this to avoid a library scan and instead do a Series Scan by finding the series that has a lowestFolderPath higher or equal to the filePath
+
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
@@ -285,10 +307,10 @@ public class LibraryWatcher : ILibraryWatcher
 
         var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
         _logger.LogTrace("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
-        if (!rootFolder.Any()) return string.Empty;
+        if (rootFolder.Count == 0) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
-        return  Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[rootFolder.Count - 1]));
+        return Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[rootFolder.Count - 1]));
     }
 
 
@@ -296,7 +318,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// This is called via Hangfire to decrement the counter. Must work around a lock
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
-    public void UpdateLastBufferOverflow()
+    public static void UpdateLastBufferOverflow()
     {
         lock (Lock)
         {
