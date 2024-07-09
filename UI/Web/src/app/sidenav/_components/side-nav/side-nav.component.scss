@@ -104,7 +104,7 @@
         position: fixed;
         margin: 0;
         left: 0;
-        top: 56px;
+        top: var(--nav-offset);
         transition: width var(--side-nav-openclose-transition);
         z-index: 999;
         overflow: auto;
@@ -122,14 +122,14 @@
         }
 
         &.no-donate {
-          height: calc((var(--vh)*100) - 56px);
+          height: calc((var(--vh)*100) - var(--nav-offset));
         }
     }
 
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc((var(--vh)*100) - 56px);
+        height: calc((var(--vh)*100) - var(--nav-offset));
         position: absolute;
         left: 0;
         z-index: 998;

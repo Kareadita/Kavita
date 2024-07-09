@@ -1,11 +1,11 @@
 <ng-container *transloco="let t">
   <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
-    <h5 title>
+    <h4 title>
       <span>{{libraryName}}</span>
       <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
-    </h5>
+    </h4>
     @if (active.fragment === '') {
-      <h6 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h6>
+      <h5 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h5>
     }
 
   </app-side-nav-companion-bar>
