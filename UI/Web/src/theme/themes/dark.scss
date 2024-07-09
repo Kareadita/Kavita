@@ -2,6 +2,16 @@
 
 :root, :root .default {
     /* Base colors */
+    --layer0: rgba(255,255,255,0);
+    --layer1: rgba(255,255,255,0.05);
+    --layer2: rgba(255,255,255,0.07);
+    --layer3: rgba(255,255,255,0.08);
+    --layer4: rgba(255,255,255,0.09);
+    --layer5: rgba(255,255,255,0.11);
+    --layer6: rgba(255,255,255,0.12);
+    --layer7: rgba(255,255,255,0.14);
+    --layer8: rgba(255,255,255,0.15);
+    --layer9: rgba(255,255,255,0.16);
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
     --primary-color-darker-shade: #338A67;
@@ -23,7 +33,7 @@
 
 
     /* Navbar */
-    --navbar-bg-color: black;
+    --navbar-bg-color: var(--layer4);
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
@@ -103,10 +113,10 @@
     --tagbadge-filled-bg-color: var(--primary-color);
 
     /* Side Nav */
-    --side-nav-bg-color: rgba(0,0,0,0.2);
-    --side-nav-mobile-bg-color: rgb(25,26,28);
+    --side-nav-bg-color: var(--layer2);
+    --side-nav-mobile-bg-color: var(--layer2);
     --side-nav-openclose-transition: 0.15s ease-in-out;
-    --side-nav-box-shadow: rgba(0,0,0,0.5);
+    --side-nav-box-shadow: var(--layer0);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
     --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
@@ -120,8 +130,8 @@
     --side-nav-closed-bg-color: transparent;
     --side-nav-item-active-color: var(--primary-color);
     --side-nav-item-active-text-color: white;
-    --side-nav-active-bg-color: rgba(0,0,0,0.5);
-    --side-nav-overlay-color: rgba(0,0,0,0.5);
+    --side-nav-active-bg-color: var(--layer1);
+    --side-nav-overlay-color: var(--layer1);
 
 
     /* List items */
@@ -133,7 +143,7 @@
     --list-group-active-border-color: none;
 
     /* Popover */
-    --popover-body-bg-color: var(--navbar-bg-color);
+    --popover-body-bg-color: #2C2C2C;
     --popover-body-text-color: var(--navbar-text-color);
     --popover-outerarrow-color: transparent;
     --popover-arrow-color: transparent;
@@ -159,8 +169,8 @@
     --dropdown-item-hover-text-color: white;
     --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
     --dropdown-item-text-color: var(--navbar-text-color);
-    --dropdown-item-bg-color: var(--navbar-bg-color);
-    --dropdown-overlay-color: rgba(0,0,0,0.5);
+    --dropdown-item-bg-color: #2C2C2C;
+    --dropdown-overlay-color: var(--layer1);
 
     /* Accordion */
     --accordion-header-text-color: rgba(74, 198, 148, 0.9);
@@ -198,7 +208,7 @@
     --brand-font-family: "Spartan", sans-serif;
 
     /* Card */
-    --card-bg-color: rgba(22,27,34,0.5);
+    --card-bg-color: var(--layer1);
     --card-text-color: var(--body-text-color);
     --card-border-width: 0 1px 1px 1px;
     --card-border-style: solid;

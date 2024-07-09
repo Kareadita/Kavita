@@ -5,7 +5,7 @@
         <app-side-nav *ngIf="navService.sideNavVisibility$ | async"></app-side-nav>
 
         <div class="container-fluid" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
-            <div style="padding: 20px 0 0;" *ngIf="navService.sideNavVisibility$ | async else noSideNav">
+            <div *ngIf="navService.sideNavVisibility$ | async else noSideNav">
                 <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
                     <router-outlet></router-outlet>
                 </div>

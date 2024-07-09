@@ -31,10 +31,10 @@ public static class Seed
         {
             new()
             {
-                Name = "Dark-Material",
-                NormalizedName = "Dark-Material".ToNormalized(),
+                Name = "Dark",
+                NormalizedName = "Dark".ToNormalized(),
                 Provider = ThemeProvider.System,
-                FileName = "dark-material.scss",
+                FileName = "dark.scss",
                 IsDefault = true,
                 Description = "Default theme shipped with Kavita"
             }

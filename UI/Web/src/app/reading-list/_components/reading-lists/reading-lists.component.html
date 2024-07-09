@@ -1,11 +1,11 @@
 <ng-container *transloco="let t; read: 'reading-lists'">
   <app-side-nav-companion-bar>
-    <h2 title>
-      <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
+    <h4 title>
       <span>{{t('title')}}</span>
-    </h2>
+      <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
+    </h4>
     @if (pagination) {
-      <h6 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination.totalItems | number})}}</h6>
+      <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination.totalItems | number})}}</h5>
     }
 
   </app-side-nav-companion-bar>

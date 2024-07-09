@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'all-collections'">
   <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
-    <h2 title>{{t('title')}}</h2>
-    <h6 subtitle>{{t('item-count', {num: collections.length | number})}}</h6>
+    <h4 title>{{t('title')}}</h4>
+    <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 

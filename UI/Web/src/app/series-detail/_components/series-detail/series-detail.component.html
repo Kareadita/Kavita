@@ -3,26 +3,26 @@
     @if (series) {
       <app-side-nav-companion-bar [hasExtras]="true" [extraDrawer]="extrasDrawer">
         <ng-container title>
-          <h2 class="title text-break">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+          <h4 class="title text-break">
             <span>{{series.name}}
               @if(isLoadingExtra || isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
-                <span class="visually-hidden">loading...</span>
-              </div>
+                  <span class="visually-hidden">loading...</span>
+                </div>
               }
-          </span>
-          </h2>
+            </span>
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+          </h4>
         </ng-container>
         @if (series.localizedName !== series.name) {
           <ng-container subtitle>
-            <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
+            <h5 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h5>
           </ng-container>
         }
 
 
         <ng-template #extrasDrawer let-offcanvas>
-          <div style="margin-top: 56px">
+          <div>
             <div class="offcanvas-header">
               <h4 class="offcanvas-title" id="offcanvas-basic-title">{{t('page-settings-title')}}</h4>
               <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="offcanvas.dismiss()"></button>

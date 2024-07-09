@@ -3,14 +3,14 @@
 
   <div class="container-fluid">
     <div class="row mb-2">
-      <div class="col-8"><h3>{{t('title')}}</h3></div>
+      <div class="col-8"><h5>{{t('title')}}</h5></div>
       <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{t('invite')}}</span></button></div>
     </div>
 
     <ul class="list-group">
       <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
         <div>
-          <h4>
+          <h6>
             <span id="member-name--{{idx}}" [ngClass]="{'highlight': member.username === loggedInUsername}">{{member.username | titlecase}}</span>
             <div class="float-end" *ngIf="canEditMember(member)">
               <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(member)"
@@ -31,7 +31,7 @@
               <button *ngIf="!member.isPending" class="btn btn-secondary btn-sm" (click)="updatePassword(member)"
                       placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
             </div>
-          </h4>
+          </h6>
           <div class="user-info">
             <div>{{t('last-active-title')}}
               <span class="badge bg-secondary text-dark ms-1 pending-badge" *ngIf="member.isPending; else activeTime">{{t('pending-title')}}</span>
