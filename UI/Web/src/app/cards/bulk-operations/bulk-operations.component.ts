@@ -36,7 +36,7 @@ export class BulkOperationsComponent implements OnInit {
    * Modal mode means don't fix to the top
    */
   @Input() modalMode = false;
-  @Input() topOffset: number = 56;
+  @Input() topOffset: number = 60;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];
