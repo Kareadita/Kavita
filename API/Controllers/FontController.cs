@@ -1,72 +1,103 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Font;
+using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
+using API.Services.Tasks.Scanner.Parser;
+using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using MimeTypes;
+using Serilog;
 
 namespace API.Controllers;
 
 public class FontController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IFontService _fontService;
+    private readonly IDirectoryService _directoryService;
     private readonly ITaskScheduler _taskScheduler;
+    private readonly IFontService _fontService;
+    private readonly IMapper _mapper;
 
-    public FontController(IUnitOfWork unitOfWork, IFontService fontService, ITaskScheduler taskScheduler)
+    private readonly Regex _fontFileExtensionRegex = new(Parser.FontFileExtensions, RegexOptions.IgnoreCase, Parser.RegexTimeout);
+
+    public FontController(IUnitOfWork unitOfWork, ITaskScheduler taskScheduler, IDirectoryService directoryService,
+        IFontService fontService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _fontService = fontService;
+        _directoryService = directoryService;
         _taskScheduler = taskScheduler;
+        _fontService = fontService;
+        _mapper = mapper;
     }
 
     [ResponseCache(CacheProfileName = "10Minute")]
-    [AllowAnonymous]
-    [HttpGet("GetFonts")]
+    [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<EpubFontDto>>> GetFonts()
     {
-        return Ok(await _unitOfWork.EpubFontRepository.GetFontDtos());
+        return Ok(await _unitOfWork.EpubFontRepository.GetFontDtosAsync());
     }
 
+    [HttpGet]
     [AllowAnonymous]
-    [HttpGet("download-font")]
-    public async Task<IActionResult> GetFont(int fontId)
+    public async Task<IActionResult> GetFont(int fontId, string apiKey)
     {
-        try
-        {
-            var font = await _unitOfWork.EpubFontRepository.GetFont(fontId);
-            if (font == null) return NotFound();
-            var contentType = GetContentType(font.FileName);
-            return File(await _fontService.GetContent(fontId), contentType, font.FileName);
-        }
-        catch (KavitaException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+
+        if (userId == 0) return BadRequest();
+
+        var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
+
+        if (font == null) return NotFound();
+
+        var contentType = MimeTypeMap.GetMimeType(Path.GetExtension(font.FileName));
+        var path = Path.Join(_directoryService.EpubFontDirectory, font.FileName);
+        return PhysicalFile(path, contentType);
     }
 
-    [AllowAnonymous]
-    [HttpPost("scan")]
-    public IActionResult Scan()
+    [HttpDelete]
+    public async Task<IActionResult> DeleteFont(int fontId)
     {
-        _taskScheduler.ScanEpubFonts();
+        await _fontService.Delete(fontId);
         return Ok();
     }
 
-    private string GetContentType(string fileName)
+    [HttpPost("upload")]
+    public async Task<ActionResult<EpubFontDto>> UploadFont(IFormFile formFile)
     {
-        var extension = Path.GetExtension(fileName).ToLowerInvariant();
-        return extension switch
-        {
-            ".ttf" => "application/font-tff",
-            ".otf" => "application/font-otf",
-            ".woff" => "application/font-woff",
-            ".woff2" => "application/font-woff2",
-            _ => "application/octet-stream",
-        };
+        if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName)))
+            return BadRequest("Invalid file");
+
+        if (formFile.FileName.Contains(".."))
+            return BadRequest("Invalid file");
+
+        var tempFile = await UploadToTemp(formFile);
+        var font = await _fontService.CreateFontFromFileAsync(tempFile);
+        return Ok(_mapper.Map<EpubFontDto>(font));
+    }
+
+    [HttpPost("upload-url")]
+    public async Task<ActionResult<EpubFontDto>> UploadFontByUrl(string url)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async Task<string> UploadToTemp(IFormFile file)
+    {
+        var outputFile = Path.Join(_directoryService.TempDirectory, file.FileName);
+        await using var stream = System.IO.File.Create(outputFile);
+        await file.CopyToAsync(stream);
+        stream.Close();
+        return outputFile;
     }
 }

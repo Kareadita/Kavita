@@ -15,10 +15,12 @@ public interface IEpubFontRepository
     void Add(EpubFont font);
     void Remove(EpubFont font);
     void Update(EpubFont font);
-    Task<IEnumerable<EpubFontDto>> GetFontDtos();
-    Task<EpubFontDto?> GetFontDto(int fontId);
-    Task<IEnumerable<EpubFont>> GetFonts();
-    Task<EpubFont?> GetFont(int fontId);
+    Task<IEnumerable<EpubFontDto>> GetFontDtosAsync();
+    Task<EpubFontDto?> GetFontDtoAsync(int fontId);
+    Task<EpubFontDto?> GetFontDtoByNameAsync(string name);
+    Task<IEnumerable<EpubFont>> GetFontsAsync();
+    Task<EpubFont?> GetFontAsync(int fontId);
+    Task<bool> IsFontInUseAsync(int fontId);
 }
 
 public class EpubFontRepository: IEpubFontRepository
@@ -47,14 +49,14 @@ public class EpubFontRepository: IEpubFontRepository
         _context.Entry(font).State = EntityState.Modified;
     }
 
-    public async Task<IEnumerable<EpubFontDto>> GetFontDtos()
+    public async Task<IEnumerable<EpubFontDto>> GetFontDtosAsync()
     {
         return await _context.EpubFont
             .ProjectTo<EpubFontDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
-    public async Task<EpubFontDto?> GetFontDto(int fontId)
+    public async Task<EpubFontDto?> GetFontDtoAsync(int fontId)
     {
         return await _context.EpubFont
             .Where(f => f.Id == fontId)
@@ -62,16 +64,35 @@ public class EpubFontRepository: IEpubFontRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<EpubFont>> GetFonts()
+    public async Task<EpubFontDto?> GetFontDtoByNameAsync(string name)
+    {
+        return await _context.EpubFont
+            .Where(f => f.Name.Equals(name))
+            .ProjectTo<EpubFontDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<EpubFont>> GetFontsAsync()
     {
         return await _context.EpubFont
             .ToListAsync();
     }
 
-    public async Task<EpubFont?> GetFont(int fontId)
+    public async Task<EpubFont?> GetFontAsync(int fontId)
     {
         return await _context.EpubFont
             .Where(f => f.Id == fontId)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<bool> IsFontInUseAsync(int fontId)
+    {
+        return await _context.AppUserPreferences
+            .Join(_context.EpubFont,
+                preference => preference.BookReaderFontFamily,
+                font => font.Name,
+                (preference, font) => new { preference, font })
+            .AnyAsync(joined => joined.font.Id == fontId);
+    }
+
 }

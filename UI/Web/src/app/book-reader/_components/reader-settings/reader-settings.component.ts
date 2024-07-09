@@ -19,7 +19,7 @@ import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ThemeService } from 'src/app/_services/theme.service';
-import {BookService, EpubFont} from '../../_services/book.service';
+import {BookService} from '../../_services/book.service';
 import { BookBlackTheme } from '../../_models/book-black-theme';
 import { BookDarkTheme } from '../../_models/book-dark-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
@@ -27,6 +27,8 @@ import { BookPaperTheme } from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {FontService} from "../../../_services/font.service";
+import {EpubFont} from "../../../_models/preferences/epub-font";
 
 /**
  * Used for book reader. Do not use for other components
@@ -171,10 +173,10 @@ export class ReaderSettingsComponent implements OnInit {
 
   constructor(private bookService: BookService, private accountService: AccountService,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
-    private readonly cdRef: ChangeDetectorRef) {}
+    private readonly cdRef: ChangeDetectorRef, private fontService: FontService) {}
 
   ngOnInit(): void {
-    this.bookService.getEpubFonts().subscribe(fonts => {
+    this.fontService.getFonts().subscribe(fonts => {
       this.fontFamilies = fonts;
       this.fontOptions = fonts.map(f => f.name);
       this.cdRef.markForCheck();

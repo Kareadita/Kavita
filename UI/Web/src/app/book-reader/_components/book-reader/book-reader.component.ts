@@ -52,6 +52,7 @@ import {
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {FontService} from "../../../_services/font.service";
 
 
 enum TabID {
@@ -124,6 +125,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly fontService = inject(FontService);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -583,11 +585,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.bookService.getEpubFonts().subscribe(fonts => {
+    this.fontService.getFonts().subscribe(fonts => {
       fonts.forEach(font => {
-        const fontFace = new FontFace(font.name, `url(${this.bookService.baseUrl}Font/download-font?fontId=${font.id})`);
-        fontFace.load().then(loadedFace => {
-          (document as any).fonts.add(loadedFace);
+        this.fontService.getFontFace(font).load().then(loadedFace => {
+          (this.document as any).fonts.add(loadedFace);
         });
       })
     })

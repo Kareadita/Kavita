@@ -4,20 +4,6 @@ import { TextResonse } from 'src/app/_types/text-response';
 import { environment } from 'src/environments/environment';
 import { BookChapterItem } from '../_models/book-chapter-item';
 import { BookInfo } from '../_models/book-info';
-import {Observable} from "rxjs";
-
-export enum FontProvider {
-  System = 1,
-  User = 2,
-}
-
-export interface EpubFont {
-  id: number;
-  name: string;
-  provider: FontProvider;
-  created: Date;
-  lastModified: Date;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -27,10 +13,6 @@ export class BookService {
   baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
-
-  getEpubFonts(): Observable<EpubFont[]>  {
-    return this.http.get<Array<EpubFont>>(this.baseUrl + 'Font/GetFonts')
-  }
 
   getBookChapters(chapterId: number) {
     return this.http.get<Array<BookChapterItem>>(this.baseUrl + 'book/' + chapterId + '/chapters');

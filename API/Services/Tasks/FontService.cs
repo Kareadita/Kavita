@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,93 +16,99 @@ namespace API.Services.Tasks;
 
 public interface IFontService
 {
-    Task<byte[]> GetContent(int fontId);
-    Task Scan();
+    Task<EpubFont> CreateFontFromFileAsync(string path);
+    Task Delete(int fontId);
 }
 
 public class FontService: IFontService
 {
 
+    public static readonly string DefaultFont = "default";
+
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHubContext<MessageHub> _messageHub;
     private readonly ILogger<FontService> _logger;
 
-    public FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub,
-        ILogger<FontService> logger)
+    public FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
-        _messageHub = messageHub;
         _logger = logger;
     }
 
-    public async Task<byte[]> GetContent(int fontId)
+    public async Task<EpubFont> CreateFontFromFileAsync(string path)
     {
-        // TODO: Differentiate between Provider.User & Provider.System
-        var font = await _unitOfWork.EpubFontRepository.GetFont(fontId);
-        if (font == null) throw new KavitaException("Font file missing or invalid");
-        var fontFile = _directoryService.FileSystem.Path.Join(_directoryService.EpubFontDirectory, font.FileName);
-        if (string.IsNullOrEmpty(fontFile) || !_directoryService.FileSystem.File.Exists(fontFile))
-            throw new KavitaException("Font file missing or invalid");
-        return await _directoryService.FileSystem.File.ReadAllBytesAsync(fontFile);
-    }
-
-    public async Task Scan()
-    {
-        _directoryService.Exists(_directoryService.EpubFontDirectory);
-        var reservedNames = Seed.DefaultFonts.Select(f => f.NormalizedName).ToList();
-        var fontFiles =
-            _directoryService.GetFilesWithExtension(Parser.NormalizePath(_directoryService.EpubFontDirectory), @"\.[woff2|tff|otf|woff]")
-                .Where(name => !reservedNames.Contains(Parser.Normalize(name))).ToList();
-
-        var allFonts = (await _unitOfWork.EpubFontRepository.GetFonts()).ToList();
-        var userFonts = allFonts.Where(f => f.Provider == FontProvider.User).ToList();
-
-        foreach (var userFont in userFonts)
+        if (!_directoryService.FileSystem.File.Exists(path))
         {
-            var filePath = Parser.NormalizePath(
-                _directoryService.FileSystem.Path.Join(_directoryService.EpubFontDirectory, userFont.FileName));
-            if (_directoryService.FileSystem.File.Exists(filePath)) continue;
-            allFonts.Remove(userFont);
-            await RemoveFont(userFont);
-
-            // TODO: Send update to UI
-            _logger.LogInformation("Removed a font because it didn't exist on disk {FilePath}", filePath);
+            _logger.LogInformation("Unable to create font from manual upload as font not in temp");
+            throw new KavitaException("errors.font-manual-upload");
         }
 
-        var allFontNames = allFonts.Select(f => f.NormalizedName).ToList();
-        foreach (var fontFile in fontFiles)
-        {
-            var nakedFileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(fontFile);
-            // TODO: discuss this, using this to "prettyfy" the file name, to display in the UI
-            var fontName = Regex.Replace(nakedFileName, "[^a-zA-Z0-9]", " ");
-            var normalizedName = Parser.Normalize(nakedFileName);
-            if (allFontNames.Contains(normalizedName)) continue;
+        var fileName = _directoryService.FileSystem.FileInfo.New(path).Name;
+        var nakedFileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(fileName);
+        var fontName = Parser.PrettifyFileName(nakedFileName);
+        var normalizedName = Parser.Normalize(nakedFileName);
 
-            _unitOfWork.EpubFontRepository.Add(new EpubFont()
-            {
-                Name = fontName,
-                NormalizedName = normalizedName,
-                FileName = _directoryService.FileSystem.Path.GetFileName(fontFile),
-                Provider = FontProvider.User,
-            });
-
-            // TODO: Send update to UI
-            _logger.LogInformation("Added a new font from disk {FontFile}", fontFile);
-        }
-        if (_unitOfWork.HasChanges())
+        if (await _unitOfWork.EpubFontRepository.GetFontDtoByNameAsync(fontName) != null)
         {
-            await _unitOfWork.CommitAsync();
+            throw new KavitaException("errors.font-already-in-use");
         }
+
+        _directoryService.CopyFileToDirectory(path, _directoryService.EpubFontDirectory);
+        var finalLocation = _directoryService.FileSystem.Path.Join(_directoryService.EpubFontDirectory, fileName);
+
+        var font = new EpubFont()
+        {
+            Name = fontName,
+            NormalizedName = normalizedName,
+            FileName = Path.GetFileName(finalLocation),
+            Provider = FontProvider.User
+        };
+        _unitOfWork.EpubFontRepository.Add(font);
+        await _unitOfWork.CommitAsync();
 
         // TODO: Send update to UI
-        _logger.LogInformation("Finished FontService#Scan");
+        return font;
+    }
+
+    public async Task Delete(int fontId)
+    {
+        if (await _unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId))
+        {
+            throw new KavitaException("errors.delete-font-in-use");
+        }
+
+        var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
+        if (font == null)
+            return;
+
+        await RemoveFont(font);
     }
 
     public async Task RemoveFont(EpubFont font)
     {
-        // TODO: Default font? Ask in kavita discord if needed, as we can always fallback to the browsers default font.
+        if (font.Provider == FontProvider.System)
+            return;
+
+        var prefs = await _unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Name);
+        foreach (var pref in prefs)
+        {
+            pref.BookReaderFontFamily = DefaultFont;
+            _unitOfWork.UserRepository.Update(pref);
+        }
+
+        try
+        {
+            // Copy the theme file to temp for nightly removal (to give user time to reclaim if made a mistake)
+            var existingLocation =
+                _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, font.FileName);
+            var newLocation =
+                _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, font.FileName);
+            _directoryService.CopyFileToDirectory(existingLocation, newLocation);
+            _directoryService.DeleteFiles([existingLocation]);
+        }
+        catch (Exception) { /* Swallow */ }
+
         _unitOfWork.EpubFontRepository.Remove(font);
         await _unitOfWork.CommitAsync();
     }

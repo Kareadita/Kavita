@@ -619,6 +619,10 @@
           <app-theme-manager></app-theme-manager>
           }
 
+          @defer (when tab.fragment === FragmentID.Font; prefetch on idle) {
+            <app-font-manager></app-font-manager>
+          }
+
           @defer (when tab.fragment === FragmentID.Devices; prefetch on idle) {
           <app-manage-devices></app-manage-devices>
           }

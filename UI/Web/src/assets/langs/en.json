@@ -102,6 +102,7 @@
         "preferences-tab": "Preferences",
         "3rd-party-clients-tab": "3rd Party Clients",
         "theme-tab": "Theme",
+        "font-tab": "Font",
         "devices-tab": "Devices",
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
@@ -201,6 +202,21 @@
         "preview-default": "Select a theme first",
         "preview-default-admin": "Select a theme first or upload one manually",
         "preview-title": "Preview"
+    },
+
+    "font-manager": {
+        "title": "Font Manager",
+        "description": "Kavita comes with a few fonts, but you can add your own. This page is for adding and removing fonts, use the book reading settings to choose the font you want to use.",
+        "enter-an-url-pre-title": "Enter an {{url}}",
+        "url": "url",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "a font file",
+        "preview-default": "Upload your own font via file or url",
+        "delete": "{{common.delete}}",
+        "url-label": "Url",
+        "back": "Back",
+        "load": "Load"
     },
 
     "theme": {
@@ -1972,7 +1988,10 @@
         "invalid-password-reset-url": "Invalid reset password url",
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
-        "theme-already-in-use": "Theme already exists by that name"
+        "theme-already-in-use": "Theme already exists by that name",
+        "delete-font-in-use": "Font is currently in use by at least one user, cannot delete",
+        "font-manual-upload": "There was an issue creating Font from manual upload",
+        "font-already-in-use": "Font already exists by that name"
     },
 
     "metadata-builder": {
@@ -2218,7 +2237,8 @@
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
-        "mal-token-required": "MAL Token is required, set in User Settings"
+        "mal-token-required": "MAL Token is required, set in User Settings",
+        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal"
     },
 
     "actionable": {

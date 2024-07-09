@@ -33,7 +33,6 @@ import {SettingsService} from 'src/app/admin/settings.service';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {forkJoin} from 'rxjs';
 import {bookColorThemes} from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
-import {BookService} from 'src/app/book-reader/_services/book.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {UserHoldsComponent} from '../user-holds/user-holds.component';
@@ -77,6 +76,8 @@ import {PdfTheme} from "../../_models/preferences/pdf-theme";
 import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
 import {PdfLayoutMode} from "../../_models/preferences/pdf-layout-mode";
 import {PdfSpreadMode} from "../../_models/preferences/pdf-spread-mode";
+import {FontManagerComponent} from "../font-manager/font-manager/font-manager.component";
+import {FontService} from "../../_services/font.service";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -90,6 +91,7 @@ enum FragmentID {
   Preferences = '',
   Clients = 'clients',
   Theme = 'theme',
+  Font = 'font',
   Devices = 'devices',
   Stats = 'stats',
   Scrobbling = 'scrobbling'
@@ -105,14 +107,14 @@ enum FragmentID {
     ChangePasswordComponent, ChangeAgeRestrictionComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
     ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
-    TranslocoDirective, LoadingComponent, ManageScrobblingProvidersComponent, PdfLayoutModePipe],
+    TranslocoDirective, LoadingComponent, ManageScrobblingProvidersComponent, PdfLayoutModePipe, FontManagerComponent],
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
-  private readonly bookService = inject(BookService);
+  private readonly fontService = inject(FontService);
   private readonly titleService = inject(Title);
   private readonly route = inject(ActivatedRoute);
   private readonly settingsService = inject(SettingsService);
@@ -153,6 +155,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'preferences-tab', fragment: FragmentID.Preferences},
     {title: '3rd-party-clients-tab', fragment: FragmentID.Clients},
     {title: 'theme-tab', fragment: FragmentID.Theme},
+    {title: 'font-tab', fragment: FragmentID.Font},
     {title: 'devices-tab', fragment: FragmentID.Devices},
     {title: 'stats-tab', fragment: FragmentID.Stats},
   ];
@@ -173,7 +176,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.bookService.getEpubFonts().subscribe(res => {
+    this.fontService.getFonts().subscribe(res => {
       this.fontFamilies = res.map(f => f.name);
       this.cdRef.markForCheck();
     })
