@@ -22,8 +22,8 @@ a {
     }
 
     &::placeholder {
-        opacity: 0.5;
-        color: #cecece;
+        opacity: var(--login-input-placeholder-opacity);
+        color: var(--login-input-placeholder-color);
         font-family: var(--login-input-font-family);
       }
 }
