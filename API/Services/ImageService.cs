@@ -223,7 +223,7 @@ public class ImageService : IImageService
 
     /// <summary>
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
-    /// fileName and .png extension.
+    /// fileName and the appropriate extension.
     /// </summary>
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
@@ -235,7 +235,6 @@ public class ImageService : IImageService
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);
-        if (stream.CanSeek) stream.Position = 0;
 
         var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
         var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);

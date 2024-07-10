@@ -155,21 +155,3 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build_nightly.outputs.digest }}
-
-      - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-          severity: info
-          description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
-          details: '${{ steps.findPr.outputs.body }}'
-          text: <@&939225192553644133> A new stable build has been released.
-          webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
-
-      - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-          severity: info
-          description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
-          details: '${{ steps.findPr.outputs.body }}'
-          text: <@&939225459156217917> <@&939225350775406643>  A new nightly build has been released for docker.
-          webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}

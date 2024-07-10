@@ -12448,6 +12448,40 @@
         }
       }
     },
+    "/api/Upload/volume": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Replaces volume cover image and locks it with a base64 encoded image.",
+        "description": "This is a helper API for Komf - Kavita UI does not use. Volume will find first chapter to update.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Upload/library": {
       "post": {
         "tags": [
