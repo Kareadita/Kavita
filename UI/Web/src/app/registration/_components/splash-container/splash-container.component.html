@@ -1,5 +1,5 @@
 <div class="mx-auto container login text-center"
-    [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - 57px)' : 'calc(var(--vh, 1vh) * 100)'}">
+    [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - var(--nav-offset))' : 'calc(var(--vh, 1vh) * 100)'}">
 
     <div class="row align-items-center row-cols-1 logo-container mb-3 justify-content-center">
         <div class="col col-md-4 col-sm-12 col-xs-12 align-self-center p-0">
