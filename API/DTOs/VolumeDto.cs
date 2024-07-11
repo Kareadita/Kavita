@@ -8,7 +8,7 @@ using API.Services.Tasks.Scanner.Parser;
 
 namespace API.DTOs;
 
-public class VolumeDto : IHasReadTimeEstimate
+public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <inheritdoc cref="Volume.MinNumber"/>
@@ -62,4 +62,8 @@ public class VolumeDto : IHasReadTimeEstimate
     {
         return MinNumber.Is(Parser.SpecialVolumeNumber);
     }
+
+    public string CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
 }

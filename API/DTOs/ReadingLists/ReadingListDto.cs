@@ -1,9 +1,10 @@
 ﻿using System;
+using API.Entities.Interfaces;
 
 namespace API.DTOs.ReadingLists;
 #nullable enable
 
-public class ReadingListDto
+public class ReadingListDto : IHasCoverImage
 {
     public int Id { get; init; }
     public string Title { get; set; } = default!;
@@ -17,6 +18,10 @@ public class ReadingListDto
     /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
     /// </summary>
     public string? CoverImage { get; set; } = string.Empty;
+
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
+
     /// <summary>
     /// Minimum Year the Reading List starts
     /// </summary>

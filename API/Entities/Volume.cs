@@ -6,7 +6,7 @@ using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
-public class Volume : IEntityDate, IHasReadTimeEstimate
+public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <summary>
@@ -38,11 +38,10 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
-    /// <summary>
-    /// Absolute path to the (managed) image file
-    /// </summary>
-    /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
     public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
+
     /// <summary>
     /// Total pages of all chapters in this volume
     /// </summary>

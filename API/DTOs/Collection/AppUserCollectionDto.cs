@@ -1,11 +1,12 @@
 ﻿using System;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Services.Plus;
 
 namespace API.DTOs.Collection;
 #nullable enable
 
-public class AppUserCollectionDto
+public class AppUserCollectionDto : IHasCoverImage
 {
     public int Id { get; init; }
     public string Title { get; set; } = default!;
@@ -17,6 +18,9 @@ public class AppUserCollectionDto
     /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
     /// </summary>
     public string? CoverImage { get; set; } = string.Empty;
+
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
 
     /// <summary>

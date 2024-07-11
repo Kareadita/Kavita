@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using API.Constants;
+using API.DTOs;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using EasyCaching.Core;
 using Flurl;
@@ -60,6 +63,7 @@ public interface IImageService
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
     Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
+    void UpdateColorScape(IHasCoverImage entity);
 }
 
 public class ImageService : IImageService
@@ -416,11 +420,174 @@ public class ImageService : IImageService
 
             _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
-        }catch (Exception ex)
+        } catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
             throw;
         }
+    }
+
+    private static (Vector3, Vector3) GetPrimarySecondaryColors(string imagePath, int numColors = 2)
+    {
+        using var image = Image.NewFromFile(imagePath);
+        // Resize the image to speed up processing
+        var resizedImage = image.Resize(0.1);
+
+        // Convert image to RGB array
+        var pixels = resizedImage.WriteToMemory().ToArray();
+
+        // Convert to list of Vector3 (RGB)
+        var rgbPixels = new List<Vector3>();
+        for (var i = 0; i < pixels.Length; i += 3)
+        {
+            rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
+        }
+
+        // Perform k-means clustering
+        var clusters = KMeansClustering(rgbPixels, numColors);
+
+        return (clusters[0], clusters[1]);
+    }
+
+    private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
+    {
+        var random = new Random();
+        var centroids = points.OrderBy(x => random.Next()).Take(k).ToList();
+
+        for (var i = 0; i < maxIterations; i++)
+        {
+            var clusters = new List<Vector3>[k];
+            for (var j = 0; j < k; j++)
+                clusters[j] = new List<Vector3>();
+
+            foreach (var point in points)
+            {
+                var nearestCentroidIndex = centroids
+                    .Select((centroid, index) => new { Index = index, Distance = Vector3.DistanceSquared(centroid, point) })
+                    .OrderBy(x => x.Distance)
+                    .First().Index;
+                clusters[nearestCentroidIndex].Add(point);
+            }
+
+            var newCentroids = clusters.Select(cluster =>
+                cluster.Count != 0 ? new Vector3(
+                    cluster.Average(p => p.X),
+                    cluster.Average(p => p.Y),
+                    cluster.Average(p => p.Z)
+                ) : Vector3.Zero
+            ).ToList();
+
+            if (centroids.SequenceEqual(newCentroids))
+                break;
+
+            centroids = newCentroids;
+        }
+
+        return centroids;
+    }
+
+    // public static Vector3 GetComplementaryColor(Vector3 color)
+    // {
+    //     // Simple complementary color calculation
+    //     return new Vector3(255 - color.X, 255 - color.Y, 255 - color.Z);
+    // }
+
+    public static string RgbToHex(Vector3 color)
+    {
+        return $"#{(int)color.X:X2}{(int)color.Y:X2}{(int)color.Z:X2}";
+    }
+
+    public static Vector3 GetComplementaryColor(Vector3 color)
+    {
+        // Convert RGB to HSL
+        var (h, s, l) = RgbToHsl(color);
+
+        // Rotate hue by 180 degrees
+        h = (h + 180) % 360;
+
+        // Convert back to RGB
+        return HslToRgb(h, s, l);
+    }
+
+    private static (double H, double S, double L) RgbToHsl(Vector3 rgb)
+    {
+        double r = rgb.X / 255;
+        double g = rgb.Y / 255;
+        double b = rgb.Z / 255;
+
+        var max = Math.Max(r, Math.Max(g, b));
+        var min = Math.Min(r, Math.Min(g, b));
+        var diff = max - min;
+
+        double h = 0;
+        double s = 0;
+        var l = (max + min) / 2;
+
+        if (Math.Abs(diff) > 0.00001)
+        {
+            s = l > 0.5 ? diff / (2 - max - min) : diff / (max + min);
+
+            if (max == r)
+                h = (g - b) / diff + (g < b ? 6 : 0);
+            else if (max == g)
+                h = (b - r) / diff + 2;
+            else if (max == b)
+                h = (r - g) / diff + 4;
+
+            h *= 60;
+        }
+
+        return (h, s, l);
+    }
+
+    private static Vector3 HslToRgb(double h, double s, double l)
+    {
+        double r, g, b;
+
+        if (Math.Abs(s) < 0.00001)
+        {
+            r = g = b = l;
+        }
+        else
+        {
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = HueToRgb(p, q, h + 120);
+            g = HueToRgb(p, q, h);
+            b = HueToRgb(p, q, h - 120);
+        }
+
+        return new Vector3((float)(r * 255), (float)(g * 255), (float)(b * 255));
+    }
+
+    private static double HueToRgb(double p, double q, double t)
+    {
+        if (t < 0) t += 360;
+        if (t > 360) t -= 360;
+        return t switch
+        {
+            < 60 => p + (q - p) * t / 60,
+            < 180 => q,
+            < 240 => p + (q - p) * (240 - t) / 60,
+            _ => p
+        };
+    }
+
+    /// <summary>
+    /// Generates the Primary and Secondary colors from a file
+    /// </summary>
+    /// <remarks>This may use a second most common color or a complementary color. It's up to implemenation to choose what's best</remarks>
+    /// <param name="sourceFile"></param>
+    /// <returns></returns>
+    public static ColorScape CalculateColorScape(string sourceFile)
+    {
+        var colors = GetPrimarySecondaryColors(sourceFile);
+
+        return new ColorScape()
+        {
+            Primary = RgbToHex(colors.Item1),
+            Secondary = RgbToHex(colors.Item2)
+        };
     }
 
     private static string FallbackToKavitaReaderFavicon(string baseUrl)
@@ -582,5 +749,13 @@ public class ImageService : IImageService
         }
 
         image.WriteToFile(dest);
+    }
+
+    public void UpdateColorScape(IHasCoverImage entity)
+    {
+        var colors = CalculateColorScape(
+            _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, entity.CoverImage));
+        entity.PrimaryColor = colors.Primary;
+        entity.SecondaryColor = colors.Secondary;
     }
 }

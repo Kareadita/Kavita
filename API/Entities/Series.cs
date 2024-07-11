@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
-using API.Extensions;
 
 namespace API.Entities;
 
-public class Series : IEntityDate, IHasReadTimeEstimate
+public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <summary>
@@ -81,6 +80,9 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// The type of all the files attached to this series
     /// </summary>
     public MangaFormat Format { get; set; } = MangaFormat.Unknown;
+
+    public string PrimaryColor { get; set; } = string.Empty;
+    public string SecondaryColor { get; set; } = string.Empty;
 
     public bool SortNameLocked { get; set; }
     public bool LocalizedNameLocked { get; set; }
