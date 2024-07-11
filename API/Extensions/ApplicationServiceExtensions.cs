@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using API.Constants;
 using API.Data;
 using API.Helpers;
@@ -53,6 +53,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMediaConversionService, MediaConversionService>();
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IStreamService, StreamService>();
+        services.AddScoped<IKoreaderService, KoreaderService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
