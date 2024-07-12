@@ -311,7 +311,7 @@ export class ThemeService {
   }
 
   private unsetPageColorOverrides() {
-    Array.from(this.document.body.classList).filter(cls => cls === 'pagecolor').forEach(c => this.document.body.classList.remove(c));
+    Array.from(this.document.head.children).filter(el => el.tagName === 'STYLE' && el.id.toLowerCase() === 'pagecolor').forEach(c => this.document.head.removeChild(c));
   }
 
   private unsetBookThemes() {
@@ -333,21 +333,8 @@ export class ThemeService {
   }
 
   private calculateComplementaryColor(hex: string): string {
-    // const rgb = this.hexToRgb(hex);
-    // const complement = rgb.map(value => 255 - value);
-    // return this.rgbToHex(complement[0], complement[1], complement[2]);
-
     const num = parseInt(hex.slice(1), 16);
     let compNum = 0xFFFFFF ^ num;
     return `#${compNum.toString(16).padStart(6, '0').toUpperCase()}`;
-  }
-
-  private hexToRgb(hex: string): number[] {
-    const bigint = parseInt(hex.slice(1), 16);
-    return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
-  }
-
-  private rgbToHex(r: number, g: number, b: number): string {
-    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
   }
 }

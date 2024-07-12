@@ -13,6 +13,18 @@
     --elevation-layer7: rgba(255,255,255,0.14);
     --elevation-layer8: rgba(255,255,255,0.15);
     --elevation-layer9: rgba(255,255,255,0.16);
+
+    --elevation-layer0-dark: rgba(0, 0, 0,0);
+    --elevation-layer1-dark: rgba(0, 0, 0,0.05);
+    --elevation-layer2-dark: rgba(0, 0, 0,0.07);
+    --elevation-layer3-dark: rgba(0, 0, 0,0.08);
+    --elevation-layer4-dark: rgba(0, 0, 0,0.09);
+    --elevation-layer5-dark: rgba(0, 0, 0,0.11);
+    --elevation-layer6-dark: rgba(0, 0, 0,0.12);
+    --elevation-layer7-dark: rgba(0, 0, 0,0.14);
+    --elevation-layer8-dark: rgba(0, 0, 0,0.15);
+    --elevation-layer9-dark: rgba(0, 0, 0,0.16);
+    --elevation-layer10-dark: rgba(0, 0, 0, 0.4);
     --nav-offset: 75px;
 
     /* Base colors */
@@ -42,7 +54,7 @@
 
 
     /* Navbar */
-    --navbar-bg-color: var(--elevation-layer4);
+    --navbar-bg-color: var(--elevation-layer10-dark);
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
@@ -122,8 +134,8 @@
     --tagbadge-filled-bg-color: var(--primary-color);
 
     /* Side Nav */
-    --side-nav-bg-color: var(--elevation-layer2);
-    --side-nav-mobile-bg-color: var(--elevation-layer2);
+    --side-nav-bg-color: var(--elevation-layer4-dark);
+    --side-nav-mobile-bg-color: var(--elevation-layer4-dark);
     --side-nav-openclose-transition: 0.15s ease-in-out;
     --side-nav-box-shadow: var(--elevation-layer0);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
