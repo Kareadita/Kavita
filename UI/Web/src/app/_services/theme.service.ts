@@ -213,24 +213,23 @@ export class ThemeService {
   }
 
   generateBackgroundColors(primaryColor: string, leanDark: boolean = true) {
-    const lighterColor = this.lightenDarkenColor(primaryColor, 0);
-    const darkerColor = this.lightenDarkenColor(primaryColor, -40);
+    const lightenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
+    const darkenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
+
+    const lightenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
+    const darkenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
+
+    const lighterColor = this.lightenDarkenColor(primaryColor, lightenOffsetPrimary);
+    const darkerColor = this.lightenDarkenColor(primaryColor, darkenOffsetPrimary);
 
     let compColor = this.calculateComplementaryColor(primaryColor);
     if (leanDark) {
-      compColor = this.lightenDarkenColor(compColor, -40); // Make it darker
+      compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
     } else {
-      compColor = this.lightenDarkenColor(compColor, 10);  // Make it lighter
+      compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
     }
 
     return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
-  }
-
-  generateBackgroundString(colors: {primary: string, darker: string, lighter: string, complementary: string}) {
-    return `background: radial-gradient(circle farthest-side at 0% 100%, ${colors.darker} 0%, ${colors.darker} 100%),
-                        radial-gradient(circle farthest-side at 100% 100%, ${colors.primary} 0%, ${colors.primary} 100%),
-                        radial-gradient(circle farthest-side at 100% 0%, ${colors.lighter} 0%, ${colors.lighter} 100%),
-                        radial-gradient(circle farthest-side at 0% 0%, ${colors.complementary} 0%, ${colors.complementary} 100%), black !important;`;
   }
 
 
