@@ -77,6 +77,9 @@ public class ImageService : IImageService
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
 
+    private const double WhiteThreshold = 0.80; // Colors with lightness above this are considered too close to white
+    private const double BlackThreshold = 0.15; // Colors with lightness below this are considered too close to black
+
 
     /// <summary>
     /// Width of the Thumbnail generation
@@ -239,7 +242,6 @@ public class ImageService : IImageService
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);
-        if (stream.CanSeek) stream.Position = 0;
 
         var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
         var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);
@@ -427,26 +429,97 @@ public class ImageService : IImageService
         }
     }
 
-    private static (Vector3, Vector3) GetPrimarySecondaryColors(string imagePath, int numColors = 2)
+    private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath, int numColors = 2)
     {
         using var image = Image.NewFromFile(imagePath);
         // Resize the image to speed up processing
         var resizedImage = image.Resize(0.1);
 
-        // Convert image to RGB array
-        var pixels = resizedImage.WriteToMemory().ToArray();
+        // Pre-process the image to replace white and black pixels
+        //var processedImage = PreProcessImage(resizedImage);
 
-        // Convert to list of Vector3 (RGB)
-        var rgbPixels = new List<Vector3>();
-        for (var i = 0; i < pixels.Length; i += 3)
+        // Generate a histogram
+        var histogram = GenerateColorHistogram(resizedImage);
+
+        // // Convert image to RGB array
+        // var pixels = resizedImage.WriteToMemory().ToArray();
+        //
+        // // Convert to list of Vector3 (RGB)
+        // var rgbPixels = new List<Vector3>();
+        // for (var i = 0; i < pixels.Length; i += 3)
+        // {
+        //     rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
+        // }
+        //
+        // // Perform k-means clustering
+        // var clusters = KMeansClustering(rgbPixels, numColors);
+        //
+        // return (clusters[0], clusters[1]);
+
+        // Filter out colors that are too close to white or black
+        // var suitableColors = clusters
+        //     .Where(c => !IsColorCloseToWhiteOrBlack(c))
+        //     .OrderByDescending(c => rgbPixels.Count(p => Vector3.DistanceSquared(p, c) < 100)) // Sort by cluster size
+        //     .ToList();
+
+        // Filter out colors that are too close to white or black and sort by frequency
+        var suitableColors = histogram
+            .Where(c => !IsColorCloseToWhiteOrBlack(c.Key))
+            .OrderByDescending(c => c.Value)
+            .Take(numColors)
+            .Select(c => c.Key)
+            .ToList();
+
+        if (suitableColors.Count == 0)
         {
-            rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
+            return (null, null); // No suitable colors found
+        }
+        if (suitableColors.Count == 1)
+        {
+            return (suitableColors[0], null); // Only one suitable color found
         }
 
-        // Perform k-means clustering
-        var clusters = KMeansClustering(rgbPixels, numColors);
+        return (suitableColors[0], suitableColors[1]); // Return the two most dominant suitable colors
+    }
 
-        return (clusters[0], clusters[1]);
+    private static Image PreProcessImage(Image image)
+    {
+        // Create a mask for white and black pixels
+        var whiteMask = image.Colourspace(Enums.Interpretation.Lab)[0] > (WhiteThreshold * 100);
+        var blackMask = image.Colourspace(Enums.Interpretation.Lab)[0] < (BlackThreshold * 100);
+
+        // Create a replacement color (e.g., medium gray)
+        var replacementColor = new[] { 128.0, 128.0, 128.0 };
+
+        // Apply the masks to replace white and black pixels
+        var processedImage = image.Copy();
+        processedImage = processedImage.Ifthenelse(whiteMask, replacementColor);
+        processedImage = processedImage.Ifthenelse(blackMask, replacementColor);
+
+        return processedImage;
+    }
+
+    private static Dictionary<Vector3, int> GenerateColorHistogram(Image image)
+    {
+        var pixels = image.WriteToMemory().ToArray();
+        var histogram = new Dictionary<Vector3, int>();
+
+        for (var i = 0; i < pixels.Length; i += 3)
+        {
+            var color = new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]);
+            if (!histogram.TryAdd(color, 1))
+            {
+                histogram[color]++;
+            }
+        }
+
+        return histogram;
+    }
+
+    private static bool IsColorCloseToWhiteOrBlack(Vector3 color)
+    {
+        var (_, _, lightness) = RgbToHsl(color);
+        return lightness is > WhiteThreshold or < BlackThreshold;
     }
 
     private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
@@ -458,7 +531,9 @@ public class ImageService : IImageService
         {
             var clusters = new List<Vector3>[k];
             for (var j = 0; j < k; j++)
-                clusters[j] = new List<Vector3>();
+            {
+                clusters[j] = [];
+            }
 
             foreach (var point in points)
             {
@@ -492,7 +567,7 @@ public class ImageService : IImageService
     //     return new Vector3(255 - color.X, 255 - color.Y, 255 - color.Z);
     // }
 
-    public static string RgbToHex(Vector3 color)
+    private static string RgbToHex(Vector3 color)
     {
         return $"#{(int)color.X:X2}{(int)color.Y:X2}{(int)color.Z:X2}";
     }
@@ -579,14 +654,16 @@ public class ImageService : IImageService
     /// <remarks>This may use a second most common color or a complementary color. It's up to implemenation to choose what's best</remarks>
     /// <param name="sourceFile"></param>
     /// <returns></returns>
-    public static ColorScape CalculateColorScape(string sourceFile)
+    private static ColorScape CalculateColorScape(string sourceFile)
     {
+        if (!File.Exists(sourceFile)) return new ColorScape() {Primary = null, Secondary = null};
+
         var colors = GetPrimarySecondaryColors(sourceFile);
 
         return new ColorScape()
         {
-            Primary = RgbToHex(colors.Item1),
-            Secondary = RgbToHex(colors.Item2)
+            Primary = colors.Item1 == null ? null : RgbToHex(colors.Item1.Value),
+            Secondary = colors.Item2 == null ? null : RgbToHex(colors.Item2.Value)
         };
     }
 

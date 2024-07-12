@@ -116,6 +116,7 @@ import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
+import {ThemeService} from "../../../_services/theme.service";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -173,12 +174,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly scrollService = inject(ScrollService);
   private readonly deviceService = inject(DeviceService);
   private readonly translocoService = inject(TranslocoService);
-
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
   protected readonly navService = inject(NavService);
   protected readonly readerService = inject(ReaderService);
+  protected readonly themeService = inject(ThemeService);
+
   protected readonly LibraryType = LibraryType;
   protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
@@ -640,6 +642,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
+
+      this.themeService.setPageColor(this.series.primaryColor);
 
       if (loadExternal) {
         this.loadPlusMetadata(this.seriesId, this.libraryType);

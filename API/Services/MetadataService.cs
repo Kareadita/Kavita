@@ -143,7 +143,6 @@ public class MetadataService : IMetadataService
             return Task.FromResult(false);
         }
 
-
         // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
         volume.Chapters ??= new List<Chapter>();
 
@@ -153,6 +152,7 @@ public class MetadataService : IMetadataService
             firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
             if (firstChapter == null) return Task.FromResult(false);
         }
+
 
         volume.CoverImage = firstChapter.CoverImage;
         _imageService.UpdateColorScape(volume);

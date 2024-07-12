@@ -1,18 +1,30 @@
 <div [ngClass]="{'no-transitions' : (transitionState$ | async)}">
-    <app-nav-header></app-nav-header>
-    <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
-        <a id="content"></a>
-        <app-side-nav *ngIf="navService.sideNavVisibility$ | async"></app-side-nav>
-
-        <div class="container-fluid" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
-            <div *ngIf="navService.sideNavVisibility$ | async else noSideNav">
-                <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
-                    <router-outlet></router-outlet>
-                </div>
-            </div>
-            <ng-template #noSideNav>
-                <router-outlet></router-outlet>
-            </ng-template>
-        </div>
+    <div class="fullpage-background">
+      <div class="background-area">
+        <canvas id="backgroundCanvas" class="default-background" style="width: 100%; height: 100%; margin-top: calc(-1 * var(--nav-offset));"></canvas>
+      </div>
     </div>
+    <app-nav-header></app-nav-header>
+    @if(navService.sideNavVisibility$ | async; as sideNavVisibility) {
+      <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': sideNavVisibility}">
+        <a id="content"></a>
+        @if(sideNavVisibility) {
+          <app-side-nav></app-side-nav>
+        }
+
+
+        <div class="container-fluid" [ngClass]="{'g-0': !sideNavVisibility}">
+          @if (sideNavVisibility) {
+            <div>
+              <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
+                <router-outlet></router-outlet>
+              </div>
+            </div>
+          } @else {
+            <router-outlet></router-outlet>
+          }
+        </div>
+      </div>
+    }
+
 </div>

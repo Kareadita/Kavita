@@ -8,6 +8,35 @@ body {
   color-scheme: var(--color-scheme);
   max-height: 100%;
   overflow-y: auto;
+
+  // Basic gradiant effect but not particularly good
+  //background: linear-gradient(
+  //    to right,
+  //    var(--primary-bg-color) 0%,
+  //    var(--secondary-bg-color) 100%
+  //);
+
+
+  // This may be how Plex achieves the effect
+  //$darken-1: rgba(0, 0, 0, 0.3);
+  //$darken-2: rgba(0, 0, 0, 0.6);
+  //$darken-3: rgba(0, 0, 0, 0.8);
+  //$darken-4: rgba(0, 0, 0, 1);
+
+  // Almost there, but too powerful of a color
+  //background: linear-gradient(to top left, #ce1421, $darken-3 100%),
+  //linear-gradient(to top right, var(--bs-body-bg), $darken-3 100%),
+  //linear-gradient(to bottom left, #ce1421, $darken-3 100%),
+  //linear-gradient(to bottom right, var(--bs-body-bg), $darken-3 100%) !important;
+  //background-blend-mode: screen;
+
+  //background: linear-gradient(to top left, $darken-4, $darken-3 20%),
+  //  linear-gradient(to top right, $darken-3, #ce1421 100%),
+  //  linear-gradient(to bottom left, $darken-4, $darken-3 20%),
+  //  linear-gradient(to bottom right, $darken-3, #ce1421 100%) !important;
+  //background-blend-mode: darken(#ce1421, 0.6);
+  //opacity: 0.2;
+
 }
 
 .no-transitions, .no-transitions * {
@@ -41,5 +70,4 @@ hr {
 .navbar-offset {
   margin-top: 75px;
 }
-
 

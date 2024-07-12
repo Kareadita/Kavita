@@ -28,8 +28,12 @@
     --text-muted-color: lightgrey;
 
     /* New Color scheme */
-    --secondary-color: #212328;
     --bulk-background-color: rgba(39,39,39,1);
+
+  /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors */
+
+    --primary-bg-color: var(--bs-body-bg);
+    --secondary-bg-color: var(--bs-body-bg);
 
     /* Meta and Globals */
     --theme-color: #000000;

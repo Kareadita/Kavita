@@ -5,6 +5,6 @@
 /// </summary>
 public class ColorScape
 {
-    public required string Primary { get; set; }
-    public required string Secondary { get; set; }
+    public required string? Primary { get; set; }
+    public required string? Secondary { get; set; }
 }

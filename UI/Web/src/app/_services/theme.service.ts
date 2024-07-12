@@ -1,9 +1,18 @@
 import {DOCUMENT} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, SecurityContext} from '@angular/core';
+import {
+  DestroyRef,
+  inject,
+  Inject,
+  Injectable,
+  Renderer2,
+  RendererFactory2,
+  RendererStyleFlags2,
+  SecurityContext
+} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
-import {map, ReplaySubject, take} from 'rxjs';
+import {filter, map, ReplaySubject, take} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
@@ -15,6 +24,7 @@ import {translate} from "@ngneat/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
+import {NavigationStart, Router} from "@angular/router";
 
 
 @Injectable({
@@ -42,8 +52,15 @@ export class ThemeService {
 
 
   constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
-  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService) {
+  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService,
+  private router: Router) {
     this.renderer = rendererFactory.createRenderer(null, null);
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationStart)
+    ).subscribe(() => {
+      this.setPageColor('');
+    });
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
@@ -90,21 +107,21 @@ export class ThemeService {
     return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
 
-    /**
-     * --theme-color from theme. Updates the meta tag
-     * @returns
-     */
-    getThemeColor() {
-      return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
-    }
+  /**
+   * --theme-color from theme. Updates the meta tag
+   * @returns
+   */
+  getThemeColor() {
+    return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
+  }
 
-    /**
-     * --msapplication-TileColor from theme. Updates the meta tag
-     * @returns
-     */
-    getTileColor() {
-      return getComputedStyle(this.document.body).getPropertyValue('--title-color').trim();
-    }
+  /**
+   * --msapplication-TileColor from theme. Updates the meta tag
+   * @returns
+   */
+  getTileColor() {
+    return getComputedStyle(this.document.body).getPropertyValue('--title-color').trim();
+  }
 
   getCssVariable(variable: string) {
     return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
@@ -163,6 +180,64 @@ export class ThemeService {
 
   clearBookTheme() {
     this.unsetBookThemes();
+  }
+
+  /**
+   * Set's the background color from a single primary color.
+   * @param primaryColor
+   */
+  setPageColor(primaryColor: string) {
+    // Remove existing style element with old variable overrides
+    const pageColorSelector = 'pagecolor';
+    this.unsetPageColorOverrides();
+
+    // Remove default-background class from canvas
+    const elem = this.document.querySelector('#backgroundCanvas');
+    if (!elem) return;
+
+    if (primaryColor === '' || primaryColor === null || primaryColor === undefined) {
+
+      // When undefined, treat as if we are reverting back to default
+      return;
+    }
+
+    const complementaryColor = this.calculateComplementaryColor(primaryColor);
+
+    const inlineStyle = this.generateBackgroundString(primaryColor, complementaryColor);
+
+    // TODO: Probably a good idea to generate the 4 colors as a css variable for theme creators
+    const styleElem = this.document.createElement('style');
+    styleElem.id = pageColorSelector;
+    styleElem.appendChild(this.document.createTextNode(`.default-background { ${inlineStyle} !important }`));
+    this.renderer.appendChild(this.document.head, styleElem);
+
+    this.renderer.setStyle(this.document.querySelector('#backgroundCanvas'), 'background', inlineStyle, RendererStyleFlags2.Important);
+  }
+
+  generateBackgroundString(primaryColor: string, complementaryColor: string, leanDark: boolean = true) {
+    // const [r, g, b] = this.hexToRgb(primaryColor);
+    // const [cr, cg, cb] = this.hexToRgb(complementaryColor);
+    //
+    // //return `radial-gradient(circle farthest-side at 0% 100%, ${primaryColor} 0%);`;
+    // return `radial-gradient(circle farthest-side at 0% 100%, rgb(3, 47, 66) 0%, rgba(3, 47, 66, 0) 100%),
+    // radial-gradient(circle farthest-side at 100% 100%, rgb(23, 63, 77) 0%, rgba(23, 63, 77, 0) 100%),
+    // radial-gradient(circle farthest-side at 100% 0%, rgb(6, 57, 77) 0%, rgba(6, 57, 77, 0) 100%),
+    // radial-gradient(circle farthest-side at 0% 0%, rgb(77, 70, 58) 0%, rgba(77, 70, 58, 0) 100%), black;`
+
+    const lighterColor = this.lightenDarkenColor(primaryColor, 0);
+    const darkerColor = this.lightenDarkenColor(primaryColor, -40);
+
+    let compColor = this.calculateComplementaryColor(primaryColor);
+    if (leanDark) {
+      compColor = this.lightenDarkenColor(compColor, -40); // Make it darker
+    } else {
+      compColor = this.lightenDarkenColor(compColor, 10);  // Make it lighter
+    }
+
+    return `background: radial-gradient(circle farthest-side at 0% 100%, ${darkerColor} 0%, ${darkerColor} 100%),
+                        radial-gradient(circle farthest-side at 100% 100%, ${primaryColor} 0%, ${primaryColor} 100%),
+                        radial-gradient(circle farthest-side at 100% 0%, ${lighterColor} 0%, ${lighterColor} 100%),
+                        radial-gradient(circle farthest-side at 0% 0%, ${compColor} 0%, ${compColor} 100%), black !important;`;
   }
 
 
@@ -235,9 +310,44 @@ export class ThemeService {
     this.themeCache.forEach(theme => this.document.body.classList.remove(theme.selector));
   }
 
+  private unsetPageColorOverrides() {
+    Array.from(this.document.body.classList).filter(cls => cls === 'pagecolor').forEach(c => this.document.body.classList.remove(c));
+  }
+
   private unsetBookThemes() {
     Array.from(this.document.body.classList).filter(cls => cls.startsWith('brtheme-')).forEach(c => this.document.body.classList.remove(c));
   }
 
+  private lightenDarkenColor(hex: string, amt: number) {
+    let num = parseInt(hex.slice(1), 16);
+    let r = (num >> 16) + amt;
+    let g = ((num >> 8) & 0x00FF) + amt;
+    let b = (num & 0x0000FF) + amt;
 
+    r = Math.max(Math.min(255, r), 0);
+    g = Math.max(Math.min(255, g), 0);
+    b = Math.max(Math.min(255, b), 0);
+
+    let newColor = (r << 16) | (g << 8) | b;
+    return `#${(0x1000000 + newColor).toString(16).slice(1).toUpperCase()}`;
+  }
+
+  private calculateComplementaryColor(hex: string): string {
+    // const rgb = this.hexToRgb(hex);
+    // const complement = rgb.map(value => 255 - value);
+    // return this.rgbToHex(complement[0], complement[1], complement[2]);
+
+    const num = parseInt(hex.slice(1), 16);
+    let compNum = 0xFFFFFF ^ num;
+    return `#${compNum.toString(16).padStart(6, '0').toUpperCase()}`;
+  }
+
+  private hexToRgb(hex: string): number[] {
+    const bigint = parseInt(hex.slice(1), 16);
+    return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+  }
+
+  private rgbToHex(r: number, g: number, b: number): string {
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  }
 }

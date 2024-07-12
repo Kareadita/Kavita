@@ -18,4 +18,8 @@ export interface Volume {
     minHoursToRead: number;
     maxHoursToRead: number;
     avgHoursToRead: number;
+
+    coverImage?: string;
+    primaryColor: string;
+    secondaryColor: string;
 }

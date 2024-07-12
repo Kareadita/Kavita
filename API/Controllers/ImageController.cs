@@ -171,6 +171,7 @@ public class ImageController : BaseApiController
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
             settings.CoverImageSize,
             destFile);
+        // TODO: Refactor this so that reading lists have a dedicated cover image so we can calculate primary/secondary colors
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
 
@@ -186,6 +187,7 @@ public class ImageController : BaseApiController
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
             settings.CoverImageSize,
             destFile);
+        // TODO: Refactor this so that collections have a dedicated cover image so we can calculate primary/secondary colors
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
 
