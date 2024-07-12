@@ -470,16 +470,12 @@ public class ImageService : IImageService
             .Select(c => c.Key)
             .ToList();
 
-        if (suitableColors.Count == 0)
+        return suitableColors.Count switch
         {
-            return (null, null); // No suitable colors found
-        }
-        if (suitableColors.Count == 1)
-        {
-            return (suitableColors[0], null); // Only one suitable color found
-        }
-
-        return (suitableColors[0], suitableColors[1]); // Return the two most dominant suitable colors
+            0 => (null, null),
+            1 => (suitableColors[0], null),
+            _ => (suitableColors[0], suitableColors[1])
+        };
     }
 
     private static Image PreProcessImage(Image image)

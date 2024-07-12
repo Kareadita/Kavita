@@ -191,39 +191,28 @@ export class ThemeService {
     const pageColorSelector = 'pagecolor';
     this.unsetPageColorOverrides();
 
-    // Remove default-background class from canvas
     const elem = this.document.querySelector('#backgroundCanvas');
-    if (!elem) return;
 
-    if (primaryColor === '' || primaryColor === null || primaryColor === undefined) {
-
-      // When undefined, treat as if we are reverting back to default
+    // When undefined, treat as if we are reverting back to default
+    if (!elem || primaryColor === '' || primaryColor === null || primaryColor === undefined) {
       return;
     }
 
-    const complementaryColor = this.calculateComplementaryColor(primaryColor);
+    const colors = this.generateBackgroundColors(primaryColor, this.isDarkTheme());
 
-    const inlineStyle = this.generateBackgroundString(primaryColor, complementaryColor);
-
-    // TODO: Probably a good idea to generate the 4 colors as a css variable for theme creators
     const styleElem = this.document.createElement('style');
     styleElem.id = pageColorSelector;
-    styleElem.appendChild(this.document.createTextNode(`.default-background { ${inlineStyle} !important }`));
+    styleElem.appendChild(this.document.createTextNode(`
+    :root, :root .default {
+    --colorscape-primary-color: ${colors.primary};
+    --colorscape-lighter-color: ${colors.lighter};
+    --colorscape-darker-color: ${colors.darker};
+    --colorscape-complementary-color: ${colors.complementary};
+    }`));
     this.renderer.appendChild(this.document.head, styleElem);
-
-    this.renderer.setStyle(this.document.querySelector('#backgroundCanvas'), 'background', inlineStyle, RendererStyleFlags2.Important);
   }
 
-  generateBackgroundString(primaryColor: string, complementaryColor: string, leanDark: boolean = true) {
-    // const [r, g, b] = this.hexToRgb(primaryColor);
-    // const [cr, cg, cb] = this.hexToRgb(complementaryColor);
-    //
-    // //return `radial-gradient(circle farthest-side at 0% 100%, ${primaryColor} 0%);`;
-    // return `radial-gradient(circle farthest-side at 0% 100%, rgb(3, 47, 66) 0%, rgba(3, 47, 66, 0) 100%),
-    // radial-gradient(circle farthest-side at 100% 100%, rgb(23, 63, 77) 0%, rgba(23, 63, 77, 0) 100%),
-    // radial-gradient(circle farthest-side at 100% 0%, rgb(6, 57, 77) 0%, rgba(6, 57, 77, 0) 100%),
-    // radial-gradient(circle farthest-side at 0% 0%, rgb(77, 70, 58) 0%, rgba(77, 70, 58, 0) 100%), black;`
-
+  generateBackgroundColors(primaryColor: string, leanDark: boolean = true) {
     const lighterColor = this.lightenDarkenColor(primaryColor, 0);
     const darkerColor = this.lightenDarkenColor(primaryColor, -40);
 
@@ -234,10 +223,14 @@ export class ThemeService {
       compColor = this.lightenDarkenColor(compColor, 10);  // Make it lighter
     }
 
-    return `background: radial-gradient(circle farthest-side at 0% 100%, ${darkerColor} 0%, ${darkerColor} 100%),
-                        radial-gradient(circle farthest-side at 100% 100%, ${primaryColor} 0%, ${primaryColor} 100%),
-                        radial-gradient(circle farthest-side at 100% 0%, ${lighterColor} 0%, ${lighterColor} 100%),
-                        radial-gradient(circle farthest-side at 0% 0%, ${compColor} 0%, ${compColor} 100%), black !important;`;
+    return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
+  }
+
+  generateBackgroundString(colors: {primary: string, darker: string, lighter: string, complementary: string}) {
+    return `background: radial-gradient(circle farthest-side at 0% 100%, ${colors.darker} 0%, ${colors.darker} 100%),
+                        radial-gradient(circle farthest-side at 100% 100%, ${colors.primary} 0%, ${colors.primary} 100%),
+                        radial-gradient(circle farthest-side at 100% 0%, ${colors.lighter} 0%, ${colors.lighter} 100%),
+                        radial-gradient(circle farthest-side at 0% 0%, ${colors.complementary} 0%, ${colors.complementary} 100%), black !important;`;
   }
 
 
@@ -262,7 +255,6 @@ export class ThemeService {
           const styleElem = this.document.createElement('style');
           styleElem.id = 'theme-' + theme.name;
           styleElem.appendChild(this.document.createTextNode(content));
-
           this.renderer.appendChild(this.document.head, styleElem);
 
           // Check if the theme has --theme-color and apply it to meta tag

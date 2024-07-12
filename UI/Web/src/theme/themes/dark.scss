@@ -43,9 +43,19 @@
     --bulk-background-color: rgba(39,39,39,1);
 
   /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors */
+    /**
+      Offsets are used to generate the 4 corners of gradient.
+     */
+    --colorscape-primary-lighten-offset: 0;
+    --colorscape-primary-darken-offset: -40;
+    --colorscape-secondary-lighten-offset: 10;
+    --colorscape-secondary-darken-offset: -40;
+    /* These are the default background colors for the app. These will be updated on different pages with the generated colors */
+    --colorscape-primary-color: rgb(38, 38, 38);
+    --colorscape-lighter-color: rgb(32, 32, 32);
+    --colorscape-darker-color: rgb(28, 28, 28);
+    --colorscape-complementary-color: rgb(51, 51, 51);
 
-    --primary-bg-color: var(--bs-body-bg);
-    --secondary-bg-color: var(--bs-body-bg);
 
     /* Meta and Globals */
     --theme-color: #000000;

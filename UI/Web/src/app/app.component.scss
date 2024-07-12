@@ -40,10 +40,18 @@
 }
 
 .default-background {
-  background: radial-gradient(circle farthest-side at 0% 100%, rgb(28, 28, 28) 0%, rgba(28, 28, 28, 0) 100%),
-              radial-gradient(circle farthest-side at 100% 100%, rgb(38, 38, 38) 0%, rgba(38, 38, 38, 0) 100%),
-              radial-gradient(circle farthest-side at 100% 0%, rgb(32, 32, 32) 0%, rgba(32, 32, 32, 0) 100%),
-              radial-gradient(circle farthest-side at 0% 0%, rgb(51, 51, 51) 0%, rgba(51, 51, 51, 0) 100%), black
+  background: radial-gradient(circle farthest-side at 0% 100%,
+    var(--colorscape-darker-color) 0%,
+    var(--colorscape-darker-color) 100%),
+              radial-gradient(circle farthest-side at 100% 100%,
+      var(--colorscape-primary-color) 0%,
+      var(--colorscape-primary-color) 100%),
+              radial-gradient(circle farthest-side at 100% 0%,
+      var(--colorscape-lighter-color) 0%,
+      var(--colorscape-lighter-color) 100%),
+              radial-gradient(circle farthest-side at 0% 0%,
+      var(--colorscape-complementary-color) 0%,
+      var(--colorscape-complementary-color) 100%), black
 }
 
 .fullpage-background {
