@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -16,6 +17,9 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NetVips;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using Image = NetVips.Image;
 
 namespace API.Services;
@@ -77,8 +81,8 @@ public class ImageService : IImageService
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
 
-    private const double WhiteThreshold = 0.80; // Colors with lightness above this are considered too close to white
-    private const double BlackThreshold = 0.15; // Colors with lightness below this are considered too close to black
+    private const double WhiteThreshold = 0.90; // Colors with lightness above this are considered too close to white
+    private const double BlackThreshold = 0.25; // Colors with lightness below this are considered too close to black
 
 
     /// <summary>
@@ -435,47 +439,42 @@ public class ImageService : IImageService
         // Resize the image to speed up processing
         var resizedImage = image.Resize(0.1);
 
-        // Pre-process the image to replace white and black pixels
-        //var processedImage = PreProcessImage(resizedImage);
 
-        // Generate a histogram
-        var histogram = GenerateColorHistogram(resizedImage);
+        // Convert image to RGB array
+        var pixels = resizedImage.WriteToMemory().ToArray();
 
-        // // Convert image to RGB array
-        // var pixels = resizedImage.WriteToMemory().ToArray();
-        //
-        // // Convert to list of Vector3 (RGB)
-        // var rgbPixels = new List<Vector3>();
-        // for (var i = 0; i < pixels.Length; i += 3)
-        // {
-        //     rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
-        // }
-        //
-        // // Perform k-means clustering
-        // var clusters = KMeansClustering(rgbPixels, numColors);
-        //
-        // return (clusters[0], clusters[1]);
-
-        // Filter out colors that are too close to white or black
-        // var suitableColors = clusters
-        //     .Where(c => !IsColorCloseToWhiteOrBlack(c))
-        //     .OrderByDescending(c => rgbPixels.Count(p => Vector3.DistanceSquared(p, c) < 100)) // Sort by cluster size
-        //     .ToList();
-
-        // Filter out colors that are too close to white or black and sort by frequency
-        var suitableColors = histogram
-            .Where(c => !IsColorCloseToWhiteOrBlack(c.Key))
-            .OrderByDescending(c => c.Value)
-            .Take(numColors)
-            .Select(c => c.Key)
-            .ToList();
-
-        return suitableColors.Count switch
+        // Convert to list of Vector3 (RGB)
+        var rgbPixels = new List<Vector3>();
+        for (var i = 0; i < pixels.Length; i += 3)
         {
-            0 => (null, null),
-            1 => (suitableColors[0], null),
-            _ => (suitableColors[0], suitableColors[1])
-        };
+            rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
+        }
+
+        // Perform k-means clustering
+        var clusters = KMeansClustering(rgbPixels, numColors);
+
+        var sorted = SortByVibrancy(clusters);
+
+        return (sorted[0], sorted[1]);
+    }
+
+    private static (Vector3?, Vector3?) GetPrimaryColorSharp(string imagePath)
+    {
+        using var image = SixLabors.ImageSharp.Image.Load<Rgb24>(imagePath);
+
+        image.Mutate(
+            x => x
+                // Scale the image down preserving the aspect ratio. This will speed up quantization.
+                // We use nearest neighbor as it will be the fastest approach.
+                .Resize(new ResizeOptions() { Sampler = KnownResamplers.NearestNeighbor, Size = new SixLabors.ImageSharp.Size(100, 0) })
+
+                // Reduce the color palette to 1 color without dithering.
+                .Quantize(new OctreeQuantizer(new QuantizerOptions { MaxColors = 4 })));
+
+        Rgb24 dominantColor = image[0, 0];
+
+        // This will give you a dominant color in HEX format i.e #5E35B1FF
+        return (new Vector3(dominantColor.R, dominantColor.G, dominantColor.B), new Vector3(dominantColor.R, dominantColor.G, dominantColor.B));
     }
 
     private static Image PreProcessImage(Image image)
@@ -563,12 +562,27 @@ public class ImageService : IImageService
     //     return new Vector3(255 - color.X, 255 - color.Y, 255 - color.Z);
     // }
 
+    public static List<Vector3> SortByBrightness(List<Vector3> colors)
+    {
+        return colors.OrderBy(c => 0.299 * c.X + 0.587 * c.Y + 0.114 * c.Z).ToList();
+    }
+
+    public static List<Vector3> SortByVibrancy(List<Vector3> colors)
+    {
+        return colors.OrderByDescending(c =>
+        {
+            float max = Math.Max(c.X, Math.Max(c.Y, c.Z));
+            float min = Math.Min(c.X, Math.Min(c.Y, c.Z));
+            return (max - min) / max;
+        }).ToList();
+    }
+
     private static string RgbToHex(Vector3 color)
     {
         return $"#{(int)color.X:X2}{(int)color.Y:X2}{(int)color.Z:X2}";
     }
 
-    public static Vector3 GetComplementaryColor(Vector3 color)
+    private static Vector3 GetComplementaryColor(Vector3 color)
     {
         // Convert RGB to HSL
         var (h, s, l) = RgbToHsl(color);
@@ -650,7 +664,7 @@ public class ImageService : IImageService
     /// <remarks>This may use a second most common color or a complementary color. It's up to implemenation to choose what's best</remarks>
     /// <param name="sourceFile"></param>
     /// <returns></returns>
-    private static ColorScape CalculateColorScape(string sourceFile)
+    public static ColorScape CalculateColorScape(string sourceFile)
     {
         if (!File.Exists(sourceFile)) return new ColorScape() {Primary = null, Secondary = null};
 
@@ -830,5 +844,32 @@ public class ImageService : IImageService
             _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, entity.CoverImage));
         entity.PrimaryColor = colors.Primary;
         entity.SecondaryColor = colors.Secondary;
+    }
+
+    public static Color HexToRgb(string? hex)
+    {
+        if (string.IsNullOrEmpty(hex)) throw new ArgumentException("Hex cannot be null");
+
+        // Remove the leading '#' if present
+        hex = hex.TrimStart('#');
+
+        // Ensure the hex string is valid
+        if (hex.Length != 6 && hex.Length != 3)
+        {
+            throw new ArgumentException("Hex string should be 6 or 3 characters long.");
+        }
+
+        if (hex.Length == 3)
+        {
+            // Expand shorthand notation to full form (e.g., "abc" -> "aabbcc")
+            hex = string.Concat(hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]);
+        }
+
+        // Parse the hex string into RGB components
+        var r = Convert.ToInt32(hex.Substring(0, 2), 16);
+        var g = Convert.ToInt32(hex.Substring(2, 2), 16);
+        var b = Convert.ToInt32(hex.Substring(4, 2), 16);
+
+        return Color.FromArgb(r, g, b);
     }
 }
