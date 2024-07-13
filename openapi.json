@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.0",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.1",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -2319,6 +2319,7 @@
         "tags": [
           "Font"
         ],
+        "summary": "List out the fonts",
         "responses": {
           "200": {
             "description": "OK",
@@ -2357,10 +2358,12 @@
         "tags": [
           "Font"
         ],
+        "summary": "Returns a font",
         "parameters": [
           {
             "name": "fontId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2369,6 +2372,7 @@
           {
             "name": "apiKey",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -2384,13 +2388,24 @@
         "tags": [
           "Font"
         ],
+        "summary": "Removes a font from the system",
         "parameters": [
           {
             "name": "fontId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "confirmed",
+            "in": "query",
+            "description": "If the font is in use by other users and an admin wants it deleted, they must confirm to force delete it",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -2406,6 +2421,7 @@
         "tags": [
           "Font"
         ],
+        "summary": "Manual upload",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -2426,44 +2442,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/EpubFontDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EpubFontDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EpubFontDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Font/upload-url": {
-      "post": {
-        "tags": [
-          "Font"
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -13818,7 +13796,7 @@
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A \n separated string of all missing series",
+            "description": "A \r\n separated string of all missing series",
             "nullable": true
           },
           "appUser": {
@@ -13913,7 +13891,7 @@
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A \n separated string of all missing series",
+            "description": "A \r\n separated string of all missing series",
             "nullable": true
           }
         },
@@ -16373,13 +16351,9 @@
             "type": "integer",
             "format": "int32"
           },
-          "created": {
+          "fileName": {
             "type": "string",
-            "format": "date-time"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
+            "nullable": true
           }
         },
         "additionalProperties": false

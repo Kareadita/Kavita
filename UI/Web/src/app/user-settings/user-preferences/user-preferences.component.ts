@@ -74,7 +74,6 @@ import {ManageScrobblingProvidersComponent} from "../manage-scrobbling-providers
 import {PdfLayoutModePipe} from "../../pdf-reader/_pipe/pdf-layout-mode.pipe";
 import {PdfTheme} from "../../_models/preferences/pdf-theme";
 import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
-import {PdfLayoutMode} from "../../_models/preferences/pdf-layout-mode";
 import {PdfSpreadMode} from "../../_models/preferences/pdf-spread-mode";
 import {FontManagerComponent} from "../font-manager/font-manager/font-manager.component";
 import {FontService} from "../../_services/font.service";
@@ -234,7 +233,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.user.preferences = results.pref;
 
       if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
-        this.user.preferences.bookReaderFontFamily = 'default';
+        this.user.preferences.bookReaderFontFamily = 'Default';
       }
 
       this.settingsForm.addControl('readingDirection', new FormControl(this.user.preferences.readingDirection, []));

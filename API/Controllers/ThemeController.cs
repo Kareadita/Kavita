@@ -40,7 +40,7 @@ public class ThemeController : BaseApiController
         _mapper = mapper;
     }
 
-    [ResponseCache(CacheProfileName = "10Minute")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()

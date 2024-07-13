@@ -13,6 +13,5 @@ export interface EpubFont {
   id: number;
   name: string;
   provider: FontProvider;
-  created: Date;
-  lastModified: Date;
+  fileName: string;
 }

@@ -79,16 +79,14 @@ public class FontService: IFontService
         }
 
         var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
-        if (font == null)
-            return;
+        if (font == null) return;
 
         await RemoveFont(font);
     }
 
     public async Task RemoveFont(EpubFont font)
     {
-        if (font.Provider == FontProvider.System)
-            return;
+        if (font.Provider == FontProvider.System) return;
 
         var prefs = await _unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Name);
         foreach (var pref in prefs)

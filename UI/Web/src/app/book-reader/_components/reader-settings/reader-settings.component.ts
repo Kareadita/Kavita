@@ -85,6 +85,7 @@ export const bookColorThemes = [
 ];
 
 const mobileBreakpointMarginOverride = 700;
+const defaultFontFamily = 'Default';
 
 @Component({
     selector: 'app-reader-settings',
@@ -132,7 +133,6 @@ export class ReaderSettingsComponent implements OnInit {
   /**
    * List of all font families user can select from
    */
-  fontOptions: Array<string> = [];
   fontFamilies: Array<EpubFont> = [];
   /**
    * Internal property used to capture all the different css properties to render on all elements
@@ -178,7 +178,6 @@ export class ReaderSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.fontService.getFonts().subscribe(fonts => {
       this.fontFamilies = fonts;
-      this.fontOptions = fonts.map(f => f.name);
       this.cdRef.markForCheck();
     })
 
@@ -187,7 +186,7 @@ export class ReaderSettingsComponent implements OnInit {
         this.user = user;
 
         if (this.user.preferences.bookReaderFontFamily === undefined) {
-          this.user.preferences.bookReaderFontFamily = 'default';
+          this.user.preferences.bookReaderFontFamily = defaultFontFamily;
         }
         if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
           this.user.preferences.bookReaderFontSize = 100;
@@ -211,7 +210,8 @@ export class ReaderSettingsComponent implements OnInit {
 
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(fontName => {
-          if (fontName === 'default') {
+          console.log('updating font-family to ', fontName);
+          if (fontName === defaultFontFamily) {
             this.pageStyles['font-family'] = 'inherit';
           } else {
             this.pageStyles['font-family'] = "'" + fontName + "'";

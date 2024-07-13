@@ -1,13 +1,12 @@
 import {DestroyRef, inject, Injectable} from "@angular/core";
 import {map, ReplaySubject} from "rxjs";
-import {EpubFont} from "../_models/preferences/epub-font";
+import {EpubFont, FontProvider} from "../_models/preferences/epub-font";
 import {environment} from 'src/environments/environment';
 import {HttpClient} from "@angular/common/http";
-import {EVENTS, MessageHubService} from "./message-hub.service";
+import {MessageHubService} from "./message-hub.service";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {AccountService} from "./account.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NotificationProgressEvent} from "../_models/events/notification-progress-event";
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +40,10 @@ export class FontService {
   }
 
   getFontFace(font: EpubFont): FontFace {
+    if (font.provider === FontProvider.System) {
+      return new FontFace(font.name, `url('/assets/fonts/${font.name}/${font.fileName}')`);
+    }
+
     return new FontFace(font.name, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`);
   }
 
