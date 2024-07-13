@@ -218,6 +218,9 @@
     "scan-libraries": "Scan Libraries",
     "kavita+-data-refresh": "Kavita+ Data Refresh",
     "backup": "Backup",
-    "update-yearly-stats": "Update Yearly Stats"
+    "update-yearly-stats": "Update Yearly Stats",
+
+
+    "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts"
 
 }
