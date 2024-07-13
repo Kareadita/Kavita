@@ -31,11 +31,13 @@ export class AppComponent implements OnInit {
   public readonly navService = inject(NavService);
   public readonly cdRef = inject(ChangeDetectorRef);
   public readonly serverService = inject(ServerService);
+  public readonly accountService = inject(AccountService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly ngbModal = inject(NgbModal);
+  private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
 
-  constructor(private accountService: AccountService,
-    private libraryService: LibraryService,
-    private router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig,
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService, private modalConfig: NgbModalConfig) {
+  constructor(ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document, modalConfig: NgbModalConfig) {
 
     modalConfig.fullscreen = 'md';
 
@@ -44,7 +46,7 @@ export class AppComponent implements OnInit {
     ratingConfig.resettable = true;
 
     // Close any open modals when a route change occurs
-    router.events
+    this.router.events
       .pipe(
           filter(event => event instanceof NavigationStart),
           takeUntilDestroyed(this.destroyRef)

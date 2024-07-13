@@ -643,7 +643,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
-      this.themeService.setPageColor(this.series.primaryColor, this.series.secondaryColor);
+      this.themeService.setColorScape(this.series.primaryColor, this.series.secondaryColor);
 
       if (loadExternal) {
         this.loadPlusMetadata(this.seriesId, this.libraryType);

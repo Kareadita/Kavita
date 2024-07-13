@@ -26,6 +26,7 @@ import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {NavigationEnd, NavigationStart, Router} from "@angular/router";
 
+const colorScapeSelector = 'pagecolor';
 
 @Injectable({
   providedIn: 'root'
@@ -59,7 +60,7 @@ export class ThemeService {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      this.setPageColor('');
+      this.setColorScape('');
     });
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
@@ -182,13 +183,14 @@ export class ThemeService {
     this.unsetBookThemes();
   }
 
+
   /**
    * Set's the background color from a single primary color.
    * @param primaryColor
+   * @param complementaryColor
    */
-  setPageColor(primaryColor: string, complementaryColor: string | null = null) {
+  setColorScape(primaryColor: string, complementaryColor: string | null = null) {
     // Remove existing style element with old variable overrides
-    const pageColorSelector = 'pagecolor';
     this.unsetPageColorOverrides();
 
     if (this.getCssVariable('--colorscape-enabled') === 'false') {
@@ -202,39 +204,51 @@ export class ThemeService {
       return;
     }
 
-    const colors = this.generateBackgroundColors(primaryColor, this.isDarkTheme());
-    colors.complementary = complementaryColor ? complementaryColor : colors.complementary;
+    const colors = this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme());
+    //colors.complementary = complementaryColor ? complementaryColor : colors.complementary;
 
-    const styleElem = this.document.createElement('style');
-    styleElem.id = pageColorSelector;
-    styleElem.appendChild(this.document.createTextNode(`
-    :root, :root .default {
-    --colorscape-primary-color: ${colors.primary};
-    --colorscape-lighter-color: ${colors.lighter};
-    --colorscape-darker-color: ${colors.darker};
-    --colorscape-complementary-color: ${colors.complementary};
-    }`));
-    this.renderer.appendChild(this.document.head, styleElem);
+    this.injectStyleElement(colorScapeSelector, `
+      :root, :root .default {
+      --colorscape-primary-color: ${colors.primary};
+      --colorscape-lighter-color: ${colors.lighter};
+      --colorscape-darker-color: ${colors.darker};
+      --colorscape-complementary-color: ${colors.complementary};
+      }`);
+
+    // const styleElem = this.document.createElement('style');
+    // styleElem.id = pageColorSelector;
+    // styleElem.appendChild(this.document.createTextNode(`
+    // :root, :root .default {
+    // --colorscape-primary-color: ${colors.primary};
+    // --colorscape-lighter-color: ${colors.lighter};
+    // --colorscape-darker-color: ${colors.darker};
+    // --colorscape-complementary-color: ${colors.complementary};
+    // }`));
+    // this.renderer.appendChild(this.document.head, styleElem);
 
     console.log('ColorScape colors: ', colors);
   }
 
-  generateBackgroundColors(primaryColor: string, leanDark: boolean = true) {
+
+
+  generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true) {
     const lightenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
     const darkenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
 
     const lightenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
     const darkenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
 
-    const lighterColor = this.lightenDarkenColor(primaryColor, lightenOffsetPrimary);
+    const compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
+
+    const lighterColor = this.lightenDarkenColor(compColor, lightenOffsetPrimary);
     const darkerColor = this.lightenDarkenColor(primaryColor, darkenOffsetPrimary);
 
-    let compColor = this.calculateComplementaryColor(primaryColor);
-    if (leanDark) {
-      compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
-    } else {
-      compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
-    }
+    // let compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
+    // if (leanDark) {
+    //   compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
+    // } else {
+    //   compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
+    // }
 
     return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
   }
@@ -334,5 +348,12 @@ export class ThemeService {
     const num = parseInt(hex.slice(1), 16);
     let compNum = 0xFFFFFF ^ num;
     return `#${compNum.toString(16).padStart(6, '0').toUpperCase()}`;
+  }
+
+  private injectStyleElement(idSelector: string, body: string) {
+    const styleElem = this.document.createElement('style');
+    styleElem.id = idSelector;
+    styleElem.appendChild(this.document.createTextNode(body));
+    this.renderer.appendChild(this.document.head, styleElem);
   }
 }
