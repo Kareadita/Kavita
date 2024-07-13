@@ -216,7 +216,8 @@
         "delete": "{{common.delete}}",
         "url-label": "Url",
         "back": "Back",
-        "load": "Load"
+        "load": "Load",
+        "default-font-no-preview": "This font cannot be previewed. This will take the default style from the book."
     },
 
     "theme": {

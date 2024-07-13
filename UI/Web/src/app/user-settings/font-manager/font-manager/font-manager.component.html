@@ -125,15 +125,9 @@
       <div class="d-flex justify-content-between w-100">
         @if (item.name === 'Default') {
           <div class="ms-2 me-auto fs-6">
-            This font cannot be previewed. This will take the default style from the book.
+            {{t('default-font-no-preview')}}
           </div>
         }
-
-        <div class="d-flex justify-content-end">
-          @if (item.hasOwnProperty('provider') && item.provider === FontProvider.User && item.hasOwnProperty('id')) {
-            <button class="btn btn-danger me-1" (click)="deleteFont(item.id)">{{t('delete')}}</button>
-          }
-        </div>
       </div>
 
       <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
