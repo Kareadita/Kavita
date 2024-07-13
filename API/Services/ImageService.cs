@@ -433,7 +433,7 @@ public class ImageService : IImageService
         }
     }
 
-    private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath, int numColors = 2)
+    private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
     {
         using var image = Image.NewFromFile(imagePath);
         // Resize the image to speed up processing
@@ -451,7 +451,7 @@ public class ImageService : IImageService
         }
 
         // Perform k-means clustering
-        var clusters = KMeansClustering(rgbPixels, numColors);
+        var clusters = KMeansClustering(rgbPixels, 4);
 
         var sorted = SortByVibrancy(clusters);
 

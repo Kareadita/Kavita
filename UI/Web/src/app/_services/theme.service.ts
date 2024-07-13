@@ -24,7 +24,7 @@ import {translate} from "@ngneat/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
-import {NavigationStart, Router} from "@angular/router";
+import {NavigationEnd, NavigationStart, Router} from "@angular/router";
 
 
 @Injectable({
@@ -57,7 +57,7 @@ export class ThemeService {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     this.router.events.pipe(
-      filter(event => event instanceof NavigationStart)
+      filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.setPageColor('');
     });
@@ -186,10 +186,14 @@ export class ThemeService {
    * Set's the background color from a single primary color.
    * @param primaryColor
    */
-  setPageColor(primaryColor: string) {
+  setPageColor(primaryColor: string, complementaryColor: string | null = null) {
     // Remove existing style element with old variable overrides
     const pageColorSelector = 'pagecolor';
     this.unsetPageColorOverrides();
+
+    if (this.getCssVariable('--colorscape-enabled') === 'false') {
+      return;
+    }
 
     const elem = this.document.querySelector('#backgroundCanvas');
 
@@ -199,6 +203,7 @@ export class ThemeService {
     }
 
     const colors = this.generateBackgroundColors(primaryColor, this.isDarkTheme());
+    colors.complementary = complementaryColor ? complementaryColor : colors.complementary;
 
     const styleElem = this.document.createElement('style');
     styleElem.id = pageColorSelector;
@@ -210,6 +215,8 @@ export class ThemeService {
     --colorscape-complementary-color: ${colors.complementary};
     }`));
     this.renderer.appendChild(this.document.head, styleElem);
+
+    console.log('ColorScape colors: ', colors);
   }
 
   generateBackgroundColors(primaryColor: string, leanDark: boolean = true) {

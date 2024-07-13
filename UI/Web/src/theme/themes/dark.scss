@@ -33,7 +33,7 @@
     --primary-color-darker-shade: #338A67;
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
-    --bs-body-bg: #121212;
+    --bs-body-bg: #3f4245; // #121212
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
@@ -42,11 +42,12 @@
     /* New Color scheme */
     --bulk-background-color: rgba(39,39,39,1);
 
-  /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors */
+    /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors */
     /**
       Offsets are used to generate the 4 corners of gradient.
      */
-    --colorscape-primary-lighten-offset: 0;
+    --colorscape-enabled: true;
+    --colorscape-primary-lighten-offset: 10;
     --colorscape-primary-darken-offset: -40;
     --colorscape-secondary-lighten-offset: 10;
     --colorscape-secondary-darken-offset: -40;

@@ -51,7 +51,10 @@
       var(--colorscape-lighter-color) 100%),
               radial-gradient(circle farthest-side at 0% 0%,
       var(--colorscape-complementary-color) 0%,
-      var(--colorscape-complementary-color) 100%), black
+      var(--colorscape-complementary-color) 100%), black;
+  animation: fadein 5s linear;
+  //transition: var(--transition-time, 1s) ease-in-out;
+  transition: all .15s cubic-bezier(.07,.95,0,1);
 }
 
 .fullpage-background {
@@ -62,6 +65,7 @@
   height: 100vh;
   z-index: -1; /* Ensure it stays at the very bottom */
   pointer-events: none; /* So it doesn't interfere with clicks */
+  background-color: var(--bs-body-bg);
 
   .background-area {
     position: absolute;
