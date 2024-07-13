@@ -25,8 +25,9 @@ import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {NavigationEnd, NavigationStart, Router} from "@angular/router";
+import {ColorTransitionService} from "./color-transition.service";
 
-const colorScapeSelector = 'pagecolor';
+const colorScapeSelector = 'colorscape';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +35,8 @@ const colorScapeSelector = 'pagecolor';
 export class ThemeService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly colorTransitionService = inject(ColorTransitionService);
+
   public defaultTheme: string = 'dark';
   public defaultBookTheme: string = 'Dark';
 
@@ -190,69 +193,8 @@ export class ThemeService {
    * @param complementaryColor
    */
   setColorScape(primaryColor: string, complementaryColor: string | null = null) {
-    // Remove existing style element with old variable overrides
-    this.unsetPageColorOverrides();
-
-    if (this.getCssVariable('--colorscape-enabled') === 'false') {
-      return;
-    }
-
-    const elem = this.document.querySelector('#backgroundCanvas');
-
-    // When undefined, treat as if we are reverting back to default
-    if (!elem || primaryColor === '' || primaryColor === null || primaryColor === undefined) {
-      return;
-    }
-
-    const colors = this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme());
-    //colors.complementary = complementaryColor ? complementaryColor : colors.complementary;
-
-    this.injectStyleElement(colorScapeSelector, `
-      :root, :root .default {
-      --colorscape-primary-color: ${colors.primary};
-      --colorscape-lighter-color: ${colors.lighter};
-      --colorscape-darker-color: ${colors.darker};
-      --colorscape-complementary-color: ${colors.complementary};
-      }`);
-
-    // const styleElem = this.document.createElement('style');
-    // styleElem.id = pageColorSelector;
-    // styleElem.appendChild(this.document.createTextNode(`
-    // :root, :root .default {
-    // --colorscape-primary-color: ${colors.primary};
-    // --colorscape-lighter-color: ${colors.lighter};
-    // --colorscape-darker-color: ${colors.darker};
-    // --colorscape-complementary-color: ${colors.complementary};
-    // }`));
-    // this.renderer.appendChild(this.document.head, styleElem);
-
-    console.log('ColorScape colors: ', colors);
+    this.colorTransitionService.setColorScape(primaryColor, complementaryColor);
   }
-
-
-
-  generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true) {
-    const lightenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
-    const darkenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
-
-    const lightenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
-    const darkenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
-
-    const compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
-
-    const lighterColor = this.lightenDarkenColor(compColor, lightenOffsetPrimary);
-    const darkerColor = this.lightenDarkenColor(primaryColor, darkenOffsetPrimary);
-
-    // let compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
-    // if (leanDark) {
-    //   compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
-    // } else {
-    //   compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
-    // }
-
-    return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
-  }
-
 
   /**
    * Sets the theme as active. Will inject a style tag into document to load a custom theme and apply the selector to the body
@@ -322,38 +264,7 @@ export class ThemeService {
     this.themeCache.forEach(theme => this.document.body.classList.remove(theme.selector));
   }
 
-  private unsetPageColorOverrides() {
-    Array.from(this.document.head.children).filter(el => el.tagName === 'STYLE' && el.id.toLowerCase() === 'pagecolor').forEach(c => this.document.head.removeChild(c));
-  }
-
   private unsetBookThemes() {
     Array.from(this.document.body.classList).filter(cls => cls.startsWith('brtheme-')).forEach(c => this.document.body.classList.remove(c));
-  }
-
-  private lightenDarkenColor(hex: string, amt: number) {
-    let num = parseInt(hex.slice(1), 16);
-    let r = (num >> 16) + amt;
-    let g = ((num >> 8) & 0x00FF) + amt;
-    let b = (num & 0x0000FF) + amt;
-
-    r = Math.max(Math.min(255, r), 0);
-    g = Math.max(Math.min(255, g), 0);
-    b = Math.max(Math.min(255, b), 0);
-
-    let newColor = (r << 16) | (g << 8) | b;
-    return `#${(0x1000000 + newColor).toString(16).slice(1).toUpperCase()}`;
-  }
-
-  private calculateComplementaryColor(hex: string): string {
-    const num = parseInt(hex.slice(1), 16);
-    let compNum = 0xFFFFFF ^ num;
-    return `#${compNum.toString(16).padStart(6, '0').toUpperCase()}`;
-  }
-
-  private injectStyleElement(idSelector: string, body: string) {
-    const styleElem = this.document.createElement('style');
-    styleElem.id = idSelector;
-    styleElem.appendChild(this.document.createTextNode(body));
-    this.renderer.appendChild(this.document.head, styleElem);
   }
 }
