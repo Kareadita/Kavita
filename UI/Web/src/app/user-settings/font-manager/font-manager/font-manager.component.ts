@@ -15,7 +15,6 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
-import {ThemeProvider} from "../../../_models/preferences/site-theme";
 import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
@@ -63,7 +62,10 @@ export class FontManagerComponent implements OnInit {
     map(c => c && this.accountService.hasAdminRole(c))
   );
 
-  form!: FormGroup;
+  form: FormGroup = new FormGroup({
+    fontUrl: new FormControl('', [])
+  });
+
   selectedFont: EpubFont | undefined = undefined;
 
   files: NgxFileDropEntry[] = [];
@@ -75,19 +77,12 @@ export class FontManagerComponent implements OnInit {
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
   ngOnInit() {
-    this.form = this.fb.group({
-      coverImageUrl: new FormControl('', [])
-    });
-    this.cdRef.markForCheck();
+    this.loadFonts();
+  }
 
+  loadFonts() {
     this.fontService.getFonts().subscribe(fonts => {
       this.fonts = fonts;
-      // this.fonts.forEach(font => {
-      //   this.fontService.getFontFace(font).load().then(loadedFace => {
-      //     (this.document as any).fonts.add(loadedFace);
-      //   });
-      // })
-
       this.cdRef.markForCheck();
     });
   }
@@ -119,9 +114,13 @@ export class FontManagerComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  uploadFromUrl(url?: string) {
-    url = url || this.form.get('coverImageUrl')?.value.trim();
+  uploadFromUrl() {
+    const url = this.form.get('fontUrl')?.value.trim();
     if (!url || url === '') return;
+
+    this.fontService.uploadFromUrl(url).subscribe(() => {
+      this.loadFonts();
+    });
   }
 
   async deleteFont(id: number) {
@@ -137,8 +136,7 @@ export class FontManagerComponent implements OnInit {
 
   changeMode(mode: 'file' | 'url' | 'all') {
     this.mode = mode;
+    this.cdRef.markForCheck();
   }
 
-
-    protected readonly ThemeProvider = ThemeProvider;
 }

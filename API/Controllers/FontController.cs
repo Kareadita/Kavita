@@ -111,8 +111,8 @@ public class FontController : BaseApiController
         return Ok(_mapper.Map<EpubFontDto>(font));
     }
 
-    [HttpPost("upload-url")]
-    public async Task<ActionResult> UploadFontByUrl(string url)
+    [HttpPost("upload-by-url")]
+    public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
     {
         // Validate url
         try

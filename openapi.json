@@ -2466,7 +2466,7 @@
         }
       }
     },
-    "/api/Font/upload-url": {
+    "/api/Font/upload-by-url": {
       "post": {
         "tags": [
           "Font"
