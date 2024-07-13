@@ -2466,6 +2466,27 @@
         }
       }
     },
+    "/api/Font/upload-url": {
+      "post": {
+        "tags": [
+          "Font"
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Health": {
       "get": {
         "tags": [

@@ -15,6 +15,11 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
+import {ThemeProvider} from "../../../_models/preferences/site-theme";
+import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {ImageComponent} from "../../../shared/image/image.component";
+import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-font-manager',
@@ -29,7 +34,11 @@ import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
     SentenceCasePipe,
     SiteThemeProviderPipe,
     NgTemplateOutlet,
-    NgStyle
+    NgStyle,
+    CarouselReelComponent,
+    DefaultValuePipe,
+    ImageComponent,
+    SafeUrlPipe
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
@@ -55,12 +64,15 @@ export class FontManagerComponent implements OnInit {
   );
 
   form!: FormGroup;
+  selectedFont: EpubFont | undefined = undefined;
+
+  files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.woff2', 'woff', 'tff', 'otf'].join(',');
   mode: 'file' | 'url' | 'all' = 'all';
   isUploadingFont: boolean = false;
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
-  }
+
+  constructor(@Inject(DOCUMENT) private document: Document) {}
 
   ngOnInit() {
     this.form = this.fb.group({
@@ -70,14 +82,22 @@ export class FontManagerComponent implements OnInit {
 
     this.fontService.getFonts().subscribe(fonts => {
       this.fonts = fonts;
-      this.fonts.forEach(font => {
-        this.fontService.getFontFace(font).load().then(loadedFace => {
-          (this.document as any).fonts.add(loadedFace);
-        });
-      })
+      // this.fonts.forEach(font => {
+      //   this.fontService.getFontFace(font).load().then(loadedFace => {
+      //     (this.document as any).fonts.add(loadedFace);
+      //   });
+      // })
 
       this.cdRef.markForCheck();
     });
+  }
+
+  selectFont(font: EpubFont) {
+    this.fontService.getFontFace(font).load().then(loadedFace => {
+      (this.document as any).fonts.add(loadedFace);
+    });
+    this.selectedFont = font;
+    this.cdRef.markForCheck();
   }
 
   dropped(files: NgxFileDropEntry[]) {
@@ -120,4 +140,5 @@ export class FontManagerComponent implements OnInit {
   }
 
 
+    protected readonly ThemeProvider = ThemeProvider;
 }

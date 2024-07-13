@@ -18,6 +18,7 @@ public interface IFontService
 {
     Task<EpubFont> CreateFontFromFileAsync(string path);
     Task Delete(int fontId);
+    Task CreateFontFromUrl(string url);
 }
 
 public class FontService: IFontService
@@ -28,12 +29,16 @@ public class FontService: IFontService
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<FontService> _logger;
+    private readonly IEventHub _eventHub;
 
-    public FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger)
+    private const string SupportedFontUrlPrefix = "https://fonts.google.com/specimen/";
+
+    public FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger, IEventHub eventHub)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _eventHub = eventHub;
     }
 
     public async Task<EpubFont> CreateFontFromFileAsync(string path)
@@ -82,6 +87,21 @@ public class FontService: IFontService
         if (font == null) return;
 
         await RemoveFont(font);
+    }
+
+    public Task CreateFontFromUrl(string url)
+    {
+        if (!url.StartsWith(SupportedFontUrlPrefix))
+        {
+            throw new KavitaException("font-url-not-allowed");
+        }
+
+        // Extract Font name from url
+        var fontFamily = url.Split(SupportedFontUrlPrefix)[1].Split("?")[0];
+        _logger.LogInformation("Preparing to download {FontName} font", fontFamily);
+
+        // TODO: Send a font update event
+        return Task.CompletedTask;
     }
 
     public async Task RemoveFont(EpubFont font)

@@ -7,10 +7,12 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Font;
 using API.Entities.Enums.Font;
+using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,22 +20,25 @@ using MimeTypes;
 
 namespace API.Controllers;
 
+[Authorize]
 public class FontController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
     private readonly IFontService _fontService;
     private readonly IMapper _mapper;
+    private readonly ILocalizationService _localizationService;
 
     private readonly Regex _fontFileExtensionRegex = new(Parser.FontFileExtensions, RegexOptions.IgnoreCase, Parser.RegexTimeout);
 
     public FontController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
-        IFontService fontService, IMapper mapper)
+        IFontService fontService, IMapper mapper, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _fontService = fontService;
         _mapper = mapper;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -63,16 +68,13 @@ public class FontController : BaseApiController
         var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
         if (font == null) return NotFound();
 
-        // var fontDirectory = _directoryService.EpubFontDirectory;
-        // if (font.Provider == FontProvider.System)
-        // {
-        //     fontDirectory = _directoryService.
-        // }
+        if (font.Provider == FontProvider.System) return BadRequest("System provided fonts are not loaded by API");
+
 
         var contentType = MimeTypeMap.GetMimeType(Path.GetExtension(font.FileName));
         var path = Path.Join(_directoryService.EpubFontDirectory, font.FileName);
 
-        return PhysicalFile(path, contentType);
+        return PhysicalFile(path, contentType, true);
     }
 
     /// <summary>
@@ -109,11 +111,21 @@ public class FontController : BaseApiController
         return Ok(_mapper.Map<EpubFontDto>(font));
     }
 
-    // [HttpPost("upload-url")]
-    // public async Task<ActionResult<EpubFontDto>> UploadFontByUrl(string url)
-    // {
-    //     throw new NotImplementedException();
-    // }
+    [HttpPost("upload-url")]
+    public async Task<ActionResult> UploadFontByUrl(string url)
+    {
+        // Validate url
+        try
+        {
+            await _fontService.CreateFontFromUrl(url);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(_localizationService.Translate(User.GetUserId(), ex.Message));
+        }
+
+        return Ok();
+    }
 
     private async Task<string> UploadToTemp(IFormFile file)
     {

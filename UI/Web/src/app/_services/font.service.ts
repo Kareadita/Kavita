@@ -34,12 +34,14 @@ export class FontService {
   getFonts() {
     return this.httpClient.get<Array<EpubFont>>(this.baseUrl + 'font/all').pipe(map(fonts => {
       this.fontsSource.next(fonts);
-
       return fonts;
     }));
   }
 
+
+
   getFontFace(font: EpubFont): FontFace {
+    // TODO: We need to refactor this so that we loadFonts with an array, fonts have an id to remove them, and we don't keep populating the document
     if (font.provider === FontProvider.System) {
       return new FontFace(font.name, `url('/assets/fonts/${font.name}/${font.fileName}')`);
     }
