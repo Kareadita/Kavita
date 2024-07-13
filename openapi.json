@@ -2314,6 +2314,180 @@
         }
       }
     },
+    "/api/Font/all": {
+      "get": {
+        "tags": [
+          "Font"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Font": {
+      "get": {
+        "tags": [
+          "Font"
+        ],
+        "parameters": [
+          {
+            "name": "fontId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Font"
+        ],
+        "parameters": [
+          {
+            "name": "fontId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Font/upload": {
+      "post": {
+        "tags": [
+          "Font"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "formFile": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "formFile": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Font/upload-url": {
+      "post": {
+        "tags": [
+          "Font"
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Health": {
       "get": {
         "tags": [
@@ -13644,7 +13818,7 @@
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A \r\n separated string of all missing series",
+            "description": "A \n separated string of all missing series",
             "nullable": true
           },
           "appUser": {
@@ -13739,7 +13913,7 @@
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A \r\n separated string of all missing series",
+            "description": "A \n separated string of all missing series",
             "nullable": true
           }
         },
@@ -16179,6 +16353,36 @@
         },
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
+      },
+      "EpubFontDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "ExternalRating": {
         "type": "object",

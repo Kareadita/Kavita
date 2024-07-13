@@ -9,9 +9,11 @@ using API.Constants;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.Font;
 using API.Entities.Enums.Theme;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +27,20 @@ public static class Seed
     /// Generated on Startup. Seed.SeedSettings must run before
     /// </summary>
     public static ImmutableArray<ServerSetting> DefaultSettings;
+
+    public static readonly ImmutableArray<EpubFont> DefaultFonts =
+    [
+        ..new List<EpubFont>
+        {
+            new ()
+            {
+                Name = "Merriweather",
+                NormalizedName = Parser.Normalize("Merriweather"),
+                Provider = FontProvider.System,
+                FileName = "Merriweather-Regular.woff2",
+            }
+        }
+    ];
 
     public static readonly ImmutableArray<SiteTheme> DefaultThemes = [
         ..new List<SiteTheme>
@@ -147,6 +163,21 @@ public static class Seed
             if (existing == null)
             {
                 await context.SiteTheme.AddAsync(theme);
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task SeedFonts(DataContext context)
+    {
+        await context.Database.EnsureCreatedAsync();
+        foreach (var font in DefaultFonts)
+        {
+            var existing = context.SiteTheme.FirstOrDefaultAsync(f => f.Name.Equals(font.Name));
+            if (existing == null)
+            {
+                await context.EpubFont.AddAsync(font);
             }
         }
 

@@ -53,6 +53,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMediaConversionService, MediaConversionService>();
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IStreamService, StreamService>();
+        services.AddScoped<IFontService, FontService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
