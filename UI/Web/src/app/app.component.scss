@@ -42,20 +42,17 @@
 .default-background {
   background: radial-gradient(circle farthest-side at 0% 100%,
     var(--colorscape-darker-color) 0%,
-    var(--colorscape-darker-color) 100%),
+    var(--colorscape-darker-alpha-color) 100%),
               radial-gradient(circle farthest-side at 100% 100%,
       var(--colorscape-primary-color) 0%,
-      var(--colorscape-primary-color) 100%),
+      var(--colorscape-primary-alpha-color) 100%),
               radial-gradient(circle farthest-side at 100% 0%,
       var(--colorscape-lighter-color) 0%,
-      var(--colorscape-lighter-color) 100%),
+      var(--colorscape-lighter-alpha-color) 100%),
               radial-gradient(circle farthest-side at 0% 0%,
       var(--colorscape-complementary-color) 0%,
-      var(--colorscape-complementary-color) 100%),
+      var(--colorscape-complementary-alpha-color) 100%),
     var(--bs-body-color);
-  animation: fadein 5s ease-in-out;
-  //transition: var(--transition-time, 1s) ease-in-out;
-  transition: all .15s cubic-bezier(.07,.95,0,1);
 }
 
 .fullpage-background {
@@ -64,8 +61,8 @@
   left: 0;
   width: 100%;
   height: 100vh;
-  z-index: -1; /* Ensure it stays at the very bottom */
-  pointer-events: none; /* So it doesn't interfere with clicks */
+  z-index: -1;
+  pointer-events: none;
   background-color: var(--bs-body-bg);
 
   .background-area {

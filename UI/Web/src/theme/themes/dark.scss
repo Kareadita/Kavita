@@ -51,12 +51,17 @@
     --colorscape-primary-darken-offset: -40;
     --colorscape-secondary-lighten-offset: 10;
     --colorscape-secondary-darken-offset: -40;
-    /* These are the default background colors for the app. These will be updated on different pages with the generated colors */
+    /* These are the default background colors for the app. These will be updated on different pages with the generated colors. Must be RGB */
     --colorscape-primary-color: rgb(38, 38, 38);
     --colorscape-lighter-color: rgb(32, 32, 32);
     --colorscape-darker-color: rgb(28, 28, 28);
     --colorscape-complementary-color: rgb(51, 51, 51);
-    /* These are the default background colors. They need to match and cannot be a var reference. They will not be updated */
+    /* These need to be an alpha 0 variant. */
+    --colorscape-primary-alpha-color: rgba(38, 38, 38, 0);
+    --colorscape-lighter-alpha-color: rgba(32, 32, 32, 0);
+    --colorscape-darker-alpha-color: rgba(28, 28, 28, 0);
+    --colorscape-complementary-alpha-color: rgba(51, 51, 51, 0);
+    /* These are the default background colors. They need to match and cannot be a var reference. They will not be updated. Must be RGB */
     --colorscape-primary-default-color: rgb(38, 38, 38);
     --colorscape-lighter-default-color: rgb(32, 32, 32);
     --colorscape-darker-default-color: rgb(28, 28, 28);

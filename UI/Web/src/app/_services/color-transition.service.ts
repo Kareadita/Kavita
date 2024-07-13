@@ -9,6 +9,13 @@ interface ColorSpace {
   complementary: string;
 }
 
+interface RGBAColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
 const colorScapeSelector = 'colorscape';
 
 @Injectable({
@@ -34,39 +41,40 @@ export class ColorTransitionService {
       return;
     }
 
-    let newColors;
+    let newColors: ColorSpace;
     if (primaryColor === '' || primaryColor === null || primaryColor === undefined) {
       newColors = this.defaultColors();
     } else {
       newColors = this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme());
-      // Convert hex colors to RGB format
-      newColors = this.convertColorsToRGB(newColors);
     }
 
-    const oldColors = this.colorSubject.getValue() || this.defaultColors();
-    const duration = this.calculateTransitionDuration(oldColors, newColors);
+    // Convert hex colors to RGB format
+    const newColorsRGBA = this.convertColorsToRGBA(newColors);
 
-    //console.log('Transitioning colors from ', oldColors, ' to ', newColors);
-    this.animateColorTransition(oldColors, newColors, duration);
+    const oldColors = this.colorSubject.getValue() || this.convertColorsToRGBA(this.defaultColors());
+    const duration = this.calculateTransitionDuration(oldColors, newColorsRGBA);
 
-    this.colorSubject.next(newColors);
+    //console.log('Transitioning colors from ', oldColors, ' to ', newColorsRGBA);
+    this.animateColorTransition(oldColors, newColorsRGBA, duration);
+
+    this.colorSubject.next(newColorsRGBA);
   }
 
-  private convertColorsToRGB(colors: ColorSpace): any {
-    const convertedColors: any = {};
+  private convertColorsToRGBA(colors: ColorSpace): { [key: string]: RGBAColor } {
+    const convertedColors: { [key: string]: RGBAColor } = {};
     for (const [key, value] of Object.entries(colors)) {
-      convertedColors[key] = this.hexToRGB(value as string);
+      convertedColors[key] = this.hexToRGBA(value);
     }
     return convertedColors;
   }
 
-  private calculateTransitionDuration(oldColors: ColorSpace, newColors: ColorSpace): number {
+  private calculateTransitionDuration(oldColors: { [key: string]: RGBAColor }, newColors: { [key: string]: RGBAColor }): number {
     const colorKeys = ['primary', 'lighter', 'darker', 'complementary'];
     let totalDistance = 0;
 
     for (const key of colorKeys) {
-      const oldRGB = this.getRGBValues((oldColors as any)[key]);
-      const newRGB = this.getRGBValues((newColors as any)[key]);
+      const oldRGB = [oldColors[key].r, oldColors[key].g, oldColors[key].b];
+      const newRGB = [newColors[key].r, newColors[key].g, newColors[key].b];
       totalDistance += this.calculateColorDistance(oldRGB, newRGB);
     }
 
@@ -85,14 +93,14 @@ export class ColorTransitionService {
     );
   }
 
-  private hexToRGB(hex: string): string {
+  private hexToRGBA(hex: string, opacity: number = 1): RGBAColor {
     if (hex.startsWith('#')) {
       const r = parseInt(hex.slice(1, 3), 16);
       const g = parseInt(hex.slice(3, 5), 16);
       const b = parseInt(hex.slice(5, 7), 16);
-      return `rgb(${r}, ${g}, ${b})`;
+      return { r, g, b, a: opacity };
     }
-    return hex; // Return as is if it's not a hex color
+    return { r: 0, g: 0, b: 0, a: opacity }; // Fallback to opaque black if not a hex color
   }
 
   private defaultColors() {
@@ -105,19 +113,17 @@ export class ColorTransitionService {
   }
 
 
-  private animateColorTransition(oldColors: ColorSpace, newColors: ColorSpace, duration: number) {
+  private animateColorTransition(oldColors: { [key: string]: RGBAColor }, newColors: { [key: string]: RGBAColor }, duration: number) {
     const startTime = performance.now();
 
     const animate = (currentTime: number) => {
       const elapsedTime = currentTime - startTime;
       const progress = Math.min(elapsedTime / duration, 1);
 
-      const interpolatedColors = {
-        primary: this.interpolateColor(oldColors.primary, newColors.primary, progress),
-        darker: this.interpolateColor(oldColors.darker, newColors.darker, progress),
-        lighter: this.interpolateColor(oldColors.lighter, newColors.lighter, progress),
-        complementary: this.interpolateColor(oldColors.complementary, newColors.complementary, progress)
-      };
+      const interpolatedColors: { [key: string]: RGBAColor } = {};
+      for (const key in oldColors) {
+        interpolatedColors[key] = this.interpolateRGBAColor(oldColors[key], newColors[key], progress);
+      }
 
       this.setColorsImmediately(interpolatedColors);
 
@@ -129,35 +135,29 @@ export class ColorTransitionService {
     requestAnimationFrame(animate);
   }
 
-  private setColorsImmediately(colors: ColorSpace) {
+  private interpolateRGBAColor(color1: RGBAColor, color2: RGBAColor, progress: number): RGBAColor {
+    return {
+      r: Math.round(color1.r + (color2.r - color1.r) * progress),
+      g: Math.round(color1.g + (color2.g - color1.g) * progress),
+      b: Math.round(color1.b + (color2.b - color1.b) * progress),
+      a: color1.a + (color2.a - color1.a) * progress
+    };
+  }
+
+  private setColorsImmediately(colors: { [key: string]: RGBAColor }) {
+    const defaultBackgroundColors = this.defaultColors();
     this.injectStyleElement(colorScapeSelector, `
       :root, :root .default {
-        --colorscape-primary-color: ${colors.primary};
-        --colorscape-lighter-color: ${colors.lighter};
-        --colorscape-darker-color: ${colors.darker};
-        --colorscape-complementary-color: ${colors.complementary};
+        --colorscape-primary-color: ${this.rgbaToString(colors.primary)};
+        --colorscape-lighter-color: ${this.rgbaToString(colors.lighter)};
+        --colorscape-darker-color: ${this.rgbaToString(colors.darker)};
+        --colorscape-complementary-color: ${this.rgbaToString(colors.complementary)};
+        --colorscape-primary-alpha-color: ${this.rgbaToString({ ...colors.primary, a: 0 })};
+        --colorscape-lighter-alpha-color: ${this.rgbaToString({ ...colors.lighter, a: 0 })};
+        --colorscape-darker-alpha-color: ${this.rgbaToString({ ...colors.darker, a: 0 })};
+        --colorscape-complementary-alpha-color: ${this.rgbaToString({ ...colors.complementary, a: 0 })};
       }
     `);
-  }
-
-  private interpolateColor(color1: string, color2: string, progress: number): string {
-    const [r1, g1, b1] = this.getRGBValues(color1);
-    const [r2, g2, b2] = this.getRGBValues(color2);
-
-    const r = Math.round(r1 + (r2 - r1) * progress);
-    const g = Math.round(g1 + (g2 - g1) * progress);
-    const b = Math.round(b1 + (b2 - b1) * progress);
-
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  private getRGBValues(color: string): number[] {
-    const matches = color.match(/\d+/g);
-    if (matches) {
-      return matches.map(Number);
-    }
-    console.error('Invalid color format:', color);
-    return [0, 0, 0]; // Fallback to black if color format is not recognized
   }
 
   // Include your existing methods here:
@@ -181,6 +181,10 @@ export class ColorTransitionService {
     // }
 
     return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
+  }
+
+  private rgbaToString(color: RGBAColor): string {
+    return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
   }
 
   private getCssVariable(variableName: string): string {
