@@ -121,7 +121,7 @@
   </ng-template>
 
   <ng-template #availableFont let-item>
-
+    @if (item) {
       <div class="d-flex justify-content-between w-100">
         @if (item.name === 'Default') {
           <div class="ms-2 me-auto fs-6">
@@ -133,16 +133,12 @@
           @if (item.hasOwnProperty('provider') && item.provider === FontProvider.User && item.hasOwnProperty('id')) {
             <button class="btn btn-danger me-1" (click)="deleteFont(item.id)">{{t('delete')}}</button>
           }
-
-          <div *ngIf="item.hasOwnProperty('provider')" class="align-self-center">
-            <span class="pill p-1 mx-1 provider">{{item.provider | siteThemeProvider}}</span>
-          </div>
-
         </div>
       </div>
 
-      <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
-            The quick brown fox jumps over the lazy dog
+      <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
+        The quick brown fox jumps over the lazy dog
       </div>
+    }
   </ng-template>
 </ng-container>
