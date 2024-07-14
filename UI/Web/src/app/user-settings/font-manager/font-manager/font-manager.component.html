@@ -12,6 +12,12 @@
         <div class="pe-2">
           <ul style="height: 100%" class="list-group list-group-flush">
 
+            <li class="list-group-item d-flex justify-content-between align-items-start {{!selectedFont ? 'active' : ''}}" (click)="selectFont(undefined)">
+              <div class="ms-2 me-auto">
+                <div class="fw-bold">{{t("add-new-font")}}</div>
+              </div>
+            </li>
+
             @for (font of fonts; track font.name) {
               <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
             }

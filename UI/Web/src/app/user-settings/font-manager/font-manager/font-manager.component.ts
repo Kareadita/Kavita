@@ -87,7 +87,13 @@ export class FontManagerComponent implements OnInit {
     });
   }
 
-  selectFont(font: EpubFont) {
+  selectFont(font: EpubFont | undefined) {
+    if (!font) {
+      this.selectedFont = undefined;
+      this.cdRef.markForCheck();
+      return;
+    }
+
     this.fontService.getFontFace(font).load().then(loadedFace => {
       (this.document as any).fonts.add(loadedFace);
     });
