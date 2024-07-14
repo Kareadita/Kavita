@@ -4,13 +4,16 @@
 
 
       @if (accountService.hasAdminRole(user)) {
-        <h6>Admin</h6>
+        <h6 class="side-nav-header">Admin</h6>
         @for(tab of adminTabs; track tab.fragment) {
-          <app-side-nav-item [noIcon]="true" link="admin/dashboard" [queryParams]="'#' + tab.fragment" [title]="t('admin-dashboard.' + tab.title)"></app-side-nav-item>
+          <app-side-nav-item [noIcon]="true" link="/admin/dashboard" [fragment]="tab.fragment" [title]="t('admin-dashboard.' + tab.title)"></app-side-nav-item>
         }
       }
 
-
+      <h6 class="side-nav-header" [ngClass]="{'mt-3': accountService.hasAdminRole(user)}">Preferences</h6>
+      @for(tab of prefTabs; track tab.fragment) {
+        <app-side-nav-item [noIcon]="true" link="/preferences" [fragment]="tab.fragment" [title]="t('user-preferences.' + tab.title)"></app-side-nav-item>
+      }
     </div>
   }
 

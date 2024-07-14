@@ -19,6 +19,18 @@ enum AdminTabId {
   KavitaPlus = 'kavitaplus'
 }
 
+enum PreferenceTabId {
+  Account = 'account',
+  Preferences = '',
+  Clients = 'clients',
+  Theme = 'theme',
+  Devices = 'devices',
+  Stats = 'stats',
+  Scrobbling = 'scrobbling'
+}
+
+interface Tab {title: string, fragment: string};
+
 @Component({
   selector: 'app-preference-nav',
   standalone: true,
@@ -41,7 +53,7 @@ export class PreferenceNavComponent {
 
   protected readonly AdminTabId = AdminTabId;
 
-  adminTabs: Array<{title: string, fragment: string}> = [
+  adminTabs: Array<Tab> = [
     {title: 'general-tab', fragment: AdminTabId.General},
     {title: 'users-tab', fragment: AdminTabId.Users},
     {title: 'libraries-tab', fragment: AdminTabId.Libraries},
@@ -52,6 +64,16 @@ export class PreferenceNavComponent {
     {title: 'system-tab', fragment: AdminTabId.System},
     {title: 'kavita+-tab', fragment: AdminTabId.KavitaPlus},
   ];
+
+  prefTabs: Array<Tab> = [
+    {title: 'account-tab', fragment: PreferenceTabId.Account},
+    {title: 'preferences-tab', fragment: PreferenceTabId.Preferences},
+    {title: '3rd-party-clients-tab', fragment: PreferenceTabId.Clients},
+    {title: 'theme-tab', fragment: PreferenceTabId.Theme},
+    {title: 'devices-tab', fragment: PreferenceTabId.Devices},
+    {title: 'stats-tab', fragment: PreferenceTabId.Stats},
+  ];
+
   active = this.adminTabs[0];
 
 }

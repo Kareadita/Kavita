@@ -12,6 +12,10 @@
       <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" (click)="openLink()">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
       </a>
+    } @else if (fragment) {
+      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link" [fragment]="fragment">
+        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+      </a>
     } @else {
       <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link" [queryParams]="queryParams">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
