@@ -78,7 +78,6 @@ export class ColorscapeService {
       return;
     }
 
-    console.log('Transitioning colors from ', oldColors, ' to ', newColorsRGBA);
     this.animateColorTransition(oldColors, newColorsRGBA, duration);
 
     this.colorSubject.next(newColorsRGBA);
