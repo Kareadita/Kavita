@@ -10,15 +10,20 @@
     <div class="row g-0 theme-container">
       <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
         <div class="pe-2">
+
+          <div class="d-flex justify-content-between mb-2 align-items-center {{!selectedFont ? 'active' : ''}}">
+            <button class="btn btn-primary me-1" (click)="selectFont(undefined)" [disabled]="selectedFont === undefined">
+              <i class="fa fa-plus me-1" aria-hidden="true"></i> {{t("add-new-font")}}
+            </button>
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" id="filter-out-system-fonts" (change)="toggleFilterSystemFonts()">
+              <label for="filter-out-system-fonts" class="form-check-label">{{t('filter-system-fonts-label')}}</label>
+              </div>
+          </div>
+
           <ul style="height: 100%" class="list-group list-group-flush">
 
-            <li class="list-group-item d-flex justify-content-between align-items-start {{!selectedFont ? 'active' : ''}}" (click)="selectFont(undefined)">
-              <div class="ms-2 me-auto">
-                <div class="fw-bold">{{t("add-new-font")}}</div>
-              </div>
-            </li>
-
-            @for (font of fonts; track font.name) {
+            @for (font of fontsToDisplay(); track font.name) {
               <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
             }
           </ul>

@@ -220,7 +220,8 @@
         "back": "Back",
         "load": "Load",
         "default-font-no-preview": "This font cannot be previewed. This will take the default style from the book.",
-        "add-new-font": "Add new font"
+        "add-new-font": "Add",
+        "filter-system-fonts-label": "Filter System Fonts"
     },
 
     "theme": {

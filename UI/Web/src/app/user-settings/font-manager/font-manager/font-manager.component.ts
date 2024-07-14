@@ -68,6 +68,7 @@ export class FontManagerComponent implements OnInit {
     fontUrl: new FormControl('', [])
   });
 
+  filterSystemFonts: boolean = false;
   selectedFont: EpubFont | undefined = undefined;
 
   files: NgxFileDropEntry[] = [];
@@ -145,6 +146,15 @@ export class FontManagerComponent implements OnInit {
   changeMode(mode: 'file' | 'url' | 'all') {
     this.mode = mode;
     this.cdRef.markForCheck();
+  }
+
+  toggleFilterSystemFonts() {
+    this.filterSystemFonts = !this.filterSystemFonts;
+    this.cdRef.markForCheck();
+  }
+
+  fontsToDisplay(): EpubFont[] {
+    return this.filterSystemFonts ? this.fonts.filter(f => f.provider !== FontProvider.System) : this.fonts;
   }
 
 }
