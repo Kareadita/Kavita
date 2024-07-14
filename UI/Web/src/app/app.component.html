@@ -10,25 +10,28 @@
     }
     <app-nav-header></app-nav-header>
 
-      <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
-        <a id="content"></a>
-        @if (navService.sideNavVisibility$ | async) {
+    <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
+
+      @if (navService.sideNavVisibility$ | async) {
+        @if(isPreferencesPage$ | async) {
+          <app-preference-nav></app-preference-nav>
+        } @else {
           <app-side-nav></app-side-nav>
         }
+      }
 
-
-        <div class="container-fluid" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
-          @if ((navService.sideNavVisibility$ | async)) {
-            <div>
-              <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
-                <router-outlet></router-outlet>
-              </div>
+      <div class="container-fluid" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
+        <a id="content"></a>
+        @if ((navService.sideNavVisibility$ | async)) {
+          <div>
+            <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
+              <router-outlet></router-outlet>
             </div>
-          } @else {
-            <router-outlet></router-outlet>
-          }
-        </div>
+          </div>
+        } @else {
+          <router-outlet></router-outlet>
+        }
       </div>
-
+    </div>
 
 </div>

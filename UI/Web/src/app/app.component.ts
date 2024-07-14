@@ -1,26 +1,26 @@
 import {ChangeDetectorRef, Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
-import {NavigationStart, Router, RouterOutlet} from '@angular/router';
+import {NavigationEnd, NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {map, shareReplay, take, tap} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
-import { filter } from 'rxjs/operators';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import {interval, Observable, switchMap} from 'rxjs';
+import {filter, interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerService} from "./_services/server.service";
 import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
+import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: true,
-  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent]
+  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent]
 })
 export class AppComponent implements OnInit {
 
@@ -36,6 +36,18 @@ export class AppComponent implements OnInit {
   private readonly ngbModal = inject(NgbModal);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
+
+  isPreferencesPage$ = this.router.events.pipe(
+    filter(event => event instanceof NavigationEnd),
+    map((evt) => {
+      const event = (evt as NavigationEnd);
+      const url = event.urlAfterRedirects || event.url;
+      return (
+        /\/admin\/dashboard(#.*)?/.test(url) || /\/preferences(\/[^\/]+|#.*)?/.test(url)
+      );
+    }),
+    takeUntilDestroyed(this.destroyRef),
+  );
 
   constructor(ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document, modalConfig: NgbModalConfig) {
 

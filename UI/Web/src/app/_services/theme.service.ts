@@ -7,7 +7,6 @@ import {
   Injectable,
   Renderer2,
   RendererFactory2,
-  RendererStyleFlags2,
   SecurityContext
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -24,11 +23,9 @@ import {translate} from "@ngneat/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
-import {NavigationEnd, NavigationStart, Router} from "@angular/router";
+import {NavigationEnd, Router} from "@angular/router";
 import {ColorscapeService} from "./colorscape.service";
 import {ColorScape} from "../_models/theme/colorscape";
-
-const colorScapeSelector = 'colorscape';
 
 @Injectable({
   providedIn: 'root'
