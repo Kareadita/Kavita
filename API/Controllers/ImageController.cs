@@ -42,7 +42,7 @@ public class ImageController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("chapter-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "apiKey"])]
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -60,7 +60,7 @@ public class ImageController : BaseApiController
     /// <param name="libraryId"></param>
     /// <returns></returns>
     [HttpGet("library-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"libraryId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["libraryId", "apiKey"])]
     public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -78,7 +78,7 @@ public class ImageController : BaseApiController
     /// <param name="volumeId"></param>
     /// <returns></returns>
     [HttpGet("volume-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"volumeId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["volumeId", "apiKey"])]
     public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -95,7 +95,7 @@ public class ImageController : BaseApiController
     /// </summary>
     /// <param name="seriesId">Id of Series</param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"seriesId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["seriesId", "apiKey"])]
     [HttpGet("series-cover")]
     public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
     {
@@ -116,7 +116,7 @@ public class ImageController : BaseApiController
     /// <param name="collectionTagId"></param>
     /// <returns></returns>
     [HttpGet("collection-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"collectionTagId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["collectionTagId", "apiKey"])]
     public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -141,7 +141,7 @@ public class ImageController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpGet("readinglist-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"readingListId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["readingListId", "apiKey"])]
     public async Task<ActionResult> GetReadingListCoverImage(int readingListId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -200,7 +200,8 @@ public class ImageController : BaseApiController
     /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
     /// <returns></returns>
     [HttpGet("bookmark")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "pageNum", "apiKey"
+    ])]
     public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -222,7 +223,7 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("web-link")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = new []{"url", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["url", "apiKey"])]
     public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -260,7 +261,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy="RequireAdminRole")]
     [HttpGet("cover-upload")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"filename", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["filename", "apiKey"])]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();

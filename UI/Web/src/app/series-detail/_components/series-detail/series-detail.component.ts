@@ -45,7 +45,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {map, take} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {
@@ -415,11 +415,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
-  debugLog(message: string) {
-    console.log(message);
-  }
-
-
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
@@ -445,6 +440,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
         }
+      } else if (event.event === EVENTS.CoverUpdate) {
+        this.themeService.refreshColorScape('series', this.seriesId).subscribe();
       }
     });
 

@@ -16,6 +16,12 @@ interface RGBAColor {
   a: number;
 }
 
+interface RGB {
+  r: number;
+  g: number;
+  b: number;
+}
+
 const colorScapeSelector = 'colorscape';
 
 @Injectable({
@@ -160,27 +166,133 @@ export class ColorTransitionService {
     `);
   }
 
-  // Include your existing methods here:
-  private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true) {
-    const lightenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
-    const darkenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
+  // private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true) {
+  //   const lightenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
+  //   const darkenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
+  //
+  //   const lightenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
+  //   const darkenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
+  //
+  //   const compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
+  //
+  //   const lighterColor = this.lightenDarkenColor(compColor, lightenOffsetPrimary);
+  //   const darkerColor = this.lightenDarkenColor(primaryColor, darkenOffsetPrimary);
+  //
+  //   // let compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
+  //   // if (leanDark) {
+  //   //   compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
+  //   // } else {
+  //   //   compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
+  //   // }
+  //
+  //   return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
+  // }
 
-    const lightenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
-    const darkenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
+  private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true): ColorSpace {
+    const primary = this.hexToRgb(primaryColor);
+    const secondary = secondaryColor ? this.hexToRgb(secondaryColor) : this.calculateComplementaryRgb(primary);
 
-    const compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
+    const primaryHSL = this.rgbToHsl(primary);
+    const secondaryHSL = this.rgbToHsl(secondary);
 
-    const lighterColor = this.lightenDarkenColor(compColor, lightenOffsetPrimary);
-    const darkerColor = this.lightenDarkenColor(primaryColor, darkenOffsetPrimary);
+    const lighterHSL = this.adjustHue(secondaryHSL, 30);
+    lighterHSL.s = Math.min(lighterHSL.s + 0.2, 1);
+    lighterHSL.l = Math.min(lighterHSL.l + 0.1, 0.6);
 
-    // let compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
-    // if (leanDark) {
-    //   compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
-    // } else {
-    //   compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
-    // }
+    const darkerHSL = { ...primaryHSL };
+    darkerHSL.l = Math.max(darkerHSL.l - 0.3, 0.1);
 
-    return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
+    const complementaryHSL = this.adjustHue(primaryHSL, 180);
+    complementaryHSL.s = Math.min(complementaryHSL.s + 0.1, 1);
+    complementaryHSL.l = Math.max(complementaryHSL.l - 0.2, 0.2);
+
+    return {
+      primary: this.rgbToHex(primary),
+      lighter: this.rgbToHex(this.hslToRgb(lighterHSL)),
+      darker: this.rgbToHex(this.hslToRgb(darkerHSL)),
+      complementary: this.rgbToHex(this.hslToRgb(complementaryHSL))
+    };
+  }
+
+  private hexToRgb(hex: string): RGB {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 };
+  }
+
+  private rgbToHex(rgb: RGB): string {
+    return `#${((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1)}`;
+  }
+
+  private rgbToHsl(rgb: RGB): { h: number; s: number; l: number } {
+    const r = rgb.r / 255;
+    const g = rgb.g / 255;
+    const b = rgb.b / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+
+    return { h, s, l };
+  }
+
+  private hslToRgb(hsl: { h: number; s: number; l: number }): RGB {
+    const { h, s, l } = hsl;
+    let r, g, b;
+
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255)
+    };
+  }
+
+  private adjustHue(hsl: { h: number; s: number; l: number }, amount: number): { h: number; s: number; l: number } {
+    return {
+      h: (hsl.h + amount / 360) % 1,
+      s: hsl.s,
+      l: hsl.l
+    };
+  }
+
+  private calculateComplementaryRgb(rgb: RGB): RGB {
+    const hsl = this.rgbToHsl(rgb);
+    const complementaryHsl = this.adjustHue(hsl, 180);
+    return this.hslToRgb(complementaryHsl);
   }
 
   private rgbaToString(color: RGBAColor): string {

@@ -1702,6 +1702,47 @@
         }
       }
     },
+    "/api/ColorScape/series": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color sca",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Device/create": {
       "post": {
         "tags": [
@@ -15640,6 +15681,21 @@
         },
         "additionalProperties": false
       },
+      "ColorScapeDto": {
+        "type": "object",
+        "properties": {
+          "primary": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "A set of colors for the color scape system in the UI"
+      },
       "ConfirmEmailDto": {
         "required": [
           "email",
@@ -22446,58 +22502,7 @@
       "description": "Responsible for all things Want To Read"
     }
   ]
-}"additionalProperties": false
-      },
-      "UpdateWantToReadDto": {
-        "type": "object",
-        "properties": {
-          "seriesIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "description": "List of Series Ids that will be Added/Removed",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "A list of Series to pass when working with Want To Read APIs"
-      },
-      "UploadFileDto": {
-        "required": [
-          "id",
-          "url"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "Id of the Entity",
-            "format": "int32"
-          },
-          "url": {
-            "type": "string",
-            "description": "Base Url encoding of the file to upload from (can be null)",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UploadUrlDto": {
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "properties": {
-          "url": {
-            "minLength": 1,
-            "type": "string",
-            "description": "External url"
-          }
-        },
-        "additionalProperties": false
-      },
+}},
       "UserDto": {
         "type": "object",
         "properties": {

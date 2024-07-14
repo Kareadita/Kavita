@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
-import {filter, map, ReplaySubject, take} from 'rxjs';
+import {filter, map, ReplaySubject, take, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
@@ -26,6 +26,7 @@ import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {NavigationEnd, NavigationStart, Router} from "@angular/router";
 import {ColorTransitionService} from "./color-transition.service";
+import {ColorScape} from "../_models/theme/colorscape";
 
 const colorScapeSelector = 'colorscape';
 
@@ -194,6 +195,12 @@ export class ThemeService {
    */
   setColorScape(primaryColor: string, complementaryColor: string | null = null) {
     this.colorTransitionService.setColorScape(primaryColor, complementaryColor);
+  }
+
+  refreshColorScape(entity: 'series' | 'volume' | 'chapter', id: number) {
+    return this.httpClient.get<ColorScape>(`${this.baseUrl}colorscape/${entity}?id=${id}`).pipe(tap((cs) => {
+      this.setColorScape(cs.primary || '', cs.secondary);
+    }));
   }
 
   /**
