@@ -68,7 +68,7 @@
           <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}"  [imageUrl]="seriesImage"></app-image>
           @if (series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial) {
             <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">
-              <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
+              <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages" [showValue]="true"></ngb-progressbar>
             </div>
             <div class="under-image">
               {{t('continue-from', {title: ContinuePointTitle})}}
