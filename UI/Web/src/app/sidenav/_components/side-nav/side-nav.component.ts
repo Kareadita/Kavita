@@ -20,7 +20,7 @@ import { ActionService } from '../../../_services/action.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
-import {CommonModule} from "@angular/common";
+import {AsyncPipe, CommonModule, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
@@ -38,7 +38,7 @@ import {WikiLink} from "../../../_models/wiki";
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip],
+  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip, NgClass, AsyncPipe],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
