@@ -1,1 +1,10 @@
-<p>preference-nav works!</p>
+<ng-container *transloco="let t; read: 'side-nav'">
+  @if (accountService.currentUser$ | async; as user) {
+    <div class="side-nav no-donate">
+
+
+
+    </div>
+  }
+
+</ng-container>
