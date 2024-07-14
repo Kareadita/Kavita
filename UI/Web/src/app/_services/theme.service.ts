@@ -25,7 +25,7 @@ import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {NavigationEnd, NavigationStart, Router} from "@angular/router";
-import {ColorTransitionService} from "./color-transition.service";
+import {ColorScapeService} from "./color-scape.service";
 import {ColorScape} from "../_models/theme/colorscape";
 
 const colorScapeSelector = 'colorscape';
@@ -36,7 +36,7 @@ const colorScapeSelector = 'colorscape';
 export class ThemeService {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly colorTransitionService = inject(ColorTransitionService);
+  private readonly colorTransitionService = inject(ColorScapeService);
 
   public defaultTheme: string = 'dark';
   public defaultBookTheme: string = 'Dark';
@@ -197,6 +197,11 @@ export class ThemeService {
     this.colorTransitionService.setColorScape(primaryColor, complementaryColor);
   }
 
+  /**
+   * Trigger a request to get the colors for a given entity and apply them
+   * @param entity
+   * @param id
+   */
   refreshColorScape(entity: 'series' | 'volume' | 'chapter', id: number) {
     return this.httpClient.get<ColorScape>(`${this.baseUrl}colorscape/${entity}?id=${id}`).pipe(tap((cs) => {
       this.setColorScape(cs.primary || '', cs.secondary);

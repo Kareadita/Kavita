@@ -445,7 +445,7 @@ public class ImageService : IImageService
 
         // Convert to list of Vector3 (RGB)
         var rgbPixels = new List<Vector3>();
-        for (var i = 0; i < pixels.Length; i += 3)
+        for (var i = 0; i < pixels.Length - 2; i += 3)
         {
             rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
         }
@@ -455,7 +455,16 @@ public class ImageService : IImageService
 
         var sorted = SortByVibrancy(clusters);
 
-        return (sorted[0], sorted[1]);
+        if (sorted.Count >= 2)
+        {
+            return (sorted[0], sorted[1]);
+        }
+        if (sorted.Count == 1)
+        {
+            return (sorted[0], null);
+        }
+
+        return (null, null);
     }
 
     private static (Vector3?, Vector3?) GetPrimaryColorSharp(string imagePath)

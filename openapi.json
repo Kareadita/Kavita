@@ -1707,7 +1707,89 @@
         "tags": [
           "ColorScape"
         ],
-        "summary": "Returns the color sca",
+        "summary": "Returns the color scape for a series",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/volume": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a volume",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/chapter": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a chapter",
         "parameters": [
           {
             "name": "id",
@@ -22502,82 +22584,7 @@
       "description": "Responsible for all things Want To Read"
     }
   ]
-}},
-      "UserDto": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "token": {
-            "type": "string",
-            "nullable": true
-          },
-          "refreshToken": {
-            "type": "string",
-            "nullable": true
-          },
-          "apiKey": {
-            "type": "string",
-            "nullable": true
-          },
-          "preferences": {
-            "$ref": "#/components/schemas/UserPreferencesDto"
-          },
-          "ageRestriction": {
-            "$ref": "#/components/schemas/AgeRestrictionDto"
-          },
-          "kavitaVersion": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserDtoICount": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/UserDto"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserPreferencesDto": {
-        "required": [
-          "autoCloseMenu",
-          "backgroundColor",
-          "blurUnreadSummaries",
-          "bookReaderFontFamily",
-          "bookReaderFontSize",
-          "bookReaderImmersiveMode",
-          "bookReaderLayoutMode",
-          "bookReaderLineSpacing",
-          "bookReaderMargin",
-          "bookReaderReadingDirection",
-          "bookReaderTapToPaginate",
-          "bookReaderThemeName",
-          "bookReaderWritingStyle",
-          "collapseSeriesRelationships",
-          "emulateBook",
-          "globalPageLayoutMode",
-          "layoutMode",
-          "locale",
-          "noTransitions",
-          "pageSplitOption",
-          "pdfLayoutMode",
-          "pdfScrollMode",
-          "pdfSpreadMode",
-          "pdfTheme",
+}        "pdfTheme",
           "promptForDownloadSize",
           "readerMode",
           "readingDirection",

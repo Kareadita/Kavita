@@ -9,6 +9,13 @@ interface ColorSpace {
   complementary: string;
 }
 
+interface ColorSpaceRGBA {
+  primary: RGBAColor;
+  lighter: RGBAColor;
+  darker: RGBAColor;
+  complementary: RGBAColor;
+}
+
 interface RGBAColor {
   r: number;
   g: number;
@@ -24,10 +31,13 @@ interface RGB {
 
 const colorScapeSelector = 'colorscape';
 
+/**
+ * ColorScape handles setting the scape and managing the transitions
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class ColorTransitionService {
+export class ColorScapeService {
   private colorSubject = new BehaviorSubject<any>(null);
   public colors$ = this.colorSubject.asObservable();
 
@@ -60,18 +70,80 @@ export class ColorTransitionService {
     const oldColors = this.colorSubject.getValue() || this.convertColorsToRGBA(this.defaultColors());
     const duration = this.calculateTransitionDuration(oldColors, newColorsRGBA);
 
-    //console.log('Transitioning colors from ', oldColors, ' to ', newColorsRGBA);
+    // Check if the colors we are transitioning to are the same
+    // if (this.areRGBAColorsEqual(oldColors, newColorsRGBA)) {
+    //   return;
+    // }
+
+    console.log('Transitioning colors from ', oldColors, ' to ', newColorsRGBA);
     this.animateColorTransition(oldColors, newColorsRGBA, duration);
 
     this.colorSubject.next(newColorsRGBA);
   }
 
+  /**
+   * Are two colors equal that allow for small visual differences not noticeable to the eye
+   * @param color1
+   * @param color2
+   * @param threshold
+   * @private
+   */
+  private areRGBAColorsVisuallyEqual(color1: RGBAColor, color2: RGBAColor, threshold: number = 1): boolean {
+    return Math.abs(color1.r - color2.r) <= threshold &&
+      Math.abs(color1.g - color2.g) <= threshold &&
+      Math.abs(color1.b - color2.b) <= threshold &&
+      Math.abs(color1.a - color2.a) <= threshold / 255;
+  }
+
+  private areRGBAColorsEqual(color1: RGBAColor, color2: RGBAColor): boolean {
+    return color1.r === color2.r &&
+      color1.g === color2.g &&
+      color1.b === color2.b &&
+      color1.a === color2.a;
+  }
+
   private convertColorsToRGBA(colors: ColorSpace): { [key: string]: RGBAColor } {
     const convertedColors: { [key: string]: RGBAColor } = {};
     for (const [key, value] of Object.entries(colors)) {
-      convertedColors[key] = this.hexToRGBA(value);
+      convertedColors[key] = this.parseColorToRGBA(value);
     }
     return convertedColors;
+  }
+
+  private parseColorToRGBA(color: string): RGBAColor {
+    if (color.startsWith('#')) {
+      return this.hexToRGBA(color);
+    } else if (color.startsWith('rgb')) {
+      return this.rgbStringToRGBA(color);
+    } else {
+      console.warn(`Unsupported color format: ${color}. Defaulting to black.`);
+      return { r: 0, g: 0, b: 0, a: 1 };
+    }
+  }
+
+  private hexToRGBA(hex: string, opacity: number = 1): RGBAColor {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+        a: opacity
+      }
+      : { r: 0, g: 0, b: 0, a: opacity };
+  }
+
+  private rgbStringToRGBA(rgb: string): RGBAColor {
+    const matches = rgb.match(/(\d+(\.\d+)?)/g);
+    if (matches) {
+      return {
+        r: parseInt(matches[0], 10),
+        g: parseInt(matches[1], 10),
+        b: parseInt(matches[2], 10),
+        a: matches.length === 4 ? parseFloat(matches[3]) : 1
+      };
+    }
+    return { r: 0, g: 0, b: 0, a: 1 };
   }
 
   private calculateTransitionDuration(oldColors: { [key: string]: RGBAColor }, newColors: { [key: string]: RGBAColor }): number {
@@ -99,15 +171,6 @@ export class ColorTransitionService {
     );
   }
 
-  private hexToRGBA(hex: string, opacity: number = 1): RGBAColor {
-    if (hex.startsWith('#')) {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return { r, g, b, a: opacity };
-    }
-    return { r: 0, g: 0, b: 0, a: opacity }; // Fallback to opaque black if not a hex color
-  }
 
   private defaultColors() {
     return {
@@ -117,7 +180,6 @@ export class ColorTransitionService {
       complementary: this.getCssVariable('--colorscape-complementary-default-color'),
     }
   }
-
 
   private animateColorTransition(oldColors: { [key: string]: RGBAColor }, newColors: { [key: string]: RGBAColor }, duration: number) {
     const startTime = performance.now();
