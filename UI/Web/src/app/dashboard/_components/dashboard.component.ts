@@ -33,6 +33,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {ServerService} from "../../_services/server.service";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 enum StreamId {
   OnDeck,
@@ -257,4 +258,6 @@ export class DashboardComponent implements OnInit {
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
   }
+
+  protected readonly SettingsTabId = SettingsTabId;
 }
