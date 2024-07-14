@@ -25,7 +25,7 @@ import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {NavigationEnd, NavigationStart, Router} from "@angular/router";
-import {ColorScapeService} from "./color-scape.service";
+import {ColorscapeService} from "./colorscape.service";
 import {ColorScape} from "../_models/theme/colorscape";
 
 const colorScapeSelector = 'colorscape';
@@ -36,7 +36,7 @@ const colorScapeSelector = 'colorscape';
 export class ThemeService {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly colorTransitionService = inject(ColorScapeService);
+  private readonly colorTransitionService = inject(ColorscapeService);
 
   public defaultTheme: string = 'dark';
   public defaultBookTheme: string = 'Dark';

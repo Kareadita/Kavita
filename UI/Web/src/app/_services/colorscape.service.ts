@@ -37,15 +37,22 @@ const colorScapeSelector = 'colorscape';
 @Injectable({
   providedIn: 'root'
 })
-export class ColorScapeService {
-  private colorSubject = new BehaviorSubject<any>(null);
+export class ColorscapeService {
+  private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
   public colors$ = this.colorSubject.asObservable();
 
-  private minDuration = 1000; // 1 second minimum duration
-  private maxDuration = 4000; // 3 seconds maximum duration
+  private minDuration = 1000; // minimum duration
+  private maxDuration = 4000; // maximum duration
 
-  constructor(@Inject(DOCUMENT) private document: Document) {}
+  constructor(@Inject(DOCUMENT) private document: Document) {
 
+  }
+
+  /**
+   * Sets a color scape for the active theme
+   * @param primaryColor
+   * @param complementaryColor
+   */
   setColorScape(primaryColor: string, complementaryColor: string | null = null) {
     if (this.getCssVariable('--colorscape-enabled') === 'false') {
       return;
@@ -57,23 +64,19 @@ export class ColorScapeService {
       return;
     }
 
-    let newColors: ColorSpace;
-    if (primaryColor === '' || primaryColor === null || primaryColor === undefined) {
-      newColors = this.defaultColors();
-    } else {
-      newColors = this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme());
-    }
+    const newColors: ColorSpace = primaryColor ?
+      this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme()) :
+      this.defaultColors();
 
-    // Convert hex colors to RGB format
     const newColorsRGBA = this.convertColorsToRGBA(newColors);
-
     const oldColors = this.colorSubject.getValue() || this.convertColorsToRGBA(this.defaultColors());
     const duration = this.calculateTransitionDuration(oldColors, newColorsRGBA);
 
-    // Check if the colors we are transitioning to are the same
-    // if (this.areRGBAColorsEqual(oldColors, newColorsRGBA)) {
-    //   return;
-    // }
+
+    // Check if the colors we are transitioning to are visually equal
+    if (this.areColorSpacesVisuallyEqual(oldColors, newColorsRGBA)) {
+      return;
+    }
 
     console.log('Transitioning colors from ', oldColors, ' to ', newColorsRGBA);
     this.animateColorTransition(oldColors, newColorsRGBA, duration);
@@ -81,33 +84,27 @@ export class ColorScapeService {
     this.colorSubject.next(newColorsRGBA);
   }
 
-  /**
-   * Are two colors equal that allow for small visual differences not noticeable to the eye
-   * @param color1
-   * @param color2
-   * @param threshold
-   * @private
-   */
-  private areRGBAColorsVisuallyEqual(color1: RGBAColor, color2: RGBAColor, threshold: number = 1): boolean {
+  private areColorSpacesVisuallyEqual(color1: ColorSpaceRGBA, color2: ColorSpaceRGBA, threshold: number = 0): boolean {
+    return this.areRGBAColorsVisuallyEqual(color1.primary, color2.primary, threshold) &&
+      this.areRGBAColorsVisuallyEqual(color1.lighter, color2.lighter, threshold) &&
+      this.areRGBAColorsVisuallyEqual(color1.darker, color2.darker, threshold) &&
+      this.areRGBAColorsVisuallyEqual(color1.complementary, color2.complementary, threshold);
+  }
+
+  private areRGBAColorsVisuallyEqual(color1: RGBAColor, color2: RGBAColor, threshold: number = 0): boolean {
     return Math.abs(color1.r - color2.r) <= threshold &&
       Math.abs(color1.g - color2.g) <= threshold &&
       Math.abs(color1.b - color2.b) <= threshold &&
       Math.abs(color1.a - color2.a) <= threshold / 255;
   }
 
-  private areRGBAColorsEqual(color1: RGBAColor, color2: RGBAColor): boolean {
-    return color1.r === color2.r &&
-      color1.g === color2.g &&
-      color1.b === color2.b &&
-      color1.a === color2.a;
-  }
-
-  private convertColorsToRGBA(colors: ColorSpace): { [key: string]: RGBAColor } {
-    const convertedColors: { [key: string]: RGBAColor } = {};
-    for (const [key, value] of Object.entries(colors)) {
-      convertedColors[key] = this.parseColorToRGBA(value);
-    }
-    return convertedColors;
+  private convertColorsToRGBA(colors: ColorSpace): ColorSpaceRGBA {
+    return {
+      primary: this.parseColorToRGBA(colors.primary),
+      lighter: this.parseColorToRGBA(colors.lighter),
+      darker: this.parseColorToRGBA(colors.darker),
+      complementary: this.parseColorToRGBA(colors.complementary)
+    };
   }
 
   private parseColorToRGBA(color: string): RGBAColor {
@@ -146,13 +143,13 @@ export class ColorScapeService {
     return { r: 0, g: 0, b: 0, a: 1 };
   }
 
-  private calculateTransitionDuration(oldColors: { [key: string]: RGBAColor }, newColors: { [key: string]: RGBAColor }): number {
-    const colorKeys = ['primary', 'lighter', 'darker', 'complementary'];
+  private calculateTransitionDuration(oldColors: ColorSpaceRGBA, newColors: ColorSpaceRGBA): number {
+    const colorKeys: (keyof ColorSpaceRGBA)[] = ['primary', 'lighter', 'darker', 'complementary'];
     let totalDistance = 0;
 
     for (const key of colorKeys) {
-      const oldRGB = [oldColors[key].r, oldColors[key].g, oldColors[key].b];
-      const newRGB = [newColors[key].r, newColors[key].g, newColors[key].b];
+      const oldRGB = this.rgbaToRgb(oldColors[key]);
+      const newRGB = this.rgbaToRgb(newColors[key]);
       totalDistance += this.calculateColorDistance(oldRGB, newRGB);
     }
 
@@ -163,11 +160,15 @@ export class ColorScapeService {
     return Math.round(duration);
   }
 
-  private calculateColorDistance(rgb1: number[], rgb2: number[]): number {
+  private rgbaToRgb(rgba: RGBAColor): RGB {
+    return { r: rgba.r, g: rgba.g, b: rgba.b };
+  }
+
+  private calculateColorDistance(rgb1: RGB, rgb2: RGB): number {
     return Math.sqrt(
-      Math.pow(rgb2[0] - rgb1[0], 2) +
-      Math.pow(rgb2[1] - rgb1[1], 2) +
-      Math.pow(rgb2[2] - rgb1[2], 2)
+      Math.pow(rgb2.r - rgb1.r, 2) +
+      Math.pow(rgb2.g - rgb1.g, 2) +
+      Math.pow(rgb2.b - rgb1.b, 2)
     );
   }
 
@@ -181,17 +182,19 @@ export class ColorScapeService {
     }
   }
 
-  private animateColorTransition(oldColors: { [key: string]: RGBAColor }, newColors: { [key: string]: RGBAColor }, duration: number) {
+  private animateColorTransition(oldColors: ColorSpaceRGBA, newColors: ColorSpaceRGBA, duration: number) {
     const startTime = performance.now();
 
     const animate = (currentTime: number) => {
       const elapsedTime = currentTime - startTime;
       const progress = Math.min(elapsedTime / duration, 1);
 
-      const interpolatedColors: { [key: string]: RGBAColor } = {};
-      for (const key in oldColors) {
-        interpolatedColors[key] = this.interpolateRGBAColor(oldColors[key], newColors[key], progress);
-      }
+      const interpolatedColors: ColorSpaceRGBA = {
+        primary: this.interpolateRGBAColor(oldColors.primary, newColors.primary, progress),
+        lighter: this.interpolateRGBAColor(oldColors.lighter, newColors.lighter, progress),
+        darker: this.interpolateRGBAColor(oldColors.darker, newColors.darker, progress),
+        complementary: this.interpolateRGBAColor(oldColors.complementary, newColors.complementary, progress)
+      };
 
       this.setColorsImmediately(interpolatedColors);
 
@@ -212,8 +215,7 @@ export class ColorScapeService {
     };
   }
 
-  private setColorsImmediately(colors: { [key: string]: RGBAColor }) {
-    const defaultBackgroundColors = this.defaultColors();
+  private setColorsImmediately(colors: ColorSpaceRGBA) {
     this.injectStyleElement(colorScapeSelector, `
       :root, :root .default {
         --colorscape-primary-color: ${this.rgbaToString(colors.primary)};
@@ -227,28 +229,6 @@ export class ColorScapeService {
       }
     `);
   }
-
-  // private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true) {
-  //   const lightenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
-  //   const darkenOffsetPrimary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
-  //
-  //   const lightenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-lighten-offset'), 10);
-  //   const darkenOffsetSecondary = parseInt(this.getCssVariable('--colorscape-primary-darken-offset'), 10);
-  //
-  //   const compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
-  //
-  //   const lighterColor = this.lightenDarkenColor(compColor, lightenOffsetPrimary);
-  //   const darkerColor = this.lightenDarkenColor(primaryColor, darkenOffsetPrimary);
-  //
-  //   // let compColor = secondaryColor ? secondaryColor : this.calculateComplementaryColor(primaryColor);
-  //   // if (leanDark) {
-  //   //   compColor = this.lightenDarkenColor(compColor, lightenOffsetSecondary); // Make it darker
-  //   // } else {
-  //   //   compColor = this.lightenDarkenColor(compColor, darkenOffsetSecondary);  // Make it lighter
-  //   // }
-  //
-  //   return {primary: primaryColor, darker: darkerColor, lighter: lighterColor, complementary: compColor};
-  // }
 
   private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true): ColorSpace {
     const primary = this.hexToRgb(primaryColor);
@@ -377,26 +357,6 @@ export class ColorScapeService {
       this.document.head.appendChild(styleElement);
     }
     styleElement.textContent = styles;
-  }
-
-  private lightenDarkenColor(hex: string, amt: number) {
-    let num = parseInt(hex.slice(1), 16);
-    let r = (num >> 16) + amt;
-    let g = ((num >> 8) & 0x00FF) + amt;
-    let b = (num & 0x0000FF) + amt;
-
-    r = Math.max(Math.min(255, r), 0);
-    g = Math.max(Math.min(255, g), 0);
-    b = Math.max(Math.min(255, b), 0);
-
-    let newColor = (r << 16) | (g << 8) | b;
-    return `#${(0x1000000 + newColor).toString(16).slice(1).toUpperCase()}`;
-  }
-
-  private calculateComplementaryColor(hex: string): string {
-    const num = parseInt(hex.slice(1), 16);
-    let compNum = 0xFFFFFF ^ num;
-    return `#${compNum.toString(16).padStart(6, '0').toUpperCase()}`;
   }
 
   private unsetPageColorOverrides() {
