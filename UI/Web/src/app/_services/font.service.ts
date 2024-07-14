@@ -59,8 +59,8 @@ export class FontService {
     return this.httpClient.post(this.baseUrl + "font/upload-by-url?url=" + encodeURIComponent(url), {});
   }
 
-  deleteFont(id: number) {
-    return this.httpClient.delete(this.baseUrl + `font?fontId=${id}`);
+  deleteFont(id: number, force: boolean = false) {
+    return this.httpClient.delete(this.baseUrl + `font?fontId=${id}&force=${force}`);
   }
 
 }

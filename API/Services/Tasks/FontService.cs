@@ -17,7 +17,7 @@ namespace API.Services.Tasks;
 public interface IFontService
 {
     Task<EpubFont> CreateFontFromFileAsync(string path);
-    Task Delete(int fontId);
+    Task Delete(int fontId, bool force);
     Task CreateFontFromUrl(string url);
 }
 
@@ -76,15 +76,20 @@ public class FontService: IFontService
         return font;
     }
 
-    public async Task Delete(int fontId)
+    public async Task Delete(int fontId, bool force)
     {
-        if (await _unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId))
+        if (!force && await _unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId))
         {
             throw new KavitaException("errors.delete-font-in-use");
         }
 
         var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
         if (font == null) return;
+
+        if (font.Provider == FontProvider.System)
+        {
+            throw new KavitaException("errors.cant-delete-system-font");
+        }
 
         await RemoveFont(font);
     }
@@ -104,20 +109,21 @@ public class FontService: IFontService
         return Task.CompletedTask;
     }
 
-    public async Task RemoveFont(EpubFont font)
+    private async Task RemoveFont(EpubFont font)
     {
         if (font.Provider == FontProvider.System) return;
 
         var prefs = await _unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Name);
         foreach (var pref in prefs)
         {
+            // TODO: SignalR message informing your front has been reset to the default font
             pref.BookReaderFontFamily = DefaultFont;
             _unitOfWork.UserRepository.Update(pref);
         }
 
         try
         {
-            // Copy the theme file to temp for nightly removal (to give user time to reclaim if made a mistake)
+            // Copy the font file to temp for nightly removal (to give user time to reclaim if made a mistake)
             var existingLocation =
                 _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, font.FileName);
             var newLocation =

@@ -81,15 +81,13 @@ public class FontController : BaseApiController
     /// Removes a font from the system
     /// </summary>
     /// <param name="fontId"></param>
-    /// <param name="confirmed">If the font is in use by other users and an admin wants it deleted, they must confirm to force delete it</param>
+    /// <param name="force">If the font is in use by other users and an admin wants it deleted, can they force delete it</param>
     /// <returns></returns>
     [HttpDelete]
-    public async Task<IActionResult> DeleteFont(int fontId, bool confirmed = false)
+    public async Task<IActionResult> DeleteFont(int fontId, bool force = false)
     {
-        // TODO: We need to check if this font is used by anyone else and if so, need to inform the user
-        // Need to check if this is a system font as well
-        var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && confirmed;
-        await _fontService.Delete(fontId);
+        var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && force;
+        await _fontService.Delete(fontId, forceDelete);
         return Ok();
     }
 

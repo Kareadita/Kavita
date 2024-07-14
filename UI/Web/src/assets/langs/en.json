@@ -214,10 +214,13 @@
         "upload-continued": "a font file",
         "preview-default": "Upload your own font via file or url",
         "delete": "{{common.delete}}",
+        "force-delete": "Force {{common.delete}}",
+        "force-delete-warning": "Force delete will remove the font, and reset users selected font to default if they are using this font.",
         "url-label": "Url",
         "back": "Back",
         "load": "Load",
-        "default-font-no-preview": "This font cannot be previewed. This will take the default style from the book."
+        "default-font-no-preview": "This font cannot be previewed. This will take the default style from the book.",
+        "add-new-font": "Add new font"
     },
 
     "theme": {
@@ -1992,7 +1995,8 @@
         "theme-already-in-use": "Theme already exists by that name",
         "delete-font-in-use": "Font is currently in use by at least one user, cannot delete",
         "font-manual-upload": "There was an issue creating Font from manual upload",
-        "font-already-in-use": "Font already exists by that name"
+        "font-already-in-use": "Font already exists by that name",
+        "cant-delete-system-font": "Cannot delete system font"
     },
 
     "metadata-builder": {
@@ -2239,7 +2243,8 @@
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
         "mal-token-required": "MAL Token is required, set in User Settings",
-        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal"
+        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal",
+        "confirm-delete-font-force": "{{toasts.confirm-delete-font}}. If used by users, will reset theirs to default"
     },
 
     "actionable": {

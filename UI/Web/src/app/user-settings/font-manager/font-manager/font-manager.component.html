@@ -102,6 +102,15 @@
               <div class="float-end">
                 @if (selectedFont.provider !== FontProvider.System && selectedFont.name !== 'Default') {
                   <button class="btn btn-danger me-1" (click)="deleteFont(selectedFont.id)">{{t('delete')}}</button>
+
+                  @if (hasAdmin$) {
+                    <button class="btn btn-danger me-1" (click)="deleteFont(selectedFont.id, true)" [ngbTooltip]="tipContent">{{t('force-delete')}}</button>
+
+                    <ng-template #tipContent>
+                      {{t('force-delete-warning')}}
+                    </ng-template>
+                  }
+
                 }
               </div>
             </h4>

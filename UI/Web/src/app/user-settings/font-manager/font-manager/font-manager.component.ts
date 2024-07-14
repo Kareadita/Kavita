@@ -19,6 +19,7 @@ import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-font-manager',
@@ -37,7 +38,8 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
     CarouselReelComponent,
     DefaultValuePipe,
     ImageComponent,
-    SafeUrlPipe
+    SafeUrlPipe,
+    NgbTooltip
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
@@ -129,12 +131,12 @@ export class FontManagerComponent implements OnInit {
     });
   }
 
-  async deleteFont(id: number) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-font'))) {
+  async deleteFont(id: number, force: boolean = false) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-font' + (force ? '-force' : '')))) {
       return;
     }
 
-    this.fontService.deleteFont(id).subscribe(() => {
+    this.fontService.deleteFont(id, force).subscribe(() => {
       this.fonts = this.fonts.filter(f => f.id !== id);
       this.cdRef.markForCheck();
     });
