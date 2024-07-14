@@ -20,6 +20,7 @@ import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
   selector: 'app-font-manager',
@@ -45,6 +46,14 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
   styleUrl: './font-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  animations: [
+    trigger('loadNewFontAnimation', [
+      transition('void => loaded', [
+        style({ backgroundColor: 'var(--primary-color)' }),
+        animate('2s', style({ backgroundColor: 'var(--list-group-item-bg-color)' }))
+      ])
+    ])
+  ],
 })
 export class FontManagerComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -59,6 +68,7 @@ export class FontManagerComponent implements OnInit {
 
   user: User | undefined;
   fonts: Array<EpubFont> = [];
+  loadedFonts: Array<EpubFont> = [];
   hasAdmin$ = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}),
     map(c => c && this.accountService.hasAdminRole(c))
@@ -159,7 +169,12 @@ export class FontManagerComponent implements OnInit {
 
   private addFont(font: EpubFont) {
     this.fonts = [...this.fonts, font];
+    this.loadedFonts = [...this.loadedFonts, font];
     this.cdRef.markForCheck();
+  }
+
+  animationState(font: EpubFont) {
+    return this.loadedFonts.includes(font) ? 'loaded' : '';
   }
 
 }

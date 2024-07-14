@@ -131,7 +131,7 @@
 
   <ng-template #fontOption let-item>
     @if (item !== undefined) {
-      <li class="list-group-item d-flex justify-content-between align-items-start {{selectedFont && selectedFont.name === item.name ? 'active' : ''}}" (click)="selectFont(item)">
+      <li [@loadNewFontAnimation]="animationState(item)" class="list-group-item d-flex justify-content-between align-items-start {{selectedFont && selectedFont.name === item.name ? 'active' : ''}}" (click)="selectFont(item)">
         <div class="ms-2 me-auto">
           <div class="fw-bold">{{item.name | sentenceCase}}</div>
         </div>
