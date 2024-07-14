@@ -13,25 +13,25 @@ import {
   readingDirections,
   readingModes,
   scalingOptions
-} from "../../../../_models/preferences/preferences";
-import {AccountService} from "../../../../_services/account.service";
+} from "../../_models/preferences/preferences";
+import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
-import {BookService} from "../../../../book-reader/_services/book.service";
+import {BookService} from "../../book-reader/_services/book.service";
 import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
-import {SettingsService} from "../../../../admin/settings.service";
-import {LocalizationService} from "../../../../_services/localization.service";
-import {bookColorThemes} from "../../../../book-reader/_components/reader-settings/reader-settings.component";
+import {SettingsService} from "../../admin/settings.service";
+import {LocalizationService} from "../../_services/localization.service";
+import {bookColorThemes} from "../../book-reader/_components/reader-settings/reader-settings.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {User} from "../../../../_models/user";
-import {Language} from "../../../../_models/metadata/language";
+import {User} from "../../_models/user";
+import {Language} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {forkJoin} from "rxjs";
 import {take} from "rxjs/operators";
-import {BookPageLayoutMode} from "../../../../_models/readers/book-page-layout-mode";
-import {PdfTheme} from "../../../../_models/preferences/pdf-theme";
-import {PdfScrollMode} from "../../../../_models/preferences/pdf-scroll-mode";
-import {PdfSpreadMode} from "../../../../_models/preferences/pdf-spread-mode";
+import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
+import {PdfTheme} from "../../_models/preferences/pdf-theme";
+import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
+import {PdfSpreadMode} from "../../_models/preferences/pdf-spread-mode";
 import {
   NgbAccordionBody, NgbAccordionButton,
   NgbAccordionCollapse,
@@ -67,18 +67,17 @@ enum AccordionPanelID {
     ColorPickerModule,
     NgForOf
   ],
-  templateUrl: './manga-user-preferences.component.html',
-  styleUrl: './manga-user-preferences.component.scss',
+  templateUrl: './manage-user-preferences.component.html',
+  styleUrl: './manage-user-preferences.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MangaUserPreferencesComponent {
+export class ManageUserPreferencesComponent {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
   private readonly bookService = inject(BookService);
   private readonly titleService = inject(Title);
-  private readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
