@@ -22,7 +22,8 @@
 
 <ng-template #inner>
     <div class="active-highlight"></div>
-    <span class="phone-hidden" title="{{title}}">
+    @if (!noIcon) {
+      <span class="phone-hidden" title="{{title}}">
         <div>
           @if (imageUrl !== null && imageUrl !== '') {
             <app-image [imageUrl]="imageUrl" width="20px" height="20px"></app-image>
@@ -30,7 +31,9 @@
             <i class="fa {{icon}}" aria-hidden="true"></i>
           }
         </div>
-    </span>
+      </span>
+    }
+
     <span class="side-nav-text">
         <div>
             {{title}}

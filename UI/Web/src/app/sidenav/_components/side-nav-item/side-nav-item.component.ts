@@ -30,6 +30,10 @@ export class SideNavItemComponent implements OnInit {
   @Input() icon: string = '';
   @Input() imageUrl: string | null = '';
   /**
+   * Removes all the space around the icon area
+   */
+  @Input() noIcon: boolean = false;
+  /**
    * Text for the item
    */
   @Input() title: string = '';

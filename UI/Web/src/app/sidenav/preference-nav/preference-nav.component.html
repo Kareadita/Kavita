@@ -1,7 +1,14 @@
-<ng-container *transloco="let t; read: 'side-nav'">
+<ng-container *transloco="let t">
   @if (accountService.currentUser$ | async; as user) {
     <div class="side-nav no-donate">
 
+
+      @if (accountService.hasAdminRole(user)) {
+        <h6>Admin</h6>
+        @for(tab of adminTabs; track tab.fragment) {
+          <app-side-nav-item [noIcon]="true" link="admin/dashboard" [queryParams]="'#' + tab.fragment" [title]="t('admin-dashboard.' + tab.title)"></app-side-nav-item>
+        }
+      }
 
 
     </div>
