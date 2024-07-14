@@ -69,7 +69,7 @@ export class FontManagerComponent implements OnInit {
   selectedFont: EpubFont | undefined = undefined;
 
   files: NgxFileDropEntry[] = [];
-  acceptableExtensions = ['.woff2', 'woff', 'tff', 'otf'].join(',');
+  acceptableExtensions = ['.woff2', '.woff', '.tff', '.otf'].join(',');
   mode: 'file' | 'url' | 'all' = 'all';
   isUploadingFont: boolean = false;
 
