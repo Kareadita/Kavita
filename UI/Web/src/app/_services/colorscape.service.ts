@@ -230,30 +230,52 @@ export class ColorscapeService {
     `);
   }
 
-  private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, leanDark: boolean = true): ColorSpace {
+  private generateBackgroundColors(primaryColor: string, secondaryColor: string | null = null, isDarkTheme: boolean = true): ColorSpace {
     const primary = this.hexToRgb(primaryColor);
     const secondary = secondaryColor ? this.hexToRgb(secondaryColor) : this.calculateComplementaryRgb(primary);
 
     const primaryHSL = this.rgbToHsl(primary);
     const secondaryHSL = this.rgbToHsl(secondary);
 
-    const lighterHSL = this.adjustHue(secondaryHSL, 30);
-    lighterHSL.s = Math.min(lighterHSL.s + 0.2, 1);
-    lighterHSL.l = Math.min(lighterHSL.l + 0.1, 0.6);
+    if (isDarkTheme) {
+      const lighterHSL = this.adjustHue(secondaryHSL, 30);
+      lighterHSL.s = Math.min(lighterHSL.s + 0.2, 1);
+      lighterHSL.l = Math.min(lighterHSL.l + 0.1, 0.6);
 
-    const darkerHSL = { ...primaryHSL };
-    darkerHSL.l = Math.max(darkerHSL.l - 0.3, 0.1);
+      const darkerHSL = { ...primaryHSL };
+      darkerHSL.l = Math.max(darkerHSL.l - 0.3, 0.1);
 
-    const complementaryHSL = this.adjustHue(primaryHSL, 180);
-    complementaryHSL.s = Math.min(complementaryHSL.s + 0.1, 1);
-    complementaryHSL.l = Math.max(complementaryHSL.l - 0.2, 0.2);
+      const complementaryHSL = this.adjustHue(primaryHSL, 180);
+      complementaryHSL.s = Math.min(complementaryHSL.s + 0.1, 1);
+      complementaryHSL.l = Math.max(complementaryHSL.l - 0.2, 0.2);
 
-    return {
-      primary: this.rgbToHex(primary),
-      lighter: this.rgbToHex(this.hslToRgb(lighterHSL)),
-      darker: this.rgbToHex(this.hslToRgb(darkerHSL)),
-      complementary: this.rgbToHex(this.hslToRgb(complementaryHSL))
-    };
+      return {
+        primary: this.rgbToHex(primary),
+        lighter: this.rgbToHex(this.hslToRgb(lighterHSL)),
+        darker: this.rgbToHex(this.hslToRgb(darkerHSL)),
+        complementary: this.rgbToHex(this.hslToRgb(complementaryHSL))
+      };
+    } else {
+      // NOTE: Light themes look bad in general with this system.
+      const lighterHSL = { ...primaryHSL };
+      lighterHSL.s = Math.max(lighterHSL.s - 0.3, 0);
+      lighterHSL.l = Math.min(lighterHSL.l + 0.5, 0.95);
+
+      const darkerHSL = { ...primaryHSL };
+      darkerHSL.s = Math.max(darkerHSL.s - 0.1, 0);
+      darkerHSL.l = Math.min(darkerHSL.l + 0.3, 0.9);
+
+      const complementaryHSL = this.adjustHue(primaryHSL, 180);
+      complementaryHSL.s = Math.max(complementaryHSL.s - 0.2, 0);
+      complementaryHSL.l = Math.min(complementaryHSL.l + 0.4, 0.9);
+
+      return {
+        primary: this.rgbToHex(primary),
+        lighter: this.rgbToHex(this.hslToRgb(lighterHSL)),
+        darker: this.rgbToHex(this.hslToRgb(darkerHSL)),
+        complementary: this.rgbToHex(this.hslToRgb(complementaryHSL))
+      };
+    }
   }
 
   private hexToRgb(hex: string): RGB {
