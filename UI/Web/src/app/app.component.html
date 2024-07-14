@@ -13,7 +13,7 @@
     <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
 
       @if (navService.sideNavVisibility$ | async) {
-        @if(isPreferencesPage$ | async) {
+        @if(navService.usePreferenceSideNav$ | async) {
           <app-preference-nav></app-preference-nav>
         } @else {
           <app-side-nav></app-side-nav>

@@ -12,12 +12,12 @@ import {ManageUsersComponent} from '../manage-users/manage-users.component';
 import {ManageMediaSettingsComponent} from '../manage-media-settings/manage-media-settings.component';
 import {ManageEmailSettingsComponent} from '../manage-email-settings/manage-email-settings.component';
 import {ManageSettingsComponent} from '../manage-settings/manage-settings.component';
-import {NgFor, NgIf} from '@angular/common';
+import {NgFor} from '@angular/common';
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {WikiLink} from "../../_models/wiki";
 
 enum TabID {
@@ -65,6 +65,8 @@ export class DashboardComponent implements OnInit {
     {title: 'kavita+-tab', fragment: TabID.KavitaPlus},
   ];
   active = this.tabs[0];
+
+
 
 
   constructor() {

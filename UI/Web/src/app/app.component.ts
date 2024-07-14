@@ -37,17 +37,6 @@ export class AppComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
 
-  isPreferencesPage$ = this.router.events.pipe(
-    filter(event => event instanceof NavigationEnd),
-    map((evt) => {
-      const event = (evt as NavigationEnd);
-      const url = event.urlAfterRedirects || event.url;
-      return (
-        /\/admin\/dashboard(#.*)?/.test(url) || /\/preferences(\/[^\/]+|#.*)?/.test(url)
-      );
-    }),
-    takeUntilDestroyed(this.destroyRef),
-  );
 
   constructor(ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document, modalConfig: NgbModalConfig) {
 

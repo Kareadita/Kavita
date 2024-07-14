@@ -1,10 +1,30 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {AsyncPipe, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
 import {AccountService} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
-import {RouterLink} from "@angular/router";
+import {ActivatedRoute, RouterLink} from "@angular/router";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+
+// export enum PreferenceTabId {
+//   General = '',
+//   Email = 'email',
+//   Media = 'media',
+//   Users = 'users',
+//   Libraries = 'libraries',
+//   System = 'system',
+//   Tasks = 'tasks',
+//   Statistics = 'statistics',
+//   KavitaPlus = 'kavitaplus',
+//   Account = 'account',
+//   Preferences = '',
+//   Clients = 'clients',
+//   Theme = 'theme',
+//   Devices = 'devices',
+//   Stats = 'stats',
+//   Scrobbling = 'scrobbling'
+// }
 
 
 enum AdminTabId {
@@ -50,6 +70,8 @@ export class PreferenceNavComponent {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly navService = inject(NavService);
   protected readonly accountService = inject(AccountService);
+  protected readonly cdRef = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly AdminTabId = AdminTabId;
 
@@ -74,6 +96,31 @@ export class PreferenceNavComponent {
     {title: 'stats-tab', fragment: PreferenceTabId.Stats},
   ];
 
-  active = this.adminTabs[0];
+  active = this.prefTabs[0];
+  hasActiveLicense = false;
+
+  constructor() {
+    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+      if (res) {
+        if (this.prefTabs.filter(t => t.fragment == PreferenceTabId.Scrobbling).length === 0) {
+          this.prefTabs.push({title: 'scrobbling-tab', fragment: PreferenceTabId.Scrobbling});
+        }
+
+        this.hasActiveLicense = true;
+        this.cdRef.markForCheck();
+      }
+
+      this.route.fragment.subscribe(frag => {
+        const tabs = [...this.adminTabs, ...this.prefTabs];
+        const tab = tabs.filter(item => item.fragment === frag);
+        if (tab.length > 0) {
+          this.active = tab[0];
+        } else {
+          this.active = this.prefTabs[1]; // Default to preferences
+        }
+        this.cdRef.markForCheck();
+      });
+    });
+  }
 
 }

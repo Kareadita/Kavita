@@ -1,18 +1,26 @@
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { ReplaySubject, take } from 'rxjs';
+import {DestroyRef, inject, Inject, Injectable, OnDestroy, Renderer2, RendererFactory2} from '@angular/core';
+import {filter, ReplaySubject, Subject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {TextResonse} from "../_types/text-response";
 import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 import {AccountService} from "./account.service";
-import {tap} from "rxjs/operators";
+import {map, tap} from "rxjs/operators";
+import {NavigationEnd, Router} from "@angular/router";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
 })
 export class NavService {
+
+  private readonly accountService = inject(AccountService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  //private readonly onDestroy = new Subject<void>();
+
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
@@ -33,10 +41,22 @@ export class NavService {
    */
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
 
+  usePreferenceSideNav$ = this.router.events.pipe(
+    filter(event => event instanceof NavigationEnd),
+    map((evt) => {
+      const event = (evt as NavigationEnd);
+      const url = event.urlAfterRedirects || event.url;
+      return (
+        /\/admin\/dashboard(#.*)?/.test(url) || /\/preferences(\/[^\/]+|#.*)?/.test(url) || /\/settings(\/[^\/]+|#.*)?/.test(url)
+      );
+    }),
+    takeUntilDestroyed(this.destroyRef),
+  );
+
   private renderer: Renderer2;
   baseUrl = environment.apiUrl;
 
-  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient, private accountService: AccountService) {
+  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     // To avoid flashing, let's check if we are authenticated before we show
