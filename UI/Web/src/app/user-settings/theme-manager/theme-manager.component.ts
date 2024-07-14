@@ -123,7 +123,13 @@ export class ThemeManagerComponent {
     });
   }
 
-  selectTheme(theme: SiteTheme | DownloadableSiteTheme) {
+  selectTheme(theme: SiteTheme | DownloadableSiteTheme | undefined) {
+    if (!theme) {
+      this.selectedTheme = undefined;
+      this.cdRef.markForCheck();
+      return;
+    }
+
     if (theme.hasOwnProperty('provider')) {
       this.selectedTheme = {
         isSiteTheme: true,

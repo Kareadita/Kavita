@@ -10,6 +10,13 @@
     <div class="row g-0 theme-container">
       <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
         <div class="pe-2">
+
+          <div class="d-flex justify-content-between mb-2 align-items-center {{!selectedTheme ? 'active' : ''}}">
+            <button class="btn btn-primary me-1" (click)="selectTheme(undefined)" [disabled]="selectedTheme === undefined">
+              <i class="fa fa-plus me-1" aria-hidden="true"></i> {{t("add-new-theme")}}
+            </button>
+          </div>
+
           <ul style="height: 100%" class="list-group list-group-flush">
 
             @for (theme of themeService.themes$ | async; track theme.name) {
