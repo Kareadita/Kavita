@@ -6,40 +6,42 @@
   </app-side-nav-companion-bar>
   <div class="container-fluid g-0">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
-      <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class=tab>
-        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ t(tab.title) }}</a>
-        <ng-template ngbNavContent>
-          <ng-container *ngIf="tab.fragment === TabID.General">
-            <app-manage-settings></app-manage-settings>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Email">
-            <app-manage-email-settings></app-manage-email-settings>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Media">
-            <app-manage-media-settings></app-manage-media-settings>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Users">
-            <app-manage-users></app-manage-users>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Libraries">
-            <app-manage-library></app-manage-library>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.System">
-            <app-manage-system></app-manage-system>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Statistics">
-            <app-server-stats></app-server-stats>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Tasks">
-            <app-manage-tasks-settings></app-manage-tasks-settings>
-          </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.KavitaPlus">
-            <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
-            <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
-            <app-license></app-license>
-          </ng-container>
-        </ng-template>
-      </li>
+      @for(tab of tabs; track tab.fragment) {
+        <li [ngbNavItem]="tab" class=tab>
+          <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ t(tab.title) }}</a>
+          <ng-template ngbNavContent>
+            @defer (when tab.fragment === TabID.General; prefetch on idle) {
+              <app-manage-settings></app-manage-settings>
+            }
+            @defer (when tab.fragment === TabID.Email; prefetch on idle) {
+              <app-manage-email-settings></app-manage-email-settings>
+            }
+            @defer (when tab.fragment === TabID.Media; prefetch on idle) {
+              <app-manage-media-settings></app-manage-media-settings>
+            }
+            @defer (when tab.fragment === TabID.Users; prefetch on idle) {
+              <app-manage-users></app-manage-users>
+            }
+            @defer (when tab.fragment === TabID.Libraries; prefetch on idle) {
+              <app-manage-library></app-manage-library>
+            }
+            @defer (when tab.fragment === TabID.System; prefetch on idle) {
+              <app-manage-system></app-manage-system>
+            }
+            @defer (when tab.fragment === TabID.Statistics; prefetch on idle) {
+              <app-server-stats></app-server-stats>
+            }
+            @defer (when tab.fragment === TabID.Tasks; prefetch on idle) {
+              <app-manage-tasks-settings></app-manage-tasks-settings>
+            }
+            @defer (when tab.fragment === TabID.KavitaPlus; prefetch on idle) {
+              <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
+              <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
+              <app-license></app-license>
+            }
+          </ng-template>
+        </li>
+      }
     </ul>
     <div [ngbNavOutlet]="nav" class="mt-3 mb-3"></div>
 

@@ -7,7 +7,6 @@ import {LicenseComponent} from '../license/license.component';
 import {ManageTasksSettingsComponent} from '../manage-tasks-settings/manage-tasks-settings.component';
 import {ServerStatsComponent} from '../../statistics/_components/server-stats/server-stats.component';
 import {ManageSystemComponent} from '../manage-system/manage-system.component';
-import {ManageLogsComponent} from '../manage-logs/manage-logs.component';
 import {ManageLibraryComponent} from '../manage-library/manage-library.component';
 import {ManageUsersComponent} from '../manage-users/manage-users.component';
 import {ManageMediaSettingsComponent} from '../manage-media-settings/manage-media-settings.component';
@@ -29,7 +28,6 @@ enum TabID {
   Libraries = 'libraries',
   System = 'system',
   Tasks = 'tasks',
-  Logs = 'logs',
   Statistics = 'statistics',
   KavitaPlus = 'kavitaplus'
 }
@@ -40,7 +38,7 @@ enum TabID {
     styleUrls: ['./dashboard.component.scss'],
     standalone: true,
   imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink,
-    NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent,
+    NgbNavContent, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent,
     ManageUsersComponent, ManageLibraryComponent, ManageSystemComponent, ServerStatsComponent,
     ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe, TranslocoDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
