@@ -10,15 +10,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     runGuardsAndResolvers: 'always',
     children: [
-      // {
-      //   path: 'admin',
-      //   canActivate: [AdminGuard],
-      //   loadChildren: () => import('./_routes/admin-routing.module').then(m => m.routes)
-      // },
-      // {
-      //   path: 'preferences',
-      //   loadChildren: () => import('./_routes/user-settings-routing.module').then(m => m.routes)
-      // },
       {
         path: 'settings',
         loadChildren: () => import('./_routes/settings-routing.module').then(m => m.routes)

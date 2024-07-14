@@ -16,6 +16,7 @@ import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {catchError} from "rxjs";
 import {WikiLink} from "../../_models/wiki";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-license',
@@ -23,7 +24,7 @@ import {WikiLink} from "../../_models/wiki";
   styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
+  imports: [NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective, RouterLink]
 })
 export class LicenseComponent implements OnInit {
 

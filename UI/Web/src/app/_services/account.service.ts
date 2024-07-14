@@ -74,6 +74,17 @@ export class AccountService {
     });
   }
 
+  hasAnyRole(user: User, roles: Array<Role>) {
+    if (!user || !user.roles) {
+      return false;
+    }
+    if (roles.length === 0) {
+      return true;
+    }
+
+    return roles.some(role => user.roles.includes(role));
+  }
+
   hasAdminRole(user: User) {
     return user && user.roles.includes(Role.Admin);
   }

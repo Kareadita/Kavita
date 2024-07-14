@@ -180,7 +180,7 @@
               <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
             </div>
             <div class="nav-item not-xs-only">
-              <a routerLink="/settings" class="dark-exempt btn btn-icon" [title]="t('settings')">
+              <a routerLink="/settings" [fragment]="SettingsTabId.Account" class="dark-exempt btn btn-icon" [title]="t('settings')">
                 <i class="fa fa-cogs nav" aria-hidden="true"></i>
                 <span class="visually-hidden">{{t('settings')}}</span>
               </a>

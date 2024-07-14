@@ -1,19 +1,16 @@
-<ng-container *transloco="let t">
+<ng-container *transloco="let t; read:'settings'">
   @if (accountService.currentUser$ | async; as user) {
     <div class="side-nav no-donate">
 
-
-      @if (accountService.hasAdminRole(user)) {
-        <h6 class="side-nav-header">Admin</h6>
-        @for(tab of adminTabs; track tab.fragment) {
-          <app-side-nav-item [noIcon]="true" link="/admin/dashboard" [fragment]="tab.fragment" [title]="t('admin-dashboard.' + tab.title)"></app-side-nav-item>
+      @for(section of sections; track section.title + section.children.length; let idx = $index;) {
+        <h6 class="side-nav-header" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h6>
+        @for(item of section.children; track item.fragment) {
+          @if (accountService.hasAnyRole(user, item.roles)) {
+            <app-side-nav-item [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment"></app-side-nav-item>
+          }
         }
       }
 
-      <h6 class="side-nav-header" [ngClass]="{'mt-3': accountService.hasAdminRole(user)}">Preferences</h6>
-      @for(tab of prefTabs; track tab.fragment) {
-        <app-side-nav-item [noIcon]="true" link="/preferences" [fragment]="tab.fragment" [title]="t('user-preferences.' + tab.title)"></app-side-nav-item>
-      }
     </div>
   }
 

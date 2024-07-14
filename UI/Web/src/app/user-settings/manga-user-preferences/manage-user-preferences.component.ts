@@ -19,7 +19,6 @@ import {ToastrService} from "ngx-toastr";
 import {BookService} from "../../book-reader/_services/book.service";
 import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
-import {SettingsService} from "../../admin/settings.service";
 import {LocalizationService} from "../../_services/localization.service";
 import {bookColorThemes} from "../../book-reader/_components/reader-settings/reader-settings.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";

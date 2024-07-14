@@ -98,6 +98,7 @@
     "user-preferences": {
         "title": "User Dashboard",
         "pref-description": "These are global settings that are bound to your account.",
+
         "account-tab": "Account",
         "preferences-tab": "Preferences",
         "3rd-party-clients-tab": "3rd Party Clients",
@@ -106,6 +107,7 @@
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Smart Filters",
+
         "success-toast": "User preferences updated",
 
         "global-settings-title": "Global Settings",
@@ -649,7 +651,13 @@
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
         "activate-reset-tooltip": "Untie your license with this server. Requires both License and Email.",
-        "activate-save": "{{common.save}}"
+        "activate-save": "{{common.save}}",
+
+        "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
+        "kavita+-desc-part-2": "premium benefits",
+        "kavita+-desc-part-3": "today!",
+        "kavita+-requirement": "Kavita+ is designed to work only with the latest release - 2 versions. Anything outside of that is subject to not working.",
+        "kavita+-releases": "See releases"
     },
 
     "book-line-overlay": {
@@ -1420,23 +1428,26 @@
     },
 
 
-    "admin-dashboard": {
-        "title": "Admin Dashboard",
-        "general-tab": "General",
-        "users-tab": "Users",
-        "libraries-tab": "Libraries",
-        "media-tab": "Media",
-        "logs-tab": "Logs",
-        "email-tab": "Email",
-        "tasks-tab": "Tasks",
-        "statistics-tab": "Statistics",
-        "system-tab": "System",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
-        "kavita+-desc-part-2": "premium benefits",
-        "kavita+-desc-part-3": "today!",
-        "kavita+-requirement": "Kavita+ is designed to work only with the latest release - 2 versions. Anything outside of that is subject to not working.",
-        "kavita+-releases": "See releases"
+    "settings": {
+        "account-section-title": "Account",
+        "server-section-title": "Server",
+        "admin-general": "General",
+        "admin-users": "Users",
+        "admin-libraries": "Libraries",
+        "admin-media": "Media",
+        "admin-logs": "Logs",
+        "admin-email": "Email",
+        "admin-tasks": "Tasks",
+        "admin-statistics": "Statistics",
+        "admin-system": "System",
+        "admin-kavitaplus": "Kavita+",
+        "account": "Account",
+        "preferences": "Preferences",
+        "clients": "Clients",
+        "devices": "Devices",
+        "user-stats": "Stats",
+        "scrobbling": "Scrobbling",
+        "theme": "Theme"
     },
 
     "collection-detail": {

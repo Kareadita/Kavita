@@ -45,6 +45,7 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 
 @Component({
     selector: 'app-nav-header',
@@ -284,4 +285,5 @@ export class NavHeaderComponent implements OnInit {
 
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly SettingsTabId = SettingsTabId;
 }
