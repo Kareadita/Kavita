@@ -56,7 +56,7 @@ export class FontService {
   }
 
   uploadFromUrl(url: string) {
-    return this.httpClient.post(this.baseUrl + "font/upload-by-url?url=" + encodeURIComponent(url), {});
+    return this.httpClient.post<EpubFont>(this.baseUrl + "font/upload-by-url?url=" + encodeURIComponent(url), {});
   }
 
   deleteFont(id: number, force: boolean = false) {

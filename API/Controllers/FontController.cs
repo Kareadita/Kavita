@@ -115,7 +115,8 @@ public class FontController : BaseApiController
         // Validate url
         try
         {
-            await _fontService.CreateFontFromUrl(url);
+            var font = await _fontService.CreateFontFromUrl(url);
+            return Ok(_mapper.Map<EpubFontDto>(font));
         }
         catch (KavitaException ex)
         {

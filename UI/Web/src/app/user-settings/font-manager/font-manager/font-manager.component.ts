@@ -112,10 +112,9 @@ export class FontManagerComponent implements OnInit {
 
       const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
       fileEntry.file((file: File) => {
-        this.fontService.uploadFont(file, droppedFile).subscribe(f => {
+        this.fontService.uploadFont(file, droppedFile).subscribe(newFont => {
           this.isUploadingFont = false;
-          this.fonts = [...this.fonts, f];
-          this.cdRef.markForCheck();
+          this.addFont(newFont)
         });
       });
     }
@@ -127,8 +126,9 @@ export class FontManagerComponent implements OnInit {
     const url = this.form.get('fontUrl')?.value.trim();
     if (!url || url === '') return;
 
-    this.fontService.uploadFromUrl(url).subscribe(() => {
-      this.loadFonts();
+    this.fontService.uploadFromUrl(url).subscribe(newFont => {
+      this.form.get('fontUrl')?.reset();
+      this.addFont(newFont)
     });
   }
 
@@ -155,6 +155,11 @@ export class FontManagerComponent implements OnInit {
 
   fontsToDisplay(): EpubFont[] {
     return this.filterSystemFonts ? this.fonts.filter(f => f.provider !== FontProvider.System) : this.fonts;
+  }
+
+  private addFont(font: EpubFont) {
+    this.fonts = [...this.fonts, font];
+    this.cdRef.markForCheck();
   }
 
 }

@@ -85,7 +85,7 @@ public interface IFontService
 {
     Task<EpubFont> CreateFontFromFileAsync(string path);
     Task Delete(int fontId, bool force);
-    Task CreateFontFromUrl(string url);
+    Task<EpubFont> CreateFontFromUrl(string url);
 }
 
 public class FontService: IFontService
@@ -163,7 +163,7 @@ public class FontService: IFontService
         await RemoveFont(font);
     }
 
-    public async Task CreateFontFromUrl(string url)
+    public async Task<EpubFont> CreateFontFromUrl(string url)
     {
         if (!url.StartsWith(SupportedFontUrlPrefix))
         {
@@ -194,7 +194,7 @@ public class FontService: IFontService
         _logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily, fileName, googleFontRef.url);
         var path = await googleFontRef.url.DownloadFileAsync(_directoryService.TempDirectory, fileName);
 
-        await CreateFontFromFileAsync(path);
+        return await CreateFontFromFileAsync(path);
     }
 
     private async Task RemoveFont(EpubFont font)
