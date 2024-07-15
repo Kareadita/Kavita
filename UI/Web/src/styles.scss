@@ -101,3 +101,7 @@ app-root {
   border-radius: 8px;
   min-height: 50px;
 }
+
+body {
+  scrollbar-gutter: stable both-edges;
+}
