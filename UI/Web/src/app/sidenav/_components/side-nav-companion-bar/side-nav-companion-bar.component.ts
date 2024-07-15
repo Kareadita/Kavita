@@ -72,7 +72,6 @@ export class SideNavCompanionBarComponent implements OnInit {
 
     this.toggleService.toggleState$.pipe(takeUntilDestroyed(this.destroyRef), tap(isOpen => {
       this.isFilterOpen = isOpen;
-      this.filterOpen.emit(this.isFilterOpen);
       this.cdRef.markForCheck();
     })).subscribe();
   }

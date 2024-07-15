@@ -29,7 +29,7 @@ export class JumpbarService {
     this.resumeKeys[key] = value;
   }
 
-  saveScrollOffset(url: string, value: number) {
+  saveResumePosition(url: string, value: number) {
     this.resumeScroll[url] = value;
   }
 

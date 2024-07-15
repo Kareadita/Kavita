@@ -833,7 +833,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.isLoadingExtra = false;
       this.cdRef.markForCheck();
-      console.log('isLoadingExtra is false')
     });
   }
 
