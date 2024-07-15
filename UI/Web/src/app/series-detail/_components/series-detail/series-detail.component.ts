@@ -723,7 +723,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         this.isLoading = false;
         this.cdRef.markForCheck();
-        console.log('isLoading is now false')
       });
     }, err => {
       this.router.navigateByUrl('/home');
@@ -815,7 +814,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (data === null) {
         this.isLoadingExtra = false;
         this.cdRef.markForCheck();
-        console.log('isLoadingExtra is false')
         return;
       }
 

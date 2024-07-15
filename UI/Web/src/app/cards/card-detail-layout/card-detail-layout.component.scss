@@ -106,13 +106,13 @@ h2 {
 
 
 .flip-button {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: none;
-  perspective: 1000px;
   cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 40px;
+  height: 25px;
+  position: relative;
+  overflow: hidden;
 }
 
 .flip-button-inner {
@@ -122,6 +122,9 @@ h2 {
   text-align: center;
   transition: transform 0.6s;
   transform-style: preserve-3d;
+
+  top: 0;
+  left: 0;
 }
 
 .flip-button:hover .flip-button-inner {
