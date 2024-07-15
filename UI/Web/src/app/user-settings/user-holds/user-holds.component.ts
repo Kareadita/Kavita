@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {shareReplay} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ScrobbleEventTypePipe} from "../../_single-module/scrobble-event-type.pipe";
+import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
 
 import {
   NgbAccordionBody,

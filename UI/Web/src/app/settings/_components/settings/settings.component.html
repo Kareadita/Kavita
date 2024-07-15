@@ -1,116 +1,117 @@
 <ng-container *transloco="let t; read:'settings'">
-  @if(fragment !== null) {
-    <app-side-nav-companion-bar>
-      <h2 title>
-        {{fragment | settingFragment}}
-      </h2>
-    </app-side-nav-companion-bar>
-    <div class="container-fluid">
+  <app-side-nav-companion-bar>
+    <h2 title>
+      {{fragment | settingFragment}}
+    </h2>
+  </app-side-nav-companion-bar>
+  <div class="container-fluid col-me-4 pb-3">
 
-      @if (accountService.currentUser$ | async; as user) {
-        @if (accountService.hasAdminRole(user)) {
-          @defer (when fragment === SettingsTabId.General; prefetch on idle) {
-            @if (fragment === SettingsTabId.General) {
-              <app-manage-settings></app-manage-settings>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.Email; prefetch on idle) {
-            @if (fragment === SettingsTabId.Email) {
-              <app-manage-email-settings></app-manage-email-settings>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.Media; prefetch on idle) {
-            @if (fragment === SettingsTabId.Media) {
-              <app-manage-media-settings></app-manage-media-settings>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.Users; prefetch on idle) {
-            @if (fragment === SettingsTabId.Users) {
-              <app-manage-users></app-manage-users>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.Libraries; prefetch on idle) {
-            @if (fragment === SettingsTabId.Libraries) {
-              <app-manage-library></app-manage-library>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.System; prefetch on idle) {
-            @if (fragment === SettingsTabId.System) {
-              <app-manage-system></app-manage-system>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.Statistics; prefetch on idle) {
-            @if (fragment === SettingsTabId.Statistics) {
-              <app-server-stats></app-server-stats>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.Tasks; prefetch on idle) {
-            @if (fragment === SettingsTabId.Tasks) {
-              <app-manage-tasks-settings></app-manage-tasks-settings>
-            }
-          }
-
-          @defer (when fragment === SettingsTabId.KavitaPlus; prefetch on idle) {
-            @if (fragment === SettingsTabId.KavitaPlus) {
-              <app-license></app-license>
-            }
+    @if (accountService.currentUser$ | async; as user) {
+      @if (accountService.hasAdminRole(user)) {
+        @defer (when fragment === SettingsTabId.General; prefetch on idle) {
+          @if (fragment === SettingsTabId.General) {
+            <app-manage-settings></app-manage-settings>
           }
         }
 
-
-        @defer (when fragment === SettingsTabId.Account; prefetch on idle) {
-          @if (fragment === SettingsTabId.Account) {
-            <app-change-email></app-change-email>
-            <app-change-password></app-change-password>
-            <app-change-age-restriction></app-change-age-restriction>
-            <app-manage-scrobbling-providers></app-manage-scrobbling-providers>
+        @defer (when fragment === SettingsTabId.Email; prefetch on idle) {
+          @if (fragment === SettingsTabId.Email) {
+            <app-manage-email-settings></app-manage-email-settings>
           }
         }
 
-        @defer (when fragment === SettingsTabId.Preferences; prefetch on idle) {
-          @if (fragment === SettingsTabId.Preferences) {
-            <app-manga-user-preferences></app-manga-user-preferences>
+        @defer (when fragment === SettingsTabId.Media; prefetch on idle) {
+          @if (fragment === SettingsTabId.Media) {
+            <app-manage-media-settings></app-manage-media-settings>
           }
         }
 
-        @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
-          @if (fragment === SettingsTabId.Clients) {
-            <app-manage-opds></app-manage-opds>
+        @defer (when fragment === SettingsTabId.Users; prefetch on idle) {
+          @if (fragment === SettingsTabId.Users) {
+            <app-manage-users></app-manage-users>
           }
         }
 
-        @defer (when fragment === SettingsTabId.Theme; prefetch on idle) {
-          @if (fragment === SettingsTabId.Theme) {
-            <app-theme-manager></app-theme-manager>
+        @defer (when fragment === SettingsTabId.Libraries; prefetch on idle) {
+          @if (fragment === SettingsTabId.Libraries) {
+            <app-manage-library></app-manage-library>
           }
         }
 
-        @defer (when fragment === SettingsTabId.Devices; prefetch on idle) {
-          @if (fragment === SettingsTabId.Devices) {
-            <app-manage-devices></app-manage-devices>
+        @defer (when fragment === SettingsTabId.System; prefetch on idle) {
+          @if (fragment === SettingsTabId.System) {
+            <app-manage-system></app-manage-system>
           }
         }
 
-        @defer (when fragment === SettingsTabId.UserStats; prefetch on idle) {
-          @if (fragment === SettingsTabId.UserStats) {
-            <app-user-stats></app-user-stats>
+        @defer (when fragment === SettingsTabId.Statistics; prefetch on idle) {
+          @if (fragment === SettingsTabId.Statistics) {
+            <app-server-stats></app-server-stats>
           }
         }
 
-        @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
-            <app-user-scrobble-history></app-user-scrobble-history>
-            <app-user-holds></app-user-holds>
+        @defer (when fragment === SettingsTabId.Tasks; prefetch on idle) {
+          @if (fragment === SettingsTabId.Tasks) {
+            <app-manage-tasks-settings></app-manage-tasks-settings>
+          }
+        }
+
+        @defer (when fragment === SettingsTabId.KavitaPlus; prefetch on idle) {
+          @if (fragment === SettingsTabId.KavitaPlus) {
+            <app-license></app-license>
           }
         }
       }
-    </div>
-  }
+
+
+      @defer (when fragment === SettingsTabId.Account; prefetch on idle) {
+        @if (fragment === SettingsTabId.Account) {
+          <app-change-email></app-change-email>
+          <div class="setting-section-break"></div>
+          <app-change-password></app-change-password>
+          <div class="setting-section-break"></div>
+          <app-change-age-restriction></app-change-age-restriction>
+          <div class="setting-section-break"></div>
+          <app-manage-scrobbling-providers></app-manage-scrobbling-providers>
+        }
+      }
+
+      @defer (when fragment === SettingsTabId.Preferences; prefetch on idle) {
+        @if (fragment === SettingsTabId.Preferences) {
+          <app-manga-user-preferences></app-manga-user-preferences>
+        }
+      }
+
+      @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
+        @if (fragment === SettingsTabId.Clients) {
+          <app-manage-opds></app-manage-opds>
+        }
+      }
+
+      @defer (when fragment === SettingsTabId.Theme; prefetch on idle) {
+        @if (fragment === SettingsTabId.Theme) {
+          <app-theme-manager></app-theme-manager>
+        }
+      }
+
+      @defer (when fragment === SettingsTabId.Devices; prefetch on idle) {
+        @if (fragment === SettingsTabId.Devices) {
+          <app-manage-devices></app-manage-devices>
+        }
+      }
+
+      @defer (when fragment === SettingsTabId.UserStats; prefetch on idle) {
+        @if (fragment === SettingsTabId.UserStats) {
+          <app-user-stats></app-user-stats>
+        }
+      }
+
+      @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
+        @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
+          <app-user-scrobble-history></app-user-scrobble-history>
+          <app-user-holds></app-user-holds>
+        }
+      }
+    }
+  </div>
 </ng-container>

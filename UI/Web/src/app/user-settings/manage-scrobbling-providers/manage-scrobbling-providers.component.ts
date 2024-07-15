@@ -1,5 +1,5 @@
-import {ChangeDetectorRef, Component, ContentChild, DestroyRef, ElementRef, inject, OnInit} from '@angular/core';
-import {NgIf, NgOptimizedImage} from "@angular/common";
+import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {NgOptimizedImage} from "@angular/common";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -16,6 +16,8 @@ import {ToastrService} from "ngx-toastr";
 import {ManageAlertsComponent} from "../../admin/manage-alerts/manage-alerts.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
@@ -35,6 +37,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     NgbAccordionHeader,
     NgbAccordionItem,
     LoadingComponent,
+    ScrobbleProviderItemComponent,
+    ScrobbleProviderNamePipe,
   ],
   templateUrl: './manage-scrobbling-providers.component.html',
   styleUrl: './manage-scrobbling-providers.component.scss'
@@ -46,6 +50,8 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+
   hasValidLicense: boolean = false;
 
   formGroup: FormGroup = new FormGroup({});
@@ -53,8 +59,6 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   malToken: string = '';
   malUsername: string = '';
 
-  aniListTokenExpired: boolean = false;
-  malTokenExpired: boolean = false;
 
   isViewMode: boolean = true;
   loaded: boolean = false;
@@ -75,10 +79,6 @@ export class ManageScrobblingProvidersComponent implements OnInit {
           this.malUsername = dto.username;
           this.formGroup.get('malToken')?.setValue(this.malToken);
           this.formGroup.get('malUsername')?.setValue(this.malUsername);
-          this.cdRef.markForCheck();
-        });
-        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
-          this.aniListTokenExpired = hasExpired;
           this.cdRef.markForCheck();
         });
       } else {
@@ -125,5 +125,6 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   toggleViewMode() {
     this.isViewMode = !this.isViewMode;
     this.resetForm();
+    this.cdRef.markForCheck();
   }
 }
