@@ -17,80 +17,80 @@
     </div>
   </div>
 
-  @if (isViewMode) {
-    <div class="container-fluid row">
-      <span class="col-12">{{user?.email}}</span>
-    </div>
-  }
-
-  <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
-    <ng-container>
-      <div class="row">
-        @if (errors.length > 0) {
-          <div class="alert alert-danger" role="alert">
-            @for(error of errors; track error) {
-              <div>{{error}}</div>
-            })
-          </div>
-        }
-        <form [formGroup]="form">
-          @if(!hasValidEmail) {
-            <div class="alert alert-warning" role="alert">
-              {{t('has-invalid-email')}}
+  <div class="container-fluid row">
+    @if (isViewMode) {
+      <span>{{user?.email}}</span>
+    } @else {
+      <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+        <ng-container>
+          @if (errors.length > 0) {
+            <div class="alert alert-danger" role="alert">
+              @for(error of errors; track error) {
+                <div>{{error}}</div>
+              })
             </div>
           }
-          <div class="mb-3">
-            <label for="email" class="form-label">{{t('email-label')}}</label>
-            @if(form.get('email'); as formControl) {
-              <input class="form-control custom-input" type="email" id="email" formControlName="email"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
-              @if (formControl.errors) {
-                <div id="email-validations" class="invalid-feedback">
-                  @if (formControl.errors.required) {
-                    <div>{{t('required-field')}}</div>
-                  }
-                  @if (formControl.errors.email) {
-                    <div>{{t('valid-email')}}</div>
-                  }
-                </div>
-              }
+          <form [formGroup]="form">
+            @if(!hasValidEmail) {
+              <div class="alert alert-warning" role="alert">
+                {{t('has-invalid-email')}}
+              </div>
             }
-          </div>
-
-          <div class="mb-3">
-            <label for="password" class="form-label">{{t('current-password-label')}}</label>
-            @if (form.get('password'); as formControl) {
-              <input class="form-control custom-input" type="password" id="password" formControlName="password"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
-              @if (formControl.errors) {
-                <div id="password-validations" class="invalid-feedback">
-                  @if (formControl.errors.required) {
-                    <div>{{t('required-field')}}</div>
-                  }
-                </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">{{t('email-label')}}</label>
+              @if(form.get('email'); as formControl) {
+                <input class="form-control custom-input" type="email" id="email" formControlName="email"
+                       [class.is-invalid]="formControl.invalid && formControl.touched">
+                @if (formControl.errors) {
+                  <div id="email-validations" class="invalid-feedback">
+                    @if (formControl.errors.required) {
+                      <div>{{t('required-field')}}</div>
+                    }
+                    @if (formControl.errors.email) {
+                      <div>{{t('valid-email')}}</div>
+                    }
+                  </div>
+                }
               }
-            }
-          </div>
+            </div>
 
-          <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-            <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="email-card" (click)="resetForm()">{{t('reset')}}</button>
-            <button type="submit" class="flex-fill btn btn-primary" aria-describedby="email-card" (click)="saveForm()" [disabled]="!form.valid || !(form.dirty || form.touched)">{{t('save')}}</button>
-          </div>
-        </form>
+            <div class="mb-3">
+              <label for="password" class="form-label">{{t('current-password-label')}}</label>
+              @if (form.get('password'); as formControl) {
+                <input class="form-control custom-input" type="password" id="password" formControlName="password"
+                       [class.is-invalid]="formControl.invalid && formControl.touched">
+                @if (formControl.errors) {
+                  <div id="password-validations" class="invalid-feedback">
+                    @if (formControl.errors.required) {
+                      <div>{{t('required-field')}}</div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+
+            <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+              <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="email-card" (click)="resetForm()">{{t('reset')}}</button>
+              <button type="submit" class="flex-fill btn btn-primary" aria-describedby="email-card" (click)="saveForm()" [disabled]="!form.valid || !(form.dirty || form.touched)">{{t('save')}}</button>
+            </div>
+          </form>
+        </ng-container>
+
+        @if (emailLink !== '') {
+          <h4>{{t('email-updated-title')}}</h4>
+          <p>{{t('email-updated-description')}}</p>
+          <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
+          <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
+        }
+
+        <ng-template #noPermission>
+          <p>{{t('permission-error')}}</p>
+        </ng-template>
       </div>
-    </ng-container>
-
-    @if (emailLink !== '') {
-      <h4>{{t('email-updated-title')}}</h4>
-      <p>{{t('email-updated-description')}}</p>
-      <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-      <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
     }
-
-    <ng-template #noPermission>
-      <p>{{t('permission-error')}}</p>
-    </ng-template>
   </div>
+
+
 
 
 </ng-container>
