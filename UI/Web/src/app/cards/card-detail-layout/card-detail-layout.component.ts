@@ -1,4 +1,4 @@
-import {CommonModule, DOCUMENT} from '@angular/common';
+import {CommonModule, DOCUMENT, NgClass, NgForOf, NgTemplateOutlet} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -44,7 +44,7 @@ const ANIMATION_TIME_MS = 0;
 @Component({
   selector: 'app-card-detail-layout',
   standalone: true,
-  imports: [CommonModule, LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent, TranslocoDirective],
+  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent, TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -159,14 +159,14 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
         setTimeout(() => this.scrollTo(keys[0]), 100);
       }
     }
-    //  else {
-    //   // I will come back and refactor this to work
-    //   // const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
-    //   // console.log('scroll position: ', scrollPosition);
-    //   // if (scrollPosition > 0) {
-    //   //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
-    //   // }
-    // }
+     else {
+      // I will come back and refactor this to work
+      const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
+      console.log('scroll position: ', scrollPosition);
+      if (scrollPosition > 0) {
+        setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
+      }
+    }
   }
 
   hasCustomSort() {
@@ -192,7 +192,11 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
 
   scrollTo(jumpKey: JumpKey) {
-    if (this.hasCustomSort()) return;
+    if (this.hasCustomSort()) {
+
+    } else {
+
+    }
 
     let targetIndex = 0;
     for(let i = 0; i < this.jumpBarKeys.length; i++) {
@@ -215,6 +219,9 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     } else if (item.hasOwnProperty('title')) {
       name = item.title;
     }
+    console.log('name: ', name.charAt(0));
+
     this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
+    this.jumpbarService.saveScrollOffset(this.router.url, this.scrollService.scrollPosition);
   }
 }
