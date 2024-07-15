@@ -1,0 +1,14 @@
+<ng-container *transloco="let t;">
+  <div class="container-fluid row mb-2">
+    <div class="col-4">
+      <h6 class="section-title" id="email-card">{{title}}
+        @if (titleExtraRef) {
+          <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
+        }
+      </h6>
+    </div>
+    <div class="col-1">
+      <button class="btn btn-text btn-sm" (click)="toggleViewMode()" [disabled]="!canEdit">{{isEditMode ? t('common.cancel') : t('common.edit')}}</button>
+    </div>
+  </div>
+</ng-container>

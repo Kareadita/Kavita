@@ -1,15 +1,6 @@
 <ng-container *transloco="let t; read:'scrobbling-providers'">
-<div class="p-2">
 
-  <div class="container-fluid row mb-2">
-    <div class="col-4">
-      <h6 class="section-title">{{t('title')}}</h6>
-    </div>
-    <div class="col-1">
-      <button class="btn btn-text btn-sm" [disabled]="!hasValidLicense" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
-    </div>
-  </div>
-  </div>
+  <app-setting-title [title]="t('title')" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)"></app-setting-title>
 
   @if (loaded) {
     <div class="container-fluid">

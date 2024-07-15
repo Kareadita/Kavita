@@ -1,11 +1,7 @@
 <ng-container *transloco="let t; read:'change-age-restriction'">
 
-  <div class="container-fluid row mb-2">
-    <div class="col-4"><h4 class="header-title" id="age-restriction">{{t('age-restriction-label')}}</h4></div>
-    <div class="col-1">
-      <button class="btn btn-text btn-sm" (click)="toggleViewMode()" [disabled]="(hasChangeAgeRestrictionAbility | async) === false">{{isViewMode ? t('edit') : t('cancel')}}</button>
-    </div>
-  </div>
+  <app-setting-title [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)" [title]="t('age-restriction-label')"></app-setting-title>
+
 
   @if (user) {
     <div class="container-fluid row">

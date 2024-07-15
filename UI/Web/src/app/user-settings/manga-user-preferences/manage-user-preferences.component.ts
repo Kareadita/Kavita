@@ -287,4 +287,10 @@ export class ManageUserPreferencesComponent {
     d.text = translate('preferences.' + o.text);
     return d;
   }
+
+  updateEditMode(mode: boolean) {
+    //this.isViewMode = !mode;
+    this.cdRef.markForCheck();
+    this.resetForm();
+  }
 }

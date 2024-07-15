@@ -9,6 +9,7 @@ import { ApiKeyComponent } from '../api-key/api-key.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 
 @Component({
     selector: 'app-change-email',
@@ -16,7 +17,7 @@ import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbTooltip, NgbCollapse, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, ScrobbleProviderNamePipe]
+  imports: [NgbTooltip, NgbCollapse, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, ScrobbleProviderNamePipe, SettingTitleComponent]
 })
 export class ChangeEmailComponent implements OnInit {
 
@@ -95,5 +96,14 @@ export class ChangeEmailComponent implements OnInit {
     this.isViewMode = !this.isViewMode;
     this.resetForm();
   }
+
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
+    this.cdRef.markForCheck();
+    this.resetForm();
+  }
+
+
+
 
 }

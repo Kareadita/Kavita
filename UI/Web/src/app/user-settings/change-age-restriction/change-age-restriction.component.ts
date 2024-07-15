@@ -18,6 +18,7 @@ import { RestrictionSelectorComponent } from '../restriction-selector/restrictio
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { AsyncPipe } from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 
 @Component({
     selector: 'app-change-age-restriction',
@@ -25,7 +26,7 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective]
+  imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 
@@ -80,14 +81,16 @@ export class ChangeAgeRestrictionComponent implements OnInit {
       }
       this.resetForm();
       this.isViewMode = true;
+      this.cdRef.markForCheck();
     }, err => {
 
     });
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
     this.resetForm();
+    this.cdRef.markForCheck();
   }
 
 }

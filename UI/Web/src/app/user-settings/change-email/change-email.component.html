@@ -1,21 +1,16 @@
 <ng-container *transloco="let t; read:'change-email'">
 
-  <div class="container-fluid row mb-2">
-    <div class="col-4">
-      <h6 class="section-title" id="email-card">{{t('email-title')}}
-        @if(emailConfirmed) {
-          <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
-          <span class="visually-hidden">{{t('email-confirmed')}}</span>
-        } @else {
-          <i class="fa-solid fa-exclamation-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('email-not-confirmed')"></i>
-          <span class="visually-hidden">{{t('email-not-confirmed')}}</span>
-        }
-      </h6>
-    </div>
-    <div class="col-1">
-      <button class="btn btn-text btn-sm" (click)="toggleViewMode()" [disabled]="!canEdit">{{isViewMode ? t('edit') : t('cancel')}}</button>
-    </div>
-  </div>
+  <app-setting-title [canEdit]="canEdit" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)" [title]="t('email-title')">
+    <ng-template #extra>
+      @if(emailConfirmed) {
+        <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
+        <span class="visually-hidden">{{t('email-confirmed')}}</span>
+      } @else {
+        <i class="fa-solid fa-exclamation-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('email-not-confirmed')"></i>
+        <span class="visually-hidden">{{t('email-not-confirmed')}}</span>
+      }
+    </ng-template>
+  </app-setting-title>
 
   <div class="container-fluid row">
     @if (isViewMode) {

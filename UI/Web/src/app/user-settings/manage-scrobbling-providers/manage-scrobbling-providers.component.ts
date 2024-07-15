@@ -18,6 +18,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
@@ -39,6 +40,7 @@ import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe
     LoadingComponent,
     ScrobbleProviderItemComponent,
     ScrobbleProviderNamePipe,
+    SettingTitleComponent,
   ],
   templateUrl: './manage-scrobbling-providers.component.html',
   styleUrl: './manage-scrobbling-providers.component.scss'
@@ -122,8 +124,8 @@ export class ManageScrobblingProvidersComponent implements OnInit {
     });
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
     this.resetForm();
     this.cdRef.markForCheck();
   }
