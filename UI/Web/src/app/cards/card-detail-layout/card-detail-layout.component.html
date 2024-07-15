@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'card-detail-layout'">
 
-  @if (header !== undefined && header.length > 0) {
+  @if (header.length > 0) {
     <div class="row mt-2 g-0 pb-2">
       <div class="col me-auto">
         <h4>
@@ -10,15 +10,13 @@
             </span>
           }
 
-          @if (header !== undefined && header.length > 0) {
-            <span>
+          <span>
               {{header}}&nbsp;
-              @if (pagination !== undefined) {
-                <span class="badge bg-primary rounded-pill"
-                      [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
-              }
-            </span>
-          }
+            @if (pagination !== undefined) {
+              <span class="badge bg-primary rounded-pill"
+                    [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
+            }
+          </span>
 
         </h4>
       </div>
@@ -36,7 +34,7 @@
         <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
           <div class="grid row g-0" #container>
             <div class="card col-auto mt-2 mb-2"
-                 (click)="tryToSaveJumpKey(item)"
+                 (click)="tryToSaveJumpKey()"
                  *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i"
                  id="jumpbar-index--{{i}}"
                  [attr.jumpbar-index]="i">
@@ -55,7 +53,7 @@
   <ng-template #cardTemplate>
     <virtual-scroller #scroll [items]="items" [bufferAmount]="bufferAmount">
       <div class="grid row g-0" #container>
-        <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" (click)="tryToSaveJumpKey(item)" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+        <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
           <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
       </div>

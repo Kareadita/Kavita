@@ -186,7 +186,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     setTimeout(() => this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex), ANIMATION_TIME_MS + 100);
   }
 
-  tryToSaveJumpKey(item: any) {
+  tryToSaveJumpKey() {
     this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex);
   }
 }
