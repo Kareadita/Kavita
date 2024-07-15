@@ -62,8 +62,13 @@
   <ng-template #jumpBar>
     <div class="jump-bar">
       <ng-container *ngFor="let jumpKey of jumpBarKeysToRender; let i = index;">
-        <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)" [ngbTooltip]="t('jumpkey-count', {count: jumpKey.size})" placement="left">
-          {{jumpKey.title}}
+        <button class="btn btn-link flip-button" [ngClass]="{'disabled': hasCustomSort()}"
+                (click)="scrollTo(jumpKey)">
+          <div class="flip-button-inner">
+            <div class="flip-button-front">{{jumpKey.title}}</div>
+            <div class="flip-button-back">{{jumpKey.size}}</div>
+          </div>
+
         </button>
       </ng-container>
     </div>

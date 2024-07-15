@@ -15,12 +15,12 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {ToastrService} from "ngx-toastr";
 import {ManageAlertsComponent} from "../../admin/manage-alerts/manage-alerts.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
   standalone: true,
   imports: [
-    NgIf,
     NgOptimizedImage,
     NgbTooltip,
     ReactiveFormsModule,
@@ -60,7 +60,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   loaded: boolean = false;
 
   constructor() {
-    this.accountService.hasValidLicense$.subscribe(res => {
+    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.hasValidLicense = res;
       this.cdRef.markForCheck();
       if (this.hasValidLicense) {
@@ -81,6 +81,9 @@ export class ManageScrobblingProvidersComponent implements OnInit {
           this.aniListTokenExpired = hasExpired;
           this.cdRef.markForCheck();
         });
+      } else {
+        this.loaded = true;
+        this.cdRef.markForCheck();
       }
     });
   }
