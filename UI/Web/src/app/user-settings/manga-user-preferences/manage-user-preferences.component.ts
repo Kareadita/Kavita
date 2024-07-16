@@ -37,12 +37,24 @@ import {
   NgbAccordionDirective, NgbAccordionHeader,
   NgbAccordionItem, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgForOf, NgIf, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {ColorPickerModule} from "ngx-color-picker";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {ReadingDirectionPipe} from "../../_pipes/reading-direction.pipe";
+import {ScalingOptionPipe} from "../../_pipes/scaling-option.pipe";
+import {PageSplitOptionPipe} from "../../_pipes/page-split-option.pipe";
+import {ReaderModePipe} from "../../_pipes/reading-mode.pipe";
+import {LayoutModePipe} from "../../_pipes/layout-mode.pipe";
+import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
+import {BookPageLayoutModePipe} from "../../_pipes/book-page-layout-mode.pipe";
+import {PdfSpreadTypePipe} from "../../pdf-reader/_pipe/pdf-spread-mode.pipe";
+import {PdfSpreadModePipe} from "../../_pipes/pdf-spread-mode.pipe";
+import {PdfThemePipe} from "../../_pipes/pdf-theme.pipe";
+import {PdfScrollModeTypePipe} from "../../pdf-reader/_pipe/pdf-scroll-mode.pipe";
+import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -65,7 +77,21 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
     SettingTitleComponent,
     SettingItemComponent,
     PageLayoutModePipe,
-    SettingSwitchComponent
+    SettingSwitchComponent,
+    ReadingDirectionPipe,
+    ScalingOptionPipe,
+    PageSplitOptionPipe,
+    ReaderModePipe,
+    LayoutModePipe,
+    NgStyle,
+    WritingStylePipe,
+    BookPageLayoutModePipe,
+    PdfSpreadTypePipe,
+    PdfSpreadTypePipe,
+    PdfSpreadModePipe,
+    PdfThemePipe,
+    PdfScrollModeTypePipe,
+    PdfScrollModePipe
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -81,25 +107,24 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
 
+  protected readonly readingDirections = readingDirections;
+  protected readonly scalingOptions = scalingOptions;
+  protected readonly pageSplitOptions = pageSplitOptions;
+  protected readonly readerModes = readingModes;
+  protected readonly layoutModes = layoutModes;
+  protected readonly bookWritingStyles = bookWritingStyles;
+  protected readonly pageLayoutModes = pageLayoutModes;
+  protected readonly bookLayoutModes = bookLayoutModes;
+  protected readonly pdfSpreadModes = pdfSpreadModes;
+  protected readonly pdfThemes = pdfThemes;
+  protected readonly pdfScrollModes = pdfScrollModes;
 
-  readingDirectionsTranslated = readingDirections.map(this.translatePrefOptions);
-  scalingOptionsTranslated = scalingOptions.map(this.translatePrefOptions);
-  pageSplitOptionsTranslated = pageSplitOptions.map(this.translatePrefOptions);
-  readingModesTranslated = readingModes.map(this.translatePrefOptions);
-  layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
-  bookLayoutModesTranslated = bookLayoutModes.map(this.translatePrefOptions);
   bookColorThemesTranslated = bookColorThemes.map(o => {
     const d = {...o};
     d.name = translate('theme.' + d.translationKey);
     return d;
   });
 
-  pageLayoutModesTranslated = pageLayoutModes.map(this.translatePrefOptions);
-  bookWritingStylesTranslated = bookWritingStyles.map(this.translatePrefOptions);
-  // pdfLayoutModesTranslated = pdfLayoutModes.map(this.translatePrefOptions);
-  pdfScrollModesTranslated = pdfScrollModes.map(this.translatePrefOptions);
-  pdfSpreadModesTranslated = pdfSpreadModes.map(this.translatePrefOptions);
-  pdfThemesTranslated = pdfThemes.map(this.translatePrefOptions);
 
   fontFamilies: Array<string> = [];
   locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
@@ -107,6 +132,9 @@ export class ManageUserPreferencesComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
 
+  get Locale() {
+    return this.locales.filter(l => l.isoCode === this.settingsForm.get('locale')!.value)[0].title;
+  }
 
 
   constructor() {
@@ -147,6 +175,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
       this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
       this.settingsForm.addControl('swipeToPaginate', new FormControl(this.user.preferences.swipeToPaginate, []));
+      this.settingsForm.addControl('backgroundColor', new FormControl(this.user.preferences.backgroundColor, []));
 
       this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
       this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
@@ -215,7 +244,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
-      backgroundColor: this.user?.preferences.backgroundColor || '#000',
+      backgroundColor: modelSettings.backgroundColor || '#000',
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
@@ -242,9 +271,14 @@ export class ManageUserPreferencesComponent implements OnInit {
     };
   }
 
-  handleBackgroundColorChange() {
+  handleBackgroundColorChange(color: string) {
     this.settingsForm.markAsDirty();
     this.settingsForm.markAsTouched();
+    if (this.user?.preferences) {
+      this.user.preferences.backgroundColor = color;
+    }
+
+    this.settingsForm.get('backgroundColor')?.setValue(color);
     this.cdRef.markForCheck();
   }
 
@@ -253,5 +287,4 @@ export class ManageUserPreferencesComponent implements OnInit {
     d.text = translate('preferences.' + o.text);
     return d;
   }
-
 }

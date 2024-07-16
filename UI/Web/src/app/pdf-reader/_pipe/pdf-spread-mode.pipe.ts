@@ -3,10 +3,10 @@ import {TranslocoService} from "@ngneat/transloco";
 import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
 
 @Pipe({
-  name: 'pdfSpreadMode',
+  name: 'pdfSpreadType',
   standalone: true
 })
-export class PdfSpreadModePipe implements PipeTransform {
+export class PdfSpreadTypePipe implements PipeTransform {
   translocoService = inject(TranslocoService);
 
   transform(value: SpreadType): string {

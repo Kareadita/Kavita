@@ -3,10 +3,10 @@ import {TranslocoService} from "@ngneat/transloco";
 import {ScrollModeType} from "ngx-extended-pdf-viewer";
 
 @Pipe({
-  name: 'pdfScrollMode',
+  name: 'pdfScrollModeType',
   standalone: true
 })
-export class PdfScrollModePipe implements PipeTransform {
+export class PdfScrollModeTypePipe implements PipeTransform {
   translocoService = inject(TranslocoService);
   transform(value: ScrollModeType): string {
     switch (value) {

@@ -2,10 +2,9 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, ContentChild,
-  EventEmitter,
   inject,
   Input,
-  Output, TemplateRef
+  TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";

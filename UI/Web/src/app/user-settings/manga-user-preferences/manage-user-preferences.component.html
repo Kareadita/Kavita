@@ -3,7 +3,6 @@
     {{t('pref-description')}}
   </p>
 
-  <!-- TODO: Change the code so that after making a change it just saves -->
   @if (user) {
     <form [formGroup]="settingsForm">
       <h4>{{t('global-settings-title')}}</h4>
@@ -16,8 +15,8 @@
             <ng-template #edit>
               <select class="form-select" aria-describedby="manga-header"
                       formControlName="globalPageLayoutMode">
-                @for (opt of pageLayoutModesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of pageLayoutModes; track opt) {
+                  <option [value]="opt.value">{{opt.value | pageLayoutMode}}</option>
                 }
               </select>
             </ng-template>
@@ -28,7 +27,7 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('locale')!.value | titlecase}}
+              {{Locale | titlecase}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="global-header" formControlName="locale">
@@ -109,13 +108,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('readingDirection')!.value}}
+              {{settingsForm.get('readingDirection')!.value | readingDirection}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
                       formControlName="globalPageLayoutMode">
-                @for (opt of readingDirectionsTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of readingDirections; track opt) {
+                  <option [value]="opt.value">{{opt.value | readingDirection}}</option>
                 }
               </select>
             </ng-template>
@@ -125,13 +124,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('scaling-option-label')" [subtitle]="t('scaling-option-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('scalingOption')!.value}}
+              {{settingsForm.get('scalingOption')!.value | scalingOption}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
                       formControlName="scalingOption">
-                @for (opt of scalingOptionsTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of scalingOptions; track opt) {
+                  <option [value]="opt.value">{{opt.value | scalingOption}}</option>
                 }
               </select>
             </ng-template>
@@ -141,13 +140,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('page-splitting-label')" [subtitle]="t('page-splitting-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('pageSplitOption')!.value}}
+              {{settingsForm.get('pageSplitOption')!.value | pageSplitOption}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
                       formControlName="pageSplitOption">
-                @for (opt of pageSplitOptionsTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of pageSplitOptions; track opt) {
+                  <option [value]="opt.value">{{opt.value | pageSplitOption}}</option>
                 }
               </select>
             </ng-template>
@@ -157,13 +156,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('reading-mode-label')" [subtitle]="t('reading-mode-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('readerMode')!.value}}
+              {{settingsForm.get('readerMode')!.value | readerMode}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
                       formControlName="readerMode">
-                @for (opt of readingModesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of readerModes; track opt) {
+                  <option [value]="opt.value">{{opt.value | readerMode}}</option>
                 }
               </select>
             </ng-template>
@@ -173,13 +172,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('layout-mode-label')" [subtitle]="t('layout-mode-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('layoutMode')!.value}}
+              {{settingsForm.get('layoutMode')!.value | layoutMode}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
                       formControlName="layoutMode">
-                @for (opt of layoutModesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of layoutModes; track opt) {
+                  <option [value]="opt.value">{{opt.value | layoutMode}}</option>
                 }
               </select>
             </ng-template>
@@ -189,14 +188,14 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('background-color-label')" [subtitle]="t('background-color-tooltip')">
             <ng-template #view>
-              <input [value]="user!.preferences!.backgroundColor" class="form-control"
-                     (colorPickerChange)="handleBackgroundColorChange()"
-                     [style.background]="user!.preferences!.backgroundColor" [cpAlphaChannel]="'disabled'"
-                     [(colorPicker)]="user!.preferences!.backgroundColor" />
+              <div class="color-box-container">
+                <div class="color-box" [ngStyle]="{'background-color': user.preferences!.backgroundColor}"></div>
+                <span class="hex-code">{{ user.preferences!.backgroundColor.toUpperCase() }}</span>
+              </div>
             </ng-template>
             <ng-template #edit>
               <input [value]="user!.preferences!.backgroundColor" class="form-control"
-                     (colorPickerChange)="handleBackgroundColorChange()"
+                     (colorPickerChange)="handleBackgroundColorChange($event)"
                      [style.background]="user!.preferences!.backgroundColor" [cpAlphaChannel]="'disabled'"
                      [(colorPicker)]="user!.preferences!.backgroundColor" />
             </ng-template>
@@ -283,13 +282,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('bookReaderReadingDirection')!.value}}
+              {{settingsForm.get('bookReaderReadingDirection')!.value | readingDirection}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="book-reader-heading"
                       formControlName="bookReaderReadingDirection">
-                @for (opt of readingDirectionsTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of readingDirections; track opt) {
+                  <option [value]="opt.value">{{opt.value | readingDirection}}</option>
                 }
               </select>
             </ng-template>
@@ -299,7 +298,7 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('font-family-label')" [subtitle]="t('font-family-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('bookReaderFontFamily')!.value}}
+              {{settingsForm.get('bookReaderFontFamily')!.value | titlecase}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="book-reader-heading"
@@ -315,13 +314,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('writing-style-label')" [subtitle]="t('writing-style-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('bookReaderWritingStyle')!.value}}
+              {{settingsForm.get('bookReaderWritingStyle')!.value | writingStyle}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="book-reader-heading"
                       formControlName="bookReaderWritingStyle">
-                @for (opt of bookWritingStylesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of bookWritingStyles; track opt) {
+                  <option [value]="opt.value">{{opt.value | writingStyle}}</option>
                 }
               </select>
             </ng-template>
@@ -331,13 +330,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('layout-mode-book-label')" [subtitle]="t('layout-mode-book-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('bookReaderLayoutMode')!.value}}
+              {{settingsForm.get('bookReaderLayoutMode')!.value | bookPageLayoutMode}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="book-reader-heading"
                       formControlName="bookReaderLayoutMode">
-                @for (opt of bookLayoutModesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of bookLayoutModes; track opt) {
+                  <option [value]="opt.value">{{opt.value | bookPageLayoutMode}}</option>
                 }
               </select>
             </ng-template>
@@ -404,13 +403,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('pdf-spread-mode-label')" [subtitle]="t('pdf-spread-mode-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('pdfSpreadMode')!.value}}
+              {{settingsForm.get('pdfSpreadMode')!.value | pdfSpreadMode}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="pdf-reader-heading"
                       formControlName="pdfSpreadMode">
-                @for (opt of pdfSpreadModesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of pdfSpreadModes; track opt) {
+                  <option [value]="opt.value">{{opt.value | pdfSpreadMode}}</option>
                 }
               </select>
             </ng-template>
@@ -420,13 +419,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('pdf-theme-label')" [subtitle]="t('pdf-theme-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('pdfTheme')!.value}}
+              {{settingsForm.get('pdfTheme')!.value | pdfTheme}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="pdf-reader-heading"
                       formControlName="pdfTheme">
-                @for (opt of pdfThemesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of pdfThemes; track opt) {
+                  <option [value]="opt.value">{{opt.value | pdfTheme}}</option>
                 }
               </select>
             </ng-template>
@@ -436,13 +435,13 @@
         <div class="row g-0 mt-2">
           <app-setting-item [title]="t('pdf-scroll-mode-label')" [subtitle]="t('pdf-scroll-mode-tooltip')">
             <ng-template #view>
-              {{settingsForm.get('pdfScrollMode')!.value}}
+              {{settingsForm.get('pdfScrollMode')!.value | pdfScrollMode}}
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="pdf-reader-heading"
                       formControlName="pdfScrollMode">
-                @for (opt of pdfScrollModesTranslated; track opt) {
-                  <option [value]="opt.value">{{opt.text | titlecase}}</option>
+                @for (opt of pdfScrollModes; track opt) {
+                  <option [value]="opt.value">{{opt.value | pdfScrollMode}}</option>
                 }
               </select>
             </ng-template>
