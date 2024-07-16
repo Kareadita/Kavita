@@ -69,7 +69,8 @@
     --color-scheme: dark;
     --tile-color: var(--primary-color);
 
-    /* Headings */
+    /* Setting Item */
+  // TODO: Robbie let's refactor this so all setting classes inherit from this area
     --h6-text-color: #d5d5d5;
     --h6-font-size: 1.2rem;
     --h6-font-weight: bold;

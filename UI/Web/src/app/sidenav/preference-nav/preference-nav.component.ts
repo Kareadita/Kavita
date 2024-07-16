@@ -79,7 +79,6 @@ export class PreferenceNavComponent {
         new SideNavItem(SettingsTabId.Theme),
         new SideNavItem(SettingsTabId.Devices),
         new SideNavItem(SettingsTabId.UserStats),
-        new SideNavItem(SettingsTabId.Scrobbling),
       ]
     },
     {

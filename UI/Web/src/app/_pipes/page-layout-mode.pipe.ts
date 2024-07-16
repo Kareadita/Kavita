@@ -11,7 +11,7 @@ export class PageLayoutModePipe implements PipeTransform {
   transform(value: PageLayoutMode): string {
     switch (value) {
       case PageLayoutMode.Cards: return translate('preferences.cards');
-      case PageLayoutMode.List: return translate('preferences.lists');
+      case PageLayoutMode.List: return translate('preferences.list');
     }
   }
 
