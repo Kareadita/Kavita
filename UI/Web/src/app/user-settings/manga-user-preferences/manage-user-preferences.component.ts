@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {
   bookLayoutModes,
@@ -25,7 +25,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {User} from "../../_models/user";
 import {Language} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {forkJoin} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap, tap} from "rxjs";
 import {take} from "rxjs/operators";
 import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
 import {PdfTheme} from "../../_models/preferences/pdf-theme";
@@ -43,13 +43,6 @@ import {SettingTitleComponent} from "../../settings/_components/setting-title/se
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-
-enum AccordionPanelID {
-  ImageReader = 'image-reader',
-  BookReader = 'book-reader',
-  GlobalSettings = 'global-settings',
-  PdfReader = 'pdf-reader'
-}
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -78,18 +71,16 @@ enum AccordionPanelID {
   styleUrl: './manage-user-preferences.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ManageUserPreferencesComponent {
+export class ManageUserPreferencesComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  private readonly toastr = inject(ToastrService);
   private readonly bookService = inject(BookService);
   private readonly titleService = inject(Title);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
 
-  protected readonly AccordionPanelID = AccordionPanelID;
 
   readingDirectionsTranslated = readingDirections.map(this.translatePrefOptions);
   scalingOptionsTranslated = scalingOptions.map(this.translatePrefOptions);
@@ -110,14 +101,13 @@ export class ManageUserPreferencesComponent {
   pdfSpreadModesTranslated = pdfSpreadModes.map(this.translatePrefOptions);
   pdfThemesTranslated = pdfThemes.map(this.translatePrefOptions);
 
+  fontFamilies: Array<string> = [];
+  locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
 
-  observableHandles: Array<any> = [];
-  fontFamilies: Array<string> = [];
 
-  locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
 
   constructor() {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
@@ -186,6 +176,23 @@ export class ManageUserPreferencesComponent {
         this.settingsForm.get('locale')?.disable();
       }
 
+      this.settingsForm.valueChanges.pipe(
+        distinctUntilChanged(),
+        debounceTime(100),
+        filter(_ => this.settingsForm.valid),
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(_ => {
+          const data = this.packSettings();
+          return this.accountService.updatePreferences(data);
+        }),
+        tap(updatedPrefs => {
+          if (this.user) {
+            this.user.preferences = updatedPrefs;
+            this.cdRef.markForCheck();
+          }
+        })
+      ).subscribe();
+
       this.cdRef.markForCheck();
     });
 
@@ -198,48 +205,9 @@ export class ManageUserPreferencesComponent {
     this.cdRef.markForCheck();
   }
 
-  resetForm() {
-    if (this.user === undefined) { return; }
-    this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection);
-    this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption);
-    this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu);
-    this.settingsForm.get('showScreenHints')?.setValue(this.user.preferences.showScreenHints);
-    this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode);
-    this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode);
-    this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
-    this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
-    this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize);
-    this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
-    this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
-    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
-    this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
-    this.settingsForm.get('bookReaderWritingStyle')?.setValue(this.user.preferences.bookReaderWritingStyle);
-    this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
-    this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
-    this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
-    this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
-    this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
-    this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
-    this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
-    this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions);
-    this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
-    this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate);
-    this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
-    this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews);
-    this.settingsForm.get('locale')?.setValue(this.user.preferences.locale);
-
-    this.settingsForm.get('pdfTheme')?.setValue(this.user.preferences.pdfTheme);
-    this.settingsForm.get('pdfScrollMode')?.setValue(this.user.preferences.pdfScrollMode);
-    this.settingsForm.get('pdfSpreadMode')?.setValue(this.user.preferences.pdfSpreadMode);
-
-    this.cdRef.markForCheck();
-    this.settingsForm.markAsPristine();
-  }
-
-  save() {
-    if (this.user === undefined) return;
+  packSettings(): Preferences {
     const modelSettings = this.settingsForm.value;
-    const data: Preferences = {
+    return  {
       readingDirection: parseInt(modelSettings.readingDirection, 10),
       scalingOption: parseInt(modelSettings.scalingOption, 10),
       pageSplitOption: parseInt(modelSettings.pageSplitOption, 10),
@@ -247,7 +215,7 @@ export class ManageUserPreferencesComponent {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
-      backgroundColor: this.user.preferences.backgroundColor,
+      backgroundColor: this.user?.preferences.backgroundColor || '#000',
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
@@ -272,16 +240,6 @@ export class ManageUserPreferencesComponent {
       pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
       pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
     };
-
-    this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success(translate('user-preferences.success-toast'));
-      if (this.user) {
-        this.user.preferences = updatedPrefs;
-
-        this.cdRef.markForCheck();
-      }
-      this.resetForm();
-    }));
   }
 
   handleBackgroundColorChange() {
@@ -296,9 +254,4 @@ export class ManageUserPreferencesComponent {
     return d;
   }
 
-  updateEditMode(mode: boolean) {
-    //this.isViewMode = !mode;
-    this.cdRef.markForCheck();
-    this.resetForm();
-  }
 }
