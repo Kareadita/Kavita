@@ -2,7 +2,12 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-11">
-        <h6 class="section-title" id="email-card">{{title}}
+        <h6 class="section-title" id="email-card">
+          @if(labelId) {
+            <label class="reset-label" [for]="labelId">{{title}}</label>
+          } @else {
+            {{title}}
+          }
           @if (titleExtraRef) {
             <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
           }

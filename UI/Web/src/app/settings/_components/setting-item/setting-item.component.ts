@@ -29,6 +29,7 @@ export class SettingItemComponent {
   @Input() canEdit: boolean = true;
   @Input() isEditMode: boolean = false;
   @Input() subtitle: string | undefined = undefined;
+  @Input() labelId: string | undefined = undefined;
   @Output() editMode = new EventEmitter<boolean>();
 
   /**

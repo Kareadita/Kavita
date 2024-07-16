@@ -12,7 +12,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   standalone: true,
   imports: [
     ApiKeyComponent,
-    NgIf,
     TranslocoDirective
   ],
   templateUrl: './manage-opds.component.html',

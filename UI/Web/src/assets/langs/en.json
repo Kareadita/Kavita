@@ -101,7 +101,6 @@
 
         "account-tab": "Account",
         "preferences-tab": "Preferences",
-        "3rd-party-clients-tab": "3rd Party Clients",
         "theme-tab": "Theme",
         "devices-tab": "Devices",
         "stats-tab": "Stats",
@@ -1451,7 +1450,7 @@
         "admin-kavitaplus": "Kavita+",
         "account": "Account",
         "preferences": "Preferences",
-        "clients": "Clients",
+        "clients": "API Key / OPDS",
         "devices": "Devices",
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",

@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read:'scrobbling-providers'">
 
-  <app-setting-title [title]="t('title')" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)"></app-setting-title>
+  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)"></app-setting-title>
 
   @if (loaded) {
     <div class="container-fluid">
