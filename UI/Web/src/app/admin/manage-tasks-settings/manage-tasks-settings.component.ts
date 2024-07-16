@@ -4,7 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay, take} from 'rxjs/operators';
-import {debounceTime, defer, distinctUntilChanged, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
+import {debounceTime, defer, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
