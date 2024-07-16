@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {NgOptimizedImage} from "@angular/common";
+import {NgForOf, NgIf, NgOptimizedImage} from "@angular/common";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -19,6 +19,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
@@ -41,6 +42,9 @@ import {SettingTitleComponent} from "../../settings/_components/setting-title/se
     ScrobbleProviderItemComponent,
     ScrobbleProviderNamePipe,
     SettingTitleComponent,
+    NgForOf,
+    NgIf,
+    SettingItemComponent,
   ],
   templateUrl: './manage-scrobbling-providers.component.html',
   styleUrl: './manage-scrobbling-providers.component.scss'

@@ -39,6 +39,10 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {NgForOf, NgIf, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {ColorPickerModule} from "ngx-color-picker";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -64,7 +68,11 @@ enum AccordionPanelID {
     NgTemplateOutlet,
     TitleCasePipe,
     ColorPickerModule,
-    NgForOf
+    NgForOf,
+    SettingTitleComponent,
+    SettingItemComponent,
+    PageLayoutModePipe,
+    SettingSwitchComponent
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',

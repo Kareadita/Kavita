@@ -11,37 +11,21 @@ import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-setting-title',
+  selector: 'app-setting-switch',
   standalone: true,
   imports: [
     NgTemplateOutlet,
     TranslocoDirective
   ],
-  templateUrl: './setting-title.component.html',
-  styleUrl: './setting-title.component.scss',
+  templateUrl: './setting-switch.component.html',
+  styleUrl: './setting-switch.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingTitleComponent {
-
+export class SettingSwitchComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required:true}) title: string = '';
-  @Input() canEdit: boolean = true;
-  @Input() isEditMode: boolean = false;
-  @Output() editMode = new EventEmitter<boolean>();
-  @ContentChild('extra') titleExtraRef!: TemplateRef<any>;
-
-  constructor() {
-
-  }
-
-  toggleViewMode() {
-    this.isEditMode = !this.isEditMode;
-    this.editMode.emit(this.isEditMode);
-    this.cdRef.markForCheck();
-  }
-
-
-
+  @Input() subtitle: string | undefined = undefined;
+  @ContentChild('switch') switchRef!: TemplateRef<any>;
 
 }

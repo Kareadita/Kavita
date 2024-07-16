@@ -10,6 +10,7 @@ import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
     selector: 'app-change-email',
@@ -17,7 +18,7 @@ import {SettingTitleComponent} from "../../settings/_components/setting-title/se
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbTooltip, NgbCollapse, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, ScrobbleProviderNamePipe, SettingTitleComponent]
+  imports: [NgbTooltip, NgbCollapse, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, ScrobbleProviderNamePipe, SettingTitleComponent, SettingItemComponent]
 })
 export class ChangeEmailComponent implements OnInit {
 

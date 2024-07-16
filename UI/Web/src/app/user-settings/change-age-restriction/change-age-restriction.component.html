@@ -1,28 +1,23 @@
 <ng-container *transloco="let t; read:'change-age-restriction'">
-
-  <app-setting-title [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)" [title]="t('age-restriction-label')"></app-setting-title>
-
-
   @if (user) {
-    <div class="container-fluid row">
-      @if (isViewMode) {
+    <app-setting-item [title]="t('age-restriction-label')">
+      <ng-template #view>
         <span class="col-12">{{user.ageRestriction.ageRating | ageRating }}
           @if (user.ageRestriction.ageRating !== AgeRating.NotApplicable && user.ageRestriction.includeUnknowns) {
             <span class="ms-1 me-1">+</span> {{t('unknowns')}}
           }
-      </span>
-      } @else {
+        </span>
+      </ng-template>
+      <ng-template #edit>
         <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
-            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [reset]="reset"></app-restriction-selector>
+          <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [reset]="reset"></app-restriction-selector>
 
-            <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-              <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="age-restriction" (click)="resetForm()">{{t('reset')}}</button>
-              <button type="submit" class="flex-fill btn btn-primary" aria-describedby="age-restriction" (click)="saveForm()">{{t('save')}}</button>
-            </div>
+          <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+            <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="age-restriction" (click)="resetForm()">{{t('reset')}}</button>
+            <button type="submit" class="flex-fill btn btn-primary" aria-describedby="age-restriction" (click)="saveForm()">{{t('save')}}</button>
+          </div>
         </div>
-      }
-    </div>
+      </ng-template>
+    </app-setting-item>
   }
-
-
 </ng-container>

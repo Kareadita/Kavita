@@ -17,6 +17,7 @@ import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
     selector: 'app-change-password',
@@ -24,7 +25,7 @@ import {SettingTitleComponent} from "../../settings/_components/setting-title/se
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoDirective, SettingTitleComponent]
+  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoDirective, SettingTitleComponent, SettingItemComponent]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 

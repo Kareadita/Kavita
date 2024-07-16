@@ -1,23 +1,23 @@
 @if (link === undefined || link.length === 0) {
-  <div class="side-nav-item" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}">
+  <div class="side-nav-item" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async) === false), 'active': highlighted}">
     <ng-container [ngTemplateOutlet]="inner"></ng-container>
   </div>
 } @else {
   @if (external) {
-    <a class="side-nav-item" [href]="link" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" rel="noopener noreferrer" target="_blank">
+    <a class="side-nav-item" [href]="link" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async) === false), 'active': highlighted}" rel="noopener noreferrer" target="_blank">
       <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </a>
   } @else {
     @if (queryParams && queryParams !== {}) {
-      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" (click)="openLink()">
+      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async) === false), 'active': highlighted}" (click)="openLink()">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
       </a>
     } @else if (fragment) {
-      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link" [fragment]="fragment">
+      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async) === false), 'active': highlighted}" [routerLink]="link" [fragment]="fragment">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
       </a>
     } @else {
-      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link" [queryParams]="queryParams">
+      <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async) === false), 'active': highlighted}" [routerLink]="link" [queryParams]="queryParams">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
       </a>
     }

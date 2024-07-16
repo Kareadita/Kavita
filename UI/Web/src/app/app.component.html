@@ -24,7 +24,7 @@
         <a id="content"></a>
         @if ((navService.sideNavVisibility$ | async)) {
           <div>
-            <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
+            <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false || (navService.usePreferenceSideNav$ | async)}">
               <router-outlet></router-outlet>
             </div>
           </div>

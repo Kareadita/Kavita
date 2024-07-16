@@ -4,7 +4,7 @@
       {{fragment | settingFragment}}
     </h2>
   </app-side-nav-companion-bar>
-  <div class="container-fluid col-me-4 pb-3">
+  <div class="row col-me-4 pb-3 col-md-5 col-sm-12">
 
     @if (accountService.currentUser$ | async; as user) {
       @if (accountService.hasAdminRole(user)) {
