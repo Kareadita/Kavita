@@ -47,7 +47,7 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() queryParams: any | undefined = undefined;
 
-
+  @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
   private readonly destroyRef = inject(DestroyRef);
 
 
@@ -83,6 +83,12 @@ export class SideNavItemComponent implements OnInit {
 
     if (!page.endsWith('/') && !queryParams) {
       page = page + '/';
+    }
+
+    if (this.comparisonMethod === 'startsWith') {
+      this.highlighted = page.startsWith(this.link);
+      this.cdRef.markForCheck();
+      return;
     }
 
     if (this.queryParams) {
