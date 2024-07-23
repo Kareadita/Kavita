@@ -48,7 +48,6 @@ export class SideNavItemComponent implements OnInit {
   @Input() queryParams: any | undefined = undefined;
 
 
-  @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
   private readonly destroyRef = inject(DestroyRef);
 
 
@@ -68,7 +67,9 @@ export class SideNavItemComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.updateHighlight(this.router.url.split('?')[0]);
+      const tokens = this.router.url.split('?');
+      const [token1, token2 = undefined] = tokens;
+      this.updateHighlight(token1, token2);
     }, 100);
 
   }
@@ -84,26 +85,18 @@ export class SideNavItemComponent implements OnInit {
       page = page + '/';
     }
 
-
-    if (this.comparisonMethod === 'equals' && page === this.link) {
-      this.highlighted = true;
-      this.cdRef.markForCheck();
-      return;
-    }
-    if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
-
-      if (queryParams && queryParams === this.queryParams) {
-        this.highlighted = true;
-        this.cdRef.markForCheck();
-        return;
+    if (this.queryParams) {
+      if (!queryParams) {
+        this.highlighted = false;
+      } else {
+        this.highlighted = queryParams === this.queryParams && page === this.link;
       }
 
-      this.highlighted = true;
       this.cdRef.markForCheck();
       return;
     }
 
-    this.highlighted = false;
+    this.highlighted = page === this.link;
     this.cdRef.markForCheck();
   }
 
