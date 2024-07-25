@@ -425,7 +425,7 @@ public class ImageService : IImageService
     private static string FallbackToKavitaReaderFavicon(string baseUrl)
     {
         var correctSizeLink = string.Empty;
-        var allOverrides = "https://kavitareader.com/assets/favicons/urls.txt".GetStringAsync().Result;
+        var allOverrides = "https://www.kavitareader.com/assets/favicons/urls.txt".GetStringAsync().Result;
         if (!string.IsNullOrEmpty(allOverrides))
         {
             var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
