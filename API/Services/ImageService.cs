@@ -440,7 +440,7 @@ public class ImageService : IImageService
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
             }
 
-            correctSizeLink = "https://kavitareader.com/assets/favicons/" + externalFile;
+            correctSizeLink = "https://www.kavitareader.com/assets/favicons/" + externalFile;
         }
 
         return correctSizeLink;
