@@ -2240,7 +2240,8 @@
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
-        "mal-token-required": "MAL Token is required, set in User Settings"
+        "mal-token-required": "MAL Token is required, set in User Settings",
+        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?"
     },
 
     "actionable": {

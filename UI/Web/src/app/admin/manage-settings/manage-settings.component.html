@@ -55,7 +55,7 @@
       </div>
 
       <div class="row g-0 mt-2">
-        @if (settingsForm.get('ipaddresses'); as formControl) {
+        @if (settingsForm.get('ipAddresses'); as formControl) {
           <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
             <ng-template #view>
               {{formControl.value}}
@@ -316,7 +316,7 @@
       </div>
     </ng-container>
 
-    <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
+    <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mt-4">
       <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
       <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">{{t('reset')}}</button>
       <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
