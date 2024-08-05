@@ -17,6 +17,7 @@ import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 interface AdhocTask {
   name: string;
@@ -33,7 +34,7 @@ interface AdhocTask {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe,
-    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe]
+    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
