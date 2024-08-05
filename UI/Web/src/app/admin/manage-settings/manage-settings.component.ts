@@ -7,8 +7,13 @@ import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {WikiLink} from "../../_models/wiki";
+import {pageLayoutModes} from "../../_models/preferences/preferences";
+import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -18,7 +23,7 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
   styleUrls: ['./manage-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet, PageLayoutModePipe, SettingItemComponent, SettingSwitchComponent, SafeHtmlPipe]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -33,6 +38,11 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+
+  allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
+    WikiLink.DataCollection +
+    '" rel="noopener noreferrer" target="_blank">wiki</a> ' +
+    translate('manage-settings.allow-stats-tooltip-part-2');
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -146,4 +156,6 @@ export class ManageSettingsComponent implements OnInit {
       console.error('error: ', err);
     });
   }
+
+  protected readonly pageLayoutModes = pageLayoutModes;
 }

@@ -8,13 +8,15 @@ import {
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-setting-switch',
   standalone: true,
   imports: [
     NgTemplateOutlet,
-    TranslocoDirective
+    TranslocoDirective,
+    SafeHtmlPipe
   ],
   templateUrl: './setting-switch.component.html',
   styleUrl: './setting-switch.component.scss',

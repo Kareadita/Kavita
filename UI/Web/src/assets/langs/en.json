@@ -1234,6 +1234,9 @@
     },
 
     "manage-settings": {
+        "networking-settings-title": "Networking",
+        "system-settings-title": "System",
+        "customization-settings-title": "Customization",
         "notice": "Notice:",
         "restart-required": "Changing Port, Base Url, Cache Size or IPs requires a manual restart of Kavita to take effect.",
         "base-url-label": "Base Url",

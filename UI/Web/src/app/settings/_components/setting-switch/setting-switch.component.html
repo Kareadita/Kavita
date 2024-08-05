@@ -13,7 +13,7 @@
 
 
     @if (subtitle) {
-      <div class="text-muted mt-2">{{subtitle}}</div>
+      <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
     }
   </div>
 </ng-container>

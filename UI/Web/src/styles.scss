@@ -105,3 +105,9 @@ app-root {
 body {
   scrollbar-gutter: stable both-edges;
 }
+
+.setting-section-break {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 30px 0;
+}
