@@ -12,6 +12,9 @@ import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -20,7 +23,7 @@ import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageAlertsComponent, TitleCasePipe, NgbAlert]
+    ManageAlertsComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

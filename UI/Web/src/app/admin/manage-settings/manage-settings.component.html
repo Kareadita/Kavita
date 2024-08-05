@@ -219,7 +219,7 @@
             <ng-template #switch>
               <div class="form-check form-switch">
                 <div class="form-check form-switch">
-                  <input id="opds" type="checkbox" aria-label="OPDS Support" class="form-check-input" formControlName="enableOpds">
+                  <input id="opds" type="checkbox" [attr.aria-label]="t('opds-label')" class="form-check-input" formControlName="enableOpds">
                 </div>
               </div>
             </ng-template>

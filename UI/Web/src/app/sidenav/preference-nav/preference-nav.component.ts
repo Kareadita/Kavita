@@ -44,9 +44,6 @@ class SideNavItem {
   }
 }
 
-
-interface Tab {title: string, fragment: string}
-
 @Component({
   selector: 'app-preference-nav',
   standalone: true,
@@ -69,8 +66,6 @@ export class PreferenceNavComponent {
   protected readonly accountService = inject(AccountService);
   protected readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
-
-  protected readonly SettingsTabId = SettingsTabId;
 
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
@@ -103,7 +98,7 @@ export class PreferenceNavComponent {
       children: [
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
-        new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin]),
+        new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin]), // NOTE: It might be cool to pass an observable here for getting a count of issues to put in a badge
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
     },
