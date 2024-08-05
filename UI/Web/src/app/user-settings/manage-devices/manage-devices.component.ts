@@ -23,7 +23,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective, SettingItemComponent]
+  imports: [NgbCollapse, EditDeviceComponent, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective, SettingItemComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 

@@ -1,18 +1,16 @@
 <ng-container *transloco="let t; read:'manage-devices'">
   <div class="container-fluid">
     <div class="row mb-2">
-      <div class="col-8"><h3>{{t('title')}}</h3></div>
-      <div class="col-4">
-        <button class="btn btn-primary float-end" (click)="collapse.toggle()" [attr.aria-expanded]="!addDeviceIsCollapsed"
-                aria-controls="collapseExample">
-          <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add')}}
-        </button>
-      </div>
+      <h3>{{t('title')}}</h3>
     </div>
 
     <p>
       {{t('description')}}
     </p>
+
+    @if(!hasEmailSetup) {
+      <div class="alert alert-warning" role="alert">{{t('email-setup-alert')}}</div>
+    }
 
     <app-setting-item [title]="t('title')" [canEdit]="true" [editLabel]="t('add')" [subtitle]="t('description')">
       <ng-template #edit>
@@ -21,21 +19,13 @@
       <ng-template #view></ng-template>
     </app-setting-item>
 
-
-    @if(hasEmailSetup) {
-      <div class="alert alert-warning" role="alert">{{t('email-setup-alert')}}</div>
-    }
-
-    <div #collapse="ngbCollapse" [(ngbCollapse)]="addDeviceIsCollapsed">
-      <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
-    </div>
-
     <div class="row g-0 mt-2">
       <h4>{{t('devices-title')}}</h4>
-      <p *ngIf="devices.length === 0">
-        {{t('no-devices')}}
-      </p>
-      <ng-container *ngFor="let device of devices">
+      @if (devices.length === 0) {
+        <p>{{t('no-devices')}}</p>
+      }
+
+      @for(device of devices; track device.name + device.emailAddress + device.platform) {
         <div class="card col-auto me-3 mb-3" style="width: 18rem;">
           <div class="card-body">
             <h5 class="card-title">{{device.name | sentenceCase}}</h5>
@@ -46,9 +36,9 @@
             <button class="btn btn-primary" (click)="editDevice(device)">{{t('edit')}}</button>
           </div>
         </div>
-      </ng-container>
+      }
+
     </div>
   </div>
-
 
 </ng-container>

@@ -18,7 +18,7 @@ import { DeviceService } from 'src/app/_services/device.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {NgIf, NgFor, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
@@ -27,7 +27,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./edit-device.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgbTooltip, NgFor, DevicePlatformPipe, TranslocoModule, NgTemplateOutlet]
+  imports: [ReactiveFormsModule, NgbTooltip, DevicePlatformPipe, TranslocoModule, NgTemplateOutlet]
 })
 export class EditDeviceComponent implements OnInit, OnChanges {
 
