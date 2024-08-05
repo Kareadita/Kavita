@@ -26,6 +26,7 @@ export class SettingItemComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required:true}) title: string = '';
+  @Input() editLabel: string | undefined = undefined;
   @Input() canEdit: boolean = true;
   @Input() isEditMode: boolean = false;
   @Input() subtitle: string | undefined = undefined;

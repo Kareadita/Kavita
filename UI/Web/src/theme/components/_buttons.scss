@@ -75,17 +75,25 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
   color: var(--body-text-color);
 }
 
+.btn-secondary {
+  color: var(--btn-secondary-text-color);
+  background-color: var(--btn-secondary-bg-color);
+  border-color: var(--btn-secondary-border-color);
+}
+
 .btn.btn-secondary.alt {
     background-color: var(--btn-alt-bg-color);
     border-color: var(--btn-alt-border-color);
 
     &:hover {
       background-color: var(--btn-alt-hover-bg-color);
+      font-weight: var(--btn-secondary-font-weight);
     }
 
     &:focus {
       background-color: var(--btn-alt-focus-bg-color);
       box-shadow: 0 0 0 0.05rem var(--btn-alt-focus-boxshadow-color);
+      font-weight: var(--btn-secondary-font-weight);
     }
 }
 
@@ -95,4 +103,9 @@ button i.fa {
 
 .btn-check:focus + .btn, .btn:focus {
   box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);
+}
+
+/* Button with dropdown */
+.btn-group.dropdown > button {
+
 }

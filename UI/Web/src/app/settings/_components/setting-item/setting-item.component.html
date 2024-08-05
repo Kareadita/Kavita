@@ -14,7 +14,7 @@
         </h6>
       </div>
       <div class="col-1">
-        <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">{{isEditMode ? t('common.cancel') : t('common.edit')}}</button>
+        <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">{{isEditMode ? t('common.cancel') : (editLabel || t('common.edit'))}}</button>
       </div>
     </div>
 

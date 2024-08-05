@@ -15,6 +15,7 @@ import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
     selector: 'app-manage-devices',
@@ -22,7 +23,7 @@ import {ConfirmService} from "../../shared/confirm.service";
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective]
+  imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective, SettingItemComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 

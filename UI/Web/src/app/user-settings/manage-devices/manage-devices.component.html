@@ -14,6 +14,14 @@
       {{t('description')}}
     </p>
 
+    <app-setting-item [title]="t('title')" [canEdit]="true" [editLabel]="t('add')" [subtitle]="t('description')">
+      <ng-template #edit>
+        <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
+      </ng-template>
+      <ng-template #view></ng-template>
+    </app-setting-item>
+
+
     @if(hasEmailSetup) {
       <div class="alert alert-warning" role="alert">{{t('email-setup-alert')}}</div>
     }

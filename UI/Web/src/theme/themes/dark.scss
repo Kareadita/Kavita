@@ -101,13 +101,22 @@
     --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
     /* Buttons */
+
     --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
     --btn-primary-text-color: white;
-    --btn-primary-bg-color: var(--primary-color);
+    --btn-primary-bg-color: transparent;
     --btn-primary-border-color: var(--primary-color);
     --btn-primary-hover-text-color: white;
     --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
     --btn-primary-hover-border-color: var(--primary-color-darker-shade);
+
+    --btn-secondary-text-color: white;
+    --btn-secondary-bg-color: transparent;
+    --btn-secondary-border-color: transparent;
+    --btn-secondary-hover-bg-color: transparent;
+    --btn-secondary-hover-border-color: transparent;
+    --btn-secondary-font-weight: bold;
+
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
