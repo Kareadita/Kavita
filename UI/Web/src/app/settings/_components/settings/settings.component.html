@@ -26,7 +26,7 @@
 
         @defer (when fragment === SettingsTabId.Media; prefetch on idle) {
           @if (fragment === SettingsTabId.Media) {
-            <div class="col-md-12">
+            <div class="col-md-5 col-sm-12">
               <app-manage-media-settings></app-manage-media-settings>
             </div>
           }
@@ -44,6 +44,14 @@
           @if (fragment === SettingsTabId.Libraries) {
             <div class="col-md-12">
               <app-manage-library></app-manage-library>
+            </div>
+          }
+        }
+
+        @defer (when fragment === SettingsTabId.MediaIssues; prefetch on idle) {
+          @if (fragment === SettingsTabId.MediaIssues) {
+            <div class="col-md-12">
+              <app-manage-alerts></app-manage-alerts>
             </div>
           }
         }

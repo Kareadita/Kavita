@@ -46,6 +46,7 @@ import {
 } from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
 import {ManageKavitaplusComponent} from "../../../admin/manage-kavitaplus/manage-kavitaplus.component";
 import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-scrobbling.component";
+import {ManageAlertsComponent} from "../../../admin/manage-alerts/manage-alerts.component";
 
 @Component({
   selector: 'app-settings',
@@ -81,7 +82,8 @@ import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-
     SettingFragmentPipe,
     KavitaplusMetadataBreakdownStatsComponent,
     ManageKavitaplusComponent,
-    ManageScrobblingComponent
+    ManageScrobblingComponent,
+    ManageAlertsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

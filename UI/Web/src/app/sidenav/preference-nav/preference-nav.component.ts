@@ -19,6 +19,7 @@ export enum SettingsTabId {
   System = 'admin-system',
   Tasks = 'admin-tasks',
   Statistics = 'admin-statistics',
+  MediaIssues = 'admin-media-issues',
 
   // Kavita+
   KavitaPlus = 'admin-kavitaplus',
@@ -102,6 +103,7 @@ export class PreferenceNavComponent {
       children: [
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
+        new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin]),
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
     },
