@@ -17,7 +17,7 @@
           }
         </div>
 
-        <div class="col-md-3 col-sm-12 pe-2">
+        <div class="col-md-4 col-sm-12 pe-2">
           <label for="email" class="form-label">{{t('email-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
           <ng-template #emailTooltip>{{t('email-tooltip')}}</ng-template>
           <span class="visually-hidden" id="email-help">
@@ -39,7 +39,7 @@
           }
         </div>
 
-        <div class="col-md-3 col-sm-12 pe-2">
+        <div class="col-md-3 col-sm-12">
           <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
           @if(settingsForm.get('platform'); as formControl) {
             <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"

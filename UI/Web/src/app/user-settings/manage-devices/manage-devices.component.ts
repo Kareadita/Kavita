@@ -33,7 +33,7 @@ export class ManageDevicesComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
 
   devices: Array<Device> = [];
-  addDeviceIsCollapsed: boolean = true;
+  isEditingDevice: boolean = false;
   device: Device | undefined;
   hasEmailSetup = false;
 
@@ -47,7 +47,7 @@ export class ManageDevicesComponent implements OnInit {
 
 
   loadDevices() {
-    this.addDeviceIsCollapsed = true;
+    this.isEditingDevice = false;
     this.device = undefined;
     this.cdRef.markForCheck();
     this.deviceService.getDevices().subscribe(devices => {
@@ -67,7 +67,7 @@ export class ManageDevicesComponent implements OnInit {
 
   editDevice(device: Device) {
     this.device = device;
-    this.addDeviceIsCollapsed = false;
+    this.isEditingDevice = true;
     this.cdRef.markForCheck();
   }
 }

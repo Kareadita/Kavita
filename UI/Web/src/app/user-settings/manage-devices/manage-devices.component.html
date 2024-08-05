@@ -1,44 +1,38 @@
 <ng-container *transloco="let t; read:'manage-devices'">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <h3>{{t('title')}}</h3>
-    </div>
+  <app-setting-item [title]="t('title')" [canEdit]="true" [editLabel]="t('add')" [subtitle]="t('description')">
+    <ng-template #edit>
+      <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
+    </ng-template>
+    <ng-template #view>
+      @if(!hasEmailSetup) {
+        <div class="alert alert-warning" role="alert">{{t('email-setup-alert')}}</div>
+      }
+    </ng-template>
+  </app-setting-item>
 
-    <p>
-      {{t('description')}}
-    </p>
+  @if(isEditingDevice) {
+    <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
+  }
 
-    @if(!hasEmailSetup) {
-      <div class="alert alert-warning" role="alert">{{t('email-setup-alert')}}</div>
+  <div class="row g-0 mt-2">
+    <h4>{{t('devices-title')}}</h4>
+    @if (devices.length === 0) {
+      <p>{{t('no-devices')}}</p>
     }
 
-    <app-setting-item [title]="t('title')" [canEdit]="true" [editLabel]="t('add')" [subtitle]="t('description')">
-      <ng-template #edit>
-        <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
-      </ng-template>
-      <ng-template #view></ng-template>
-    </app-setting-item>
+    @for(device of devices; track device.name + device.emailAddress + device.platform) {
+      <div class="card col-auto me-3 mb-3" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{device.name | sentenceCase}}</h5>
+          {{t('platform-label')}}<h6 class="card-subtitle mb-2 text-muted">{{device.platform | devicePlatform}}</h6>
+          {{t('email-label')}}<h6 class="card-subtitle mb-2 text-muted">{{device.emailAddress}}</h6>
 
-    <div class="row g-0 mt-2">
-      <h4>{{t('devices-title')}}</h4>
-      @if (devices.length === 0) {
-        <p>{{t('no-devices')}}</p>
-      }
-
-      @for(device of devices; track device.name + device.emailAddress + device.platform) {
-        <div class="card col-auto me-3 mb-3" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">{{device.name | sentenceCase}}</h5>
-            {{t('platform-label')}}<h6 class="card-subtitle mb-2 text-muted">{{device.platform | devicePlatform}}</h6>
-            {{t('email-label')}}<h6 class="card-subtitle mb-2 text-muted">{{device.emailAddress}}</h6>
-
-            <button class="btn btn-danger me-2" (click)="deleteDevice(device)">{{t('delete')}}</button>
-            <button class="btn btn-primary" (click)="editDevice(device)">{{t('edit')}}</button>
-          </div>
+          <button class="btn btn-danger me-2" (click)="deleteDevice(device)">{{t('delete')}}</button>
+          <button class="btn btn-primary" (click)="editDevice(device)">{{t('edit')}}</button>
         </div>
-      }
+      </div>
+    }
 
-    </div>
   </div>
 
 </ng-container>

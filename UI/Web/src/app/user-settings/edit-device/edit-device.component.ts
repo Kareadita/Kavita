@@ -31,6 +31,10 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
 })
 export class EditDeviceComponent implements OnInit, OnChanges {
 
+  protected readonly deviceService = inject(DeviceService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @Input() device: Device | undefined;
 
   @Output() deviceAdded: EventEmitter<void> = new EventEmitter();
@@ -39,10 +43,6 @@ export class EditDeviceComponent implements OnInit, OnChanges {
 
   settingsForm: FormGroup = new FormGroup({});
   devicePlatforms = devicePlatforms;
-
-
-  constructor(public deviceService: DeviceService, private toastr: ToastrService,
-    private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 
