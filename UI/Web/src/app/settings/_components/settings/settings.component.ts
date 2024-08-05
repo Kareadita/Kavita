@@ -41,6 +41,10 @@ import {SettingFragmentPipe} from "../../../_pipes/setting-fragment.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
 import {ToastrService} from "ngx-toastr";
+import {
+    KavitaplusMetadataBreakdownStatsComponent
+} from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
+import {ManageKavitaplusComponent} from "../manage-kavitaplus/manage-kavitaplus.component";
 
 @Component({
   selector: 'app-settings',
@@ -73,7 +77,9 @@ import {ToastrService} from "ngx-toastr";
     ManageTasksSettingsComponent,
     ManageUsersComponent,
     ServerStatsComponent,
-    SettingFragmentPipe
+    SettingFragmentPipe,
+    KavitaplusMetadataBreakdownStatsComponent,
+    ManageKavitaplusComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
