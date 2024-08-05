@@ -113,7 +113,7 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('password'); as formControl) {
-        <app-setting-item [title]="t('password-label')" [subtitle]="t('password-tooltip')">
+        <app-setting-item [title]="t('password-label')">
           <ng-template #view>
             {{formControl.value ? '********' : null | defaultValue}}
           </ng-template>
@@ -128,7 +128,7 @@
       @if (settingsForm.get('sizeLimit'); as formControl) {
         <app-setting-item [title]="t('size-limit-label')" [subtitle]="t('size-limit-tooltip')">
           <ng-template #view>
-            {{formControl.value | defaultValue}}
+            {{formControl.value | bytes}}
           </ng-template>
           <ng-template #edit>
             <input type="number" inputmode="numeric" min="1" class="form-control" aria-describedby="email-header" formControlName="sizeLimit" id="settings-size-limit" />

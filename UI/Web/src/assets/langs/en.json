@@ -242,20 +242,26 @@
         "description": "This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files.",
         "devices-title": "Devices",
         "no-devices": "There are no devices setup yet",
-        "platform-label": "Platform: ",
-        "email-label": "Email: ",
+        "platform-label": "Platform",
+        "email-label": "Email",
+        "name-label": "Name",
         "email-setup-alert": "Want to send files to your devices? Have the your admin setup Email settings first!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "no-data": "{{typeahead.no-data}}"
     },
 
-    "edit-device": {
-        "device-name-label": "Device Name",
+    "edit-device-modal": {
+        "title": "Edit Device",
+        "device-name-label": "{{manage-devices.name-label}}",
+        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "This email will be used to accept the file via Send To",
         "device-platform-label": "Device Platform",
         "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}"
     },

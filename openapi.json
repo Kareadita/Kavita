@@ -1830,7 +1830,9 @@
         "tags": [
           "Device"
         ],
+        "summary": "Creates a new Device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1851,7 +1853,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              }
+            }
           }
         }
       }
@@ -1861,7 +1880,9 @@
         "tags": [
           "Device"
         ],
+        "summary": "Updates an existing Device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1882,7 +1903,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              }
+            }
           }
         }
       }
@@ -22584,47 +22622,7 @@
       "description": "Responsible for all things Want To Read"
     }
   ]
-}        "pdfTheme",
-          "promptForDownloadSize",
-          "readerMode",
-          "readingDirection",
-          "scalingOption",
-          "shareReviews",
-          "showScreenHints",
-          "swipeToPaginate",
-          "theme"
-        ],
-        "type": "object",
-        "properties": {
-          "readingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
-            "format": "int32"
-          },
-          "scalingOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How should the image be scaled to screen",
-            "format": "int32"
-          },
-          "pageSplitOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: Which side of a split image should we show first",
+}lit image should we show first",
             "format": "int32"
           },
           "readerMode": {
