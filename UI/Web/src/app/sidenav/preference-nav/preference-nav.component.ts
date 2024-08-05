@@ -19,6 +19,8 @@ export enum SettingsTabId {
   System = 'admin-system',
   Tasks = 'admin-tasks',
   Statistics = 'admin-statistics',
+
+  // Kavita+
   KavitaPlus = 'admin-kavitaplus',
 
   // Non-Admin
@@ -42,7 +44,7 @@ class SideNavItem {
 }
 
 
-interface Tab {title: string, fragment: string};
+interface Tab {title: string, fragment: string}
 
 @Component({
   selector: 'app-preference-nav',
@@ -89,7 +91,7 @@ export class PreferenceNavComponent {
         new SideNavItem(SettingsTabId.Email, [Role.Admin]),
         new SideNavItem(SettingsTabId.Statistics, [Role.Admin]),
         new SideNavItem(SettingsTabId.System, [Role.Admin]),
-        new SideNavItem(SettingsTabId.KavitaPlus, [Role.Admin]),
+
       ]
     },
     {
@@ -99,62 +101,28 @@ export class PreferenceNavComponent {
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
+    },
+    {
+      title: 'kavitaplus-section-title',
+      children: [
+        new SideNavItem(SettingsTabId.KavitaPlus, [Role.Admin]),
+      ]
     }
   ];
 
-  // adminTabs: Array<Tab> = [
-  //   {title: 'general-tab', fragment: SettingsTabId.General},
-  //   {title: 'users-tab', fragment: SettingsTabId.Users},
-  //   {title: 'libraries-tab', fragment: SettingsTabId.Libraries},
-  //   {title: 'media-tab', fragment: SettingsTabId.Media},
-  //   {title: 'email-tab', fragment: SettingsTabId.Email},
-  //   {title: 'tasks-tab', fragment: SettingsTabId.Tasks},
-  //   {title: 'statistics-tab', fragment: SettingsTabId.Statistics},
-  //   {title: 'system-tab', fragment: SettingsTabId.System},
-  //   {title: 'kavita+-tab', fragment: SettingsTabId.KavitaPlus},
-  // ];
-  //
-  // prefTabs: Array<Tab> = [
-  //   {title: 'account-tab', fragment: SettingsTabId.Account},
-  //   {title: 'preferences-tab', fragment: SettingsTabId.Preferences},
-  //   {title: '3rd-party-clients-tab', fragment: SettingsTabId.Clients},
-  //   {title: 'theme-tab', fragment: SettingsTabId.Theme},
-  //   {title: 'devices-tab', fragment: SettingsTabId.Devices},
-  //   {title: 'stats-tab', fragment: SettingsTabId.UserStats},
-  // ];
-  // // TODO: Title isn't needed as we can map with the fragment
 
-  //active = this.prefTabs[0];
   hasActiveLicense = false;
 
   constructor() {
     this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
-        // if (this.prefTabs.filter(t => t.fragment == SettingsTabId.Scrobbling).length === 0) {
-        //   this.prefTabs.push({title: 'scrobbling-tab', fragment: SettingsTabId.Scrobbling});
-        // }
-
-        const items = this.sections[0].children;
-        if (items.filter(t => t.fragment == SettingsTabId.Scrobbling).length === 0) {
-          items.push(new SideNavItem(SettingsTabId.Scrobbling));
-          this.cdRef.markForCheck();
+        this.hasActiveLicense = true;
+        if (this.hasActiveLicense && this.sections[3].children.length === 1) {
+          this.sections[3].children.push(new SideNavItem(SettingsTabId.Scrobbling, []));
         }
 
-        this.hasActiveLicense = true;
         this.cdRef.markForCheck();
       }
-
-
-      // this.route.fragment.subscribe(frag => {
-      //   const tabs = [...this.adminTabs, ...this.prefTabs];
-      //   const tab = tabs.filter(item => item.fragment === frag);
-      //   if (tab.length > 0) {
-      //     this.active = tab[0];
-      //   } else {
-      //     this.active = this.prefTabs[1]; // Default to preferences
-      //   }
-      //   this.cdRef.markForCheck();
-      // });
     });
   }
 

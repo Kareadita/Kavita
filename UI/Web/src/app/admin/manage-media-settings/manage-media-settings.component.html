@@ -1,6 +1,7 @@
 <ng-container *transloco="let t; read: 'manage-media-settings'">
-  <div class="container-fluid">
-    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined" class="mb-2">
+
+
+    <form [formGroup]="settingsForm" class="mb-2">
 
       <div class="row g-0">
         <p>{{t('encode-as-description-part-1')}} <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">{{t('encode-as-description-part-2')}}</a>/<a href="https://caniuse.com/?search=avif" target="_blank" rel="noopener noreferrer">{{t('encode-as-description-part-3')}}</a>
@@ -83,7 +84,5 @@
       </div>
     </div>
 
-
-  </div>
 
 </ng-container>
