@@ -71,6 +71,9 @@ export class PreferenceNavComponent {
 
   protected readonly SettingsTabId = SettingsTabId;
 
+  /**
+   * This links to settings.component.html which has triggers on what underlying component to render out.
+   */
   sections = [
     {
       title: 'account-section-title',

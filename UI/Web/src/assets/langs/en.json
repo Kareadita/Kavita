@@ -188,7 +188,8 @@
 
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger events."
+        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger events.",
+        "no-data": "{{typeahead.no-data}}"
     },
 
     "theme-manager": {
@@ -1219,6 +1220,7 @@
     },
 
     "manage-scrobble-errors": {
+        "title": "Scrobbling Errors",
         "description": "This table contains issues found during scrobbling. This list is non-managed. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, you are best correcting the series name or localized series name or adding a weblink for the providers.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Clear Errors",
@@ -1226,7 +1228,8 @@
         "created-header": "Created",
         "comment-header": "Comment",
         "edit-header": "Edit",
-        "edit-item-alt": "Edit {{seriesName}}"
+        "edit-item-alt": "Edit {{seriesName}}",
+        "no-data": "No issues"
     },
 
     "default-date-pipe": {

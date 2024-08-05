@@ -30,7 +30,7 @@ import { CoverImageSizes } from '../_models/cover-image-size';
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent, TranslocoDirective]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, TranslocoDirective]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

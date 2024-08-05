@@ -138,9 +138,8 @@
 
       @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
         @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
-          <div class="col-md-5 col-sm-12">
-            <app-user-scrobble-history></app-user-scrobble-history>
-            <app-user-holds></app-user-holds>
+          <div class="col-md-12">
+            <app-manage-scrobling></app-manage-scrobling>
           </div>
         }
       }

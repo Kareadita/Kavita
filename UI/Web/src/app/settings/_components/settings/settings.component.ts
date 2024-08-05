@@ -19,7 +19,7 @@ import {
 } from "../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-manager.component";
 import {TranslocoDirective} from "@ngneat/transloco";
-import {UserHoldsComponent} from "../../../user-settings/user-holds/user-holds.component";
+import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
 import {
   UserScrobbleHistoryComponent
 } from "../../../_single-module/user-scrobble-history/user-scrobble-history.component";
@@ -45,6 +45,7 @@ import {
     KavitaplusMetadataBreakdownStatsComponent
 } from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
 import {ManageKavitaplusComponent} from "../manage-kavitaplus/manage-kavitaplus.component";
+import {ManageScrobblingComponent} from "../manage-scrobling/manage-scrobbling.component";
 
 @Component({
   selector: 'app-settings',
@@ -64,7 +65,7 @@ import {ManageKavitaplusComponent} from "../manage-kavitaplus/manage-kavitaplus.
     SideNavCompanionBarComponent,
     ThemeManagerComponent,
     TranslocoDirective,
-    UserHoldsComponent,
+    ScrobblingHoldsComponent,
     UserScrobbleHistoryComponent,
     UserStatsComponent,
     AsyncPipe,
@@ -79,7 +80,8 @@ import {ManageKavitaplusComponent} from "../manage-kavitaplus/manage-kavitaplus.
     ServerStatsComponent,
     SettingFragmentPipe,
     KavitaplusMetadataBreakdownStatsComponent,
-    ManageKavitaplusComponent
+    ManageKavitaplusComponent,
+    ManageScrobblingComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

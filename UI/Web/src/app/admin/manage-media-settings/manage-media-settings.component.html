@@ -67,22 +67,22 @@
       </div>
     </div>
 
-    <div class="mt-3" ngbAccordion [destroyOnHide]="false">
-      <div ngbAccordionItem>
-        <h2 ngbAccordionHeader>
-          <button ngbAccordionButton>
-            {{t('scrobble-issue-title')}} <span class="ms-1" *ngIf="scrobbleCount > 0">({{scrobbleCount}})</span>
-          </button>
-        </h2>
-        <div ngbAccordionCollapse>
-          <div ngbAccordionBody>
-            <ng-template>
-              <app-manage-scrobble-errors (scrobbleCount)="scrobbleCount = $event"></app-manage-scrobble-errors>
-            </ng-template>
-          </div>
-        </div>
-      </div>
-    </div>
+<!--    <div class="mt-3" ngbAccordion [destroyOnHide]="false">-->
+<!--      <div ngbAccordionItem>-->
+<!--        <h2 ngbAccordionHeader>-->
+<!--          <button ngbAccordionButton>-->
+<!--            {{t('scrobble-issue-title')}} <span class="ms-1" *ngIf="scrobbleCount > 0">({{scrobbleCount}})</span>-->
+<!--          </button>-->
+<!--        </h2>-->
+<!--        <div ngbAccordionCollapse>-->
+<!--          <div ngbAccordionBody>-->
+<!--            <ng-template>-->
+<!--              <app-manage-scrobble-errors (scrobbleCount)="scrobbleCount = $event"></app-manage-scrobble-errors>-->
+<!--            </ng-template>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
 
 
 </ng-container>

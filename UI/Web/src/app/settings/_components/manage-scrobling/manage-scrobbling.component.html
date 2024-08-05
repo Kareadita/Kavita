@@ -1,0 +1,11 @@
+
+<app-user-scrobble-history></app-user-scrobble-history>
+<div class="mt-4">
+  <app-user-holds></app-user-holds>
+</div>
+
+@if(isAdmin$ | async; as isAdmin) {
+  <div class="mt-4">
+    <app-manage-scrobble-errors (scrobbleCount)="updateScrobbleErrorCount($event)"></app-manage-scrobble-errors>
+  </div>
+}

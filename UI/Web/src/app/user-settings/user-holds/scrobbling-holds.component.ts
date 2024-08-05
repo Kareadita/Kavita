@@ -17,11 +17,11 @@ import {TranslocoDirective} from "@ngneat/transloco";
   selector: 'app-user-holds',
   standalone: true,
     imports: [CommonModule, ScrobbleEventTypePipe, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody, NgbAccordionItem, NgbAccordionHeader, TranslocoDirective],
-  templateUrl: './user-holds.component.html',
-  styleUrls: ['./user-holds.component.scss'],
+  templateUrl: './scrobbling-holds.component.html',
+  styleUrls: ['./scrobbling-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserHoldsComponent {
+export class ScrobblingHoldsComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly destroyRef = inject(DestroyRef);
