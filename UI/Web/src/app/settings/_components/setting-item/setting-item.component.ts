@@ -9,13 +9,15 @@ import {
 } from '@angular/core';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {NgTemplateOutlet} from "@angular/common";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-setting-item',
   standalone: true,
   imports: [
     TranslocoDirective,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    SafeHtmlPipe
   ],
   templateUrl: './setting-item.component.html',
   styleUrl: './setting-item.component.scss',
@@ -28,6 +30,7 @@ export class SettingItemComponent {
   @Input({required:true}) title: string = '';
   @Input() editLabel: string | undefined = undefined;
   @Input() canEdit: boolean = true;
+  @Input() showEdit: boolean = true;
   @Input() isEditMode: boolean = false;
   @Input() subtitle: string | undefined = undefined;
   @Input() labelId: string | undefined = undefined;
@@ -45,6 +48,10 @@ export class SettingItemComponent {
    * View in Edit mode
    */
   @ContentChild('edit') valueEditRef!: TemplateRef<any>;
+  /**
+   * Extra button controls to show instead of Edit
+   */
+  @ContentChild('titleActions') titleActionsRef!: TemplateRef<any>;
 
   toggleEditMode() {
     this.isEditMode = !this.isEditMode;

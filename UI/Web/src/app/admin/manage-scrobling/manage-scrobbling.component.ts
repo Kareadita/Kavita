@@ -1,13 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
-import {ManageScrobbleErrorsComponent} from "../../../admin/manage-scrobble-errors/manage-scrobble-errors.component";
+import {ManageScrobbleErrorsComponent} from "../manage-scrobble-errors/manage-scrobble-errors.component";
 import {AsyncPipe} from "@angular/common";
-import {AccountService} from "../../../_services/account.service";
+import {AccountService} from "../../_services/account.service";
 import {map, shareReplay} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
+import {ScrobblingHoldsComponent} from "../../user-settings/user-holds/scrobbling-holds.component";
 import {
   UserScrobbleHistoryComponent
-} from "../../../_single-module/user-scrobble-history/user-scrobble-history.component";
+} from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
 
 @Component({
   selector: 'app-manage-scrobling',

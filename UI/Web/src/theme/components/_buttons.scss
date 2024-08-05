@@ -54,7 +54,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 }
 
 
-.btn-icon {
+.btn-icon, .btn-primary-text, .btn-secondary-text, .btn-danger-text {
   cursor: pointer;
   color: var(--body-text-color);
   border: none;
@@ -69,6 +69,18 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
     border: none;
   }
+}
+
+.btn-primary-text {
+  color: var(--btn-primary-text-text-color);
+}
+
+.btn-secondary-text {
+  color: var(--btn-secondary-text-text-color);
+}
+
+.btn-danger-text {
+  color: var(--btn-danger-text-text-color);
 }
 
 .btn-outline-secondary {

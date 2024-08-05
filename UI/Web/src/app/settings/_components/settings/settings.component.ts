@@ -44,8 +44,8 @@ import {ToastrService} from "ngx-toastr";
 import {
     KavitaplusMetadataBreakdownStatsComponent
 } from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
-import {ManageKavitaplusComponent} from "../manage-kavitaplus/manage-kavitaplus.component";
-import {ManageScrobblingComponent} from "../manage-scrobling/manage-scrobbling.component";
+import {ManageKavitaplusComponent} from "../../../admin/manage-kavitaplus/manage-kavitaplus.component";
+import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-scrobbling.component";
 
 @Component({
   selector: 'app-settings',

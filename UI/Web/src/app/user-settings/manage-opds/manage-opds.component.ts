@@ -1,18 +1,22 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
 import {ApiKeyComponent} from "../api-key/api-key.component";
-import {NgIf} from "@angular/common";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
 import {User} from "../../_models/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {WikiLink} from "../../_models/wiki";
 
 @Component({
   selector: 'app-manage-opds',
   standalone: true,
   imports: [
     ApiKeyComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    SettingTitleComponent,
+    SettingItemComponent
   ],
   templateUrl: './manage-opds.component.html',
   styleUrl: './manage-opds.component.scss',
@@ -24,7 +28,9 @@ export class ManageOpdsComponent {
   private readonly settingsService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
+
   user: User | undefined = undefined;
+  opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
   opdsEnabled: boolean = false;
   opdsUrl: string = '';
@@ -47,4 +53,5 @@ export class ManageOpdsComponent {
       this.cdRef.markForCheck();
     });
   }
+
 }

@@ -1,6 +1,6 @@
 <ng-container *transloco="let t;">
   <div class="container-fluid">
-    <div class="row mb-2">
+    <div class="row g-0 mb-2">
       <div class="col-11">
         <h6 class="section-title" id="email-card">
           @if(labelId) {
@@ -14,7 +14,12 @@
         </h6>
       </div>
       <div class="col-1">
-        <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">{{isEditMode ? t('common.cancel') : (editLabel || t('common.edit'))}}</button>
+        @if (showEdit) {
+          <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">{{isEditMode ? t('common.cancel') : (editLabel || t('common.edit'))}}</button>
+        }
+        @if (titleActionsRef) {
+          <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>
+        }
       </div>
     </div>
 
@@ -27,7 +32,7 @@
 
 
     @if (subtitle) {
-      <div class="text-muted mt-2">{{subtitle}}</div>
+      <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
     }
   </div>
 </ng-container>
