@@ -4,7 +4,7 @@
       <ng-container>
         <div class="col-auto mb-2">
           <app-icon-and-title [label]="t('total-series-label')" [clickable]="false" fontClasses="fa-solid fa-book-open" [title]="t('total-series-tooltip', {count: stats.seriesCount | number})">
-            {{t('series-count', {num: stats.seriesCount | number})}}
+            {{t('series-count', {num: useCompactNumber ? (stats.seriesCount | compactNumber) : (stats.seriesCount | number)})}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -13,7 +13,7 @@
       <ng-container >
         <div class="col-auto mb-2">
           <app-icon-and-title [label]="t('total-volumes-label')" [clickable]="false" fontClasses="fas fa-book" [title]="t('total-volumes-tooltip', {count: stats.volumeCount | number})">
-            {{t('volume-count', {num: stats.volumeCount | number})}}
+            {{t('volume-count', {num: useCompactNumber ? (stats.volumeCount | compactNumber) : (stats.volumeCount | number)})}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -22,7 +22,7 @@
       <ng-container>
         <div class="col-auto mb-2">
           <app-icon-and-title [label]="t('total-files-label')" [clickable]="false" fontClasses="fa-regular fa-file" [title]="t('total-files-tooltip', {count: stats.totalFiles | number})">
-            {{t('file-count', {num: stats.totalFiles | number})}}
+            {{t('file-count', {num: useCompactNumber ? (stats.totalFiles | compactNumber) : (stats.totalFiles | number)})}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -40,7 +40,7 @@
       <ng-container>
         <div class="col-auto mb-2">
           <app-icon-and-title [label]="t('total-genres-label')" [clickable]="true" fontClasses="fa-solid fa-tags" [title]="t('total-genres-tooltip', {count: stats.totalGenres | number})" (click)="openGenreList();$event.stopPropagation();">
-            {{t('genre-count', {num: stats.totalGenres | compactNumber})}}
+            {{t('genre-count', {num: useCompactNumber ? (stats.totalGenres | compactNumber) : (stats.totalGenres | number)})}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -49,7 +49,7 @@
       <ng-container>
         <div class="col-auto mb-2">
           <app-icon-and-title [label]="t('total-tags-label')" [clickable]="true" fontClasses="fa-solid fa-tags" [title]="t('total-tags-tooltip', {count: stats.totalTags | number})" (click)="openTagList();$event.stopPropagation();">
-            {{t('tag-count', {num: stats.totalTags | compactNumber})}}
+            {{t('tag-count', {num: useCompactNumber ? (stats.totalTags | compactNumber) : (stats.totalTags | number)})}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -58,7 +58,7 @@
       <ng-container>
         <div class="col-auto mb-2">
           <app-icon-and-title [label]="t('total-people-label')" [clickable]="true" fontClasses="fa-solid fa-user-tag" [title]="t('total-people-tooltip', {count: stats.totalPeople | number})" (click)="openPeopleList();$event.stopPropagation();">
-            {{t('people-count', {num: stats.totalPeople | compactNumber})}}
+            {{t('people-count', {num: useCompactNumber ? (stats.totalPeople | compactNumber) : (stats.totalPeople | number)})}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -71,6 +71,19 @@
           </app-icon-and-title>
         </div>
       </ng-container>
+    </div>
+
+    <div class="row g-0 mt-4 mb-3 d-flex justify-content-end">
+      <div class="col"></div> <!--add empty columns to space button towards screen justified right-->
+      <div class="col"></div>
+      <div class="col"></div>
+      <div class="col"></div>
+      <div class="col"></div>
+      <div class="col" style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary me-2" (click)="toggleNumberFormat()"> <!--set user input boolean to flip between Compact and Raw numbers-->
+          {{ useCompactNumber ? 'Use Raw Numbers' : 'Use Compact Numbers' }}
+        </button>
+      </div>
     </div>
 
     <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
