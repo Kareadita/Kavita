@@ -52,7 +52,6 @@ export class ServerStatsComponent {
   mostActiveSeries$!: Observable<Array<PieDataItem>>;
   recentlyRead$!: Observable<Array<PieDataItem>>;
   stats$!: Observable<ServerStatistics>;
-  useCompactNumber: boolean = true;
   seriesImage: (data: PieDataItem) => string;
   openSeries = (data: PieDataItem) => {
     const series = data.extra as Series;
@@ -115,7 +114,6 @@ export class ServerStatsComponent {
       })),
       takeUntilDestroyed(this.destroyRef)
     );
-    this.useCompactNumber = false;
   }
 
   openGenreList() {
@@ -148,9 +146,6 @@ export class ServerStatsComponent {
     });
   }
 
-  toggleNumberFormat() {
-    this.useCompactNumber = !this.useCompactNumber;
-  }
 
 
 }
