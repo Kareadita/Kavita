@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row g-0 mb-2">
       <div class="col-11">
-        <h6 class="section-title" id="email-card">{{title}}</h6>
+        <h6 class="section-title" [id]="id || title">{{title}}</h6>
       </div>
       <div class="col-1">
         @if (switchRef) {

@@ -27,6 +27,7 @@ export class SettingSwitchComponent {
 
   @Input({required:true}) title: string = '';
   @Input() subtitle: string | undefined = undefined;
+  @Input() id: string | undefined = undefined;
   @ContentChild('switch') switchRef!: TemplateRef<any>;
 
 }

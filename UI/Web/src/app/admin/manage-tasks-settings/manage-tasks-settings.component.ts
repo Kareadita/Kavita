@@ -18,6 +18,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {ConfirmService} from "../../shared/confirm.service";
 
 interface AdhocTask {
   name: string;
@@ -40,6 +41,12 @@ export class ManageTasksSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
+  private readonly modalService = inject(NgbModal);
+  private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
@@ -114,9 +121,6 @@ export class ManageTasksSettingsComponent implements OnInit {
   ];
   customOption = 'custom';
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private serverService: ServerService, private modalService: NgbModal,
-    private downloadService: DownloadService) { }
 
   ngOnInit(): void {
     forkJoin({
@@ -263,7 +267,9 @@ export class ManageTasksSettingsComponent implements OnInit {
     });
   }
 
-  resetToDefaults() {
+  async resetToDefaults() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
+
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();

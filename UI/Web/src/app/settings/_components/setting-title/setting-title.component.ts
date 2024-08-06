@@ -26,22 +26,16 @@ export class SettingTitleComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required:true}) title: string = '';
+  @Input() id: string | undefined = undefined;
   @Input() canEdit: boolean = true;
   @Input() isEditMode: boolean = false;
   @Output() editMode = new EventEmitter<boolean>();
   @ContentChild('extra') titleExtraRef!: TemplateRef<any>;
-
-  constructor() {
-
-  }
 
   toggleViewMode() {
     this.isEditMode = !this.isEditMode;
     this.editMode.emit(this.isEditMode);
     this.cdRef.markForCheck();
   }
-
-
-
 
 }
