@@ -152,6 +152,14 @@
         }
       }
 
+      @defer (when fragment === SettingsTabId.CBLImport; prefetch on idle) {
+        @if (fragment === SettingsTabId.CBLImport) {
+          <div class="col-md-12">
+            <app-import-cbl></app-import-cbl>
+          </div>
+        }
+      }
+
       @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
         @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
           <div class="col-md-12">

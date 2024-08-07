@@ -1,23 +1,29 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {FileUploadModule, FileUploadValidators} from '@iplab/ngx-file-upload';
-import {
-  NgbAccordionModule, NgbAccordionToggle,
-  NgbActiveModal
-} from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
-import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
-import { ReadingListService } from 'src/app/_services/reading-list.service';
-import {StepTrackerComponent, TimelineStep} from '../../_components/step-tracker/step-tracker.component';
-import {CommonModule} from "@angular/common";
-import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
+import {FileUploadComponent, FileUploadValidators} from "@iplab/ngx-file-upload";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {NgForOf, NgIf, NgTemplateOutlet} from "@angular/common";
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem,
+  NgbActiveModal
+} from "@ng-bootstrap/ng-bootstrap";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {StepTrackerComponent, TimelineStep} from "../step-tracker/step-tracker.component";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {WikiLink} from "../../../_models/wiki";
+import {ReadingListService} from "../../../_services/reading-list.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {ToastrService} from "ngx-toastr";
+import {forkJoin} from "rxjs";
+import {CblImportSummary} from "../../../_models/reading-list/cbl/cbl-import-summary";
+import { WikiLink } from 'src/app/_models/wiki';
+import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
+
 
 interface FileStep {
   fileName: string;
@@ -34,18 +40,35 @@ enum Step {
 }
 
 @Component({
-  selector: 'app-import-cbl-modal',
+  selector: 'app-import-cbl',
   standalone: true,
-  imports: [CommonModule,
-    FileUploadModule,
-    NgbAccordionModule,
+  imports: [
+    CblConflictReasonPipe,
+    CblImportResultPipe,
+    FileUploadComponent,
+    FormsModule,
+    NgbAccordionBody,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionDirective,
+    NgbAccordionHeader,
+    NgbAccordionItem,
+    ReactiveFormsModule,
     SafeHtmlPipe,
-    CblConflictReasonPipe, ReactiveFormsModule, StepTrackerComponent, CblImportResultPipe, NgbAccordionToggle, TranslocoDirective],
-  templateUrl: './import-cbl-modal.component.html',
-  styleUrls: ['./import-cbl-modal.component.scss'],
+    StepTrackerComponent,
+    TranslocoDirective,
+    NgTemplateOutlet
+  ],
+  templateUrl: './import-cbl.component.html',
+  styleUrl: './import-cbl.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImportCblModalComponent {
+export class ImportCblComponent {
+  private readonly readingListService = inject(ReadingListService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly utilityService = inject(UtilityService);
+
 
   protected readonly CblImportResult = CblImportResult;
   protected readonly Step = Step;
@@ -90,13 +113,7 @@ export class ImportCblModalComponent {
     }
   }
 
-  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService,
-    public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef,
-    private toastr: ToastrService) {}
 
-  close() {
-    this.ngModal.close();
-  }
 
   nextStep() {
     if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
@@ -113,11 +130,12 @@ export class ImportCblModalComponent {
         const pages = [];
         for (let i = 0; i < files.length; i++) {
           const formData = new FormData();
-            formData.append('cbl', files[i]);
-            formData.append('dryRun', 'true');
-            formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
-            pages.push(this.readingListService.validateCbl(formData));
+          formData.append('cbl', files[i]);
+          formData.append('dryRun', 'true');
+          formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
+          pages.push(this.readingListService.validateCbl(formData));
         }
+
         forkJoin(pages).subscribe(results => {
           this.filesToProcess = [];
           results.forEach(cblImport => {
@@ -210,7 +228,7 @@ export class ImportCblModalComponent {
       pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {
-        results.forEach(cblImport => {
+      results.forEach(cblImport => {
         const index = this.filesToProcess.findIndex(p => p.fileName === cblImport.fileName);
         this.filesToProcess[index].dryRunSummary = cblImport;
       });
@@ -234,6 +252,7 @@ export class ImportCblModalComponent {
       formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
       pages.push(this.readingListService.importCbl(formData));
     }
+
     forkJoin(pages).subscribe(results => {
       results.forEach(cblImport => {
         const index = this.filesToProcess.findIndex(p => p.fileName === cblImport.fileName);

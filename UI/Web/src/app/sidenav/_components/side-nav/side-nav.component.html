@@ -3,11 +3,7 @@
     <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
                                       'hidden': (navService.sideNavVisibility$ | async) === false,
                                       'no-donate': (accountService.hasValidLicense$ | async) === true}">
-      <app-side-nav-item icon="fa-home" [title]="t('home')" link="/home/">
-        <ng-container actions>
-          <app-card-actionables [actions]="homeActions" [labelBy]="t('home')" iconClass="fa-ellipsis-v" (actionHandler)="handleHomeActions($event)"></app-card-actionables>
-        </ng-container>
-      </app-side-nav-item>
+      <app-side-nav-item icon="fa-home" [title]="t('home')" link="/home/"></app-side-nav-item>
 
       @if (navStreams$ | async; as streams) {
         @if (showAll) {
@@ -45,11 +41,7 @@
             }
 
             @case (SideNavStreamType.ReadingLists) {
-              <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">
-                <ng-container actions>
-                  <app-card-actionables [actions]="readingListActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>
-                </ng-container>
-              </app-side-nav-item>
+              <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/"></app-side-nav-item>
             }
 
             @case (SideNavStreamType.Collections) {

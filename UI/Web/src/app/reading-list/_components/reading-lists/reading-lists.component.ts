@@ -12,21 +12,17 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { ImportCblModalComponent } from '../../_modals/import-cbl-modal/import-cbl-modal.component';
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
-import {UserCollection} from "../../../_models/collection-tag";
-import {User} from "../../../_models/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-reading-lists',
@@ -50,7 +46,7 @@ export class ReadingListsComponent implements OnInit {
   hasPromote: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
-  globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
+  globalActions: Array<ActionItem<any>> = [];
   trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}`;
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -102,12 +98,6 @@ export class ReadingListsComponent implements OnInit {
     if (typeof action.callback === 'function') {
       action.callback(action, undefined);
     }
-  }
-
-  importCbl() {
-    const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl', fullscreen: 'md'});
-    ref.closed.subscribe(result => this.loadPage());
-    ref.dismissed.subscribe(_ => this.loadPage());
   }
 
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {

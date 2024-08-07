@@ -53,6 +53,7 @@ import {
 import {
   ImportMalCollectionComponent
 } from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
+import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/import-cbl.component";
 
 @Component({
   selector: 'app-settings',
@@ -91,7 +92,8 @@ import {
     ManageScrobblingComponent,
     ManageAlertsComponent,
     ManageCustomizationComponent,
-    ImportMalCollectionComponent
+    ImportMalCollectionComponent,
+    ImportCblComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
