@@ -10,7 +10,7 @@
       @if (accountService.hasAdminRole(user)) {
         @defer (when fragment === SettingsTabId.General; prefetch on idle) {
           @if (fragment === SettingsTabId.General) {
-            <div class="col-md-5 col-sm-12">
+            <div class="col-md-6 col-sm-12">
               <app-manage-settings></app-manage-settings>
             </div>
           }
@@ -18,7 +18,7 @@
 
         @defer (when fragment === SettingsTabId.Email; prefetch on idle) {
           @if (fragment === SettingsTabId.Email) {
-            <div class="col-md-5 col-sm-12">
+            <div class="col-md-6 col-sm-12">
               <app-manage-email-settings></app-manage-email-settings>
             </div>
           }
@@ -26,7 +26,7 @@
 
         @defer (when fragment === SettingsTabId.Media; prefetch on idle) {
           @if (fragment === SettingsTabId.Media) {
-            <div class="col-md-5 col-sm-12">
+            <div class="col-md-6 col-sm-12">
               <app-manage-media-settings></app-manage-media-settings>
             </div>
           }
@@ -58,7 +58,7 @@
 
         @defer (when fragment === SettingsTabId.System; prefetch on idle) {
           @if (fragment === SettingsTabId.System) {
-            <div class="col-md-5 col-sm-12">
+            <div class="col-md-12">
               <app-manage-system></app-manage-system>
             </div>
           }
@@ -66,7 +66,7 @@
 
         @defer (when fragment === SettingsTabId.Statistics; prefetch on idle) {
           @if (fragment === SettingsTabId.Statistics) {
-            <div class="col-md-12 col-sm-12">
+            <div class="col-md-12">
               <app-server-stats></app-server-stats>
             </div>
           }
@@ -82,7 +82,7 @@
 
         @defer (when fragment === SettingsTabId.KavitaPlus; prefetch on idle) {
           @if (fragment === SettingsTabId.KavitaPlus) {
-            <div class="col-md-5 col-sm-12">
+            <div class="col-md-12">
               <app-manage-kavitaplus></app-manage-kavitaplus>
             </div>
           }
@@ -92,7 +92,7 @@
 
       @defer (when fragment === SettingsTabId.Account; prefetch on idle) {
         @if (fragment === SettingsTabId.Account) {
-          <div class="col-md-5 col-sm-12">
+          <div class="col-md-6 col-sm-12">
             <app-change-email></app-change-email>
             <div class="setting-section-break"></div>
             <app-change-password></app-change-password>
@@ -106,7 +106,7 @@
 
       @defer (when fragment === SettingsTabId.Preferences; prefetch on idle) {
         @if (fragment === SettingsTabId.Preferences) {
-          <div class="col-md-5 col-sm-12">
+          <div class="col-md-6 col-sm-12">
             <app-manga-user-preferences></app-manga-user-preferences>
           </div>
         }
@@ -122,7 +122,7 @@
 
       @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
         @if (fragment === SettingsTabId.Clients) {
-          <div class="col-md-5 col-sm-12">
+          <div class="col-md-6 col-sm-12">
             <app-manage-opds></app-manage-opds>
           </div>
         }
@@ -138,7 +138,7 @@
 
       @defer (when fragment === SettingsTabId.Devices; prefetch on idle) {
         @if (fragment === SettingsTabId.Devices) {
-          <div class="col-md-5 col-sm-12">
+          <div class="col-md-12">
             <app-manage-devices></app-manage-devices>
           </div>
         }
