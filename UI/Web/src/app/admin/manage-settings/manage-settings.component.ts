@@ -9,7 +9,6 @@ import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {WikiLink} from "../../_models/wiki";
-import {pageLayoutModes} from "../../_models/preferences/preferences";
 import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";

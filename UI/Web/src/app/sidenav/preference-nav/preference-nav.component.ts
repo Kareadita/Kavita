@@ -31,7 +31,8 @@ export enum SettingsTabId {
   Theme = 'theme',
   Devices = 'devices',
   UserStats = 'user-stats',
-  Scrobbling = 'scrobbling'
+  Scrobbling = 'scrobbling',
+  Customize = 'customize'
 }
 
 class SideNavItem {
@@ -76,6 +77,7 @@ export class PreferenceNavComponent {
       children: [
         new SideNavItem(SettingsTabId.Account, [Role.Admin]),
         new SideNavItem(SettingsTabId.Preferences),
+        new SideNavItem(SettingsTabId.Customize),
         new SideNavItem(SettingsTabId.Clients),
         new SideNavItem(SettingsTabId.Theme),
         new SideNavItem(SettingsTabId.Devices),

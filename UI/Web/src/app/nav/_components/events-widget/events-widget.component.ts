@@ -9,7 +9,7 @@ import {
   OnInit
 } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import {BehaviorSubject, debounceTime, Observable, of} from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -67,6 +67,8 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   private updateNotificationModalRef: NgbModalRef | null = null;
 
+  activeEventsSource = new BehaviorSubject<number>(0);
+  activeEvents$ = this.activeEventsSource.asObservable().pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100));
   activeEvents: number = 0;
   /**
    * Intercepts from Single Updates to show an extra indicator to the user
@@ -93,12 +95,14 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         values.push(event.payload as ErrorEvent);
         this.errorSource.next(values);
         this.activeEvents += 1;
+        this.activeEventsSource.next(this.activeEvents);
         this.cdRef.markForCheck();
       } else if (event.event === EVENTS.Info) {
         const values = this.infoSource.getValue();
         values.push(event.payload as InfoEvent);
         this.infoSource.next(values);
         this.activeEvents += 1;
+        this.activeEventsSource.next(this.activeEvents);
         this.cdRef.markForCheck();
       } else if (event.event === EVENTS.UpdateAvailable) {
         this.handleUpdateAvailableClick(event.payload);
@@ -121,6 +125,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         values.push(message);
         this.singleUpdateSource.next(values);
         this.activeEvents += 1;
+        this.activeEventsSource.next(this.activeEvents);
         if (event.payload.name === EVENTS.UpdateAvailable) {
           this.updateAvailable = true;
         }
@@ -140,6 +145,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         data = data.filter(m => m.name !== message.name);
         this.progressEventsSource.next(data);
         this.activeEvents = Math.max(this.activeEvents - 1, 0);
+        this.activeEventsSource.next(this.activeEvents);
         this.cdRef.markForCheck();
         break;
       default:
@@ -153,6 +159,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     if (index < 0) {
       data.push(message);
       this.activeEvents += 1;
+      this.activeEventsSource.next(this.activeEvents);
       this.cdRef.markForCheck();
     } else {
       data[index] = message;
@@ -204,6 +211,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     this.infoSource.next([]);
     this.errorSource.next([]);
     this.activeEvents -= Math.max(infoCount + errorCount, 0);
+    this.activeEventsSource.next(this.activeEvents);
     this.cdRef.markForCheck();
   }
 
@@ -223,6 +231,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
       this.errorSource.next(data);
     }
     this.activeEvents = Math.max(this.activeEvents - 1, 0);
+    this.activeEventsSource.next(this.activeEvents);
     this.cdRef.markForCheck();
   }
 

@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row g-0">
       <div class="col-11">
-        <h6 class="section-title" id="email-card">
+        <h6 class="section-title">
           @if(labelId) {
             <label class="reset-label" [for]="labelId">{{title}}</label>
           } @else {
@@ -15,7 +15,9 @@
       </div>
       <div class="col-1">
         @if (showEdit) {
-          <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">{{isEditMode ? t('common.cancel') : (editLabel || t('common.edit'))}}</button>
+          <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">
+            {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}
+          </button>
         }
         @if (titleActionsRef) {
           <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>

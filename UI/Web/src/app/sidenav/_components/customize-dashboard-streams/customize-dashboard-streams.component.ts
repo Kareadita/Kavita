@@ -33,9 +33,6 @@ export class CustomizeDashboardStreamsComponent {
   items: DashboardStream[] = [];
   smartFilters: SmartFilter[] = [];
   accessibilityMode: boolean = false;
-
-
-
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
   });
@@ -49,7 +46,7 @@ export class CustomizeDashboardStreamsComponent {
     this.cdRef.markForCheck();
   }
 
-  constructor(public modal: NgbActiveModal) {
+  constructor() {
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
       this.items = results[0];
 

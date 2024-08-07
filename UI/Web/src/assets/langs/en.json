@@ -1470,7 +1470,8 @@
         "devices": "Devices",
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
-        "theme": "Theme"
+        "theme": "Theme",
+        "customize": "Customize"
     },
 
     "collection-detail": {

@@ -25,7 +25,6 @@
     --elevation-layer8-dark: rgba(0, 0, 0,0.15);
     --elevation-layer9-dark: rgba(0, 0, 0,0.16);
     --elevation-layer10-dark: rgba(0, 0, 0, 0.4);
-    --nav-offset: 75px;
 
     /* Base colors */
     --primary-color: #4ac694;
@@ -33,7 +32,7 @@
     --primary-color-darker-shade: #338A67;
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
-    --bs-body-bg: #3f4245; // #121212
+    --bs-body-bg: #3f4245;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
@@ -68,9 +67,10 @@
     --theme-color: #000000;
     --color-scheme: dark;
     --tile-color: var(--primary-color);
+    --nav-offset: 75px;
 
     /* Setting Item */
-  // TODO: Robbie let's refactor this so all setting classes inherit from this area
+    // TODO: Robbie let's refactor this so all setting classes inherit from this area
     --h6-text-color: #d5d5d5;
     --h6-font-size: 1.2rem;
     --h6-font-weight: bold;
@@ -101,21 +101,35 @@
     --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
     /* Buttons */
-
     --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
     --btn-primary-text-color: white;
-    --btn-primary-bg-color: transparent;
+    --btn-primary-bg-color: var(--primary-color);
     --btn-primary-border-color: var(--primary-color);
     --btn-primary-hover-text-color: white;
     --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
     --btn-primary-hover-border-color: var(--primary-color-darker-shade);
 
+    --btn-primary-outline-text-color: white;
+    --btn-primary-outline-bg-color: transparent;
+    --btn-primary-outline-border-color: var(--primary-color);
+    --btn-primary-outline-hover-text-color: white;
+    --btn-primary-outline-hover-bg-color: transparent;
+    --btn-primary-outline-hover-border-color: var(--primary-color-darker-shade);
+
     --btn-secondary-text-color: white;
-    --btn-secondary-bg-color: transparent;
-    --btn-secondary-border-color: transparent;
-    --btn-secondary-hover-bg-color: transparent;
-    --btn-secondary-hover-border-color: transparent;
+    --btn-secondary-bg-color: #6c757d;
+    --btn-secondary-border-color: #6c757d;
+    --btn-secondary-hover-bg-color: var(--bs-btn-hover-bg);
+    --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
     --btn-secondary-font-weight: bold;
+
+    --btn-secondary-outline-text-color: white;
+    --btn-secondary-outline-bg-color: transparent;
+    --btn-secondary-outline-border-color: transparent;
+    --btn-secondary-outline-hover-bg-color: transparent;
+    --btn-secondary-outline-hover-border-color: transparent;
+    --btn-secondary-outline-font-weight: bold;
+
 
     --btn-primary-text-text-color: white;
     --btn-secondary-text-text-color: lightgrey;
@@ -153,6 +167,9 @@
     --nav-link-bg-color: var(--primary-color);
     --nav-link-active-text-color: white;
     --nav-link-text-color: white;
+
+    /* Modal */
+    --modal-bg-color: #202122; // var(--bs-body-bg)
 
     /* Header */
     --nav-header-text-color: white;

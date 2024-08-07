@@ -36,12 +36,20 @@ import {Breakpoint, KEY_CODES, UtilityService} from "../../../shared/_services/u
 @Component({
   selector: 'app-customize-sidenav-streams',
   standalone: true,
-  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe, BulkOperationsComponent],
+  imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe, BulkOperationsComponent],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomizeSidenavStreamsComponent implements OnDestroy {
+
+  private readonly sideNavService = inject(NavService);
+  private readonly filterService = inject(FilterService);
+  private readonly externalSourceService = inject(ExternalSourceService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly utilityService = inject(UtilityService);
 
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
@@ -101,14 +109,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   }
 
 
-  private readonly sideNavService = inject(NavService);
-  private readonly filterService = inject(FilterService);
-  private readonly externalSourceService = inject(ExternalSourceService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  public readonly utilityService = inject(UtilityService);
-
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
@@ -124,7 +124,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
     }
   }
 
-  constructor(public modal: NgbActiveModal) {
+  constructor() {
 
     this.pageOperationsForm.get('accessibilityMode')?.valueChanges.pipe(
         tap(_ => {
