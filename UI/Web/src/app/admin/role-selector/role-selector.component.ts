@@ -1,11 +1,20 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import { Member } from 'src/app/_models/auth/member';
 import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import {AccountService} from 'src/app/_services/account.service';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgFor } from '@angular/common';
 import {TranslocoDirective,} from "@ngneat/transloco";
+import {SelectionModel} from "../../typeahead/_models/selection-model";
 
 @Component({
     selector: 'app-role-selector',
@@ -16,6 +25,10 @@ import {TranslocoDirective,} from "@ngneat/transloco";
   imports: [NgFor, ReactiveFormsModule, FormsModule, TranslocoDirective]
 })
 export class RoleSelectorComponent implements OnInit {
+
+  private readonly accountService = inject(AccountService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
 
   /**
    * This must have roles
@@ -29,8 +42,12 @@ export class RoleSelectorComponent implements OnInit {
 
   allRoles: string[] = [];
   selectedRoles: Array<{selected: boolean, disabled: boolean, data: string}> = [];
+  selections!: SelectionModel<string>;
+  selectAll: boolean = false;
 
-  constructor(public modal: NgbActiveModal, private accountService: AccountService, private readonly cdRef: ChangeDetectorRef) { }
+  get hasSomeSelected() {
+    return this.selections != null && this.selections.hasSomeSelected();
+  }
 
   ngOnInit(): void {
     this.accountService.getRoles().subscribe(roles => {
@@ -40,11 +57,15 @@ export class RoleSelectorComponent implements OnInit {
       }
       roles = roles.filter(item => !bannedRoles.includes(item));
       this.allRoles = roles;
+      this.selections = new SelectionModel<string>(false, this.allRoles);
+
       this.selectedRoles = roles.map(item => {
         return {selected: false, disabled: false, data: item};
       });
+
       this.cdRef.markForCheck();
       this.preselect();
+
       this.selected.emit(this.selectedRoles.filter(item => item.selected).map(item => item.data));
     });
   }
@@ -65,6 +86,7 @@ export class RoleSelectorComponent implements OnInit {
         }
       });
     }
+    this.syncSelections();
     this.cdRef.markForCheck();
   }
 
@@ -81,8 +103,27 @@ export class RoleSelectorComponent implements OnInit {
         e.disabled = false;
       });
     }
+    this.syncSelections();
     this.cdRef.markForCheck();
     this.selected.emit(roles);
+  }
+
+  syncSelections() {
+    this.selectedRoles.forEach(s => this.selections.toggle(s.data, s.selected));
+    this.cdRef.markForCheck();
+  }
+
+  toggleAll() {
+    this.selectAll = !this.selectAll;
+
+    // Update selectedRoles considering disabled state
+    this.selectedRoles.filter(r => !r.disabled).forEach(r => r.selected = this.selectAll);
+
+    // Sync selections with updated selectedRoles
+    this.syncSelections();
+
+    this.selected.emit(this.selections.selected());
+    this.cdRef.markForCheck();
   }
 
 }

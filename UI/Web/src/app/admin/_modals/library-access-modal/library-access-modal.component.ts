@@ -3,10 +3,10 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {Library} from 'src/app/_models/library/library';
 import {Member} from 'src/app/_models/auth/member';
 import {LibraryService} from 'src/app/_services/library.service';
-import {SelectionModel} from 'src/app/typeahead/_components/typeahead.component';
 import {NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {SelectionModel} from "../../../typeahead/_models/selection-model";
 
 @Component({
   selector: 'app-library-access-modal',

@@ -394,7 +394,9 @@
     },
 
     "role-selector": {
-        "title": "Roles"
+        "title": "Roles",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
 
     "directory-picker": {
