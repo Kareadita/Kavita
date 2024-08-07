@@ -20,7 +20,7 @@ import { ActionService } from '../../../_services/action.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
-import {AsyncPipe, CommonModule, NgClass} from "@angular/common";
+import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
@@ -63,7 +63,7 @@ export class SideNavComponent implements OnInit {
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   readingListActions = [];
   homeActions = [
-    {action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.openCustomize.bind(this)},
+    //{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.openCustomize.bind(this)}, // moved to settings page
     {action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)},
   ];
 

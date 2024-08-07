@@ -112,6 +112,14 @@
         }
       }
 
+      @defer (when fragment === SettingsTabId.Customize; prefetch on idle) {
+        @if (fragment === SettingsTabId.Customize) {
+          <div class="col-md-12">
+            <app-manage-customization></app-manage-customization>
+          </div>
+        }
+      }
+
       @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
         @if (fragment === SettingsTabId.Clients) {
           <div class="col-md-5 col-sm-12">

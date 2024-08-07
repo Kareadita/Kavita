@@ -47,6 +47,9 @@ import {
 import {ManageKavitaplusComponent} from "../../../admin/manage-kavitaplus/manage-kavitaplus.component";
 import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-scrobbling.component";
 import {ManageAlertsComponent} from "../../../admin/manage-alerts/manage-alerts.component";
+import {
+  ManageCustomizationComponent
+} from "../../../sidenav/_components/manage-customization/manage-customization.component";
 
 @Component({
   selector: 'app-settings',
@@ -83,7 +86,8 @@ import {ManageAlertsComponent} from "../../../admin/manage-alerts/manage-alerts.
     KavitaplusMetadataBreakdownStatsComponent,
     ManageKavitaplusComponent,
     ManageScrobblingComponent,
-    ManageAlertsComponent
+    ManageAlertsComponent,
+    ManageCustomizationComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

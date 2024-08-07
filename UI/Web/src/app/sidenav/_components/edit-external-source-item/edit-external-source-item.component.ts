@@ -5,10 +5,7 @@ import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {ExternalSourceService} from "../../../_services/external-source.service";
-import {distinctUntilChanged, filter, tap} from "rxjs/operators";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {switchMap} from "rxjs";
-import {ToastrModule, ToastrService} from "ngx-toastr";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-edit-external-source-item',
@@ -18,6 +15,10 @@ import {ToastrModule, ToastrService} from "ngx-toastr";
   styleUrls: ['./edit-external-source-item.component.scss']
 })
 export class EditExternalSourceItemComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly externalSourceService = inject(ExternalSourceService);
+  private readonly toastr = inject(ToastrService);
 
   @Input({required: true}) source!: ExternalSource;
   @Output() sourceUpdate = new EventEmitter<ExternalSource>();
@@ -25,23 +26,17 @@ export class EditExternalSourceItemComponent implements OnInit {
   @Input() isViewMode: boolean = true;
 
   formGroup: FormGroup = new FormGroup({});
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly externalSourceService = inject(ExternalSourceService);
-  private readonly toastr = inject(ToastrService);
-
-  hasErrors(controlName: string) {
-    const errors = this.formGroup.get(controlName)?.errors;
-    return Object.values(errors || []).filter(v => v).length > 0;
-  }
-
-  constructor() {}
 
   ngOnInit(): void {
     this.formGroup.addControl('name', new FormControl(this.source.name, [Validators.required]));
     this.formGroup.addControl('host', new FormControl(this.source.host, [Validators.required, Validators.pattern(/^(http:|https:)+[^\s]+[\w]\/?$/)]));
     this.formGroup.addControl('apiKey', new FormControl(this.source.apiKey, [Validators.required]));
     this.cdRef.markForCheck();
+  }
+
+  hasErrors(controlName: string) {
+    const errors = this.formGroup.get(controlName)?.errors;
+    return Object.values(errors || []).filter(v => v).length > 0;
   }
 
   resetForm() {
@@ -81,6 +76,7 @@ export class EditExternalSourceItemComponent implements OnInit {
       });
     });
   }
+
   delete() {
     if (this.source.id === 0) {
         this.sourceDelete.emit(this.source);
