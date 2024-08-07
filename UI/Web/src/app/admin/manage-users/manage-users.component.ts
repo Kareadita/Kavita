@@ -19,6 +19,7 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {makeBindingParser} from "@angular/compiler";
 
 @Component({
     selector: 'app-manage-users',
@@ -26,7 +27,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
     styleUrls: ['./manage-users.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgFor, NgIf, NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe]
+  imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe]
 })
 export class ManageUsersComponent implements OnInit {
 
@@ -42,7 +43,6 @@ export class ManageUsersComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   public readonly messageHub = inject(MessageHubService);
-  private readonly serverService = inject(ServerService);
   private readonly router = inject(Router);
 
   constructor() {
@@ -85,7 +85,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   openEditUser(member: Member) {
-    const modalRef = this.modalService.open(EditUserComponent, {size: 'lg'});
+    const modalRef = this.modalService.open(EditUserComponent, { scrollable: true, size: 'xl', fullscreen: 'md' });
     modalRef.componentInstance.member = member;
     modalRef.closed.subscribe(() => {
       this.loadMembers();
@@ -151,4 +151,5 @@ export class ManageUsersComponent implements OnInit {
     return member.roles.filter(item => item != 'Pleb');
   }
 
+  protected readonly makeBindingParser = makeBindingParser;
 }

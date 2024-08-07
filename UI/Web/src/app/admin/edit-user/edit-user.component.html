@@ -10,7 +10,7 @@
 
             <form [formGroup]="userForm">
                 <div class="row g-0">
-                    <div class="col-md-6 col-sm-12 pe-2">
+                    <div class="col-md-6 col-sm-12 pe-4">
                         <div class="mb-3">
                             <label for="username" class="form-label">{{t('username')}}</label>
                             <input id="username" class="form-control" formControlName="username" type="text"
@@ -45,16 +45,16 @@
                 </div>
 
                 <div class="row g-0">
-                    <div class="col-md-6">
+                    <div class="col-md-6 pe-4">
                         <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6 mt-3">
                         <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member"></app-library-selector>
                     </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row g-0 mt-3">
                     <div class="col-md-12">
                         <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
                     </div>
