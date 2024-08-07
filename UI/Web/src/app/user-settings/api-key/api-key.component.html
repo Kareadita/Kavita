@@ -2,9 +2,9 @@
 
   <app-setting-item [title]="title" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText">
     <ng-template #view>
-        <input #apiKey [type]="InputType" readonly class="form-control" style="width: 80%" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
+        <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
 
-      <div>
+      <div class="d-inline-flex">
         @if (hideData) {
           <button class="btn btn-secondary-text" type="button" (click)="toggleVisibility()">
             {{isDataHidden ? t('show') : t('hide')}}

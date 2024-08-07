@@ -7,7 +7,7 @@
     <form [formGroup]="settingsForm">
       <h4>{{t('global-settings-title')}}</h4>
       <ng-container>
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('page-layout-mode-label')" [subtitle]="t('page-layout-mode-tooltip')">
             <ng-template #view>
               {{settingsForm.get('globalPageLayoutMode')!.value | pageLayoutMode}}
@@ -24,7 +24,7 @@
         </div>
 
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')">
             <ng-template #view>
               {{Locale | titlecase}}
@@ -39,7 +39,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('blur-unread-summaries-label')" [subtitle]="t('blur-unread-summaries-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -52,7 +52,7 @@
         </div>
 
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('prompt-on-download-label')" [subtitle]="t('prompt-on-download-tooltip', {size: '100'})">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -64,7 +64,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('disable-animations-label')" [subtitle]="t('disable-animations-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -76,7 +76,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('collapse-series-relationships-label')" [subtitle]="t('collapse-series-relationships-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -105,7 +105,7 @@
 
       <h4 id="image-reader-heading" class="mt-3">{{t('image-reader-settings-title')}}</h4>
       <ng-container>
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
             <ng-template #view>
               {{settingsForm.get('readingDirection')!.value | readingDirection}}
@@ -121,7 +121,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('scaling-option-label')" [subtitle]="t('scaling-option-tooltip')">
             <ng-template #view>
               {{settingsForm.get('scalingOption')!.value | scalingOption}}
@@ -137,7 +137,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('page-splitting-label')" [subtitle]="t('page-splitting-tooltip')">
             <ng-template #view>
               {{settingsForm.get('pageSplitOption')!.value | pageSplitOption}}
@@ -153,7 +153,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('reading-mode-label')" [subtitle]="t('reading-mode-tooltip')">
             <ng-template #view>
               {{settingsForm.get('readerMode')!.value | readerMode}}
@@ -169,7 +169,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('layout-mode-label')" [subtitle]="t('layout-mode-tooltip')">
             <ng-template #view>
               {{settingsForm.get('layoutMode')!.value | layoutMode}}
@@ -185,7 +185,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('background-color-label')" [subtitle]="t('background-color-tooltip')">
             <ng-template #view>
               <div class="color-box-container">
@@ -202,7 +202,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('auto-close-menu-label')" [subtitle]="t('auto-close-menu-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -214,7 +214,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('show-screen-hints-label')" [subtitle]="t('show-screen-hints-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -226,7 +226,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -238,7 +238,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -255,7 +255,7 @@
 
       <h4 id="book-reader-heading" class="mt-3">{{t('book-reader-settings-title')}}</h4>
       <ng-container>
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -267,7 +267,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch">
@@ -279,7 +279,7 @@
           </app-setting-switch>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
             <ng-template #view>
               {{settingsForm.get('bookReaderReadingDirection')!.value | readingDirection}}
@@ -295,7 +295,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('font-family-label')" [subtitle]="t('font-family-tooltip')">
             <ng-template #view>
               {{settingsForm.get('bookReaderFontFamily')!.value | titlecase}}
@@ -311,7 +311,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('writing-style-label')" [subtitle]="t('writing-style-tooltip')">
             <ng-template #view>
               {{settingsForm.get('bookReaderWritingStyle')!.value | writingStyle}}
@@ -327,7 +327,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('layout-mode-book-label')" [subtitle]="t('layout-mode-book-tooltip')">
             <ng-template #view>
               {{settingsForm.get('bookReaderLayoutMode')!.value | bookPageLayoutMode}}
@@ -343,7 +343,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('color-theme-book-label')" [subtitle]="t('color-theme-book-tooltip')">
             <ng-template #view>
               {{settingsForm.get('bookReaderThemeName')!.value}}
@@ -359,7 +359,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('font-size-book-label')" [subtitle]="t('font-size-book-tooltip')">
             <ng-template #view>
               <span class="range-text">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
@@ -371,7 +371,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('line-height-book-label')" [subtitle]="t('line-height-book-tooltip')">
             <ng-template #view>
               <span class="range-text">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
@@ -383,7 +383,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('margin-book-label')" [subtitle]="t('margin-book-tooltip')">
             <ng-template #view>
               <span class="range-text">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
@@ -400,7 +400,7 @@
 
       <h4 id="pdf-reader-heading" class="mt-3">{{t('pdf-reader-settings-title')}}</h4>
       <ng-container>
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('pdf-spread-mode-label')" [subtitle]="t('pdf-spread-mode-tooltip')">
             <ng-template #view>
               {{settingsForm.get('pdfSpreadMode')!.value | pdfSpreadMode}}
@@ -416,7 +416,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('pdf-theme-label')" [subtitle]="t('pdf-theme-tooltip')">
             <ng-template #view>
               {{settingsForm.get('pdfTheme')!.value | pdfTheme}}
@@ -432,7 +432,7 @@
           </app-setting-item>
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('pdf-scroll-mode-label')" [subtitle]="t('pdf-scroll-mode-tooltip')">
             <ng-template #view>
               {{settingsForm.get('pdfScrollMode')!.value | pdfScrollMode}}

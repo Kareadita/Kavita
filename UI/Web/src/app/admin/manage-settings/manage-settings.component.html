@@ -7,7 +7,7 @@
 
     <h4>{{t('networking-settings-title')}}</h4>
     <ng-container>
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('hostName'); as formControl) {
           <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
             <ng-template #view>
@@ -29,7 +29,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('baseUrl'); as formControl) {
           <app-setting-item [title]="t('base-url-label')" [subtitle]="t('base-url-tooltip')">
             <ng-template #view>
@@ -54,7 +54,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('ipAddresses'); as formControl) {
           <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
             <ng-template #view>
@@ -79,7 +79,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('port'); as formControl) {
           <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')">
             <ng-template #view>
@@ -100,7 +100,7 @@
 
     <h4>{{t('system-settings-title')}}</h4>
     <ng-container>
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('totalBackups'); as formControl) {
           <app-setting-item [title]="t('backup-label')" [subtitle]="t('backup-tooltip')">
             <ng-template #view>
@@ -130,7 +130,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('totalLogs'); as formControl) {
           <app-setting-item [title]="t('log-label')" [subtitle]="t('log-tooltip')">
             <ng-template #view>
@@ -160,7 +160,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('loggingLevel'); as formControl) {
           <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
             <ng-template #view>
@@ -187,7 +187,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('cacheSize'); as formControl) {
           <app-setting-item [title]="t('cache-size-label')" [subtitle]="t('cache-size-tooltip')">
             <ng-template #view>
@@ -213,7 +213,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableOpds'); as formControl) {
           <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
             <ng-template #switch>
@@ -227,7 +227,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableFolderWatching'); as formControl) {
           <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
             <ng-template #switch>
@@ -241,7 +241,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('allowStatCollection'); as formControl) {
           <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
             <ng-template #switch>
@@ -261,7 +261,7 @@
 
     <h4>{{t('customization-settings-title')}}</h4>
     <ng-container>
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('onDeckProgressDays'); as formControl) {
           <app-setting-item [title]="t('on-deck-last-progress-label')" [subtitle]="t('on-deck-last-progress-tooltip')">
             <ng-template #view>
@@ -288,7 +288,7 @@
         }
       </div>
 
-      <div class="row g-0 mt-2">
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('onDeckUpdateDays'); as formControl) {
           <app-setting-item [title]="t('on-deck-last-chapter-add-label')" [subtitle]="t('on-deck-last-progress-tooltip')">
             <ng-template #view>

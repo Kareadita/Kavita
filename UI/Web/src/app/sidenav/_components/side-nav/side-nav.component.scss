@@ -7,6 +7,7 @@
     font-size: 12px;
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
+    left: 10px;
 
     &.closed {
         width: 50px;

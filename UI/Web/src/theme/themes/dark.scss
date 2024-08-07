@@ -33,11 +33,11 @@
     --primary-color-darker-shade: #338A67;
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
-    --bs-body-bg: #3f4245; // #121212
+    --bs-body-bg: #000; // #121212
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
-    --text-muted-color: lightgrey;
+    --text-muted-color: hsla(0,0%,100%,.45);
 
     /* New Color scheme */
     --bulk-background-color: rgba(39,39,39,1);

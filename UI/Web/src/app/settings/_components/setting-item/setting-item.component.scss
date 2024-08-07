@@ -1,11 +1,14 @@
 .text-muted {
-  font-style: italic;
-  font-size: 16px;
+  font-size: 14px;
+
+  a {
+    color: var(--primary-color);
+  }
 }
 
 .view-value {
   font-size: 18px;
-  color: white;
+  color: var(--primary-color);
 }
 
 .reset-label {
