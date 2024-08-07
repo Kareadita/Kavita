@@ -33,10 +33,7 @@
     color: var(--btn-secondary-outline-hover-text-color);
     background-color: var(--btn-secondary-outline-hover-bg-color);
     border-color: var(--btn-secondary-outline-hover-border-color);
-    border-bottom: 2px solid white;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-
+    box-shadow: inset 0px -2px 0px 0px white;
   }
 }
 
