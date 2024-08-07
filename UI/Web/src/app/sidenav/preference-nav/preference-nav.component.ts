@@ -23,6 +23,7 @@ export enum SettingsTabId {
 
   // Kavita+
   KavitaPlus = 'admin-kavitaplus',
+  MALStackImport = 'mal-stack-import',
 
   // Non-Admin
   Account = 'account',
@@ -32,7 +33,8 @@ export enum SettingsTabId {
   Devices = 'devices',
   UserStats = 'user-stats',
   Scrobbling = 'scrobbling',
-  Customize = 'customize'
+  Customize = 'customize',
+  CBLImport = 'cbl-import'
 }
 
 class SideNavItem {
@@ -105,6 +107,12 @@ export class PreferenceNavComponent {
       ]
     },
     {
+      title: 'import-section-title',
+      children: [
+        new SideNavItem(SettingsTabId.CBLImport, []),
+      ]
+    },
+    {
       title: 'kavitaplus-section-title',
       children: [
         new SideNavItem(SettingsTabId.KavitaPlus, [Role.Admin]),
@@ -119,8 +127,14 @@ export class PreferenceNavComponent {
     this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
         this.hasActiveLicense = true;
-        if (this.hasActiveLicense && this.sections[3].children.length === 1) {
-          this.sections[3].children.push(new SideNavItem(SettingsTabId.Scrobbling, []));
+        if (this.hasActiveLicense) {
+          if (this.sections[4].children.length === 1) {
+            this.sections[4].children.push(new SideNavItem(SettingsTabId.Scrobbling, []));
+          }
+          if (this.sections[3].children.length === 1) {
+            this.sections[3].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
+          }
+
         }
 
         this.cdRef.markForCheck();

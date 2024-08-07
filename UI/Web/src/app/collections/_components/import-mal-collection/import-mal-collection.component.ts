@@ -1,35 +1,30 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {ReactiveFormsModule} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {ToastrService} from "ngx-toastr";
+import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
+import {ConfirmService} from "../../../shared/confirm.service";
 import {MalStack} from "../../../_models/collection/mal-stack";
 import {UserCollection} from "../../../_models/collection-tag";
-import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {forkJoin} from "rxjs";
-import {ToastrService} from "ngx-toastr";
-import {DecimalPipe} from "@angular/common";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {ConfirmService} from "../../../shared/confirm.service";
+import {DecimalPipe} from "@angular/common";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 
 @Component({
-  selector: 'app-import-mal-collection-modal',
+  selector: 'app-import-mal-collection',
   standalone: true,
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
-    Select2Module,
+    LoadingComponent,
     DecimalPipe,
-    LoadingComponent
+    DefaultValuePipe
   ],
-  templateUrl: './import-mal-collection-modal.component.html',
-  styleUrl: './import-mal-collection-modal.component.scss',
+  templateUrl: './import-mal-collection.component.html',
+  styleUrl: './import-mal-collection.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImportMalCollectionModalComponent {
-
-  protected readonly ngbModal = inject(NgbActiveModal);
+export class ImportMalCollectionComponent {
   private readonly collectionService = inject(CollectionTagService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
@@ -43,9 +38,8 @@ export class ImportMalCollectionModalComponent {
   constructor() {
     this.scrobblingService.getMalToken().subscribe(async token => {
       if (token.accessToken === '') {
-       await this.confirmService.alert(translate('toasts.mal-token-required'));
-       this.ngbModal.dismiss();
-       return;
+        await this.confirmService.alert(translate('toasts.mal-token-required'));
+        return;
       }
       this.setup();
     });
@@ -78,6 +72,4 @@ export class ImportMalCollectionModalComponent {
       this.toastr.success(translate('toasts.stack-imported'));
     })
   }
-
-
 }

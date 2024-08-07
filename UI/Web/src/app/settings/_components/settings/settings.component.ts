@@ -50,6 +50,9 @@ import {ManageAlertsComponent} from "../../../admin/manage-alerts/manage-alerts.
 import {
   ManageCustomizationComponent
 } from "../../../sidenav/_components/manage-customization/manage-customization.component";
+import {
+  ImportMalCollectionComponent
+} from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
 
 @Component({
   selector: 'app-settings',
@@ -87,7 +90,8 @@ import {
     ManageKavitaplusComponent,
     ManageScrobblingComponent,
     ManageAlertsComponent,
-    ManageCustomizationComponent
+    ManageCustomizationComponent,
+    ImportMalCollectionComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

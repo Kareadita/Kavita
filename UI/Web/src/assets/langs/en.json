@@ -1452,6 +1452,7 @@
         "account-section-title": "Account",
         "server-section-title": "Server",
         "manage-section-title": "Manage",
+        "import-section-title": "Import",
         "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
         "admin-general": "General",
         "admin-users": "Users",
@@ -1471,7 +1472,9 @@
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
-        "customize": "Customize"
+        "customize": "Customize",
+        "cbl-import": "CBL Reading List",
+        "mal-stack-import": "MAL Stack"
     },
 
     "collection-detail": {
@@ -1643,7 +1646,8 @@
         "description": "Import your MAL Interest Stacks and create Collections within Kavita",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
-        "nothing-found": "Nothing found"
+        "nothing-found": "Nothing found",
+        "track": "Track"
     },
 
     "edit-chapter-progress": {

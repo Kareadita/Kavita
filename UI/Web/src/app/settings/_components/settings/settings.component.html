@@ -159,6 +159,14 @@
           </div>
         }
       }
+
+      @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
+        @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {
+          <div class="col-md-12">
+            <app-import-mal-collection></app-import-mal-collection>
+          </div>
+        }
+      }
     }
   </div>
 </ng-container>
