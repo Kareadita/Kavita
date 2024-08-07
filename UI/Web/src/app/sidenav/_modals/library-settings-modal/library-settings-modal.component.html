@@ -1,12 +1,11 @@
 <ng-container *transloco="let t; read: 'library-settings-modal'">
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
-      <ng-container *ngIf="!isAddLibrary; else addLibraryTitle">
+      @if (!isAddLibrary) {
         {{t('edit-title', {name: library!.name | sentenceCase})}}
-      </ng-container>
-      <ng-template #addLibraryTitle>
+      } @else {
         {{t('add-title')}}
-      </ng-template>
+      }
     </h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
@@ -20,15 +19,22 @@
           <ng-template ngbNavContent>
             <div class="mb-3">
               <label for="library-name" class="form-label">{{t('name-label')}}</label>
-              <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="libraryForm.get('name')?.invalid && libraryForm.get('name')?.touched">
-              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="libraryForm.dirty || libraryForm.touched">
-                <div *ngIf="libraryForm.get('name')?.errors?.required">
-                  {{t('required-field')}}
-                </div>
-                <div *ngIf="libraryForm.get('name')?.errors?.duplicateName">
-                  {{t('library-name-unique')}}
-                </div>
-              </div>
+              @if (libraryForm.get('name'); as formControl) {
+                <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
+                @if (libraryForm.dirty || libraryForm.touched) {
+                  <div id="inviteForm-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('required-field')}}</div>
+                    }
+
+                    @if (formControl.errors?.duplicateName) {
+                      <div>{{t('library-name-unique')}}</div>
+                    }
+                  </div>
+                }
+
+              }
+
             </div>
 
             <div class="mb-3">
@@ -46,7 +52,10 @@
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
               </span>
               <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
+                @for (opt of libraryTypes; track opt; let i = $index) {
+                  <option [value]="i">{{opt}}</option>
+                }
+
               </select>
             </div>
             <div *ngIf="!isAddLibrary">
@@ -61,11 +70,14 @@
           <a ngbNavLink>{{t(TabID.Folder)}}</a>
           <ng-template ngbNavContent>
             <p>{{t('folder-description')}}</p>
-            <ul class="list-group" style="width: 100%">
-              <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
-                {{folder}}
-                <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-              </li>
+            <ul class="list-group list-group-flush" style="width: 100%">
+              @for(folder of selectedFolders; track folder) {
+                <li class="list-group-item">
+                  {{folder}}
+                  <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                </li>
+              }
+
             </ul>
             <div class="row mt-2">
               <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
@@ -85,7 +97,10 @@
         <li [ngbNavItem]="TabID.Cover" [disabled]="isAddLibrary && setupStep < 2">
           <a ngbNavLink>{{t(TabID.Cover)}}</a>
           <ng-template ngbNavContent>
-            <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
+            @if (isAddLibrary) {
+              <p class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
+            }
+
             <p>{{t('cover-description-extra')}}</p>
             <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
                                      (selectedBase64Url)="applyCoverImage($event)" [showReset]="library?.coverImage !== null"
@@ -104,10 +119,12 @@
                     {{t('file-type-group-tooltip')}}
                   </p>
                   <div class="hstack gap-2">
-                    <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
-                      <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
-                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
-                    </div>
+                    @for (group of fileTypeGroups; track group) {
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
+                        <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -246,12 +263,11 @@
     <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
     <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
 
-    <ng-container *ngIf="isAddLibrary && setupStep !== 3; else editLibraryButton">
+    @if (isAddLibrary && setupStep !== 3) {
       <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">{{t('next')}}</button>
-    </ng-container>
-    <ng-template #editLibraryButton>
+    } @else {
       <button type="button" class="btn btn-primary" [disabled]="isDisabled()" (click)="save()">{{t('save')}}</button>
-    </ng-template>
+    }
   </div>
 
 </ng-container>

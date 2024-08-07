@@ -21,10 +21,8 @@ import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { TimeAgoPipe } from '../../_pipes/time-ago.pipe';
 import { LibraryTypePipe } from '../../_pipes/library-type.pipe';
 import { RouterLink } from '@angular/router';
-import { NgFor, NgIf } from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {ActionService} from "../../_services/action.service";
 
 @Component({
     selector: 'app-manage-library',
@@ -32,11 +30,10 @@ import {ActionService} from "../../_services/action.service";
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
+  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 
-  private readonly actionService = inject(ActionService);
   private readonly libraryService = inject(LibraryService);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
@@ -51,9 +48,6 @@ export class ManageLibraryComponent implements OnInit {
    * If a deletion is in progress for a library
    */
   deletionInProgress: boolean = false;
-  libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
-
-
 
   ngOnInit(): void {
     this.getLibraries();
