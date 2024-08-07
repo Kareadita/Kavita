@@ -1,5 +1,4 @@
 import {ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
@@ -10,7 +9,7 @@ import {ToastrService} from "ngx-toastr";
 @Component({
   selector: 'app-edit-external-source-item',
   standalone: true,
-  imports: [CommonModule, NgbCollapse, ReactiveFormsModule, TranslocoDirective],
+  imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective],
   templateUrl: './edit-external-source-item.component.html',
   styleUrls: ['./edit-external-source-item.component.scss']
 })

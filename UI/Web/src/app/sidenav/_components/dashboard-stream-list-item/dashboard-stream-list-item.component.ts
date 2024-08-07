@@ -5,7 +5,7 @@ import {
   Input,
   Output
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgClass} from '@angular/common';
 import {ImageComponent} from "../../../shared/image/image.component";
 import {MangaFormatIconPipe} from "../../../_pipes/manga-format-icon.pipe";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
@@ -17,7 +17,7 @@ import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 @Component({
   selector: 'app-dashboard-stream-list-item',
   standalone: true,
-  imports: [CommonModule, ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe],
+  imports: [ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe, NgClass],
   templateUrl: './dashboard-stream-list-item.component.html',
   styleUrls: ['./dashboard-stream-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
