@@ -20,10 +20,27 @@
     background-color : var(--primary-color);
   }
 }
+.list-group-item {
+  background-color: transparent;
+
+  &:hover {
+    background-color: var(--card-bg-color);
+    border-radius: 5px;
+  }
+
+  &:active, &.active {
+    background-color: var(--card-bg-color);
+    border-radius: 5px;
+  }
+}
 
 .list-group-item, .list-group-item.active {
   border-top-width: 0;
   border-bottom-width: 0;
+}
+
+.card {
+  min-height: 100%;
 }
 
 ngx-file-drop ::ng-deep > div {
