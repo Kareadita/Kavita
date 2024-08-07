@@ -24,6 +24,22 @@
   }
 }
 
+.btn-secondary-outline {
+  color: var(--btn-secondary-outline-text-color);
+  background-color: var(--btn-secondary-outline-bg-color);
+  border-color: var(--btn-secondary-outline-border-color);
+
+  &:hover {
+    color: var(--btn-secondary-outline-hover-text-color);
+    background-color: var(--btn-secondary-outline-hover-bg-color);
+    border-color: var(--btn-secondary-outline-hover-border-color);
+    border-bottom: 2px solid white;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+  }
+}
+
 .btn-close {
   filter: var(--btn-icon-filter) !important;
 }
