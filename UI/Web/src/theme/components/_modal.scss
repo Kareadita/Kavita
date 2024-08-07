@@ -1,9 +1,7 @@
-.modal-container, .modal-dialog {
-  background-color: var(--modal-bg-color);
-}
 
 .modal-content {
     color: var(--body-text-color);
+    background-color: var(--modal-bg-color);
 }
 
 .modal-title {
