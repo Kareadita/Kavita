@@ -104,11 +104,18 @@
 
     --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
     --btn-primary-text-color: white;
-    --btn-primary-bg-color: transparent;
+    --btn-primary-bg-color: var(--primary-color);
     --btn-primary-border-color: var(--primary-color);
     --btn-primary-hover-text-color: white;
     --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
     --btn-primary-hover-border-color: var(--primary-color-darker-shade);
+
+    --btn-primary-outline-text-color: white;
+    --btn-primary-outline-bg-color: transparent;
+    --btn-primary-outline-border-color: var(--primary-color);
+    --btn-primary-outline-hover-text-color: white;
+    --btn-primary-outline-hover-bg-color: transparent;
+    --btn-primary-outline-hover-border-color: var(--primary-color-darker-shade);
 
     --btn-secondary-text-color: white;
     --btn-secondary-bg-color: transparent;

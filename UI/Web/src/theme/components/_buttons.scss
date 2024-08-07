@@ -12,6 +12,18 @@
   }
 }
 
+.btn-primary-outline {
+  color: var(--btn-primary-outline-text-color);
+  background-color: var(--btn-primary-outline-bg-color);
+  border-color: var(--btn-primary-outline-border-color);
+
+  &:hover {
+    color: var(--btn-primary-outline-hover-text-color);
+    background-color: var(--btn-primary-outline-hover-bg-color);
+    border-color: var(--btn-primary-outline-hover-border-color);
+  }
+}
+
 .btn-close {
   filter: var(--btn-icon-filter) !important;
 }
