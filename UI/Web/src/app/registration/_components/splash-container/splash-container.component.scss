@@ -1,3 +1,7 @@
+::ng-deep body {
+    scrollbar-gutter: stable;
+}
+
 .login {
     display: flex;
     align-items: center;
