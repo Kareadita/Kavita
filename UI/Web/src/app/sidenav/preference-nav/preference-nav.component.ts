@@ -7,8 +7,9 @@ import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.c
 import {ActivatedRoute, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
-import {map, Observable, shareReplay, take} from "rxjs";
+import {map, Observable, shareReplay} from "rxjs";
 import {ServerService} from "../../_services/server.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 
 export enum SettingsTabId {
 
@@ -74,6 +75,7 @@ export class PreferenceNavComponent {
   protected readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   private readonly serverService = inject(ServerService);
+  private readonly scrobbleService = inject(ScrobblingService);
 
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
@@ -138,7 +140,12 @@ export class PreferenceNavComponent {
         this.hasActiveLicense = true;
         if (this.hasActiveLicense) {
           if (this.sections[4].children.length === 1) {
-            this.sections[4].children.push(new SideNavItem(SettingsTabId.Scrobbling, []));
+            this.sections[4].children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
+              this.scrobbleService.getScrobbleErrors().pipe(
+                takeUntilDestroyed(this.destroyRef),
+                map(d => d.length),
+                shareReplay({bufferSize: 1, refCount: true})))
+              );
           }
           if (this.sections[3].children.length === 1) {
             this.sections[3].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
