@@ -1138,15 +1138,15 @@
         "read": "{{common.read}}"
     },
 
-    "manage-alerts": {
+    "manage-media-issues": {
         "description-part-1": "This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
         "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
         "clear-alerts": "Clear Alerts",
-        "extension-header": "Extension",
         "file-header": "File",
         "comment-header": "Comment",
-        "details-header": "Details"
+        "created-header": "Created",
+        "no-data": "No Data"
     },
 
     "manage-email-settings": {

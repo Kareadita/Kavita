@@ -11,7 +11,7 @@ import {
 import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
+import {ManageMediaIssuesComponent} from "../manage-alerts/manage-media-issues.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -24,7 +24,7 @@ import {BytesPipe} from "../../_pipes/bytes.pipe";
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageAlertsComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
+    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

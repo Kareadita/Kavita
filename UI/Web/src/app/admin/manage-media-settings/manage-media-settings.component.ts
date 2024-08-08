@@ -18,7 +18,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
-import {ManageAlertsComponent} from '../manage-alerts/manage-alerts.component';
+import {ManageMediaIssuesComponent} from '../manage-alerts/manage-media-issues.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {allCoverImageSizes} from '../_models/cover-image-size';
@@ -37,7 +37,7 @@ import {ConfirmService} from "../../shared/confirm.service";
   standalone: true,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem,
     NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody,
-    ManageAlertsComponent, TranslocoDirective, PageLayoutModePipe, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
+    ManageMediaIssuesComponent, TranslocoDirective, PageLayoutModePipe, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

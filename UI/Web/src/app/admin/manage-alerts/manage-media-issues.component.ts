@@ -19,19 +19,20 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { FilterPipe } from '../../_pipes/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
-import { NgIf, NgFor } from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {WikiLink} from "../../_models/wiki";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 
 @Component({
     selector: 'app-manage-alerts',
-    templateUrl: './manage-alerts.component.html',
-    styleUrls: ['./manage-alerts.component.scss'],
+    templateUrl: './manage-media-issues.component.html',
+    styleUrls: ['./manage-media-issues.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader, TranslocoDirective]
+  imports: [ReactiveFormsModule, LoadingComponent, FilterPipe, SortableHeader, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe]
 })
-export class ManageAlertsComponent implements OnInit {
+export class ManageMediaIssuesComponent implements OnInit {
 
   @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;

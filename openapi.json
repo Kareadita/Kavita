@@ -18060,6 +18060,10 @@
             "type": "string",
             "description": "Exception message",
             "nullable": true
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

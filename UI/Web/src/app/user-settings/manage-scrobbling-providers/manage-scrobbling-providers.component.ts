@@ -13,7 +13,7 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-import {ManageAlertsComponent} from "../../admin/manage-alerts/manage-alerts.component";
+import {ManageMediaIssuesComponent} from "../../admin/manage-alerts/manage-media-issues.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
@@ -31,7 +31,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     Select2Module,
     TranslocoDirective,
     NgbCollapse,
-    ManageAlertsComponent,
+    ManageMediaIssuesComponent,
     NgbAccordionBody,
     NgbAccordionButton,
     NgbAccordionCollapse,
