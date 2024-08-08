@@ -59,6 +59,10 @@ export class SideNavItemComponent implements OnInit {
    * If using a lin, then you can pass optional fragment to append to the end
    */
   @Input() fragment: string | undefined = undefined;
+  /**
+   * Optional count to pass in that will show as a red badge on the side, indicating some action needs to be taken
+   */
+  @Input() badgeCount: number | null = -1;
 
 
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';

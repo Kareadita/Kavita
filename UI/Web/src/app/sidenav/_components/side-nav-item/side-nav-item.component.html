@@ -40,7 +40,10 @@
 
     <span class="side-nav-text">
         <div>
-            {{title}}
+          {{title}}
+          @if (badgeCount && badgeCount > 0) {
+            <span class="badge bg-primary rounded-pill ms-2">{{badgeCount}}</span>
+          }
         </div>
     </span>
     <span class="card-actions">

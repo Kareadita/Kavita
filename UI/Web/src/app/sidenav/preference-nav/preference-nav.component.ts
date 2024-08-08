@@ -7,6 +7,8 @@ import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.c
 import {ActivatedRoute, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
+import {map, Observable, shareReplay, take} from "rxjs";
+import {ServerService} from "../../_services/server.service";
 
 export enum SettingsTabId {
 
@@ -40,10 +42,12 @@ export enum SettingsTabId {
 class SideNavItem {
   fragment: SettingsTabId;
   roles: Array<Role> = [];
+  badgeCount$?: Observable<number> | undefined;
 
-  constructor(fragment: SettingsTabId, roles: Array<Role> = []) {
+  constructor(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount$: Observable<number> | undefined = undefined) {
     this.fragment = fragment;
     this.roles = roles;
+    this.badgeCount$ = badgeCount$;
   }
 }
 
@@ -69,6 +73,7 @@ export class PreferenceNavComponent {
   protected readonly accountService = inject(AccountService);
   protected readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly serverService = inject(ServerService);
 
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
@@ -102,7 +107,11 @@ export class PreferenceNavComponent {
       children: [
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
-        new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin]), // NOTE: It might be cool to pass an observable here for getting a count of issues to put in a badge
+        new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin],
+          this.serverService.getMediaErrors().pipe(
+            takeUntilDestroyed(this.destroyRef),
+            map(d => d.length),
+            shareReplay({bufferSize: 1, refCount: true}))),
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
     },
