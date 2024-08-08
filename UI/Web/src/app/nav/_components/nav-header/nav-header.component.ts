@@ -46,6 +46,7 @@ import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
     selector: 'app-nav-header',
@@ -68,6 +69,7 @@ export class NavHeaderComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly navService = inject(NavService);
   protected readonly imageService = inject(ImageService);
+  protected readonly utilityService = inject(UtilityService);
 
   protected readonly FilterField = FilterField;
 
@@ -286,4 +288,5 @@ export class NavHeaderComponent implements OnInit {
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly SettingsTabId = SettingsTabId;
+  protected readonly Breakpoint = Breakpoint;
 }

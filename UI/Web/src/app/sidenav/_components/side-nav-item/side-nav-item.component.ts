@@ -30,6 +30,11 @@ export class SideNavItemComponent implements OnInit {
   protected readonly navService = inject(NavService);
 
   /**
+   * Id for automatic scrolling to.
+   */
+  @Input() id: string | null = null;
+
+  /**
    * Icon to display next to item. ie) 'fa-home'
    */
   @Input() icon: string = '';

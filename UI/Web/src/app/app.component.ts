@@ -1,26 +1,37 @@
-import {ChangeDetectorRef, Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  HostListener,
+  inject,
+  Inject,
+  OnInit
+} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {map, shareReplay, take, tap} from 'rxjs/operators';
-import { AccountService } from './_services/account.service';
-import { LibraryService } from './_services/library.service';
-import { NavService } from './_services/nav.service';
+import {AccountService} from './_services/account.service';
+import {LibraryService} from './_services/library.service';
+import {NavService} from './_services/nav.service';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
-import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass, NgIf} from '@angular/common';
 import {filter, interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
-import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
+import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerService} from "./_services/server.service";
 import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
+import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: true,
-  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent]
+  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
 
@@ -28,14 +39,16 @@ export class AppComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly offcanvas = inject(NgbOffcanvas);
-  public readonly navService = inject(NavService);
-  public readonly cdRef = inject(ChangeDetectorRef);
-  public readonly serverService = inject(ServerService);
-  public readonly accountService = inject(AccountService);
+  protected readonly navService = inject(NavService);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly serverService = inject(ServerService);
+  protected readonly accountService = inject(AccountService);
   private readonly libraryService = inject(LibraryService);
   private readonly ngbModal = inject(NgbModal);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
+
+  protected readonly Breakpoint = Breakpoint;
 
 
   constructor(ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document, modalConfig: NgbModalConfig) {
@@ -73,9 +86,6 @@ export class AppComponent implements OnInit {
 
 
     this.transitionState$ = this.accountService.currentUser$.pipe(
-      tap(user => {
-
-      }),
       map((user) => {
       if (!user) return false;
       return user.preferences.noTransitions;

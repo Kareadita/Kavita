@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
 import {TranslocoDirective} from "@ngneat/transloco";
-import {AsyncPipe, NgClass} from "@angular/common";
+import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
 import {AccountService, Role} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
-import {ActivatedRoute, RouterLink} from "@angular/router";
+import {ActivatedRoute, NavigationEnd, Router, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
-import {map, Observable, shareReplay} from "rxjs";
+import {filter, map, Observable, shareReplay} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 
@@ -67,15 +67,17 @@ class SideNavItem {
   styleUrl: './preference-nav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PreferenceNavComponent {
+export class PreferenceNavComponent implements AfterViewInit {
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly navService = inject(NavService);
   protected readonly accountService = inject(AccountService);
   protected readonly cdRef = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly serverService = inject(ServerService);
   private readonly scrobbleService = inject(ScrobblingService);
+  private readonly document = inject(DOCUMENT);
 
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
@@ -153,9 +155,24 @@ export class PreferenceNavComponent {
 
         }
 
+        this.scrollToActiveItem();
         this.cdRef.markForCheck();
       }
     });
+  }
+
+  ngAfterViewInit() {
+    this.scrollToActiveItem();
+  }
+
+  scrollToActiveItem() {
+    const activeFragment = this.route.snapshot.fragment;
+    if (activeFragment) {
+      const element = this.document.getElementById('nav-item-' + activeFragment);
+      if (element) {
+        element.scrollIntoView({behavior: 'smooth', block: 'center'});
+      }
+    }
   }
 
 }
