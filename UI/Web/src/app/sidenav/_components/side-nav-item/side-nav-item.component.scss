@@ -1,16 +1,16 @@
 ::ng-deep .side-nav.closed {
     .side-nav-item {
         .side-nav-text {
-            opacity: 0;
+            opacity: 0 !important;
         }
 
         .card-actions {
-           opacity: 0;
+           opacity: 0 !important;
         }
 
         &.active {
             color: var(--side-nav-item-active-color);
-            background-color: unset;
+            background-color: unset !important;
         }
     }
 }
