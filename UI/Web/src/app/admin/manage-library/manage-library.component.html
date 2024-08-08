@@ -1,52 +1,47 @@
 <ng-container *transloco="let t; read: 'manage-library'">
+  <div class="position-relative"><button class="btn btn-primary-outline position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span></button></div>
 
-  <div class="position-relative"><button class="btn btn-primary-outline position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span></button>
-  </div>
-  <div class="container-fluid">
-    <ul class="list-group">
-<!--      <li class="list-group-item no-hover">-->
-<!--        <div class="text-center">-->
-<!--          <button class="btn btn-primary-outline" (click)="addLibrary()" [title]="t('add-library')">-->
-<!--            <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span></button>-->
-<!--        </div>-->
-<!--      </li>-->
-
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">{{t('name-header')}}</th>
+      <th scope="col">{{t('type-title')}}</th>
+      <th scope="col">{{t('shared-folders-title')}}</th>
+      <th scope="col">{{t('last-scanned-title')}}</th>
+      <th scope="col">{{t('actions-header')}}</th>
+    </tr>
+    </thead>
+    <tbody>
       @for(library of libraries; track library.name + library.type + library.folders.length + library.lastScanned; let idx = $index) {
-        <li class="list-group-item no-hover">
-          <div class="d-flex flex-row align-items-center align-self-center justify-content-around container-fluid">
-            <h5 class="library-name col-md-4">
-              <span id="library-name--{{idx}}"><a [routerLink]="'/library/' + library.id">{{library.name}}</a></span>&nbsp;
-
-            </h5>
-
-            <div class="container-fluid user-info d-inline-flex justify-content-between align-items-center align-self-center">
-              <div>{{t('type-title')}} {{library.type | libraryType}}</div>
-              <div>{{t('shared-folders-title')}} {{library.folders.length + ' folders'}}</div>
-              <div>
-                {{t('last-scanned-title')}}
-                {{library.lastScanned | timeAgo | defaultDate}}
-              </div>
-              <div class="float-end">
-                <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')"><i class="fa fa-sync-alt" aria-hidden="true"></i></button>
-                <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i></button>
-                <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pen" placement="top" [ngbTooltip]="t('edit-library')" [attr.aria-label]="t('edit-library-by-name', {name: library.name | sentenceCase})"></i></button>
-              </div>
+        <tr>
+          <td id="username--{{idx}}">
+            <a [routerLink]="'/library/' + library.id">{{library.name}}</a>
+          </td>
+          <td>
+            {{library.type | libraryType}}
+          </td>
+          <td>
+            {{t('folder-count', {num: library.folders.length})}}
+          </td>
+          <td>
+            {{library.lastScanned | timeAgo | defaultDate}}
+          </td>
+          <td>
+            <div class="float-end">
+              <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')"><i class="fa fa-sync-alt" aria-hidden="true"></i></button>
+              <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i></button>
+              <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pen" placement="top" [ngbTooltip]="t('edit-library')" [attr.aria-label]="t('edit-library-by-name', {name: library.name | sentenceCase})"></i></button>
             </div>
-          </div>
-        </li>
-      } @empty {
+          </td>
+        </tr>
+      }
+      @empty {
         @if (loading) {
-          <li class="list-group-item">
-            <div class="spinner-border text-primary" role="status">
-              <span class="invisible">{{t('loading')}}</span>
-            </div>
-          </li>
+          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="loading"></app-loading></td></tr>
         } @else {
-          <li class="list-group-item">
-            {{t('no-data')}}
-          </li>
+          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
         }
       }
-    </ul>
-  </div>
+    </tbody>
+  </table>
 </ng-container>

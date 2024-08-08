@@ -1190,14 +1190,17 @@
         "add-library": "Add Library",
         "no-data": "There are no libraries. Try creating one.",
         "loading": "{{common.loading}}",
-        "last-scanned-title": "Last Scanned:",
-        "shared-folders-title": "Shared Folders:",
-        "type-title": "Type:",
+        "last-scanned-title": "Last Scanned",
+        "shared-folders-title": "Shared Folders",
+        "type-title": "Type",
         "scan-library": "Scan Library",
         "delete-library": "Delete Library",
         "delete-library-by-name": "Delete {{name}}",
         "edit-library": "Edit",
-        "edit-library-by-name": "Delete {{name}}"
+        "edit-library-by-name": "Delete {{name}}",
+        "folder-count": "{{num}} folders",
+        "actions-header": "{{manage-users.actions-header}}",
+        "name-header": "{{manage-users.name-header}}"
     },
 
     "manage-media-settings": {

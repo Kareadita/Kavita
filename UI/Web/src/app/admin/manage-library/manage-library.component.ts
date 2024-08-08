@@ -23,6 +23,11 @@ import { LibraryTypePipe } from '../../_pipes/library-type.pipe';
 import { RouterLink } from '@angular/router';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {AsyncPipe, TitleCasePipe} from "@angular/common";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
     selector: 'app-manage-library',
@@ -30,7 +35,7 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
+  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe, AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 
