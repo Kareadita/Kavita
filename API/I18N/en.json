@@ -138,6 +138,8 @@
     "generic-cover-reading-list-save": "Unable to save cover image to Reading List",
     "generic-cover-chapter-save": "Unable to save cover image to Chapter",
     "generic-cover-library-save": "Unable to save cover image to Library",
+    "generic-cover-person-save": "Unable to save cover image to Person",
+    "generic-cover-volume-save": "Unable to save cover image to Volume",
     "access-denied": "You do not have access",
     "reset-chapter-lock": "Unable to resetting cover lock for Chapter",
 
