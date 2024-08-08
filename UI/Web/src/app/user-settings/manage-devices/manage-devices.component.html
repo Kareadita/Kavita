@@ -1,9 +1,18 @@
 <ng-container *transloco="let t; read:'manage-devices'">
 
+  <div class="position-relative">
+    <button class="btn btn-primary-outline position-absolute custom-position" (click)="addDevice()">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      <span class="phone-hidden ms-1">
+        {{t('add')}}
+      </span>
+    </button>
+  </div>
+
   <p>{{t('description')}}</p>
 
   <div class="float-end">
-    <button class="btn btn-primary" (click)="addDevice()">{{t('add')}}</button>
+
   </div>
 
   <table class="table table-striped table-sm scrollable">

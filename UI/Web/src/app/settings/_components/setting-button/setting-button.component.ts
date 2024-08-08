@@ -2,6 +2,9 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
 
+/**
+ * Use with btn-sm
+ */
 @Component({
   selector: 'app-setting-button',
   standalone: true,
@@ -14,7 +17,7 @@ import {TranslocoDirective} from "@ngneat/transloco";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingButtonComponent {
-  
+
   @Input({required:true}) subtitle: string = '';
 
 }
