@@ -4,7 +4,7 @@
 
       <h4>{{t('title')}}</h4>
       <ng-container>
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('taskScan'); as formControl) {
             <app-setting-item [title]="t('library-scan-label')" [subtitle]="t('library-scan-tooltip')">
               <ng-template #view>
@@ -43,7 +43,7 @@
           }
         </div>
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('taskBackup'); as formControl) {
             <app-setting-item [title]="t('library-database-backup-label')" [subtitle]="t('library-database-backup-tooltip')">
               <ng-template #view>
@@ -83,7 +83,7 @@
         </div>
 
 
-        <div class="row g-0 mt-2">
+        <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('taskCleanup'); as formControl) {
             <app-setting-item [title]="t('cleanup-label')" [subtitle]="t('cleanup-tooltip')">
               <ng-template #view>
@@ -134,9 +134,9 @@
       <h4>{{t('adhoc-tasks-title')}}</h4>
 
       @for(task of adhocTasks; track task.name; let idx = $index) {
-        <div class="mb-2">
+        <div class="mt-4 mb-4">
           <app-setting-button [subtitle]="t(task.description)">
-            <button class="btn btn-secondary btn-sm" (click)="runAdhoc(task)">{{t(task.name)}}</button>
+            <button class="btn btn-secondary btn-sm mb-2" (click)="runAdhoc(task)">{{t(task.name)}}</button>
           </app-setting-button>
         </div>
       }
