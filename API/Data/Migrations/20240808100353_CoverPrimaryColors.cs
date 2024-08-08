@@ -38,15 +38,13 @@ namespace API.Data.Migrations
                 name: "PrimaryColor",
                 table: "ReadingList",
                 type: "TEXT",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "SecondaryColor",
                 table: "ReadingList",
                 type: "TEXT",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "PrimaryColor",

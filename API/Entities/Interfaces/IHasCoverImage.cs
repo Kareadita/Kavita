@@ -11,9 +11,9 @@ public interface IHasCoverImage
     /// <summary>
     /// Primary color derived from the Cover Image
     /// </summary>
-    public string PrimaryColor { get; set; }
+    public string? PrimaryColor { get; set; }
     /// <summary>
     /// Secondary color derived from the Cover Image
     /// </summary>
-    public string SecondaryColor { get; set; }
+    public string? SecondaryColor { get; set; }
 }

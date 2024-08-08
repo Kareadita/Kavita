@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
-import {NavigationEnd, NavigationStart, Router, RouterOutlet} from '@angular/router';
+import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {map, shareReplay, take, tap} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';

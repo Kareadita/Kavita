@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -1523,14 +1523,12 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PrimaryColor")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Promoted")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SecondaryColor")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("StartingMonth")

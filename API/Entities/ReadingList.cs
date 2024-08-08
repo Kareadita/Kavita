@@ -24,8 +24,8 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// </summary>
     public bool Promoted { get; set; }
     public string? CoverImage { get; set; }
-    public string PrimaryColor { get; set; }
-    public string SecondaryColor { get; set; }
+    public string? PrimaryColor { get; set; }
+    public string? SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
 
     /// <summary>
