@@ -1400,14 +1400,18 @@
         "resend": "Resend",
         "setup": "Setup",
         "admin": "Admin",
-        "last-active-title": "Last Active:",
-        "roles-title": "Roles:",
+        "last-active-header": "Last Active",
+        "roles-header": "Roles",
+        "name-header": "Name",
         "none": "None",
         "never": "Never",
         "online-now-tooltip": "Online Now",
-        "sharing-title": "Sharing:",
+        "too-many-libraries": "A lot",
+        "sharing-header": "Sharing",
         "no-data": "There are no other users.",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "actions-header": "Actions",
+        "pending-tooltip": "This user has not validated their email"
     },
 
     "edit-collection-tags": {

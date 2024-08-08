@@ -12,13 +12,16 @@ import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, DatePipe, NgClass, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, DatePipe, NgClass, NgIf, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {makeBindingParser} from "@angular/compiler";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 
 @Component({
     selector: 'app-manage-users',
@@ -26,7 +29,7 @@ import {makeBindingParser} from "@angular/compiler";
     styleUrls: ['./manage-users.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe]
+  imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe, LoadingComponent, NgIf, TimeAgoPipe, SentenceCasePipe]
 })
 export class ManageUsersComponent implements OnInit {
 
