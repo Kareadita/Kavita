@@ -132,30 +132,16 @@
       <div class="setting-section-break"></div>
 
       <h4>{{t('adhoc-tasks-title')}}</h4>
-      <table class="table table-striped">
-        <thead>
-        <tr>
-          <th scope="col">{{t('job-title-header')}}</th>
-          <th scope="col">{{t('description-header')}}</th>
-          <th scope="col">{{t('action-header')}}</th>
-        </tr>
-        </thead>
-        <tbody>
-          @for(task of adhocTasks; track task.name; let idx = $index) {
-            <tr>
-              <td id="adhoctask--{{idx}}">
-                {{t(task.name)}}
-              </td>
-              <td>
-                {{t(task.description)}}
-              </td>
-              <td>
-                <button class="btn btn-primary" (click)="runAdhoc(task)" attr.aria-labelledby="adhoctask--{{idx}}">Run</button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+
+      @for(task of adhocTasks; track task.name; let idx = $index) {
+        <div class="mb-2">
+          <app-setting-button [subtitle]="t(task.description)">
+            <button class="btn btn-secondary btn-sm" (click)="runAdhoc(task)">{{t(task.name)}}</button>
+          </app-setting-button>
+        </div>
+      }
+
+      <div class="setting-section-break"></div>
 
       <h4>{{t('recurring-tasks-title')}}</h4>
       <table class="table table-striped">

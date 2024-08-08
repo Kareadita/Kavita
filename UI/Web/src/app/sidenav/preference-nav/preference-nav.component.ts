@@ -73,7 +73,6 @@ export class PreferenceNavComponent implements AfterViewInit {
   protected readonly navService = inject(NavService);
   protected readonly accountService = inject(AccountService);
   protected readonly cdRef = inject(ChangeDetectorRef);
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly serverService = inject(ServerService);
   private readonly scrobbleService = inject(ScrobblingService);
