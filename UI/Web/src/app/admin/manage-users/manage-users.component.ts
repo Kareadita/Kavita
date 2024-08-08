@@ -104,7 +104,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   inviteUser() {
-    const modalRef = this.modalService.open(InviteUserComponent, {size: 'lg'});
+    const modalRef = this.modalService.open(InviteUserComponent, {size: 'xl'});
     modalRef.closed.subscribe((successful: boolean) => {
       this.loadMembers();
     });

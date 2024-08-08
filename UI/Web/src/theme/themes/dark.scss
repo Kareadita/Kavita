@@ -219,11 +219,19 @@
 
     /* List items */
     --list-group-item-text-color: var(--body-text-color);
-    --list-group-item-bg-color: #343a40;
-    --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+    --list-group-item-bg-color: transparent;
     --list-group-hover-text-color: white;
     --list-group-hover-bg-color: rgb(22, 27, 34);
     --list-group-active-border-color: none;
+    --list-group-item-border-top-left-radius: 0px;
+    --list-group-item-border-top-right-radius: 0px;
+    --list-group-item-border-bottom-left-radius: 0px;
+    --list-group-item-border-bottom-right-radius: 0px;
+    --list-group-item-border-width: 1px 0 1px 0;
+    --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+    --list-group-item-border-style: solid;
+    --list-group-item-first-border-width: 0px 0px 1px 0px;
+    --list-group-item-last-border-width: 0px 0px 0px 0px;
 
     /* Popover */
     --popover-body-bg-color: #2C2C2C;
