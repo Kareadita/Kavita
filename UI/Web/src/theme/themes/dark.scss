@@ -68,6 +68,7 @@
     --color-scheme: dark;
     --tile-color: var(--primary-color);
     --nav-offset: 75px;
+    --nav-mobile-offset: 55px;
 
     /* Setting Item */
     // TODO: Robbie let's refactor this so all setting classes inherit from this area
@@ -197,7 +198,7 @@
 
     /* Side Nav */
     --side-nav-bg-color: var(--elevation-layer4-dark);
-    --side-nav-mobile-bg-color: var(--elevation-layer4-dark);
+    --side-nav-mobile-bg-color: var(--colorscape-darker-color);
     --side-nav-openclose-transition: 0.15s ease-in-out;
     --side-nav-box-shadow: var(--elevation-layer0);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);

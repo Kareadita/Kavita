@@ -45,7 +45,7 @@
     position: fixed;
     margin: 0;
     left: 0;
-    top: var(--nav-offset);
+    top: var(--nav-mobile-offset);
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
     overflow: auto;
@@ -63,7 +63,7 @@
     }
 
     &.no-donate {
-      height: calc((var(--vh)*100) - var(--nav-offset));
+      height: calc((var(--vh)*100) - var(--nav-mobile-offset));
     }
   }
 
