@@ -195,7 +195,10 @@
 
           @if (showVolumeTab) {
             <li [ngbNavItem]="TabID.Volumes">
-              <a ngbNavLink>{{UseBookLogic ? t('books-tab') : t('volumes-tab')}}</a>
+              <a ngbNavLink>
+                {{UseBookLogic ? t('books-tab') : t('volumes-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{volumes.length}}</span>
+              </a>
               <ng-template ngbNavContent>
 
                 <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
@@ -222,7 +225,10 @@
 
           @if (showChapterTab) {
             <li [ngbNavItem]="TabID.Chapters">
-              <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
+              <a ngbNavLink>
+                {{utilityService.formatChapterName(libraryType) + 's'}}
+                <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
+              </a>
               <ng-template ngbNavContent>
                 <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
                   @switch (renderMode) {
@@ -247,7 +253,10 @@
 
           @if (hasSpecials) {
             <li [ngbNavItem]="TabID.Specials">
-              <a ngbNavLink>{{t('specials-tab')}}</a>
+              <a ngbNavLink>
+                {{t('specials-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{specials.length}}</span>
+              </a>
               <ng-template ngbNavContent>
                 <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                   @switch (renderMode) {
@@ -271,7 +280,10 @@
 
           @if (hasRelations) {
             <li [ngbNavItem]="TabID.Related">
-              <a ngbNavLink>{{t('related-tab')}}</a>
+              <a ngbNavLink>
+                {{t('related-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{relations.length}}</span>
+              </a>
               <ng-template ngbNavContent>
                 <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
                   <div class="card-container row g-0" #container>
@@ -350,16 +362,6 @@
                 </app-carousel-reel>
               </div>
 
-<!--              <virtual-scroller #scroll [items]="reviews" [parentScroll]="scrollingBlock" [childHeight]="1">-->
-<!--                <div class="card-container row g-0" #container>-->
-<!--                  <div class="card" (click)="openReviewModal()">-->
-<!--                    <i class="fa fa-plus-circle" aria-hidden="true"></i>-->
-<!--                  </div>-->
-<!--                  @for (item of scroll.viewPortItems; let idx = $index; track item.username + item.body) {-->
-<!--                    <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>-->
-<!--                  }-->
-<!--                </div>-->
-<!--              </virtual-scroller>-->
             </ng-template>
           </li>
 
