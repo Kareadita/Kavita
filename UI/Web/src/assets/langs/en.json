@@ -2260,6 +2260,8 @@
         "collections-unpromoted": "Collections un-promoted",
         "reading-lists-promoted": "Reading Lists promoted",
         "reading-lists-unpromoted": "Reading Lists un-promoted",
+        "reading-list-promoted": "Reading List promoted",
+        "reading-list-unpromoted": "Reading List un-promoted",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",

@@ -47,7 +47,7 @@ export class ReadingListsComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = [];
-  trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}`;
+  trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}_${item.promoted}`;
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
@@ -84,6 +84,7 @@ export class ReadingListsComponent implements OnInit {
   getActions(readingList: ReadingList) {
     const d = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
+
     return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
   }
@@ -112,6 +113,22 @@ export class ReadingListsComponent implements OnInit {
         this.actionService.editReadingList(readingList, (updatedList: ReadingList) => {
           // Reload information around list
           readingList = updatedList;
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.Promote:
+        this.actionService.promoteMultipleReadingLists([readingList], true, (res) => {
+          // Reload information around list
+          readingList.promoted = true;
+          this.loadPage();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.UnPromote:
+        this.actionService.promoteMultipleReadingLists([readingList], false, (res) => {
+          // Reload information around list
+          readingList.promoted = false;
+          this.loadPage();
           this.cdRef.markForCheck();
         });
         break;
