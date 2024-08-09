@@ -4,12 +4,8 @@
       <div class="container-fluid">
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
 
-        @if(navService.usePreferenceSideNav$ | async) {
-          <a class="side-nav-toggle" routerLink="/home"><i class="fa-solid fa-house"></i></a>
-        } @else {
-          @if (navService.sideNavVisibility$ | async) {
-            <a class="side-nav-toggle" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
-          }
+        @if (navService.sideNavVisibility$ | async) {
+          <a class="side-nav-toggle" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
         }
 
 
@@ -192,8 +188,8 @@
               </button>
               <div ngbDropdownMenu>
                 <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
-                <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
                 <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
+                <a ngbDropdownItem [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
                 <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
               </div>
             </div>

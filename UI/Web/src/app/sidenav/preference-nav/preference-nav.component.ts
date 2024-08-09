@@ -91,7 +91,7 @@ export class PreferenceNavComponent implements AfterViewInit {
     {
       title: 'account-section-title',
       children: [
-        new SideNavItem(SettingsTabId.Account, [Role.Admin]),
+        new SideNavItem(SettingsTabId.Account, []),
         new SideNavItem(SettingsTabId.Preferences),
         new SideNavItem(SettingsTabId.Customize),
         new SideNavItem(SettingsTabId.Clients),
@@ -153,6 +153,9 @@ export class PreferenceNavComponent implements AfterViewInit {
   hasActiveLicense = false;
 
   constructor() {
+
+    this.navService.collapseSideNav(false);
+
     this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
         this.hasActiveLicense = true;
