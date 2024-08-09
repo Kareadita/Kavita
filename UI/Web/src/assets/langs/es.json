@@ -227,7 +227,6 @@
         "pref-description": "Estos son ajustes globales vinculados a tu cuenta.",
         "account-tab": "Cuenta",
         "preferences-tab": "Preferencias",
-        "3rd-party-clients-tab": "Clientes de terceros",
         "theme-tab": "Tema",
         "devices-tab": "Dispositivos",
         "stats-tab": "Estadísticas",
@@ -354,15 +353,6 @@
         "delete": "{{common.delete}}",
         "email-label": "Correo electrónico: ",
         "email-setup-alert": "¿Quieres enviar archivos a tus dispositivos? ¡Haz que tu administrador configure primero el correo electrónico!"
-    },
-    "edit-device": {
-        "device-name-label": "Nombre del dispositivo",
-        "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
-        "device-platform-label": "Plataforma del dispositivo",
-        "save": "{{common.save}}",
-        "email-tooltip": "Este correo electrónico se utilizará para aceptar el archivo a través de Enviar a"
     },
     "restriction-selector": {
         "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
@@ -1244,7 +1234,6 @@
         "settings": "Ajustes",
         "help": "{{common.help}}",
         "announcements": "Anuncios",
-        "promoted": "{{common.promoted}}",
         "all-filters": "Filtros inteligentes"
     },
     "add-to-list-modal": {
@@ -1479,21 +1468,10 @@
     "external-series-card": {
         "open-external": "Abrir externamente"
     },
-    "manage-alerts": {
-        "description-part-1": "Esta tabla contiene los problemas encontrados durante el escaneo o la lectura de tus medios. Esta lista no está gestionada. Puedes borrarla en cualquier momento y utilizar Escaneado (forzado) de la biblioteca para realizar el análisis. Puedes encontrar una lista de algunos errores comunes y su significado en ",
-        "file-header": "Fichero",
-        "comment-header": "Comentario",
-        "description-part-2": "wiki.",
-        "details-header": "Detalles",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Limpiar alertas",
-        "extension-header": "Extensión"
-    },
     "manage-email-settings": {
         "send-to-warning": "Si quieres que Enviar a dispositivo funcione debes configurar tus opciones de correo electrónico",
         "email-url-label": "URL del servicio de correo",
         "description": "Para utilizar algunas funciones de Kavita como Olvidé mi contraseña y Enviar al dispositivo, debe configurarse un proveedor de correo electrónico. Otras funciones como el cambio de contraseña son menos seguras sin la configuración del correo electrónico.",
-        "title": "Servicios de correo electrónico (SMTP)",
         "reset": "{{common.reset}}",
         "test": "Test",
         "email-url-tooltip": "Utiliza la dirección URL completa del servicio de correo electrónico. No incluyas la barra oblicua final.",
@@ -1641,24 +1619,6 @@
         "last-90-days": "{{time-periods.last-90-days}}",
         "all-users": "Todos los usuarios"
     },
-    "admin-dashboard": {
-        "kavita+-desc-part-3": "hoy!",
-        "general-tab": "General",
-        "users-tab": "Usuarios",
-        "libraries-tab": "Bibliotecas",
-        "logs-tab": "Registros",
-        "email-tab": "Correo electrónico",
-        "tasks-tab": "Tareas",
-        "statistics-tab": "Estadísticas",
-        "system-tab": "Sistema",
-        "kavita+-tab": "Kavita+",
-        "title": "Panel de administrador",
-        "media-tab": "Multimedia",
-        "kavita+-desc-part-1": "Kavita+ es un servicio de suscripción premium que desbloquea características para todos los usuarios en esta instancia de Kavita. Compra una suscripción para desblquear. ",
-        "kavita+-desc-part-2": "Ventajas del premium",
-        "kavita+-releases": "Ver las publicaciones",
-        "kavita+-requirement": "Kavita+ está diseñado para funcionar sólo con la última versión - 2 versiones. Cualquier cosa fuera de eso está sujeto a no funcionar."
-    },
     "file-breakdown-stats": {
         "visualisation-label": "Visualización",
         "format-title": "Formato",
@@ -1801,7 +1761,6 @@
         "setup": "Configuración",
         "none": "Ninguno",
         "never": "Nunca",
-        "sharing-title": "Compartiendo:",
         "no-data": "No hay otros usuarios.",
         "title": "Usuarios activos",
         "resend-invite-tooltip": "Reenviar invitación",
@@ -1812,11 +1771,9 @@
         "invite": "Invitación",
         "you-alt": "(Tú)",
         "loading": "{{common.loading}}",
-        "roles-title": "Roles:",
         "setup-user-tooltip": "Configurar usuario",
         "setup-user-alt": "Configurar usuario {{user}}",
         "resend": "Reenviar",
-        "last-active-title": "Activo por última vez:",
         "username-pattern": "El nombre de usuario sólo puede contener los siguientes caracteres y espacios en blanco: {{characters}}",
         "admin": "Admr."
     },

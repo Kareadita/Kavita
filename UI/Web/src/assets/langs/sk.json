@@ -46,7 +46,6 @@
         "success-toast": "Používateľské preferencie aktualizované",
         "page-layout-mode-tooltip": "Zobraziť položky ako karty alebo zoznam na stránke Detaily série.",
         "preferences-tab": "Preferencie",
-        "3rd-party-clients-tab": "Klienti od tretej strany",
         "stats-tab": "Štatistiky",
         "devices-tab": "Zariadenia",
         "locale-label": "Lokál",
@@ -420,7 +419,6 @@
         "you-alt": "(Ty)",
         "pending-title": "Čakajúce",
         "username-pattern": "Používateľské meno môže obsahovať iba nasledujúce znaky a medzery: {{characters}}",
-        "roles-title": "Roly:",
         "never": "Nikdy",
         "title": "Aktívni používatelia",
         "setup": "Nastaviť",
@@ -432,7 +430,6 @@
         "change-password-alt": "Zmeniť heslo {{user}}",
         "resend": "Znovu odoslať",
         "admin": "Administrátor",
-        "last-active-title": "Posledná aktivita:",
         "none": "Žiadne",
         "edit-user-tooltip": "Upraviť",
         "delete-user-alt": "Zmazať používateľa {{user}}",
@@ -440,8 +437,7 @@
         "setup-user-tooltip": "Nastaviť Používateľa",
         "edit-user-alt": "Upraviť používateľa {{user}}",
         "no-data": "Neexistujú žiadni iní používatelia.",
-        "online-now-tooltip": "Práve online",
-        "sharing-title": "Zdieľať:"
+        "online-now-tooltip": "Práve online"
     },
     "edit-collection-tags": {
         "general-tab": "Všeobecné",
@@ -453,24 +449,6 @@
         "promote-tooltip": "Povýšenie znamená, že tag možno vidieť na celom serveri, nielen pre správcov. Všetky série, ktoré majú tento tag, budú mať stále obmedzenia prístupu používateľov.",
         "summary-label": "Zhrnutie",
         "title": "Upraviť zbierku {{collectionName}}"
-    },
-    "admin-dashboard": {
-        "users-tab": "Používatelia",
-        "system-tab": "Systém",
-        "kavita+-desc-part-3": "dnes!",
-        "kavita+-tab": "Kavita+",
-        "title": "Administrátorský Dashboard",
-        "email-tab": "E-mail",
-        "statistics-tab": "Štatistiky",
-        "kavita+-requirement": "Kavita+ je navrhnutá tak, aby fungovala iba s najnovším vydaním – 2 verziami. Čokoľvek mimo toho môže byť nefunkčné.",
-        "kavita+-releases": "Pozrite si vydania",
-        "general-tab": "Všeobecné",
-        "logs-tab": "Logy",
-        "kavita+-desc-part-2": "prémiové benefity",
-        "libraries-tab": "Knižnice",
-        "media-tab": "Médiá",
-        "tasks-tab": "Úlohy",
-        "kavita+-desc-part-1": "Kavita+ je prémiová predplatená služba, ktorá odomyká funkcie pre všetkých používateľov v tejto inštancii Kavita. Ak ju chcete odomknúť, kúpte si predplatné "
     },
     "events-widget": {
         "dismiss-all": "Odmietnuť všetko",
@@ -730,10 +708,6 @@
     },
     "badge-expander": {
         "more-items": "a {{count}} ďalších"
-    },
-    "edit-device": {
-        "device-platform-label": "Platforma Zariadenia",
-        "device-name-label": "Názov Zariadenia"
     },
     "change-password": {
         "current-password-label": "Súčasné Heslo",
@@ -1235,14 +1209,6 @@
         "special": "Špeciál",
         "issue-num": "Chyba #"
     },
-    "manage-alerts": {
-        "file-header": "Súbor",
-        "description-part-2": "wiki.",
-        "clear-alerts": "Vymazať upozornenia",
-        "comment-header": "Komentár",
-        "details-header": "Detaily",
-        "extension-header": "Rozšírenie"
-    },
     "manage-email-settings": {
         "email-settings-title": "Nastavenia e-mailu",
         "size-limit-label": "Limit veľkosti",
@@ -1264,8 +1230,7 @@
         "sender-displayname-tooltip": "Meno, z ktorého príjemca uvidí, keď dostane e-mail",
         "username-tooltip": "Používateľské meno používané na overenie voči host-u",
         "description": "Aby ste mohli používať niektoré funkcie Kavity, ako je Zabudnuté heslo a Odoslať do zariadenia, musí byť nastavený poskytovateľ e-mailu. Ostatné funkcie, ako je zmena hesla, sú bez nastavenia e-mailu menej bezpečné.",
-        "send-to-warning": "Ak chcete, aby funkcia Odoslať do zariadenia fungovala, musíte nastaviť nastavenia e-mailu",
-        "title": "E-mailové služby (SMTP)"
+        "send-to-warning": "Ak chcete, aby funkcia Odoslať do zariadenia fungovala, musíte nastaviť nastavenia e-mailu"
     },
     "manage-library": {
         "delete-library": "Zmazať knižnicu",
@@ -1352,7 +1317,6 @@
     },
     "nav-header": {
         "skip-alt": "Preskočiť na hlavný obsah",
-        "promoted": "(povýšené)",
         "announcements": "Oznámenia",
         "settings": "Nastavenia",
         "no-data": "Neboli nájdené žiadne výsledky",
