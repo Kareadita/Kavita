@@ -40,7 +40,6 @@ import {ServerStatsComponent} from "../../../statistics/_components/server-stats
 import {SettingFragmentPipe} from "../../../_pipes/setting-fragment.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
-import {ToastrService} from "ngx-toastr";
 import {
     KavitaplusMetadataBreakdownStatsComponent
 } from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";

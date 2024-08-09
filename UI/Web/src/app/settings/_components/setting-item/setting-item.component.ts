@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, EventEmitter,
+  ContentChild, ElementRef, EventEmitter, HostListener,
   inject,
   Input, Output,
   TemplateRef
@@ -10,6 +10,7 @@ import {
 import {TranslocoDirective} from "@ngneat/transloco";
 import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {filter, fromEvent, tap} from "rxjs";
 
 @Component({
   selector: 'app-setting-item',
@@ -53,6 +54,27 @@ export class SettingItemComponent {
    * Extra button controls to show instead of Edit
    */
   @ContentChild('titleActions') titleActionsRef!: TemplateRef<any>;
+
+  @HostListener('click', ['$event'])
+  onClickInside(event: MouseEvent) {
+    event.stopPropagation(); // Prevent the click from bubbling up
+  }
+
+  constructor(private readonly elementRef: ElementRef) {
+    if (!this.toggleOnViewClick) return;
+
+    // fromEvent(window, 'click')
+    //   .pipe(
+    //     filter((_: MouseEvent) => this.toggleOnViewClick),
+    //     filter((event: MouseEvent) => !elementRef.nativeElement.contains(event.target)),
+    //     tap((_: MouseEvent) => {
+    //       this.isEditMode = false;
+    //       this.editMode.emit(this.isEditMode);
+    //       this.cdRef.markForCheck();
+    //     })
+    //   )
+    //   .subscribe();
+  }
 
   toggleEditMode() {
 
