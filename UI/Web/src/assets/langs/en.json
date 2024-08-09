@@ -370,8 +370,11 @@
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "Average Reading / Week",
         "last-active-label": "Last Active",
-        "chapters": "{{value}} chapters"
-
+        "chapters": "{{value}} chapters",
+        "pages-read-by-year-title": "Pages Read By Year",
+        "words-read-by-year-title": "Words Read By Year",
+        "words-count": "{{num}} words",
+        "pages-count": "{{num}} pages"
     },
 
     "user-stats": {
@@ -2306,7 +2309,9 @@
         "mark-visible": "Mark as Visible",
         "mark-invisible": "Mark as Invisible",
         "unpromote": "Un-Promote",
-        "promote": "Promote"
+        "promote": "Promote",
+        "new-collection": "New Collection",
+        "multiple-selections": "Multiple Selections"
     },
 
     "preferences": {

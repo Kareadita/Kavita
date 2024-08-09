@@ -35,6 +35,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   private readonly collectionService = inject(CollectionTagService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly MaxItems = 8;
 
   @Input({required: true}) title!: string;
   /**

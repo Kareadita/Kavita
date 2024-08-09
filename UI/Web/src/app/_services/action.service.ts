@@ -469,7 +469,7 @@ export class ActionService implements OnDestroy {
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
       this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
-      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.title = translate('action.multiple-selections');
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
 
 
@@ -509,7 +509,7 @@ export class ActionService implements OnDestroy {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.title = translate('action.multiple-selections');
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
 
 
@@ -537,7 +537,7 @@ export class ActionService implements OnDestroy {
     if (this.collectionModalRef != null) { return; }
       this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.collectionModalRef.componentInstance.title = 'New Collection';
+      this.collectionModalRef.componentInstance.title = translate('action.new-collection');
 
       this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;
