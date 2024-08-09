@@ -79,5 +79,11 @@
     "want-to-read": {
         "title": "Olvasandó",
         "series-count": "{{common.series-count}}"
+    },
+    "user-preferences": {
+        "preferences-tab": "Preferenciák",
+        "theme-tab": "Téma",
+        "devices-tab": "Eszközök",
+        "background-color-label": "Háttérszín"
     }
 }

@@ -44,7 +44,8 @@
         "rating": "Ocena {{r}}",
         "description": "Tutaj znajdziesz wszystkie wydarzenia scrobble powiązane z Twoim kontem. Aby wydarzenia mogły istnieć, musisz mieć skonfigurowanego aktywnego dostawcę scrobble. Wszystkie zdarzenia, które zostały przetworzone, zostaną usunięte po miesiącu. Jeśli istnieją nieprzetworzone zdarzenia, prawdopodobnie nie mogą one tworzyć dopasowań u dostawcy. Skontaktuj się z administratorem, aby je poprawić.",
         "volume-num": "Tom {{num}}",
-        "chapter-num": "Rozdział {{num}}"
+        "chapter-num": "Rozdział {{num}}",
+        "special": "{{entity-title.special}}"
     },
     "review-series-modal": {
         "close": "{{common.close}}",
@@ -135,7 +136,6 @@
         "immersive-mode-tooltip": "Spowoduje to ukrycie menu za kliknięciem dokumentu czytnika i włączenie funkcji stuknij aby wyświetlić stronę",
         "pdf-reader-settings-title": "Czytnik PDF",
         "pdf-scroll-mode-tooltip": "Sposób przewijania stron. Pionowo/poziomo i dotknij, aby przejść do strony (bez przewijania)",
-        "3rd-party-clients-tab": "Aplikacje zewnętrzne",
         "pdf-scroll-mode-label": "Tryb przewijania",
         "pdf-spread-mode-tooltip": "Jak powinny być ułożone strony. Pojedyncze lub podwójne (nieparzyste/parzyste)",
         "pdf-theme-label": "Motyw",
@@ -148,7 +148,18 @@
         "set-default": "Ustaw domyślne",
         "applied": "Zastosowany",
         "updated-toastr": "Domyślna strona została zaktualizowana do {{name}}",
-        "scan-queued": "Skanowanie motywu strony zostało ustawione w kolejce"
+        "scan-queued": "Skanowanie motywu strony zostało ustawione w kolejce",
+        "delete": "{{common.delete}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "description": "Kavita jest dostępna w wielu kolorach, znajdź schemat kolorów, który spełnia Twoje potrzeby lub stwórz własny i udostępnij go. Motywy mogą być stosowane do Twojego konta lub do wszystkich kont.",
+        "default-theme": "Domyślny motyw",
+        "download": "{{changelog.download}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "plik css",
+        "preview-default": "Najpierw wybierz motyw",
+        "active-theme": "Aktywny",
+        "preview-default-admin": "Najpierw wybierz motyw alby prześlij go ręcznie",
+        "preview-title": "Podgląd"
     },
     "manage-devices": {
         "add": "{{common.add}}",
@@ -161,15 +172,6 @@
         "email-setup-alert": "Chcesz wysyłać pliki na swoje urządzenia? Najpierw poproś administratora o skonfigurowanie ustawień poczty e-mail!",
         "email-label": "Email: ",
         "devices-title": "Urządzenia"
-    },
-    "edit-device": {
-        "email-label": "{{common.email}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
-        "device-name-label": "Nazwa urządzenia",
-        "email-tooltip": "Ten adres e-mail zostanie użyty do zaakceptowania pliku za pośrednictwem funkcji Wyślij do",
-        "device-platform-label": "Platforma urządzenia"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -327,7 +329,8 @@
         "promoted": "{{common.promoted}}",
         "cover-artists-title": "Twórcy okładek",
         "colorists-title": "Koloryści",
-        "see-less": "Zobacz mniej"
+        "see-less": "Zobacz mniej",
+        "rating-title": "Oceny"
     },
     "side-nav": {
         "donate-tooltip": "Możesz to usunąć subskrybując Kavita+",
@@ -386,7 +389,9 @@
         "file-type-group-tooltip": "Jakie typy plików Kavita będzie szukać podczas skanowania. Na przykład, Archiwa zawiera wszystkie cb*, zip, rar, itd. typy plików.",
         "exclude-patterns-tooltip": "Skonfiguruj zestaw wzorców (składnia Glob) które Kavita będzie dopasowywać podczas skanowania katalogów i wykluczać z wyników skanera.",
         "help": "{{common.help}}",
-        "manage-reading-list-label": "Zarządzanie listami czytelniczymi"
+        "manage-reading-list-label": "Zarządzanie listami czytelniczymi",
+        "kavitaplus-eligible-label": "Kwalifikuje się do Kavity+",
+        "include-in-dashboard-label": "Dodaj do Panelu Nawigacyjnego"
     },
     "api-key": {
         "key-reset": "Reset klucza API",
@@ -430,7 +435,8 @@
         "sequel": "Sequel",
         "adaptation": "Adaptacja",
         "parent": "Rodzic",
-        "spin-off": "Spin Off"
+        "spin-off": "Spin Off",
+        "annual": "Coroczny"
     },
     "person-role-pipe": {
         "character": "Postać",
@@ -655,7 +661,8 @@
         "include-unknowns-tooltip": "Jeśli zaznaczone, to nieznane będą dozwolone z ograniczeniem wiekowym. Może to prowadzić do wycieku nieoznakowanych multimediów do użytkowników z ograniczeniami wiekowymi."
     },
     "site-theme-provider-pipe": {
-        "system": "System"
+        "system": "System",
+        "custom": "{{device-platform-pipe.custom}}"
     },
     "time-periods": {
         "this-week": "Ten tydzień",
@@ -737,7 +744,8 @@
     },
     "all-filters": {
         "title": "Wszystkie inteligentne filtry",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "user-stats": {
         "library-read-progress-title": "Postęp w przeczytaniu biblioteki",
@@ -872,7 +880,8 @@
         "cache-size-validation": "Musisz mieć co najmniej 50 MB.",
         "field-required": "{{validation.field-required}}",
         "max-logs-validation": "Nie można mieć więcej niż {{num}} logów",
-        "folder-watching-tooltip": "Umożliwia Kavita monitorowanie folderów biblioteki w celu wykrywania zmian i uruchamiania skanowania tych zmian. Pozwala to na aktualizację zawartości bez ręcznego uruchamiania skanowania lub oczekiwania na nocne skanowanie. Zawsze będzie czekać 10 minut przed uruchomieniem skanowania."
+        "folder-watching-tooltip": "Umożliwia Kavita monitorowanie folderów biblioteki w celu wykrywania zmian i uruchamiania skanowania tych zmian. Pozwala to na aktualizację zawartości bez ręcznego uruchamiania skanowania lub oczekiwania na nocne skanowanie. Zawsze będzie czekać 10 minut przed uruchomieniem skanowania.",
+        "on-deck-last-progress-tooltip": "Liczba dni od ostatniego postępu zanim coś zostanie wyrzucone z półki."
     },
     "manage-system": {
         "donations-title": "Darowizny:",
@@ -886,7 +895,9 @@
         "installId-title": "ID instalacji",
         "more-info-title": "Więcej informacji",
         "source-title": "Źródło:",
-        "updates-title": "Historia aktualizacji"
+        "updates-title": "Historia aktualizacji",
+        "first-install-version-title": "Pierwsza zainstalowana wersja",
+        "first-install-date-title": "Data pierwszej instalacji"
     },
     "manage-tasks-settings": {
         "analyze-files-task-desc": "Uruchamia długotrwałe zadanie, które analizuje pliki w celu wygenerowania rozszerzenia i rozmiaru. Powinno być uruchomione tylko raz dla wersji v0.7. Nie jest wymagane w przypadku instalacji po wersji v0.7.",
@@ -949,10 +960,7 @@
         "edit-user-alt": "Edytuj użytkownika {{user}}",
         "resend-invite-tooltip": "Wyślij zaproszenie ponownie",
         "setup": "Konfiguracja",
-        "last-active-title": "Ostatnia aktywność:",
-        "sharing-title": "Współdzielenie:",
         "resend": "Wyślij ponownie",
-        "roles-title": "Role:",
         "no-data": "Nie ma innych użytkowników.",
         "loading": "{{common.loading}}",
         "delete-user-tooltip": "Usuń użytkownika",
@@ -980,12 +988,16 @@
         "name-label": "Nazwa",
         "name-validation": "Nazwa musi być unikatowa",
         "deselect-all": "{{common.deselect-all}}",
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "source-url-title": "URL źródła:",
+        "info-tab": "{{edit-series-modal.info-tab}}",
+        "missing-series-title": "Brakujące Serie:",
+        "last-sync-title": "Ostatnia synchronizacja:",
+        "total-series-title": "Liczba Serii:"
     },
     "nav-header": {
         "search-series-alt": "Szukaj serii",
         "server-settings": "Ustawienia serwera",
-        "promoted": "{{common.promoted}}",
         "settings": "Ustawienia",
         "help": "{{common.help}}",
         "search-alt": "Szukaj…",
@@ -1150,7 +1162,6 @@
         "sender-address-tooltip": "Jest to adres e-mail, który odbiorca zobaczy po otrzymaniu wiadomości e-mail. Zazwyczaj jest to adres e-mail powiązany z kontem.",
         "username-label": "Nazwa użytkownika",
         "username-tooltip": "Nazwa użytkownika używana do uwierzytelniania na hoście",
-        "title": "Usługi poczty elektronicznej (SMTP)",
         "description": "Aby korzystać z niektórych funkcji Kavita, takich jak Zapomniałem hasła i Wyślij do urządzenia, należy skonfigurować dostawcę poczty e-mail. Inne funkcje, takie jak zmiana hasła, są mniej bezpieczne bez konfiguracji poczty e-mail.",
         "email-settings-title": "Ustawienia e-mail",
         "reset": "{{common.reset}}",
@@ -1167,7 +1178,8 @@
         "size-limit-label": "Limit rozmiaru",
         "size-limit-tooltip": "Ile bajtów może obsłużyć serwer poczty e-mail dla załączników",
         "gmail-label": "Gmail",
-        "outlook-label": "Outlook"
+        "outlook-label": "Outlook",
+        "test-warning": "Musisz zapisać przed użyciem przycisku Test."
     },
     "manage-media-settings": {
         "reset-to-default": "{{common.reset-to-default}}",
@@ -1215,7 +1227,8 @@
         "dismiss-all": "Odrzuć wszystko",
         "downloading-item": "Pobieram {{item}}",
         "more-info": "Kliknij, aby uzyskać więcej informacji",
-        "users-online-count": "{{num}} Użytkowników online"
+        "users-online-count": "{{num}} Użytkowników online",
+        "download-in-queue": "{{num}} pobrań w kolejce"
     },
     "add-to-list-modal": {
         "promoted-alt": "{{common.promoted}}",
@@ -1306,7 +1319,8 @@
         "collections": "Kolekcje",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "reading-lists": "Listy czytelnicze"
+        "reading-lists": "Listy czytelnicze",
+        "include-extras": "Uwzględnij rozdziały i pliki"
     },
     "external-series-card": {
         "open-external": "Otwórz zewnętrzny"
@@ -1316,16 +1330,6 @@
         "continuous-reading-prev-chapter": "Poprzedni rozdział",
         "continuous-reading-next-chapter-alt": "Przewiń w górę, aby przejść do następnego rozdziału",
         "continuous-reading-next-chapter": "Następny rozdział"
-    },
-    "manage-alerts": {
-        "details-header": "Detale",
-        "description-part-2": "wiki.",
-        "description-part-1": "Ta tabela zawiera błędy wykryte podczas skanowania lub odczytu nośnika. Ta lista nie jest zarządzana. Można ją wyczyścić w dowolnym momencie i użyć funkcji \"wymuś skan\" w celu przeprowadzenia analizy. Listę niektórych typowych błędów i ich znaczenie można znaleźć na ",
-        "clear-alerts": "Wyczyść alerty",
-        "filter-label": "{{common.filter}}",
-        "file-header": "Plik",
-        "extension-header": "Rozszerzenie",
-        "comment-header": "Komentarz"
     },
     "edit-series-relation": {
         "remove": "{{common.remove}}",
@@ -1352,29 +1356,12 @@
         "summary-label": "Podsumowanie",
         "title": "Edytuj listę czytelniczą: {{name}}"
     },
-    "admin-dashboard": {
-        "kavita+-desc-part-1": "Kavita+ to usługa subskrypcji premium, która odblokowuje funkcje dla wszystkich użytkowników tej instancji Kavita. Kup subskrypcję, aby odblokować ",
-        "statistics-tab": "Statystyki",
-        "tasks-tab": "Zadania",
-        "system-tab": "System",
-        "kavita+-tab": "Kavita+",
-        "libraries-tab": "Biblioteki",
-        "email-tab": "Email",
-        "kavita+-desc-part-2": "korzyści premium",
-        "kavita+-desc-part-3": "dzisiaj!",
-        "title": "Pulpit administratora",
-        "general-tab": "Ogólne",
-        "users-tab": "Użytkownicy",
-        "media-tab": "Media",
-        "logs-tab": "Logi",
-        "kavita+-requirement": "Kavita+ została zaprojektowana do pracy tylko z 2 ostatnimi wersjami. Wszystko poza tym może nie działać.",
-        "kavita+-releases": "Zobacz wydania"
-    },
     "collection-detail": {
         "no-data-filtered": "Żadne elementy nie pasują do bieżącego filtra.",
         "title-alt": "Kavita - Kolekcja {{collectionName}}",
         "no-data": "Brak elementów. Spróbuj dodać serię.",
-        "series-header": "Serie"
+        "series-header": "Serie",
+        "last-sync": "Ostatnia synchronizacja: {{date}}"
     },
     "all-collections": {
         "create-one-part-2": "jedną",
@@ -1428,7 +1415,8 @@
         "item-count": "{{common.item-count}}",
         "create-one-part-2": "jedną",
         "create-one-part-1": "Spróbuj stworzyć",
-        "no-data": "Nie ma list czytelniczych."
+        "no-data": "Nie ma list czytelniczych.",
+        "title": "Listy czytelnicze"
     },
     "common": {
         "reset-to-default": "Przywróć ustawienia domyślne",
@@ -1792,7 +1780,7 @@
     "customize-dashboard-streams": {
         "clear": "{{common.clear}}",
         "add": "{{common.add}}",
-        "no-data": "Wszystkie inteligentne filtry zostały dodane do pulpitu nawigacyjnego, lub żadne nie zostały jeszcze nie utworzone.",
+        "no-data": "Wszystkie inteligentne filtry zostały dodane do panelu nawigacyjnego, lub żadne nie zostały jeszcze nie utworzone.",
         "save": "{{common.save}}",
         "filter": "{{common.filter}}"
     },
@@ -1927,7 +1915,8 @@
         "date-created-header": "Utworzono (UTC)",
         "user-header": "Użytkownik",
         "date-updated-header": "Ostatnia aktualizacja (UTC)",
-        "action-header": "{{common.edit}}"
+        "action-header": "{{common.edit}}",
+        "page-read-header": "Przeczytane strony"
     },
     "pdf-layout-mode-pipe": {
         "single": "Pojedyncza strona",
@@ -1940,6 +1929,10 @@
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "nothing-found": "Nic nie znaleziono"
+    },
+    "browse-themes-modal": {
+        "title": "Przeglądaj Motywy"
     }
 }

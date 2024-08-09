@@ -86,7 +86,6 @@
         "pref-description": "Dit zijn algemene instellingen die aan he account zijn gekoppeld.",
         "account-tab": "Account",
         "preferences-tab": "Voorkeuren",
-        "3rd-party-clients-tab": "Clients van derden",
         "theme-tab": "Thema",
         "devices-tab": "Apparaten",
         "stats-tab": "Statistieken",
@@ -185,15 +184,6 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
-    },
-    "edit-device": {
-        "device-name-label": "Apparaat naam",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Dit e-mailadres wordt gebruikt om het bestand via Verzenden naar te accepteren",
-        "device-platform-label": "Apparaatplatform",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -905,18 +895,7 @@
     "list-item": {
         "read": "{{common.read}}"
     },
-    "manage-alerts": {
-        "description-part-1": "Deze tabel bevat problemen die zijn gevonden tijdens het scannen of lezen van uw media. Deze lijst wordt niet beheerd. U kunt het op elk moment wissen en Library (Force) Scan gebruiken om analyses uit te voeren. Een lijst met enkele veelvoorkomende fouten en hun betekenis is te vinden op de ",
-        "description-part-2": "wiki.",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Meldingen wissen",
-        "extension-header": "Extensie",
-        "file-header": "Bestand",
-        "comment-header": "Opmerking",
-        "details-header": "Details"
-    },
     "manage-email-settings": {
-        "title": "E-mailservices (SMTP)",
         "description": "Kavita komt standaard met een e-mailservice om taken mogelijk te maken, zoals het uitnodigen van gebruikers, verzoeken om wachtwoord opnieuw in te stellen, enz. E-mails die via onze service worden verzonden, worden onmiddellijk verwijderd. U kunt uw eigen e-mailservice gebruiken door de {{link}}  service in te stellen. Stel de URL van de e-mailservice in en gebruik de testknop om te controleren of deze werkt. U kunt deze instellingen op elk moment terugzetten naar de standaardinstellingen. Er is geen manier om e-mails voor authenticatie uit te schakelen, hoewel u niet verplicht bent om een geldig e-mailadres voor gebruikers te gebruiken. Bevestigingslinks worden altijd opgeslagen in logboeken en gepresenteerd in de gebruikersinterface. Registratie-/bevestigings-e-mails worden niet verzonden als u Kavita niet opent via een openbaar bereikbare URL of tenzij de functie Hostnaam is geconfigureerd.",
         "send-to-warning": "Als u Verzenden naar apparaat wilt laten werken, moet u uw eigen e-mailservice hosten.",
         "email-url-label": "E-mailservice-URL",
@@ -1088,12 +1067,9 @@
         "change-password-alt": "Verander wachtwoord {{user}}",
         "resend": "Opnieuw versturen",
         "setup": "Instelling",
-        "last-active-title": "Laatst actief:",
-        "roles-title": "Rollen:",
         "none": "Geen",
         "never": "Nooit",
         "online-now-tooltip": "Nu online",
-        "sharing-title": "Delen:",
         "no-data": "Er zijn geen andere gebruikers.",
         "loading": "{{common.loading}}"
     },
@@ -1126,22 +1102,6 @@
         "quick-catchups": "Snelle inhaalacties",
         "quick-reads": "Snel gelezen",
         "on-deck": "{{dashboard.on-deck-title}}"
-    },
-    "admin-dashboard": {
-        "title": "Beheerdashboard",
-        "general-tab": "Algemeen",
-        "users-tab": "Gebruikers",
-        "libraries-tab": "Bibliotheken",
-        "media-tab": "Media",
-        "logs-tab": "Logboeken",
-        "email-tab": "Email",
-        "tasks-tab": "Taken",
-        "statistics-tab": "Statistieken",
-        "system-tab": "Systeem",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ is een premium abonnementsservice die functies ontgrendelt voor alle gebruikers van deze Kavita-instantie. Koop een abonnement om te ontgrendelen ",
-        "kavita+-desc-part-2": "premium voordelen",
-        "kavita+-desc-part-3": "Vandaag!"
     },
     "collection-detail": {
         "no-data": "Hier is nog niks. Probeer nieuwe series toe te voegen.",
@@ -1226,7 +1186,6 @@
         "skip-alt": "Ga verder naar de hoofdinhoud",
         "search-series-alt": "Zoek serie",
         "search-alt": "Zoek…",
-        "promoted": "(gepromoot)",
         "no-data": "Geen resultaten gevonden",
         "scroll-to-top-alt": "Scroll naar boven",
         "server-settings": "Serverinstellingen",

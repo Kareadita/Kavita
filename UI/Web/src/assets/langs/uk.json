@@ -56,12 +56,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
     },
-    "edit-device": {
-        "email-label": "{{common.email}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
-    },
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",

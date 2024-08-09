@@ -181,5 +181,6 @@
     "progress-must-exist": "Postęp musi istnieć u użytkownika",
     "reading-list-permission": "Nie masz uprawnień do tej listy czytelniczej lub lista nie istnieje",
     "reading-list-item-delete": "Nie można usunąć elementu(ów)",
-    "generic-reading-list-update": "Wystąpił problem z aktualizacją listy czytelniczej"
+    "generic-reading-list-update": "Wystąpił problem z aktualizacją listy czytelniczej",
+    "collection-already-exists": "Kolekcja już istnieje"
 }

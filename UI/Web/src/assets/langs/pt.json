@@ -89,7 +89,6 @@
         "pref-description": "Estas definições globais estão ligadas à sua conta.",
         "account-tab": "Conta",
         "preferences-tab": "Preferências",
-        "3rd-party-clients-tab": "Clientes de Terceiros",
         "theme-tab": "Tema",
         "devices-tab": "Dispositivos",
         "stats-tab": "Estatísticas",
@@ -213,15 +212,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "Deseja enviar ficheiros para os seus dispositivos? Peça ao administrador para primeiro configurar o Email!"
-    },
-    "edit-device": {
-        "device-name-label": "Nome do Dispositivo",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Este email será usado para aceitar o ficheiro através da funcionalidade Enviar Para",
-        "device-platform-label": "Plataforma do Dispositivo",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -984,18 +974,7 @@
     "list-item": {
         "read": "{{common.read}}"
     },
-    "manage-alerts": {
-        "description-part-1": "Esta tabela contém problemas encontrados durante a análise e leitura dos seus ficheiros. Pode limpar esta a lista a qualquer momento e preenchê-la novamente ao usar Análise da Biblioteca. A lista dos erros mais comuns e o seu significado pode ser encontrado no ",
-        "description-part-2": "wiki.",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Limpar Alertas",
-        "extension-header": "Extensão",
-        "file-header": "Ficheiro",
-        "comment-header": "Comentário",
-        "details-header": "Detallhes"
-    },
     "manage-email-settings": {
-        "title": "Serviços de Email (SMTP)",
         "description": "Para poder usar algumas funcionalidades do Kavita, como Esqueceu a Password e Enviar para Dispositivo, tem de configurar um serviço de email. Outras funcionalidades, como Alteração de Password, são menos seguras sem a configuração de Email.",
         "send-to-warning": "Para que a funcionalidade Enviar para Dispositivo funcione é necessário configurar as definições de email",
         "email-url-label": "URL do Serviço de Email",
@@ -1206,12 +1185,9 @@
         "change-password-alt": "Alterar Palavra Passe {{user}}",
         "resend": "Reenviar",
         "setup": "Configurar",
-        "last-active-title": "Última Atividade:",
-        "roles-title": "Funções:",
         "none": "Nenhuma",
         "never": "Nunca",
         "online-now-tooltip": "Online Agora",
-        "sharing-title": "A Partilhar:",
         "no-data": "Não existem outros utilizadores.",
         "loading": "{{common.loading}}",
         "username-pattern": "O nome de utilizador só pode conter os seguintes caracteres e o espaço em branco: {{characters}}",
@@ -1252,24 +1228,6 @@
         "quick-catchups": "Atualizações Rápidas",
         "quick-reads": "Leituras Rápidas",
         "on-deck": "{{dashboard.on-deck-title}}"
-    },
-    "admin-dashboard": {
-        "title": "Painel do Administrador",
-        "general-tab": "Geral",
-        "users-tab": "Utilizadores",
-        "libraries-tab": "Bibliotecas",
-        "media-tab": "Media",
-        "logs-tab": "Logs",
-        "email-tab": "Email",
-        "tasks-tab": "Tarefas",
-        "statistics-tab": "Estatísticas",
-        "system-tab": "Sistema",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "O Kavita+ é um serviço de subscrição premium que desbloqueia funcionalidades para todos os utilizadores desta instância Kavita. Compre uma subscrição para desbloquear ",
-        "kavita+-desc-part-2": "os benefícios premium",
-        "kavita+-desc-part-3": "agora!",
-        "kavita+-releases": "Ver lançamentos",
-        "kavita+-requirement": "Kavita+ foi projetado para funcionar apenas com a versão mais recente – 2 versões. Qualquer coisa fora disso está sujeita a não funcionar."
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -1360,7 +1318,6 @@
         "skip-alt": "Saltar para o conteúdo principal",
         "search-series-alt": "Procurar séries",
         "search-alt": "Pesquisar…",
-        "promoted": "{{common.promoted}}",
         "no-data": "Sem resultados",
         "scroll-to-top-alt": "Ir para o Topo",
         "server-settings": "Definições do Servidor",
