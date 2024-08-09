@@ -2,16 +2,18 @@
     position: absolute;
     bottom: 12px;
     width: 190px;
-    background: var(--navbar-bg-color);
+    background: var(--side-nav-bg-color);
     border-radius: var(--side-nav-border-radius);
     font-size: 12px;
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
+    left: 10px;
 
     &.closed {
-        width: 50px;
+        width: 45px;
         overflow-x: hidden;
         overflow-y: auto;
+        left: -50px;
     }
 }
 
@@ -82,7 +84,7 @@
     }
 
     &.closed {
-        width: 50px;
+        width: 55px;
         overflow-x: hidden;
         overflow-y: auto;
         background-color: var(--side-nav-closed-bg-color);
@@ -100,11 +102,11 @@
         padding: 10px 0;
         width: 55vw;
         background-color: var(--side-nav-mobile-bg-color);
-        height: calc((var(--vh)*100) - 125px);
+        height: calc((var(--vh)*100));
         position: fixed;
         margin: 0;
         left: 0;
-        top: 56px;
+        top: var(--nav-mobile-offset);
         transition: width var(--side-nav-openclose-transition);
         z-index: 999;
         overflow: auto;
@@ -122,14 +124,19 @@
         }
 
         &.no-donate {
-          height: calc((var(--vh)*100) - 56px);
+          height: calc((var(--vh)*100) - var(--nav-mobile-offset));
         }
+    }
+
+    .bottom {
+        display:none;
+
     }
 
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc((var(--vh)*100) - 56px);
+        height: calc((var(--vh)*100) - var(--nav-offset));
         position: absolute;
         left: 0;
         z-index: 998;

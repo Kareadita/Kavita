@@ -22,131 +22,12 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import { Observable, ReplaySubject } from 'rxjs';
 import { auditTime, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { SelectionCompareFn, TypeaheadSettings } from '../_models/typeahead-settings';
+import { TypeaheadSettings } from '../_models/typeahead-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {SelectionModel} from "../_models/selection-model";
 
-
-/**
-   * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle.
-   * @param selectedState Optional state to set selectedOptions to. If not passed, defaults to false.
-   * @param selectedOptions Optional data elements to inform the SelectionModel of. If not passed, as toggle() occur, items are tracked.
-   * @param propAccessor Optional string that points to a unique field within the T type. Used for quickly looking up.
-   */
-export class SelectionModel<T extends object> {
-  _data!: Array<{value: T, selected: boolean}>;
-  _propAccessor: string = '';
-
-  constructor(selectedState: boolean = false, selectedOptions: Array<T> = [], propAccessor: string = '') {
-    this._data = [];
-
-    if (propAccessor != undefined || propAccessor !== '') {
-      this._propAccessor = propAccessor;
-    }
-
-    selectedOptions.forEach(d => {
-      this._data.push({value: d, selected: selectedState});
-    });
-  }
-
-  /**
-   * Will toggle if the data item is selected or not. If data option is not tracked, will add it and set state to true.
-   * @param data Item to toggle
-   * @param selectedState Force the state
-   * @param compareFn An optional function to use for the lookup, else will use shallowEqual implementation
-   */
-  toggle(data: T, selectedState?: boolean, compareFn?: SelectionCompareFn<T>) {
-    let lookupMethod = this.shallowEqual;
-    if (compareFn != undefined || compareFn != null) {
-      lookupMethod = compareFn;
-    }
-
-    const dataItem = this._data.filter(d => lookupMethod(d.value, data));
-    if (dataItem.length > 0) {
-      if (selectedState != undefined) {
-        dataItem[0].selected = selectedState;
-      } else {
-        dataItem[0].selected = !dataItem[0].selected;
-      }
-    } else {
-      this._data.push({value: data, selected: (selectedState === undefined ? true : selectedState)});
-    }
-  }
-
-
-  /**
-   * Is the passed item selected
-   * @param data item to check against
-   * @param compareFn optional method to use to perform comparisons
-   * @returns boolean
-   */
-  isSelected(data: T, compareFn?: SelectionCompareFn<T>): boolean {
-    let lookupMethod = this.shallowEqual;
-    if (compareFn != undefined || compareFn != null) {
-      lookupMethod = compareFn;
-    }
-
-    const dataItem = this._data.filter(d => lookupMethod(d.value, data));
-
-    if (dataItem.length > 0) {
-      return dataItem[0].selected;
-    }
-    return false;
-  }
-
-  /**
-   *
-   * @returns If some of the items are selected, but not all
-   */
-  hasSomeSelected(): boolean {
-    const selectedCount = this._data.filter(d => d.selected).length;
-    return (selectedCount !== this._data.length && selectedCount !== 0)
-  }
-
-  /**
-   *
-   * @returns All Selected items
-   */
-  selected(): Array<T> {
-    return this._data.filter(d => d.selected).map(d => d.value);
-  }
-
-  /**
-   *
-   * @returns All Non-Selected items
-   */
-   unselected(): Array<T> {
-    return this._data.filter(d => !d.selected).map(d => d.value);
-  }
-
-  /**
-   *
-   * @returns Last element added/tracked or undefined if nothing is tracked
-   */
-  peek(): T | undefined {
-    if (this._data.length > 0) {
-      return this._data[this._data.length - 1].value;
-    }
-
-    return undefined;
-  }
-
-  shallowEqual(a: T, b: T) {
-
-    for (let key in a) {
-      if (!(key in b) || a[key] !== b[key]) {
-        return false;
-      }
-    }
-    for (let key in b) {
-      if (!(key in a)) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
 
 const ANIMATION_SPEED = 200;
 
@@ -193,6 +74,7 @@ export class TypeaheadComponent implements OnInit {
   @Input() focus: EventEmitter<string> | undefined;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
   private readonly destroyRef = inject(DestroyRef);

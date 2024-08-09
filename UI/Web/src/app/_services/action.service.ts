@@ -84,23 +84,25 @@ export class ActionService implements OnDestroy {
    * Request a refresh of Metadata for a given Library
    * @param library Partial Library, must have id and name populated
    * @param callback Optional callback to perform actions after API completes
+   * @param forceUpdate Optional Should we force
    * @returns
    */
-  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback) {
+  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;
     }
 
-    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-      if (callback) {
-        callback(library);
+    // Prompt the user if we are doing a forced call
+    if (forceUpdate) {
+      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
+        if (callback) {
+          callback(library);
+        }
+        return;
       }
-      return;
     }
 
-    const forceUpdate = true; //await this.promptIfForce();
-
-    this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
+    this.libraryService.refreshMetadata(library?.id, forceUpdate).subscribe((res: any) => {
       this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);
@@ -467,7 +469,7 @@ export class ActionService implements OnDestroy {
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
       this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
-      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.title = translate('action.multiple-selections');
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
 
 
@@ -507,7 +509,7 @@ export class ActionService implements OnDestroy {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.title = translate('action.multiple-selections');
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
 
 
@@ -535,7 +537,7 @@ export class ActionService implements OnDestroy {
     if (this.collectionModalRef != null) { return; }
       this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.collectionModalRef.componentInstance.title = 'New Collection';
+      this.collectionModalRef.componentInstance.title = translate('action.new-collection');
 
       this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;

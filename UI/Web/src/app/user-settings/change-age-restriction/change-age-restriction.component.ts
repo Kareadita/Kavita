@@ -16,8 +16,12 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { AgeRatingPipe } from '../../_pipes/age-rating.pipe';
 import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, AsyncPipe } from '@angular/common';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {ReactiveFormsModule} from "@angular/forms";
+import {Select2Module} from "ng-select2-component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
     selector: 'app-change-age-restriction',
@@ -25,9 +29,16 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective]
+  imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent, NgForOf, NgIf, ReactiveFormsModule, Select2Module, SettingItemComponent]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
+
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly AgeRating = AgeRating;
 
   user: User | undefined = undefined;
   hasChangeAgeRestrictionAbility: Observable<boolean> = of(false);
@@ -35,11 +46,7 @@ export class ChangeAgeRestrictionComponent implements OnInit {
   selectedRestriction!: AgeRestriction;
   originalRestriction!: AgeRestriction;
   reset: EventEmitter<AgeRestriction> = new EventEmitter();
-  private readonly destroyRef = inject(DestroyRef);
 
-  get AgeRating() { return AgeRating; }
-
-  constructor(private accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
@@ -77,14 +84,16 @@ export class ChangeAgeRestrictionComponent implements OnInit {
       }
       this.resetForm();
       this.isViewMode = true;
+      this.cdRef.markForCheck();
     }, err => {
 
     });
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
     this.resetForm();
+    this.cdRef.markForCheck();
   }
 
 }

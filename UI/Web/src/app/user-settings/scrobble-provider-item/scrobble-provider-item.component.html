@@ -1,0 +1,25 @@
+<ng-container *transloco="let t; read:'scrobbling-providers'">
+  <div class="col-auto">
+    <img class="me-2" width="32" height="32" ngSrc="assets/images/ExternalServices/{{provider | scrobbleProviderName}}.png" alt="{{provider | scrobbleProviderName}}" [ngbTooltip]="provider | scrobbleProviderName">
+    @if(token && token.length > 0) {
+      {{t('token-set')}}
+    } @else {
+      {{t('no-token-set')}}
+    }
+    <span class="ms-4">
+      @if(hasExpired) {
+        <i class="error fa-solid fa-exclamation-circle error" aria-hidden="true" [ngbTooltip]="t('token-expired')"></i>
+        <span class="visually-hidden">{{t('token-expired')}}</span>
+      } @else {
+        <i class="fa-solid fa-circle-check ms-1 confirm-icon success" aria-hidden="true" [ngbTooltip]="t('token-valid')"></i>
+        <span class="visually-hidden" aria-describedby="">{{provider | scrobbleProviderName}}: {{t('token-valid')}}</span>
+      }
+    </span>
+  </div>
+  @if (isEditMode) {
+    <div class="row col-auto mt-3">
+      <ng-container [ngTemplateOutlet]="editRef"></ng-container>
+    </div>
+  }
+
+</ng-container>

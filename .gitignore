@@ -536,6 +536,6 @@ UI/Web/.angular/
 BenchmarkDotNet.Artifacts
 
 
-API.Tests/Services/Test Data/ImageService/Covers/*_output*
-API.Tests/Services/Test Data/ImageService/Covers/*_baseline*
-API.Tests/Services/Test Data/ImageService/Covers/index.html
+API.Tests/Services/Test Data/ImageService/**/*_output*
+API.Tests/Services/Test Data/ImageService/**/*_baseline*
+API.Tests/Services/Test Data/ImageService/**/*.html

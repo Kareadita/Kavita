@@ -1,0 +1,40 @@
+<ng-container *transloco="let t;">
+  <div class="container-fluid">
+    <div class="row g-0">
+      <div class="col-11">
+        <h6 class="section-title">
+          @if(labelId) {
+            <label class="reset-label" [for]="labelId">{{title}}</label>
+          } @else {
+            {{title}}
+          }
+          @if (titleExtraRef) {
+            <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
+          }
+        </h6>
+      </div>
+      <div class="col-1">
+        @if (showEdit) {
+          <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">
+            {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}
+          </button>
+        }
+        @if (titleActionsRef) {
+          <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>
+        }
+      </div>
+    </div>
+
+
+    @if (isEditMode) {
+      <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
+    } @else {
+      <span class="view-value" (click)="toggleEditMode()"><ng-container [ngTemplateOutlet]="valueViewRef"></ng-container></span>
+    }
+
+
+    @if (subtitle) {
+      <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
+    }
+  </div>
+</ng-container>

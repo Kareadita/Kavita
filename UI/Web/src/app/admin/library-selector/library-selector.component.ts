@@ -1,20 +1,33 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { Library } from 'src/app/_models/library/library';
-import { Member } from 'src/app/_models/auth/member';
-import { LibraryService } from 'src/app/_services/library.service';
-import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
-import { NgIf, NgFor } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {Library} from 'src/app/_models/library/library';
+import {Member} from 'src/app/_models/auth/member';
+import {LibraryService} from 'src/app/_services/library.service';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {SelectionModel} from "../../typeahead/_models/selection-model";
 
 @Component({
     selector: 'app-library-selector',
     templateUrl: './library-selector.component.html',
     styleUrls: ['./library-selector.component.scss'],
     standalone: true,
-  imports: [NgIf, ReactiveFormsModule, FormsModule, NgFor, TranslocoDirective]
+  imports: [ReactiveFormsModule, FormsModule, TranslocoDirective, LoadingComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySelectorComponent implements OnInit {
+
+  private readonly libraryService = inject(LibraryService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input() member: Member | undefined;
   @Output() selected: EventEmitter<Array<Library>> = new EventEmitter<Array<Library>>();
@@ -29,7 +42,6 @@ export class LibrarySelectorComponent implements OnInit {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  constructor(private libraryService: LibraryService, private fb: FormBuilder) { }
 
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libs => {
@@ -51,12 +63,14 @@ export class LibrarySelectorComponent implements OnInit {
       this.selectAll = this.selections.selected().length === this.allLibraries.length;
       this.selected.emit(this.selections.selected());
     }
+    this.cdRef.markForCheck();
   }
 
   toggleAll() {
     this.selectAll = !this.selectAll;
     this.allLibraries.forEach(s => this.selections.toggle(s, this.selectAll));
     this.selected.emit(this.selections.selected());
+    this.cdRef.markForCheck();
   }
 
   handleSelection(item: Library) {
@@ -68,6 +82,7 @@ export class LibrarySelectorComponent implements OnInit {
       this.selectAll = true;
     }
 
+    this.cdRef.markForCheck();
     this.selected.emit(this.selections.selected());
   }
 

@@ -33,11 +33,11 @@ export class DeviceService {
   }
 
   createDevice(name: string, platform: DevicePlatform, emailAddress: string) {
-    return this.httpClient.post(this.baseUrl + 'device/create', {name, platform, emailAddress}, TextResonse);
+    return this.httpClient.post<Device>(this.baseUrl + 'device/create', {name, platform, emailAddress});
   }
 
   updateDevice(id: number, name: string, platform: DevicePlatform, emailAddress: string) {
-    return this.httpClient.post(this.baseUrl + 'device/update', {id, name, platform, emailAddress}, TextResonse);
+    return this.httpClient.post<Device>(this.baseUrl + 'device/update', {id, name, platform, emailAddress});
   }
 
   deleteDevice(id: number) {

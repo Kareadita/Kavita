@@ -4,7 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay, take} from 'rxjs/operators';
-import {debounceTime, defer, distinctUntilChanged, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
+import {debounceTime, defer, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -17,6 +17,9 @@ import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {ConfirmService} from "../../shared/confirm.service";
+import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 
 interface AdhocTask {
   name: string;
@@ -33,12 +36,18 @@ interface AdhocTask {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe,
-    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe]
+    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent, SettingButtonComponent]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
+  private readonly modalService = inject(NgbModal);
+  private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
@@ -113,9 +122,6 @@ export class ManageTasksSettingsComponent implements OnInit {
   ];
   customOption = 'custom';
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private serverService: ServerService, private modalService: NgbModal,
-    private downloadService: DownloadService) { }
 
   ngOnInit(): void {
     forkJoin({
@@ -262,7 +268,9 @@ export class ManageTasksSettingsComponent implements OnInit {
     });
   }
 
-  resetToDefaults() {
+  async resetToDefaults() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
+
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();

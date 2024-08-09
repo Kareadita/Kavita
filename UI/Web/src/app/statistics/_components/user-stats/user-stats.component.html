@@ -9,19 +9,15 @@
     </div>
 
     <div class="row g-0 fixed-row">
-      <div class="col-md-12 col-sm-12 mt-4 pt-2">
-        <app-reading-activity [userId]="userId" [isAdmin]="(isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
-      </div>
+      <app-reading-activity [userId]="userId" [isAdmin]="(accountService.isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
     </div>
 
     <div class="row g-0 fixed-row">
-      <div class="col-md-6 col-sm-12 mb-sm-4">
-        <app-day-breakdown [userId]="userId"></app-day-breakdown>
-      </div>
-      <div class="col-md-6 col-sm-12">
-        <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')"></app-stat-list>
-      </div>
+      <app-day-breakdown [userId]="userId"></app-day-breakdown>
+    </div>
 
+    <div class="row g-0 fixed-row">
+      <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')"></app-stat-list>
     </div>
 
   </div>

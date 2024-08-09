@@ -9,13 +9,15 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { map, Observable, of, shareReplay, take } from 'rxjs';
+import { map, Observable, of, shareReplay } from 'rxjs';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
     selector: 'app-change-password',
@@ -23,9 +25,14 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoDirective]
+  imports: [NgbCollapse, ReactiveFormsModule, AsyncPipe, TranslocoDirective, SettingTitleComponent, SettingItemComponent]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -34,13 +41,10 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
   isViewMode: boolean = true;
-  private readonly destroyRef = inject(DestroyRef);
+
 
   public get password() { return this.passwordChangeForm.get('password'); }
   public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
-
-
-  constructor(private accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 
@@ -86,13 +90,15 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
       this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
       this.isViewMode = true;
+      this.cdRef.markForCheck();
     }, err => {
       this.resetPasswordErrors = err;
+      this.cdRef.markForCheck();
     }));
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
-    this.resetPasswordForm();
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
+    this.cdRef.markForCheck();
   }
 }

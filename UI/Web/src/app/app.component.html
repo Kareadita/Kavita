@@ -1,18 +1,38 @@
 <div [ngClass]="{'no-transitions' : (transitionState$ | async)}">
-    <app-nav-header></app-nav-header>
-    <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
-        <a id="content"></a>
-        <app-side-nav *ngIf="navService.sideNavVisibility$ | async"></app-side-nav>
-
-        <div class="container-fluid" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
-            <div style="padding: 20px 0 0;" *ngIf="navService.sideNavVisibility$ | async else noSideNav">
-                <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false}">
-                    <router-outlet></router-outlet>
-                </div>
-            </div>
-            <ng-template #noSideNav>
-                <router-outlet></router-outlet>
-            </ng-template>
+    @if (accountService.currentUser$ | async; as currentUser) {
+      @if (currentUser) {
+        <div class="fullpage-background">
+          <div class="background-area">
+            <canvas id="backgroundCanvas" class="default-background" style="width: 100%; height: calc(var(--vh) * 100);"></canvas>
+          </div>
         </div>
+      }
+    }
+    <app-nav-header></app-nav-header>
+
+    <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
+
+      @if (navService.sideNavVisibility$ | async) {
+        @if(navService.usePreferenceSideNav$ | async) {
+          <app-preference-nav></app-preference-nav>
+        } @else {
+          <app-side-nav></app-side-nav>
+        }
+      }
+
+      <div class="container-fluid" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
+        <a id="content"></a>
+        @if (navService.sideNavVisibility$ | async) {
+          <div>
+            <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false || (navService.usePreferenceSideNav$ | async),
+                  'companion-bar-collapsed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async))}">
+              <router-outlet></router-outlet>
+            </div>
+          </div>
+        } @else {
+          <router-outlet></router-outlet>
+        }
+      </div>
     </div>
+
 </div>

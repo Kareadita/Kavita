@@ -5,7 +5,7 @@ using API.Entities.Interfaces;
 namespace API.DTOs;
 #nullable enable
 
-public class SeriesDto : IHasReadTimeEstimate
+public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; init; }
     public string? Name { get; init; }
@@ -62,4 +62,8 @@ public class SeriesDto : IHasReadTimeEstimate
     /// The last time the folder for this series was scanned
     /// </summary>
     public DateTime LastFolderScanned { get; set; }
+
+    public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
 }

@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.0",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.1",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -1702,12 +1702,137 @@
         }
       }
     },
+    "/api/ColorScape/series": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a series",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/volume": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a volume",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/chapter": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a chapter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Device/create": {
       "post": {
         "tags": [
           "Device"
         ],
+        "summary": "Creates a new Device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1728,7 +1853,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              }
+            }
           }
         }
       }
@@ -1738,7 +1880,9 @@
         "tags": [
           "Device"
         ],
+        "summary": "Updates an existing Device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1759,7 +1903,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              }
+            }
           }
         }
       }
@@ -13565,7 +13726,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Path to the (managed) image file",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -13702,6 +13870,14 @@
           "coverImage": {
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -14791,7 +14967,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Relative path to the (managed) image file representing the cover image",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -15249,6 +15432,18 @@
             "type": "integer",
             "description": "Total number of issues for the series",
             "format": "int32"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -15639,6 +15834,21 @@
           }
         },
         "additionalProperties": false
+      },
+      "ColorScapeDto": {
+        "type": "object",
+        "properties": {
+          "primary": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "A set of colors for the color scape system in the UI"
       },
       "ConfirmEmailDto": {
         "required": [
@@ -17254,6 +17464,14 @@
             "type": "string",
             "nullable": true
           },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
           "type": {
             "enum": [
               0,
@@ -17842,6 +18060,10 @@
             "type": "string",
             "description": "Exception message",
             "nullable": true
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -18264,7 +18486,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Absolute path to the (managed) image file",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -18372,6 +18601,14 @@
           "coverImage": {
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "startingYear": {
@@ -19297,6 +19534,14 @@
             "description": "The type of all the files attached to this series",
             "format": "int32"
           },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
           "sortNameLocked": {
             "type": "boolean"
           },
@@ -19588,6 +19833,18 @@
             "type": "string",
             "description": "The last time the folder for this series was scanned",
             "format": "date-time"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22195,7 +22452,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Absolute path to the (managed) image file",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "pages": {
@@ -22303,6 +22567,18 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

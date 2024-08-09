@@ -1,3 +1,20 @@
+::ng-deep .side-nav.closed {
+    .side-nav-item {
+        .side-nav-text {
+            opacity: 0 !important;
+        }
+
+        .card-actions {
+           opacity: 0 !important;
+        }
+
+        &.active {
+            color: var(--side-nav-item-active-color);
+            background-color: unset !important;
+        }
+    }
+}
+
 .side-nav-item {
     position: relative;
     align-items: center;
@@ -112,6 +129,10 @@ a {
 
         .side-nav-text {
             width: 100%;
+        }
+
+        span:last-child {
+            flex-grow: 0;
         }
 
 

@@ -4,7 +4,7 @@ import {CommonModule} from '@angular/common';
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEvent, ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
-import {ScrobbleEventTypePipe} from "../scrobble-event-type.pipe";
+import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
 import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, take} from "rxjs/operators";

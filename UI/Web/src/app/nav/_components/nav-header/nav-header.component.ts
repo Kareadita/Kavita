@@ -45,6 +45,9 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
     selector: 'app-nav-header',
@@ -52,14 +55,31 @@ import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/p
     styleUrls: ['./nav-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
+  imports: [RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
     AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, PromotedIconComponent]
 })
 export class NavHeaderComponent implements OnInit {
 
-  @ViewChild('search') searchViewRef!: any;
+  private readonly router = inject(Router);
+  private readonly scrollService = inject(ScrollService);
+  private readonly searchService = inject(SearchService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  protected readonly accountService = inject(AccountService);
+  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly navService = inject(NavService);
+  protected readonly imageService = inject(ImageService);
+  protected readonly utilityService = inject(UtilityService);
+
+  protected readonly FilterField = FilterField;
+  protected readonly WikiLink = WikiLink;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly Breakpoint = Breakpoint;
+
+  @ViewChild('search') searchViewRef!: any;
+
 
   isLoading = false;
   debounceTime = 300;
@@ -69,12 +89,8 @@ export class NavHeaderComponent implements OnInit {
   backToTopNeeded = false;
   searchFocused: boolean = false;
   scrollElem: HTMLElement;
-  protected readonly FilterField = FilterField;
 
-  constructor(public accountService: AccountService, private router: Router, public navService: NavService,
-    public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService, private searchService: SearchService, private readonly cdRef: ChangeDetectorRef,
-    private filterUtilityService: FilterUtilitiesService) {
+  constructor(@Inject(DOCUMENT) private document: Document) {
       this.scrollElem = this.document.body;
   }
 
@@ -274,6 +290,4 @@ export class NavHeaderComponent implements OnInit {
     this.navService.toggleSideNav();
   }
 
-
-  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

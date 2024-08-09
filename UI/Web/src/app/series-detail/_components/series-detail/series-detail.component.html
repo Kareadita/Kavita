@@ -3,26 +3,26 @@
     @if (series) {
       <app-side-nav-companion-bar [hasExtras]="true" [extraDrawer]="extrasDrawer">
         <ng-container title>
-          <h2 class="title text-break">
+          <h4 class="title text-break">
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             <span>{{series.name}}
               @if(isLoadingExtra || isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
-                <span class="visually-hidden">loading...</span>
-              </div>
+                  <span class="visually-hidden">loading...</span>
+                </div>
               }
-          </span>
-          </h2>
+            </span>
+          </h4>
         </ng-container>
         @if (series.localizedName !== series.name) {
           <ng-container subtitle>
-            <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
+            <h5 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h5>
           </ng-container>
         }
 
 
         <ng-template #extrasDrawer let-offcanvas>
-          <div style="margin-top: 56px">
+          <div>
             <div class="offcanvas-header">
               <h4 class="offcanvas-title" id="offcanvas-basic-title">{{t('page-settings-title')}}</h4>
               <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="offcanvas.dismiss()"></button>
@@ -65,10 +65,10 @@
             </div>
           }
 
-          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}"  [imageUrl]="seriesImage"></app-image>
+          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}" height="400px"  [imageUrl]="seriesImage"></app-image>
           @if (series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial) {
             <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">
-              <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
+              <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages" [showValue]="true"></ngb-progressbar>
             </div>
             <div class="under-image">
               {{t('continue-from', {title: ContinuePointTitle})}}
@@ -79,14 +79,14 @@
           <div class="row g-0">
             <div class="col-auto">
               <div class="btn-group">
-                <button type="button" class="btn btn-primary" (click)="read()">
+                <button type="button" class="btn btn-primary-outline" (click)="read()">
               <span>
                 <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                 <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
               </span>
                 </button>
                 <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                  <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                  <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button ngbDropdownItem (click)="read(true)">
                   <span>
@@ -100,7 +100,7 @@
             </div>
 
             <div class="col-auto ms-2">
-              <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
+              <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
             <span>
                 <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
             </span>
@@ -108,7 +108,7 @@
             </div>
             @if (isAdmin) {
               <div class="col-auto ms-2">
-                <button class="btn btn-secondary" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
+                <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
                   <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                 </button>
               </div>
@@ -116,14 +116,14 @@
 
             <div class="col-auto ms-2 d-none d-md-block">
               <div class="card-actions">
-                <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline"></app-card-actionables>
               </div>
             </div>
 
             @if (isAdmin || hasDownloadingRole) {
               <div class="col-auto ms-2 d-none d-md-block">
                 @if (download$ | async; as download) {
-                  <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')" [disabled]="download !== null">
+                  <button class="btn btn-secondary-outline" (click)="downloadSeries()" [title]="t('download-series--tooltip')" [disabled]="download !== null">
                     @if (download !== null) {
                       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                       <span class="visually-hidden">{{t('downloading-status')}}</span>
@@ -132,7 +132,7 @@
                     }
                   </button>
                 } @else {
-                  <button class="btn btn-secondary" (click)="downloadSeries()" [title]="t('download-series--tooltip')">
+                  <button class="btn btn-secondary-outline" (click)="downloadSeries()" [title]="t('download-series--tooltip')">
                     <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                   </button>
                 }

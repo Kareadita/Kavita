@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "Login",
+        "title": "Sign in to your account",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
-        "submit": "{{common.submit}}"
+        "submit": "Sign in"
     },
 
     "dashboard": {
@@ -98,14 +98,15 @@
     "user-preferences": {
         "title": "User Dashboard",
         "pref-description": "These are global settings that are bound to your account.",
+
         "account-tab": "Account",
         "preferences-tab": "Preferences",
-        "3rd-party-clients-tab": "3rd Party Clients",
         "theme-tab": "Theme",
         "devices-tab": "Devices",
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Smart Filters",
+
         "success-toast": "User preferences updated",
 
         "global-settings-title": "Global Settings",
@@ -132,13 +133,19 @@
         "page-splitting-label": "Page Splitting",
         "page-splitting-tooltip": "How to split a full width image (ie both left and right images are combined)",
         "reading-mode-label": "Reading Mode",
+        "reading-mode-tooltip": "TODO",
         "layout-mode-label": "Layout Mode",
         "layout-mode-tooltip": "Render a single image to the screen or two side-by-side images",
         "background-color-label": "Background Color",
+        "background-color-tooltip": "Background Color of Image Reader",
         "auto-close-menu-label": "Auto Close Menu",
+        "auto-close-menu-tooltip": "Should menu auto close",
         "show-screen-hints-label": "Show Screen Hints",
+        "show-screen-hints-tooltip": "Show an overlay to help understand pagination area and direction",
         "emulate-comic-book-label": "Emulate comic book",
+        "emulate-comic-book-tooltip": "Applies a shadow effect to emulate reading from a book",
         "swipe-to-paginate-label": "Swipe to Paginate",
+        "swipe-to-paginate-tooltip": "Should swiping on the screen cause the next or previous page to be triggered",
 
         "book-reader-settings-title": "Book Reader",
         "tap-to-paginate-label": "Tap to Paginate",
@@ -156,6 +163,7 @@
         "color-theme-book-label": "Color Theme",
         "color-theme-book-tooltip": "What color theme to apply to the book reader content and menu",
         "font-size-book-label": "Font Size",
+        "font-size-book-tooltip": "Percent of scaling to apply to font in the book",
         "line-height-book-label": "Line Spacing",
         "line-height-book-tooltip": "How much spacing between the lines of the book",
         "margin-book-label": "Margin",
@@ -167,11 +175,14 @@
         "pdf-spread-mode-label": "Spread Mode",
         "pdf-spread-mode-tooltip": "How pages should be laid out. Single or double (odd/even)",
         "pdf-theme-label": "Theme",
+        "pdf-theme-tooltip": "Color theme of the reader",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Tachiyomi users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
-        "clients-api-key-tooltip": "The API key is like a password. Keep it secret, Keep it safe.",
-        "clients-opds-url-tooltip": "OPDS URL",
+        "clients-api-key-tooltip": "The API key is like a password. Resetting it will invalidate any existing clients.",
+        "clients-opds-url-label": "OPDS URL",
+        "clients-api-key-label": "API Key",
+        "clients-opds-url-tooltip": "See a list of supported OPDS clients: ",
 
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
@@ -179,7 +190,8 @@
 
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger events."
+        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger events.",
+        "no-data": "{{typeahead.no-data}}"
     },
 
     "theme-manager": {
@@ -200,7 +212,8 @@
         "upload-continued": "a css file",
         "preview-default": "Select a theme first",
         "preview-default-admin": "Select a theme first or upload one manually",
-        "preview-title": "Preview"
+        "preview-title": "Preview",
+        "add": "{{common.add}}"
     },
 
     "theme": {
@@ -230,20 +243,26 @@
         "description": "This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files.",
         "devices-title": "Devices",
         "no-devices": "There are no devices setup yet",
-        "platform-label": "Platform: ",
-        "email-label": "Email: ",
+        "platform-label": "Platform",
+        "email-label": "Email",
+        "name-label": "Name",
         "email-setup-alert": "Want to send files to your devices? Have the your admin setup Email settings first!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "no-data": "{{typeahead.no-data}}"
     },
 
-    "edit-device": {
-        "device-name-label": "Device Name",
+    "edit-device-modal": {
+        "title": "Edit Device",
+        "device-name-label": "{{manage-devices.name-label}}",
+        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "This email will be used to accept the file via Send To",
         "device-platform-label": "Device Platform",
         "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}"
     },
@@ -351,8 +370,11 @@
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "Average Reading / Week",
         "last-active-label": "Last Active",
-        "chapters": "{{value}} chapters"
-
+        "chapters": "{{value}} chapters",
+        "pages-read-by-year-title": "Pages Read By Year",
+        "words-read-by-year-title": "Words Read By Year",
+        "words-count": "{{num}} words",
+        "pages-count": "{{num}} pages"
     },
 
     "user-stats": {
@@ -376,7 +398,9 @@
     },
 
     "role-selector": {
-        "title": "Roles"
+        "title": "Roles",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
 
     "directory-picker": {
@@ -603,7 +627,7 @@
     "invite-user": {
         "title": "Invite User",
         "close": "{{common.close}}",
-        "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name and Email setting fields set in the <a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab, otherwise a link will be presented to you to setup on the user's behalf.<br/><br/>The email is not required to be valid.",
+        "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name and Email setting fields set in the <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab, otherwise a link will be presented to you to setup on the user's behalf.<br/><br/>The email is not required to be valid.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "User invited",
@@ -649,7 +673,13 @@
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
         "activate-reset-tooltip": "Untie your license with this server. Requires both License and Email.",
-        "activate-save": "{{common.save}}"
+        "activate-save": "{{common.save}}",
+
+        "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
+        "kavita+-desc-part-2": "premium benefits",
+        "kavita+-desc-part-3": "today!",
+        "kavita+-requirement": "Kavita+ is designed to work only with the latest release - 2 versions. Anything outside of that is subject to not working.",
+        "kavita+-releases": "See releases"
     },
 
     "book-line-overlay": {
@@ -1112,19 +1142,18 @@
         "read": "{{common.read}}"
     },
 
-    "manage-alerts": {
+    "manage-media-issues": {
         "description-part-1": "This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
         "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
         "clear-alerts": "Clear Alerts",
-        "extension-header": "Extension",
         "file-header": "File",
         "comment-header": "Comment",
-        "details-header": "Details"
+        "created-header": "Created",
+        "no-data": "No Data"
     },
 
     "manage-email-settings": {
-        "title": "Email Services (SMTP)",
         "description": "In order to use some functions of Kavita like Forgot Password and Send To Device, an email provider must be setup. Other features like Password change are less secure without Email setup.",
         "setting-description": "You must fill out both Host Name and SMTP settings to use email-based functionality within Kavita.",
         "test-warning": "You must save before using Test button.",
@@ -1165,14 +1194,17 @@
         "add-library": "Add Library",
         "no-data": "There are no libraries. Try creating one.",
         "loading": "{{common.loading}}",
-        "last-scanned-title": "Last Scanned:",
-        "shared-folders-title": "Shared Folders:",
-        "type-title": "Type:",
+        "last-scanned-title": "Last Scanned",
+        "shared-folders-title": "Shared Folders",
+        "type-title": "Type",
         "scan-library": "Scan Library",
         "delete-library": "Delete Library",
         "delete-library-by-name": "Delete {{name}}",
         "edit-library": "Edit",
-        "edit-library-by-name": "Delete {{name}}"
+        "edit-library-by-name": "Delete {{name}}",
+        "folder-count": "{{num}} folders",
+        "actions-header": "{{manage-users.actions-header}}",
+        "name-header": "{{manage-users.name-header}}"
     },
 
     "manage-media-settings": {
@@ -1180,7 +1212,7 @@
         "encode-as-description-part-2": "Can I Use WebP?",
         "encode-as-description-part-3": "Can I Use AVIF?",
         "encode-as-warning": "You cannot convert back to PNG once you've gone to WebP/AVIF. You would need to refresh covers on your libraries to regenerate all covers. Bookmarks and favicons cannot be converted.",
-        "media-warning": "You must trigger the media conversion task in Tasks Tab.",
+        "media-warning": "You must trigger the media conversion task in Tasks Tab after Saving.",
         "encode-as-label": "Save Media As",
         "encode-as-tooltip": "All media Kavita manages (covers, bookmarks, favicons) will be encoded as this type.",
         "bookmark-dir-label": "Bookmarks Directory",
@@ -1204,6 +1236,7 @@
     },
 
     "manage-scrobble-errors": {
+        "title": "Scrobbling Errors",
         "description": "This table contains issues found during scrobbling. This list is non-managed. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, you are best correcting the series name or localized series name or adding a weblink for the providers.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Clear Errors",
@@ -1211,7 +1244,8 @@
         "created-header": "Created",
         "comment-header": "Comment",
         "edit-header": "Edit",
-        "edit-item-alt": "Edit {{seriesName}}"
+        "edit-item-alt": "Edit {{seriesName}}",
+        "no-data": "No issues"
     },
 
     "default-date-pipe": {
@@ -1219,6 +1253,9 @@
     },
 
     "manage-settings": {
+        "networking-settings-title": "Networking",
+        "system-settings-title": "System",
+        "customization-settings-title": "Customization",
         "notice": "Notice:",
         "restart-required": "Changing Port, Base Url, Cache Size or IPs requires a manual restart of Kavita to take effect.",
         "base-url-label": "Base Url",
@@ -1370,14 +1407,18 @@
         "resend": "Resend",
         "setup": "Setup",
         "admin": "Admin",
-        "last-active-title": "Last Active:",
-        "roles-title": "Roles:",
+        "last-active-header": "Last Active",
+        "roles-header": "Roles",
+        "name-header": "Name",
         "none": "None",
         "never": "Never",
         "online-now-tooltip": "Online Now",
-        "sharing-title": "Sharing:",
+        "too-many-libraries": "A lot",
+        "sharing-header": "Sharing",
         "no-data": "There are no other users.",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "actions-header": "Actions",
+        "pending-tooltip": "This user has not validated their email"
     },
 
     "edit-collection-tags": {
@@ -1420,23 +1461,33 @@
     },
 
 
-    "admin-dashboard": {
-        "title": "Admin Dashboard",
-        "general-tab": "General",
-        "users-tab": "Users",
-        "libraries-tab": "Libraries",
-        "media-tab": "Media",
-        "logs-tab": "Logs",
-        "email-tab": "Email",
-        "tasks-tab": "Tasks",
-        "statistics-tab": "Statistics",
-        "system-tab": "System",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
-        "kavita+-desc-part-2": "premium benefits",
-        "kavita+-desc-part-3": "today!",
-        "kavita+-requirement": "Kavita+ is designed to work only with the latest release - 2 versions. Anything outside of that is subject to not working.",
-        "kavita+-releases": "See releases"
+    "settings": {
+        "account-section-title": "Account",
+        "server-section-title": "Server",
+        "manage-section-title": "Manage",
+        "import-section-title": "Import",
+        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "admin-general": "General",
+        "admin-users": "Users",
+        "admin-libraries": "Libraries",
+        "admin-media": "Media",
+        "admin-media-issues": "Media Issues",
+        "admin-logs": "Logs",
+        "admin-email": "Email",
+        "admin-tasks": "Tasks",
+        "admin-statistics": "Statistics",
+        "admin-system": "System",
+        "admin-kavitaplus": "Kavita+",
+        "account": "Account",
+        "preferences": "Preferences",
+        "clients": "API Key / OPDS",
+        "devices": "Devices",
+        "user-stats": "Stats",
+        "scrobbling": "Scrobbling",
+        "theme": "Theme",
+        "customize": "Customize",
+        "cbl-import": "CBL Reading List",
+        "mal-stack-import": "MAL Stack"
     },
 
     "collection-detail": {
@@ -1549,7 +1600,6 @@
         "skip-alt": "Skip to main content",
         "search-series-alt": "Search series",
         "search-alt": "Search…",
-        "promoted": "{{common.promoted}}",
         "no-data": "No results found",
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
@@ -1609,7 +1659,8 @@
         "description": "Import your MAL Interest Stacks and create Collections within Kavita",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
-        "nothing-found": "Nothing found"
+        "nothing-found": "Nothing found",
+        "track": "Track"
     },
 
     "edit-chapter-progress": {
@@ -2213,17 +2264,21 @@
         "collections-unpromoted": "Collections un-promoted",
         "reading-lists-promoted": "Reading Lists promoted",
         "reading-lists-unpromoted": "Reading Lists un-promoted",
+        "reading-list-promoted": "Reading List promoted",
+        "reading-list-unpromoted": "Reading List un-promoted",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
-        "mal-token-required": "MAL Token is required, set in User Settings"
+        "mal-token-required": "MAL Token is required, set in User Settings",
+        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?"
     },
 
     "actionable": {
         "scan-library": "Scan Library",
         "refresh-covers": "Refresh Covers",
+        "generate-colorscape": "Generate ColorScape",
         "analyze-files": "Analyze Files",
         "settings": "Settings",
         "edit": "Edit",
@@ -2254,7 +2309,9 @@
         "mark-visible": "Mark as Visible",
         "mark-invisible": "Mark as Invisible",
         "unpromote": "Un-Promote",
-        "promote": "Promote"
+        "promote": "Promote",
+        "new-collection": "New Collection",
+        "multiple-selections": "Multiple Selections"
     },
 
     "preferences": {

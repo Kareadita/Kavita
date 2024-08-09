@@ -21,12 +21,9 @@
       }
     </div>
   </div>
-  <table class="table table-striped table-hover table-sm scrollable">
+  <table class="table table-striped table-sm scrollable">
     <thead>
     <tr>
-      <th scope="col" sortable="createdUtc" (sort)="updateSort($event)">
-        {{t('created-header')}}
-      </th>
       <th scope="col" sortable="lastModifiedUtc" (sort)="updateSort($event)" direction="desc">
         {{t('last-modified-header')}}
       </th>
@@ -45,66 +42,62 @@
     </tr>
     </thead>
     <tbody>
-    @if (events.length === 0) {
-      <tr>
-        <td colspan="6">{{t('no-data')}}</td>
-      </tr>
-    }
-
-    <tr *ngFor="let item of events; let idx = index;">
-      <td>
-        {{item.createdUtc | utcToLocalTime  | defaultValue}}
-      </td>
-      <td>
-        {{item.lastModifiedUtc | utcToLocalTime | defaultValue }}
-      </td>
-      <td>
-        {{item.scrobbleEventType | scrobbleEventType}}
-      </td>
-      <td id="scrobble-history--{{idx}}">
-        <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
-      </td>
-      <td>
-        @switch (item.scrobbleEventType) {
-          @case (ScrobbleEventType.ChapterRead) {
-            @if(item.volumeNumber === LooseLeafOrDefaultNumber) {
-              @if (item.chapterNumber === LooseLeafOrDefaultNumber) {
-                {{t('special')}}
-              } @else {
-                {{t('chapter-num', {num: item.chapterNumber})}}
+      @for(item of events; track item; let idx = $index) {
+        <tr>
+          <td>
+            {{item.lastModifiedUtc | utcToLocalTime | defaultValue }}
+          </td>
+          <td>
+            {{item.scrobbleEventType | scrobbleEventType}}
+          </td>
+          <td id="scrobble-history--{{idx}}">
+            <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
+          </td>
+          <td>
+            @switch (item.scrobbleEventType) {
+              @case (ScrobbleEventType.ChapterRead) {
+                @if(item.volumeNumber === LooseLeafOrDefaultNumber) {
+                  @if (item.chapterNumber === LooseLeafOrDefaultNumber) {
+                    {{t('special')}}
+                  } @else {
+                    {{t('chapter-num', {num: item.chapterNumber})}}
+                  }
+                }
+                @else if (item.chapterNumber === LooseLeafOrDefaultNumber) {
+                  {{t('volume-num', {num: item.volumeNumber})}}
+                }
+                @else if (item.chapterNumber === LooseLeafOrDefaultNumber && item.volumeNumber === SpecialVolumeNumber) {
+                  Special
+                }
+                @else {
+                  {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
+                }
+              }
+              @case (ScrobbleEventType.ScoreUpdated) {
+                {{t('rating', {r: item.rating})}}
+              }
+              @default {
+                {{t('not-applicable')}}
               }
             }
-            @else if (item.chapterNumber === LooseLeafOrDefaultNumber) {
-              {{t('volume-num', {num: item.volumeNumber})}}
+          </td>
+          <td>
+            @if(item.isProcessed) {
+              <i class="fa-solid fa-check-circle icon" aria-hidden="true"></i>
+            } @else if (item.isErrored) {
+              <i class="fa-solid fa-circle-exclamation icon error" aria-hidden="true" [ngbTooltip]="item.errorDetails"></i>
+            } @else {
+              <i class="fa-regular fa-circle icon" aria-hidden="true"></i>
             }
-            @else if (item.chapterNumber === LooseLeafOrDefaultNumber && item.volumeNumber === SpecialVolumeNumber) {
-              Special
-            }
-            @else {
-              {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
-            }
-          }
-          @case (ScrobbleEventType.ScoreUpdated) {
-            {{t('rating', {r: item.rating})}}
-          }
-          @default {
-            {{t('not-applicable')}}
-          }
-        }
-      </td>
-      <td>
-        @if(item.isProcessed) {
-          <i class="fa-solid fa-check-circle icon" aria-hidden="true"></i>
-        } @else if (item.isErrored) {
-          <i class="fa-solid fa-circle-exclamation icon error" aria-hidden="true" [ngbTooltip]="item.errorDetails"></i>
-        } @else {
-          <i class="fa-regular fa-circle icon" aria-hidden="true"></i>
-        }
-        <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">
-          {{item.isProcessed ? t('processed') : t('not-processed')}}
-        </span>
-      </td>
-    </tr>
+            <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">
+            {{item.isProcessed ? t('processed') : t('not-processed')}}
+          </span>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="6" style="text-align: center;">{{t('no-data')}}</td></tr>
+      }
+
     </tbody>
   </table>
 </ng-container>

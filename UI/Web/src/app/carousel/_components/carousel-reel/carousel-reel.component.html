@@ -1,16 +1,21 @@
 <ng-container *transloco="let t; read: 'carousel-reel'">
 
-  @if(alwaysShow || items && items.length > 0) {
-    <div class="carousel-container">
+  @if (alwaysShow || items && items.length > 0) {
+    <div class="carousel-container mb-3">
       <div>
-        <h3 (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
+        <h4 class="header" (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
           <a href="javascript:void(0)"  class="section-title" >{{title}}</a>
-          <i *ngIf="iconClasses !== ''" class="{{iconClasses}} title-icon ms-1" aria-hidden="true"></i>
-        </h3>
-        <div class="float-end" *ngIf="swiper">
-          <button class="btn btn-icon carousel-btn" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span></button>
-          <button class="btn btn-icon carousel-btn" [disabled]="swiper.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
-        </div>
+          @if (iconClasses !== '') {
+            <i class="{{iconClasses}} title-icon ms-1" aria-hidden="true"></i>
+          }
+        </h4>
+        @if (swiper) {
+          <div class="float-end">
+            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span></button>
+            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
+          </div>
+        }
+
       </div>
       @if (items.length > 0) {
         <div>
@@ -18,14 +23,17 @@
             [slidesPerView]="'auto'"
             (init)="onSwiper($event)"
             [freeMode]="true">
-            <ng-template *ngFor="let item of items; index as i;" swiperSlide>
-              <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-            </ng-template>
-            <ng-container *ngIf="alwaysShow && items.length === 0">
+            @for(item of items; track item; let i = $index;) {
               <ng-template swiperSlide>
-                <ng-container [ngTemplateOutlet]="promptToAddTemplate"></ng-container>
+                <ng-container swiperSlide [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
               </ng-template>
-            </ng-container>
+            } @empty {
+              @if (alwaysShow) {
+                <ng-template swiperSlide>
+                  <ng-container [ngTemplateOutlet]="carouselItemTemplate"></ng-container>
+                </ng-template>
+              }
+            }
           </swiper>
         </div>
       }

@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
+  DestroyRef, HostListener,
   inject,
   OnInit
 } from '@angular/core';
@@ -21,10 +21,18 @@ import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { TimeAgoPipe } from '../../_pipes/time-ago.pipe';
 import { LibraryTypePipe } from '../../_pipes/library-type.pipe';
 import { RouterLink } from '@angular/router';
-import { NgFor, NgIf } from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {AsyncPipe, TitleCasePipe} from "@angular/common";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {BehaviorSubject, Observable} from "rxjs";
 
 @Component({
     selector: 'app-manage-library',
@@ -32,11 +40,10 @@ import {ActionService} from "../../_services/action.service";
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
+  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe, AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe, CardActionablesComponent]
 })
 export class ManageLibraryComponent implements OnInit {
 
-  private readonly actionService = inject(ActionService);
   private readonly libraryService = inject(LibraryService);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
@@ -44,16 +51,27 @@ export class ManageLibraryComponent implements OnInit {
   private readonly hubService = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
 
+  protected readonly Breakpoint = Breakpoint;
+
+  actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   libraries: Library[] = [];
   loading = false;
   /**
    * If a deletion is in progress for a library
    */
   deletionInProgress: boolean = false;
-  libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
+  useActionableSource = new BehaviorSubject<boolean>(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
+  useActionables$: Observable<boolean> = this.useActionableSource.asObservable();
 
-
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  onResize(){
+    this.useActionableSource.next(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
+  }
 
   ngOnInit(): void {
     this.getLibraries();
@@ -136,9 +154,35 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-  scanLibrary(library: Library) {
-    this.libraryService.scan(library.id).pipe(take(1)).subscribe(() => {
-      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
-    });
+  async scanLibrary(library: Library) {
+    await this.actionService.scanLibrary(library);
+  }
+
+  async handleAction(action: ActionItem<Library>, library: Library) {
+    switch (action.action) {
+      case(Action.Scan):
+        await this.actionService.scanLibrary(library);
+        break;
+      case(Action.RefreshMetadata):
+        await this.actionService.refreshMetadata(library);
+        break;
+      case(Action.GenerateColorScape):
+        await this.actionService.refreshMetadata(library, undefined, false);
+        break;
+      case(Action.Edit):
+        this.editLibrary(library)
+        break;
+      case (Action.Delete):
+        await this.deleteLibrary(library);
+        break;
+      default:
+        break;
+    }
+  }
+
+  performAction(action: ActionItem<Library>, library: Library) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, library);
+    }
   }
 }

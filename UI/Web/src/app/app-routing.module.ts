@@ -11,13 +11,8 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     children: [
       {
-        path: 'admin',
-        canActivate: [AdminGuard],
-        loadChildren: () => import('./_routes/admin-routing.module').then(m => m.routes)
-      },
-      {
-        path: 'preferences',
-        loadChildren: () => import('./_routes/user-settings-routing.module').then(m => m.routes)
+        path: 'settings',
+        loadChildren: () => import('./_routes/settings-routing.module').then(m => m.routes)
       },
       {
         path: 'collections',
@@ -29,7 +24,6 @@ const routes: Routes = [
       },
       {
         path: 'announcements',
-        canActivate: [AdminGuard],
         loadChildren: () => import('./_routes/announcements-routing.module').then(m => m.routes)
       },
       {

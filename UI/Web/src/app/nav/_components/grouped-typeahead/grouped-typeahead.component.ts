@@ -105,10 +105,6 @@ export class GroupedTypeaheadComponent implements OnInit {
   includeChapterAndFiles: boolean = false;
   prevSearchTerm: string = '';
   searchSettingsForm = new FormGroup(({'includeExtras': new FormControl(false)}));
-  isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
-    if (!u) return false;
-    return this.accountService.hasAdminRole(u);
-  }));
 
   get searchTerm() {
     return this.typeaheadForm.get('typeahead')?.value || '';

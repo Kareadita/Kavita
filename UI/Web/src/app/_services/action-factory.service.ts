@@ -102,7 +102,11 @@ export enum Action {
    * Promotes the underlying item (Reading List, Collection)
    */
   Promote = 24,
-  UnPromote = 25
+  UnPromote = 25,
+  /**
+   * Invoke a refresh covers as false to generate colorscapes
+   */
+  GenerateColorScape = 26,
 }
 
 /**
@@ -241,6 +245,13 @@ export class ActionFactoryService {
           {
             action: Action.RefreshMetadata,
             title: 'refresh-covers',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.GenerateColorScape,
+            title: 'generate-colorscape',
             callback: this.dummyCallback,
             requiresAdmin: true,
             children: [],

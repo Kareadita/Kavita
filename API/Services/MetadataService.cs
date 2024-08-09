@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using API.Helpers;
 using API.SignalR;
@@ -38,6 +40,9 @@ public interface IMetadataService
     Task RemoveAbandonedMetadataKeys();
 }
 
+/// <summary>
+/// Handles everything around Cover/ColorScape management
+/// </summary>
 public class MetadataService : IMetadataService
 {
     public const string Name = "MetadataService";
@@ -47,10 +52,13 @@ public class MetadataService : IMetadataService
     private readonly ICacheHelper _cacheHelper;
     private readonly IReadingItemService _readingItemService;
     private readonly IDirectoryService _directoryService;
+    private readonly IImageService _imageService;
     private readonly IList<SignalRMessage> _updateEvents = new List<SignalRMessage>();
+
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
         IEventHub eventHub, ICacheHelper cacheHelper,
-        IReadingItemService readingItemService, IDirectoryService directoryService)
+        IReadingItemService readingItemService, IDirectoryService directoryService,
+        IImageService imageService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -58,6 +66,7 @@ public class MetadataService : IMetadataService
         _cacheHelper = cacheHelper;
         _readingItemService = readingItemService;
         _directoryService = directoryService;
+        _imageService = imageService;
     }
 
     /// <summary>
@@ -71,16 +80,28 @@ public class MetadataService : IMetadataService
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null) return Task.FromResult(false);
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage),
+        if (!_cacheHelper.ShouldUpdateCoverImage(
+                _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage),
                 firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
-            return Task.FromResult(false);
+        {
+            if (NeedsColorSpace(chapter))
+            {
+                _imageService.UpdateColorScape(chapter);
+                _unitOfWork.ChapterRepository.Update(chapter);
+                _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
+            }
 
+            return Task.FromResult(false);
+        }
 
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
 
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath,
             ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat, coverImageSize);
+
+        _imageService.UpdateColorScape(chapter);
+
         _unitOfWork.ChapterRepository.Update(chapter);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
@@ -95,6 +116,15 @@ public class MetadataService : IMetadataService
         firstFile.UpdateLastModified();
     }
 
+    private static bool NeedsColorSpace(IHasCoverImage? entity)
+    {
+        if (entity == null) return false;
+        return !string.IsNullOrEmpty(entity.CoverImage) &&
+               (string.IsNullOrEmpty(entity.PrimaryColor) || string.IsNullOrEmpty(entity.SecondaryColor));
+    }
+
+
+
     /// <summary>
     /// Updates the cover image for a Volume
     /// </summary>
@@ -105,8 +135,16 @@ public class MetadataService : IMetadataService
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
         if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
-                null, volume.Created, forceUpdate)) return Task.FromResult(false);
-
+                null, volume.Created, forceUpdate))
+        {
+            if (NeedsColorSpace(volume))
+            {
+                _imageService.UpdateColorScape(volume);
+                _unitOfWork.VolumeRepository.Update(volume);
+                _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
+            }
+            return Task.FromResult(false);
+        }
 
         // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
         volume.Chapters ??= new List<Chapter>();
@@ -118,7 +156,10 @@ public class MetadataService : IMetadataService
             if (firstChapter == null) return Task.FromResult(false);
         }
 
+
         volume.CoverImage = firstChapter.CoverImage;
+        _imageService.UpdateColorScape(volume);
+
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
 
         return Task.FromResult(true);
@@ -133,12 +174,25 @@ public class MetadataService : IMetadataService
     {
         if (series == null) return Task.CompletedTask;
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage),
+        if (!_cacheHelper.ShouldUpdateCoverImage(
+                _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage),
                 null, series.Created, forceUpdate, series.CoverImageLocked))
+        {
+            // Check if we don't have a primary/seconary color
+            if (NeedsColorSpace(series))
+            {
+                _imageService.UpdateColorScape(series);
+                _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
+            }
+
+
             return Task.CompletedTask;
+        }
 
         series.Volumes ??= [];
         series.CoverImage = series.GetCoverImage();
+
+        _imageService.UpdateColorScape(series);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;

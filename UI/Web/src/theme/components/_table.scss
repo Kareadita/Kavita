@@ -10,6 +10,7 @@ th[sortable].asc:after {
     width: 22px;
     height: 22px;
     float: right;
+    filter: invert(1);
 }
 
 th[sortable].desc:after {
@@ -21,11 +22,28 @@ th[sortable].desc:after {
   height: 22px;
   float: right;
   transform: rotate(180deg);
+  filter: invert(1);
 }
 
 .table {
-  --bs-table-color-state: var(--bs-body-color);
-  --bs-table-bg: #d3d3d3;
+
+  thead {
+    --bs-table-color-state: var(--table-header-text-color);
+    --bs-table-bg: var(--table-header-bg-color);
+  }
+  tbody {
+    --bs-table-color-state: var(--table-body-text-color);
+    --bs-table-bg: var(--table-body-bg-color);
+  }
+
+  tr {
+    border-style: var(--table-body-border);
+  }
 }
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  --bs-table-bg: var(--table-body-striped-bg-color);
+}
+
 
 

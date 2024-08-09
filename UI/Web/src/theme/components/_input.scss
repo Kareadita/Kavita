@@ -31,3 +31,12 @@ input:not([type="range"]), .form-control {
 .form-range::-webkit-slider-thumb, .form-range::-moz-range-thumb {
     background-color: var(--input-range-color);
 }
+
+.form-check-input[type=checkbox]:indeterminate {
+  background-color: var(--input-bg-color);
+  border-color: var(--input-border-color);
+}
+
+.form-switch {
+  padding-left: 1.5em;
+}

@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'all-collections'">
   <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
-    <h2 title>{{t('title')}}</h2>
-    <h6 subtitle>{{t('item-count', {num: collections.length | number})}}</h6>
+    <h4 title>{{t('title')}}</h4>
+    <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
@@ -27,7 +27,7 @@
 
     <ng-template #noData>
       {{t('no-data')}}
-      @if(isAdmin$ | async) {
+      @if(accountService.isAdmin$ | async) {
         {{t('create-one-part-1')}} <a [href]="WikiLink.Collections" rel="noopener noreferrer" target="_blank">{{t('create-one-part-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
       }
     </ng-template>

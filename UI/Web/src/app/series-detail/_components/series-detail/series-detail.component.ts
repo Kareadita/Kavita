@@ -45,7 +45,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {map, take} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {
@@ -116,6 +116,7 @@ import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
+import {ThemeService} from "../../../_services/theme.service";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -173,12 +174,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly scrollService = inject(ScrollService);
   private readonly deviceService = inject(DeviceService);
   private readonly translocoService = inject(TranslocoService);
-
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
   protected readonly navService = inject(NavService);
   protected readonly readerService = inject(ReaderService);
+  protected readonly themeService = inject(ThemeService);
+
   protected readonly LibraryType = LibraryType;
   protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
@@ -413,11 +415,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
-  debugLog(message: string) {
-    console.log(message);
-  }
-
-
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
@@ -443,6 +440,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
         }
+      } else if (event.event === EVENTS.CoverUpdate) {
+        this.themeService.refreshColorScape('series', this.seriesId).subscribe();
       }
     });
 
@@ -641,6 +640,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
+      this.themeService.setColorScape(this.series.primaryColor, this.series.secondaryColor);
+
       if (loadExternal) {
         this.loadPlusMetadata(this.seriesId, this.libraryType);
       }
@@ -722,7 +723,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         this.isLoading = false;
         this.cdRef.markForCheck();
-        console.log('isLoading is now false')
       });
     }, err => {
       this.router.navigateByUrl('/home');
@@ -814,7 +814,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (data === null) {
         this.isLoadingExtra = false;
         this.cdRef.markForCheck();
-        console.log('isLoadingExtra is false')
         return;
       }
 
@@ -834,7 +833,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.isLoadingExtra = false;
       this.cdRef.markForCheck();
-      console.log('isLoadingExtra is false')
     });
   }
 
@@ -947,11 +945,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (closeResult.success) {
         window.scrollTo(0, 0);
         this.loadSeries(this.seriesId, closeResult.updateExternal);
+      } else if (closeResult.updateExternal) {
+        this.loadSeries(this.seriesId, closeResult.updateExternal);
       }
 
       if (closeResult.coverImageUpdate) {
         this.toastr.info(this.translocoService.translate('series-detail.cover-change'));
       }
+
     });
   }
 

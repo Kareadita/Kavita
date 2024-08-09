@@ -6,9 +6,14 @@ import {ServerService} from 'src/app/_services/server.service';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {WikiLink} from "../../_models/wiki";
+import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {ConfirmService} from "../../shared/confirm.service";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -18,7 +23,7 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
   styleUrls: ['./manage-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
+  imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet, PageLayoutModePipe, SettingItemComponent, SettingSwitchComponent, SafeHtmlPipe]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -27,12 +32,18 @@ export class ManageSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
+  private readonly confirmService = inject(ConfirmService);
   protected readonly WikiLink = WikiLink;
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+
+  allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
+    WikiLink.DataCollection +
+    '" rel="noopener noreferrer" target="_blank">wiki</a> ' +
+    translate('manage-settings.allow-stats-tooltip-part-2');
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -116,8 +127,10 @@ export class ManageSettingsComponent implements OnInit {
     });
   }
 
-  resetToDefaults() {
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+  async resetToDefaults() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
+
+    this.settingsService.resetServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));

@@ -32,8 +32,8 @@ import {PdfTheme} from "../../../_models/preferences/pdf-theme";
 import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
 import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfLayoutModePipe} from "../../_pipe/pdf-layout-mode.pipe";
-import {PdfScrollModePipe} from "../../_pipe/pdf-scroll-mode.pipe";
-import {PdfSpreadModePipe} from "../../_pipe/pdf-spread-mode.pipe";
+import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
+import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
 
 @Component({
     selector: 'app-pdf-reader',
@@ -42,7 +42,7 @@ import {PdfSpreadModePipe} from "../../_pipe/pdf-spread-mode.pipe";
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
-    PdfLayoutModePipe, PdfScrollModePipe, PdfSpreadModePipe]
+    PdfLayoutModePipe, PdfScrollModeTypePipe, PdfSpreadTypePipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 

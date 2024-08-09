@@ -33,6 +33,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {ServerService} from "../../_services/server.service";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 enum StreamId {
   OnDeck,
@@ -57,7 +58,7 @@ export class DashboardComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly metadataService = inject(MetadataService);
   private readonly recommendationService = inject(RecommendationService);
-  public readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly libraryService = inject(LibraryService);
   private readonly seriesService = inject(SeriesService);
   private readonly router = inject(Router);
@@ -72,7 +73,6 @@ export class DashboardComponent implements OnInit {
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
-  isAdmin$: Observable<boolean> = of(false);
 
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
@@ -126,13 +126,6 @@ export class DashboardComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
-
-
-    this.isAdmin$ = this.accountService.currentUser$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map(user => (user && this.accountService.hasAdminRole(user)) || false),
-      shareReplay({bufferSize: 1, refCount: true})
-    );
   }
 
   ngOnInit(): void {
@@ -257,4 +250,6 @@ export class DashboardComponent implements OnInit {
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
   }
+
+  protected readonly SettingsTabId = SettingsTabId;
 }

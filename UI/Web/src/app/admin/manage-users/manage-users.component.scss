@@ -12,5 +12,23 @@
 }
 
 .pending-badge {
-  font-size: 15px;
+  font-size: 12px;
+}
+
+.custom-position {
+  right: 15px;
+  top: -42px;
+}
+
+.member-name {
+  word-break: keep-all;
+  margin: 0;
+}
+
+.actions {
+  min-width: 152px;
+}
+
+.list-group-item:nth-child(even) {
+  background-color: var(--elevation-layer1);
 }

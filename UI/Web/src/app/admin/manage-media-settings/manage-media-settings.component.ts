@@ -17,12 +17,17 @@ import {
   NgbModal,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {EncodeFormats} from '../_models/encode-format';
-import {ManageScrobbleErrorsComponent} from '../manage-scrobble-errors/manage-scrobble-errors.component';
-import {ManageAlertsComponent} from '../manage-alerts/manage-alerts.component';
+import {allEncodeFormats} from '../_models/encode-format';
+import {ManageMediaIssuesComponent} from '../manage-media-issues/manage-media-issues.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import { CoverImageSizes } from '../_models/cover-image-size';
+import {allCoverImageSizes} from '../_models/cover-image-size';
+import {pageLayoutModes} from "../../_models/preferences/preferences";
+import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {EncodeFormatPipe} from "../../_pipes/encode-format.pipe";
+import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
   selector: 'app-manage-media-settings',
@@ -30,27 +35,25 @@ import { CoverImageSizes } from '../_models/cover-image-size';
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent, TranslocoDirective]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem,
+    NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody,
+    ManageMediaIssuesComponent, TranslocoDirective, PageLayoutModePipe, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
 })
 export class ManageMediaSettingsComponent implements OnInit {
+
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modalService = inject(NgbModal);
+
+  protected readonly allEncodeFormats = allEncodeFormats;
+  protected readonly allCoverImageSizes = allCoverImageSizes;
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
 
-  alertCount: number = 0;
-  scrobbleCount: number = 0;
-  coverImageSizes = CoverImageSizes.map(o => {
-    const newObj = {...o};
-    newObj.title = translate(o.title);
-    return newObj;
-  })
-
-  private readonly translocoService = inject(TranslocoService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-
-  get EncodeFormats() { return EncodeFormats; }
-
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, private modalService: NgbModal, ) { }
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
@@ -85,7 +88,9 @@ export class ManageMediaSettingsComponent implements OnInit {
     });
   }
 
-  resetToDefaults() {
+  async resetToDefaults() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
+
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
@@ -107,4 +112,6 @@ export class ManageMediaSettingsComponent implements OnInit {
       }
     });
   }
+
+  protected readonly pageLayoutModes = pageLayoutModes;
 }

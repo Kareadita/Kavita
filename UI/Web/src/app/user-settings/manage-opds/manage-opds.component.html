@@ -1,0 +1,19 @@
+<ng-container *transloco="let t; read:'user-preferences'">
+  @if (!opdsEnabled) {
+    <div class="alert alert-warning" role="alert">{{t('clients-opds-alert')}}</div>
+  }
+
+  <p>{{t('clients-opds-description')}}</p>
+
+
+  <app-api-key [hideData]="true" [title]="t('clients-api-key-label')" [tooltipText]="t('clients-api-key-tooltip')" [showRefresh]="true"></app-api-key>
+
+
+  @if (opdsEnabled && opdsUrl) {
+    <div class="mt-4">
+      <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
+                 [transform]="makeUrl"></app-api-key>
+    </div>
+  }
+
+</ng-container>

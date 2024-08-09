@@ -17,7 +17,7 @@ import {
   NgbNavOutlet
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, of, map, shareReplay } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
@@ -32,9 +32,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { ReaderService } from 'src/app/_services/reader.service';
-import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -69,6 +67,19 @@ enum TabID {
 })
 export class CardDetailDrawerComponent implements OnInit {
 
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly imageService = inject(ImageService);
+  private readonly uploadService = inject(UploadService);
+  private readonly toastr = inject(ToastrService);
+  protected readonly accountService = inject(AccountService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
+  private readonly router = inject(Router);
+  private readonly libraryService = inject(LibraryService);
+  private readonly readerService = inject(ReaderService);
+  protected readonly activeOffcanvas = inject(NgbActiveOffcanvas);
+  private readonly downloadService = inject(DownloadService);
+  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly MangaFormat = MangaFormat;
@@ -114,22 +125,6 @@ export class CardDetailDrawerComponent implements OnInit {
 
   summary: string = '';
   downloadInProgress: boolean = false;
-
-
-
-
-  constructor(public utilityService: UtilityService,
-    public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService,
-    private accountService: AccountService, private actionFactoryService: ActionFactoryService,
-    private actionService: ActionService, private router: Router, private libraryService: LibraryService,
-    private seriesService: SeriesService, private readerService: ReaderService,
-    public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService, private readonly cdRef: ChangeDetectorRef) {
-      this.isAdmin$ = this.accountService.currentUser$.pipe(
-        takeUntilDestroyed(this.destroyRef),
-        map(user => (user && this.accountService.hasAdminRole(user)) || false),
-        shareReplay()
-      );
-  }
 
   ngOnInit(): void {
     this.imageUrls = this.chapters.map(c => this.imageService.getChapterCoverImage(c.id));

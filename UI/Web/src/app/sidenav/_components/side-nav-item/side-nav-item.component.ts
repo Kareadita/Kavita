@@ -8,27 +8,41 @@ import {
   OnInit
 } from '@angular/core';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
-import { filter, map } from 'rxjs';
+import {filter, map, tap} from 'rxjs';
 import { NavService } from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule, NgOptimizedImage} from "@angular/common";
+import {AsyncPipe, NgClass, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 
 
 @Component({
   selector: 'app-side-nav-item',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgOptimizedImage, ImageComponent],
+  imports: [RouterLink, NgOptimizedImage, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavItemComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly navService = inject(NavService);
+
+  /**
+   * Id for automatic scrolling to.
+   */
+  @Input() id: string | null = null;
+
   /**
    * Icon to display next to item. ie) 'fa-home'
    */
   @Input() icon: string = '';
   @Input() imageUrl: string | null = '';
+  /**
+   * Removes all the space around the icon area
+   */
+  @Input() noIcon: boolean = false;
   /**
    * Text for the item
    */
@@ -46,53 +60,72 @@ export class SideNavItemComponent implements OnInit {
    * If using a link, then you can pass optional queryParameters
    */
   @Input() queryParams: any | undefined = undefined;
+  /**
+   * If using a lin, then you can pass optional fragment to append to the end
+   */
+  @Input() fragment: string | undefined = undefined;
+  /**
+   * Optional count to pass in that will show as a red badge on the side, indicating some action needs to be taken
+   */
+  @Input() badgeCount: number | null = -1;
 
 
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
-  private readonly destroyRef = inject(DestroyRef);
+
 
 
   highlighted = false;
 
-  constructor(public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef) {
-    router.events
+  constructor() {
+    this.router.events
       .pipe(filter(event => event instanceof NavigationEnd),
             takeUntilDestroyed(this.destroyRef),
-            map(evt => evt as NavigationEnd))
-      .subscribe((evt: NavigationEnd) => {
-        const tokens = evt.url.split('?');
-        const [token1, token2 = undefined] = tokens;
-        this.updateHighlight(token1, token2);
-      });
+            map(evt => evt as NavigationEnd),
+            tap((evt: NavigationEnd) => this.triggerHighlightCheck(evt.url))
+      ).subscribe();
   }
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.updateHighlight(this.router.url.split('?')[0]);
+      this.triggerHighlightCheck(this.router.url);
     }, 100);
-
   }
 
-  updateHighlight(page: string, queryParams?: string) {
+  triggerHighlightCheck(routeUrl: string) {
+    const [url, queryParams] = routeUrl.split('?');
+    const [page, fragment = ''] = url.split('#');
+    this.updateHighlight(page, queryParams, url.includes('#') ? fragment : undefined);
+  }
+
+
+  updateHighlight(page: string, queryParams?: string, fragment?: string) {
     if (this.link === undefined) {
       this.highlighted = false;
       this.cdRef.markForCheck();
       return;
     }
 
-    if (!page.endsWith('/') && !queryParams) {
+    if (!page.endsWith('/') && !queryParams && this.fragment === undefined) {
       page = page + '/';
     }
 
+    let fragmentEqual = false;
+    if (fragment === this.fragment) {
+      fragmentEqual = true;
+    }
+    if (this.fragment === '' && fragment === undefined) { // This is the case where we load a fragment of nothing and browser removes the #
+      fragmentEqual = true;
+    }
 
-    if (this.comparisonMethod === 'equals' && page === this.link) {
+
+    if (this.comparisonMethod === 'equals' && page === this.link && fragmentEqual) {
       this.highlighted = true;
       this.cdRef.markForCheck();
       return;
     }
-    if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
 
-      if (queryParams && queryParams === this.queryParams) {
+    if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
+      if (queryParams && queryParams === this.queryParams && fragmentEqual) {
         this.highlighted = true;
         this.cdRef.markForCheck();
         return;
@@ -108,11 +141,15 @@ export class SideNavItemComponent implements OnInit {
   }
 
   openLink() {
-    if (Object.keys(this.queryParams).length === 0) {
-      this.router.navigateByUrl(this.link!);
-      return
+    if (Object.keys(this.queryParams).length !== 0) {
+      this.router.navigateByUrl(this.link + '?' + this.queryParams);
+      return;
+    } else if (this.fragment) {
+      this.router.navigateByUrl(this.link + '#' + this.fragment);
+      return;
     }
-    this.router.navigateByUrl(this.link + '?' + this.queryParams);
+
+    this.router.navigateByUrl(this.link!);
   }
 
 }

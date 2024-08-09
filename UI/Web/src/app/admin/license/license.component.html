@@ -1,12 +1,15 @@
 <ng-container *transloco="let t; read: 'license'">
+  <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
+  <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
+
   <div class="card mt-2">
     <div class="card-body">
       <div class="card-title">
-        <div class="container-fluid row mb-2">
-          <div class="col-10 col-sm-10">
+        <div class="row mb-2">
+          <div class="col-8">
             <h4 id="license-key-header">{{t('title')}}</h4>
           </div>
-          <div class="col-2 text-end">
+          <div class="col-4 text-end">
             @if (hasLicense) {
               @if (hasValidLicense) {
                 <a class="btn btn-primary btn-sm me-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
@@ -39,7 +42,7 @@
       </div>
 
       @if (isViewMode) {
-        <div class="container-fluid row">
+        <div class="row">
           <span class="col-12">
             @if (hasLicense) {
               <span class="me-1">*********</span>

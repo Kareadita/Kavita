@@ -1,17 +1,17 @@
 <ng-container *transloco="let t; read: 'reading-list-detail'">
   <app-side-nav-companion-bar [hasExtras]="readingList !== undefined" [extraDrawer]="extrasDrawer">
-    <h2 title>
-      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.aria-labelledby]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
+    <h4 title>
       {{readingList?.title}}
       @if (readingList?.promoted) {
         <span class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
       }
-    </h2>
-    <h6 subtitle class="subtitle-with-actionables">{{t('item-count', {num: items.length | number})}}</h6>
+      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.aria-labelledby]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
+    </h4>
+    <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: items.length | number})}}</h5>
 
     <ng-template #extrasDrawer let-offcanvas>
       @if (readingList) {
-        <div style="margin-top: 56px">
+        <div>
           <div class="offcanvas-header">
             <h4 class="offcanvas-title" id="offcanvas-basic-title">{{t('page-settings-title')}}</h4>
             <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss()"></button>

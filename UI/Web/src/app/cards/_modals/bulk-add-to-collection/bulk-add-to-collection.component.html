@@ -6,7 +6,7 @@
   </div>
   <form style="width: 100%" [formGroup]="listForm">
     <div class="modal-body">
-      @if (lists.length >= 5) {
+      @if (lists.length >= MaxItems) {
         <div class="mb-3">
           <label for="filter" class="form-label">{{t('filter-label')}}</label>
           <div class="input-group">

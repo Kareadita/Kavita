@@ -116,4 +116,6 @@ export class ManageScrobbleErrorsComponent implements OnInit {
       modalRef.componentInstance.series = series;
     });
   }
+
+  protected readonly filter = filter;
 }

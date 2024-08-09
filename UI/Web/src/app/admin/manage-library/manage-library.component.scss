@@ -1,0 +1,13 @@
+.custom-position {
+    right: 15px;
+    top: -42px;
+}
+
+.member-name {
+    word-break: keep-all;
+    margin: 0;
+}
+
+.list-group-item:nth-child(even) {
+    background-color: var(--elevation-layer1);
+}

@@ -10,15 +10,18 @@ import {ConfirmService} from 'src/app/shared/confirm.service';
 import {MessageHubService} from 'src/app/_services/message-hub.service';
 import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
-import {ServerService} from 'src/app/_services/server.service';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, DatePipe, NgClass, NgFor, NgIf, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, DatePipe, NgClass, NgIf, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {makeBindingParser} from "@angular/compiler";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 
 @Component({
     selector: 'app-manage-users',
@@ -26,7 +29,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
     styleUrls: ['./manage-users.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgFor, NgIf, NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe]
+  imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe, LoadingComponent, NgIf, TimeAgoPipe, SentenceCasePipe]
 })
 export class ManageUsersComponent implements OnInit {
 
@@ -42,7 +45,6 @@ export class ManageUsersComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   public readonly messageHub = inject(MessageHubService);
-  private readonly serverService = inject(ServerService);
   private readonly router = inject(Router);
 
   constructor() {
@@ -85,7 +87,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   openEditUser(member: Member) {
-    const modalRef = this.modalService.open(EditUserComponent, {size: 'lg'});
+    const modalRef = this.modalService.open(EditUserComponent, { scrollable: true, size: 'xl', fullscreen: 'md' });
     modalRef.componentInstance.member = member;
     modalRef.closed.subscribe(() => {
       this.loadMembers();
@@ -105,7 +107,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   inviteUser() {
-    const modalRef = this.modalService.open(InviteUserComponent, {size: 'lg'});
+    const modalRef = this.modalService.open(InviteUserComponent, {size: 'xl'});
     modalRef.closed.subscribe((successful: boolean) => {
       this.loadMembers();
     });
@@ -151,4 +153,5 @@ export class ManageUsersComponent implements OnInit {
     return member.roles.filter(item => item != 'Pleb');
   }
 
+  protected readonly makeBindingParser = makeBindingParser;
 }
