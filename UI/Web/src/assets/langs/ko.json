@@ -263,14 +263,11 @@
         "delete-user-tooltip": "사용자 삭제",
         "edit-user-tooltip": "편집",
         "resend-invite-alt": "초대 재전송 {{user}}",
-        "roles-title": "권한:",
-        "last-active-title": "마지막 접속:",
         "title": "활성 사용자",
         "invite": "초대",
         "change-password-tooltip": "비밀번호 변경",
         "change-password-alt": "비밀번호 변경 {{user}}",
         "online-now-tooltip": "지금 온라인",
-        "sharing-title": "공유:",
         "username-pattern": "사용자 이름은 다음 문자와 공백만 포함할 수 있습니다: {{characters}}",
         "admin": "관리자"
     },
@@ -298,7 +295,6 @@
         "missing-series-title": "누락된 시리즈:"
     },
     "nav-header": {
-        "promoted": "{{common.promoted}}",
         "skip-alt": "메인 콘텐츠로 건너뛰기",
         "no-data": "검색 결과가 없습니다",
         "server-settings": "서버 설정",
@@ -979,7 +975,6 @@
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
-        "title": "이메일 서비스(SMTP)",
         "description": "비밀번호 잊어버리기와 기기로 전송과 같은 Kavita의 일부 기능을 사용하려면 이메일 공급자를 설정해야 합니다. 이메일 설정 없이는 비밀번호 변경과 같은 다른 기능이 보안이 적습니다.",
         "host-name-validation": "호스트 이름은 http(s)로 시작하고 /로 끝나지 않아야 합니다",
         "reset-to-default": "{{common.reset-to-default}}",
@@ -1296,7 +1291,6 @@
     "user-preferences": {
         "account-tab": "계정",
         "preferences-tab": "기본 설정",
-        "3rd-party-clients-tab": "서드파티 클라이언트",
         "theme-tab": "테마",
         "stats-tab": "통계",
         "success-toast": "사용자 기본 설정이 변경되었습니다",
@@ -1569,16 +1563,6 @@
         "id-title": "아이디",
         "sort-order-title": "정렬 순서"
     },
-    "manage-alerts": {
-        "extension-header": "확장자",
-        "clear-alerts": "알림 지우기",
-        "filter-label": "{{common.filter}}",
-        "description-part-1": "이 표에는 미디어를 스캔하거나 읽는 동안 발견된 문제가 포함되어 있습니다. 이 목록은 관리되지 않습니다. 언제든지 지우고 라이브러리(강제) 스캔을 사용하여 분석을 수행할 수 있습니다. 몇 가지 일반적인 오류 목록과 그 의미는 다음에서 찾을 수 있습니다. ",
-        "description-part-2": "위키.",
-        "details-header": "상세",
-        "file-header": "파일",
-        "comment-header": "코멘트"
-    },
     "default-date-pipe": {
         "never": "없음"
     },
@@ -1596,15 +1580,6 @@
         "no-restriction": "제한 없음",
         "include-unknowns-label": "알 수 없는 항목 포함",
         "include-unknowns-tooltip": "켤 경우 연령 제한이 있는 Unknown이 허용됩니다. 이로 인해 연령 제한이 있는 사용자에게 태그가 지정되지 않은 미디어가 유출될 수 있습니다."
-    },
-    "edit-device": {
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
-        "device-name-label": "장치 이름",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "이 이메일은 보내기를 통해 파일을 수락하는 데 사용됩니다",
-        "device-platform-label": "장치 플랫폼"
     },
     "change-password": {
         "current-password-label": "현재 비밀번호",
@@ -1749,24 +1724,6 @@
     "library-detail": {
         "library-tab": "라이브러리",
         "recommended-tab": "추천"
-    },
-    "admin-dashboard": {
-        "title": "관리자 대시보드",
-        "general-tab": "일반",
-        "users-tab": "사용자",
-        "libraries-tab": "라이브러리",
-        "media-tab": "미디어",
-        "logs-tab": "로그",
-        "email-tab": "이메일",
-        "tasks-tab": "작업",
-        "statistics-tab": "통계",
-        "system-tab": "시스템",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+는 이 Kavita 인스턴스의 모든 사용자를 위한 기능을 잠금 해제하는 프리미엄 구독 서비스입니다. 잠금 해제하려면 구독 구매 ",
-        "kavita+-desc-part-2": "프리미엄 혜택",
-        "kavita+-desc-part-3": "오늘!",
-        "kavita+-requirement": "Kavita+ 는 최신 버전으로만 작동하도록 설계되었습니다 - 2. 그 이외의 버전은 작동하지 않을 수 있습니다.",
-        "kavita+-releases": "릴리스 참조"
     },
     "reading-lists": {
         "no-data": "읽기 목록이 없습니다.",

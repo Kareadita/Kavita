@@ -1,11 +1,11 @@
 {
     "login": {
         "title": "เข้าสู่ระบบ",
-        "username": "{{common.username}}",
-        "password": "{{common.password}}",
+        "username": "ชื่อผู้ใช้",
+        "password": "รหัสผ่าน",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "ลืมรหัสผ่าน?",
-        "submit": "{{common.submit}}"
+        "submit": "ตกลง"
     },
     "dashboard": {
         "no-libraries": "ยังไม่ได้ตั้งค่ารายการหนังสือ กรุณาตั้งค่าใน",
@@ -16,11 +16,11 @@
         "recently-added-title": "ซีรี่ย์ใหม่"
     },
     "edit-user": {
-        "edit": "{{common.edit}}",
-        "close": "{{common.close}}",
+        "edit": "ตั้งค่าผู้ใช้",
+        "close": "ปิดการตั้งค่า",
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
-        "email": "{{common.email}}",
+        "email": "ตั้งค่าอีเมล์",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "กำลังบันทึก…",
@@ -86,7 +86,6 @@
         "pref-description": "นี่คือการตั้งค่าส่วนกลางที่ผูกกับบัญชีของคุณ",
         "account-tab": "บัญชี",
         "preferences-tab": "ตั้งค่าทั่วไป",
-        "3rd-party-clients-tab": "ไคลเอนต์บุคคลที่สาม",
         "theme-tab": "ธีม",
         "devices-tab": "อุปกรณ์",
         "stats-tab": "สถิติ",
@@ -192,15 +191,6 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
-    },
-    "edit-device": {
-        "device-name-label": "ชื่ออุปกรณ์",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "อีเมลนี้จะใช้ในการรับไฟล์ผ่าน Send To",
-        "device-platform-label": "แพลตฟอร์มอุปกรณ์",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",

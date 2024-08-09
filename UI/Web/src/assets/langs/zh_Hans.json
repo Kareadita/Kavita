@@ -90,7 +90,6 @@
         "pref-description": "这些是绑定到您的帐户的全局设置。",
         "account-tab": "账户",
         "preferences-tab": "首选项",
-        "3rd-party-clients-tab": "第三方客户端",
         "theme-tab": "主题",
         "devices-tab": "设备",
         "stats-tab": "状态",
@@ -214,15 +213,6 @@
         "delete": "删除",
         "edit": "编辑",
         "email-setup-alert": "想要将文件发送到您的设备吗？ 首先进行管理员设置电子邮件设置！"
-    },
-    "edit-device": {
-        "device-name-label": "设备名称",
-        "email-label": "电子邮箱",
-        "email-tooltip": "此电子邮件地址用于接收通过“发送到”菜单发送的文件",
-        "device-platform-label": "设备平台",
-        "save": "保存",
-        "required-field": "必填项",
-        "valid-email": "填写有效邮箱"
     },
     "change-password": {
         "password-label": "密码",
@@ -985,18 +975,7 @@
     "list-item": {
         "read": "{{common.read}}"
     },
-    "manage-alerts": {
-        "description-part-1": "此表格列出了扫描或读取媒体时发现的问题。此列表不受管理。您可以随时清除它，并使用扫描（强制）资料库来进行分析。一些常见错误及其释义的列表可以访问。 ",
-        "description-part-2": "wiki。",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "清除警报",
-        "extension-header": "扩展名",
-        "file-header": "文件",
-        "comment-header": "备注",
-        "details-header": "详情"
-    },
     "manage-email-settings": {
-        "title": "电子邮件服务（SMTP）",
         "description": "为了使用 Kavita 的某些功能，例如忘记密码和发送到设备，必须设置电子邮件提供商。如果没有电子邮件设置，其他功能（例如密码更改）的安全性就会降低。",
         "send-to-warning": "如果您希望\"发送到设备\"正常工作，您必须设置您的电子邮件设置",
         "email-url-label": "邮件服务器网址",
@@ -1207,12 +1186,9 @@
         "change-password-alt": "更改密码 {{user}}",
         "resend": "重新发送",
         "setup": "设置",
-        "last-active-title": "上次活动：",
-        "roles-title": "角色：",
         "none": "没有",
         "never": "从不",
         "online-now-tooltip": "在线",
-        "sharing-title": "共享：",
         "no-data": "没有其他用户。",
         "loading": "{{common.loading}}",
         "username-pattern": "用户名只能包含以下字符和空格： {{characters}}",
@@ -1253,24 +1229,6 @@
         "quick-catchups": "快速回顾",
         "quick-reads": "快速阅读",
         "on-deck": "{{dashboard.on-deck-title}}"
-    },
-    "admin-dashboard": {
-        "title": "管理员面板",
-        "general-tab": "常规",
-        "users-tab": "用户",
-        "libraries-tab": "资料库",
-        "media-tab": "媒体",
-        "logs-tab": "日志",
-        "email-tab": "电子邮件",
-        "tasks-tab": "任务",
-        "statistics-tab": "统计数据",
-        "system-tab": "系统",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+是一项高级订阅服务，可为Kavita上的所有用户解锁功能。购买订阅解锁 ",
-        "kavita+-desc-part-2": "高级会员福利",
-        "kavita+-desc-part-3": "！",
-        "kavita+-requirement": "Kavita+ 仅适用最新发布的近2个版本。除此之外的任何版本都可能无法正常工作。",
-        "kavita+-releases": "查看版本"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
@@ -1362,7 +1320,6 @@
         "skip-alt": "跳转至主要内容",
         "search-series-alt": "搜索系列",
         "search-alt": "搜索…",
-        "promoted": "{{common.promoted}}",
         "no-data": "无结果",
         "scroll-to-top-alt": "滚动到顶部",
         "server-settings": "服务器设置",

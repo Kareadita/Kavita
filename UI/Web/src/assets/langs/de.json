@@ -90,7 +90,6 @@
         "pref-description": "Dies sind globale Einstellungen, die an Ihr Konto gebunden sind.",
         "account-tab": "Konto",
         "preferences-tab": "Präferenzen",
-        "3rd-party-clients-tab": "Drittanbieter-Clients",
         "theme-tab": "Thema",
         "devices-tab": "Geräte",
         "stats-tab": "Statistiken",
@@ -214,15 +213,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "Möchten Sie Dateien an Ihre Geräte senden? Lassen Sie zuerst die E-Mail-Einstellungen von Ihrem Administrator einrichten!"
-    },
-    "edit-device": {
-        "device-name-label": "Gerätename",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Diese E-Mail wird verwendet, um die Datei über \"Senden an\" anzunehmen",
-        "device-platform-label": "Geräteplattform",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -801,18 +791,7 @@
     "list-item": {
         "read": "{{common.read}}"
     },
-    "manage-alerts": {
-        "description-part-1": "Diese Tabelle enthält Fehler, die beim Scannen oder Einlesen Ihrer Medien gefunden wurden. Diese Liste ist nicht verwaltet. Sie können sie jederzeit löschen und mit Library (Erzwingen) Scan eine Analyse durchführen. Eine Liste mit einigen häufigen Fehlern und deren Bedeutung finden Sie unter der Seite ",
-        "description-part-2": "Wiki.",
-        "filter-label": "Filter",
-        "clear-alerts": "Warnungen löschen",
-        "extension-header": "Erweiterung",
-        "file-header": "Datei",
-        "comment-header": "Kommentar",
-        "details-header": "Einzelheiten"
-    },
     "manage-email-settings": {
-        "title": "E-Mail-Dienste (SMTP)",
         "description": "Um Funktionen wie \"Passwort vergessen\" oder \"An Gerät senden\" zu verwenden, muss ein E-Mail Server konfiguriert werden. \nOhne E-Mail Server wird die Funktion \"Passwort ändern\" weniger sicher!",
         "reset": "{{common.reset}}",
         "test": "Test",
@@ -862,12 +841,9 @@
         "change-password-alt": "Passwort ändern {{user}}",
         "resend": "Erneut senden",
         "setup": "Einrichten",
-        "last-active-title": "Zuletzt aktiv:",
-        "roles-title": "Funktionen:",
         "none": "Keine",
         "never": "Nie",
         "online-now-tooltip": "Jetzt online",
-        "sharing-title": "Teilen:",
         "no-data": "Es gibt keine anderen Benutzer.",
         "loading": "{{common.loading}}"
     },

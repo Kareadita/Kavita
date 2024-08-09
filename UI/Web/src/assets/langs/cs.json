@@ -85,7 +85,6 @@
         "pref-description": "Toto jsou globální nastavení, která jsou vázána na váš účet.",
         "account-tab": "Účet",
         "preferences-tab": "Předvolby",
-        "3rd-party-clients-tab": "Klienti třetích stran",
         "theme-tab": "Téma",
         "devices-tab": "Zařízení",
         "stats-tab": "Statistiky",
@@ -191,15 +190,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "Chcete odesílat soubory do svých zařízení? Nechte si od správce nejprve nastavit E-mail!"
-    },
-    "edit-device": {
-        "device-name-label": "Název zařízení",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Tento e-mail bude použit k přijetí souboru prostřednictvím Odeslat",
-        "device-platform-label": "Platforma zařízení",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",

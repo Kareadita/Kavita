@@ -90,7 +90,6 @@
         "pref-description": "Essas são configurações globais vinculadas à sua conta.",
         "account-tab": "Conta",
         "preferences-tab": "Preferências",
-        "3rd-party-clients-tab": "Clientes de Terceiros",
         "theme-tab": "Tema",
         "devices-tab": "Dispositivos",
         "stats-tab": "Estatísticas",
@@ -214,15 +213,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "Quer enviar arquivos para seus dispositivos? Peça ao seu administrador que configure as configurações de e-mail primeiro!"
-    },
-    "edit-device": {
-        "device-name-label": "Nome do Dispositivo",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Este e-mail será usado para aceitar o arquivo via Enviar Para",
-        "device-platform-label": "Plataforma do Dispositivo",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -985,18 +975,7 @@
     "list-item": {
         "read": "{{common.read}}"
     },
-    "manage-alerts": {
-        "description-part-1": "Esta tabela contém problemas encontrados durante a verificação ou leitura de sua mídia. Esta lista não é gerenciada. Você pode limpá-lo a qualquer momento e usar o Escanear (À Força) Biblioteca para realizar a análise. Uma lista de alguns erros comuns e o que eles significam pode ser encontrada no ",
-        "description-part-2": "wiki.",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Limpar Alertas",
-        "extension-header": "Extensão",
-        "file-header": "Arquivo",
-        "comment-header": "Comentário",
-        "details-header": "Detalhes"
-    },
     "manage-email-settings": {
-        "title": "Serviço de E-Mail (SMTP)",
         "description": "Para usar algumas funções do Kavita, como Esqueci a senha e Enviar para o dispositivo, um provedor de e-mail deve ser configurado. Outros recursos, como alteração de senha, são menos seguros sem configuração de e-mail.",
         "send-to-warning": "se quiser que Enviar para dispositivo funcione, você deve definir suas configurações de e-mail",
         "email-url-label": "URL do Serviço de E-Mail",
@@ -1207,12 +1186,9 @@
         "change-password-alt": "Alterar Senha {{user}}",
         "resend": "Reenviar",
         "setup": "Configurar",
-        "last-active-title": "Última Atividade:",
-        "roles-title": "Papéis:",
         "none": "Nada",
         "never": "Nunca",
         "online-now-tooltip": "Online Agora",
-        "sharing-title": "Compartilhando:",
         "no-data": "Não há outros usuários.",
         "loading": "{{common.loading}}",
         "username-pattern": "O nome de usuário só pode conter os seguintes caracteres e espaços em branco: {{characters}}",
@@ -1253,24 +1229,6 @@
         "quick-catchups": "Atualizações Rápidas",
         "quick-reads": "Leituras Rápidas",
         "on-deck": "{{dashboard.on-deck-title}}"
-    },
-    "admin-dashboard": {
-        "title": "Painel do Administrador",
-        "general-tab": "Geral",
-        "users-tab": "Usuários",
-        "libraries-tab": "Bibliotecas",
-        "media-tab": "Mídia",
-        "logs-tab": "Registros",
-        "email-tab": "Email",
-        "tasks-tab": "Tarefas",
-        "statistics-tab": "Estatísticas",
-        "system-tab": "Sistema",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ é um serviço de assinatura premium que desbloqueia recursos para todos os usuários nesta instância Kavita. Compre uma assinatura para desbloquear ",
-        "kavita+-desc-part-2": "benefícios premium",
-        "kavita+-desc-part-3": "hoje!",
-        "kavita+-requirement": "Kavita+ foi projetado para funcionar apenas com a versão mais recente – 2 versões. Qualquer coisa fora disso está sujeita a não funcionar.",
-        "kavita+-releases": "Ver lançamentos"
     },
     "collection-detail": {
         "no-data": "Não há itens. Tente adicionar uma série.",
@@ -1362,7 +1320,6 @@
         "skip-alt": "Ir para o conteúdo principal",
         "search-series-alt": "Pesquisar séries",
         "search-alt": "Pesquisar…",
-        "promoted": "{{common.promoted}}",
         "no-data": "Nenhum resultado encontrado",
         "scroll-to-top-alt": "Rolar para o Topo",
         "server-settings": "Configurações do Servidor",
