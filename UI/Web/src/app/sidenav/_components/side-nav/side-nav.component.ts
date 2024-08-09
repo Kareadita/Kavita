@@ -52,11 +52,10 @@ export class SideNavComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly WikiLink = WikiLink;
+  protected readonly ItemLimit = 10;
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  readingListActions = [];
-  homeActions = [];
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
@@ -97,7 +96,7 @@ export class SideNavComponent implements OnInit {
           )
           : this.loadDataOnInit$.pipe(
             tap(d => this.totalSize = d.length),
-            map(d => d.slice(0, 10))
+            map(d => d.slice(0, this.ItemLimit))
           )
       ),
       takeUntilDestroyed(this.destroyRef),
@@ -108,7 +107,7 @@ export class SideNavComponent implements OnInit {
       }),
       switchMap(() => {
         if (this.showAll) return this.loadDataOnInit$;
-        else return this.loadDataOnInit$.pipe(map(d => d.slice(0, 10)))
+        else return this.loadDataOnInit$.pipe(map(d => d.slice(0, this.ItemLimit)))
       }), // Reload data when events occur
       takeUntilDestroyed(this.destroyRef),
     )
@@ -167,11 +166,6 @@ export class SideNavComponent implements OnInit {
         break;
     }
   }
-
-  handleHomeActions(action: ActionItem<void>) {
-    action.callback(action, undefined);
-  }
-
 
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
