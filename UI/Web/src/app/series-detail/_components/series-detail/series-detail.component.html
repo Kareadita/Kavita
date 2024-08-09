@@ -101,11 +101,12 @@
 
             <div class="col-auto ms-2">
               <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
-            <span>
-                <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
-            </span>
+                <span>
+                    <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
+                </span>
               </button>
             </div>
+
             @if (isAdmin) {
               <div class="col-auto ms-2">
                 <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
@@ -149,16 +150,6 @@
             </div>
           }
 
-        </div>
-
-        <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata.summary.length === 0}">
-          <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
-                             iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                             [clickableTitle]="true" (sectionClick)="openReviewModal()">
-            <ng-template #carouselItem let-item let-position="idx">
-              <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
-            </ng-template>
-          </app-carousel-reel>
         </div>
       </div>
 
@@ -337,6 +328,121 @@
             </li>
           }
 
+          <li [ngbNavItem]="TabID.Reviews">
+            <a ngbNavLink>{{t('reviews-tab')}}</a>
+            <ng-template ngbNavContent>
+
+              <div class="mb-3">
+                <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
+                                   iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
+                                   [clickableTitle]="true" (sectionClick)="openReviewModal()">
+                  <ng-template #carouselItem let-item let-position="idx">
+                    <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+                  </ng-template>
+                </app-carousel-reel>
+              </div>
+
+              <div class="mb-3">
+                <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
+                  <ng-template #carouselItem let-item let-position="idx">
+                    <app-review-card [review]="item"></app-review-card>
+                  </ng-template>
+                </app-carousel-reel>
+              </div>
+
+<!--              <virtual-scroller #scroll [items]="reviews" [parentScroll]="scrollingBlock" [childHeight]="1">-->
+<!--                <div class="card-container row g-0" #container>-->
+<!--                  <div class="card" (click)="openReviewModal()">-->
+<!--                    <i class="fa fa-plus-circle" aria-hidden="true"></i>-->
+<!--                  </div>-->
+<!--                  @for (item of scroll.viewPortItems; let idx = $index; track item.username + item.body) {-->
+<!--                    <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>-->
+<!--                  }-->
+<!--                </div>-->
+<!--              </virtual-scroller>-->
+            </ng-template>
+          </li>
+
+          @if (seriesMetadata) {
+            <li [ngbNavItem]="TabID.Cast">
+              <a ngbNavLink>{{t('cast-tab')}}</a>
+              <ng-template ngbNavContent>
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.writers" [title]="t('writers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.colorists" [title]="t('colorists-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.editors" [title]="t('editors-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.characters" [title]="t('characters-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <!-- TODO: For Comic/ComicVine lets render this as cover artists and for everything else as artist -->
+                  <app-carousel-reel [items]="seriesMetadata.coverArtists" [title]="t('cover-artists-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.inkers" [title]="t('inkers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.letterers" [title]="t('letterers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.pencillers" [title]="t('pencillers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.translators" [title]="t('translators-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+              </ng-template>
+            </li>
+          }
 
         </ul>
         <div [ngbNavOutlet]="nav"></div>

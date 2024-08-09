@@ -117,6 +117,7 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
+import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -129,7 +130,9 @@ enum TabID {
   Storyline = 2,
   Volumes = 3,
   Chapters = 4,
-  Recommendations = 5
+  Recommendations = 5,
+  Reviews = 6,
+  Cast = 7
 }
 
 interface StoryLineItem {
@@ -150,7 +153,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -221,6 +224,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   activeTabId = TabID.Storyline;
 
   reviews: Array<UserReview> = [];
+  plusReviews: Array<UserReview> = [];
   ratings: Array<Rating> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -818,7 +822,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
 
       // Reviews
-      this.reviews = [...data.reviews];
+      //this.reviews = [...data.reviews];
+      this.plusReviews = data.reviews;
+
       if (data.ratings) {
         this.ratings = [...data.ratings];
       }

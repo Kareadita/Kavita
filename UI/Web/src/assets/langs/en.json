@@ -786,17 +786,35 @@
         "edit-series-alt": "Edit Series Information",
         "download-series--tooltip": "Download Series",
         "downloading-status": "Downloading…",
-        "user-reviews-alt": "User Reviews",
+        "reviews-tab": "Reviews",
         "storyline-tab": "Storyline",
         "books-tab": "Books",
         "volumes-tab": "Volumes",
         "specials-tab": "Specials",
         "related-tab": "Related",
+        "cast-tab": "Cast",
         "recommendations-tab": "Recommendations",
         "send-to": "File emailed to {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "There are no chapters to this volume. Cannot read.",
-        "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages."
+        "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages.",
+
+        "user-reviews-local": "Local Reviews",
+        "user-reviews-plus": "External Reviews",
+
+        "writers-title": "Writers",
+        "cover-artists-title": "Cover Artists",
+        "characters-title": "Characters",
+        "colorists-title": "Colorists",
+        "editors-title": "Editors",
+        "inkers-title": "Inkers",
+        "letterers-title": "Letterers",
+        "translators-title": "Translators",
+        "pencillers-title": "Pencillers",
+        "publishers-title": "Publishers",
+        "imprints-title": "Imprints",
+        "teams-title": "Teams",
+        "locations-title": "Locations"
     },
 
     "series-metadata-detail": {
