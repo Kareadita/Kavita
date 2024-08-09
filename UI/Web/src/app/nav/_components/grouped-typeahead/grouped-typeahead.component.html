@@ -154,7 +154,7 @@
             </ul>
           }
 
-          @if (hasData && (isAdmin$ | async)) {
+          @if (searchTerm.length > 0 && !isLoading) {
             <li class="list-group-item" style="min-height: 34px" (click)="$event.stopPropagation()">
               <ng-container [ngTemplateOutlet]="extraTemplate"></ng-container>
               <form [formGroup]="searchSettingsForm">
@@ -164,7 +164,6 @@
                   <label class="form-check-label" for="search-include-extras">{{t('include-extras')}}</label>
                 </div>
               </form>
-
             </li>
           }
         </ul>

@@ -92,10 +92,15 @@ form {
     color: var(--body-text-color);
 
     &:hover {
-        background-color: var(--list-group-item-bg-color) !important;
+        background-color: var(--search-list-group-item-bg-color, black) !important;
         cursor: default;
     }
 }
+
+.list-group-item {
+  background-color: var(--search-list-group-item-bg-color, black);
+}
+
 
 .dropdown {
     width: 100vw;

@@ -4,6 +4,8 @@
                                       'hidden': (navService.sideNavVisibility$ | async) === false,
                                       'no-donate': (accountService.hasValidLicense$ | async) === true}">
 
+      <app-side-nav-item icon="fa-home" [title]="t('home')" link="/home/"></app-side-nav-item>
+
       @if (navStreams$ | async; as streams) {
         @if (showAll) {
           <app-side-nav-item icon="fa fa-chevron-left" [title]="t('back')" (click)="showLess()"></app-side-nav-item>
