@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'events-widget'">
 
-  @if (isAdmin$ | async) {
+  @if (accountService.isAdmin$ | async) {
     @if (downloadService.activeDownloads$ | async; as activeDownloads) {
       @if (errors$ | async; as errors) {
         @if (infos$ | async; as infos) {

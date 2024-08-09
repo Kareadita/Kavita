@@ -9,7 +9,7 @@
     </div>
 
     <div class="row g-0 fixed-row">
-      <app-reading-activity [userId]="userId" [isAdmin]="(isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
+      <app-reading-activity [userId]="userId" [isAdmin]="(accountService.isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
     </div>
 
     <div class="row g-0 fixed-row">

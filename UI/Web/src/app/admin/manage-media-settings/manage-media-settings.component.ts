@@ -18,7 +18,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
-import {ManageMediaIssuesComponent} from '../manage-alerts/manage-media-issues.component';
+import {ManageMediaIssuesComponent} from '../manage-media-issues/manage-media-issues.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {allCoverImageSizes} from '../_models/cover-image-size';

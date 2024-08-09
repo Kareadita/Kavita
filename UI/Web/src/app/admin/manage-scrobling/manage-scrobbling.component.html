@@ -4,7 +4,7 @@
   <app-user-holds></app-user-holds>
 </div>
 
-@if(isAdmin$ | async; as isAdmin) {
+@if(accountService.isAdmin$ | async) {
   <div class="mt-4">
     <app-manage-scrobble-errors (scrobbleCount)="updateScrobbleErrorCount($event)"></app-manage-scrobble-errors>
   </div>

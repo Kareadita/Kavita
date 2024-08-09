@@ -9,8 +9,7 @@ import {
   OnInit
 } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
-import {BehaviorSubject, debounceTime, Observable, of} from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import {BehaviorSubject, debounceTime} from 'rxjs';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -40,15 +39,13 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   public readonly downloadService = inject(DownloadService);
   public readonly messageHub = inject(MessageHubService);
   private readonly modalService = inject(NgbModal);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({required: true}) user!: User;
 
-
-  isAdmin$: Observable<boolean> = of(false);
 
   /**
    * Progress events (Event Type: 'started', 'ended', 'updated' that have progress property)
@@ -108,12 +105,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         this.handleUpdateAvailableClick(event.payload);
       }
     });
-
-    this.isAdmin$ = this.accountService.currentUser$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map(user => (user && this.accountService.hasAdminRole(user)) || false),
-      shareReplay()
-    );
   }
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {

@@ -25,14 +25,7 @@ import {
 export class ManageScrobblingComponent {
 
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly accountService = inject(AccountService);
-  private readonly destroyRef = inject(DestroyRef);
-
-  isAdmin$ = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(user => (user && this.accountService.hasAdminRole(user)) || false),
-    shareReplay({bufferSize: 1, refCount: true})
-  );
+  protected readonly accountService = inject(AccountService);
 
   scrobbleCount: number = 0;
 

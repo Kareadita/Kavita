@@ -24,7 +24,6 @@ const routes: Routes = [
       },
       {
         path: 'announcements',
-        canActivate: [AdminGuard],
         loadChildren: () => import('./_routes/announcements-routing.module').then(m => m.routes)
       },
       {

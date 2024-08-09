@@ -25,7 +25,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 
 @Component({
-    selector: 'app-manage-alerts',
+    selector: 'app-manage-media-issues',
     templateUrl: './manage-media-issues.component.html',
     styleUrls: ['./manage-media-issues.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,

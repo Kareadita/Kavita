@@ -11,7 +11,7 @@ import {
 import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {ManageMediaIssuesComponent} from "../manage-alerts/manage-media-issues.component";
+import {ManageMediaIssuesComponent} from "../manage-media-issues/manage-media-issues.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";

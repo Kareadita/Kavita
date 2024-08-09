@@ -46,7 +46,7 @@ import {
 } from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
 import {ManageKavitaplusComponent} from "../../../admin/manage-kavitaplus/manage-kavitaplus.component";
 import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-scrobbling.component";
-import {ManageMediaIssuesComponent} from "../../../admin/manage-alerts/manage-media-issues.component";
+import {ManageMediaIssuesComponent} from "../../../admin/manage-media-issues/manage-media-issues.component";
 import {
   ManageCustomizationComponent
 } from "../../../sidenav/_components/manage-customization/manage-customization.component";

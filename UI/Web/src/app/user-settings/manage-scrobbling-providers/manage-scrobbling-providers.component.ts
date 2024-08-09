@@ -13,7 +13,7 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-import {ManageMediaIssuesComponent} from "../../admin/manage-alerts/manage-media-issues.component";
+import {ManageMediaIssuesComponent} from "../../admin/manage-media-issues/manage-media-issues.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";

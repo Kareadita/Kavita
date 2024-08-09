@@ -175,7 +175,7 @@
         "pdf-spread-mode-label": "Spread Mode",
         "pdf-spread-mode-tooltip": "How pages should be laid out. Single or double (odd/even)",
         "pdf-theme-label": "Theme",
-        "pdf-theme-tooltip": "TODO",
+        "pdf-theme-tooltip": "Color theme of the reader",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Tachiyomi users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",

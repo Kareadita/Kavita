@@ -76,7 +76,6 @@ export class AllCollectionsComponent implements OnInit {
   collections: UserCollection[] = [];
   collectionTagActions: ActionItem<UserCollection>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
-  isAdmin$: Observable<boolean> = of(false);
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}_${item.owner}_${item.promoted}`;
   user!: User;
@@ -116,12 +115,6 @@ export class AllCollectionsComponent implements OnInit {
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
-
-
-    this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(user => {
-      if (!user) return false;
-      return this.accountService.hasAdminRole(user);
-    }));
   }
 
   loadCollection(item: UserCollection) {
