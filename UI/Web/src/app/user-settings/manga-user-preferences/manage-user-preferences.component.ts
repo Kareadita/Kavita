@@ -133,6 +133,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   user: User | undefined = undefined;
 
   get Locale() {
+    if (!this.settingsForm.get('locale')) return 'English';
     return this.locales.filter(l => l.isoCode === this.settingsForm.get('locale')!.value)[0].title;
   }
 
@@ -214,9 +215,10 @@ export class ManageUserPreferencesComponent implements OnInit {
           const data = this.packSettings();
           return this.accountService.updatePreferences(data);
         }),
-        tap(updatedPrefs => {
+        tap(prefs => {
           if (this.user) {
-            this.user.preferences = updatedPrefs;
+            this.user.preferences = {...prefs};
+            this.reset();
             this.cdRef.markForCheck();
           }
         })
@@ -232,6 +234,45 @@ export class ManageUserPreferencesComponent implements OnInit {
       }
     });
     this.cdRef.markForCheck();
+  }
+
+  reset() {
+    if (!this.user) return;
+
+    this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('showScreenHints')?.setValue(this.user.preferences.showScreenHints, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('backgroundColor')?.setValue(this.user.preferences.backgroundColor, {onlySelf: true, emitEvent: false});
+
+    this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderWritingStyle')?.setValue(this.user.preferences.bookReaderWritingStyle, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderThemeName')?.setValue(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user?.preferences.bookReaderImmersiveMode, {onlySelf: true, emitEvent: false});
+
+    this.settingsForm.get('pdfTheme')?.setValue(this.user?.preferences.pdfTheme || PdfTheme.Dark, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('pdfScrollMode')?.setValue(this.user?.preferences.pdfScrollMode || PdfScrollMode.Vertical, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('pdfSpreadMode')?.setValue(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, {onlySelf: true, emitEvent: false});
+
+    this.settingsForm.get('theme')?.setValue(this.user.preferences.theme, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('locale')?.setValue(this.user.preferences.locale || 'en', {onlySelf: true, emitEvent: false});
   }
 
   packSettings(): Preferences {
@@ -264,7 +305,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       swipeToPaginate: modelSettings.swipeToPaginate,
       collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
       shareReviews: modelSettings.shareReviews,
-      locale: modelSettings.locale,
+      locale: modelSettings.locale || 'en',
       pdfTheme: parseInt(modelSettings.pdfTheme, 10),
       pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
       pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
@@ -280,11 +321,5 @@ export class ManageUserPreferencesComponent implements OnInit {
 
     this.settingsForm.get('backgroundColor')?.setValue(color);
     this.cdRef.markForCheck();
-  }
-
-  translatePrefOptions(o: {text: string, value: any}) {
-    const d = {...o};
-    d.text = translate('preferences.' + o.text);
-    return d;
   }
 }
