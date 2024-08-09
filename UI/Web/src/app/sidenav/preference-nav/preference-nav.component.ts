@@ -4,10 +4,10 @@ import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
 import {AccountService, Role} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
-import {ActivatedRoute, NavigationEnd, Router, RouterLink} from "@angular/router";
+import {ActivatedRoute, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
-import {filter, map, Observable, shareReplay} from "rxjs";
+import {map, Observable, of, shareReplay, switchMap, take} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {User} from "../../_models/user";
@@ -117,10 +117,21 @@ export class PreferenceNavComponent implements AfterViewInit {
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
         new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin],
-          this.serverService.getMediaErrors().pipe(
-            takeUntilDestroyed(this.destroyRef),
-            map(d => d.length),
-            shareReplay({bufferSize: 1, refCount: true}))),
+          this.accountService.currentUser$.pipe(
+            take(1),
+            switchMap(user => {
+              if (!user || !this.accountService.hasAdminRole(user)) {
+                // If no user or user does not have the admin role, return an observable of -1
+                return of(-1);
+              } else {
+                return this.serverService.getMediaErrors().pipe(
+                  takeUntilDestroyed(this.destroyRef),
+                  map(d => d.length),
+                  shareReplay({ bufferSize: 1, refCount: true })
+                );
+              }
+            })
+          )),
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
     },
@@ -148,11 +159,22 @@ export class PreferenceNavComponent implements AfterViewInit {
         if (this.hasActiveLicense) {
           if (this.sections[4].children.length === 1) {
             this.sections[4].children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
-              this.scrobbleService.getScrobbleErrors().pipe(
-                takeUntilDestroyed(this.destroyRef),
-                map(d => d.length),
-                shareReplay({bufferSize: 1, refCount: true})))
-              );
+                this.accountService.currentUser$.pipe(
+                  take(1),
+                  switchMap(user => {
+                    if (!user || !this.accountService.hasAdminRole(user)) {
+                      // If no user or user does not have the admin role, return an observable of -1
+                      return of(-1);
+                    } else {
+                      return this.scrobbleService.getScrobbleErrors().pipe(
+                        takeUntilDestroyed(this.destroyRef),
+                        map(d => d.length),
+                        shareReplay({ bufferSize: 1, refCount: true })
+                      );
+                    }
+                  })
+                ))
+            );
           }
           if (this.sections[3].children.length === 1) {
             this.sections[3].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
