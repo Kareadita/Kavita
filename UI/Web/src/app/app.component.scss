@@ -52,7 +52,7 @@
               radial-gradient(circle farthest-side at 0% 0%,
       var(--colorscape-complementary-color) 0%,
       var(--colorscape-complementary-alpha-color) 100%),
-    var(--bs-body-color);
+    var(--bs-body-bg);
 }
 
 .fullpage-background {
@@ -63,7 +63,7 @@
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  background-color: var(--bs-body-bg);
+  background-color: #121212;
 
   .background-area {
     position: absolute;
