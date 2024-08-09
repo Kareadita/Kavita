@@ -452,6 +452,7 @@
 
       <app-loading [loading]="isLoading"></app-loading>
     </div>
+
     <ng-template #estimatedNextCard let-tabId="tabId">
       @if (nextExpectedChapter) {
         @switch (tabId) {
@@ -476,26 +477,22 @@
 </ng-container>
 
 <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  @if (!item.isSpecial) {
-    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="openChapter(item)"
-                   [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                   [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                   [count]="item.files.length"
-                   (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                   [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-    </app-card-item>
-  }
+  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="openChapter(item)"
+                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
+                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                 [count]="item.files.length"
+                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                 [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-card-item>
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  @if (item.number !== LooseLeafOrSpecialNumber) {
-    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
-                   [imageUrl]="imageService.getVolumeCoverImage(item.id)"
-                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
-                   (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-    </app-card-item>
-  }
+  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
+                 [imageUrl]="imageService.getVolumeCoverImage(item.id)"
+                 [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
+                 (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                 [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-card-item>
 </ng-template>
 
 <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
@@ -509,34 +506,30 @@
 </ng-template>
 
 <ng-template #nonSpecialChapterListItem let-item>
-  @if (!item.isSpecial) {
-    <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
-                   [seriesName]="series.name" [entity]="item"
-                   [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                   [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openChapter(item)"
-                   [blur]="user?.preferences?.blurUnreadSummaries || false">
-      <ng-container title>
-        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-      </ng-container>
-    </app-list-item>
-  }
+  <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
+                 [seriesName]="series.name" [entity]="item"
+                 [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                 [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openChapter(item)"
+                 [blur]="user?.preferences?.blurUnreadSummaries || false">
+    <ng-container title>
+      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+    </ng-container>
+  </app-list-item>
 </ng-template>
 
 <ng-template #nonSpecialVolumeListItem let-item>
-  @if (item.number !== LooseLeafOrSpecialNumber) {
-    <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
-                   [seriesName]="series.name" [entity]="item"
-                   [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                   [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
-                   [blur]="user?.preferences?.blurUnreadSummaries || false">
-      <ng-container title>
-        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-      </ng-container>
-    </app-list-item>
-  }
+  <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
+                 [seriesName]="series.name" [entity]="item"
+                 [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                 [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
+                 [blur]="user?.preferences?.blurUnreadSummaries || false">
+    <ng-container title>
+      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+    </ng-container>
+  </app-list-item>
+</ng-template>
 
-
-</ng-template><ng-template #specialChapterListItem let-item>
+<ng-template #specialChapterListItem let-item>
   <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
                  [seriesName]="series.name" [entity]="item"
                  [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
