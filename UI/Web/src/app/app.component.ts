@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   HostListener,
@@ -14,7 +13,7 @@ import {AccountService} from './_services/account.service';
 import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, DOCUMENT, NgClass, NgIf} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
 import {filter, interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.component';
@@ -30,7 +29,7 @@ import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: true,
-  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
+  imports: [NgClass, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {

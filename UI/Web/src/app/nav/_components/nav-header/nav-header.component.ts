@@ -47,6 +47,7 @@ import {CollectionOwnerComponent} from "../../../collections/_components/collect
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
     selector: 'app-nav-header',
@@ -72,6 +73,10 @@ export class NavHeaderComponent implements OnInit {
   protected readonly utilityService = inject(UtilityService);
 
   protected readonly FilterField = FilterField;
+  protected readonly WikiLink = WikiLink;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('search') searchViewRef!: any;
 
@@ -285,8 +290,4 @@ export class NavHeaderComponent implements OnInit {
     this.navService.toggleSideNav();
   }
 
-
-  protected readonly ScrobbleProvider = ScrobbleProvider;
-  protected readonly SettingsTabId = SettingsTabId;
-  protected readonly Breakpoint = Breakpoint;
 }

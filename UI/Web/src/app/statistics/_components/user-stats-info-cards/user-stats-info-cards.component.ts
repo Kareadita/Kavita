@@ -8,7 +8,7 @@ import { DecimalPipe } from '@angular/common';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import {AccountService} from "../../../_services/account.service";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-user-stats-info-cards',
@@ -33,8 +33,11 @@ export class UserStatsInfoCardsComponent {
     const numberPipe = new CompactNumberPipe();
     this.statsService.getPagesPerYear().subscribe(yearCounts => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
-      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} pages`);
-      ref.componentInstance.title = 'Pages Read By Year';
+      ref.componentInstance.items = yearCounts.map(t => {
+        const countStr = translate('user-stats-info-cards.pages-count', {num: numberPipe.transform(t.value)});
+        return `${t.name}: ${countStr})`;
+      });
+      ref.componentInstance.title = translate('user-stats-info-cards.pages-read-by-year-title');
     });
   }
 
@@ -42,8 +45,11 @@ export class UserStatsInfoCardsComponent {
     const numberPipe = new CompactNumberPipe();
     this.statsService.getWordsPerYear().subscribe(yearCounts => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
-      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} words`);
-      ref.componentInstance.title = 'Words Read By Year';
+      ref.componentInstance.items = yearCounts.map(t => {
+        const countStr = translate('user-stats-info-cards.words-count', {num: numberPipe.transform(t.value)});
+        return `${t.name}: ${countStr})`;
+      });
+      ref.componentInstance.title = translate('user-stats-info-cards.words-read-by-year-title');
     });
   }
 }

@@ -19,7 +19,6 @@ export class NavService {
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  //private readonly onDestroy = new Subject<void>();
 
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
@@ -136,5 +135,10 @@ export class NavService {
       this.sideNavCollapseSource.next(newVal);
       localStorage.setItem(this.localStorageSideNavKey, newVal + '');
     });
+  }
+
+  collapseSideNav(state: boolean) {
+    this.sideNavCollapseSource.next(state);
+    localStorage.setItem(this.localStorageSideNavKey, state + '');
   }
 }
