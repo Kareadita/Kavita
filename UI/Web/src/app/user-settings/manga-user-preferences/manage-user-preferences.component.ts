@@ -206,6 +206,7 @@ export class ManageUserPreferencesComponent implements OnInit {
         this.settingsForm.get('locale')?.disable();
       }
 
+      // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
         debounceTime(100),
