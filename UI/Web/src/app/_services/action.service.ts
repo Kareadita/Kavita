@@ -84,23 +84,25 @@ export class ActionService implements OnDestroy {
    * Request a refresh of Metadata for a given Library
    * @param library Partial Library, must have id and name populated
    * @param callback Optional callback to perform actions after API completes
+   * @param forceUpdate Optional Should we force
    * @returns
    */
-  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback) {
+  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;
     }
 
-    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-      if (callback) {
-        callback(library);
+    // Prompt the user if we are doing a forced call
+    if (forceUpdate) {
+      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
+        if (callback) {
+          callback(library);
+        }
+        return;
       }
-      return;
     }
 
-    const forceUpdate = true; //await this.promptIfForce();
-
-    this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
+    this.libraryService.refreshMetadata(library?.id, forceUpdate).subscribe((res: any) => {
       this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);

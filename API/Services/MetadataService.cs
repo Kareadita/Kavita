@@ -40,6 +40,9 @@ public interface IMetadataService
     Task RemoveAbandonedMetadataKeys();
 }
 
+/// <summary>
+/// Handles everything around Cover/ColorScape management
+/// </summary>
 public class MetadataService : IMetadataService
 {
     public const string Name = "MetadataService";

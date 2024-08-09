@@ -3,7 +3,6 @@
     <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
                                       'hidden': (navService.sideNavVisibility$ | async) === false,
                                       'no-donate': (accountService.hasValidLicense$ | async) === true}">
-      <app-side-nav-item icon="fa-home" [title]="t('home')" link="/home/"></app-side-nav-item>
 
       @if (navStreams$ | async; as streams) {
         @if (showAll) {

@@ -2275,6 +2275,7 @@
     "actionable": {
         "scan-library": "Scan Library",
         "refresh-covers": "Refresh Covers",
+        "generate-colorscape": "Generate ColorScape",
         "analyze-files": "Analyze Files",
         "settings": "Settings",
         "edit": "Edit",

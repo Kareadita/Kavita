@@ -262,6 +262,9 @@ export class LibraryDetailComponent implements OnInit {
           case(Action.RefreshMetadata):
             await this.actionService.refreshMetadata(library);
             break;
+          case(Action.GenerateColorScape):
+            await this.actionService.refreshMetadata(library, undefined, false);
+            break;
           case(Action.Edit):
             this.actionService.editLibrary(library);
             break;
