@@ -8,6 +8,10 @@
 .scroller {
   max-height: calc(100dvh - 180px);
   overflow-y: auto;
+
+  @media (max-width: 576px) {
+    max-height: calc(100dvh - 480px);
+  }
 }
 
 .pill {
@@ -20,6 +24,7 @@
     background-color : var(--primary-color);
   }
 }
+
 .list-group-item {
   background-color: transparent;
 
