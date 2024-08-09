@@ -29,6 +29,8 @@ import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file
 import {ReactiveFormsModule} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;
@@ -52,6 +54,7 @@ export class ThemeManagerComponent {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
+  private readonly modalService = inject(NgbModal);
 
   protected readonly ThemeProvider = ThemeProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
@@ -163,5 +166,13 @@ export class ThemeManagerComponent {
     }
     this.isUploadingTheme = true;
     this.cdRef.markForCheck();
+  }
+
+  previewImage(imgUrl: string) {
+    if (imgUrl === '') return;
+
+    const ref = this.modalService.open(PreviewImageModalComponent, {size: 'xl', fullscreen: 'lg'});
+    ref.componentInstance.title = this.selectedTheme!.name;
+    ref.componentInstance.image = imgUrl;
   }
 }

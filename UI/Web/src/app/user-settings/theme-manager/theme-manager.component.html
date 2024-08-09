@@ -90,9 +90,7 @@
 
             <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" [title]="t('preview-title')">
               <ng-template #carouselItem let-item>
-                <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
-                  <app-image [imageUrl]="item" height="108px" width="260px"></app-image>
-                </a>
+                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)"></app-image>
               </ng-template>
             </app-carousel-reel>
           } @else {
@@ -100,9 +98,7 @@
 
             <app-carousel-reel [items]="selectedTheme.site!.previewUrls" [title]="t('preview-title')">
               <ng-template #carouselItem let-item>
-                <a [href]="item | safeUrl" target="_blank" rel="noopener noreferrer">
-                  <app-image [imageUrl]="item" height="108px" width="260px"></app-image>
-                </a>
+                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)"></app-image>
               </ng-template>
             </app-carousel-reel>
           }
