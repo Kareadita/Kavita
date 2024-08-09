@@ -60,20 +60,24 @@ export class SettingItemComponent {
     event.stopPropagation(); // Prevent the click from bubbling up
   }
 
-  constructor(private readonly elementRef: ElementRef) {
+  constructor(elementRef: ElementRef) {
     if (!this.toggleOnViewClick) return;
 
-    // fromEvent(window, 'click')
-    //   .pipe(
-    //     filter((_: MouseEvent) => this.toggleOnViewClick),
-    //     filter((event: MouseEvent) => !elementRef.nativeElement.contains(event.target)),
-    //     tap((_: MouseEvent) => {
-    //       this.isEditMode = false;
-    //       this.editMode.emit(this.isEditMode);
-    //       this.cdRef.markForCheck();
-    //     })
-    //   )
-    //   .subscribe();
+    fromEvent(window, 'click')
+      .pipe(
+        filter((event: Event) => {
+          if (!this.toggleOnViewClick) return false;
+
+          const mouseEvent = event as MouseEvent;
+          return !elementRef.nativeElement.contains(mouseEvent.target)
+        }),
+        tap(() => {
+          this.isEditMode = false;
+          this.editMode.emit(this.isEditMode);
+          this.cdRef.markForCheck();
+        })
+      )
+      .subscribe();
   }
 
   toggleEditMode() {
