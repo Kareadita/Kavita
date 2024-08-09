@@ -163,15 +163,6 @@
           }
         </ul>
 
-<!--        @if ((navService.usePreferenceSideNav$ | async) && utilityService.getActiveBreakpoint() <= Breakpoint.Tablet) {-->
-<!--          <div class="nav-item">-->
-<!--            <select class="form-control">-->
-<!--              <option>Account</option>-->
-
-<!--            </select>-->
-<!--          </div>-->
-<!--        }-->
-
         @if (!searchFocused) {
           @if (backToTopNeeded) {
             <div class="back-to-top">
@@ -202,10 +193,7 @@
               <div ngbDropdownMenu>
                 <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
                 <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
-                <!-- TODO: I think non-admins should be able to see announcements to understand what's new -->
-                @if(accountService.hasAdminRole(user)) {
-                  <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
-                }
+                <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
                 <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
               </div>
             </div>

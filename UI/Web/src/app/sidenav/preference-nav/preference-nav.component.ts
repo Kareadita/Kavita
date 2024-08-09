@@ -10,6 +10,7 @@ import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
 import {filter, map, Observable, shareReplay} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
+import {User} from "../../_models/user";
 
 export enum SettingsTabId {
 
@@ -38,6 +39,11 @@ export enum SettingsTabId {
   Scrobbling = 'scrobbling',
   Customize = 'customize',
   CBLImport = 'cbl-import'
+}
+
+interface PrefSection {
+  title: string;
+  children: SideNavItem[];
 }
 
 class SideNavItem {
@@ -81,7 +87,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
    */
-  sections = [
+  sections: Array<PrefSection> = [
     {
       title: 'account-section-title',
       children: [
@@ -172,6 +178,10 @@ export class PreferenceNavComponent implements AfterViewInit {
         element.scrollIntoView({behavior: 'smooth', block: 'center'});
       }
     }
+  }
+
+  hasAnyChildren(user: User, section: PrefSection) {
+    return section.children.filter(item => this.accountService.hasAnyRole(user, item.roles)).length > 0;
   }
 
 }

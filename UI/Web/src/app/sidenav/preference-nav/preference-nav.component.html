@@ -3,10 +3,12 @@
     <div class="side-nav no-donate">
 
       @for(section of sections; track section.title + section.children.length; let idx = $index;) {
-        <h6 class="side-nav-header" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h6>
-        @for(item of section.children; track item.fragment) {
-          @if (accountService.hasAnyRole(user, item.roles)) {
-            <app-side-nav-item [id]="'nav-item-' + item.fragment"  [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment" [badgeCount]="item.badgeCount$ | async"></app-side-nav-item>
+        @if (hasAnyChildren(user, section)) {
+          <h6 class="side-nav-header" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h6>
+          @for(item of section.children; track item.fragment) {
+            @if (accountService.hasAnyRole(user, item.roles)) {
+              <app-side-nav-item [id]="'nav-item-' + item.fragment"  [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment" [badgeCount]="item.badgeCount$ | async"></app-side-nav-item>
+            }
           }
         }
       }
