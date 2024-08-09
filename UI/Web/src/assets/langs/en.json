@@ -1373,7 +1373,7 @@
 
         "convert-media-task": "Convert Media to Target Encoding",
         "convert-media-task-desc": "Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).",
-        "convert-media-success": "Conversion of Media to Target Encoding has been queued",
+        "convert-media-task-success": "Conversion of Media to Target Encoding has been queued",
 
         "bust-cache-task": "Bust Cache",
         "bust-cache-task-desc": "Busts the Kavita+ Cache - should only be used when debugging bad matches.",
