@@ -42,5 +42,5 @@ export class ManageCustomizationComponent {
   protected readonly Breakpoint = Breakpoint;
   protected readonly WikiLink = WikiLink;
 
-  activeTab = TabID.SideNav;
+  activeTab = TabID.Dashboard;
 }
