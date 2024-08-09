@@ -8,9 +8,7 @@
     }
   </div>
 
-  <p>{{t('description')}}</p>
-
-
+  <p class="ps-2">{{t('description')}}</p>
 
 
   <div class="row g-0 theme-container">
@@ -33,7 +31,6 @@
       <div class="card p-3">
 
         @if (selectedTheme === undefined) {
-
           <div class="row pb-4">
             <div class="mx-auto">
               <div class="d-flex justify-content-center">
@@ -77,8 +74,7 @@
             </ngx-file-drop>
           }
 
-        }
-        @else {
+        } @else {
           <h4>
             {{selectedTheme.name | sentenceCase}}
             <div class="float-end">
