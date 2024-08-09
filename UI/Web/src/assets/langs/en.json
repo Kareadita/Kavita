@@ -2342,6 +2342,8 @@
         "fit-to-width": "Fit to Width",
         "original": "Original",
         "fit-to-screen": "Fit to Screen",
+        "split-right-to-left": "Split Right to Left",
+        "split-left-to-right": "Split Left to Right",
         "no-split": "No Split",
         "webtoon": "Webtoon",
         "single": "Single",
