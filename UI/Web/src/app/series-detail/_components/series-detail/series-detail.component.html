@@ -4,6 +4,7 @@
       <app-side-nav-companion-bar [hasExtras]="true" [extraDrawer]="extrasDrawer">
         <ng-container title>
           <h4 class="title text-break">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             <span>{{series.name}}
               @if(isLoadingExtra || isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -11,7 +12,6 @@
                 </div>
               }
             </span>
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
           </h4>
         </ng-container>
         @if (series.localizedName !== series.name) {
