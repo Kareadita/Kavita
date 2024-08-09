@@ -86,11 +86,10 @@
 .side-nav-header {
   color: #d5d5d5;
   font-weight: bold;
-  font-size: 20px;
   margin-left: 5px;
 }
 
 // Overrides for this component
 ::ng-deep .side-nav-item {
-  padding: 0 5px;
+  padding: 0 0 0 20px !important;
 }
