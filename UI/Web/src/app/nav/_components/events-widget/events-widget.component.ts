@@ -9,7 +9,7 @@ import {
   OnInit
 } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
-import {BehaviorSubject, debounceTime} from 'rxjs';
+import {BehaviorSubject, debounceTime, startWith} from 'rxjs';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -65,7 +65,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEventsSource = new BehaviorSubject<number>(0);
-  activeEvents$ = this.activeEventsSource.asObservable().pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100));
+  activeEvents$ = this.activeEventsSource.asObservable().pipe(startWith(0), takeUntilDestroyed(this.destroyRef), debounceTime(100));
   activeEvents: number = 0;
   /**
    * Intercepts from Single Updates to show an extra indicator to the user
