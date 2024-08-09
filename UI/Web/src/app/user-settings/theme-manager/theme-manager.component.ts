@@ -14,7 +14,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import {NgIf, NgFor, AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
@@ -45,7 +45,9 @@ interface ThemeContainer {
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe, NgxFileDropModule, ReactiveFormsModule, Select2Module, LoadingComponent]
+  imports: [AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent,
+    SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe, NgxFileDropModule,
+    ReactiveFormsModule, Select2Module, LoadingComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
@@ -126,7 +128,12 @@ export class ThemeManagerComponent {
     });
   }
 
-  selectTheme(theme: SiteTheme | DownloadableSiteTheme) {
+  selectTheme(theme: SiteTheme | DownloadableSiteTheme | undefined) {
+    if (theme === undefined) {
+      this.selectedTheme = undefined;
+      return;
+    }
+
     if (theme.hasOwnProperty('provider')) {
       this.selectedTheme = {
         isSiteTheme: true,
