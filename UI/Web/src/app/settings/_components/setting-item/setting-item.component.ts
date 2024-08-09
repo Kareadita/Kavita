@@ -34,6 +34,7 @@ export class SettingItemComponent {
   @Input() isEditMode: boolean = false;
   @Input() subtitle: string | undefined = undefined;
   @Input() labelId: string | undefined = undefined;
+  @Input() toggleOnViewClick: boolean = true;
   @Output() editMode = new EventEmitter<boolean>();
 
   /**
@@ -54,6 +55,9 @@ export class SettingItemComponent {
   @ContentChild('titleActions') titleActionsRef!: TemplateRef<any>;
 
   toggleEditMode() {
+
+    if (!this.toggleOnViewClick) return;
+
     this.isEditMode = !this.isEditMode;
     this.editMode.emit(this.isEditMode);
     this.cdRef.markForCheck();
