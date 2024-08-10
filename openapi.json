@@ -1245,6 +1245,45 @@
         }
       }
     },
+    "/api/Chapter": {
+      "get": {
+        "tags": [
+          "Chapter"
+        ],
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Collection": {
       "get": {
         "tags": [

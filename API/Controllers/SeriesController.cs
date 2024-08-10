@@ -237,16 +237,17 @@ public class SeriesController : BaseApiController
 
         _unitOfWork.SeriesRepository.Update(series);
 
-        if (await _unitOfWork.CommitAsync())
+        if (!await _unitOfWork.CommitAsync())
         {
-            if (needsRefreshMetadata)
-            {
-                _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
-            }
-            return Ok();
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-update"));
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-update"));
+        if (needsRefreshMetadata)
+        {
+            _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+        }
+
+        return Ok();
     }
 
     /// <summary>
