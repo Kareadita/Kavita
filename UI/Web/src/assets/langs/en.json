@@ -918,8 +918,6 @@
         "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against. Will always wait 10 minutes before triggering scan.",
         "include-in-dashboard-label": "Include in Dashboard",
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
-        "include-in-recommendation-label": "Include in Recommended",
-        "include-in-recommendation-tooltip": "Should series from the library be included on the Recommended page.",
         "include-in-search-label": "Include in Search",
         "include-in-search-tooltip": "Should series and any derived information (genres, people, files) from the library be included in search results.",
         "force-scan": "Force Scan",

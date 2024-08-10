@@ -144,7 +144,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    if (this.library && (this.library.type === LibraryType.Comic || this.library.type === LibraryType.Book)) {
+    if (this.library && !(this.library.type === LibraryType.Manga || this.library.type === LibraryType.LightNovel) ) {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
       this.libraryForm.get('allowScrobbling')?.disable();
     }
@@ -207,6 +207,11 @@ export class LibrarySettingsModalComponent implements OnInit {
         }
 
         this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible);
+        if (!this.IsKavitaPlusEligible) {
+          this.libraryForm.get('allowScrobbling')?.disable();
+        } else {
+          this.libraryForm.get('allowScrobbling')?.enable();
+        }
         this.cdRef.markForCheck();
       }),
       takeUntilDestroyed(this.destroyRef)
