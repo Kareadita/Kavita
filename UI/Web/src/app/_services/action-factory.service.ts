@@ -224,16 +224,23 @@ export class ActionFactoryService {
     const tasks = [];
 
     for (let parent of actions) {
+      if (parent.action === Action.SendTo) continue;
+
       if (parent.children.length === 0) {
         parent.title = translate('actionable.' + parent.title);
-        parent.description = translate('actionable.' + parent.description);
+        if (parent.description !== '') {
+          parent.description = translate('actionable.' + parent.description);
+        }
+
         tasks.push(parent);
         continue;
       }
 
       for (let child of parent.children) {
         child.title = translate('actionable.' + child.title);
-        child.description = translate('actionable.' + child.description);
+        if (child.description !== '') {
+          child.description = translate('actionable.' + child.description);
+        }
         tasks.push(child);
       }
     }

@@ -1855,6 +1855,7 @@
         "cover-image-tab": "Cover Image",
         "related-tab": "Related",
         "info-tab": "Info",
+        "tasks-tab": "{{library-settings-modal.tasks-tab}}",
         "genres-label": "Genres",
         "tags-label": "Tags",
         "cover-artist-label": "Cover Artist",

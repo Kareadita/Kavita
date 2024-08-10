@@ -1,4 +1,4 @@
-import {AsyncPipe, DOCUMENT, NgIf, NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgOptimizedImage} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
