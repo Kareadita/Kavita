@@ -14,5 +14,9 @@
 
 .hex-code {
   font-size: 16px;
-  color: white; // TODO: Hook in with setting-item css variable
+  color: var(--primary-color);
+}
+
+input[type="range"] {
+  //width: 92%;
 }

@@ -133,7 +133,7 @@
         "page-splitting-label": "Page Splitting",
         "page-splitting-tooltip": "How to split a full width image (ie both left and right images are combined)",
         "reading-mode-label": "Reading Mode",
-        "reading-mode-tooltip": "TODO",
+        "reading-mode-tooltip": "Change reader to paginate vertically, horizontally, or have an infinite scroll",
         "layout-mode-label": "Layout Mode",
         "layout-mode-tooltip": "Render a single image to the screen or two side-by-side images",
         "background-color-label": "Background Color",

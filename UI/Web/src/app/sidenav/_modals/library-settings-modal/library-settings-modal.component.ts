@@ -46,6 +46,8 @@ import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-typ
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {WikiLink} from "../../../_models/wiki";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
 
 enum TabID {
   General = 'general-tab',
@@ -66,7 +68,7 @@ enum StepID {
   standalone: true,
   imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent],
+    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent, SettingItemComponent, SettingSwitchComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -77,6 +79,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
   protected readonly WikiLink = WikiLink;
+
 
   public readonly utilityService = inject(UtilityService);
   public readonly modal = inject(NgbActiveModal);
@@ -94,6 +97,9 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   active = TabID.General;
   imageUrls: Array<string> = [];
+  protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
+  `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
+  `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
 
   libraryForm: FormGroup = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
