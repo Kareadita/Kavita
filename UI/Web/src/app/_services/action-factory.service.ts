@@ -403,6 +403,13 @@ export class ActionFactoryService {
             children: [],
           },
           {
+            action: Action.GenerateColorScape,
+            title: 'generate-colorscape',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
             action: Action.AnalyzeFiles,
             title: 'analyze-files',
             callback: this.dummyCallback,

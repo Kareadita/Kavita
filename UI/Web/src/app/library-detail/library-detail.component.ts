@@ -260,10 +260,10 @@ export class LibraryDetailComponent implements OnInit {
             await this.actionService.scanLibrary(library);
             break;
           case(Action.RefreshMetadata):
-            await this.actionService.refreshMetadata(library);
+            await this.actionService.refreshLibraryMetadata(library);
             break;
           case(Action.GenerateColorScape):
-            await this.actionService.refreshMetadata(library, undefined, false);
+            await this.actionService.refreshLibraryMetadata(library, undefined, false);
             break;
           case(Action.Edit):
             this.actionService.editLibrary(library);
@@ -279,7 +279,10 @@ export class LibraryDetailComponent implements OnInit {
         await this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
-        await this.actionService.refreshMetadata(lib);
+        await this.actionService.refreshLibraryMetadata(lib);
+        break;
+      case(Action.GenerateColorScape):
+        await this.actionService.refreshLibraryMetadata(lib, undefined, false);
         break;
       case(Action.Edit):
         this.actionService.editLibrary(lib);

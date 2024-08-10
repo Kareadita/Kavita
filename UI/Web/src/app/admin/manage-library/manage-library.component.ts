@@ -164,10 +164,10 @@ export class ManageLibraryComponent implements OnInit {
         await this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        await this.actionService.refreshMetadata(library);
+        await this.actionService.refreshLibraryMetadata(library);
         break;
       case(Action.GenerateColorScape):
-        await this.actionService.refreshMetadata(library, undefined, false);
+        await this.actionService.refreshLibraryMetadata(library, undefined, false);
         break;
       case(Action.Edit):
         this.editLibrary(library)

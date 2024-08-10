@@ -2218,6 +2218,7 @@
         "email-service-reachable": "Kavita Email Connection Successful",
         "email-service-unresponsive": "Email Service Url did not respond.",
         "refresh-covers-queued": "Refresh covers queued for {{name}}",
+        "generate-colorscape-queued": "Generate colorscape queued for {{name}}",
         "library-file-analysis-queued": "Library file analysis queued for {{name}}",
         "entity-read": "{{name}} is now read",
         "entity-unread": "{{name}} is now unread",

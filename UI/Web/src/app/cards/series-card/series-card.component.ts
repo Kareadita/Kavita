@@ -148,6 +148,9 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       case(Action.RefreshMetadata):
         this.refreshMetadata(series);
         break;
+      case(Action.GenerateColorScape):
+        this.refreshMetadata(series, false);
+        break;
       case(Action.Delete):
         this.deleteSeries(series);
         break;
@@ -199,8 +202,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     });
   }
 
-  async refreshMetadata(series: Series) {
-    await this.actionService.refreshMetdata(series);
+  async refreshMetadata(series: Series, forceUpdate = false) {
+    await this.actionService.refreshSeriesMetadata(series, undefined, forceUpdate);
   }
 
   async scanLibrary(series: Series) {
