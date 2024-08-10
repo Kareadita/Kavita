@@ -316,7 +316,7 @@
                     @case (PageLayoutMode.List) {
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                         @if (!item.hasOwnProperty('coverUrl')) {
-                          <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                          <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">
                             <ng-container title>
                             <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
                               <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
