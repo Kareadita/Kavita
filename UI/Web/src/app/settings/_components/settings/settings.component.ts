@@ -18,7 +18,7 @@ import {
   SideNavCompanionBarComponent
 } from "../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-manager.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
 import {
   UserScrobbleHistoryComponent

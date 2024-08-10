@@ -6,7 +6,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 /**
  * This component just validates the email via API then redirects to login

@@ -39,7 +39,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
@@ -47,12 +47,16 @@ import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {WikiLink} from "../../../_models/wiki";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
+import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
+import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
+import {ActionService} from "../../../_services/action.service";
 
 enum TabID {
   General = 'general-tab',
   Folder = 'folder-tab',
   Cover = 'cover-tab',
-  Advanced = 'advanced-tab'
+  Advanced = 'advanced-tab',
+  Tasks = 'tasks-tab'
 }
 
 enum StepID {
@@ -67,21 +71,15 @@ enum StepID {
   standalone: true,
   imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent, SettingItemComponent, SettingSwitchComponent],
+    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
-  protected readonly LibraryType = LibraryType;
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly TabID = TabID;
-  protected readonly WikiLink = WikiLink;
-
-
-  public readonly utilityService = inject(UtilityService);
-  public readonly modal = inject(NgbActiveModal);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly modal = inject(NgbActiveModal);
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadService = inject(UploadService);
   private readonly modalService = inject(NgbModal);
@@ -91,6 +89,13 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
+  protected readonly WikiLink = WikiLink;
 
   @Input({required: true}) library!: Library | undefined;
 
@@ -121,6 +126,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
+
+  tasks: ActionItem<Library>[] = this.getTasks();
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
@@ -373,4 +380,29 @@ export class LibrarySettingsModalComponent implements OnInit {
         return false; // Advanced are optional
     }
   }
+
+  getTasks() {
+    const blackList = [Action.Edit];
+    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(this.runTask.bind(this)), blackList);
+  }
+
+  async runTask(action: ActionItem<Library>) {
+    switch (action.action) {
+      case Action.Scan:
+        await this.actionService.scanLibrary(this.library!);
+        break;
+      case Action.RefreshMetadata:
+        await this.actionService.refreshLibraryMetadata(this.library!);
+        break;
+      case Action.GenerateColorScape:
+        await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
+        break;
+      case Action.Delete:
+        await this.actionService.deleteLibrary(this.library!, () => {
+          this.modal.dismiss();
+        });
+        break;
+    }
+  }
+
 }

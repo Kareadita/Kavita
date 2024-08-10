@@ -34,7 +34,7 @@ import {EventsWidgetComponent} from '../events-widget/events-widget.component';
 import {SeriesFormatComponent} from '../../../shared/series-format/series-format.component';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {GroupedTypeaheadComponent, SearchEvent} from '../grouped-typeahead/grouped-typeahead.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";

@@ -7,7 +7,7 @@ import {
   TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({

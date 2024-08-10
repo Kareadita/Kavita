@@ -7,7 +7,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { NgTemplateOutlet, NgIf } from '@angular/common';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-confirm-reset-password',

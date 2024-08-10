@@ -19,7 +19,7 @@ import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";

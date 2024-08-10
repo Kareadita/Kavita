@@ -13,7 +13,7 @@ import { User } from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgFor } from '@angular/common';
-import {TranslocoDirective,} from "@ngneat/transloco";
+import {TranslocoDirective,} from "@jsverse/transloco";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 
 @Component({

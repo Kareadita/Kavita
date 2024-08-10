@@ -22,7 +22,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {allFields} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {distinctUntilChanged, tap} from "rxjs/operators";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-metadata-builder',

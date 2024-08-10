@@ -891,6 +891,7 @@
         "folder-tab": "Folder",
         "cover-tab": "Cover",
         "advanced-tab": "Advanced",
+        "tasks-tab": "Tasks",
         "name-label": "Name",
         "library-name-unique": "Library name must be unique",
         "last-scanned-label": "Last Scanned:",

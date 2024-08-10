@@ -201,6 +201,25 @@
 
           </ng-template>
         </li>
+
+        <!-- Only show tasks on edit flow -->
+        @if (!isAddLibrary) {
+          <li [ngbNavItem]="TabID.Tasks">
+            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+            <ng-template ngbNavContent>
+              <div class="mt-4 mb-4">
+                @for(task of tasks; track task.action) {
+                  <app-setting-button [subtitle]="task.description">
+                    <button class="btn btn-secondary btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                  </app-setting-button>
+                }
+              </div>
+            </ng-template>
+          </li>
+
+        }
+
+
       </ul>
 
       <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>

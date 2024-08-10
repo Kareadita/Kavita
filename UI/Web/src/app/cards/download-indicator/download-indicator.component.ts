@@ -4,7 +4,7 @@ import { Download } from 'src/app/shared/_models/download';
 import { DownloadEvent } from 'src/app/shared/_services/download.service';
 import {CommonModule} from "@angular/common";
 import {CircularLoaderComponent} from "../../shared/circular-loader/circular-loader.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-download-indicator',

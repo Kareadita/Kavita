@@ -8,7 +8,7 @@ import { DecimalPipe } from '@angular/common';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import {AccountService} from "../../../_services/account.service";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-user-stats-info-cards',

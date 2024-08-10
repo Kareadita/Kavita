@@ -5,7 +5,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {FullProgress} from "../../_models/readers/full-progress";
 import {ReaderService} from "../../_services/reader.service";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 

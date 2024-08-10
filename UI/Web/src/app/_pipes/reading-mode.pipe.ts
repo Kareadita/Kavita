@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {ReaderMode} from "../_models/preferences/reader-mode";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'readerMode',

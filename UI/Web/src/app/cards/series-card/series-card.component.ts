@@ -22,7 +22,7 @@ import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
-import {translate, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoService} from "@jsverse/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 
 function deepClone(obj: any): any {
@@ -122,6 +122,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
           othersAction.children.push({
             action: Action.RemoveFromOnDeck,
             title: 'remove-from-on-deck',
+            description: '',
             callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
             class: 'danger',
             requiresAdmin: false,

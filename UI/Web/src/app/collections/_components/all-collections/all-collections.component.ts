@@ -29,7 +29,7 @@ import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";

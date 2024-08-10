@@ -3,7 +3,7 @@ import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {UserCollection} from "../../../_models/collection-tag";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {AsyncPipe, JsonPipe} from "@angular/common";
 import {AccountService} from "../../../_services/account.service";
 import {ImageComponent} from "../../../shared/image/image.component";

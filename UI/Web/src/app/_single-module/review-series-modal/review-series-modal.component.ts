@@ -12,7 +12,7 @@ import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import { SeriesService } from 'src/app/_services/series.service';
 import {UserReview} from "../review-card/user-review";
 import {CommonModule} from "@angular/common";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
 

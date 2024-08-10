@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, O
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {ToastrService} from "ngx-toastr";
 

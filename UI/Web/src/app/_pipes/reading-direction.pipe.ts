@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {ReadingDirection} from "../_models/preferences/reading-direction";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'readingDirection',

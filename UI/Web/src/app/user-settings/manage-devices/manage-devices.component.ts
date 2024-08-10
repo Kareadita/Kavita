@@ -10,7 +10,7 @@ import { DeviceService } from 'src/app/_services/device.service';
 import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import {NgbCollapse, NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";

@@ -4,7 +4,7 @@ import {ServerService} from 'src/app/_services/server.service';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {ReadMoreComponent} from '../../../shared/read-more/read-more.component';
 import {AsyncPipe, DatePipe} from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 
 @Component({

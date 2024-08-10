@@ -8,7 +8,7 @@ import {
   Output, TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-setting-title',

@@ -20,7 +20,7 @@ import {
 import {allEncodeFormats} from '../_models/encode-format';
 import {ManageMediaIssuesComponent} from '../manage-media-issues/manage-media-issues.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes} from '../_models/cover-image-size';
 import {pageLayoutModes} from "../../_models/preferences/preferences";
 import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";

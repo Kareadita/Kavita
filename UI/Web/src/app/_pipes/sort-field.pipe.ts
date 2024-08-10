@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {SortField} from "../_models/metadata/series-filter";
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'sortField',

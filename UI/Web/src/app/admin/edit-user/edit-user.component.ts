@@ -10,7 +10,7 @@ import {RestrictionSelectorComponent} from '../../user-settings/restriction-sele
 import {LibrarySelectorComponent} from '../library-selector/library-selector.component';
 import {RoleSelectorComponent} from '../role-selector/role-selector.component';
 import {NgIf} from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
 

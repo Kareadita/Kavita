@@ -7,7 +7,7 @@ import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";

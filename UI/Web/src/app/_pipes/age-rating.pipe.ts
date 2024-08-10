@@ -2,7 +2,7 @@ import {inject, Pipe, PipeTransform} from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'ageRating',

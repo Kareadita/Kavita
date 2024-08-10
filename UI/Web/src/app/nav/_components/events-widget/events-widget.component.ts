@@ -25,7 +25,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
 import { NgClass, NgStyle, AsyncPipe } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-nav-events-toggle',

@@ -14,8 +14,7 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { NavService } from 'src/app/_services/nav.service';
 import { ToggleService } from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {tap} from "rxjs";
 
 /**

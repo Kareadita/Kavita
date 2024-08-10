@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {NavService} from "../../../_services/nav.service";
 
 @Component({

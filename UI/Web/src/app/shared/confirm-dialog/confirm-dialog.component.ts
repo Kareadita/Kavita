@@ -4,7 +4,7 @@ import { ConfirmButton } from './_models/confirm-button';
 import { ConfirmConfig } from './_models/confirm-config';
 import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-confirm-dialog',

@@ -15,7 +15,7 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {StepTrackerComponent, TimelineStep} from "../step-tracker/step-tracker.component";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingListService} from "../../../_services/reading-list.service";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {ToastrService} from "ngx-toastr";
