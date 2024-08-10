@@ -96,6 +96,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
   protected readonly WikiLink = WikiLink;
+  protected readonly Action = Action;
 
   @Input({required: true}) library!: Library | undefined;
 
@@ -404,5 +405,4 @@ export class LibrarySettingsModalComponent implements OnInit {
         break;
     }
   }
-
 }

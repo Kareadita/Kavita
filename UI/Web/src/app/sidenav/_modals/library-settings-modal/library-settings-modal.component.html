@@ -207,13 +207,13 @@
           <li [ngbNavItem]="TabID.Tasks">
             <a ngbNavLink>{{t(TabID.Tasks)}}</a>
             <ng-template ngbNavContent>
-              <div class="mt-4 mb-4">
-                @for(task of tasks; track task.action) {
+              @for(task of tasks; track task.action) {
+                <div class="mt-3 mb-3">
                   <app-setting-button [subtitle]="task.description">
-                    <button class="btn btn-secondary btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                    <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
                   </app-setting-button>
-                }
-              </div>
+                </div>
+              }
             </ng-template>
           </li>
 
