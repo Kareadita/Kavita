@@ -145,4 +145,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
                NormalizedName == localizedNameNormalized ||
                NormalizedLocalizedName == localizedNameNormalized;
     }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

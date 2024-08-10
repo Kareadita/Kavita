@@ -193,4 +193,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     {
         return MinNumber.Is(Parser.DefaultChapterNumber) && !IsSpecial;
     }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

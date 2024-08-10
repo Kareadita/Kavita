@@ -377,6 +377,7 @@ public class UploadController : BaseApiController
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
             library.CoverImage = null;
+            library.ResetColorScape();
             _unitOfWork.LibraryRepository.Update(library);
             if (_unitOfWork.HasChanges())
             {

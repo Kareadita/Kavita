@@ -73,4 +73,10 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
         return $"{MinNumber}-{MaxNumber}";
     }
 
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
+
 }
