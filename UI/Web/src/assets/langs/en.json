@@ -1624,7 +1624,9 @@
         "help": "{{common.help}}",
         "announcements": "Announcements",
         "logout": "Logout",
-        "all-filters": "Smart Filters"
+        "all-filters": "Smart Filters",
+        "nav-link-header": "Navigation Options",
+        "close": "{{common.close}}"
     },
 
     "promoted-icon": {
