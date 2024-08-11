@@ -1,18 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit
-} from '@angular/core';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { filter, map, tap } from 'rxjs';
-import { NavService } from 'src/app/_services/nav.service';
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { AsyncPipe, NgClass, NgOptimizedImage, NgTemplateOutlet } from "@angular/common";
-import { ImageComponent } from "../../../shared/image/image.component";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {NavigationEnd, Router, RouterLink } from '@angular/router';
+import {filter, map, tap } from 'rxjs';
+import {NavService } from 'src/app/_services/nav.service';
+import {takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import {AsyncPipe, NgClass, NgOptimizedImage, NgTemplateOutlet } from "@angular/common";
+import {ImageComponent } from "../../../shared/image/image.component";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 
 @Component({
@@ -28,6 +21,7 @@ export class SideNavItemComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly navService = inject(NavService);
+  protected readonly utilityService = inject(UtilityService);
 
   /**
    * Id for automatic scrolling to.
@@ -69,6 +63,7 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() badgeCount: number | null = -1;
 
+
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
 
 
@@ -78,9 +73,9 @@ export class SideNavItemComponent implements OnInit {
   constructor() {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef),
-        map(evt => evt as NavigationEnd),
-        tap((evt: NavigationEnd) => this.triggerHighlightCheck(evt.url))
+          takeUntilDestroyed(this.destroyRef),
+          map(evt => evt as NavigationEnd),
+          tap((evt: NavigationEnd) => this.triggerHighlightCheck(evt.url))
       ).subscribe();
   }
 
@@ -119,7 +114,7 @@ export class SideNavItemComponent implements OnInit {
     if (this.comparisonMethod === 'startsWith') {
       this.highlighted = page.startsWith(this.link);
       this.cdRef.markForCheck();
-      return
+      return;
     }
 
     if (this.comparisonMethod === 'equals') {
@@ -143,6 +138,8 @@ export class SideNavItemComponent implements OnInit {
   }
 
   openLink() {
+    this.collapseNavIfApplicable();
+
     if (Object.keys(this.queryParams).length !== 0) {
       this.router.navigateByUrl(this.link + '?' + this.queryParams);
       return;
@@ -154,5 +151,10 @@ export class SideNavItemComponent implements OnInit {
     this.router.navigateByUrl(this.link!);
   }
 
+  // If on mobile, automatically collapse the side nav after making a selection
+  collapseNavIfApplicable() {
+    if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+      this.navService.collapseSideNav(true);
+    }
+  }
 }
-
