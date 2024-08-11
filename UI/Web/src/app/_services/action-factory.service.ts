@@ -223,25 +223,28 @@ export class ActionFactoryService {
   getActionablesForSettingsPage(actions: Array<ActionItem<any>>, blacklist: Array<Action> = []) {
     const tasks = [];
 
+    let actionItem;
     for (let parent of actions) {
       if (parent.action === Action.SendTo) continue;
 
       if (parent.children.length === 0) {
-        parent.title = translate('actionable.' + parent.title);
-        if (parent.description !== '') {
-          parent.description = translate('actionable.' + parent.description);
+        actionItem = {...parent};
+        actionItem.title = translate('actionable.' + actionItem.title);
+        if (actionItem.description !== '') {
+          actionItem.description = translate('actionable.' + actionItem.description);
         }
 
-        tasks.push(parent);
+        tasks.push(actionItem);
         continue;
       }
 
       for (let child of parent.children) {
-        child.title = translate('actionable.' + child.title);
-        if (child.description !== '') {
-          child.description = translate('actionable.' + child.description);
+        actionItem = {...child};
+        actionItem.title = translate('actionable.' + actionItem.title);
+        if (actionItem.description !== '') {
+          actionItem.description = translate('actionable.' + actionItem.description);
         }
-        tasks.push(child);
+        tasks.push(actionItem);
       }
     }
 
