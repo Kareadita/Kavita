@@ -1250,10 +1250,12 @@
         "tags": [
           "Chapter"
         ],
+        "summary": "Gets a single chapter",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1280,6 +1282,76 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chapter"
+        ],
+        "summary": "Removes a Chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chapter/update": {
+      "post": {
+        "tags": [
+          "Chapter"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -15138,6 +15210,69 @@
             "type": "string",
             "nullable": true
           },
+          "ageRatingLocked": {
+            "type": "boolean"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "isbnLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
           "people": {
             "type": "array",
             "items": {
@@ -21331,6 +21466,247 @@
           },
           "includeUnknowns": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "description": "Genres for the Chapter",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Chapter",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Highest Age Rating from all Chapters",
+            "format": "int32"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the content (BCP-47 code)",
+            "nullable": true
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "isbnLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
+          },
+          "sortOrderLocked": {
+            "type": "boolean",
+            "description": "Can the sort order be updated on scan or is it locked from UI"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "Date which chapter was released",
+            "format": "date-time"
+          },
+          "titleName": {
+            "type": "string",
+            "description": "Chapter title",
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -99,6 +99,5 @@ export interface Chapter extends IHasCast {
     teamLocked: boolean;
     locationLocked: boolean;
     ageRatingLocked: boolean;
-    releaseYearLocked: boolean;
     languageLocked: boolean;
 }

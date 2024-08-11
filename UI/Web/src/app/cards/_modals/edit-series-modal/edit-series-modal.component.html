@@ -395,7 +395,7 @@
           <li [ngbNavItem]="tabs[TabID.CoverImage]">
             <a ngbNavLink>{{t(tabs[TabID.CoverImage])}}</a>
             <ng-template ngbNavContent>
-              <p class="alert alert-primary" role="alert">
+              <p class="alert alert-warning" role="alert">
                 {{t('cover-image-description')}}
               </p>
               <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>

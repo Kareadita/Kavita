@@ -18,7 +18,6 @@ export interface IHasCast {
   translatorLocked: boolean;
   teamLocked: boolean;
   locationLocked: boolean;
-  releaseYearLocked: boolean;
   languageLocked: boolean;
 
   writers: Array<Person>;

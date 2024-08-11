@@ -28,6 +28,7 @@ public enum ChapterIncludes
 public interface IChapterRepository
 {
     void Update(Chapter chapter);
+    void Delete(Chapter chapter);
     Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None);
     Task<IChapterInfoDto?> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
@@ -58,6 +59,11 @@ public class ChapterRepository : IChapterRepository
     public void Update(Chapter chapter)
     {
         _context.Entry(chapter).State = EntityState.Modified;
+    }
+
+    public void Delete(Chapter chapter)
+    {
+        _context.Chapter.Remove(chapter);
     }
 
     public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None)
