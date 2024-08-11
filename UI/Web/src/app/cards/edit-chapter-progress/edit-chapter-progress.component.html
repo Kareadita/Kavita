@@ -17,16 +17,16 @@
           </td>
           <td>
             @if(editMode[idx]) {
-              <input type="number" formControlName="pagesRead" class="form-control"/>
+              <input type="number" formControlName="pagesRead" class="form-control" inputmode="numeric"/>
             } @else {
               {{progressEvents[idx].pagesRead}}
             }
           </td>
           <td>
-            {{progressEvents[idx].createdUtc}}
+            {{progressEvents[idx].createdUtc | utcToLocalTime | date:'shortDate' | defaultDate}}
           </td>
           <td>
-            {{progressEvents[idx].lastModifiedUtc}}
+            {{progressEvents[idx].lastModifiedUtc | utcToLocalTime | date:'shortDate' | defaultDate}}
           </td>
 <!--          <td>-->
 <!--            @if(editMode[idx]) {-->
@@ -42,6 +42,8 @@
 <!--            }-->
 <!--          </td>-->
         </tr>
+      } @empty {
+        <tr><td colspan="6" style="text-align: center;">{{t('no-data')}}</td></tr>
       }
     </tbody>
   </table>

@@ -100,4 +100,8 @@ export interface Chapter extends IHasCast {
     locationLocked: boolean;
     ageRatingLocked: boolean;
     languageLocked: boolean;
+    isbnLocked: boolean;
+    titleNameLocked: boolean;
+    sortOrderLocked: boolean;
+    releaseDateLocked: boolean;
 }

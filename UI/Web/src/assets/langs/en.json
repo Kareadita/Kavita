@@ -1704,7 +1704,8 @@
         "date-created-header": "Created (UTC)",
         "date-updated-header": "Last Updated (UTC)",
         "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}"
+        "edit-alt": "{{common.edit}}",
+        "no-data": "{{user-scrobble-history.no-data}}"
     },
 
     "import-cbl-modal": {
@@ -1933,9 +1934,63 @@
     },
 
     "edit-chapter-modal": {
-        "title": "Edit Chapter",
+        "title": "Edit",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "title-label": "Title",
+        "sort-order-label": "Sort Order",
+        "sort-order-tooltip": "The reading order in which this chapter is ordered within the volume",
+        "isbn-label": "ISBN",
+        "release-date-label": "{{entity-info-cards.release-date-title}}",
+        "summary-label": "{{edit-series-modal.summary-label}}",
+        "genres-label": "{{edit-series-modal.genres-label}}",
+        "tags-label": "{{edit-series-modal.tags-label}}",
+        "writer-label": "{{edit-series-modal.writer-label}}",
+        "cover-artist-label": "{{edit-series-modal.cover-artist-label}}",
+        "publisher-label": "{{edit-series-modal.publisher-label}}",
+        "imprint-label": "{{edit-series-modal.imprint-label}}",
+        "penciller-label": "{{edit-series-modal.penciller-label}}",
+        "letterer-label": "{{edit-series-modal.letterer-label}}",
+        "inker-label": "{{edit-series-modal.inker-label}}",
+        "editor-label": "{{edit-series-modal.editor-label}}",
+        "colorist-label": "{{edit-series-modal.colorist-label}}",
+        "character-label": "{{edit-series-modal.character-label}}",
+        "translator-label": "{{edit-series-modal.translator-label}}",
+        "team-label": "{{filter-field-pipe.team}}",
+        "location-label": "{{filter-field-pipe.location}}",
+        "language-label": "{{edit-series-modal.language-label}}",
+        "age-rating-label": "{{edit-series-modal.age-rating-label}}",
+        "web-link-description": "{{edit-series-modal.web-link-description}}",
+        "web-link-label": "{{edit-series-modal.web-link-label}}",
+        "general-tab": "General",
+        "people-tab": "People",
+        "weblink-tab": "Weblinks",
+        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "tasks-tab": "{{edit-series-modal.tasks-tab}}",
+        "progress-tab": "Progress",
+        "info-tab": "{{edit-series-modal.info-tab}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "tags-tab": "Tags",
+
+        "pages-label": "{{entity-info-cards.pages-count}}",
+        "words-label": "{{entity-info-cards.length-title}}",
+        "pages-count": "{{num}} Pages",
+        "words-count": "{{num}} Words",
+
+        "reading-time-label": "{{entity-info-cards.reading-time-title}}",
+        "date-added-label": "{{entity-info-cards.date-added-title}}",
+        "size-label": "{{entity-info-cards.size-title}}",
+        "id-label": "{{entity-info-cards.id-title}}",
+        "links-label": "{{series-metadata-detail.links-title}}",
+        "last-read-label": "{{entity-info-cards.last-read-title}}",
+        "less-than-hour": "<1 Hour",
+        "range-hours": "{{value}} {{hourWord}}",
+        "hour": "Hour",
+        "hours": "Hours",
+        "read-time-label": "{{series-info-cards.read-time-title}}",
+        "files-label": "Files"
+
     },
 
     "day-breakdown": {

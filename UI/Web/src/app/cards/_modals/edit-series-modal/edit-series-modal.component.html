@@ -52,15 +52,17 @@
                 </div>
               </div>
 
-              <div class="row g-0" *ngIf="metadata">
-                <div class="mb-3" style="width: 100%">
-                  <label for="summary" class="form-label">{{t('summary-label')}}</label>
-                  <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
-                    <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+              @if (metadata) {
+                <div class="row g-0">
+                  <div class="mb-3" style="width: 100%">
+                    <label for="summary" class="form-label">{{t('summary-label')}}</label>
+                    <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
+                      <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+                    </div>
                   </div>
                 </div>
-              </div>
+              }
 
             </ng-template>
           </li>
@@ -368,7 +370,7 @@
               <div class="row g-0">
                 <div class="mb-3">
                   <label for="location" class="form-label">{{t('location-label')}}</label>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location);metadata.locationLocked = true" [settings]="getPersonsSettings(PersonRole.Location)"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [settings]="getPersonsSettings(PersonRole.Location)"
                                  [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
                                  (newItemAdded)="metadata.locationLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">

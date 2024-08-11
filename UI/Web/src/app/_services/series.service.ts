@@ -166,6 +166,10 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, TextResonse);
   }
 
+  updateChapterMetadata(chapter: any) {
+    return this.httpClient.post(this.baseUrl + 'chapter/update', chapter, TextResonse);
+  }
+
   getSeriesForTag(collectionTagId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
 

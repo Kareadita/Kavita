@@ -19,10 +19,11 @@
           </h4>
           <div class="subtitle">
             <span>
-              <app-entity-title [libraryType]="libraryType!" [entity]="chapter"></app-entity-title>
+              <app-entity-title [libraryType]="libraryType!" [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
             </span>
             @if (chapter.titleName) {
-              <span class="ms-3">{{chapter.titleName}}</span>
+              <span class="ms-2 me-2">•</span>
+              <span>{{chapter.titleName}}</span>
             }
           </div>
 
@@ -41,8 +42,8 @@
             }
 
             <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i> {{chapter.avgHoursToRead | timeDuration }}</span>
-
-            <span>• {{chapter.pages}} pages</span>
+            <span class="ms-2 me-2">•</span>
+            <span>{{chapter.pages}} pages</span>
           </div>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->

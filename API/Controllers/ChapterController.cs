@@ -63,7 +63,7 @@ public class ChapterController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
     {
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.Id);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.Id, ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags);
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 

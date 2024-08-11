@@ -239,6 +239,7 @@ export class ActionFactoryService {
       }
 
       for (let child of parent.children) {
+        if (child.action === Action.SendTo) continue;
         actionItem = {...child};
         actionItem.title = translate('actionable.' + actionItem.title);
         if (actionItem.description !== '') {

@@ -177,6 +177,12 @@ export class ChapterDetailComponent implements OnInit {
       chapter: this.chapterService.getChapterMetadata(this.chapterId),
       libraryType: this.libraryService.getLibraryType(parseInt(libraryId, 10))
     }).subscribe(results => {
+
+      if (results.chapter === null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+
       this.series = results.series;
       this.chapter = results.chapter;
       this.libraryType = results.libraryType;
@@ -210,7 +216,7 @@ export class ChapterDetailComponent implements OnInit {
 
   openEditModal() {
     // TODO: Refactor the ModalOptions into a separate file so it's consistent
-    const ref = this.modalService.open(EditChapterModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
     ref.componentInstance.chapter = this.chapter;
     ref.componentInstance.libraryType = this.libraryType;
 
