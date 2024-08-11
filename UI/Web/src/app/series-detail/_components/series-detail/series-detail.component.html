@@ -101,11 +101,12 @@
 
             <div class="col-auto ms-2">
               <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
-            <span>
-                <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
-            </span>
+                <span>
+                    <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
+                </span>
               </button>
             </div>
+
             @if (isAdmin) {
               <div class="col-auto ms-2">
                 <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
@@ -149,16 +150,6 @@
             </div>
           }
 
-        </div>
-
-        <div class="row" [ngClass]="{'pt-3': !seriesMetadata || seriesMetadata.summary.length === 0}">
-          <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-alt')"
-                             iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                             [clickableTitle]="true" (sectionClick)="openReviewModal()">
-            <ng-template #carouselItem let-item let-position="idx">
-              <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
-            </ng-template>
-          </app-carousel-reel>
         </div>
       </div>
 
@@ -204,7 +195,10 @@
 
           @if (showVolumeTab) {
             <li [ngbNavItem]="TabID.Volumes">
-              <a ngbNavLink>{{UseBookLogic ? t('books-tab') : t('volumes-tab')}}</a>
+              <a ngbNavLink>
+                {{UseBookLogic ? t('books-tab') : t('volumes-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{volumes.length}}</span>
+              </a>
               <ng-template ngbNavContent>
 
                 <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
@@ -231,7 +225,10 @@
 
           @if (showChapterTab) {
             <li [ngbNavItem]="TabID.Chapters">
-              <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
+              <a ngbNavLink>
+                {{utilityService.formatChapterName(libraryType) + 's'}}
+                <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
+              </a>
               <ng-template ngbNavContent>
                 <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
                   @switch (renderMode) {
@@ -256,7 +253,10 @@
 
           @if (hasSpecials) {
             <li [ngbNavItem]="TabID.Specials">
-              <a ngbNavLink>{{t('specials-tab')}}</a>
+              <a ngbNavLink>
+                {{t('specials-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{specials.length}}</span>
+              </a>
               <ng-template ngbNavContent>
                 <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                   @switch (renderMode) {
@@ -280,7 +280,10 @@
 
           @if (hasRelations) {
             <li [ngbNavItem]="TabID.Related">
-              <a ngbNavLink>{{t('related-tab')}}</a>
+              <a ngbNavLink>
+                {{t('related-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{relations.length}}</span>
+              </a>
               <ng-template ngbNavContent>
                 <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
                   <div class="card-container row g-0" #container>
@@ -313,7 +316,7 @@
                     @case (PageLayoutMode.List) {
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                         @if (!item.hasOwnProperty('coverUrl')) {
-                          <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                          <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">
                             <ng-container title>
                             <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
                               <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
@@ -337,6 +340,111 @@
             </li>
           }
 
+          <li [ngbNavItem]="TabID.Reviews">
+            <a ngbNavLink>{{t('reviews-tab')}}</a>
+            <ng-template ngbNavContent>
+
+              <div class="mb-3">
+                <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
+                                   iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
+                                   [clickableTitle]="true" (sectionClick)="openReviewModal()">
+                  <ng-template #carouselItem let-item let-position="idx">
+                    <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+                  </ng-template>
+                </app-carousel-reel>
+              </div>
+
+              <div class="mb-3">
+                <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
+                  <ng-template #carouselItem let-item let-position="idx">
+                    <app-review-card [review]="item"></app-review-card>
+                  </ng-template>
+                </app-carousel-reel>
+              </div>
+
+            </ng-template>
+          </li>
+
+          @if (seriesMetadata) {
+            <li [ngbNavItem]="TabID.Cast">
+              <a ngbNavLink>{{t('cast-tab')}}</a>
+              <ng-template ngbNavContent>
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.writers" [title]="t('writers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.colorists" [title]="t('colorists-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.editors" [title]="t('editors-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.characters" [title]="t('characters-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <!-- TODO: For Comic/ComicVine lets render this as cover artists and for everything else as artist -->
+                  <app-carousel-reel [items]="seriesMetadata.coverArtists" [title]="t('cover-artists-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.inkers" [title]="t('inkers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.letterers" [title]="t('letterers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.pencillers" [title]="t('pencillers-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="seriesMetadata.translators" [title]="t('translators-title')">
+                    <ng-template #carouselItem let-item>
+                      <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+              </ng-template>
+            </li>
+          }
 
         </ul>
         <div [ngbNavOutlet]="nav"></div>
@@ -344,6 +452,7 @@
 
       <app-loading [loading]="isLoading"></app-loading>
     </div>
+
     <ng-template #estimatedNextCard let-tabId="tabId">
       @if (nextExpectedChapter) {
         @switch (tabId) {
@@ -368,26 +477,22 @@
 </ng-container>
 
 <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  @if (!item.isSpecial) {
-    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="openChapter(item)"
-                   [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                   [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                   [count]="item.files.length"
-                   (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                   [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-    </app-card-item>
-  }
+  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="openChapter(item)"
+                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
+                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                 [count]="item.files.length"
+                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                 [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-card-item>
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  @if (item.number !== LooseLeafOrSpecialNumber) {
-    <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
-                   [imageUrl]="imageService.getVolumeCoverImage(item.id)"
-                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
-                   (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-    </app-card-item>
-  }
+  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
+                 [imageUrl]="imageService.getVolumeCoverImage(item.id)"
+                 [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
+                 (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                 [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-card-item>
 </ng-template>
 
 <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
@@ -401,34 +506,30 @@
 </ng-template>
 
 <ng-template #nonSpecialChapterListItem let-item>
-  @if (!item.isSpecial) {
-    <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
-                   [seriesName]="series.name" [entity]="item"
-                   [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                   [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openChapter(item)"
-                   [blur]="user?.preferences?.blurUnreadSummaries || false">
-      <ng-container title>
-        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-      </ng-container>
-    </app-list-item>
-  }
+  <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
+                 [seriesName]="series.name" [entity]="item"
+                 [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                 [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openChapter(item)"
+                 [blur]="user?.preferences?.blurUnreadSummaries || false">
+    <ng-container title>
+      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+    </ng-container>
+  </app-list-item>
 </ng-template>
 
 <ng-template #nonSpecialVolumeListItem let-item>
-  @if (item.number !== LooseLeafOrSpecialNumber) {
-    <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
-                   [seriesName]="series.name" [entity]="item"
-                   [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                   [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
-                   [blur]="user?.preferences?.blurUnreadSummaries || false">
-      <ng-container title>
-        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-      </ng-container>
-    </app-list-item>
-  }
+  <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.id)" [libraryId]="libraryId"
+                 [seriesName]="series.name" [entity]="item"
+                 [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                 [pagesRead]="item.pagesRead" [totalPages]="item.pages" (read)="openVolume(item)"
+                 [blur]="user?.preferences?.blurUnreadSummaries || false">
+    <ng-container title>
+      <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+    </ng-container>
+  </app-list-item>
+</ng-template>
 
-
-</ng-template><ng-template #specialChapterListItem let-item>
+<ng-template #specialChapterListItem let-item>
   <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.id)" [libraryId]="libraryId"
                  [seriesName]="series.name" [entity]="item"
                  [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""

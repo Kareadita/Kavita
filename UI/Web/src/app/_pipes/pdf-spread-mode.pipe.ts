@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {PdfSpreadMode} from "../_models/preferences/pdf-spread-mode";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'pdfSpreadMode',

@@ -229,22 +229,25 @@ public class SeriesController : BaseApiController
         {
             // Trigger a refresh when we are moving from a locked image to a non-locked
             needsRefreshMetadata = true;
-            series.CoverImage = string.Empty;
+            series.CoverImage = null;
             series.CoverImageLocked = updateSeries.CoverImageLocked;
+            series.ResetColorScape();
+
         }
 
         _unitOfWork.SeriesRepository.Update(series);
 
-        if (await _unitOfWork.CommitAsync())
+        if (!await _unitOfWork.CommitAsync())
         {
-            if (needsRefreshMetadata)
-            {
-                _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
-            }
-            return Ok();
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-update"));
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-update"));
+        if (needsRefreshMetadata)
+        {
+            _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+        }
+
+        return Ok();
     }
 
     /// <summary>

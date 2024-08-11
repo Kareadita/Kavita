@@ -23,12 +23,13 @@ import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {WikiLink} from "../../../_models/wiki";
+import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 
 @Component({
   selector: 'app-side-nav',
@@ -148,10 +149,10 @@ export class SideNavComponent implements OnInit {
         await this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        await this.actionService.refreshMetadata(library);
+        await this.actionService.refreshLibraryMetadata(library);
         break;
       case(Action.GenerateColorScape):
-        await this.actionService.refreshMetadata(library, undefined, false);
+        await this.actionService.refreshLibraryMetadata(library, undefined, false);
         break;
       case (Action.AnalyzeFiles):
         await this.actionService.analyzeFiles(library);
@@ -206,4 +207,6 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
+
+  protected readonly SettingsTabId = SettingsTabId;
 }

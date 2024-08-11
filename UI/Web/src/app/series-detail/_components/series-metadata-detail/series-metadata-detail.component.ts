@@ -28,7 +28,7 @@ import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-info-cards.component";
 import {LibraryType} from "../../../_models/library/library";
 import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ImageComponent} from "../../../shared/image/image.component";

@@ -25,7 +25,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
 import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({

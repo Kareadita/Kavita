@@ -19,8 +19,8 @@ public class AppUserCollectionDto : IHasCoverImage
     /// </summary>
     public string? CoverImage { get; set; } = string.Empty;
 
-    public string PrimaryColor { get; set; }
-    public string SecondaryColor { get; set; }
+    public string PrimaryColor { get; set; } = string.Empty;
+    public string SecondaryColor { get; set; } = string.Empty;
     public bool CoverImageLocked { get; set; }
 
     /// <summary>
@@ -48,4 +48,10 @@ public class AppUserCollectionDto : IHasCoverImage
     /// A <br/> separated string of all missing series
     /// </summary>
     public string? MissingSeriesFromSource { get; set; }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

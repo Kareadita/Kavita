@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {FormsModule} from "@angular/forms";

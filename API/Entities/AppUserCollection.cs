@@ -59,6 +59,12 @@ public class AppUserCollection : IEntityDate, IHasCoverImage
     /// </summary>
     public string? MissingSeriesFromSource { get; set; }
 
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
+
     // Relationship
     public AppUser AppUser { get; set; } = null!;
     public int AppUserId { get; set; }

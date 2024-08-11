@@ -5,7 +5,7 @@ import {Member} from 'src/app/_models/auth/member';
 import {LibraryService} from 'src/app/_services/library.service';
 import {NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {SelectionModel} from "../../../typeahead/_models/selection-model";
 
 @Component({

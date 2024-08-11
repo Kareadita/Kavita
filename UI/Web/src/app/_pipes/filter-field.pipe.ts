@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { FilterField } from 'src/app/_models/metadata/v2/filter-field';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'filterField',

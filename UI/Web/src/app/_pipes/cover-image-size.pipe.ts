@@ -1,6 +1,6 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import {CoverImageSize} from "../admin/_models/cover-image-size";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'coverImageSize',

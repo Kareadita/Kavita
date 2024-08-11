@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 

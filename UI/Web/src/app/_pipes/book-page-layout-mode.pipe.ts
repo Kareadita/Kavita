@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {BookPageLayoutMode} from "../_models/readers/book-page-layout-mode";
 
 @Pipe({

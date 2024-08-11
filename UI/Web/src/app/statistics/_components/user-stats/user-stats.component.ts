@@ -12,7 +12,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
 import {UserStatsInfoCardsComponent} from '../user-stats-info-cards/user-stats-info-cards.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
 
 @Component({

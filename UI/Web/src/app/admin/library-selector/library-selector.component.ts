@@ -12,7 +12,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Library} from 'src/app/_models/library/library';
 import {Member} from 'src/app/_models/auth/member';
 import {LibraryService} from 'src/app/_services/library.service';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 

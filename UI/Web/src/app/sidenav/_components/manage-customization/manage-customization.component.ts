@@ -5,7 +5,7 @@ import {CustomizeSidenavStreamsComponent} from "../customize-sidenav-streams/cus
 import {ManageExternalSourcesComponent} from "../manage-external-sources/manage-external-sources.component";
 import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-filters.component";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from 'src/app/_models/wiki';
 
 enum TabID {
@@ -42,5 +42,5 @@ export class ManageCustomizationComponent {
   protected readonly Breakpoint = Breakpoint;
   protected readonly WikiLink = WikiLink;
 
-  activeTab = TabID.SideNav;
+  activeTab = TabID.Dashboard;
 }

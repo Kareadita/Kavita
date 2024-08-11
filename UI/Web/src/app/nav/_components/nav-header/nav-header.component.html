@@ -159,40 +159,50 @@
           }
         </ul>
 
+
         @if (!searchFocused) {
-          @if (backToTopNeeded) {
-            <div class="back-to-top">
-              <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
-                <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('scroll-to-top-alt')}}</span>
-              </button>
-            </div>
+          @if((breakpoint$ | async)! > Breakpoint.Tablet) {
+            @if (backToTopNeeded) {
+              <div class="back-to-top">
+                <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
+                  <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('scroll-to-top-alt')}}</span>
+                </button>
+              </div>
+            }
           }
 
           @if (accountService.currentUser$ | async; as user) {
             <div class="nav-item">
               <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
             </div>
-            <div class="nav-item not-xs-only">
-              <a routerLink="/settings" [fragment]="SettingsTabId.Account" class="dark-exempt btn btn-icon" [title]="t('settings')">
-                <i class="fa fa-cogs nav" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('settings')}}</span>
-              </a>
-            </div>
 
-
-            <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right">
-              <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+            @if((breakpoint$ | async)! <= Breakpoint.Mobile) {
+              <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
                 <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
                 <span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
               </button>
-              <div ngbDropdownMenu>
-                <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
-                <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
-                <a ngbDropdownItem [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
-                <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
+            } @else {
+              <div class="nav-item not-xs-only">
+                <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" class="dark-exempt btn btn-icon" [title]="t('settings')">
+                  <i class="fa fa-cogs nav" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('settings')}}</span>
+                </a>
               </div>
-            </div>
+
+              <div ngbDropdown class="nav-item dropdown d-sm-none d-md-block" display="dynamic" placement="bottom-right">
+                <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+                  <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
+                  <span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
+                </button>
+                <div ngbDropdownMenu>
+                  <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
+                  <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
+                  <a ngbDropdownItem [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
+                  <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
+                </div>
+              </div>
+            }
           }
         }
 

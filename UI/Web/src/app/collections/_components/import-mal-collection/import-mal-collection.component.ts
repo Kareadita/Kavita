@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";

@@ -10,7 +10,7 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {MangaFormatIconPipe} from "../../../_pipes/manga-format-icon.pipe";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 

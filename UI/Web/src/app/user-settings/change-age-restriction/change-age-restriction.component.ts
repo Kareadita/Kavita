@@ -17,7 +17,7 @@ import { AgeRatingPipe } from '../../_pipes/age-rating.pipe';
 import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {ReactiveFormsModule} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";

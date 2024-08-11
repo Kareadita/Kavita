@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {PageLayoutMode} from "../_models/page-layout-mode";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'pageLayoutMode',

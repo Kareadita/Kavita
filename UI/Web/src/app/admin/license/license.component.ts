@@ -13,7 +13,7 @@ import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {catchError} from "rxjs";
 import {WikiLink} from "../../_models/wiki";
 import {RouterLink} from "@angular/router";

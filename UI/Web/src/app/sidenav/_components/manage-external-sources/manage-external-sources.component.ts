@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, injec
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbCollapse, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {EditExternalSourceItemComponent} from "../edit-external-source-item/edit-external-source-item.component";

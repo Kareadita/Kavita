@@ -89,9 +89,7 @@
         <app-setting-switch [title]="t('enable-ssl-label')">
           <ng-template #switch>
             <div class="form-check form-switch">
-              <div class="form-check form-switch">
-                <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableOpds">
-              </div>
+              <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableOpds">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -142,9 +140,7 @@
         <app-setting-switch [title]="t('customized-templates-label')" [subtitle]="t('customized-templates-tooltip')">
           <ng-template #switch>
             <div class="form-check form-switch">
-              <div class="form-check form-switch">
-                <input id="settings-customized-templates" type="checkbox" class="form-check-input" formControlName="customizedTemplates">
-              </div>
+              <input id="settings-customized-templates" type="checkbox" class="form-check-input" formControlName="customizedTemplates">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -154,8 +150,6 @@
     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mt-4">
       <button type="button" class="flex-fill btn btn-secondary me-2" (click)="test()">{{t('test')}}</button>
       <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
-      <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">{{t('reset')}}</button>
-      <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
     </div>
   </form>
 

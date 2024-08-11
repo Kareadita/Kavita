@@ -62,6 +62,11 @@ const routes: Routes = [
             loadComponent: () => import('../app/series-detail/_components/series-detail/series-detail.component').then(c => c.SeriesDetailComponent)
           },
           {
+            path: ':libraryId/series/:seriesId/chapter/:chapterId',
+            pathMatch: 'full',
+            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
+          },
+          {
             path: ':libraryId/series/:seriesId/manga',
             loadChildren: () => import('./_routes/manga-reader.router.module').then(m => m.routes)
           },

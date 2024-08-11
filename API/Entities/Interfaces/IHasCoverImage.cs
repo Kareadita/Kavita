@@ -1,5 +1,7 @@
 ﻿namespace API.Entities.Interfaces;
 
+#nullable enable
+
 public interface IHasCoverImage
 {
     /// <summary>
@@ -16,4 +18,9 @@ public interface IHasCoverImage
     /// Secondary color derived from the Cover Image
     /// </summary>
     public string? SecondaryColor { get; set; }
+
+    /// <summary>
+    /// Nulls out the ColorScape properties
+    /// </summary>
+    void ResetColorScape();
 }

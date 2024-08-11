@@ -21,7 +21,7 @@ import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { TimeAgoPipe } from '../../_pipes/time-ago.pipe';
 import { LibraryTypePipe } from '../../_pipes/library-type.pipe';
 import { RouterLink } from '@angular/router';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {AsyncPipe, TitleCasePipe} from "@angular/common";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -164,10 +164,10 @@ export class ManageLibraryComponent implements OnInit {
         await this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        await this.actionService.refreshMetadata(library);
+        await this.actionService.refreshLibraryMetadata(library);
         break;
       case(Action.GenerateColorScape):
-        await this.actionService.refreshMetadata(library, undefined, false);
+        await this.actionService.refreshLibraryMetadata(library, undefined, false);
         break;
       case(Action.Edit):
         this.editLibrary(library)

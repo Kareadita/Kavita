@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {PdfScrollMode} from "../_models/preferences/pdf-scroll-mode";
 
 @Pipe({

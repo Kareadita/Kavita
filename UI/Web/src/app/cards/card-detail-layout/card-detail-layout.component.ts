@@ -33,7 +33,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 

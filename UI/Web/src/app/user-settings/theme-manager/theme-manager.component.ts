@@ -15,7 +15,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { AsyncPipe, NgTemplateOutlet} from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../../cards/series-card/series-card.component";

@@ -19,7 +19,7 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {ImageComponent} from "../../shared/image/image.component";
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-cover-image-chooser',

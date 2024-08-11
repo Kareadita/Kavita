@@ -80,4 +80,10 @@ public class Library : IEntityDate, IHasCoverImage
             LastScanned = (DateTime) time;
         }
     }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

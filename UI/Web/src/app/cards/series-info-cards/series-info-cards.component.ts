@@ -34,7 +34,7 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-series-info-cards',

@@ -19,7 +19,7 @@ import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import {switchMap, take, takeWhile, throttleTime} from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
 import { BytesPipe } from 'src/app/_pipes/bytes.pipe';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SAVER, Saver} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";

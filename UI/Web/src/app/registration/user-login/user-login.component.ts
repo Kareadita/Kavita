@@ -9,7 +9,7 @@ import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
-import {TRANSLOCO_SCOPE, TranslocoDirective} from "@ngneat/transloco";
+import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
 
 
 @Component({

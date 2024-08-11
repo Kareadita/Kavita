@@ -401,12 +401,14 @@
               <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
             </ng-template>
           </li>
+
           <li [ngbNavItem]="tabs[TabID.Related]">
             <a ngbNavLink>{{t(tabs[TabID.Related])}}</a>
             <ng-template ngbNavContent>
               <app-edit-series-relation [series]="series" [save]="saveNestedComponents"></app-edit-series-relation>
             </ng-template>
           </li>
+
           <li [ngbNavItem]="tabs[TabID.Info]">
             <a ngbNavLink>{{t(tabs[TabID.Info])}}</a>
             <ng-template ngbNavContent>
@@ -490,6 +492,19 @@
                   </div>
                 </li>
               </ul>
+            </ng-template>
+          </li>
+
+          <li [ngbNavItem]="tabs[TabID.Tasks]">
+            <a ngbNavLink>{{t(tabs[TabID.Tasks])}}</a>
+            <ng-template ngbNavContent>
+              @for(task of tasks; track task.action) {
+                <div class="mt-3 mb-3">
+                  <app-setting-button [subtitle]="task.description">
+                    <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                  </app-setting-button>
+                </div>
+              }
             </ng-template>
           </li>
         </ul>

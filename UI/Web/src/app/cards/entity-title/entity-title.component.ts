@@ -4,7 +4,7 @@ import { Chapter, LooseLeafOrDefaultNumber } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library/library';
 import { Volume } from 'src/app/_models/volume';
 import {CommonModule, NgSwitch} from "@angular/common";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 
 /**
  * This is primarily used for list item

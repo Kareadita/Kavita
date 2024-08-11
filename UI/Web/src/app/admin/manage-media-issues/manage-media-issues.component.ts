@@ -19,7 +19,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { FilterPipe } from '../../_pipes/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";

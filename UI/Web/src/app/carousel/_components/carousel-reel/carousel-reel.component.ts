@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Ev
 import { Swiper, SwiperEvents } from 'swiper/types';
 import { SwiperModule } from 'swiper/angular';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-carousel-reel',

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {PdfTheme} from "../_models/preferences/pdf-theme";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'pdfTheme',

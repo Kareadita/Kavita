@@ -367,6 +367,7 @@
             <ng-template #edit>
               <input type="range" class="form-range" id="fontsize" min="50" max="300" step="10"
                      formControlName="bookReaderFontSize">
+              <span class="ms-2">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
             </ng-template>
           </app-setting-item>
         </div>

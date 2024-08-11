@@ -11,7 +11,7 @@ import {RouterLinkActive} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbOffcanvas, NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";

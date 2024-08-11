@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {ScrobbleEventType} from "../_models/scrobbling/scrobble-event";
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'scrobbleEventType',

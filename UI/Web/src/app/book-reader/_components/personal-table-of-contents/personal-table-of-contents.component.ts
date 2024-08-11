@@ -13,7 +13,7 @@ import {ReaderService} from "../../../_services/reader.service";
 import {PersonalToC} from "../../../_models/readers/personal-toc";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 export interface PersonalToCEvent {
   pageNum: number;

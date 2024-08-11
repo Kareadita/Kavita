@@ -19,7 +19,7 @@ import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
@@ -87,7 +87,7 @@ export class ActionService implements OnDestroy {
    * @param forceUpdate Optional Should we force
    * @returns
    */
-  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true) {
+  async refreshLibraryMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;
     }
@@ -102,8 +102,11 @@ export class ActionService implements OnDestroy {
       }
     }
 
+    const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
+
     this.libraryService.refreshMetadata(library?.id, forceUpdate).subscribe((res: any) => {
-      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
+      this.toastr.info(translate(message, {name: library.name}));
+
       if (callback) {
         callback(library);
       }
@@ -226,17 +229,24 @@ export class ActionService implements OnDestroy {
    * Start a metadata refresh for a Series
    * @param series Series, must have libraryId, id and name populated
    * @param callback Optional callback to perform actions after API completes
+   * @param forceUpdate If cache should be checked or not
    */
-  async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-      if (callback) {
-        callback(series);
+  async refreshSeriesMetadata(series: Series, callback?: SeriesActionCallback, forceUpdate: boolean = true) {
+
+    // Prompt the user if we are doing a forced call
+    if (forceUpdate) {
+      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
+        if (callback) {
+          callback(series);
+        }
+        return;
       }
-      return;
     }
 
-    this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(translate('toasts.refresh-covers-queued', {name: series.name}));
+    const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
+
+    this.seriesService.refreshMetadata(series, forceUpdate).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info(translate(message, {name: series.name}));
       if (callback) {
         callback(series);
       }

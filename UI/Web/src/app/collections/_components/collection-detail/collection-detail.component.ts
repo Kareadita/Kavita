@@ -47,7 +47,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
@@ -56,7 +56,7 @@ import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
-import {TranslocoDatePipe} from "@ngneat/transloco-locale";
+import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
