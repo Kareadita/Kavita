@@ -83,6 +83,13 @@ export class StatisticsService {
       })));
   }
 
+  getTimeSpentReadingPerYear(userId = 0) {
+    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/time-spent-reading-per-year?userId=' + userId).pipe(
+      map(spreads => spreads.map(spread => {
+        return {name: spread.value + '', value: spread.count};
+      })));
+  }
+
   getTopUsers(days: number = 0) {
     return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users?days=' + days);
   }

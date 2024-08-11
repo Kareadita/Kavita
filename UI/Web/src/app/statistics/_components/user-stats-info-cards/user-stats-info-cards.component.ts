@@ -46,4 +46,12 @@ export class UserStatsInfoCardsComponent {
       ref.componentInstance.title = 'Words Read By Year';
     });
   }
+  openTimeSpentReadingByYearList() {
+    const numberPipe = new CompactNumberPipe();
+    this.statsService.getTimeSpentReadingPerYear().subscribe(yearCounts => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} hours`);
+      ref.componentInstance.title = 'Time Spent Reading By Year';
+    });
+  }
 }

@@ -34,6 +34,7 @@ public interface IStatisticService
     IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId = 0);
     IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
+    IEnumerable<StatCount<int>> GetTimeSpentReadingByYear(int userId = 0);
     Task UpdateServerStatistics();
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
     Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown();
@@ -538,6 +539,27 @@ public class StatisticService : IStatisticService
             .SumAsync(p =>
                 p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
     }
+
+public IEnumerable<StatCount<int>> GetTimeSpentReadingByYear(int userId = 0)
+{
+    var query = _context.AppUserProgresses
+        .Join(_context.Chapter, 
+            progress => progress.ChapterId, 
+            chapter => chapter.Id, 
+            (progress, chapter) => new { Progress = progress, Chapter = chapter })
+        .AsSplitQuery()
+        .AsNoTracking();
+
+    if (userId > 0)
+    {
+        query = query.Where(p => p.Progress.AppUserId == userId);
+    }
+
+    return query.GroupBy(p => p.Progress.LastModified.Year)
+        .OrderBy(g => g.Key)
+        .Select(g => new StatCount<int> { Value = g.Key, Count = g.Sum(x => x.Chapter.AvgHoursToRead) })
+        .AsEnumerable();
+}
 
     public async Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown()
     {
