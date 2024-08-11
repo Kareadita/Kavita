@@ -880,7 +880,8 @@
         "donate": "Donate",
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
         "back": "Back",
-        "more": "More"
+        "more": "More",
+        "customize": "{{settings.customize}}"
     },
 
     "library-settings-modal": {

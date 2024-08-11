@@ -29,6 +29,7 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {WikiLink} from "../../../_models/wiki";
+import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 
 @Component({
   selector: 'app-side-nav',
@@ -206,4 +207,6 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
+
+  protected readonly SettingsTabId = SettingsTabId;
 }
