@@ -18,7 +18,49 @@
         <!--      }-->
       </div>
       <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
-        Title | chapter {{chapterId}}
+        <h4 class="title">
+          {{series?.name}}
+        </h4>
+        <div class="subtitle">
+          <span>Issue #{{chapter.minNumber}}</span>
+          @if (chapter.titleName) {
+            <span class="ms-3">{{chapter.titleName}}</span>
+          }
+        </div>
+
+        <div class="mt-2">
+          @if (chapter.publishers.length > 0) {
+            <span class="me-2">{{chapter.publishers[0]}}</span>
+          }
+          @if (chapter.ageRating !== AgeRating.Unknown) {
+            <span class="me-2">
+              {{chapter.ageRating | ageRating}}
+            </span>
+          } @else {
+            <span class="me-2">
+              <app-image imageUrl="./assets/images/ratings/unknown-rating.png" height="32px" width="32px"></app-image>
+            </span>
+          }
+
+
+          <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i> {{chapter.avgHoursToRead | timeDuration }}</span>
+
+          <span>• {{chapter.pages}} pages</span>
+        </div>
+
+        <!-- Rating goes here (after I implement support for rating individual issues -->
+        @if (libraryType !== null && series) {
+          <div class="mt-2">
+            <app-external-rating [seriesId]="series.id"
+                                 [ratings]="[]"
+                                 [userRating]="series.userRating"
+                                 [hasUserRated]="series.hasUserRated"
+                                 [libraryType]="libraryType">
+            </app-external-rating>
+          </div>
+        }
+
+
       </div>
     </div>
   }

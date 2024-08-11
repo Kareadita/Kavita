@@ -80,6 +80,6 @@ export interface Chapter {
   teams: Array<Person>;
   locations: Array<Person>;
 
-  primaryColor?: string;
-  secondaryColor?: string;
+  primaryColor: string;
+  secondaryColor: string;
 }

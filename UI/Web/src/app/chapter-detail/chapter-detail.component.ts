@@ -39,6 +39,17 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
 import {Chapter} from "../_models/chapter";
+import {forkJoin} from "rxjs";
+import {SeriesService} from "../_services/series.service";
+import {Series} from "../_models/series";
+import {AgeRating} from "../_models/metadata/age-rating";
+import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
+import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
+import {TimeDurationPipe} from "../_pipes/time-duration.pipe";
+import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
+import {LibraryType} from "../_models/library/library";
+import {LibraryService} from "../_services/library.service";
+import {ThemeService} from "../_services/theme.service";
 
 @Component({
   selector: 'app-chapter-detail',
@@ -68,7 +79,10 @@ import {Chapter} from "../_models/chapter";
     SeriesMetadataDetailComponent,
     TagBadgeComponent,
     VirtualScrollerModule,
-    NgStyle
+    NgStyle,
+    AgeRatingPipe,
+    TimeDurationPipe,
+    ExternalRatingComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -82,10 +96,14 @@ export class ChapterDetailComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
   private readonly chapterService = inject(ChapterService);
+  private readonly seriesService = inject(SeriesService);
+  protected readonly libraryService = inject(LibraryService);
+  protected readonly themeService = inject(ThemeService);
 
 
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly PageLayoutMode = PageLayoutMode;
+  protected readonly AgeRating = AgeRating;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -93,7 +111,11 @@ export class ChapterDetailComponent implements OnInit {
   isLoading: boolean = true;
   coverImage: string = '';
   chapterId: number = 0;
+  seriesId: number = 0;
   chapter: Chapter | null = null;
+  series: Series | null = null;
+  libraryType: LibraryType | null = null;
+
 
 
   get ScrollingBlockHeight() {
@@ -116,7 +138,24 @@ export class ChapterDetailComponent implements OnInit {
       return;
     }
 
+    this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
+
+    forkJoin({
+      series: this.seriesService.getSeries(this.seriesId),
+      chapter: this.chapterService.getChapterMetadata(this.chapterId),
+      libraryType: this.libraryService.getLibraryType(parseInt(libraryId, 10))
+    }).subscribe(results => {
+      this.series = results.series;
+      this.chapter = results.chapter;
+      this.libraryType = results.libraryType;
+
+
+      this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
+
+      this.isLoading = false;
+      this.cdRef.markForCheck();
+    });
 
     this.chapterService.getChapterMetadata(this.chapterId).subscribe(metadata => {
       this.chapter = metadata;
@@ -128,5 +167,4 @@ export class ChapterDetailComponent implements OnInit {
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
     this.cdRef.markForCheck();
   }
-
 }
