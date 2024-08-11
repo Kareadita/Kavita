@@ -112,7 +112,7 @@
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
-                      formControlName="globalPageLayoutMode">
+                      formControlName="readingDirection">
                 @for (opt of readingDirections; track opt) {
                   <option [value]="opt.value">{{opt.value | readingDirection}}</option>
                 }
