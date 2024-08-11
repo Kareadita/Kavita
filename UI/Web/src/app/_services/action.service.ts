@@ -290,6 +290,7 @@ export class ActionService implements OnDestroy {
 
   /**
    * Mark a chapter as read
+   * @param libraryId Library Id
    * @param seriesId Series Id
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
@@ -306,6 +307,7 @@ export class ActionService implements OnDestroy {
 
   /**
    * Mark a chapter as unread
+   * @param libraryId Library Id
    * @param seriesId Series Id
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes

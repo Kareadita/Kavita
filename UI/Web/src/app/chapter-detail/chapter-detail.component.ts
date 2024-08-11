@@ -21,7 +21,7 @@ import {
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
-  NgbDropdownToggle,
+  NgbDropdownToggle, NgbModal,
   NgbNav, NgbNavChangeEvent,
   NgbNavContent, NgbNavItem,
   NgbNavLink, NgbNavOutlet,
@@ -35,7 +35,7 @@ import {
   SeriesMetadataDetailComponent
 } from "../series-detail/_components/series-metadata-detail/series-metadata-detail.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
 import {Chapter} from "../_models/chapter";
@@ -57,6 +57,8 @@ import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {CastTabComponent} from "../_single-module/cast-tab/cast-tab.component";
+import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
+import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 
 enum TabID {
   Related = 0,
@@ -100,7 +102,9 @@ enum TabID {
     ReadMoreComponent,
     NgbNavItem,
     NgbNavOutlet,
-    CastTabComponent
+    CastTabComponent,
+    RouterLink,
+    EntityTitleComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -122,6 +126,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
+  private readonly modalService = inject(NgbModal);
 
 
   protected readonly AgeRating = AgeRating;
@@ -165,6 +170,8 @@ export class ChapterDetailComponent implements OnInit {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
 
+    this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
+
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
       chapter: this.chapterService.getChapterMetadata(this.chapterId),
@@ -174,21 +181,12 @@ export class ChapterDetailComponent implements OnInit {
       this.chapter = results.chapter;
       this.libraryType = results.libraryType;
 
-
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
 
-    this.chapterService.getChapterMetadata(this.chapterId).subscribe(metadata => {
-      this.chapter = metadata;
-      this.isLoading = false;
-      console.log('chapter metadata: ', this.chapter);
-      this.cdRef.markForCheck();
-    });
-
-    this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
     this.cdRef.markForCheck();
   }
 
@@ -211,7 +209,14 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   openEditModal() {
-    // TODO: Open Edit Chapter modal
+    // TODO: Refactor the ModalOptions into a separate file so it's consistent
+    const ref = this.modalService.open(EditChapterModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    ref.componentInstance.chapter = this.chapter;
+    ref.componentInstance.libraryType = this.libraryType;
+
+    ref.closed.subscribe(res => {
+
+    });
   }
 
   onNavChange(event: NgbNavChangeEvent) {

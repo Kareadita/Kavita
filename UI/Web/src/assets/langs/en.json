@@ -1932,6 +1932,12 @@
         "specials-volume": "Specials"
     },
 
+    "edit-chapter-modal": {
+        "title": "Edit Chapter",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+
     "day-breakdown": {
         "title": "Day Breakdown",
         "no-data": "No progress, get to reading",

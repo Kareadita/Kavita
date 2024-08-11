@@ -1,0 +1,37 @@
+<ng-container *transloco="let t; read: 'edit-chapter-modal'">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h4 class="modal-title">
+        {{t('title')}}</h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+    <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+      <form [formGroup]="editForm">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+
+          <li [ngbNavItem]="TabID.General">
+            <a ngbNavLink>{{t(TabID.General)}}</a>
+            <ng-template ngbNavContent>
+            </ng-template>
+          </li>
+        </ul>
+      </form>
+
+      <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid" (click)="save()">{{t('save')}}</button>
+    </div>
+  </div>
+
+
+  <ng-template #lock let-item="item" let-field="field">
+    <span class="input-group-text clickable" (click)="unlock(item, field)">
+        <i class="fa fa-lock" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('field-locked-alt')}}</span>
+    </span>
+  </ng-template>
+
+
+</ng-container>
