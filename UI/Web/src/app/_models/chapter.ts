@@ -4,6 +4,7 @@ import {PublicationStatus} from "./metadata/publication-status";
 import {Genre} from "./metadata/genre";
 import {Tag} from "./tag";
 import {Person} from "./metadata/person";
+import {IHasCast} from "./metadata/series-metadata";
 
 export const LooseLeafOrDefaultNumber = -100000;
 export const SpecialVolumeNumber = 100000;
@@ -11,7 +12,7 @@ export const SpecialVolumeNumber = 100000;
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
  */
-export interface Chapter {
+export interface Chapter extends IHasCast {
     id: number;
     range: string;
     /**
@@ -56,30 +57,48 @@ export interface Chapter {
     lastReadingProgress: string;
     sortOrder: number;
 
-  // originally in ChapterMetadata but now inlined with Chapter data
+    primaryColor: string;
+    secondaryColor: string;
 
-  year: string;
-  language: string;
-  publicationStatus: PublicationStatus;
-  count: number;
-  totalCount: number;
+    year: string;
+    language: string;
+    publicationStatus: PublicationStatus;
+    count: number;
+    totalCount: number;
 
-  genres: Array<Genre>;
-  tags: Array<Tag>;
-  writers: Array<Person>;
-  coverArtists: Array<Person>;
-  publishers: Array<Person>;
-  characters: Array<Person>;
-  pencillers: Array<Person>;
-  inkers: Array<Person>;
-  imprints: Array<Person>;
-  colorists: Array<Person>;
-  letterers: Array<Person>;
-  editors: Array<Person>;
-  translators: Array<Person>;
-  teams: Array<Person>;
-  locations: Array<Person>;
+    genres: Array<Genre>;
+    tags: Array<Tag>;
+    writers: Array<Person>;
+    coverArtists: Array<Person>;
+    publishers: Array<Person>;
+    characters: Array<Person>;
+    pencillers: Array<Person>;
+    inkers: Array<Person>;
+    imprints: Array<Person>;
+    colorists: Array<Person>;
+    letterers: Array<Person>;
+    editors: Array<Person>;
+    translators: Array<Person>;
+    teams: Array<Person>;
+    locations: Array<Person>;
 
-  primaryColor: string;
-  secondaryColor: string;
+    summaryLocked: boolean;
+    genresLocked: boolean;
+    tagsLocked: boolean;
+    writerLocked: boolean;
+    coverArtistLocked: boolean;
+    publisherLocked: boolean;
+    characterLocked: boolean;
+    pencillerLocked: boolean;
+    inkerLocked: boolean;
+    imprintLocked: boolean;
+    coloristLocked: boolean;
+    lettererLocked: boolean;
+    editorLocked: boolean;
+    translatorLocked: boolean;
+    teamLocked: boolean;
+    locationLocked: boolean;
+    ageRatingLocked: boolean;
+    releaseYearLocked: boolean;
+    languageLocked: boolean;
 }

@@ -22,9 +22,9 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
-  NgbNav,
-  NgbNavContent,
-  NgbNavLink,
+  NgbNav, NgbNavChangeEvent,
+  NgbNavContent, NgbNavItem,
+  NgbNavLink, NgbNavOutlet,
   NgbProgressbar,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
@@ -44,12 +44,25 @@ import {SeriesService} from "../_services/series.service";
 import {Series} from "../_models/series";
 import {AgeRating} from "../_models/metadata/age-rating";
 import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
-import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
 import {TimeDurationPipe} from "../_pipes/time-duration.pipe";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {LibraryType} from "../_models/library/library";
 import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
+import {DownloadService} from "../shared/_services/download.service";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {BulkSelectionService} from "../cards/bulk-selection.service";
+import {ToastrService} from "ngx-toastr";
+import {ReaderService} from "../_services/reader.service";
+import {AccountService} from "../_services/account.service";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
+import {CastTabComponent} from "../_single-module/cast-tab/cast-tab.component";
+
+enum TabID {
+  Related = 0,
+  Reviews = 6, // Only applicable for books
+  Cast = 7
+}
 
 @Component({
   selector: 'app-chapter-detail',
@@ -82,7 +95,12 @@ import {ThemeService} from "../_services/theme.service";
     NgStyle,
     AgeRatingPipe,
     TimeDurationPipe,
-    ExternalRatingComponent
+    ExternalRatingComponent,
+    TranslocoDirective,
+    ReadMoreComponent,
+    NgbNavItem,
+    NgbNavOutlet,
+    CastTabComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -97,13 +115,17 @@ export class ChapterDetailComponent implements OnInit {
   private readonly imageService = inject(ImageService);
   private readonly chapterService = inject(ChapterService);
   private readonly seriesService = inject(SeriesService);
-  protected readonly libraryService = inject(LibraryService);
-  protected readonly themeService = inject(ThemeService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly themeService = inject(ThemeService);
+  private readonly downloadService = inject(DownloadService);
+  private readonly bulkSelectionService = inject(BulkSelectionService);
+  private readonly toastr = inject(ToastrService);
+  private readonly readerService = inject(ReaderService);
+  protected readonly accountService = inject(AccountService);
 
 
-  protected readonly TagBadgeCursor = TagBadgeCursor;
-  protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly AgeRating = AgeRating;
+  protected readonly TabID = TabID;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -115,6 +137,8 @@ export class ChapterDetailComponent implements OnInit {
   chapter: Chapter | null = null;
   series: Series | null = null;
   libraryType: LibraryType | null = null;
+  hasReadingProgress = false;
+  activeTabId = TabID.Related;
 
 
 
@@ -165,6 +189,33 @@ export class ChapterDetailComponent implements OnInit {
     });
 
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
+    this.cdRef.markForCheck();
+  }
+
+  download() {
+    this.downloadService.download('chapter', this.chapter!, (d) => {
+      // TODO
+    });
+  }
+
+  read(incognitoMode: boolean = false) {
+    if (this.bulkSelectionService.hasSelections()) return;
+    if (this.chapter === null) return;
+
+    if (this.chapter.pages === 0) {
+      this.toastr.error(translate('series-detail.no-pages'));
+      return;
+    }
+    this.router.navigate(this.readerService.getNavigationArray(this.series?.libraryId!, this.seriesId, this.chapter.id, this.chapter.files[0].format),
+      {queryParams: {incognitoMode}});
+  }
+
+  openEditModal() {
+    // TODO: Open Edit Chapter modal
+  }
+
+  onNavChange(event: NgbNavChangeEvent) {
+    this.bulkSelectionService.deselectAll();
     this.cdRef.markForCheck();
   }
 }

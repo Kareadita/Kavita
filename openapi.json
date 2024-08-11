@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.2",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.3",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -15471,6 +15471,68 @@
             "type": "integer",
             "description": "Total number of issues for the series",
             "format": "int32"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "publicationStatusLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "releaseYearLocked": {
+            "type": "boolean"
           },
           "coverImage": {
             "type": "string",

@@ -1036,6 +1036,21 @@
         "cannot-read": "Cannot Read"
     },
 
+    "cast-tab": {
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "translators-title": "{{series-metadata-detail.translators-title}}",
+        "letterers-title": "{{series-metadata-detail.letterers-title}}",
+        "colorists-title": "{{series-metadata-detail.colorists-title}}",
+        "inkers-title": "{{series-metadata-detail.inkers-title}}",
+        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
+        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
+        "editors-title": "{{series-metadata-detail.editors-title}}",
+        "teams-title": "{{series-metadata-detail.teams-title}}",
+        "locations-title": "{{series-metadata-detail.locations-title}}"
+    },
+
     "chapter-metadata-detail": {
         "no-data": "No metadata available",
         "writers-title": "{{series-metadata-detail.writers-title}}",

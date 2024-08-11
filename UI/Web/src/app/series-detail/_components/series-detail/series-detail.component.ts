@@ -118,6 +118,7 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
 import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
+import {CastTabComponent} from "../../../_single-module/cast-tab/cast-tab.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -153,7 +154,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
