@@ -5,7 +5,7 @@ import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { NgIf } from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 
 @Component({

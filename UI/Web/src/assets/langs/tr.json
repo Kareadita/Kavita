@@ -72,7 +72,6 @@
         "pref-description": "Bunlar, hesabınıza bağlı olan genel ayarlardır.",
         "account-tab": "Hesap",
         "preferences-tab": "Tercihler",
-        "3rd-party-clients-tab": "3. Parti Uygulamalar",
         "theme-tab": "Tema",
         "devices-tab": "Cihazlar",
         "stats-tab": "İstatistikler",
@@ -141,9 +140,6 @@
         "title": "Aygıt Yöneticisi",
         "devices-title": "Aygıtlar",
         "no-devices": "Herhangi bir aygıt ayarlanmamış"
-    },
-    "edit-device": {
-        "device-name-label": "Aygıt İsmi"
     },
     "common": {
         "email": "E-posta",

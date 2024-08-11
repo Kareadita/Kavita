@@ -44,7 +44,7 @@
 @import './theme/components/alerts';
 @import './theme/components/typeahead';
 
-
+@import './theme/utilities/headings';
 @import './theme/utilities/utilities';
 @import './theme/utilities/animations';
 @import './theme/utilities/global';
@@ -60,6 +60,18 @@
 @font-face {
   font-family: "Spartan";
   src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins/Poppins.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "League Spartan";
+  src: url("assets/fonts/League_Spartan/LeagueSpartan-VariableFont_wght.ttf");
   font-display: swap;
 }
 
@@ -88,4 +100,14 @@ app-root {
   border: 3px solid transparent;
   border-radius: 8px;
   min-height: 50px;
+}
+
+body {
+  scrollbar-gutter: stable both-edges;
+}
+
+.setting-section-break {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 30px 0;
 }

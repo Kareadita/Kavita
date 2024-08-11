@@ -9,7 +9,7 @@ using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <summary>
@@ -46,11 +46,9 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
-    /// <summary>
-    /// Relative path to the (managed) image file representing the cover image
-    /// </summary>
-    /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
     public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
     /// Total number of pages in all MangaFiles
@@ -194,5 +192,11 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public bool IsSingleVolumeChapter()
     {
         return MinNumber.Is(Parser.DefaultChapterNumber) && !IsSpecial;
+    }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
     }
 }

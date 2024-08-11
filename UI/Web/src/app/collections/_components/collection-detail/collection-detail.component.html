@@ -2,10 +2,10 @@
   <div #companionBar>
     <app-side-nav-companion-bar *ngIf="series !== undefined" [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
       <ng-container title>
-        <h2 *ngIf="collectionTag !== undefined">
-          <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
+        <h4 *ngIf="collectionTag !== undefined">
           {{collectionTag.title}}<span class="ms-1" *ngIf="collectionTag.promoted">(<i aria-hidden="true" class="fa fa-angle-double-up"></i>)</span>
-        </h2>
+          <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
+        </h4>
       </ng-container>
     </app-side-nav-companion-bar>
   </div>

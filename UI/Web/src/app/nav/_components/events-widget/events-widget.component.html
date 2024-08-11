@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'events-widget'">
 
-  @if (isAdmin$ | async) {
+  @if (accountService.isAdmin$ | async) {
     @if (downloadService.activeDownloads$ | async; as activeDownloads) {
       @if (errors$ | async; as errors) {
         @if (infos$ | async; as infos) {
@@ -11,16 +11,17 @@
                     [autoClose]="'outside'">
 
               @if (onlineUsers.length > 1) {
-                <span class="me-2" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0 || updateAvailable}">{{onlineUsers.length}}</span>
+                <span class="me-2" [ngClass]="{'colored': ((activeEvents$ | async) || 0) > 0 || activeDownloads.length > 0 || updateAvailable}">{{onlineUsers.length}}</span>
               }
-              <i aria-hidden="true" class="fa fa-wave-square nav" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0 || updateAvailable}"></i>
+
+              <i aria-hidden="true" class="fa fa-wave-square nav" [ngClass]="{'colored': ((activeEvents$ | async) || 0) > 0 || activeDownloads.length > 0 || updateAvailable}"></i>
 
 
               @if (errors.length > 0) {
                 <i aria-hidden="true" class="fa fa-circle-exclamation nav widget-button--indicator error"></i>
               } @else if (infos.length > 0) {
                 <i aria-hidden="true" class="fa fa-circle-info nav widget-button--indicator info"></i>
-              } @else if (activeEvents > 0 || activeDownloads.length > 0) {
+              } @else if (((activeEvents$ | async) || 0) > 0 || activeDownloads.length > 0) {
                 <div class="nav widget-button--indicator spinner-border spinner-border-sm"></div>
               } @else if (updateAvailable) {
                 <i aria-hidden="true" class="fa fa-circle-arrow-up nav widget-button--indicator update"></i>

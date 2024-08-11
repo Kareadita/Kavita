@@ -1,0 +1,23 @@
+<ng-container *transloco="let t; read:'settings'">
+  @if (accountService.currentUser$ | async; as user) {
+
+    @if((navService.sideNavCollapsed$ | async) === false) {
+      <div class="side-nav no-donate">
+
+        @for(section of sections; track section.title + section.children.length; let idx = $index;) {
+          @if (hasAnyChildren(user, section)) {
+            <h5 class="side-nav-header mt-3 mb-2 ms-3" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h5>
+            @for(item of section.children; track item.fragment) {
+              @if (accountService.hasAnyRole(user, item.roles)) {
+                <app-side-nav-item [id]="'nav-item-' + item.fragment"  [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment" [badgeCount]="item.badgeCount$ | async"></app-side-nav-item>
+              }
+            }
+          }
+        }
+
+      </div>
+    }
+
+  }
+
+</ng-container>

@@ -15,7 +15,7 @@ import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-publication-status-stats',

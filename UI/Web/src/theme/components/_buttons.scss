@@ -12,6 +12,34 @@
   }
 }
 
+.btn-primary-outline {
+  color: var(--btn-primary-outline-text-color);
+  background-color: var(--btn-primary-outline-bg-color);
+  border-color: var(--btn-primary-outline-border-color);
+
+  &:hover {
+    color: var(--btn-primary-outline-hover-text-color);
+    background-color: var(--btn-primary-outline-hover-bg-color);
+    border-color: var(--btn-primary-outline-hover-border-color);
+  }
+}
+
+.btn-secondary-outline {
+  color: var(--btn-secondary-outline-text-color);
+  background-color: var(--btn-secondary-outline-bg-color);
+  border-color: var(--btn-secondary-outline-border-color);
+
+  &:hover {
+    color: var(--btn-secondary-outline-hover-text-color);
+    background-color: var(--btn-secondary-outline-hover-bg-color);
+    border-color: var(--btn-secondary-outline-hover-border-color);
+    box-shadow: inset 0px -2px 0px 0px var(--btn-secondary-outline-text-color);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+  }
+}
+
 .btn-close {
   filter: var(--btn-icon-filter) !important;
 }
@@ -37,12 +65,24 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
 }
 
+.btn-text {
+  color: var(--primary-color);
+  > i {
+    color: var(--primary-color) !important;
+  }
+
+  &:hover, &:focus {
+    color: var(--primary-color);
+  }
+}
+
+
 .btn:focus, .btn:active, .btn:active:focus {
   box-shadow: 0 0 0 0 var(---btn-focus-boxshadow-color) !important;
 }
 
 
-.btn-icon {
+.btn-icon, .btn-primary-text, .btn-secondary-text, .btn-danger-text {
   cursor: pointer;
   color: var(--body-text-color);
   border: none;
@@ -59,8 +99,26 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
   }
 }
 
+.btn-primary-text {
+  color: var(--btn-primary-text-text-color);
+}
+
+.btn-secondary-text {
+  color: var(--btn-secondary-text-text-color);
+}
+
+.btn-danger-text {
+  color: var(--btn-danger-text-text-color);
+}
+
 .btn-outline-secondary {
   color: var(--body-text-color);
+}
+
+.btn-secondary {
+  color: var(--btn-secondary-text-color);
+  background-color: var(--btn-secondary-bg-color);
+  border-color: var(--btn-secondary-border-color);
 }
 
 .btn.btn-secondary.alt {
@@ -69,11 +127,13 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 
     &:hover {
       background-color: var(--btn-alt-hover-bg-color);
+      font-weight: var(--btn-secondary-font-weight);
     }
 
     &:focus {
       background-color: var(--btn-alt-focus-bg-color);
       box-shadow: 0 0 0 0.05rem var(--btn-alt-focus-boxshadow-color);
+      font-weight: var(--btn-secondary-font-weight);
     }
 }
 
@@ -83,4 +143,9 @@ button i.fa {
 
 .btn-check:focus + .btn, .btn:focus {
   box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);
+}
+
+/* Button with dropdown */
+.btn-group.dropdown > button {
+
 }

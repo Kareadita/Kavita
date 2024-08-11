@@ -90,7 +90,6 @@
         "pref-description": "Voici les paramètres globaux liés à votre compte.",
         "account-tab": "Compte",
         "preferences-tab": "Préférences",
-        "3rd-party-clients-tab": "Clients tiers",
         "theme-tab": "Thème",
         "devices-tab": "Appareils",
         "stats-tab": "Statistiques",
@@ -210,15 +209,6 @@
         "edit": "{{common.edit}}",
         "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita par un navigateur web mais qui, en revanche, disposent d'une adresse courriel acceptant de recevoir des fichiers.",
         "email-setup-alert": "Vous souhaitez envoyer des fichiers à vos appareils ? Configurez d'abord vos paramètres d'E-mail !"
-    },
-    "edit-device": {
-        "device-name-label": "Nom du Périphérique",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Cette adresse courriel va être utilisée pour accepter le ficher via Envoyer Vers",
-        "device-platform-label": "Platforme du périphérique",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -1275,16 +1265,6 @@
     "download-indicator": {
         "progress": "{{percentage}}% téléchargé"
     },
-    "manage-alerts": {
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Effacer les alertes",
-        "details-header": "Détails",
-        "description-part-2": "wiki.",
-        "extension-header": "Extension",
-        "file-header": "Fichier",
-        "comment-header": "Commentaire",
-        "description-part-1": "Ce tableau contient les problèmes détectés lors de l'analyse ou de la lecture de vos médias. Cette liste n'est pas gérée. Vous pouvez l'effacer à tout moment et utiliser la fonction scan de la bibliothèque (en mode Forcer) pour effectuer une analyse. Une liste de quelques erreurs courantes et leur signification peut être trouvée sur le "
-    },
     "series-info-cards": {
         "format-title": "Format",
         "less-than-hour": "{{entity-info-cards.less-than-hour}}",
@@ -1321,7 +1301,6 @@
         "save": "{{common.save}}",
         "description": "Kavita est livré avec un service de messagerie pour effectuer des tâches telles que l'invitation d'utilisateurs, les demandes de réinitialisation de mot de passe, etc. Les e-mails envoyés via notre service sont immédiatement supprimés. Vous pouvez utiliser votre propre service de messagerie en configurant le service {{link}}. Définissez l'URL du service de messagerie et utilisez le bouton Test pour vous assurer qu'il fonctionne. Vous pouvez réinitialiser ces paramètres par défaut à tout moment. Il n'existe aucun moyen de désactiver les e-mails pour l'authentification, même si vous n'êtes pas obligé d'utiliser une adresse e-mail valide pour les utilisateurs. Les liens de confirmation seront toujours enregistrés dans les journaux et présentés dans l'interface utilisateur. Les e-mails d'inscription/confirmation ne seront pas envoyés si vous n'accédez pas à Kavita via une URL accessible au public ou à moins que la fonctionnalité Nom d'hôte ne soit configurée. Pour utiliser certaines fonctions de Kavita comme \"Mot de passe oublié\" et \"Envoyer à l'appareil\", un fournisseur d'E-mail doit être configuré. D'autre fonctionnalités comme \"Changer mot de passe\" sont moins sécurisée sans E-mail configuré.",
         "send-to-warning": "Si vous souhaitez que l'envoi vers un appareil fonctionne, vous devez paramétré votre service de messagerie",
-        "title": "Services E-mail (SMTP)",
         "email-settings-title": "Paramètres E-mail",
         "sender-address-label": "Adresse d’expéditeur",
         "sender-displayname-label": "Nom complet",
@@ -1560,8 +1539,6 @@
         "delete-user-alt": "Supprimer l'utilisateur {{user}}",
         "title": "Utilisateurs actifs",
         "delete-user-tooltip": "Supprimer l'utilisateur",
-        "roles-title": "Rôles :",
-        "last-active-title": "Dernière activité :",
         "none": "Aucun",
         "edit-user-alt": "Modifier l'utilisateur {{user}}",
         "resend-invite-alt": "Renvoyer l'invitation {{user}}",
@@ -1569,7 +1546,6 @@
         "setup": "Configurer",
         "edit-user-tooltip": "Modifier",
         "no-data": "Il n'y a pas d'autres utilisateurs.",
-        "sharing-title": "Partage :",
         "loading": "{{common.loading}}",
         "change-password-tooltip": "Modifier le mot de passe",
         "resend": "Renvoyer",
@@ -1578,24 +1554,6 @@
         "setup-user-alt": "Configurer l'utilisateur {{user}}",
         "username-pattern": "Le nom d'utilisateur ne peut contenir que les caractères et espaces suivants : {{caractères}}",
         "admin": "Admin"
-    },
-    "admin-dashboard": {
-        "users-tab": "Utilisateurs",
-        "media-tab": "Médias",
-        "kavita+-desc-part-3": "aujourd'hui !",
-        "libraries-tab": "Bibliothèques",
-        "email-tab": "E-mail",
-        "general-tab": "Général",
-        "system-tab": "Système",
-        "logs-tab": "Journaux",
-        "kavita+-desc-part-1": "Kavita+ est un service d'abonnement premium qui débloque des fonctionnalités pour tous les utilisateurs de cette instance Kavita. Achetez un abonnement pour débloquer ",
-        "title": "Tableau de bord de l'administrateur",
-        "statistics-tab": "Statistiques",
-        "kavita+-tab": "Kavita+",
-        "tasks-tab": "Tâches",
-        "kavita+-desc-part-2": "avantages premium",
-        "kavita+-releases": "Voir les versions publiées",
-        "kavita+-requirement": "Kavita+ est conçu pour fonctionner uniquement avec la dernière version - 2 versions. Toute autre version est susceptible de ne pas fonctionner."
     },
     "import-cbl-modal": {
         "validate-warning": "Le CBL présente des problèmes qui empêchent l'importation. Corrigez ces problèmes et réessayez.",
@@ -1762,7 +1720,6 @@
     "nav-header": {
         "skip-alt": "Passer au contenu principal",
         "settings": "Paramètres",
-        "promoted": "{{common.promoted}}",
         "announcements": "Annonces",
         "logout": "Déconnexion",
         "all-filters": "Filtres intelligents",

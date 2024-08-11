@@ -5,7 +5,7 @@ import { CompactNumberPipe } from '../../../_pipes/compact-number.pipe';
 import { ImageComponent } from '../../../shared/image/image.component';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgClass, AsyncPipe } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-stat-list',

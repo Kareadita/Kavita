@@ -1,8 +1,22 @@
 .list-group-item {
   color: var(--list-group-item-text-color);
   background-color: var(--list-group-item-bg-color);
+  border-width: var(--list-group-item-border-width);
+  border-style: var(--list-group-item-border-style);
   border-color: var(--list-group-item-border-color);
   word-break: break-all;
+
+  &:first-child {
+    border-top-left-radius: var(--list-group-item-border-radius);
+    border-top-right-radius: var(--list-group-item-border-radius);
+    border-width: var(--list-group-item-first-border-width);
+  }
+
+  &:last-child {
+    border-bottom-left-radius: var(--list-group-item-border-radius);
+    border-bottom-right-radius: var(--list-group-item-border-radius);
+    border-width: var(--list-group-item-last-border-width);
+  }
 
   &:hover {
     color: var(--list-group-hover-text-color);

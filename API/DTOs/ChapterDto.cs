@@ -10,7 +10,7 @@ namespace API.DTOs;
 /// A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying
 /// file (abstracted from type).
 /// </summary>
-public class ChapterDto : IHasReadTimeEstimate
+public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; init; }
     /// <summary>
@@ -159,4 +159,14 @@ public class ChapterDto : IHasReadTimeEstimate
     public int TotalCount { get; set; }
 
     #endregion
+
+    public string CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

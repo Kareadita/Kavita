@@ -79,4 +79,7 @@ export interface Chapter {
   translators: Array<Person>;
   teams: Array<Person>;
   locations: Array<Person>;
+
+  primaryColor: string;
+  secondaryColor: string;
 }

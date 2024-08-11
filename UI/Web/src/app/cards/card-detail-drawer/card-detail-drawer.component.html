@@ -50,7 +50,7 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="(isAdmin$ | async) === false">
+        <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="(accountService.isAdmin$ | async) === false">
           <a ngbNavLink>{{t(tabs[TabID.Cover].title)}}</a>
           <ng-template ngbNavContent>
             <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
@@ -59,7 +59,7 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="tabs[TabID.Files]" [disabled]="(isAdmin$ | async) === false">
+        <li [ngbNavItem]="tabs[TabID.Files]" [disabled]="(accountService.isAdmin$ | async) === false">
           <a ngbNavLink>{{t(tabs[TabID.Files].title)}}</a>
           <ng-template ngbNavContent>
             @if (!utilityService.isChapter(data)) {

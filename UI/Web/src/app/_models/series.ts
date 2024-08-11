@@ -64,4 +64,7 @@ export interface Series {
    * This is currently only used on Series detail page for recommendations
    */
   summary?: string;
+  coverImage?: string;
+  primaryColor: string;
+  secondaryColor: string;
 }

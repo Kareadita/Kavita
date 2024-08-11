@@ -1,35 +1,38 @@
 <ng-container *transloco="let t; read:'restriction-selector'">
-  <ng-container *ngIf="restrictionForm">
-    <ng-container *ngIf="showContext">
-      <h4>{{t('title')}}</h4>
-      <p>{{t('description')}}
-        <ng-container *ngIf="isAdmin">{{t('not-applicable-for-admins')}}</ng-container>
-      </p>
-    </ng-container>
-    <form [formGroup]="restrictionForm">
-      <div class="mb-3">
-        <label for="age-rating" class="form-label visually-hidden">{{t('age-rating-label')}}</label>
-        <div class="input-group">
-          <select class="form-select" id="age-rating" formControlName="ageRating">
-            <option value="-1">{{t('no-restriction')}}</option>
-            <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
-          </select>
-        </div>
-      </div>
+   @if (restrictionForm) {
+     @if (showContext) {
+       <h4>{{t('title')}}</h4>
+       <p>{{t('description')}}
+         @if (isAdmin) {
+           {{t('not-applicable-for-admins')}}
+         }
+       </p>
+     }
 
-      <div class="mb-3">
-        <div class="form-check form-switch">
-          <input type="checkbox" id="auto-close" role="switch" formControlName="ageRestrictionIncludeUnknowns" class="form-check-input" aria-describedby="include-unknowns-help" [value]="true" aria-labelledby="auto-close-label">
-          <label class="form-check-label" for="auto-close">{{t('include-unknowns-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="includeUnknownsTooltip" role="button" tabindex="0"></i>
-        </div>
+     <form [formGroup]="restrictionForm">
+       <div class="mb-3">
+         <label for="age-rating" class="form-label visually-hidden">{{t('age-rating-label')}}</label>
+         <div class="input-group">
+           <select class="form-select" id="age-rating" formControlName="ageRating">
+             <option value="-1">{{t('no-restriction')}}</option>
+             @for (opt of ageRatings; track opt.value) {
+               <option [value]="opt.value">{{opt.title | titlecase}}</option>
+             }
+           </select>
+         </div>
+       </div>
 
-        <ng-template #includeUnknownsTooltip>{{t('include-unknowns-tooltip')}}</ng-template>
-        <span class="visually-hidden" id="include-unknowns-help">
+       <div class="mb-3">
+         <div class="form-check form-switch">
+           <input type="checkbox" id="auto-close" role="switch" formControlName="ageRestrictionIncludeUnknowns" class="form-check-input" aria-describedby="include-unknowns-help" [value]="true" aria-labelledby="auto-close-label">
+           <label class="form-check-label" for="auto-close">{{t('include-unknowns-label')}}</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="includeUnknownsTooltip" role="button" tabindex="0"></i>
+         </div>
+
+         <ng-template #includeUnknownsTooltip>{{t('include-unknowns-tooltip')}}</ng-template>
+         <span class="visually-hidden" id="include-unknowns-help">
           <ng-container [ngTemplateOutlet]="includeUnknownsTooltip"></ng-container>
         </span>
-      </div>
-
-
-    </form>
-  </ng-container>
+       </div>
+     </form>
+   }
 </ng-container>

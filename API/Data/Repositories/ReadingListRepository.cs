@@ -83,7 +83,7 @@ public class ReadingListRepository : IReadingListRepository
         return await _context.ReadingList
             .Where(c => c.Id == readingListId)
             .Select(c => c.CoverImage)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<string>> GetAllCoverImagesAsync()

@@ -96,7 +96,7 @@
 
 
           <!-- scroll mode should be disabled when book mode is used -->
-          <button (click)="toggleScrollMode()" class="btn-icon toolbarButton" [ngbTooltip]="scrollMode | pdfScrollMode" [disabled]="this.pageLayoutMode === 'book'">
+          <button (click)="toggleScrollMode()" class="btn-icon toolbarButton" [ngbTooltip]="scrollMode | pdfScrollModeType" [disabled]="this.pageLayoutMode === 'book'">
             @switch (scrollMode) {
               @case (ScrollModeType.vertical) {
                 <svg aria-hidden="true" [ngStyle]="{color: fontColor}" style="width: 24px; height: 24px; margin-top: 3px" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 4c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5h-3c-1 0-1.5-.5-1.5-1.5v-5C5 4.5 5.5 4 6.5 4zM11 0v.5c0 1-.5 1.5-1.5 1.5h-3C5.5 2 5 1.5 5 .5V0h6zM11 16v-.5c0-1-.5-1.5-1.5-1.5h-3c-1 0-1.5.5-1.5 1.5v.5h6z"></path></svg>
@@ -112,10 +112,10 @@
               }
             }
 
-            <span class="visually-hidden">{{scrollMode | pdfScrollMode}}</span>
+            <span class="visually-hidden">{{scrollMode | pdfScrollModeType}}</span>
           </button>
 
-          <button (click)="toggleSpreadMode()" class="btn-icon toolbarButton" [ngbTooltip]="spreadMode | pdfSpreadMode" [disabled]="this.pageLayoutMode === 'book'">
+          <button (click)="toggleSpreadMode()" class="btn-icon toolbarButton" [ngbTooltip]="spreadMode | pdfSpreadType" [disabled]="this.pageLayoutMode === 'book'">
 
             @switch (spreadMode) {
               @case ('off') {
@@ -129,7 +129,7 @@
               }
             }
 
-            <span class="visually-hidden">{{spreadMode | pdfSpreadMode}}</span>
+            <span class="visually-hidden">{{spreadMode | pdfSpreadType}}</span>
           </button>
 
 

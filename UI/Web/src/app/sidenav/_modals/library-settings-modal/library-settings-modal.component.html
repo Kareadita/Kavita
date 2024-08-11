@@ -1,12 +1,11 @@
 <ng-container *transloco="let t; read: 'library-settings-modal'">
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
-      <ng-container *ngIf="!isAddLibrary; else addLibraryTitle">
+      @if (!isAddLibrary) {
         {{t('edit-title', {name: library!.name | sentenceCase})}}
-      </ng-container>
-      <ng-template #addLibraryTitle>
+      } @else {
         {{t('add-title')}}
-      </ng-template>
+      }
     </h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
@@ -20,15 +19,22 @@
           <ng-template ngbNavContent>
             <div class="mb-3">
               <label for="library-name" class="form-label">{{t('name-label')}}</label>
-              <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="libraryForm.get('name')?.invalid && libraryForm.get('name')?.touched">
-              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="libraryForm.dirty || libraryForm.touched">
-                <div *ngIf="libraryForm.get('name')?.errors?.required">
-                  {{t('required-field')}}
-                </div>
-                <div *ngIf="libraryForm.get('name')?.errors?.duplicateName">
-                  {{t('library-name-unique')}}
-                </div>
-              </div>
+              @if (libraryForm.get('name'); as formControl) {
+                <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
+                @if (libraryForm.dirty || libraryForm.touched) {
+                  <div id="inviteForm-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('required-field')}}</div>
+                    }
+
+                    @if (formControl.errors?.duplicateName) {
+                      <div>{{t('library-name-unique')}}</div>
+                    }
+                  </div>
+                }
+
+              }
+
             </div>
 
             <div class="mb-3">
@@ -46,7 +52,10 @@
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
               </span>
               <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
+                @for (opt of libraryTypes; track opt; let i = $index) {
+                  <option [value]="i">{{opt}}</option>
+                }
+
               </select>
             </div>
             <div *ngIf="!isAddLibrary">
@@ -61,11 +70,14 @@
           <a ngbNavLink>{{t(TabID.Folder)}}</a>
           <ng-template ngbNavContent>
             <p>{{t('folder-description')}}</p>
-            <ul class="list-group" style="width: 100%">
-              <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
-                {{folder}}
-                <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-              </li>
+            <ul class="list-group list-group-flush" style="width: 100%">
+              @for(folder of selectedFolders; track folder) {
+                <li class="list-group-item">
+                  {{folder}}
+                  <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                </li>
+              }
+
             </ul>
             <div class="row mt-2">
               <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
@@ -85,7 +97,10 @@
         <li [ngbNavItem]="TabID.Cover" [disabled]="isAddLibrary && setupStep < 2">
           <a ngbNavLink>{{t(TabID.Cover)}}</a>
           <ng-template ngbNavContent>
-            <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
+            @if (isAddLibrary) {
+              <p class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
+            }
+
             <p>{{t('cover-description-extra')}}</p>
             <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
                                      (selectedBase64Url)="applyCoverImage($event)" [showReset]="library?.coverImage !== null"
@@ -96,145 +111,115 @@
         <li [ngbNavItem]="TabID.Advanced" [disabled]="isAddLibrary && setupStep < 3">
           <a ngbNavLink>{{t(TabID.Advanced)}}</a>
           <ng-template ngbNavContent>
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
-                  <h6>{{t('file-type-group-label')}}</h6>
-                  <p class="accent">
-                    {{t('file-type-group-tooltip')}}
-                  </p>
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-item [title]="t('file-type-group-label')" [showEdit]="false" [canEdit]="false"
+                                [subtitle]="t('file-type-group-tooltip')" [toggleOnViewClick]="false">
+                <ng-template #view>
                   <div class="hstack gap-2">
-                    <div class="form-check form-switch" *ngFor="let group of fileTypeGroups; let i = index">
-                      <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
-                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div ngbAccordion>
-                  <div ngbAccordionItem>
-                    <h2 ngbAccordionHeader>
-                      <button ngbAccordionButton>{{t('exclude-patterns-label')}}</button>
-                    </h2>
-                    <div ngbAccordionCollapse>
-                      <div ngbAccordionBody>
-                        <ng-template>
-                          <span >{{t('exclude-patterns-tooltip')}}<a class="ms-1" [href]="WikiLink.ScannerExclude" rel="noopener noreferrer" target="_blank">{{t('help')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a></span>
-                          <div class="mt-2">
-                            <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
-                          </div>
-                        </ng-template>
+                    @for (group of fileTypeGroups; track group) {
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
+                        <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
                       </div>
-                    </div>
+                    }
                   </div>
-                </div>
-
-              </div>
-
+                </ng-template>
+              </app-setting-item>
             </div>
 
-
-
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('manage-collection-label')" [subtitle]="t('manage-collection-tooltip')">
+                <ng-template #switch>
                   <div class="form-check form-switch">
                     <input type="checkbox" id="manage-collections" role="switch" formControlName="manageCollections" class="form-check-input">
-                    <label class="form-check-label" for="manage-collections">{{t('manage-collection-label')}}</label>
                   </div>
-                </div>
-                <p class="accent">
-                  {{t('manage-collection-tooltip')}}
-                </p>
-              </div>
+                </ng-template>
+              </app-setting-switch>
             </div>
 
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('manage-reading-list-label')" [subtitle]="t('manage-reading-list-tooltip')">
+                <ng-template #switch>
                   <div class="form-check form-switch">
                     <input type="checkbox" id="manage-readinglists" role="switch" formControlName="manageReadingLists" class="form-check-input">
-                    <label class="form-check-label" for="manage-readinglists">{{t('manage-reading-list-label')}}</label>
                   </div>
-                </div>
-                <p class="accent">
-                  {{t('manage-reading-list-tooltip')}}
-                </p>
-              </div>
+                </ng-template>
+              </app-setting-switch>
             </div>
 
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('allow-scrobbling-label')" [subtitle]="t('allow-scrobbling-tooltip')">
+                <ng-template #switch>
                   <div class="form-check form-switch">
                     <input type="checkbox" id="scrobbling" role="switch" formControlName="allowScrobbling" class="form-check-input">
-                    <label class="form-check-label" for="scrobbling">{{t('allow-scrobbling-label')}}</label>
                   </div>
-                </div>
-                <p class="accent">
-                  {{t('allow-scrobbling-tooltip')}}
-                </p>
-              </div>
+                </ng-template>
+              </app-setting-switch>
             </div>
 
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
+                <ng-template #switch>
                   <div class="form-check form-switch">
-                    <input type="checkbox" id="lib-folder-watching" role="switch" formControlName="folderWatching" class="form-check-input" aria-labelledby="auto-close-label">
-                    <label class="form-check-label" for="lib-folder-watching">{{t('folder-watching-label')}}</label>
+                    <input type="checkbox" id="lib-folder-watching" role="switch" formControlName="folderWatching" class="form-check-input">
                   </div>
-                </div>
-                <p class="accent">
-                  {{t('folder-watching-tooltip')}}
-                </p>
-              </div>
+                </ng-template>
+              </app-setting-switch>
             </div>
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
+
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('include-in-dashboard-label')" [subtitle]="t('include-in-dashboard-tooltip')">
+                <ng-template #switch>
                   <div class="form-check form-switch">
-                    <input type="checkbox" id="include-dashboard" role="switch" formControlName="includeInDashboard" class="form-check-input" aria-labelledby="auto-close-label">
-                    <label class="form-check-label" for="include-dashboard">{{t('include-in-dashboard-label')}}</label>
+                    <input type="checkbox" id="include-dashboard" role="switch" formControlName="includeInDashboard" class="form-check-input">
                   </div>
-                </div>
-                <p class="accent">
-                  {{t('include-in-dashboard-tooltip')}}
-                </p>
-              </div>
+                </ng-template>
+              </app-setting-switch>
             </div>
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
+
+
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('include-in-search-label')" [subtitle]="t('include-in-search-tooltip')">
+                <ng-template #switch>
                   <div class="form-check form-switch">
-                    <input type="checkbox" id="include-recommended" role="switch" formControlName="includeInRecommended" class="form-check-input" aria-labelledby="auto-close-label">
-                    <label class="form-check-label" for="include-recommended">{{t('include-in-recommendation-label')}}</label>
+                    <input type="checkbox" id="include-search" role="switch" formControlName="includeInSearch" class="form-check-input">
                   </div>
-                </div>
-                <p class="accent">
-                  {{t('include-in-recommendation-tooltip')}}
-                </p>
-              </div>
+                </ng-template>
+              </app-setting-switch>
             </div>
-            <div class="row">
-              <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                <div class="mb-3 mt-1">
-                  <div class="form-check form-switch">
-                    <input type="checkbox" id="include-search" role="switch" formControlName="includeInSearch" class="form-check-input" aria-labelledby="auto-close-label">
-                    <label class="form-check-label" for="include-search">{{t('include-in-search-label')}}</label>
-                  </div>
-                </div>
-                <p class="accent">
-                  {{t('include-in-search-tooltip')}}
-                </p>
-              </div>
+
+            <div class="setting-section-break"></div>
+
+            <div class="row g-0 mt-4 pb-4">
+              <app-setting-item [title]="t('exclude-patterns-label')" [showEdit]="false" [canEdit]="false"
+                                [subtitle]="excludePatternTooltip" [toggleOnViewClick]="false">
+                <ng-template #view>
+                  <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                </ng-template>
+              </app-setting-item>
             </div>
+
           </ng-template>
         </li>
+
+        <!-- Only show tasks on edit flow -->
+        @if (!isAddLibrary) {
+          <li [ngbNavItem]="TabID.Tasks">
+            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+            <ng-template ngbNavContent>
+              @for(task of tasks; track task.action) {
+                <div class="mt-3 mb-3">
+                  <app-setting-button [subtitle]="task.description">
+                    <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                  </app-setting-button>
+                </div>
+              }
+            </ng-template>
+          </li>
+
+        }
+
+
       </ul>
 
       <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
@@ -246,12 +231,11 @@
     <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
     <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
 
-    <ng-container *ngIf="isAddLibrary && setupStep !== 3; else editLibraryButton">
+    @if (isAddLibrary && setupStep !== 3) {
       <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">{{t('next')}}</button>
-    </ng-container>
-    <ng-template #editLibraryButton>
+    } @else {
       <button type="button" class="btn btn-primary" [disabled]="isDisabled()" (click)="save()">{{t('save')}}</button>
-    </ng-template>
+    }
   </div>
 
 </ng-container>

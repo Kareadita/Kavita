@@ -9,7 +9,7 @@ import {
   TemplateRef
 } from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-badge-expander',

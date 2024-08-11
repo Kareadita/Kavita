@@ -92,37 +92,25 @@
       </div>
     </div>
 
-    <ng-container *ngIf="breakpoint$ | async as bp">
-      <div class="row g-0 pt-2 pb-2">
-        <app-top-readers></app-top-readers>
-      </div>
+    <div class="row g-0 pt-2 pb-2">
+      <app-top-readers></app-top-readers>
+    </div>
 
-      <div class="row g-0 pt-4 pb-2">
-        <div class="col-lg-6 col-md-12 mb-md-5">
-          <app-file-breakdown-stats></app-file-breakdown-stats>
-        </div>
-        <div class="col-lg-6 col-md-12">
-          <app-publication-status-stats></app-publication-status-stats>
-        </div>
-      </div>
+    <div class="row g-0 pt-4 pb-2">
+      <app-file-breakdown-stats></app-file-breakdown-stats>
+    </div>
 
-      <div class="row g-0 pt-4 pb-2">
-        <div class="col-md-12 col-sm-12 mt-4 pt-2">
-          <app-reading-activity [isAdmin]="true"></app-reading-activity>
-        </div>
-      </div>
+    <div class="row g-0 pt-4 pb-2">
+      <app-publication-status-stats></app-publication-status-stats>
+    </div>
 
-      <div class="row g-0 pt-4 pb-2">
-        <div class="col-md-6 col-sm-12 mt-4 pt-2">
-          <app-day-breakdown></app-day-breakdown>
-        </div>
-        @if (accountService.hasValidLicense$ | async) {
-          <div class="col-md-4 col-md-offset-2 col-sm-12 mt-4 pt-2">
-            <app-kavitaplus-metadata-breakdown-stats></app-kavitaplus-metadata-breakdown-stats>
-          </div>
-        }
-      </div>
-    </ng-container>
+    <div class="row g-0 pt-4 pb-2">
+      <app-reading-activity [isAdmin]="true"></app-reading-activity>
+    </div>
+
+    <div class="row g-0 pt-4 pb-2">
+      <app-day-breakdown></app-day-breakdown>
+    </div>
 
   </div>
 

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
@@ -6,9 +6,16 @@ import {ServerService} from 'src/app/_services/server.service';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
+import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {ConfirmService} from "../../shared/confirm.service";
+import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -18,7 +25,7 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
   styleUrls: ['./manage-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
+  imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet, PageLayoutModePipe, SettingItemComponent, SettingSwitchComponent, SafeHtmlPipe]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -27,12 +34,19 @@ export class ManageSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly WikiLink = WikiLink;
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+
+  allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
+    WikiLink.DataCollection +
+    '" rel="noopener noreferrer" target="_blank">wiki</a> ' +
+    translate('manage-settings.allow-stats-tooltip-part-2');
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -65,6 +79,23 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
       this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
 
+      // Automatically save settings as we edit them
+      this.settingsForm.valueChanges.pipe(
+        distinctUntilChanged(),
+        debounceTime(100),
+        filter(_ => this.settingsForm.valid),
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(_ => {
+          const data = this.packData();
+          return this.settingsService.updateServerSettings(data);
+        }),
+        tap(settings => {
+          this.serverSettings = settings;
+          this.resetForm();
+          this.cdRef.markForCheck();
+        })
+      ).subscribe();
+
       this.serverService.getServerInfo().subscribe(info => {
         if (info.isDocker) {
           this.settingsForm.get('ipAddresses')?.disable();
@@ -78,46 +109,41 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetForm() {
-    this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
-    this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
-    this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
-    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup);
-    this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
-    this.settingsForm.get('port')?.setValue(this.serverSettings.port);
-    this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);
-    this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
-    this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
-    this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
-    this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
-    this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
-    this.settingsForm.get('totalLogs')?.setValue(this.serverSettings.totalLogs);
-    this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);
-    this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs);
-    this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
-    this.settingsForm.get('cacheSize')?.setValue(this.serverSettings.cacheSize);
-    this.settingsForm.get('onDeckProgressDays')?.setValue(this.serverSettings.onDeckProgressDays);
-    this.settingsForm.get('onDeckUpdateDays')?.setValue(this.serverSettings.onDeckUpdateDays);
+    this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('port')?.setValue(this.serverSettings.port, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('totalLogs')?.setValue(this.serverSettings.totalLogs, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('cacheSize')?.setValue(this.serverSettings.cacheSize, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('onDeckProgressDays')?.setValue(this.serverSettings.onDeckProgressDays, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('onDeckUpdateDays')?.setValue(this.serverSettings.onDeckUpdateDays, {onlySelf: true, emitEvent: false});
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
 
-  async saveSettings() {
+  packData() {
     const modelSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     modelSettings.smtpConfig = this.serverSettings.smtpConfig;
 
-
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
-      this.serverSettings = settings;
-      this.resetForm();
-      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
+    return modelSettings;
   }
 
-  resetToDefaults() {
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+  async resetToDefaults() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
+
+    this.settingsService.resetServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));

@@ -45,7 +45,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {map, take} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {
@@ -104,7 +104,7 @@ import {TagBadgeComponent} from '../../../shared/tag-badge/tag-badge.component';
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
 import {
@@ -116,6 +116,8 @@ import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
+import {ThemeService} from "../../../_services/theme.service";
+import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -128,7 +130,9 @@ enum TabID {
   Storyline = 2,
   Volumes = 3,
   Chapters = 4,
-  Recommendations = 5
+  Recommendations = 5,
+  Reviews = 6,
+  Cast = 7
 }
 
 interface StoryLineItem {
@@ -149,7 +153,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -173,12 +177,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly scrollService = inject(ScrollService);
   private readonly deviceService = inject(DeviceService);
   private readonly translocoService = inject(TranslocoService);
-
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
   protected readonly navService = inject(NavService);
   protected readonly readerService = inject(ReaderService);
+  protected readonly themeService = inject(ThemeService);
+
   protected readonly LibraryType = LibraryType;
   protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
@@ -219,6 +224,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   activeTabId = TabID.Storyline;
 
   reviews: Array<UserReview> = [];
+  plusReviews: Array<UserReview> = [];
   ratings: Array<Rating> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -413,11 +419,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
-  debugLog(message: string) {
-    console.log(message);
-  }
-
-
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
@@ -443,6 +444,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
         }
+      } else if (event.event === EVENTS.CoverUpdate) {
+        this.themeService.refreshColorScape('series', this.seriesId).subscribe();
       }
     });
 
@@ -495,7 +498,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetdata(series);
+        this.actionService.refreshSeriesMetadata(series);
+        break;
+      case(Action.GenerateColorScape):
+        this.actionService.refreshSeriesMetadata(series, undefined, false);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
@@ -641,6 +647,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
+      this.themeService.setColorScape(this.series.primaryColor, this.series.secondaryColor);
+
       if (loadExternal) {
         this.loadPlusMetadata(this.seriesId, this.libraryType);
       }
@@ -722,7 +730,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         this.isLoading = false;
         this.cdRef.markForCheck();
-        console.log('isLoading is now false')
       });
     }, err => {
       this.router.navigateByUrl('/home');
@@ -814,12 +821,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (data === null) {
         this.isLoadingExtra = false;
         this.cdRef.markForCheck();
-        console.log('isLoadingExtra is false')
         return;
       }
 
       // Reviews
-      this.reviews = [...data.reviews];
+      //this.reviews = [...data.reviews];
+      this.plusReviews = data.reviews;
+
       if (data.ratings) {
         this.ratings = [...data.ratings];
       }
@@ -834,7 +842,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.isLoadingExtra = false;
       this.cdRef.markForCheck();
-      console.log('isLoadingExtra is false')
     });
   }
 
@@ -947,11 +954,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (closeResult.success) {
         window.scrollTo(0, 0);
         this.loadSeries(this.seriesId, closeResult.updateExternal);
+      } else if (closeResult.updateExternal) {
+        this.loadSeries(this.seriesId, closeResult.updateExternal);
       }
 
       if (closeResult.coverImageUpdate) {
         this.toastr.info(this.translocoService.translate('series-detail.cover-change'));
       }
+
     });
   }
 

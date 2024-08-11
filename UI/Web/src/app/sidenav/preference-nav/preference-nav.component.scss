@@ -1,0 +1,99 @@
+// TODO: Move this to a common file so it applies both ways
+.side-nav {
+  padding-bottom: 10px;
+  width: 190px;
+  background-color: var(--side-nav-bg-color);
+  height: calc((var(--vh)*100) - 115px);
+  position: fixed;
+  margin: 0;
+  left: 10px;
+  top: 73px;
+  border-radius: var(--side-nav-border-radius);
+  transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
+  overflow: auto;
+  border: var(--side-nav-border);
+
+  &.no-donate {
+    height: calc((var(--vh)*100) - 82px);
+  }
+
+  &.hidden {
+    display: none;
+    opacity: 0;
+  }
+
+  &.closed {
+    width: 50px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--side-nav-closed-bg-color);
+    border: var(--side-nav-border-closed);
+  }
+
+  .side-nav-item:first {
+    border-top-left-radius: var(--side-nav-border-radius);
+    border-top-right-radius: var(--side-nav-border-radius);
+  }
+}
+
+@media (max-width: 576px) {
+  .side-nav {
+    padding: 10px 0;
+    width: 55vw;
+    background-color: var(--side-nav-mobile-bg-color);
+    height: calc((var(--vh)*100) - 125px);
+    position: fixed;
+    margin: 0;
+    left: 0;
+    top: var(--nav-mobile-offset);
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 999;
+    overflow: auto;
+    border: var(--side-nav-mobile-border);
+
+    &.closed {
+      width: 0;
+      overflow: hidden;
+      box-shadow: none;
+    }
+
+    .side-nav-item:first {
+      border-top-left-radius: var(--side-nav-border-radius);
+      border-top-right-radius: var(--side-nav-border-radius);
+    }
+
+    &.no-donate {
+      height: calc((var(--vh)*100) - var(--nav-mobile-offset));
+    }
+  }
+
+  .side-nav-overlay {
+    background-color: var(--side-nav-overlay-color);
+    width: 100vw;
+    height: calc((var(--vh)*100) - var(--nav-offset));
+    position: absolute;
+    left: 0;
+    z-index: 998;
+
+    &.closed {
+      display: none;
+    }
+  }
+
+
+}
+
+.side-nav-header {
+  color: #d5d5d5;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.side-nav-header:first-of-type {
+  margin-top: 0.5rem !important;
+}
+
+// Overrides for this component
+::ng-deep .side-nav-item {
+  padding: 0 0 0 20px !important;
+}

@@ -1,0 +1,71 @@
+
+<!--<app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>-->
+
+<div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+
+  @if (chapter) {
+    <div class="row mb-0 mb-xl-3 info-container">
+      <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block mt-2">
+
+        <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}" height="400px"  [imageUrl]="coverImage"></app-image>
+        <!--      @if (series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial) {-->
+        <!--        <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">-->
+        <!--          <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages" [showValue]="true"></ngb-progressbar>-->
+        <!--        </div>-->
+        <!--        <div class="under-image">-->
+        <!--          {{t('continue-from', {title: ContinuePointTitle})}}-->
+        <!--        </div>-->
+        <!--      }-->
+      </div>
+      <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
+        <h4 class="title">
+          {{series?.name}}
+        </h4>
+        <div class="subtitle">
+          <span>Issue #{{chapter.minNumber}}</span>
+          @if (chapter.titleName) {
+            <span class="ms-3">{{chapter.titleName}}</span>
+          }
+        </div>
+
+        <div class="mt-2">
+          @if (chapter.publishers.length > 0) {
+            <span class="me-2">{{chapter.publishers[0]}}</span>
+          }
+          @if (chapter.ageRating !== AgeRating.Unknown) {
+            <span class="me-2">
+              {{chapter.ageRating | ageRating}}
+            </span>
+          } @else {
+            <span class="me-2">
+              <app-image imageUrl="./assets/images/ratings/unknown-rating.png" height="32px" width="32px"></app-image>
+            </span>
+          }
+
+
+          <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i> {{chapter.avgHoursToRead | timeDuration }}</span>
+
+          <span>• {{chapter.pages}} pages</span>
+        </div>
+
+        <!-- Rating goes here (after I implement support for rating individual issues -->
+        @if (libraryType !== null && series) {
+          <div class="mt-2">
+            <app-external-rating [seriesId]="series.id"
+                                 [ratings]="[]"
+                                 [userRating]="series.userRating"
+                                 [hasUserRated]="series.hasUserRated"
+                                 [libraryType]="libraryType">
+            </app-external-rating>
+          </div>
+        }
+
+
+      </div>
+    </div>
+  }
+
+
+
+  <app-loading [loading]="isLoading"></app-loading>
+</div>

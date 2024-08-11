@@ -51,7 +51,7 @@ import {
   PersonalTableOfContentsComponent,
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 
 enum TabID {

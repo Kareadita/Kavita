@@ -9,7 +9,7 @@ export enum LayoutMode {
     /**
      * Renders 2 pages side by side on the renderer. Cover images will not split and take up both panes.
      */
-    Double = 2, 
+    Double = 2,
     /**
      * Renders 2 pages side by side on the renderer. Cover images will not split and take up both panes. This version reverses the order and is used for Manga only
      */

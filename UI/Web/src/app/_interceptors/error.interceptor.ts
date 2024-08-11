@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
-import {translate, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoService} from "@jsverse/transloco";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {

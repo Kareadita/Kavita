@@ -9,7 +9,7 @@ import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
-import {TRANSLOCO_SCOPE, TranslocoDirective} from "@ngneat/transloco";
+import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
 
 
 @Component({
@@ -24,7 +24,7 @@ export class UserLoginComponent implements OnInit {
 
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")])
+      password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")])
   });
 
   /**

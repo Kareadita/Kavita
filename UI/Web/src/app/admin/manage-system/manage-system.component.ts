@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} f
 import {ServerService} from 'src/app/_services/server.service';
 import {ServerInfoSlim} from '../_models/server-info';
 import {DatePipe, NgIf} from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ChangelogComponent} from "../../announcements/_components/changelog/changelog.component";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";

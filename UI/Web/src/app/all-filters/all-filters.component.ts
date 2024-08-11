@@ -1,8 +1,7 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {JumpKey} from "../_models/jumpbar/jump-key";
-import {EVENTS, Message, MessageHubService} from "../_services/message-hub.service";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {
   SideNavCompanionBarComponent

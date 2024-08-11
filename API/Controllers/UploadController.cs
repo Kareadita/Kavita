@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -109,6 +108,7 @@ public class UploadController : BaseApiController
             {
                 series.CoverImage = filePath;
                 series.CoverImageLocked = true;
+                _imageService.UpdateColorScape(series);
                 _unitOfWork.SeriesRepository.Update(series);
             }
 
@@ -157,6 +157,7 @@ public class UploadController : BaseApiController
             {
                 tag.CoverImage = filePath;
                 tag.CoverImageLocked = true;
+                _imageService.UpdateColorScape(tag);
                 _unitOfWork.CollectionTagRepository.Update(tag);
             }
 
@@ -208,6 +209,7 @@ public class UploadController : BaseApiController
             {
                 readingList.CoverImage = filePath;
                 readingList.CoverImageLocked = true;
+                _imageService.UpdateColorScape(readingList);
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
 
@@ -327,15 +329,18 @@ public class UploadController : BaseApiController
             {
                 chapter.CoverImage = filePath;
                 chapter.CoverImageLocked = true;
+                _imageService.UpdateColorScape(chapter);
                 _unitOfWork.ChapterRepository.Update(chapter);
 
                 volume.CoverImage = chapter.CoverImage;
+                _imageService.UpdateColorScape(volume);
                 _unitOfWork.VolumeRepository.Update(volume);
             }
 
             if (_unitOfWork.HasChanges())
             {
                 await _unitOfWork.CommitAsync();
+
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                     MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
@@ -372,6 +377,7 @@ public class UploadController : BaseApiController
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
             library.CoverImage = null;
+            library.ResetColorScape();
             _unitOfWork.LibraryRepository.Update(library);
             if (_unitOfWork.HasChanges())
             {
@@ -391,6 +397,7 @@ public class UploadController : BaseApiController
             if (!string.IsNullOrEmpty(filePath))
             {
                 library.CoverImage = filePath;
+                _imageService.UpdateColorScape(library);
                 _unitOfWork.LibraryRepository.Update(library);
             }
 
@@ -426,12 +433,15 @@ public class UploadController : BaseApiController
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
             if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
             var originalFile = chapter.CoverImage;
+
             chapter.CoverImage = string.Empty;
             chapter.CoverImageLocked = false;
             _unitOfWork.ChapterRepository.Update(chapter);
+
             var volume = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
             volume.CoverImage = chapter.CoverImage;
             _unitOfWork.VolumeRepository.Update(volume);
+
             var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
 
             if (_unitOfWork.HasChanges())
@@ -451,7 +461,4 @@ public class UploadController : BaseApiController
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "reset-chapter-lock"));
     }
-
-
-
 }

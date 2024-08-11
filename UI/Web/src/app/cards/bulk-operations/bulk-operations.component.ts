@@ -11,7 +11,7 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { BulkSelectionService } from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, CommonModule} from "@angular/common";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
@@ -36,7 +36,7 @@ export class BulkOperationsComponent implements OnInit {
    * Modal mode means don't fix to the top
    */
   @Input() modalMode = false;
-  @Input() topOffset: number = 56;
+  @Input() topOffset: number = 60;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];

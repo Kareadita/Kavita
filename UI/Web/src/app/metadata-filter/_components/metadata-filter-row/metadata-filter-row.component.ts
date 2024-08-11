@@ -32,7 +32,7 @@ import {
   NgbInputDatepicker,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 enum PredicateType {
   Text = 1,

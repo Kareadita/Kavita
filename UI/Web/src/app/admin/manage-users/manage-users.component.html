@@ -1,18 +1,73 @@
 <ng-container *transloco="let t; read: 'manage-users'">
+  <div class="position-relative">
+    <button class="btn btn-primary-outline position-absolute custom-position" (click)="inviteUser()">
+      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{t('invite')}}</span>
+    </button>
+  </div>
 
-
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-8"><h3>{{t('title')}}</h3></div>
-      <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{t('invite')}}</span></button></div>
-    </div>
-
-    <ul class="list-group">
-      <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
-        <div>
-          <h4>
-            <span id="member-name--{{idx}}" [ngClass]="{'highlight': member.username === loggedInUsername}">{{member.username | titlecase}}</span>
-            <div class="float-end" *ngIf="canEditMember(member)">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">{{t('name-header')}}</th>
+      <th scope="col">{{t('last-active-header')}}</th>
+      <th scope="col">{{t('sharing-header')}}</th>
+      <th scope="col">{{t('roles-header')}}</th>
+      <th scope="col">{{t('actions-header')}}</th>
+    </tr>
+    </thead>
+    <tbody>
+      @for(member of members; track member.username + member.lastActiveUtc + member.roles.length; let idx = $index) {
+        <tr>
+          <td id="username--{{idx}}">
+            <span class="member-name" id="member-name--{{idx}}" [ngClass]="{'highlight': member.username === loggedInUsername}">{{member.username | titlecase}}</span>
+            @if (member.isPending) {
+              <span class="badge bg-secondary text-dark ms-1 pending-badge" [ngbTooltip]="t('pending-tooltip')">{{t('pending-title')}}</span>
+            }
+          </td>
+          <td>
+            <span [ngbTooltip]="member.lastActiveUtc | utcToLocalTime | defaultDate">
+                @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
+                  {{t('online-now-tooltip')}}
+                } @else {
+                  {{member.lastActiveUtc | utcToLocalTime | timeAgo | sentenceCase | defaultDate}}
+                }
+              </span>
+          </td>
+          <td>
+            @if (!hasAdminRole(member) && member.libraries.length > 0) {
+              @if (member.libraries.length > 5) {
+                {{t('too-many-libraries')}}
+              }
+              @else {
+                @for(lib of member.libraries; track lib.name) {
+                  <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
+                }
+              }
+            } @else {
+              {{null | defaultValue}}
+            }
+          </td>
+          <td>
+            @if (getRoles(member); as roles) {
+              <div>
+                @if (roles.length === 0) {
+                  <span>{{null | defaultValue}}</span>
+                } @else {
+                  @if (hasAdminRole(member)) {
+                    <app-tag-badge class="col-auto">{{t('admin')}}</app-tag-badge>
+                  } @else {
+                    @for (role of roles; track role) {
+                      <app-tag-badge class="col-auto">{{role}}</app-tag-badge>
+                    }
+                  }
+                }
+              </div>
+            } @else {
+              {{null | defaultValue}}
+            }
+          </td>
+          <td>
+            @if (canEditMember(member)) {
               <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(member)"
                       placement="top" [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
                 <i class="fa fa-trash" aria-hidden="true"></i>
@@ -22,51 +77,26 @@
                 <i class="fa fa-pen" aria-hidden="true"></i>
               </button>
 
-              <ng-container *ngIf="member.isPending">
+              @if (member.isPending) {
                 <button class="btn btn-secondary btn-sm me-2" (click)="resendEmail(member)"
                         placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})"><i class="fa-solid fa-share-from-square" aria-hidden="true"></i></button>
                 <button class="btn btn-secondary btn-sm" (click)="setup(member)"
                         placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
-              </ng-container>
-              <button *ngIf="!member.isPending" class="btn btn-secondary btn-sm" (click)="updatePassword(member)"
-                      placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
-            </div>
-          </h4>
-          <div class="user-info">
-            <div>{{t('last-active-title')}}
-              <span class="badge bg-secondary text-dark ms-1 pending-badge" *ngIf="member.isPending; else activeTime">{{t('pending-title')}}</span>
-              <ng-template #activeTime>
-                <span>{{member.lastActiveUtc | utcToLocalTime | defaultDate}} <i class="presence fa fa-circle ms-1" [title]="t('online-now-tooltip')" aria-hidden="true" *ngIf="(messageHub.onlineUsers$ | async)?.includes(member.username)"></i></span>
-              </ng-template>
-            </div>
-            <div *ngIf="!hasAdminRole(member) && member.libraries.length > 0">
-              {{t('sharing-title')}}
-              <app-tag-badge *ngFor="let lib of member.libraries" class="col-auto">{{lib.name}}</app-tag-badge>
-            </div>
-            <div class="row g-0">
-              <div *ngIf="getRoles(member) as roles">
-                {{t('roles-title')}} <span *ngIf="roles.length === 0; else showRoles">{{null | defaultValue}}</span>
-                <ng-template #showRoles>
-                  <ng-container *ngIf="hasAdminRole(member); else allRoles">
-                    <app-tag-badge class="col-auto">{{t('admin')}}</app-tag-badge>
-                  </ng-container>
-                  <ng-template #allRoles>
-                    <app-tag-badge *ngFor="let role of roles" class="col-auto">{{role}}</app-tag-badge>
-                  </ng-template>
-                </ng-template>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li *ngIf="loadingMembers" class="list-group-item">
-        <div class="spinner-border text-secondary" role="status">
-          <span class="visually-hidden">{{t('loading')}}</span>
-        </div>
-      </li>
-      <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
-        {{t('no-data')}}
-      </li>
-    </ul>
-  </div>
+              } @else {
+                <button class="btn btn-secondary btn-sm" (click)="updatePassword(member)"
+                        placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
+              }
+            }
+          </td>
+        </tr>
+      }
+      @empty {
+        @if (loadingMembers) {
+          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="loadingMembers"></app-loading></td></tr>
+        } @else {
+          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+        }
+      }
+    </tbody>
+  </table>
 </ng-container>

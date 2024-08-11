@@ -10,7 +10,7 @@ import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 

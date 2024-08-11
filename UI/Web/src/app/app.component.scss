@@ -8,6 +8,10 @@
     margin-left: 40px;
 }
 
+.companion-bar-collapsed {
+  margin-left: 0 !important;
+}
+
 .companion-bar-content {
     margin-left: 190px;
     width: auto;
@@ -21,7 +25,7 @@
     .content-wrapper {
         padding: 0 5px 0;
         overflow: hidden;
-        height: calc(var(--vh)*100 - 56px);
+        height: calc(var(--vh)*100 - var(--nav-offset));
 
         &.closed {
             overflow: auto;
@@ -29,12 +33,48 @@
     }
 
     .companion-bar {
-        margin-left: 0px;
-        padding-left: 0px;
+        margin-left: 0;
+        padding-left: 0;
     }
 
     .companion-bar-content {
-        margin-left: 0px;
+        margin-left: 0;
         width: auto;
     }
 }
+
+.default-background {
+  background: radial-gradient(circle farthest-side at 0% 100%,
+    var(--colorscape-darker-color) 0%,
+    var(--colorscape-darker-alpha-color) 100%),
+              radial-gradient(circle farthest-side at 100% 100%,
+      var(--colorscape-primary-color) 0%,
+      var(--colorscape-primary-alpha-color) 100%),
+              radial-gradient(circle farthest-side at 100% 0%,
+      var(--colorscape-lighter-color) 0%,
+      var(--colorscape-lighter-alpha-color) 100%),
+              radial-gradient(circle farthest-side at 0% 0%,
+      var(--colorscape-complementary-color) 0%,
+      var(--colorscape-complementary-alpha-color) 100%),
+    var(--bs-body-bg);
+}
+
+.fullpage-background {
+  position: fixed; /* Make sure it's fixed to the viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #121212;
+
+  .background-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 113vh;
+  }
+}
+

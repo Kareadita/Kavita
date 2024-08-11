@@ -17,7 +17,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { MangaFormatPipe } from '../../../_pipes/manga-format.pipe';
 import { BytesPipe } from '../../../_pipes/bytes.pipe';
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {Pagination} from "../../../_models/pagination";
 import {DownloadService} from "../../../shared/_services/download.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";

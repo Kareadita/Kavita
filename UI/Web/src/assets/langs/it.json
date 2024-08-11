@@ -88,7 +88,6 @@
         "pref-description": "Queste sono impostazioni globali che sono legate al tuo account.",
         "account-tab": "Account",
         "preferences-tab": "Preferenze",
-        "3rd-party-clients-tab": "Client di terze parti",
         "theme-tab": "Tema",
         "devices-tab": "Dispositivi",
         "stats-tab": "Statistiche",
@@ -200,15 +199,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "Vuoi inviare file ai tuoi dispositivi? Il tuo ammistratore deve prima configurare le impostazioni della posta elettronica!"
-    },
-    "edit-device": {
-        "device-name-label": "Nome Dispositivo",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Questa e-mail verrà utilizzata per recapitare il file tramite Invia a",
-        "device-platform-label": "Piattaforma del dispositivo",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -971,18 +961,7 @@
     "list-item": {
         "read": "{{common.read}}"
     },
-    "manage-alerts": {
-        "description-part-1": "Questa tabella contiene i problemi rilevati durante la scansione o la lettura dei file multimediali. Questo elenco non è gestito. È possibile cancellarlo in qualsiasi momento e utilizzare la Scansione libreria (forzata) per eseguire l'analisi. Un elenco di alcuni errori comuni e del loro significato è disponibile sul file ",
-        "description-part-2": "wiki.",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Cancella Avvisi",
-        "extension-header": "Estensione",
-        "file-header": "Documento",
-        "comment-header": "Commento",
-        "details-header": "Dettagli"
-    },
     "manage-email-settings": {
-        "title": "Servizio Email (SMTP)",
         "description": "Per utilizzare alcune funzioni di Kavita come Password Dimenticata e Invia Al Dispositivo, è necessario impostare un provider di posta elettronica. Altre funzionalità come la modifica della password sono meno sicure senza la configurazione dell'e-mail.",
         "send-to-warning": "Se vuoi che Invia Al Dispositivo funzioni, devi configurare le impostazioni e-mail",
         "email-url-label": "URL Servizio Email",
@@ -1189,12 +1168,9 @@
         "change-password-alt": "Cambia Password {{user}}",
         "resend": "Rinvia",
         "setup": "Impostare",
-        "last-active-title": "Ultimo attivo:",
-        "roles-title": "Regole:",
         "none": "Nessuno",
         "never": "Mai",
         "online-now-tooltip": "Inlinea Adesso",
-        "sharing-title": "Condivisione:",
         "no-data": "Non ci sono altri utenti.",
         "loading": "{{common.loading}}",
         "username-pattern": "Il Nome Utente può contenere solo i caratteri seguenti e spazio: {{characters}}",
@@ -1230,24 +1206,6 @@
         "quick-catchups": "Recuperi rapidi",
         "quick-reads": "Letture veloci",
         "on-deck": "{{dashboard.on-deck-title}}"
-    },
-    "admin-dashboard": {
-        "title": "Pannello di amministrazione",
-        "general-tab": "Generale",
-        "users-tab": "Utenti",
-        "libraries-tab": "Librerie",
-        "media-tab": "Media",
-        "logs-tab": "Logs",
-        "email-tab": "Email",
-        "tasks-tab": "Tasks",
-        "statistics-tab": "Statistiche",
-        "system-tab": "Sistema",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ è un servizio in abbonamento premium che sblocca funzionalità per tutti gli utenti su questa istanza Kavita. Acquista un abbonamento per sbloccare ",
-        "kavita+-desc-part-2": "vantaggi premium",
-        "kavita+-desc-part-3": "oggi!",
-        "kavita+-releases": "Vedi versioni",
-        "kavita+-requirement": "Kavita+ è sviluppata per funzionare con l'ultima release - versione 2. Tutte le versioni precedenti non funzioneranno correttamente."
     },
     "collection-detail": {
         "no-data": "Non ci sono articoli. Prova ad aggiungere una serie.",
@@ -1334,7 +1292,6 @@
         "skip-alt": "Passa al contenuto principale",
         "search-series-alt": "Cerca Serie",
         "search-alt": "Ricerca…",
-        "promoted": "{{common.promoted}}",
         "no-data": "Nessun risultato trovato",
         "scroll-to-top-alt": "Scorri verso l'alto",
         "server-settings": "Impostazioni del server",

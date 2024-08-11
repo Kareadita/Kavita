@@ -11,13 +11,8 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     children: [
       {
-        path: 'admin',
-        canActivate: [AdminGuard],
-        loadChildren: () => import('./_routes/admin-routing.module').then(m => m.routes)
-      },
-      {
-        path: 'preferences',
-        loadChildren: () => import('./_routes/user-settings-routing.module').then(m => m.routes)
+        path: 'settings',
+        loadChildren: () => import('./_routes/settings-routing.module').then(m => m.routes)
       },
       {
         path: 'collections',
@@ -29,7 +24,6 @@ const routes: Routes = [
       },
       {
         path: 'announcements',
-        canActivate: [AdminGuard],
         loadChildren: () => import('./_routes/announcements-routing.module').then(m => m.routes)
       },
       {
@@ -66,6 +60,11 @@ const routes: Routes = [
             path: ':libraryId/series/:seriesId',
             pathMatch: 'full',
             loadComponent: () => import('../app/series-detail/_components/series-detail/series-detail.component').then(c => c.SeriesDetailComponent)
+          },
+          {
+            path: ':libraryId/series/:seriesId/chapter/:chapterId',
+            pathMatch: 'full',
+            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
           },
           {
             path: ':libraryId/series/:seriesId/manga',

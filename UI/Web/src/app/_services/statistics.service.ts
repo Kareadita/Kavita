@@ -13,7 +13,7 @@ import { StatCount } from '../statistics/_models/stat-count';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 import { MangaFormat } from '../_models/manga-format';
 import { TextResonse } from '../_types/text-response';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 import {KavitaPlusMetadataBreakdown} from "../statistics/_models/kavitaplus-metadata-breakdown";
 import {throttleTime} from "rxjs/operators";
 import {DEBOUNCE_TIME} from "../shared/_services/download.service";

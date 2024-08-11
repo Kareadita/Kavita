@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import {DestroyRef, inject, Injectable } from '@angular/core';
-import {catchError, of, ReplaySubject, throwError} from 'rxjs';
+import {catchError, Observable, of, ReplaySubject, shareReplay, throwError} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -42,6 +42,10 @@ export class AccountService {
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
   public currentUser$ = this.currentUserSource.asObservable();
+  public isAdmin$: Observable<boolean> = this.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
+    if (!u) return false;
+    return this.hasAdminRole(u);
+  }), shareReplay({bufferSize: 1, refCount: true}));
 
   private hasValidLicenseSource = new ReplaySubject<boolean>(1);
   /**
@@ -72,6 +76,17 @@ export class AccountService {
       this.isOnline = true;
       this.refreshToken().subscribe();
     });
+  }
+
+  hasAnyRole(user: User, roles: Array<Role>) {
+    if (!user || !user.roles) {
+      return false;
+    }
+    if (roles.length === 0) {
+      return true;
+    }
+
+    return roles.some(role => user.roles.includes(role));
   }
 
   hasAdminRole(user: User) {

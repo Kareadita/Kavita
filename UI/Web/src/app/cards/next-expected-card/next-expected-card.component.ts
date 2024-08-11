@@ -4,7 +4,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-next-expected-card',

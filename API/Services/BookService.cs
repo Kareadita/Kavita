@@ -1223,7 +1223,7 @@ public class BookService : IBookService
         {
             // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
             var coverImageContent = epubBook.Content.Cover
-                                    ?? epubBook.Content.Images.Local.FirstOrDefault(file => Parser.IsCoverImage(file.FilePath)) // FileName -> FilePath
+                                    ?? epubBook.Content.Images.Local.FirstOrDefault(file => Parser.IsCoverImage(file.FilePath))
                                     ?? epubBook.Content.Images.Local.FirstOrDefault();
 
             if (coverImageContent == null) return string.Empty;

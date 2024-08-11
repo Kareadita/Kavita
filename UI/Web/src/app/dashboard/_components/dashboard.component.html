@@ -3,11 +3,11 @@
 <ng-container *transloco="let t; read: 'dashboard'">
   @if (libraries$ | async; as libraries) {
     @if (libraries.length === 0) {
-      @if (isAdmin$ | async; as isAdmin) {
+      @if (accountService.isAdmin$ | async; as isAdmin) {
         <div class="mt-3">
           @if (isAdmin) {
             <div class="d-flex justify-content-center">
-              <p>{{t('no-libraries')}} <a routerLink="/admin/dashboard" fragment="libraries">{{t('server-settings-link')}}</a>.</p>
+              <p>{{t('no-libraries')}} <a routerLink="/settings" [fragment]="SettingsTabId.Libraries">{{t('server-settings-link')}}</a>.</p>
             </div>
           } @else {
             <div class="d-flex justify-content-center">

@@ -31,6 +31,8 @@ export interface ReadingList {
      * If this is empty or null, the cover image isn't set. Do not use this externally.
      */
      coverImage: string;
+     primaryColor?: string;
+     secondaryColor?: string;
      startingYear: number;
      startingMonth: number;
      endingYear: number;

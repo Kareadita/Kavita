@@ -5,7 +5,8 @@
       <span class="badge bg-secondary">{{t('installed')}}</span>
       {{t('description-continued', {installed: ''})}}
     </p>
-    <ng-container *ngFor="let update of updates; let indx = index;">
+
+    @for(update of updates; track update; let indx = $index) {
       <div class="card w-100 mb-2" style="width: 18rem;">
         <div class="card-body">
           <h4 class="card-title">{{update.updateTitle}}&nbsp;
@@ -23,11 +24,16 @@
           <pre class="card-text update-body">
             <app-read-more [text]="update.updateBody" [maxLength]="500"></app-read-more>
           </pre>
-          <a *ngIf="!update.isDocker && update.updateVersion === update.currentVersion" href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
-          <a *ngIf="!update.isDocker && update.updateVersion !== update.currentVersion" href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('download')}}</a>
+          @if (!update.isDocker && (accountService.isAdmin$ | async)) {
+            @if (update.updateVersion === update.currentVersion) {
+              <a href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
+            } @else {
+              <a href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('download')}}</a>
+            }
+          }
         </div>
       </div>
-    </ng-container>
+    }
   </div>
 
 

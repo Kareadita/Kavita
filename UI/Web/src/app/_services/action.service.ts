@@ -19,7 +19,7 @@ import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
@@ -84,24 +84,29 @@ export class ActionService implements OnDestroy {
    * Request a refresh of Metadata for a given Library
    * @param library Partial Library, must have id and name populated
    * @param callback Optional callback to perform actions after API completes
+   * @param forceUpdate Optional Should we force
    * @returns
    */
-  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback) {
+  async refreshLibraryMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;
     }
 
-    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-      if (callback) {
-        callback(library);
+    // Prompt the user if we are doing a forced call
+    if (forceUpdate) {
+      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
+        if (callback) {
+          callback(library);
+        }
+        return;
       }
-      return;
     }
 
-    const forceUpdate = true; //await this.promptIfForce();
+    const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
 
-    this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
+    this.libraryService.refreshMetadata(library?.id, forceUpdate).subscribe((res: any) => {
+      this.toastr.info(translate(message, {name: library.name}));
+
       if (callback) {
         callback(library);
       }
@@ -224,17 +229,24 @@ export class ActionService implements OnDestroy {
    * Start a metadata refresh for a Series
    * @param series Series, must have libraryId, id and name populated
    * @param callback Optional callback to perform actions after API completes
+   * @param forceUpdate If cache should be checked or not
    */
-  async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-      if (callback) {
-        callback(series);
+  async refreshSeriesMetadata(series: Series, callback?: SeriesActionCallback, forceUpdate: boolean = true) {
+
+    // Prompt the user if we are doing a forced call
+    if (forceUpdate) {
+      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
+        if (callback) {
+          callback(series);
+        }
+        return;
       }
-      return;
     }
 
-    this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(translate('toasts.refresh-covers-queued', {name: series.name}));
+    const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
+
+    this.seriesService.refreshMetadata(series, forceUpdate).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info(translate(message, {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -467,7 +479,7 @@ export class ActionService implements OnDestroy {
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
       this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
-      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.title = translate('action.multiple-selections');
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
 
 
@@ -507,7 +519,7 @@ export class ActionService implements OnDestroy {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.title = translate('action.multiple-selections');
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
 
 
@@ -535,7 +547,7 @@ export class ActionService implements OnDestroy {
     if (this.collectionModalRef != null) { return; }
       this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.collectionModalRef.componentInstance.title = 'New Collection';
+      this.collectionModalRef.componentInstance.title = translate('action.new-collection');
 
       this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;

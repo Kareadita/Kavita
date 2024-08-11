@@ -22,7 +22,7 @@ import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({

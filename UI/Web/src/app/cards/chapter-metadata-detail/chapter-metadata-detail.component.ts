@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {Chapter} from "../../_models/chapter";
 
 @Component({

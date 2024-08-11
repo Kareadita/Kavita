@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; read: 'all-series'">
   <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
-    <h2 title>
+    <h4 title>
       {{title}}
-    </h2>
-    <h6 subtitle *ngIf="pagination">{{t('series-count', {num: pagination.totalItems | number})}}</h6>
+    </h4>
+    <h5 subtitle *ngIf="pagination">{{t('series-count', {num: pagination.totalItems | number})}}</h5>
   </app-side-nav-companion-bar>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
   <app-card-detail-layout *ngIf="filter"

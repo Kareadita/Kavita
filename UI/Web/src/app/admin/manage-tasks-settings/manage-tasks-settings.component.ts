@@ -4,7 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay, take} from 'rxjs/operators';
-import {debounceTime, defer, distinctUntilChanged, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
+import {debounceTime, defer, distinctUntilChanged, filter, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -12,11 +12,14 @@ import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, DatePipe, NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
-import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {translate, TranslocoModule} from "@jsverse/transloco";
+import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {ConfirmService} from "../../shared/confirm.service";
+import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 
 interface AdhocTask {
   name: string;
@@ -33,12 +36,18 @@ interface AdhocTask {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe,
-    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe]
+    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent, SettingButtonComponent]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly toastr = inject(ToastrService);
+  private readonly serverService = inject(ServerService);
+  private readonly modalService = inject(NgbModal);
+  private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
@@ -113,9 +122,6 @@ export class ManageTasksSettingsComponent implements OnInit {
   ];
   customOption = 'custom';
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private serverService: ServerService, private modalService: NgbModal,
-    private downloadService: DownloadService) { }
 
   ngOnInit(): void {
     forkJoin({
@@ -130,6 +136,7 @@ export class ManageTasksSettingsComponent implements OnInit {
 
       this.logLevels = result.levels;
       this.serverSettings = result.settings;
+
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
       this.settingsForm.addControl('taskCleanup', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
@@ -197,6 +204,24 @@ export class ManageTasksSettingsComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
+      // Automatically save settings as we edit them
+      this.settingsForm.valueChanges.pipe(
+        distinctUntilChanged(),
+        debounceTime(100),
+        filter(_ => this.settingsForm.valid),
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(_ => {
+          const data = this.packData();
+          return this.settingsService.updateServerSettings(data);
+        }),
+        tap(settings => {
+          this.serverSettings = settings;
+          this.resetForm();
+          this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
+          this.cdRef.markForCheck();
+        })
+      ).subscribe();
+
       this.cdRef.markForCheck();
     });
 
@@ -206,33 +231,33 @@ export class ManageTasksSettingsComponent implements OnInit {
 
 
   resetForm() {
-    this.settingsForm.get('taskScan')?.setValue(this.serverSettings.taskScan);
-    this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
-    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup);
+    this.settingsForm.get('taskScan')?.setValue(this.serverSettings.taskScan, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('taskCleanup')?.setValue(this.serverSettings.taskCleanup, {onlySelf: true, emitEvent: false});
 
     if (!this.taskFrequencies.includes(this.serverSettings.taskScan)) {
-      this.settingsForm.get('taskScanCustom')?.setValue(this.serverSettings.taskScan);
+      this.settingsForm.get('taskScanCustom')?.setValue(this.serverSettings.taskScan, {onlySelf: true, emitEvent: false});
     } else {
-      this.settingsForm.get('taskScanCustom')?.setValue('');
+      this.settingsForm.get('taskScanCustom')?.setValue('', {onlySelf: true, emitEvent: false});
     }
 
     if (!this.taskFrequencies.includes(this.serverSettings.taskBackup)) {
-      this.settingsForm.get('taskBackupCustom')?.setValue(this.serverSettings.taskBackup);
+      this.settingsForm.get('taskBackupCustom')?.setValue(this.serverSettings.taskBackup, {onlySelf: true, emitEvent: false});
     } else {
-      this.settingsForm.get('taskBackupCustom')?.setValue('');
+      this.settingsForm.get('taskBackupCustom')?.setValue('', {onlySelf: true, emitEvent: false});
     }
 
     if (!this.taskFrequencies.includes(this.serverSettings.taskCleanup)) {
-      this.settingsForm.get('taskCleanupCustom')?.setValue(this.serverSettings.taskCleanup);
+      this.settingsForm.get('taskCleanupCustom')?.setValue(this.serverSettings.taskCleanup, {onlySelf: true, emitEvent: false});
     } else {
-      this.settingsForm.get('taskCleanupCustom')?.setValue('');
+      this.settingsForm.get('taskCleanupCustom')?.setValue('', {onlySelf: true, emitEvent: false});
     }
 
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
 
-  async saveSettings() {
+  packData() {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.taskBackup = this.settingsForm.get('taskBackup')?.value;
     modelSettings.taskScan = this.settingsForm.get('taskScan')?.value;
@@ -250,19 +275,13 @@ export class ManageTasksSettingsComponent implements OnInit {
       modelSettings.taskCleanup = this.settingsForm.get('taskCleanupCustom')?.value;
     }
 
-
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
-      this.serverSettings = settings;
-      this.resetForm();
-      this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
-      this.toastr.success(translate('toasts.server-settings-updated'));
-      this.cdRef.markForCheck();
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
+    return modelSettings;
   }
 
-  resetToDefaults() {
+
+  async resetToDefaults() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
+
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();

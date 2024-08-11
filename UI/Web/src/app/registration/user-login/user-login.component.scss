@@ -11,11 +11,38 @@ a {
 }
 
 .custom-input {
-    background-color: #fff !important;
-    color: black !important;
+    background-color: #343A40 !important;
+    color: #fff !important;
+    border-color: var(--login-input-border-color);
+    font-family: var(--login-input-font-family);
+
+    &:focus {
+        border-color: var(--login-input-border-color-focus);
+        box-shadow: var(--login-input-box-shadow-focus);
+    }
+
+    &::placeholder {
+        opacity: var(--login-input-placeholder-opacity);
+        color: var(--login-input-placeholder-color);
+        font-family: var(--login-input-font-family);
+      }
 }
 
 .invalid-feedback {
     display: inline-block;
-    color: #343c59;
+    color: var(--bs-form-invalid-color);
+    font-family: var(--login-input-font-family);
+}
+
+.forgot-password {
+    a {
+        color: var(--login-forgot-password-color);
+        font-family: var(--login-input-font-family);
+    }
+}
+
+.sign-in {
+    .btn {
+        font-family: var(--login-input-font-family);
+    }
 }

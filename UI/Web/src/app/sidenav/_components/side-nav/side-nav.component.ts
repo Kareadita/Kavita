@@ -7,9 +7,8 @@ import {
   OnInit
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
-import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
@@ -20,25 +19,22 @@ import { ActionService } from '../../../_services/action.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
-import {CommonModule} from "@angular/common";
+import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
-import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
-import {
-  ImportMalCollectionModalComponent
-} from "../../../collections/_components/import-mal-collection-modal/import-mal-collection-modal.component";
 import {WikiLink} from "../../../_models/wiki";
+import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip],
+  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip, NgClass, AsyncPipe],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -52,20 +48,15 @@ export class SideNavComponent implements OnInit {
   private readonly actionService = inject(ActionService);
   public readonly navService = inject(NavService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly ngbModal = inject(NgbModal);
   private readonly imageService = inject(ImageService);
   public readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly WikiLink = WikiLink;
+  protected readonly ItemLimit = 10;
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  readingListActions = [];
-  homeActions = [
-    {action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.openCustomize.bind(this)},
-    {action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)},
-  ];
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
@@ -106,7 +97,7 @@ export class SideNavComponent implements OnInit {
           )
           : this.loadDataOnInit$.pipe(
             tap(d => this.totalSize = d.length),
-            map(d => d.slice(0, 10))
+            map(d => d.slice(0, this.ItemLimit))
           )
       ),
       takeUntilDestroyed(this.destroyRef),
@@ -117,7 +108,7 @@ export class SideNavComponent implements OnInit {
       }),
       switchMap(() => {
         if (this.showAll) return this.loadDataOnInit$;
-        else return this.loadDataOnInit$.pipe(map(d => d.slice(0, 10)))
+        else return this.loadDataOnInit$.pipe(map(d => d.slice(0, this.ItemLimit)))
       }), // Reload data when events occur
       takeUntilDestroyed(this.destroyRef),
     )
@@ -143,15 +134,6 @@ export class SideNavComponent implements OnInit {
         this.navService.toggleSideNav();
         this.cdRef.markForCheck();
     });
-
-    this.accountService.hasValidLicense$.subscribe(res =>{
-      if (!res) return;
-
-      if (this.homeActions.filter(f => f.title === 'import-mal-stack').length === 0) {
-        this.homeActions.push({action: Action.Import, title: 'import-mal-stack', children: [], requiresAdmin: true, callback: this.importMalCollection.bind(this)});
-        this.cdRef.markForCheck();
-      }
-    })
   }
 
   ngOnInit(): void {
@@ -167,7 +149,10 @@ export class SideNavComponent implements OnInit {
         await this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        await this.actionService.refreshMetadata(library);
+        await this.actionService.refreshLibraryMetadata(library);
+        break;
+      case(Action.GenerateColorScape):
+        await this.actionService.refreshLibraryMetadata(library, undefined, false);
         break;
       case (Action.AnalyzeFiles):
         await this.actionService.analyzeFiles(library);
@@ -181,22 +166,6 @@ export class SideNavComponent implements OnInit {
       default:
         break;
     }
-  }
-
-  handleHomeActions(action: ActionItem<void>) {
-    action.callback(action, undefined);
-  }
-
-  openCustomize() {
-    this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl', fullscreen: 'md'});
-  }
-
-  importCbl() {
-    this.ngbModal.open(ImportCblModalComponent, {size: 'xl', fullscreen: 'md'});
-  }
-
-  importMalCollection() {
-    this.ngbModal.open(ImportMalCollectionModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   performAction(action: ActionItem<Library>, library: Library) {
@@ -238,4 +207,6 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
+
+  protected readonly SettingsTabId = SettingsTabId;
 }

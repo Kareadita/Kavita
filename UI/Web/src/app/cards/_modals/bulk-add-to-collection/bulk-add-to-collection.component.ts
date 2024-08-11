@@ -18,7 +18,7 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-bulk-add-to-collection',
@@ -35,6 +35,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   private readonly collectionService = inject(CollectionTagService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly MaxItems = 8;
 
   @Input({required: true}) title!: string;
   /**
