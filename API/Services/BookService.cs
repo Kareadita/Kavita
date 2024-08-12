@@ -428,11 +428,11 @@ public class BookService : IBookService
 
     private int FindInBuffer(byte[] buffer, int bufLen, byte[] match)
     {
-        int maxPos = bufLen - match.Length;
-        for (int pos = 0; pos<=maxPos; ++pos)
+        var maxPos = bufLen - match.Length;
+        for (var pos = 0; pos<=maxPos; ++pos)
         {
-            bool found = true;
-            for (int ch = 0; ch<match.Length; ++ch)
+            var found = true;
+            for (var ch = 0; ch<match.Length; ++ch)
             {
                 if (buffer[pos+ch] != match[ch])
                 {
@@ -509,24 +509,24 @@ public class BookService : IBookService
             info.Month = publicationDate.Value.Month;
             info.Day   = publicationDate.Value.Day;
         }
-        info.Summary   = GetTextFromXmlNode(metaDoc, ns, "//dc:description") ?? "";
-        info.Publisher = GetTextFromXmlNode(metaDoc, ns, "//dc:publisher") ?? "";
-        info.Writer    = GetListFromXmlNode(metaDoc, ns, "//dc:creator") ?? "";
-        info.Title     = GetTextFromXmlNode(metaDoc, ns, "//dc:title") ?? "";
-        info.Genre     = GetListFromXmlNode(metaDoc, ns, "//dc:subject") ?? "";
-        info.LanguageISO = ValidateLanguage(GetTextFromXmlNode(metaDoc, ns, "//dc:language"));
-        ComicInfo.CleanComicInfo(info);
 
-        info.Isbn = GetTextFromXmlNode(metaDoc, ns, "//pdfx:isbn") ?? GetTextFromXmlNode(metaDoc, ns, "//prism:isbn") ?? "";
+        info.Summary   = GetTextFromXmlNode(metaDoc, ns, "//dc:description") ?? String.Empty;
+        info.Publisher = GetTextFromXmlNode(metaDoc, ns, "//dc:publisher") ?? String.Empty;
+        info.Writer    = GetListFromXmlNode(metaDoc, ns, "//dc:creator") ?? String.Empty;
+        info.Title     = GetTextFromXmlNode(metaDoc, ns, "//dc:title") ?? String.Empty;
+        info.Genre     = GetListFromXmlNode(metaDoc, ns, "//dc:subject") ?? String.Empty;
+        info.LanguageISO = ValidateLanguage(GetTextFromXmlNode(metaDoc, ns, "//dc:language"));
+
+        info.Isbn = GetTextFromXmlNode(metaDoc, ns, "//pdfx:isbn") ?? GetTextFromXmlNode(metaDoc, ns, "//prism:isbn") ?? String.Empty;
         if (!ArticleNumberHelper.IsValidIsbn10(info.Isbn) && !ArticleNumberHelper.IsValidIsbn13(info.Isbn))
         {
             _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
-            info.Isbn = "";
+            info.Isbn = String.Empty;
         }
 
         info.UserRating = GetFloatFromXmlNode(metaDoc, ns, "//calibre:rating") ?? 0.0f;
-        info.TitleSort  = GetTextFromXmlNode(metaDoc, ns, "//calibre:title_sort") ?? "";
-        info.Series     = GetTextFromXmlNode(metaDoc, ns, "//calibre:series/rdf:value") ?? "";
+        info.TitleSort  = GetTextFromXmlNode(metaDoc, ns, "//calibre:title_sort") ?? String.Empty;
+        info.Series     = GetTextFromXmlNode(metaDoc, ns, "//calibre:series/rdf:value") ?? String.Empty;
         info.SeriesSort = info.Series;
         info.Volume     = Convert.ToInt32(GetFloatFromXmlNode(metaDoc, ns, "//calibreSI:series_index") ?? 0.0f).ToString();
 
@@ -546,6 +546,8 @@ public class BookService : IBookService
             info.Volume = Parser.ParseVolume(info.Title, LibraryType.Manga);
         }
 
+        ComicInfo.CleanComicInfo(info);
+
         return info;
     }
 
@@ -556,16 +558,16 @@ public class BookService : IBookService
             const int chunkSize = 4096;
             const int overlap = 16;
             var stream = File.OpenRead(filePath);
-            byte[] buffer = new byte[chunkSize + overlap];
-            int bytesAvailable = 0;
-            bool hasMetaData = false;
-            byte[] meta = new byte[0];
+            var buffer = new byte[chunkSize + overlap];
+            var bytesAvailable = 0;
+            var hasMetaData = false;
+            var meta = new byte[0];
             while (!hasMetaData)
             {
-                int bytesRead = stream.Read(buffer, bytesAvailable, chunkSize);
+                var bytesRead = stream.Read(buffer, bytesAvailable, chunkSize);
                 if (bytesRead == 0) break;
                 bytesAvailable += bytesRead;
-                int found = FindInBuffer(buffer, bytesAvailable, Encoding.UTF8.GetBytes("<x:xmpmeta"));
+                var found = FindInBuffer(buffer, bytesAvailable, Encoding.UTF8.GetBytes("<x:xmpmeta"));
                 if (found >= 0)
                 {
                     meta = buffer[found..bytesAvailable];
@@ -574,7 +576,7 @@ public class BookService : IBookService
                 }
                 else
                 {
-                    int ovl = Math.Min(overlap, bytesAvailable);
+                    var ovl = Math.Min(overlap, bytesAvailable);
                     Buffer.BlockCopy(buffer, bytesAvailable - ovl, buffer, 0, ovl);
                     bytesAvailable = ovl;
                 }
@@ -588,7 +590,7 @@ public class BookService : IBookService
                     Buffer.BlockCopy(buffer, 0, newMeta, meta.Length, bytesAvailable);
                     meta = newMeta;
                 }
-                int found = FindInBuffer(meta, meta.Length, Encoding.UTF8.GetBytes("</x:xmpmeta>"));
+                var found = FindInBuffer(meta, meta.Length, Encoding.UTF8.GetBytes("</x:xmpmeta>"));
                 if (found >= 0)
                 {
                     var metadata = meta[0..(found + "</x:xmpmeta>".Length)];
