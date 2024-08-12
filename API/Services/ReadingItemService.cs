@@ -52,7 +52,7 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     private ComicInfo? GetComicInfo(string filePath)
     {
-        if (Parser.IsEpub(filePath))
+        if (Parser.IsEpub(filePath) || Parser.IsPdf(filePath))
         {
             return _bookService.GetComicInfo(filePath);
         }
