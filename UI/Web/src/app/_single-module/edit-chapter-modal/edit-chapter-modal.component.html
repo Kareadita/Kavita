@@ -497,11 +497,7 @@
                   <div class="mb-3">
                     <app-setting-item [title]="t('read-time-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
-                        @if (chapter.maxHoursToRead === 0 || chapter.minHoursToRead === 0) {
-                          {{t('less-than-hour')}}
-                        } @else {
-                          {{chapter.minHoursToRead}}{{chapter.maxHoursToRead !== chapter.minHoursToRead ? ('-' + chapter.maxHoursToRead) : ''}} {{chapter.minHoursToRead > 1 ? t('hours') : t('hour')}}
-                        }
+                        {{chapter | readTime }}
                       </ng-template>
                     </app-setting-item>
                   </div>

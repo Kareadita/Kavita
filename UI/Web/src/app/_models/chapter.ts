@@ -4,7 +4,8 @@ import {PublicationStatus} from "./metadata/publication-status";
 import {Genre} from "./metadata/genre";
 import {Tag} from "./tag";
 import {Person} from "./metadata/person";
-import {IHasCast} from "./metadata/series-metadata";
+import {IHasCast} from "./common/i-has-cast";
+import {IHasReadingTime} from "./common/i-has-reading-time";
 
 export const LooseLeafOrDefaultNumber = -100000;
 export const SpecialVolumeNumber = 100000;
@@ -12,7 +13,7 @@ export const SpecialVolumeNumber = 100000;
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
  */
-export interface Chapter extends IHasCast {
+export interface Chapter extends IHasCast, IHasReadingTime {
     id: number;
     range: string;
     /**

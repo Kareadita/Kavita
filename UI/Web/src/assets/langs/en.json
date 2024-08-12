@@ -1984,10 +1984,7 @@
         "id-label": "{{entity-info-cards.id-title}}",
         "links-label": "{{series-metadata-detail.links-title}}",
         "last-read-label": "{{entity-info-cards.last-read-title}}",
-        "less-than-hour": "<1 Hour",
         "range-hours": "{{value}} {{hourWord}}",
-        "hour": "Hour",
-        "hours": "Hours",
         "read-time-label": "{{series-info-cards.read-time-title}}",
         "files-label": "Files"
 
@@ -2373,6 +2370,12 @@
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
         "mal-token-required": "MAL Token is required, set in User Settings",
         "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?"
+    },
+
+    "read-time-pipe": {
+        "less-than-hour": "<1 Hour",
+        "hour": "Hour",
+        "hours": "Hours"
     },
 
     "actionable": {

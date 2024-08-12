@@ -41,7 +41,9 @@
             </span>
             }
 
-            <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i> {{chapter.avgHoursToRead | timeDuration }}</span>
+            <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
+              {{chapter | readTime }}
+            </span>
             <span class="ms-2 me-2">•</span>
             <span>{{chapter.pages}} pages</span>
           </div>

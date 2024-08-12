@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
-import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {
   AsyncPipe,
   DatePipe,
@@ -12,7 +12,7 @@ import {
   TitleCasePipe
 } from "@angular/common";
 import {
-  NgbActiveModal, NgbDate,
+  NgbActiveModal,
   NgbInputDatepicker,
   NgbNav,
   NgbNavContent,
@@ -30,13 +30,10 @@ import {Language} from "../../_models/metadata/language";
 import {Person, PersonRole} from "../../_models/metadata/person";
 import {Genre} from "../../_models/metadata/genre";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {PublicationStatusDto} from "../../_models/metadata/publication-status-dto";
 import {SeriesService} from "../../_services/series.service";
 import {ImageService} from "../../_services/image.service";
-import {LibraryService} from "../../_services/library.service";
 import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
-import {ToastrService} from "ngx-toastr";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {DownloadService} from "../../shared/_services/download.service";
@@ -59,6 +56,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 
 enum TabID {
   General = 'general-tab',
@@ -115,7 +113,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     ImageComponent,
     SafeHtmlPipe,
     DecimalPipe,
-    DatePipe
+    DatePipe,
+    ReadTimePipe
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -126,15 +125,12 @@ export class EditChapterModalComponent implements OnInit {
   public readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
   public readonly utilityService = inject(UtilityService);
-  private readonly fb = inject(FormBuilder);
   public readonly imageService = inject(ImageService);
-  private readonly libraryService = inject(LibraryService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly toastr = inject(ToastrService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);

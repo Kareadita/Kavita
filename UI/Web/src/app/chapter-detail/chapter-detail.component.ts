@@ -59,6 +59,7 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {CastTabComponent} from "../_single-module/cast-tab/cast-tab.component";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
+import {ReadTimePipe} from "../_pipes/read-time.pipe";
 
 enum TabID {
   Related = 0,
@@ -104,7 +105,8 @@ enum TabID {
     NgbNavOutlet,
     CastTabComponent,
     RouterLink,
-    EntityTitleComponent
+    EntityTitleComponent,
+    ReadTimePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',

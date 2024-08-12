@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {IHasCast} from "../../_models/metadata/series-metadata";
+import {IHasCast} from "../../_models/common/i-has-cast";
 
 @Component({
   selector: 'app-cast-tab',
