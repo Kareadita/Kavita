@@ -785,6 +785,7 @@
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Edit Series Information",
         "download-series--tooltip": "Download Series",
+        "download--tooltip": "Download",
         "downloading-status": "Downloading…",
         "reviews-tab": "Reviews",
         "storyline-tab": "Storyline",
@@ -2404,6 +2405,7 @@
         "remove-from-want-to-read-tooltip": "Remove series from Want to Read",
         "remove-from-on-deck": "Remove From On Deck",
         "remove-from-on-deck-tooltip": "Remove series from showing from On Deck",
+
         "others": "Others",
         "add-to-reading-list": "Add to Reading List",
         "add-to-reading-list-tooltip": "Add to a Reading List",

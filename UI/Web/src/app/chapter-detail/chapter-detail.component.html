@@ -94,24 +94,24 @@
                 </div>
               }
 
-<!--              @if (accountService.isAdmin$ | async || hasDownloadingRole) {-->
-<!--                <div class="col-auto ms-2 d-none d-md-block">-->
-<!--                  @if (download$ | async; as download) {-->
-<!--                    <button class="btn btn-secondary-outline" (click)="downloadSeries()" [title]="t('download-series&#45;&#45;tooltip')" [disabled]="download !== null">-->
-<!--                      @if (download !== null) {-->
-<!--                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>-->
-<!--                        <span class="visually-hidden">{{t('downloading-status')}}</span>-->
-<!--                      } @else {-->
-<!--                        <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>-->
-<!--                      }-->
-<!--                    </button>-->
-<!--                  } @else {-->
-<!--                    <button class="btn btn-secondary-outline" (click)="download()" [title]="t('download-series&#45;&#45;tooltip')">-->
-<!--                      <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>-->
-<!--                    </button>-->
-<!--                  }-->
-<!--                </div>-->
-<!--              }-->
+              @if (canDownload$ | async) {
+                <div class="col-auto ms-2 d-none d-md-block">
+                  @if (download$ | async; as download) {
+                    <button class="btn btn-secondary-outline" (click)="downloadChapter()" [title]="t('download-tooltip')" [disabled]="download !== null">
+                      @if (download) {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="visually-hidden">{{t('downloading-status')}}</span>
+                      } @else {
+                        <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                      }
+                    </button>
+                  } @else {
+                    <button class="btn btn-secondary-outline" (click)="downloadChapter()" [title]="t('download-tooltip')">
+                      <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                    </button>
+                  }
+                </div>
+              }
 
             </div>
           </div>

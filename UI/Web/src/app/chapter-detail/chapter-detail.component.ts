@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   ElementRef,
   inject,
   OnInit,
@@ -39,7 +39,7 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
 import {Chapter} from "../_models/chapter";
-import {forkJoin} from "rxjs";
+import {forkJoin, map, Observable, shareReplay} from "rxjs";
 import {SeriesService} from "../_services/series.service";
 import {Series} from "../_models/series";
 import {AgeRating} from "../_models/metadata/age-rating";
@@ -49,7 +49,7 @@ import {ExternalRatingComponent} from "../series-detail/_components/external-rat
 import {LibraryType} from "../_models/library/library";
 import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
-import {DownloadService} from "../shared/_services/download.service";
+import {DownloadEvent, DownloadService} from "../shared/_services/download.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ToastrService} from "ngx-toastr";
@@ -63,6 +63,7 @@ import {ReadTimePipe} from "../_pipes/read-time.pipe";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
   Related = 0,
@@ -133,6 +134,7 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly destroyRef = inject(DestroyRef);
 
 
   protected readonly AgeRating = AgeRating;
@@ -152,6 +154,16 @@ export class ChapterDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
   activeTabId = TabID.Related;
+  canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
+    takeUntilDestroyed(this.destroyRef),
+    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
+    shareReplay({bufferSize: 1, refCount: true})
+  ));
+  /**
+   * This is the download we get from download service.
+   */
+  download$: Observable<DownloadEvent | null> | null = null;
+  downloadInProgress: boolean = false;
 
 
 
@@ -174,6 +186,7 @@ export class ChapterDetailComponent implements OnInit {
       this.router.navigateByUrl('/home');
       return;
     }
+
 
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
@@ -198,17 +211,16 @@ export class ChapterDetailComponent implements OnInit {
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 
+      // Set up the download in progress
+      this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
+        return this.downloadService.mapToEntityType(events, this.chapter!);
+      }));
+
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
 
     this.cdRef.markForCheck();
-  }
-
-  download() {
-    this.downloadService.download('chapter', this.chapter!, (d) => {
-      // TODO
-    });
   }
 
   read(incognitoMode: boolean = false) {
@@ -242,6 +254,13 @@ export class ChapterDetailComponent implements OnInit {
 
   openPerson(field: FilterField, value: number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
+  downloadChapter() {
+    this.downloadService.download('chapter', this.chapter!, (d) => {
+      this.downloadInProgress = !!d;
+      this.cdRef.markForCheck();
+    });
   }
 
 
