@@ -579,13 +579,15 @@ public class BookService : IBookService
                     bytesAvailable = ovl;
                 }
             }
-            if (!hasMetaData) return null;
-            while ((bytesAvailable = stream.Read(buffer, 0, chunkSize)) > 0)
+            while ((bytesAvailable = stream.Read(buffer, 0, chunkSize)) > 0 || hasMetaData)
             {
-                byte[] newMeta = new byte[meta.Length + bytesAvailable];
-                Buffer.BlockCopy(meta, 0, newMeta, 0, meta.Length);
-                Buffer.BlockCopy(buffer, 0, newMeta, meta.Length, bytesAvailable);
-                meta = newMeta;
+                hasMetaData = false;
+                if (bytesAvailable > 0) {
+                    byte[] newMeta = new byte[meta.Length + bytesAvailable];
+                    Buffer.BlockCopy(meta, 0, newMeta, 0, meta.Length);
+                    Buffer.BlockCopy(buffer, 0, newMeta, meta.Length, bytesAvailable);
+                    meta = newMeta;
+                }
                 int found = FindInBuffer(meta, meta.Length, Encoding.UTF8.GetBytes("</x:xmpmeta>"));
                 if (found >= 0)
                 {
