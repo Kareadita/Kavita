@@ -81,4 +81,14 @@ public class BookServiceTests
         Assert.Equal("Accel World", comicInfo.Series);
     }
 
+    [Fact]
+    public void ShouldHaveComicInfoForPDF()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var archive = Path.Join(testDirectory, "test.pdf");
+        var comicInfo = _bookService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Variations Chromatiques de concert", comicInfo.Title);
+        Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
+    }
 }
