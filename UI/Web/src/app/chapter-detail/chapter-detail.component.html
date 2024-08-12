@@ -74,10 +74,10 @@
                     <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="read(true)">
-                  <span>
-                    <i class="fa fa-glasses" aria-hidden="true"></i>
-                    <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
-                  </span>
+                      <span>
+                        <i class="fa fa-glasses" aria-hidden="true"></i>
+                        <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
+                      </span>
                       </button>
                     </div>
                   </div>
@@ -123,18 +123,24 @@
           <div class="mt-2">
             <div class="row g-0">
               <div class="col-6">
-                Writers
+                <span>{{t('writers-title')}}</span>
                 <div>
-                  @for(writer of chapter.writers; let idx = $index; track writer.id) {
-                    {{writer.name}},
+                  @for(writer of chapter.writers; track writer.id; let idx = $index; let last = $last;) {
+                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, writer.id)">{{writer.name}}</a>
+                    @if (!last) {
+                      ,
+                    }
                   }
                 </div>
               </div>
               <div class="col-6">
-                Artists
+                <span>{{t('cover-artists-title')}}</span>
                 <div>
-                  @for(artist of chapter.coverArtists; let idx = $index; track artist.id) {
-                    {{artist.name}},
+                  @for(artist of chapter.coverArtists; track artist.id; let idx = $index; let last = $last;) {
+                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, artist.id)">{{artist.name}}</a>
+                    @if (!last) {
+                      ,
+                    }
                   }
                 </div>
               </div>

@@ -60,6 +60,9 @@ import {CastTabComponent} from "../_single-module/cast-tab/cast-tab.component";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {ReadTimePipe} from "../_pipes/read-time.pipe";
+import {FilterField} from "../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
+import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 
 enum TabID {
   Related = 0,
@@ -129,10 +132,12 @@ export class ChapterDetailComponent implements OnInit {
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
+  protected readonly FilterField = FilterField;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -234,4 +239,10 @@ export class ChapterDetailComponent implements OnInit {
     this.bulkSelectionService.deselectAll();
     this.cdRef.markForCheck();
   }
+
+  openPerson(field: FilterField, value: number) {
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
+
 }
