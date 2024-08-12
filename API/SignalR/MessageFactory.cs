@@ -142,6 +142,10 @@ public static class MessageFactory
     /// Chapter is removed from server
     /// </summary>
     public const string ChapterRemoved = "ChapterRemoved";
+    /// <summary>
+    /// Volume is removed from server
+    /// </summary>
+    public const string VolumeRemoved = "VolumeRemoved";
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
     {
@@ -226,6 +230,19 @@ public static class MessageFactory
             {
                 SeriesId = seriesId,
                 ChapterId = chapterId
+            }
+        };
+    }
+
+    public static SignalRMessage VolumeRemovedEvent(int volumeId, int seriesId)
+    {
+        return new SignalRMessage()
+        {
+            Name = VolumeRemoved,
+            Body = new
+            {
+                SeriesId = seriesId,
+                VolumeId = volumeId
             }
         };
     }

@@ -59,7 +59,7 @@ public class ChapterController : BaseApiController
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
         var vol = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
-        _unitOfWork.ChapterRepository.Delete(chapter);
+        _unitOfWork.ChapterRepository.Remove(chapter);
 
         if (await _unitOfWork.CommitAsync())
         {
@@ -273,6 +273,6 @@ public class ChapterController : BaseApiController
         return Ok();
     }
 
-    
+
 
 }

@@ -919,13 +919,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   openChapter(chapter: Chapter, incognitoMode = false) {
     if (this.bulkSelectionService.hasSelections()) return;
-    // if (chapter.pages === 0) {
-    //   this.toastr.error(this.translocoService.translate('series-detail.no-pages'));
-    //   return;
-    // }
-    // this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
-
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
+
+    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
 
   }
 
@@ -936,20 +932,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    // If user has progress on the volume, load them where they left off
-    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
-      // Find the continue point chapter and load it
-      const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
-      if (unreadChapters.length > 0) {
-        this.openChapter(unreadChapters[0]);
-        return;
-      }
-      this.openChapter(volume.chapters[0]);
-      return;
-    }
+    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', volume.id]);
+    return;
 
-    // Sort the chapters, then grab first if no reading progress
-    this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
+
+    this.readerService.readVolume(this.libraryId, this.seriesId, volume, false);
   }
 
   openEditChapter(chapter: Chapter) {

@@ -14,7 +14,7 @@ export class ReadTimePipe implements PipeTransform {
         return this.translocoService.translate('read-time-pipe.less-than-hour');
     } else {
       return `${readingTime.minHoursToRead}${readingTime.maxHoursToRead !== readingTime.minHoursToRead ? ('-' + readingTime.maxHoursToRead) : ''}` +
-        ` ${readingTime.minHoursToRead > 1 ? this.translocoService.translate('hours') : this.translocoService.translate('hour')}`;
+        ` ${readingTime.minHoursToRead > 1 ? this.translocoService.translate('read-time-pipe.hours') : this.translocoService.translate('read-time-pipe.hour')}`;
     }
   }
 
