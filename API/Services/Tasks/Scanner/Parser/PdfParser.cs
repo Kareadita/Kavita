@@ -62,6 +62,9 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 
+        // Patch in other information from ComicInfo
+        UpdateFromComicInfo(ret);
+
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && type == LibraryType.Book)
         {
             ret.IsSpecial = true;
