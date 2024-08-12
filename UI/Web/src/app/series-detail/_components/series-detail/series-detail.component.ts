@@ -919,11 +919,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   openChapter(chapter: Chapter, incognitoMode = false) {
     if (this.bulkSelectionService.hasSelections()) return;
-    if (chapter.pages === 0) {
-      this.toastr.error(this.translocoService.translate('series-detail.no-pages'));
-      return;
-    }
-    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
+    // if (chapter.pages === 0) {
+    //   this.toastr.error(this.translocoService.translate('series-detail.no-pages'));
+    //   return;
+    // }
+    // this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
+
+    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
+
   }
 
   openVolume(volume: Volume) {
