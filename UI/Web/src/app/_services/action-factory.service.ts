@@ -640,16 +640,33 @@ export class ActionFactoryService {
       },
       // RBS will handle rendering this, so non-admins with download are applicable
       {
-        action: Action.Download,
-        title: 'download',
-        description: 'download-tooltip',
+        action: Action.Submenu,
+        title: 'others',
+        description: '',
         callback: this.dummyCallback,
-        requiresAdmin: false,
-        children: [],
+        requiresAdmin: true,
+        children: [
+          {
+            action: Action.Delete,
+            title: 'delete',
+            description: 'delete-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.Download,
+            title: 'download',
+            description: 'download-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+        ]
       },
       {
         action: Action.Edit,
-        title: 'details',
+        title: 'edit',
         description: 'edit-tooltip',
         callback: this.dummyCallback,
         requiresAdmin: false,

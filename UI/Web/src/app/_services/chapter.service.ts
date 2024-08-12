@@ -16,7 +16,11 @@ export class ChapterService {
   constructor(private httpClient: HttpClient) { }
 
   getChapterMetadata(chapterId: number) {
-    return this.httpClient.get<Chapter>(this.baseUrl + 'chapter/?chapterId=' + chapterId);
+    return this.httpClient.get<Chapter>(this.baseUrl + 'chapter?chapterId=' + chapterId);
+  }
+
+  deleteChapter(chapterId: number) {
+    return this.httpClient.delete<boolean>(this.baseUrl + 'chapter?chapterId=' + chapterId);
   }
 
 }

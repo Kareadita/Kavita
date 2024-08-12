@@ -139,6 +139,7 @@ export class ChapterDetailComponent implements OnInit {
   coverImage: string = '';
   chapterId: number = 0;
   seriesId: number = 0;
+  libraryId: number = 0;
   chapter: Chapter | null = null;
   series: Series | null = null;
   libraryType: LibraryType | null = null;
@@ -169,13 +170,14 @@ export class ChapterDetailComponent implements OnInit {
 
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
+    this.libraryId = parseInt(libraryId, 10);
 
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
 
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
       chapter: this.chapterService.getChapterMetadata(this.chapterId),
-      libraryType: this.libraryService.getLibraryType(parseInt(libraryId, 10))
+      libraryType: this.libraryService.getLibraryType(this.libraryId)
     }).subscribe(results => {
 
       if (results.chapter === null) {
@@ -215,10 +217,11 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   openEditModal() {
-    // TODO: Refactor the ModalOptions into a separate file so it's consistent
     const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
     ref.componentInstance.chapter = this.chapter;
     ref.componentInstance.libraryType = this.libraryType;
+    ref.componentInstance.libraryId = this.libraryId;
+    ref.componentInstance.seriesId = this.series!.id;
 
     ref.closed.subscribe(res => {
 

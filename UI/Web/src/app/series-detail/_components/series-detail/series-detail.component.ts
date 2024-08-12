@@ -119,6 +119,11 @@ import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
 import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
 import {CastTabComponent} from "../../../_single-module/cast-tab/cast-tab.component";
+import {
+  EditChapterModalCloseResult,
+  EditChapterModalComponent
+} from "../../../_single-module/edit-chapter-modal/edit-chapter-modal.component";
+import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -447,6 +452,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         }
       } else if (event.event === EVENTS.CoverUpdate) {
         this.themeService.refreshColorScape('series', this.seriesId).subscribe();
+      } else if (event.event === EVENTS.ChapterRemoved) {
+        const removedEvent = event.payload as ChapterRemovedEvent;
+        if (removedEvent.seriesId !== this.seriesId) return;
+        this.loadSeries(this.seriesId, false);
       }
     });
 
@@ -577,7 +586,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.markChapterAsUnread(chapter);
         break;
       case(Action.Edit):
-        this.openViewInfo(chapter);
+        this.openEditChapter(chapter);
         break;
       case(Action.AddToReadingList):
         this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
@@ -938,6 +947,21 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
     // Sort the chapters, then grab first if no reading progress
     this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
+  }
+
+  openEditChapter(chapter: Chapter) {
+    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    ref.componentInstance.chapter = chapter;
+    ref.componentInstance.libraryType = this.libraryType;
+    ref.componentInstance.seriesId = this.series?.id;
+    ref.componentInstance.libraryId = this.series?.libraryId;
+
+    ref.closed.subscribe((res: EditChapterModalCloseResult) => {
+      if (res.success && res.isDeleted) {
+        this.loadSeries(this.seriesId, false);
+      }
+    });
+
   }
 
   openViewInfo(data: Volume | Chapter) {

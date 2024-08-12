@@ -10,6 +10,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
+using API.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nager.ArticleNumber;
@@ -20,11 +21,13 @@ public class ChapterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
+    private readonly IEventHub _eventHub;
 
-    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
+    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -55,10 +58,23 @@ public class ChapterController : BaseApiController
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
+        var vol = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
         _unitOfWork.ChapterRepository.Delete(chapter);
-        return Ok(await _unitOfWork.CommitAsync());
+
+        if (await _unitOfWork.CommitAsync())
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.ChapterRemoved, MessageFactory.ChapterRemovedEvent(chapter.Id, vol.SeriesId), false);
+            return Ok(true);
+        }
+
+        return Ok(false);
     }
 
+    /// <summary>
+    /// Update chapter metadata
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
@@ -249,11 +265,14 @@ public class ChapterController : BaseApiController
             return Ok();
         }
 
+        // TODO: Emit a ChapterMetadataUpdate out
+
         await _unitOfWork.CommitAsync();
 
 
         return Ok();
     }
+
 
 
 }

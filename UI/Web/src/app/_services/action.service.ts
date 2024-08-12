@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import {Subject, tap} from 'rxjs';
@@ -25,6 +25,7 @@ import {CollectionTagService} from "./collection-tag.service";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {FilterService} from "./filter.service";
 import {ReadingListService} from "./reading-list.service";
+import {ChapterService} from "./chapter.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -40,22 +41,25 @@ export type BooleanActionCallback = (result: boolean) => void;
 @Injectable({
   providedIn: 'root'
 })
-export class ActionService implements OnDestroy {
+export class ActionService {
 
-  private readonly onDestroy = new Subject<void>();
+  private readonly chapterService = inject(ChapterService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly readerService = inject(ReaderService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modalService = inject(NgbModal);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly memberService = inject(MemberService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly collectionTagService = inject(CollectionTagService);
+  private readonly filterService = inject(FilterService);
+  private readonly readingListService = inject(ReadingListService);
+
+
   private readingListModalRef: NgbModalRef | null = null;
   private collectionModalRef: NgbModalRef | null = null;
 
-  constructor(private libraryService: LibraryService, private seriesService: SeriesService,
-    private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
-    private readonly collectionTagService: CollectionTagService, private filterService: FilterService,
-              private readonly readingListService: ReadingListService) { }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   /**
    * Request a file scan for a given Library
@@ -683,6 +687,27 @@ export class ActionService implements OnDestroy {
       if (callback) {
         if (res) {
           this.toastr.success(translate('toasts.series-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
+        callback(res);
+      }
+    });
+  }
+
+  async deleteChapter(chapterId: number, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-chapter'))) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.chapterService.deleteChapter(chapterId).subscribe((res: boolean) => {
+      if (callback) {
+        if (res) {
+          this.toastr.success(translate('toasts.chapter-deleted'));
         } else {
           this.toastr.error(translate('errors.generic'));
         }

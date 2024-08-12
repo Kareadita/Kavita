@@ -70,6 +70,14 @@ enum TabID {
   Tags = 'tags-tab'
 }
 
+export interface EditChapterModalCloseResult {
+  success: boolean;
+  chapter: Chapter;
+  coverImageUpdate: boolean;
+  needsReload: boolean;
+  isDeleted: boolean;
+}
+
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
@@ -135,9 +143,12 @@ export class EditChapterModalComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
+  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) chapter!: Chapter;
   @Input({required: true}) libraryType!: LibraryType;
+  @Input({required: true}) libraryId!: number;
+  @Input({required: true}) seriesId!: number;
 
   activeId = TabID.General;
   editForm: FormGroup = new FormGroup({});
@@ -261,7 +272,7 @@ export class EditChapterModalComponent implements OnInit {
     }
 
     forkJoin(apis).subscribe(results => {
-      this.modal.close({success: true, chapter: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: needsReload});
+      this.modal.close({success: true, chapter: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: needsReload, isDeleted: false} as EditChapterModalCloseResult);
     });
   }
 
@@ -276,13 +287,22 @@ export class EditChapterModalComponent implements OnInit {
     switch (action.action) {
 
       case Action.MarkAsRead:
-        //this.actionService.markChapterAsRead(this.li);
+        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, this.chapter, (p) => {
+          this.chapter.pagesRead = p.pagesRead;
+          this.cdRef.markForCheck();
+        });
         break;
       case Action.MarkAsUnread:
-        //this.actionService.markChapterAsUnread(this.chapter);
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, this.chapter, (p) => {
+          this.chapter.pagesRead = 0;
+          this.cdRef.markForCheck();
+        });
         break;
       case Action.Delete:
-        //await this.actionService.deleteSeries(this.series);
+        await this.actionService.deleteChapter(this.chapter.id, (b) => {
+          if (!b) return;
+          this.modal.close({success: b, chapter: this.chapter, coverImageUpdate: false, needsReload: true, isDeleted: b} as EditChapterModalCloseResult);
+        });
         break;
       case Action.Download:
         this.downloadService.download('chapter', this.chapter);
@@ -517,6 +537,4 @@ export class EditChapterModalComponent implements OnInit {
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
-
-  protected readonly MangaFormat = MangaFormat;
 }

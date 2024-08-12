@@ -16,6 +16,7 @@ export enum EVENTS {
   ScanSeries = 'ScanSeries',
   SeriesAdded = 'SeriesAdded',
   SeriesRemoved = 'SeriesRemoved',
+  ChapterRemoved = 'ChapterRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
   /**
@@ -289,6 +290,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
       this.messagesSource.next({
         event: EVENTS.SeriesRemoved,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ChapterRemoved, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ChapterRemoved,
         payload: resp.body
       });
     });
