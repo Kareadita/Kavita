@@ -2,7 +2,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.writers" [title]="t('writers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Writers, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -10,7 +10,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.colorists" [title]="t('colorists-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Colorist, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -18,7 +18,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.editors" [title]="t('editors-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Editor, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -26,16 +26,15 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Characters, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
 
   <div class="mb-3">
-    <!-- TODO: For Comic/ComicVine lets render this as cover artists and for everything else as artist -->
     <app-carousel-reel [items]="metadata.coverArtists" [title]="t('cover-artists-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.CoverArtist, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -43,7 +42,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.inkers" [title]="t('inkers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Inker, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -51,7 +50,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.letterers" [title]="t('letterers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Letterer, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -59,7 +58,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.pencillers" [title]="t('pencillers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Penciller, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -67,7 +66,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.translators" [title]="t('translators-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Translators, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>
