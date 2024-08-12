@@ -1,8 +1,38 @@
+.main-container {
+  font-family: "Poppins", sans-serif;
+}
 
 .title {
   color: white;
+  font-weight: bold;
+  font-size: 1.75rem;
+}
+
+.image-container {
+  align-self: flex-start;
+}
+
+::ng-deep .image-container img {
+  vertical-align: unset !important;
 }
 
 .subtitle {
   color: lightgrey;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.btn {
+  padding: 4px 8px !important;
+  font-size: 0.8rem !important;
+}
+
+.btn-group > .btn.dropdown-toggle-split:not(first-child){
+  border-top-right-radius: var(--bs-border-radius) !important;
+  border-bottom-right-radius: var(--bs-border-radius) !important;
+  border-width: 1px 1px 1px 0 !important;
+}
+
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
+  border-width: 1px 0 1px 1px !important;
 }

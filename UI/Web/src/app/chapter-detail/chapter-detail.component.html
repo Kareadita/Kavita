@@ -1,33 +1,33 @@
 <ng-container *transloco="let t; read: 'series-detail'">
 
-  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
 
     @if (chapter && series) {
       <div class="row mb-0 mb-xl-3 info-container">
-        <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block mt-2">
+        <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3">
 
-          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}" height="400px"  [imageUrl]="coverImage"></app-image>
+          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
             @if (chapter.pagesRead < chapter.pages && hasReadingProgress) {
               <div class="progress-banner" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
                 <ngb-progressbar type="primary" height="5px" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
               </div>
             }
         </div>
-        <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
-          <h4 class="title">
+        <div class="col-xl-10 col-lg-7 col-md-7 col-xs-8 col-sm-6">
+          <h4 class="title mb-2">
             <a routerLink="/library/{{series.libraryId}}/series/{{series.id}}" class="dark-exempt btn-icon">{{series.name}}</a>
           </h4>
-          <div class="subtitle">
+          <div class="subtitle mt-2 mb-2">
             <span>
               <app-entity-title [libraryType]="libraryType!" [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
             </span>
             @if (chapter.titleName) {
-              <span class="ms-2 me-2">•</span>
+              <span class="ms-2 me-2"></span>
               <span>{{chapter.titleName}}</span>
             }
           </div>
 
-          <div class="mt-2">
+          <div class="mt-2 mb-2">
             @if (chapter.publishers.length > 0) {
               <span class="me-2">{{chapter.publishers[0]}}</span>
             }
@@ -41,7 +41,7 @@
             </span>
             }
 
-            <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
+            <span class=""><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
               {{chapter | readTime }}
             </span>
             <span class="ms-2 me-2">•</span>
@@ -50,7 +50,7 @@
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
           @if (libraryType !== null && series) {
-            <div class="mt-2">
+            <div class="mt-2 mb-2">
               <app-external-rating [seriesId]="series.id"
                                    [ratings]="[]"
                                    [userRating]="series.userRating"
@@ -60,7 +60,7 @@
             </div>
           }
 
-          <div class="mt-2">
+          <div class="mt-2 mb-3">
             <div class="row g-0">
               <div class="col-auto">
                 <div class="btn-group">
@@ -116,7 +116,7 @@
             </div>
           </div>
 
-          <div class="mt-3">
+          <div class="mt-2 mb-3">
             <app-read-more [text]="chapter.summary || ''"></app-read-more>
           </div>
 
@@ -124,9 +124,19 @@
             <div class="row g-0">
               <div class="col-6">
                 Writers
+                <div>
+                  @for(writer of chapter.writers; let idx = $index; track writer.id) {
+                    {{writer.name}},
+                  }
+                </div>
               </div>
               <div class="col-6">
                 Artists
+                <div>
+                  @for(artist of chapter.coverArtists; let idx = $index; track artist.id) {
+                    {{artist.name}},
+                  }
+                </div>
               </div>
             </div>
           </div>
