@@ -21,12 +21,20 @@
     background-color: var(--nav-link-bg-color);
 }
 
+.nav-item {
+    min-width: var(--nav-item-min-width);
+    max-width: var(--nav-item-max-width);
+}
+
 .nav-tabs {
-    border-color: var(--nav-tab-border-color);
+    border-color: var(--elevation-layer9);
 
     .nav-link {
         color: var(--nav-link-text-color);
         position: relative;
+        border-width: var(--nav-tab-border-width);
+        border-radius: 0;
+        text-align: center;
 
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);
