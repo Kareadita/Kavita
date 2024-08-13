@@ -101,9 +101,11 @@ $image-width: 160px;
 
 .card-actions {
   position: absolute;
-  top: 228px;
-  right: 5px;
-  width: 20px;
+  bottom: 0;
+  right: 0;
+  z-index: 115;
+  display: none;
+  visibility: hidden;
 }
 
 .library {
@@ -113,7 +115,7 @@ $image-width: 160px;
 }
 
 .card-title {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .card-body > div:nth-child(2) {

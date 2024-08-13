@@ -49,14 +49,19 @@
               <span class="card-title library mx-auto" style="width: auto;" (click)="read($event)">
                 <!-- Card Image -->
                 <div style="height: 48px; width: 48px;">
-                  <i class="fa-solid fa-book" aria-hidden="true" style="font-size: 2.3rem;line-height: 48px;"></i>
+                  <i class="fa-solid fa-book" aria-hidden="true" style="font-size: 2rem;line-height: 48px;"></i>
                 </div>
               </span>
         </div>
       </div>
     </div>
     <div class="card-body">
-      <div>
+        <div style="text-align: center">
+          {{chapter.titleName | defaultValue}}
+        </div>
+    </div>
+
+    <div class="card-title-container">
         <span class="card-title" id="{{chapter.id}}" tabindex="0">
           <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{chapter.id}}">
             @if (chapter.isSpecial) {
@@ -66,17 +71,12 @@
             }
           </a>
         </span>
+
         @if (actions && actions.length > 0) {
           <span class="card-actions float-end">
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="chapter.titleName"></app-card-actionables>
           </span>
         }
-      </div>
-
-        <div style="text-align: center">
-          {{chapter.titleName | defaultValue}}
-        </div>
-
     </div>
 
   </div>

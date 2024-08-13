@@ -54,8 +54,20 @@
         }
       }
     </div>
+    <div class="card-body">
+      @if (subtitleTemplate) {
+        <div style="text-align: center">
+          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+        </div>
+      }
+      @if (!suppressLibraryLink && libraryName) {
+        <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
+          {{libraryName | sentenceCase}}
+        </a>
+      }
+    </div>
     @if (title.length > 0 || actions.length > 0) {
-      <div class="card-body">
+      <div class="card-title-container">
         <div>
           <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
             <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
@@ -68,17 +80,6 @@
             </span>
           }
         </div>
-
-        @if (subtitleTemplate) {
-          <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
-          </div>
-        }
-        @if (!suppressLibraryLink && libraryName) {
-          <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
-            {{libraryName | sentenceCase}}
-          </a>
-        }
       </div>
     }
   </div>
