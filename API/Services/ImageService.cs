@@ -580,8 +580,8 @@ public class ImageService : IImageService
     {
         return colors.OrderByDescending(c =>
         {
-            float max = Math.Max(c.X, Math.Max(c.Y, c.Z));
-            float min = Math.Min(c.X, Math.Min(c.Y, c.Z));
+            var max = Math.Max(c.X, Math.Max(c.Y, c.Z));
+            var min = Math.Min(c.X, Math.Min(c.Y, c.Z));
             return (max - min) / max;
         }).ToList();
     }

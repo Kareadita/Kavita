@@ -273,6 +273,7 @@ public class UploadController : BaseApiController
                 if (volume != null)
                 {
                     volume.CoverImage = chapter.CoverImage;
+                    volume.CoverImageLocked = true;
                     _unitOfWork.VolumeRepository.Update(volume);
                 }
             }
@@ -333,6 +334,7 @@ public class UploadController : BaseApiController
                 _unitOfWork.ChapterRepository.Update(chapter);
 
                 volume.CoverImage = chapter.CoverImage;
+                volume.CoverImageLocked = true;
                 _imageService.UpdateColorScape(volume);
                 _unitOfWork.VolumeRepository.Update(volume);
             }

@@ -21,6 +21,7 @@ export interface Volume extends IHasCover {
     avgHoursToRead: number;
 
     coverImage?: string;
+    coverImageLocked: boolean;
     primaryColor: string;
     secondaryColor: string;
 }

@@ -163,6 +163,9 @@ public class ParseScannedFiles
             {
                 // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
                 // This is very helpful for ComicVine libraries by Publisher
+
+                // TODO: BUG: We might miss new folders this way. Likely need to get all folder names and see if there are any that aren't in known series list
+
                 _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
                 foreach (var seriesModified in series)
                 {

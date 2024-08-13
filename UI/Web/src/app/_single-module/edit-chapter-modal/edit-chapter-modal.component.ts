@@ -6,8 +6,6 @@ import {
   DatePipe,
   DecimalPipe,
   NgClass,
-  NgForOf,
-  NgIf,
   NgTemplateOutlet,
   TitleCasePipe
 } from "@angular/common";
@@ -91,13 +89,11 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     NgbNavOutlet,
     ReactiveFormsModule,
     NgbNavItem,
-    NgIf,
     SettingItemComponent,
     NgTemplateOutlet,
     NgClass,
     TypeaheadComponent,
     EntityTitleComponent,
-    NgForOf,
     TitleCasePipe,
     SettingButtonComponent,
     CoverImageChooserComponent,
@@ -122,14 +118,14 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 })
 export class EditChapterModalComponent implements OnInit {
 
-  public readonly modal = inject(NgbActiveModal);
+  protected readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
   public readonly utilityService = inject(UtilityService);
   public readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  public readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);

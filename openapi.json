@@ -13163,6 +13163,43 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Volume"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/want-to-read": {
@@ -22945,13 +22982,6 @@
             "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
             "format": "float"
           },
-          "chapters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Chapter"
-            },
-            "nullable": true
-          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -22971,6 +23001,9 @@
           "coverImage": {
             "type": "string",
             "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
           },
           "primaryColor": {
             "type": "string",
@@ -23001,6 +23034,13 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chapter"
+            },
+            "nullable": true
           },
           "series": {
             "$ref": "#/components/schemas/Series"

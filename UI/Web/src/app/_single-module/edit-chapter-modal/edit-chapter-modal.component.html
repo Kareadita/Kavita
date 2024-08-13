@@ -5,6 +5,7 @@
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': utilityService.getActiveBreakpoint() !== Breakpoint.Mobile}">
+
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
@@ -554,11 +555,11 @@
 
               <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                    @for (file of chapter.files; track file.id) {
-                      <div>
-                        <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
-                      </div>
-                    }
+                  @for (file of chapter.files; track file.id) {
+                    <div>
+                      <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
+                    </div>
+                  }
                 </ng-template>
               </app-setting-item>
 
