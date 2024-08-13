@@ -50,25 +50,26 @@
       </div>
     </div>
     <div class="card-body">
-      <div>
-        <span class="card-title" id="{{volume.id}}" tabindex="0">
-          <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{volume.id}}">
-            {{volume.name}}
-          </a>
-        </span>
+        <div style="text-align: center">
+          {{volume.chapters.length}} {{utilityService.formatChapterName(libraryType)}}
+        </div>
+    </div>
+
+    <div class="card-title-container">
+      <span class="card-title" id="{{volume.id}}" tabindex="0">
+      <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{volume.id}}">
+        {{volume.name}}
+      </a>
+      </span>
         @if (actions && actions.length > 0) {
           <span class="card-actions float-end">
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
           </span>
         }
-      </div>
-
-      <div class="second-footer" style="text-align: center">
-        {{volume.chapters.length}} {{utilityService.formatChapterName(libraryType)}}
-      </div>
-
     </div>
 
-  </div>
+
+
+    </div>
 
 </ng-container>

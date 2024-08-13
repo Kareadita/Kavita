@@ -9,7 +9,7 @@
           <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
             @if (chapter.pagesRead < chapter.pages && hasReadingProgress) {
               <div class="progress-banner" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
-                <ngb-progressbar type="primary" height="5px" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
+                <ngb-progressbar type="primary" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
               </div>
             }
         </div>
