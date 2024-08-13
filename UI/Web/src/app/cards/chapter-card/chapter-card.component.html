@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'card-item'">
-  <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}" >
+  <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}" >
     <div class="overlay" (click)="handleClick($event)">
       @if (chapter.pages > 0 || suppressArchiveWarning) {
         <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getChapterCoverImage(chapter.id)"></app-image>
@@ -44,12 +44,12 @@
       }
 
       <div class="card-overlay"></div>
-      <div class="overlay-information overlay-information--centered">
-        <div class="position-relative">
+      <div class="overlay-information">
+        <div class="overlay-information--centered">
               <span class="card-title library mx-auto" style="width: auto;" (click)="read($event)">
                 <!-- Card Image -->
-                <div style="height: 48px; width: 48px; background-color: var(--primary-color)">
-                  <i class="fa-solid fa-book" aria-hidden="true" style="font-size: 42px"></i>
+                <div style="height: 48px; width: 48px;">
+                  <i class="fa-solid fa-book" aria-hidden="true" style="font-size: 2.3rem;line-height: 48px;"></i>
                 </div>
               </span>
         </div>

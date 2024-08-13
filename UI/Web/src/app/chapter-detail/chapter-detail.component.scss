@@ -37,3 +37,12 @@
   min-width: var(--nav-item-min-width);
   max-width: var(--nav-item-max-width);
 }
+
+.card-body > div:nth-child(2) {
+  height: 50px;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}

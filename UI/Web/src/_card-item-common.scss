@@ -111,3 +111,17 @@ $image-width: 160px;
   text-decoration: none;
   margin-top: 0px;
 }
+
+.card-title {
+  font-size: 0.9rem;
+}
+
+.card-body > div:nth-child(2) {
+  height: 40px;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  font-size: 0.8rem;
+}
