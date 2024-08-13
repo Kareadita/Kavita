@@ -47,7 +47,6 @@ import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import {
   EditSeriesModalCloseResult,
   EditSeriesModalComponent
@@ -126,6 +125,7 @@ import {
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.component";
 import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.component";
+import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -558,7 +558,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.markVolumeAsUnread(volume);
         break;
       case(Action.Edit):
-        this.openViewInfo(volume);
+        this.openEditVolume(volume);
         break;
       case(Action.Delete):
         await this.actionService.deleteVolume(volume.id, (b) => {
@@ -959,15 +959,20 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadSeries(this.seriesId, false);
       }
     });
-
   }
 
-  openViewInfo(data: Volume | Chapter) {
-    const drawerRef = this.offcanvasService.open(CardDetailDrawerComponent, {position: 'bottom'});
-    drawerRef.componentInstance.data = data;
-    drawerRef.componentInstance.parentName = this.series?.name;
-    drawerRef.componentInstance.seriesId = this.series?.id;
-    drawerRef.componentInstance.libraryId = this.series?.libraryId;
+  openEditVolume(volume: Volume) {
+    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    ref.componentInstance.volume = volume;
+    ref.componentInstance.libraryType = this.libraryType;
+    ref.componentInstance.seriesId = this.series?.id;
+    ref.componentInstance.libraryId = this.series?.libraryId;
+
+    ref.closed.subscribe((res: EditChapterModalCloseResult) => {
+      if (res.success && res.isDeleted) {
+        this.loadSeries(this.seriesId, false);
+      }
+    });
   }
 
   openEditSeriesModal() {
