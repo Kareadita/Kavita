@@ -51,7 +51,7 @@ $image-width: 160px;
 
     .card-title {
         font-size: 0.85rem;
-        width: 140px !important;
+        max-width: 140px !important;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
@@ -109,7 +109,6 @@ $image-width: 160px;
             .overlay-information--centered {
                 position: absolute;
                 border-radius: 15px;
-                padding: 0 10px;
                 background-color: rgba(0, 0, 0, .7);
                 border-radius: 50px;
                 top: 50%;
@@ -127,7 +126,7 @@ $image-width: 160px;
 
 
     .card-body {
-        padding: 5px 5px 5px 0 !important;
+        padding: 0 5px !important;
         background-color: rgba(0,0,0,0.7);
         border-width: var(--card-border-width);
         border-style: var(--card-border-style);
@@ -136,7 +135,7 @@ $image-width: 160px;
         bottom: 0;
         z-index: 115;
         width: 100%;
-        bottom: 37px;
+        bottom: 39px;
         font-size: 0.8rem;
     }
 
