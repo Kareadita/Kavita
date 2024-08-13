@@ -6,6 +6,7 @@ import {Tag} from "./tag";
 import {Person} from "./metadata/person";
 import {IHasCast} from "./common/i-has-cast";
 import {IHasReadingTime} from "./common/i-has-reading-time";
+import {IHasCover} from "./common/i-has-cover";
 
 export const LooseLeafOrDefaultNumber = -100000;
 export const SpecialVolumeNumber = 100000;
@@ -13,7 +14,7 @@ export const SpecialVolumeNumber = 100000;
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
  */
-export interface Chapter extends IHasCast, IHasReadingTime {
+export interface Chapter extends IHasCast, IHasReadingTime, IHasCover {
     id: number;
     range: string;
     /**

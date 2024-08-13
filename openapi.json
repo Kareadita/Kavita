@@ -1330,7 +1330,9 @@
         "tags": [
           "Chapter"
         ],
+        "summary": "Update chapter metadata",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -13117,6 +13119,45 @@
                   "items": {
                     "type": "string"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Volume": {
+      "get": {
+        "tags": [
+          "Volume"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
                 }
               }
             }
