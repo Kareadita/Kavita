@@ -58,6 +58,17 @@ function deepClone(obj: any): any {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SeriesCardComponent implements OnInit, OnChanges {
+
+  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly seriesService = inject(SeriesService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modalService = inject(NgbModal);
+  private readonly imageService = inject(ImageService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
+
   @Input({required: true}) data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
@@ -95,14 +106,6 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
-
-  private readonly offcanvasService = inject(NgbOffcanvas);
-
-  constructor(private router: Router, private cdRef: ChangeDetectorRef,
-              private seriesService: SeriesService, private toastr: ToastrService,
-              private modalService: NgbModal, private imageService: ImageService,
-              private actionFactoryService: ActionFactoryService,
-              private actionService: ActionService) {}
 
 
   ngOnInit(): void {

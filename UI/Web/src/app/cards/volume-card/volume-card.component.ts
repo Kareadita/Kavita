@@ -8,54 +8,56 @@ import {
   Input, OnInit,
   Output
 } from '@angular/core';
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {DecimalPipe} from "@angular/common";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
+import {EntityTitleComponent} from "../entity-title/entity-title.component";
+import {ImageComponent} from "../../shared/image/image.component";
+import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {Router, RouterLink} from "@angular/router";
+import {Select2Module} from "ng-select2-component";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {LibraryService} from "../../_services/library.service";
 import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
-import {UtilityService} from "../../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {ReaderService} from "../../_services/reader.service";
 import {Chapter} from "../../_models/chapter";
 import {Observable} from "rxjs";
 import {User} from "../../_models/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {DecimalPipe} from "@angular/common";
-import {ImageComponent} from "../../shared/image/image.component";
-import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
-import {FormsModule} from "@angular/forms";
-import {EntityTitleComponent} from "../entity-title/entity-title.component";
-import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {Router, RouterLink} from "@angular/router";
-import {TranslocoDirective} from "@jsverse/transloco";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {filter, map} from "rxjs/operators";
 import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
-import {ReaderService} from "../../_services/reader.service";
+import {Volume} from "../../_models/volume";
+import {UtilityService} from "../../shared/_services/utility.service";
+import {LibraryType} from "../../_models/library/library";
 
 @Component({
-  selector: 'app-chapter-card',
+  selector: 'app-volume-card',
   standalone: true,
-  imports: [
-    NgbTooltip,
-    NgbProgressbar,
-    DecimalPipe,
-    ImageComponent,
-    DownloadIndicatorComponent,
-    FormsModule,
-    EntityTitleComponent,
-    CardActionablesComponent,
-    RouterLink,
-    TranslocoDirective,
-    DefaultValuePipe
-  ],
-  templateUrl: './chapter-card.component.html',
-  styleUrl: './chapter-card.component.scss',
+    imports: [
+        CardActionablesComponent,
+        DecimalPipe,
+        DefaultValuePipe,
+        DownloadIndicatorComponent,
+        EntityTitleComponent,
+        ImageComponent,
+        NgbProgressbar,
+        NgbTooltip,
+        RouterLink,
+        Select2Module,
+        TranslocoDirective
+    ],
+  templateUrl: './volume-card.component.html',
+  styleUrl: './volume-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChapterCardComponent implements OnInit {
+export class VolumeCardComponent implements OnInit {
+
   private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
@@ -67,14 +69,16 @@ export class ChapterCardComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly router = inject(Router);
   private readonly readerService = inject(ReaderService);
+  protected readonly utilityService = inject(UtilityService);
 
   @Input({required: true}) libraryId: number = 0;
+  @Input({required: true}) libraryType!: LibraryType;
   @Input({required: true}) seriesId: number = 0;
-  @Input({required: true}) chapter!: Chapter;
+  @Input({required: true}) volume!: Volume;
   /**
    * Any actions to perform on the card
    */
-  @Input() actions: ActionItem<Chapter>[] = [];
+  @Input() actions: ActionItem<Volume>[] = [];
   /**
    * If the entity is selected or not.
    */
@@ -148,18 +152,26 @@ export class ChapterCardComponent implements OnInit {
     });
 
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      return this.downloadService.mapToEntityType(events, this.chapter);
+      return this.downloadService.mapToEntityType(events, this.volume);
     }));
 
 
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
-      map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef)).subscribe(updateEvent => {
+      map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef))
+      .subscribe(updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
-      if (updateEvent.chapterId !== this.chapter.id) return;
+      if (updateEvent.volumeId !== this.volume.id) return;
 
-      this.chapter.pagesRead = updateEvent.pagesRead;
-      this.cdRef.detectChanges();
+        let sum = 0;
+        const chapters = this.volume.chapters.filter(c => c.volumeId === updateEvent.volumeId);
+        chapters.forEach(chapter => {
+          chapter.pagesRead = updateEvent.pagesRead;
+          sum += chapter.pagesRead;
+        });
+        this.volume.pagesRead = sum;
+        this.cdRef.detectChanges();
     });
+
   }
 
   handleSelection(event?: any) {
@@ -173,29 +185,31 @@ export class ChapterCardComponent implements OnInit {
 
   filterSendTo() {
     if (!this.actions || this.actions.length === 0) return;
-
-    this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.chapter);
+    // TODO: See if we can handle send to for volumes
+    //this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.volume);
   }
 
-  performAction(action: ActionItem<any>) {
+  performAction(action: ActionItem<Volume>) {
     if (action.action == Action.Download) {
-      this.downloadService.download('chapter', this.chapter);
+      this.downloadService.download('volume', this.volume);
       return; // Don't propagate the download from a card
     }
 
     if (typeof action.callback === 'function') {
-      action.callback(action, this.chapter);
+      action.callback(action, this.volume);
     }
   }
 
   handleClick(event: any) {
-    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', this.chapter.id]);
+    console.log('event target: ', event.target);
+    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', this.volume.id]);
   }
 
   read(event: any) {
     event.stopPropagation();
-    this.readerService.readChapter(this.libraryId, this.seriesId, this.chapter, false);
+    event.preventDefault();
+    console.log('reading volume');
+    this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
   }
-
 
 }

@@ -125,6 +125,7 @@ import {
 } from "../../../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.component";
+import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -160,7 +161,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent, ChapterCardComponent]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent, ChapterCardComponent, VolumeCardComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -548,7 +549,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  handleVolumeActionCallback(action: ActionItem<Volume>, volume: Volume) {
+  async handleVolumeActionCallback(action: ActionItem<Volume>, volume: Volume) {
     switch(action.action) {
       case(Action.MarkAsRead):
         this.markVolumeAsRead(volume);
@@ -558,6 +559,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         break;
       case(Action.Edit):
         this.openViewInfo(volume);
+        break;
+      case(Action.Delete):
+        await this.actionService.deleteVolume(volume.id, (b) => {
+          if (!b) return;
+          this.loadSeries(this.seriesId, false);
+        });
         break;
       case(Action.AddToReadingList):
         this.actionService.addVolumeToReadingList(volume, this.seriesId, () => {/* No Operation */ });

@@ -46,8 +46,11 @@
       <div class="card-overlay"></div>
       <div class="overlay-information overlay-information--centered">
         <div class="position-relative">
-              <span class="card-title library mx-auto" style="width: auto;">
+              <span class="card-title library mx-auto" style="width: auto;" (click)="read($event)">
                 <!-- Card Image -->
+                <div style="height: 48px; width: 48px; background-color: var(--primary-color)">
+                  <i class="fa-solid fa-book" aria-hidden="true" style="font-size: 42px"></i>
+                </div>
               </span>
         </div>
       </div>

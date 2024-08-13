@@ -26,6 +26,7 @@ import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {FilterService} from "./filter.service";
 import {ReadingListService} from "./reading-list.service";
 import {ChapterService} from "./chapter.service";
+import {VolumeService} from "./volume.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -44,6 +45,7 @@ export type BooleanActionCallback = (result: boolean) => void;
 export class ActionService {
 
   private readonly chapterService = inject(ChapterService);
+  private readonly volumeService = inject(VolumeService);
   private readonly libraryService = inject(LibraryService);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
@@ -708,6 +710,27 @@ export class ActionService {
       if (callback) {
         if (res) {
           this.toastr.success(translate('toasts.chapter-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
+        callback(res);
+      }
+    });
+  }
+
+  async deleteVolume(volumeId: number, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-volume'))) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.volumeService.deleteVolume(volumeId).subscribe((res: boolean) => {
+      if (callback) {
+        if (res) {
+          this.toastr.success(translate('toasts.volume-deleted'));
         } else {
           this.toastr.error(translate('errors.generic'));
         }

@@ -61,6 +61,7 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
+import {DefaultValuePipe} from "../_pipes/default-value.pipe";
 
 enum TabID {
   Related = 0,
@@ -128,7 +129,8 @@ interface VolumeCast extends IHasCast {
     TranslocoDirective,
     CardItemComponent,
     VirtualScrollerModule,
-    ChapterCardComponent
+    ChapterCardComponent,
+    DefaultValuePipe
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',

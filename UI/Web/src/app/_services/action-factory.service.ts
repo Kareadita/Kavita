@@ -575,12 +575,29 @@ export class ActionFactoryService {
         ],
       },
       {
-        action: Action.Download,
-        title: 'download',
-        description: 'download-tooltip',
+        action: Action.Submenu,
+        title: 'others',
+        description: '',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: [],
+        children: [
+          {
+            action: Action.Delete,
+            title: 'delete',
+            description: 'delete-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.Download,
+            title: 'download',
+            description: 'download-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+        ]
       },
       {
         action: Action.Edit,

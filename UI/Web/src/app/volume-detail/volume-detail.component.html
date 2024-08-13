@@ -127,6 +127,8 @@
                     @if (!last) {
                       ,
                     }
+                  } @empty {
+                    {{null | defaultValue}}
                   }
                 </div>
               </div>
@@ -138,6 +140,8 @@
                     @if (!last) {
                       ,
                     }
+                  } @empty {
+                    {{null | defaultValue}}
                   }
                 </div>
               </div>
@@ -155,14 +159,6 @@
               <div class="card-container row g-0" #container>
                 @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
                   <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId"></app-chapter-card>
-
-<!--                  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="readChapter(item, false)"-->
-<!--                                 [imageUrl]="imageService.getChapterCoverImage(item.id)"-->
-<!--                                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"-->
-<!--                                 [count]="item.files.length"-->
-<!--                                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume.chapters.length, $event)"-->
-<!--                                 [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">-->
-<!--                  </app-card-item>-->
                 }
               </div>
             </virtual-scroller>
