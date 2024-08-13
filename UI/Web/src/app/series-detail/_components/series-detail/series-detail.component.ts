@@ -124,6 +124,7 @@ import {
   EditChapterModalComponent
 } from "../../../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
+import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -159,7 +160,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent, ChapterCardComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 

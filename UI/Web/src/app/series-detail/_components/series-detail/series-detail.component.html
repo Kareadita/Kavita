@@ -226,7 +226,7 @@
           @if (showChapterTab) {
             <li [ngbNavItem]="TabID.Chapters">
               <a ngbNavLink>
-                {{utilityService.formatChapterName(libraryType) + 's'}}
+                {{utilityService.formatChapterName(libraryType)}}
                 <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
               </a>
               <ng-template ngbNavContent>
@@ -405,13 +405,12 @@
 </ng-container>
 
 <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="openChapter(item)"
-                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                 [count]="item.files.length"
-                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                 [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-card-item>
+  <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="series.id"
+                    [libraryId]="libraryId"
+                    [actions]="chapterActions"
+                    (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                    [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-chapter-card>
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
@@ -424,13 +423,21 @@
 </ng-template>
 
 <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
-                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                 [count]="item.files.length"
-                 (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                 [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-card-item>
+<!--  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"-->
+<!--                 [imageUrl]="imageService.getChapterCoverImage(item.id)"-->
+<!--                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"-->
+<!--                 [count]="item.files.length"-->
+<!--                 (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"-->
+<!--                 [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">-->
+<!--  </app-card-item>-->
+
+  <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="series.id"
+                    [libraryId]="libraryId"
+                    [actions]="chapterActions"
+                    (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                    [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
+  </app-chapter-card>
+
 </ng-template>
 
 <ng-template #nonSpecialChapterListItem let-item>

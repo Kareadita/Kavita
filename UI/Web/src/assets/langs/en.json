@@ -814,7 +814,9 @@
         "publishers-title": "Publishers",
         "imprints-title": "Imprints",
         "teams-title": "Teams",
-        "locations-title": "Locations"
+        "locations-title": "Locations",
+
+        "volume-num": "{{common.volume-num}}"
     },
 
     "series-metadata-detail": {

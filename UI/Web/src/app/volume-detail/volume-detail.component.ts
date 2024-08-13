@@ -4,7 +4,8 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  inject, OnInit,
+  inject,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle} from "@angular/common";
@@ -39,7 +40,7 @@ import {Series} from "../_models/series";
 import {LibraryType} from "../_models/library/library";
 import {forkJoin, map, Observable, shareReplay} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from '../_models/metadata/v2/filter-field';
@@ -55,6 +56,11 @@ import {ReadTimePipe} from "../_pipes/read-time.pipe";
 import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {ImageComponent} from "../shared/image/image.component";
+import {CardItemComponent} from "../cards/card-item/card-item.component";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {UtilityService} from "../shared/_services/utility.service";
+import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 
 enum TabID {
   Related = 0,
@@ -119,7 +125,10 @@ interface VolumeCast extends IHasCast {
     NgbTooltip,
     ImageComponent,
     NgStyle,
-    TranslocoDirective
+    TranslocoDirective,
+    CardItemComponent,
+    VirtualScrollerModule,
+    ChapterCardComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -130,19 +139,21 @@ export class VolumeDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
   private readonly volumeService = inject(VolumeService);
   private readonly seriesService = inject(SeriesService);
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
   private readonly downloadService = inject(DownloadService);
-  private readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  protected readonly utilityService = inject(UtilityService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -162,6 +173,9 @@ export class VolumeDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
   activeTabId = TabID.Related;
+
+  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterAction.bind(this));
+
   canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
     map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
@@ -373,6 +387,19 @@ export class VolumeDetailComponent implements OnInit {
       this.downloadInProgress = !!d;
       this.cdRef.markForCheck();
     });
+  }
+
+  handleChapterAction(action: ActionItem<Chapter>) {
+    switch (action.action) {
+      case Action.Delete:
+        break;
+      case Action.MarkAsRead:
+        break;
+      case Action.MarkAsUnread:
+        break;
+      case Action.MarkAsRead:
+        break;
+    }
   }
 
 }

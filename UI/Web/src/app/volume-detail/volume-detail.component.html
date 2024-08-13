@@ -19,12 +19,9 @@
           </h4>
           <div class="subtitle mt-2 mb-2">
             <span>
-              <app-entity-title [libraryType]="libraryType!" [entity]="volume" [prioritizeTitleName]="false"></app-entity-title>
+              {{t('volume-num')}}
+              <app-entity-title [libraryType]="libraryType!" [entity]="volume" [prioritizeTitleName]="true"></app-entity-title>
             </span>
-            @if (volume.name) {
-              <span class="ms-2 me-2"></span>
-              <span>{{volume.name}}</span>
-            }
           </div>
 
           <div class="mt-2 mb-2">
@@ -151,6 +148,27 @@
       </div>
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+        <li [ngbNavItem]="TabID.Chapters">
+          <a ngbNavLink>{{utilityService.formatChapterName(libraryType!)}}</a>
+          <ng-template ngbNavContent>
+            <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+              <div class="card-container row g-0" #container>
+                @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                  <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId"></app-chapter-card>
+
+<!--                  <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title" (click)="readChapter(item, false)"-->
+<!--                                 [imageUrl]="imageService.getChapterCoverImage(item.id)"-->
+<!--                                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"-->
+<!--                                 [count]="item.files.length"-->
+<!--                                 (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume.chapters.length, $event)"-->
+<!--                                 [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">-->
+<!--                  </app-card-item>-->
+                }
+              </div>
+            </virtual-scroller>
+          </ng-template>
+        </li>
+
         <li [ngbNavItem]="TabID.Related">
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
