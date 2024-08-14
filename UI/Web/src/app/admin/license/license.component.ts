@@ -6,17 +6,15 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
-import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
 import { LoadingComponent } from '../../shared/loading/loading.component';
-import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf } from '@angular/common';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {catchError} from "rxjs";
 import {WikiLink} from "../../_models/wiki";
 import {RouterLink} from "@angular/router";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
   selector: 'app-license',
@@ -24,7 +22,7 @@ import {RouterLink} from "@angular/router";
   styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective, RouterLink]
+  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, RouterLink, SettingItemComponent]
 })
 export class LicenseComponent implements OnInit {
 
@@ -142,5 +140,10 @@ export class LicenseComponent implements OnInit {
       this.isChecking = false;
       this.cdRef.markForCheck();
     });
+  }
+
+  updateEditMode(mode: boolean) {
+    this.isViewMode = mode;
+    this.cdRef.markForCheck();
   }
 }
