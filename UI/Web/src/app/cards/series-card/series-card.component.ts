@@ -38,6 +38,7 @@ import {AccountService} from "../../_services/account.service";
 import {BulkSelectionService} from "../bulk-selection.service";
 import {User} from "../../_models/user";
 import {ScrollService} from "../../_services/scroll.service";
+import {ReaderService} from "../../_services/reader.service";
 
 function deepClone(obj: any): any {
   if (obj === null || typeof obj !== 'object') {
@@ -87,6 +88,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   public readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly downloadService = inject(DownloadService);
   private readonly scrollService = inject(ScrollService);
+  private readonly readerService = inject(ReaderService);
 
   @Input({required: true}) series!: Series;
   @Input() libraryId = 0;
@@ -342,7 +344,14 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   read(event: any) {
-    // TODO: Get Continue Reading point and open directly
+
+    event.stopPropagation();
+    if (this.bulkSelectionService.hasSelections()) return;
+
+    // Get Continue Reading point and open directly
+    this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => {
+      this.readerService.readChapter(this.libraryId, this.series.id, chapter, false);
+    });
   }
 
 }
