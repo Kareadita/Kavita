@@ -57,10 +57,8 @@ enum TabID {
   General = 'general-tab',
   CoverImage = 'cover-image-tab',
   Info = 'info-tab',
-  People = 'people-tab',
   Tasks = 'tasks-tab',
   Progress = 'progress-tab',
-  Tags = 'tags-tab'
 }
 
 export interface EditVolumeModalCloseResult {
@@ -144,17 +142,8 @@ export class EditVolumeModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
 
-  tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
-  languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
-  peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
-  genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
-  tags: Tag[] = [];
-  genres: Genre[] = [];
-  ageRatings: Array<AgeRatingDto> = [];
-  validLanguages: Array<Language> = [];
-
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getChapterActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.runTask.bind(this)), blackList);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */
@@ -184,15 +173,10 @@ export class EditVolumeModalComponent implements OnInit {
     const model = this.editForm.value;
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
-    //this.volume.releaseDate = model.releaseDate;
+    const apis = [];
 
 
-    const apis = [
-
-    ];
-
-
-    if (selectedIndex > 0 && this.selectedCover !== '') {
+    if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateVolumeCoverImage(model.id, this.selectedCover, !this.coverImageReset));
     }
 
@@ -202,9 +186,8 @@ export class EditVolumeModalComponent implements OnInit {
   }
 
 
-  async runTask(action: ActionItem<Chapter>) {
+  async runTask(action: ActionItem<Volume>) {
     switch (action.action) {
-
       case Action.MarkAsRead:
         this.actionService.markVolumeAsRead(this.seriesId, this.volume, (p) => {
           this.volume.pagesRead = p.pagesRead;
