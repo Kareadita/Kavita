@@ -12819,7 +12819,8 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/Users/delete-user": {
@@ -22518,6 +22519,10 @@
             "type": "string",
             "description": "Base Url encoding of the file to upload from (can be null)",
             "nullable": true
+          },
+          "lockCover": {
+            "type": "boolean",
+            "description": "Lock the cover or not"
           }
         },
         "additionalProperties": false

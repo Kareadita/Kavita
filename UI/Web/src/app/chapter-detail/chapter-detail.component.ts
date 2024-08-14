@@ -225,6 +225,18 @@ export class ChapterDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  loadData() {
+    this.chapterService.getChapterMetadata(this.chapterId).subscribe(d => {
+      if (d === null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+
+      this.chapter = d;
+      this.cdRef.markForCheck();
+    })
+  }
+
   read(incognitoMode: boolean = false) {
     if (this.bulkSelectionService.hasSelections()) return;
     if (this.chapter === null) return;
@@ -245,7 +257,7 @@ export class ChapterDetailComponent implements OnInit {
     ref.componentInstance.seriesId = this.series!.id;
 
     ref.closed.subscribe(res => {
-
+      this.loadData();
     });
   }
 

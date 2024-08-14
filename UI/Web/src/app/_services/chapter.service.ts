@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
-import {AccountService} from "./account.service";
-import {UserCollection} from "../_models/collection-tag";
 import {Chapter} from "../_models/chapter";
-import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
+import {TextResonse} from "../_types/text-response";
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +19,10 @@ export class ChapterService {
 
   deleteChapter(chapterId: number) {
     return this.httpClient.delete<boolean>(this.baseUrl + 'chapter?chapterId=' + chapterId);
+  }
+
+  updateChapter(chapter: Chapter) {
+    return this.httpClient.post(this.baseUrl + 'chapter/update', chapter, TextResonse);
   }
 
 }

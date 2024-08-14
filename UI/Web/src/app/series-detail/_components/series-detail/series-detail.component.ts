@@ -985,11 +985,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else if (closeResult.updateExternal) {
         this.loadSeries(this.seriesId, closeResult.updateExternal);
       }
-
-      if (closeResult.coverImageUpdate) {
-        this.toastr.info(this.translocoService.translate('series-detail.cover-change'));
-      }
-
     });
   }
 

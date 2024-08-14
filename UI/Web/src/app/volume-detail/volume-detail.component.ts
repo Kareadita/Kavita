@@ -62,6 +62,10 @@ import {Action, ActionFactoryService, ActionItem} from "../_services/action-fact
 import {UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {DefaultValuePipe} from "../_pipes/default-value.pipe";
+import {
+  EditVolumeModalCloseResult,
+  EditVolumeModalComponent
+} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 
 enum TabID {
   Related = 0,
@@ -364,14 +368,14 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   openEditModal() {
-    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
-    ref.componentInstance.chapter = this.volume;
+    const ref = this.modalService.open(EditVolumeModalComponent, { size: 'xl' });
+    ref.componentInstance.volume = this.volume;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;
     ref.componentInstance.seriesId = this.series!.id;
 
-    ref.closed.subscribe(res => {
-
+    ref.closed.subscribe((res: EditVolumeModalCloseResult) => {
+      // TODO
     });
   }
 

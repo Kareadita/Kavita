@@ -1989,7 +1989,27 @@
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "{{series-info-cards.read-time-title}}",
         "files-label": "Files"
+    },
 
+    "edit-volume-modal": {
+        "title": "Edit",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "progress-tab": "Progress",
+        "tags-tab": "Tags",
+        "pages-label": "{{entity-info-cards.pages-count}}",
+        "words-label": "{{entity-info-cards.length-title}}",
+        "pages-count": "{{edit-chapter.modal-pages-count}}",
+        "words-count": "{{edit-chapter.modal-words-count}}",
+        "reading-time-label": "{{entity-info-cards.reading-time-title}}",
+        "date-added-label": "{{entity-info-cards.date-added-title}}",
+        "size-label": "{{entity-info-cards.size-title}}",
+        "id-label": "{{entity-info-cards.id-title}}",
+        "links-label": "{{series-metadata-detail.links-title}}",
+        "last-read-label": "{{entity-info-cards.last-read-title}}",
+        "range-hours": "{{value}} {{hourWord}}",
+        "read-time-label": "{{series-info-cards.read-time-title}}",
+        "files-label": "{{edit-chapter-modal.files-label}}"
     },
 
     "day-breakdown": {

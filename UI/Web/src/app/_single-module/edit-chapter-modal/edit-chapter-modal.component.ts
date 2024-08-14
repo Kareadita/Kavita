@@ -55,6 +55,7 @@ import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
+import {ChapterService} from "../../_services/chapter.service";
 
 enum TabID {
   General = 'general-tab',
@@ -130,6 +131,7 @@ export class EditChapterModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
+  private readonly chapterService = inject(ChapterService);
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
@@ -252,15 +254,15 @@ export class EditChapterModalComponent implements OnInit {
 
 
     const apis = [
-      this.seriesService.updateChapterMetadata(this.chapter)
+      this.chapterService.updateChapter(this.chapter)
     ];
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
     const needsReload = this.editForm.get('titleName')?.dirty || this.editForm.get('sortOrder')?.dirty;
 
 
-    if (selectedIndex > 0 && this.selectedCover !== '') {
-      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
+    if (selectedIndex > 0 || this.coverImageReset) {
+      apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, !this.coverImageReset));
     }
 
     forkJoin(apis).subscribe(results => {
