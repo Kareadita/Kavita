@@ -7,7 +7,6 @@
     border-radius: var(--card-border-radius);
     &:hover {
         .card-actions {
-            display: block;
             visibility: visible;
         }
     }
