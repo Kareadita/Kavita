@@ -4,7 +4,7 @@
 
   <form [formGroup]="formGroup">
     <div class="mt-2">
-      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [toggleOnViewClick]="false">
+      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)">
         <ng-template #titleExtra>
           <button class="btn btn-icon btn-sm" style="width: 58px" (click)="validateLicense()">
             @if (isChecking) {
@@ -41,7 +41,6 @@
         </ng-template>
 
         <ng-template #edit>
-          <p>{{t('activate-description')}}</p>
           <div class="form-group mb-3">
             <label for="license-key">{{t('activate-license-label')}}</label>
             <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"/>
