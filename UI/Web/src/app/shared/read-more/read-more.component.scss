@@ -5,4 +5,11 @@
 
 .read-more-cont {
   font-size: 0.8rem;
+
+  div {
+    word-break: break-all;
+    width: 100%;
+    overflow: hidden;
+    max-height: 75px;
+  }
 }
