@@ -24,7 +24,7 @@
                             (applyFilter)="updateFilter($event)"
     >
       <ng-template #cardItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
+        <app-series-card [series]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
                          (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
                          [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
       </ng-template>

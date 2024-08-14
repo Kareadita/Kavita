@@ -188,7 +188,7 @@ export class ChapterCardComponent implements OnInit {
     }
   }
 
-  handleClick(event: any) {
+  handleClick() {
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', this.chapter.id]);
   }
 

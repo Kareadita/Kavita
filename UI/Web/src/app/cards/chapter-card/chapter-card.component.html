@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'card-item'">
   <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}" >
-    <div class="overlay" (click)="handleClick($event)">
+    <div class="overlay" (click)="handleClick()">
       @if (chapter.pages > 0 || suppressArchiveWarning) {
         <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getChapterCoverImage(chapter.id)"></app-image>
       } @else if (chapter.pages === 0 && !suppressArchiveWarning) {

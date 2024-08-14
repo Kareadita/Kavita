@@ -288,7 +288,7 @@
                 <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
                   <div class="card-container row g-0" #container>
                     @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
-                      <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                      <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
                     }
                   </div>
                 </virtual-scroller>
@@ -306,7 +306,7 @@
                       <div class="card-container row g-0" #container>
                         @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                           @if (!item.hasOwnProperty('coverUrl')) {
-                            <app-series-card class="col-auto mt-2 mb-2" [data]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
+                            <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
                           } @else {
                             <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
                           }
