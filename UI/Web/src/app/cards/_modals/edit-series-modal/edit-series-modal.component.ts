@@ -551,7 +551,7 @@ export class EditSeriesModalComponent implements OnInit {
     }
 
 
-    if (selectedIndex > 0 && this.selectedCover !== '') {
+    if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
     }
 
