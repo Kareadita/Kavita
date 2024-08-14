@@ -21,16 +21,6 @@
     }
 }
 
-.card-body {
-    display:none;
-    visibility: hidden;
-}
-
-.overlay-information {
-    visibility: hidden;
-    display: none;
-}
-
 $image-height: 230px;
 $image-filter-height: 160px;
 $image-width: 160px;
@@ -71,53 +61,6 @@ $image-width: 160px;
 
             .card-overlay {
                 height: $image-filter-height;
-            }
-        }
-
-        &:hover {
-            visibility: visible;
-
-            .overlay-information {
-                visibility: visible;
-                display: block;
-            }
-
-            & + .card-body {
-                display: -webkit-box;
-                visibility: visible;
-                pointer-events: none;
-            }
-        }
-
-        .overlay-information {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 230px;
-            transition: all 0.2s;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-
-            &:hover {
-                background-color: var(--card-overlay-hover-bg-color);
-                cursor: pointer;
-            }
-
-            .overlay-information--centered {
-                position: absolute;
-                border-radius: 15px;
-                background-color: rgba(0, 0, 0, .7);
-                border-radius: 50px;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 115;
-
-                &:hover {
-                    background-color: var(--primary-color-scrollbar) !important;
-                    cursor: pointer;
-                }
             }
         }
     }

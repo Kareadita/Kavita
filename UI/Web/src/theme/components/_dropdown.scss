@@ -6,11 +6,16 @@
         color: var(--dropdown-item-text-color); 
         background-color: var(--dropdown-item-bg-color);
         cursor: pointer;
+        font-size: 0.8rem;
 
         &:hover, &:focus {
             color: var(--dropdown-item-hover-text-color); 
             background-color: var(--dropdown-item-hover-bg-color);
             text-decoration: none;
         }
+    }
+
+    .dropdown {
+        font-size: 0.8rem;
     }
 }

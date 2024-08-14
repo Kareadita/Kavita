@@ -1,8 +1,8 @@
 <ng-container *transloco="let t; read: 'edit-series-modal'">
   <div class="modal-container" *ngIf="series !== undefined">
     <div class="modal-header">
-      <h4 class="modal-title">
-        {{t('title', {seriesName: this.series.name})}}</h4>
+      <h5 class="modal-title">
+        {{t('title', {seriesName: this.series.name})}}</h5>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
@@ -414,33 +414,33 @@
           <li [ngbNavItem]="tabs[TabID.Info]">
             <a ngbNavLink>{{t(tabs[TabID.Info])}}</a>
             <ng-template ngbNavContent>
-              <h4>{{t('info-title')}}</h4>
-              <div class="row g-0 mb-2">
-                <div class="col-md-6" *ngIf="libraryName">{{t('library-title')}} {{libraryName | sentenceCase}}</div>
-                <div class="col-md-6">{{t('format-title')}} <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
+              <h5>{{t('info-title')}}</h5>
+              <div class="row g-0 mt-3 mb-3">
+                <div class="col-md-6" *ngIf="libraryName"><span class="fw-bold text-uppercase">{{t('library-title')}}</span> {{libraryName | sentenceCase}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('format-title')}}</span> <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
               </div>
-              <div class="row g-0 mb-2">
-                <div class="col-md-6">{{t('created-title')}} {{series.created | date:'shortDate'}}</div>
-                <div class="col-md-6">{{t('last-read-title')}} {{series.latestReadDate | defaultDate | timeAgo}}</div>
-                <div class="col-md-6">{{t('last-added-title')}} {{series.lastChapterAdded | defaultDate | timeAgo}}</div>
-                <div class="col-md-6">{{t('last-scanned-title')}} {{series.lastFolderScanned | defaultDate | timeAgo}}</div>
+              <div class="row g-0 mt-3 mb-3">
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('created-title')}}</span> {{series.created | date:'shortDate'}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('last-read-title')}}</span> {{series.latestReadDate | defaultDate | timeAgo}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('last-added-title')}}</span> {{series.lastChapterAdded | defaultDate | timeAgo}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('last-scanned-title')}}</span> {{series.lastFolderScanned | defaultDate | timeAgo}}</div>
               </div>
 
-              <div class="row g-0 mb-2">
-                <div class="col-auto">{{t('folder-path-title')}} {{series.folderPath | defaultValue}}</div>
+              <div class="row g-0 mt-3 mb-3">
+                <div class="col-auto"><span class="fw-bold text-uppercase">{{t('folder-path-title')}}</span> {{series.folderPath | defaultValue}}</div>
               </div>
-              <div class="row g-0 mb-2" *ngIf="metadata">
+              <div class="row g-0 mt-3 mb-3" *ngIf="metadata">
                 <div class="col-md-6">
-                  {{t('max-items-title')}} {{metadata.maxCount}}
+                  <span class="fw-bold text-uppercase">{{t('max-items-title')}}</span> {{metadata.maxCount}}
                   <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="t('highest-count-tooltip')" role="button" tabindex="0"></i>
                 </div>
                 <div class="col-md-6">
-                  {{t('total-items-title')}} {{metadata.totalCount}}
+                  <span class="fw-bold text-uppercase">{{t('total-items-title')}}</span> {{metadata.totalCount}}
                   <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="t('max-issue-tooltip')" role="button" tabindex="0"></i>
                 </div>
-                <div class="col-md-6">{{t('publication-status-title')}} {{metadata.publicationStatus | publicationStatus}}</div>
-                <div class="col-md-6">{{t('total-pages-title')}} {{series.pages}}</div>
-                <div class="col-md-6">{{t('size-title')}} {{size | bytes}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('publication-status-title')}}</span> {{metadata.publicationStatus | publicationStatus}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('total-pages-title')}}</span> {{series.pages}}</div>
+                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('size-title')}}</span> {{size | bytes}}</div>
               </div>
               <h4>Volumes</h4>
               <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
