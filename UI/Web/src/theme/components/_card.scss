@@ -144,6 +144,9 @@ $image-width: 160px;
 
     .card-title {
         width: 100%;
+        max-width: 145px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .card-overlay {
