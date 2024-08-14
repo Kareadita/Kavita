@@ -50,7 +50,6 @@ $image-width: 160px;
 
     .card-title {
         font-size: 0.85rem;
-        max-width: 140px !important;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
@@ -84,7 +83,7 @@ $image-width: 160px;
             }
 
             & + .card-body {
-                display: block;
+                display: -webkit-box;
                 visibility: visible;
                 pointer-events: none;
             }
@@ -136,6 +135,11 @@ $image-width: 160px;
         width: 100%;
         bottom: 39px;
         font-size: 0.8rem;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        max-height: 58px;
+        overflow: hidden;
     }
 
     .card-title {
