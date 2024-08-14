@@ -86,7 +86,9 @@ $image-width: 160px;
 .meta-title {
   display: none;
   visibility: hidden;
+  pointer-events: none;
 }
+
 
 .overlay {
   &:hover {
