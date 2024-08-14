@@ -85,10 +85,19 @@ public class BookServiceTests
     public void ShouldHaveComicInfoForPDF()
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
-        var archive = Path.Join(testDirectory, "test.pdf");
-        var comicInfo = _bookService.GetComicInfo(archive);
+        var document = Path.Join(testDirectory, "test.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
         Assert.NotNull(comicInfo);
         Assert.Equal("Variations Chromatiques de concert", comicInfo.Title);
         Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
     }
+
+    [Fact]
+    public void MissingPDFMetadata()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService");
+        var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.Null(comicInfo);
+      }
 }

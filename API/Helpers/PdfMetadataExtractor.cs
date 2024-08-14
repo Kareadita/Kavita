@@ -31,10 +31,10 @@ public class PdfMetadataExtractor : IPdfMetadataExtractor
     private int FindInBuffer(byte[] buffer, int bufLen, byte[] match)
     {
         var maxPos = bufLen - match.Length;
-        for (var pos = 0; pos<=maxPos; ++pos)
+        for (var pos = 0; pos <= maxPos; ++pos)
         {
             var found = true;
-            for (var ch = 0; ch<match.Length; ++ch)
+            for (var ch = 0; ch < match.Length; ++ch)
             {
                 if (buffer[pos+ch] != match[ch])
                 {
@@ -68,7 +68,9 @@ public class PdfMetadataExtractor : IPdfMetadataExtractor
     {
         var nodes = doc.DocumentElement?.SelectNodes(path+"//rdf:li", ns);
         if (nodes == null) return null;
+
         var list = new StringBuilder();
+
         foreach (XmlNode n in nodes)
         {
             if (list.Length > 0)
@@ -77,6 +79,7 @@ public class PdfMetadataExtractor : IPdfMetadataExtractor
             }
             list.Append(n.InnerText);
         }
+
         return list.Length > 0 ? list.ToString() : null;
     }
 
@@ -105,6 +108,7 @@ public class PdfMetadataExtractor : IPdfMetadataExtractor
         var info = new ComicInfo();
         var publicationDate = GetDateTimeFromXmlNode(metaDoc, ns, "//dc:date")
             ?? GetDateTimeFromXmlNode(metaDoc, ns, "//xmp:createdate");
+
         if (publicationDate != null)
         {
             info.Year  = publicationDate.Value.Year;
@@ -120,9 +124,10 @@ public class PdfMetadataExtractor : IPdfMetadataExtractor
         info.LanguageISO = BookService.ValidateLanguage(GetTextFromXmlNode(metaDoc, ns, "//dc:language"));
 
         info.Isbn = GetTextFromXmlNode(metaDoc, ns, "//pdfx:isbn") ?? GetTextFromXmlNode(metaDoc, ns, "//prism:isbn") ?? String.Empty;
+
         if (!ArticleNumberHelper.IsValidIsbn10(info.Isbn) && !ArticleNumberHelper.IsValidIsbn13(info.Isbn))
         {
-            _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+            _logger.LogDebug("[BookService] {File} has an invalid ISBN number", filePath);
             info.Isbn = String.Empty;
         }
 
@@ -159,47 +164,55 @@ public class PdfMetadataExtractor : IPdfMetadataExtractor
         {
             const int chunkSize = 4096;
             const int overlap = 16;
+            const string startTag = "<x:xmpmeta"; // No closing bracket: there generally are attributes
+            const string endTag = "</x:xmpmeta>";
             var stream = File.OpenRead(filePath);
             var buffer = new byte[chunkSize + overlap];
             var bytesAvailable = 0;
-            var hasMetaData = false;
+            var hasMetadata = false;
             var meta = new byte[0];
-            while (!hasMetaData)
+
+            while (!hasMetadata)
             {
                 var bytesRead = stream.Read(buffer, bytesAvailable, chunkSize);
                 if (bytesRead == 0) break;
+
                 bytesAvailable += bytesRead;
-                var found = FindInBuffer(buffer, bytesAvailable, Encoding.UTF8.GetBytes("<x:xmpmeta"));
+                var found = FindInBuffer(buffer, bytesAvailable, Encoding.UTF8.GetBytes(startTag));
+
                 if (found >= 0)
                 {
                     meta = buffer[found..bytesAvailable];
-                    hasMetaData = true;
+                    hasMetadata = true;
                     break;
                 }
-                else
-                {
-                    var ovl = Math.Min(overlap, bytesAvailable);
-                    Buffer.BlockCopy(buffer, bytesAvailable - ovl, buffer, 0, ovl);
-                    bytesAvailable = ovl;
-                }
+
+                var ovl = Math.Min(overlap, bytesAvailable);
+                Buffer.BlockCopy(buffer, bytesAvailable - ovl, buffer, 0, ovl);
+                bytesAvailable = ovl;
             }
-            while ((bytesAvailable = stream.Read(buffer, 0, chunkSize)) > 0 || hasMetaData)
+
+            while ((bytesAvailable = stream.Read(buffer, 0, chunkSize)) > 0 || hasMetadata)
             {
-                hasMetaData = false;
+                hasMetadata = false;
+
                 if (bytesAvailable > 0) {
                     byte[] newMeta = new byte[meta.Length + bytesAvailable];
                     Buffer.BlockCopy(meta, 0, newMeta, 0, meta.Length);
                     Buffer.BlockCopy(buffer, 0, newMeta, meta.Length, bytesAvailable);
                     meta = newMeta;
                 }
-                var found = FindInBuffer(meta, meta.Length, Encoding.UTF8.GetBytes("</x:xmpmeta>"));
+
+                var found = FindInBuffer(meta, meta.Length, Encoding.UTF8.GetBytes(endTag));
+
                 if (found >= 0)
                 {
-                    var metadata = meta[0..(found + "</x:xmpmeta>".Length)];
+                    var metadataEnd = found + endTag.Length;
+                    var metadata = meta[0..metadataEnd];
                     return GetComicInfoFromMetadata(Encoding.UTF8.GetString(metadata), filePath);
                 }
             }
-            return null; // Unterminated metadata
+            return null; // No metadata at all, or missing end tag
         }
         catch (Exception ex)
         {
