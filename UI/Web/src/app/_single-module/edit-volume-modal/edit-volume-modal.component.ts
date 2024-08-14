@@ -170,7 +170,7 @@ export class EditVolumeModalComponent implements OnInit {
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.volume.id));
 
     this.files = this.volume.chapters.flatMap(c => c.files);
-
+    this.size = this.files.reduce((sum, v) => sum + v.bytes, 0);
 
     this.editForm.addControl('coverImageIndex', new FormControl(0, []));
     this.editForm.addControl('coverImageLocked', new FormControl(this.volume.coverImageLocked, []));

@@ -1995,8 +1995,11 @@
         "title": "Edit",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "Progress",
-        "tags-tab": "Tags",
+        "progress-tab": "{{edit-chapter-modal.progress-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "tasks-tab": "{{edit-series-modal.tasks-tab}}",
+
+        "info-tab": "{{edit-series-modal.info-tab}}",
         "pages-label": "{{entity-info-cards.pages-count}}",
         "words-label": "{{entity-info-cards.length-title}}",
         "pages-count": "{{edit-chapter.modal-pages-count}}",
@@ -2543,6 +2546,7 @@
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series",
         "item-count": "{{num}} Items",
+
         "book-num": "Book",
         "issue-hash-num": "Issue #",
         "issue-num": "Issue",
@@ -2550,7 +2554,12 @@
         "volume-num": "Volume",
         "chapter-num-shorthand": "Ch {{num}}",
         "issue-num-shorthand": "#{{num}}",
-        "volume-num-shorthand": "Vol {{num}}"
+        "volume-num-shorthand": "Vol {{num}}",
+
+        "book-nums": "Books",
+        "issue-nums": "Issues",
+        "chapter-nums": "Chapters",
+        "volume-nums": "Volumes"
     }
 
 }
