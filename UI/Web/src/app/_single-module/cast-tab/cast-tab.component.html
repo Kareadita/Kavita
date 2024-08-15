@@ -1,4 +1,28 @@
 <ng-container *transloco="let t; read: 'details-tab'">
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="genres" [title]="t('genres-title')">
+      <ng-template #carouselItem let-item>
+        <app-tag-badge (click)="openGeneric(FilterField.Genres, item.id)">
+          {{item.title}}
+        </app-tag-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="tags" [title]="t('tags-title')">
+      <ng-template #carouselItem let-item>
+        <app-tag-badge (click)="openGeneric(FilterField.Tags, item.id)">
+          {{item.title}}
+        </app-tag-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="setting-section-break" aria-hidden="true"></div>
+
+
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.writers" [title]="t('writers-title')">
       <ng-template #carouselItem let-item>

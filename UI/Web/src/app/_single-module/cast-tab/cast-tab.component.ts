@@ -8,6 +8,9 @@ import {Router} from "@angular/router";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
+import {Genre} from "../../_models/metadata/genre";
+import {Tag} from "../../_models/tag";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-cast-tab',
@@ -15,7 +18,8 @@ import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.se
   imports: [
     CarouselReelComponent,
     PersonBadgeComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    TagBadgeComponent
   ],
   templateUrl: './cast-tab.component.html',
   styleUrl: './cast-tab.component.scss',
@@ -29,11 +33,18 @@ export class CastTabComponent {
   protected readonly FilterField = FilterField;
 
   @Input({required: true}) metadata!: IHasCast;
+  @Input() genres: Array<Genre> = [];
+  @Input() tags: Array<Tag> = [];
 
 
   openPerson(queryParamName: FilterField, filter: Person) {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter.id}`).subscribe();
+  }
+
+  openGeneric(queryParamName: FilterField, filter: string | number) {
+    if (queryParamName === FilterField.None) return;
+    this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
 
 

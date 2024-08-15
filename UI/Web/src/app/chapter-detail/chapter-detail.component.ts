@@ -68,6 +68,7 @@ import {DefaultValuePipe} from "../_pipes/default-value.pipe";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
+import {PageBookmark} from "../_models/readers/page-bookmark";
 
 enum TabID {
   Related = 'related-tab',
@@ -172,6 +173,7 @@ export class ChapterDetailComponent implements OnInit {
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
   readingLists: ReadingList[] = [];
+  bookmarks: Array<PageBookmark> = [];
 
 
 
@@ -201,6 +203,11 @@ export class ChapterDetailComponent implements OnInit {
     this.libraryId = parseInt(libraryId, 10);
 
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
+
+    this.readerService.getBookmarks(this.chapterId).subscribe(b => {
+      this.bookmarks = b;
+      this.cdRef.markForCheck();
+    });
 
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),

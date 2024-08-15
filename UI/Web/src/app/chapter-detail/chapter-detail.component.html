@@ -172,7 +172,7 @@
           <a ngbNavLink>{{t('details-tab')}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Details; prefetch on idle) {
-              <app-cast-tab [metadata]="chapter"></app-cast-tab>
+              <app-cast-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-cast-tab>
             }
           </ng-template>
         </li>
@@ -190,6 +190,10 @@
                                    (clicked)="openReadingList(item)"></app-card-item>
                   </ng-template>
                 </app-carousel-reel>
+              }
+
+              @if (bookmarks.length > 0) {
+                Has Bookmarks
               }
             }
           </ng-template>
