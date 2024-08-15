@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'series-metadata-detail'">
-  <div class="row g-0 mt-2 mb-2">
-    <app-read-more [text]="seriesSummary" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 1000 : 250"></app-read-more>
-  </div>
+<!--  <div class="row g-0 mt-2 mb-2">-->
+<!--    <app-read-more [text]="seriesSummary" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 1000 : 250"></app-read-more>-->
+<!--  </div>-->
 
   <!-- Ratings -->
   <app-metadata-detail [tags]="['']" [libraryId]="series.libraryId" [heading]="t('rating-title')">
@@ -47,17 +47,17 @@
 
 
   <!-- Reading Lists -->
-  <app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" [heading]="t('reading-lists-title')">
-    <ng-template #itemTemplate let-item>
-      <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-        <span *ngIf="item.promoted">
-            <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
-            <span class="visually-hidden">({{t('promoted')}})</span>
-        </span>
-        {{item.title}}
-      </app-tag-badge>
-    </ng-template>
-  </app-metadata-detail>
+<!--  <app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" [heading]="t('reading-lists-title')">-->
+<!--    <ng-template #itemTemplate let-item>-->
+<!--      <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">-->
+<!--        <span *ngIf="item.promoted">-->
+<!--            <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;-->
+<!--            <span class="visually-hidden">({{t('promoted')}})</span>-->
+<!--        </span>-->
+<!--        {{item.title}}-->
+<!--      </app-tag-badge>-->
+<!--    </ng-template>-->
+<!--  </app-metadata-detail>-->
 
   <!-- Key Person Information -->
 <!--  @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {-->
@@ -70,87 +70,87 @@
 <!--    </app-metadata-detail>-->
 <!--  }-->
 
-  <app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterField.Writers" [heading]="t('writers-title')">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+<!--  <app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterField.Writers" [heading]="t('writers-title')">-->
+<!--    <ng-template #itemTemplate let-item>-->
+<!--      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--    </ng-template>-->
+<!--  </app-metadata-detail>-->
 
 
   <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
 
 
-    <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterField.CoverArtist" [heading]="t('cover-artists-title')">
-      <ng-template #itemTemplate let-item>
-        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-      </ng-template>
-    </app-metadata-detail>
+<!--    <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterField.CoverArtist" [heading]="t('cover-artists-title')">-->
+<!--      <ng-template #itemTemplate let-item>-->
+<!--        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--      </ng-template>-->
+<!--    </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterField.Colorist" [heading]="t('colorists-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterField.Colorist" [heading]="t('colorists-title')">-->
+<!--        <ng-template #itemTemplate let-item>-->
+<!--          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterField.Editor" [heading]="t('editors-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterField.Editor" [heading]="t('editors-title')">-->
+<!--        <ng-template #itemTemplate let-item>-->
+<!--          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterField.Inker" [heading]="t('inkers-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterField.Inker" [heading]="t('inkers-title')">-->
+<!--        <ng-template #itemTemplate let-item>-->
+<!--          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterField.Letterer" [heading]="t('letterers-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterField.Letterer" [heading]="t('letterers-title')">-->
+<!--        <ng-template #itemTemplate let-item>-->
+<!--          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterField.Penciller" [heading]="t('pencillers-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterField.Penciller" [heading]="t('pencillers-title')">-->
+<!--        <ng-template #itemTemplate let-item>-->
+<!--          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-    <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterField.Characters" [heading]="t('characters-title')">
-      <ng-template #itemTemplate let-item>
-        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-      </ng-template>
-    </app-metadata-detail>
+<!--    <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterField.Characters" [heading]="t('characters-title')">-->
+<!--      <ng-template #itemTemplate let-item>-->
+<!--        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--      </ng-template>-->
+<!--    </app-metadata-detail>-->
 
-    <app-metadata-detail [tags]="seriesMetadata.teams" [libraryId]="series.libraryId" [queryParam]="FilterField.Team" [heading]="t('teams-title')">
-      <ng-template #titleTemplate let-item>
-        {{item.name}}
-      </ng-template>
-    </app-metadata-detail>
+<!--    <app-metadata-detail [tags]="seriesMetadata.teams" [libraryId]="series.libraryId" [queryParam]="FilterField.Team" [heading]="t('teams-title')">-->
+<!--      <ng-template #titleTemplate let-item>-->
+<!--        {{item.name}}-->
+<!--      </ng-template>-->
+<!--    </app-metadata-detail>-->
 
-    <app-metadata-detail [tags]="seriesMetadata.locations" [libraryId]="series.libraryId" [queryParam]="FilterField.Location" [heading]="t('locations-title')">
-      <ng-template #titleTemplate let-item>
-        {{item.name}}
-      </ng-template>
-    </app-metadata-detail>
+<!--    <app-metadata-detail [tags]="seriesMetadata.locations" [libraryId]="series.libraryId" [queryParam]="FilterField.Location" [heading]="t('locations-title')">-->
+<!--      <ng-template #titleTemplate let-item>-->
+<!--        {{item.name}}-->
+<!--      </ng-template>-->
+<!--    </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterField.Publisher" [heading]="t('publishers-title')">
-        <ng-template #itemTemplate let-item>
-          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterField.Publisher" [heading]="t('publishers-title')">-->
+<!--        <ng-template #itemTemplate let-item>-->
+<!--          <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-      <app-metadata-detail [tags]="seriesMetadata.imprints" [libraryId]="series.libraryId" [queryParam]="FilterField.Imprint" [heading]="t('imprints-title')">
-        <ng-template #titleTemplate let-item>
-          {{item.name}}
-        </ng-template>
-      </app-metadata-detail>
+<!--      <app-metadata-detail [tags]="seriesMetadata.imprints" [libraryId]="series.libraryId" [queryParam]="FilterField.Imprint" [heading]="t('imprints-title')">-->
+<!--        <ng-template #titleTemplate let-item>-->
+<!--          {{item.name}}-->
+<!--        </ng-template>-->
+<!--      </app-metadata-detail>-->
 
-    <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterField.Translators" [heading]="t('translators-title')">
-      <ng-template #itemTemplate let-item>
-        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-      </ng-template>
-    </app-metadata-detail>
+<!--    <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterField.Translators" [heading]="t('translators-title')">-->
+<!--      <ng-template #itemTemplate let-item>-->
+<!--        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>-->
+<!--      </ng-template>-->
+<!--    </app-metadata-detail>-->
 
   </div>
 

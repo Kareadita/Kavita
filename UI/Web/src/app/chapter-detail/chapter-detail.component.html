@@ -151,7 +151,7 @@
                 <span class="fw-bold">{{t('cover-artists-title')}}</span>
                 <div>
                   @for(artist of chapter.coverArtists; track artist.id; let idx = $index; let last = $last;) {
-                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, artist.id)">{{artist.name}}</a>
+                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, artist.id)">{{artist.name}}</a>
                     @if (!last) {
                       ,
                     }
@@ -177,19 +177,16 @@
           </ng-template>
         </li>
 
-
-        <li [ngbNavItem]="TabID.Related">
-          <a ngbNavLink>{{t('related-tab')}}</a>
-          <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Related; prefetch on idle) {
-              <app-related-tab [readingLists]="readingLists"></app-related-tab>
-
-              @if (bookmarks.length > 0) {
-                Has Bookmarks
+        @if(readingLists.length > 0) {
+          <li [ngbNavItem]="TabID.Related">
+            <a ngbNavLink>{{t('related-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                <app-related-tab [readingLists]="readingLists"></app-related-tab>
               }
-            }
-          </ng-template>
-        </li>
+            </ng-template>
+          </li>
+        }
       </ul>
 
       <div [ngbNavOutlet]="nav"></div>

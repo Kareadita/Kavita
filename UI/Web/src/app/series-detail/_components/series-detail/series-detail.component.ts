@@ -26,7 +26,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Title} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   NgbDropdown,
   NgbDropdownItem,
@@ -44,7 +44,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, forkJoin, Observable, of} from 'rxjs';
+import {catchError, forkJoin, Observable, of, shareReplay} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
@@ -53,7 +53,7 @@ import {
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
-import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -128,6 +128,16 @@ import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.compon
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {RelationshipPipe} from "../../../_pipes/relationship.pipe";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {AgeRating} from "../../../_models/metadata/age-rating";
+import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {ExternalRatingComponent} from "../external-rating/external-rating.component";
+import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
+import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -163,7 +173,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe, RouterLink, TimeAgoPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -174,7 +184,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly libraryService = inject(LibraryService);
   private readonly titleService = inject(Title);
@@ -193,6 +203,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly navService = inject(NavService);
   protected readonly readerService = inject(ReaderService);
   protected readonly themeService = inject(ThemeService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly PageLayoutMode = PageLayoutMode;
@@ -200,6 +211,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly RelationshipPipe = RelationshipPipe;
+  protected readonly RelationKind = RelationKind;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly FilterField = FilterField;
+  protected readonly AgeRating = AgeRating;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -302,6 +318,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   showVolumeTab = true;
   showStorylineTab = true;
   showChapterTab = true;
+  canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
+    takeUntilDestroyed(this.destroyRef),
+    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
+      shareReplay({bufferSize: 1, refCount: true})
+    ));
 
   /**
    * This is the download we get from download service.
@@ -366,7 +387,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const companionHeight = this.companionBar?.nativeElement.offsetHeight || 0;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
@@ -1084,8 +1105,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   }
 
+  openPerson(field: FilterField, value: number) {
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
 
-  protected readonly RelationshipPipe = RelationshipPipe;
-  protected readonly RelationKind = RelationKind;
-  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly Breakpoint = Breakpoint;
 }

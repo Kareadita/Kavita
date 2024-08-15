@@ -136,7 +136,7 @@
                 <span>{{t('cover-artists-title')}}</span>
                 <div>
                   @for(artist of volumeCast.coverArtists; track artist.id; let idx = $index; let last = $last;) {
-                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, artist.id)">{{artist.name}}</a>
+                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, artist.id)">{{artist.name}}</a>
                     @if (!last) {
                       ,
                     }
