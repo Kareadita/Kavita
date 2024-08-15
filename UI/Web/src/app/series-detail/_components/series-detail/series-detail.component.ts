@@ -1,7 +1,7 @@
 import {
   AsyncPipe,
   DecimalPipe,
-  DOCUMENT,
+  DOCUMENT, JsonPipe,
   NgClass,
   NgFor,
   NgIf,
@@ -126,6 +126,7 @@ import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event
 import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.component";
 import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.component";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
+import {RelationshipPipe} from "../../../_pipes/relationship.pipe";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -161,7 +162,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent, ChapterCardComponent, VolumeCardComponent]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -278,6 +279,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Related Series. Sorted by backend
    */
   relations: Array<RelatedSeriesPair> = [];
+  relationShips: RelatedSeries | null = null;
   /**
    * Recommended Series
    */
@@ -687,6 +689,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
+        this.relationShips = relations;
         this.relations = [
           ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
           ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
@@ -1081,4 +1084,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
 
+  protected readonly RelationshipPipe = RelationshipPipe;
+  protected readonly RelationKind = RelationKind;
 }
