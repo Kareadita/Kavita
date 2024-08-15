@@ -820,7 +820,9 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "pages-count": "{{num}} Pages",
-        "words-count": "{{num}} Words"
+        "words-count": "{{num}} Words",
+        "weblinks-title": "Links",
+        "more": "more"
     },
 
     "series-metadata-detail": {

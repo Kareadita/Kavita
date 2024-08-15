@@ -103,7 +103,7 @@
               </div>
 
               <div class="col-auto ms-2">
-                <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" title="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
+                <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
                   <span>
                       <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
                   </span>
@@ -112,7 +112,7 @@
 
               @if (isAdmin) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [title]="t('edit-series-alt')">
+                  <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                   </button>
                 </div>
@@ -121,7 +121,7 @@
               @if (canDownload$ | async) {
                 <div class="col-auto ms-2 d-none d-md-block">
                   @if (download$ | async; as download) {
-                    <button class="btn btn-secondary-outline" (click)="downloadSeries()" [title]="t('download-tooltip')" [disabled]="download !== null">
+                    <button class="btn btn-secondary-outline" (click)="downloadSeries()" [ngbTooltip]="t('download-tooltip')" [disabled]="download !== null">
                       @if (download) {
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         <span class="visually-hidden">{{t('downloading-status')}}</span>
@@ -130,7 +130,7 @@
                       }
                     </button>
                   } @else {
-                    <button class="btn btn-secondary-outline" (click)="downloadSeries()" [title]="t('download-tooltip')">
+                    <button class="btn btn-secondary-outline" (click)="downloadSeries()" [ngbTooltip]="t('download-tooltip')">
                       <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                     </button>
                   }
@@ -138,7 +138,7 @@
               }
 
               <div class="col-auto ms-2 d-none d-md-block">
-                <div class="card-actions">
+                <div class="card-actions" [ngbTooltip]="t('more')">
                   <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn-sm"></app-card-actionables>
                 </div>
               </div>
