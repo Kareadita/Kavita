@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 namespace Kavita.Common.EnvironmentInfo;
@@ -57,7 +57,7 @@ public static class OsInfo
         }
     }
 
-    private static string RunAndCapture(string filename, string args)
+    public static string RunAndCapture(string filename, string args, int waitInMilliseconds = 1000)
     {
         var p = new Process
         {
@@ -75,7 +75,7 @@ public static class OsInfo
 
         // To avoid deadlocks, always read the output stream first and then wait.
         var output = p.StandardOutput.ReadToEnd();
-        p.WaitForExit(1000);
+        p.WaitForExit(waitInMilliseconds);
 
         return output;
     }

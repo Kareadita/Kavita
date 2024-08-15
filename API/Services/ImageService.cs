@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -76,6 +76,7 @@ public class ImageService : IImageService
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory;
+    private readonly IImageConverterService _converterService;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
@@ -114,11 +115,12 @@ public class ImageService : IImageService
         ["https://app.plex.tv"] = "https://plex.tv"
     };
 
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory)
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory, IImageConverterService converterService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _cacheFactory = cacheFactory;
+        _converterService = converterService;
     }
 
     public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
@@ -134,6 +136,7 @@ public class ImageService : IImageService
             _directoryService.CopyDirectoryToDirectory(_directoryService.FileSystem.Path.GetDirectoryName(fileFilePath), targetDirectory,
                 Tasks.Scanner.Parser.Parser.ImageFileExtensions);
         }
+        _converterService.ConvertDirectory(targetDirectory);
     }
 
     /// <summary>
@@ -214,6 +217,7 @@ public class ImageService : IImageService
 
         try
         {
+            fileName = _converterService.ConvertFile(fileName);
             var (width, height) = size.GetDimensions();
             using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
 

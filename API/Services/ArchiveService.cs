@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -58,15 +58,17 @@ public class ArchiveService : IArchiveService
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
     private readonly IMediaErrorService _mediaErrorService;
+    private readonly IImageConverterService _converterService;
     private const string ComicInfoFilename = "ComicInfo.xml";
 
     public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService,
-        IImageService imageService, IMediaErrorService mediaErrorService)
+        IImageService imageService, IMediaErrorService mediaErrorService, IImageConverterService converterService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _imageService = imageService;
         _mediaErrorService = mediaErrorService;
+        _converterService = converterService;
     }
 
     /// <summary>
@@ -231,7 +233,7 @@ public class ArchiveService : IArchiveService
                     var entryName = FindCoverImageFilename(archivePath, archive.Entries.Select(e => e.FullName));
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
-                    using var stream = entry.Open();
+                    using var stream = _converterService.ConvertStream(entryName, entry.Open());
                     return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format, size);
                 }
                 case ArchiveLibrary.SharpCompress:
@@ -242,7 +244,7 @@ public class ArchiveService : IArchiveService
                     var entryName = FindCoverImageFilename(archivePath, entryNames);
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
-                    using var stream = entry.OpenEntryStream();
+                    using var stream = _converterService.ConvertStream(entryName, entry.OpenEntryStream());
                     return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format, size);
                 }
                 case ArchiveLibrary.NotSupported:
@@ -560,6 +562,7 @@ public class ArchiveService : IArchiveService
                 {
                     using var archive = ZipFile.OpenRead(archivePath);
                     ExtractArchiveEntries(archive, extractPath);
+                    _converterService.ConvertDirectory(extractPath);
                     break;
                 }
                 case ArchiveLibrary.SharpCompress:
@@ -568,6 +571,7 @@ public class ArchiveService : IArchiveService
                     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory
                                                                           && !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                                           && Tasks.Scanner.Parser.Parser.IsImage(entry.Key)), extractPath);
+                    _converterService.ConvertDirectory(extractPath);
                     break;
                 }
                 case ArchiveLibrary.NotSupported:
