@@ -153,7 +153,10 @@
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Chapters">
-          <a ngbNavLink>{{utilityService.formatChapterName(libraryType!)}}</a>
+          <a ngbNavLink>
+            {{utilityService.formatChapterName(libraryType!, false, false, true)}}
+            <span class="badge rounded-pill text-bg-secondary">{{volume.chapters.length}}</span>
+          </a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
               <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
