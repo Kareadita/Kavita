@@ -183,18 +183,21 @@
               </div>
             </div>
           </div>
-
-          <div class="mt-2">
-            <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
-                                        [libraryType]="libraryType" [ratings]="ratings"
-                                        [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
-          </div>
-
-
         </div>
       </div>
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+
+        <li [ngbNavItem]="TabID.Info">
+          <a ngbNavLink>{{t('Info-tab')}}</a>
+          <ng-template ngbNavContent>
+              <div class="mb-3">
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
+                [libraryType]="libraryType" [ratings]="ratings"
+                [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
+              </div>
+            </ng-template>
+          </li>
 
         @if (showStorylineTab) {
           <li [ngbNavItem]="TabID.Storyline">

@@ -793,6 +793,7 @@
         "specials-tab": "{{tabs.specials-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "details-tab": "{{tabs.details-tab}}",
+        "info-tab": "{{tabs.info-tab}}",
         "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "File emailed to {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
