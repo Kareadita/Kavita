@@ -154,52 +154,28 @@
       </div>
 
       @if (series) {
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
           @if (showStorylineTab) {
             <li [ngbNavItem]="TabID.Storyline">
               <a ngbNavLink>{{t('storyline-tab')}}</a>
               <ng-template ngbNavContent>
-                <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+                @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      @if (item.isChapter) {
-                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
-                      } @else {
-                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        @if (item.isChapter) {
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
+                        } @else {
+                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                        }
                       }
-                    }
 
-                    <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
-                  </div>
-
-<!--                  @switch (renderMode) {-->
-<!--                    @case (PageLayoutMode.Cards) {-->
-<!--                      <div class="card-container row g-0" #container>-->
-<!--                        @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                          @if (item.isChapter) {-->
-<!--                            <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>-->
-<!--                          } @else {-->
-<!--                            <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>-->
-<!--                          }-->
-<!--                        }-->
-
-<!--                        <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>-->
-<!--                      </div>-->
-<!--                    }-->
-<!--                    @case (PageLayoutMode.List) {-->
-<!--                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                        @if (item.isChapter) {-->
-<!--                          <ng-container [ngTemplateOutlet]="nonSpecialChapterListItem" [ngTemplateOutletContext]="{$implicit: item.chapter}"></ng-container>-->
-<!--                        } @else {-->
-<!--                          <ng-container [ngTemplateOutlet]="nonSpecialVolumeListItem" [ngTemplateOutletContext]="{$implicit: item.volume}"></ng-container>-->
-<!--                        }-->
-<!--                      }-->
-<!--                    }-->
-<!--                  }-->
-
-                </virtual-scroller>
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
+                    </div>
+                  </virtual-scroller>
+                }
               </ng-template>
             </li>
           }
@@ -212,30 +188,16 @@
                 <span class="badge rounded-pill text-bg-secondary">{{volumes.length}}</span>
               </a>
               <ng-template ngbNavContent>
-
-                <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
-                    }
-                    <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
-                  </div>
-<!--                  @switch (renderMode) {-->
-<!--                    @case (PageLayoutMode.Cards) {-->
-<!--                      <div class="card-container row g-0" #container>-->
-<!--                        @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>-->
-<!--                        }-->
-<!--                        <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>-->
-<!--                      </div>-->
-<!--                    }-->
-<!--                    @case (PageLayoutMode.List) {-->
-<!--                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                        <ng-container [ngTemplateOutlet]="nonSpecialVolumeListItem" [ngTemplateOutletContext]="{$implicit: item}"></ng-container>-->
-<!--                      }-->
-<!--                    }-->
-<!--                  }-->
-                </virtual-scroller>
+                @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
+                      }
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
+                    </div>
+                  </virtual-scroller>
+                }
               </ng-template>
             </li>
           }
@@ -247,29 +209,16 @@
                 <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
               </a>
               <ng-template ngbNavContent>
-                <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
-                    }
-                    <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
-                  </div>
-<!--                  @switch (renderMode) {-->
-<!--                    @case (PageLayoutMode.Cards) {-->
-<!--                      <div class="card-container row g-0" #container>-->
-<!--                        @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>-->
-<!--                        }-->
-<!--                        <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>-->
-<!--                      </div>-->
-<!--                    }-->
-<!--                    @case (PageLayoutMode.List) {-->
-<!--                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                        <ng-container [ngTemplateOutlet]="nonSpecialChapterListItem" [ngTemplateOutletContext]="{$implicit: item}"></ng-container>-->
-<!--                      }-->
-<!--                    }-->
-<!--                  }-->
-                </virtual-scroller>
+                @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
+                      }
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
+                    </div>
+                  </virtual-scroller>
+                }
               </ng-template>
             </li>
           }
@@ -281,27 +230,15 @@
                 <span class="badge rounded-pill text-bg-secondary">{{specials.length}}</span>
               </a>
               <ng-template ngbNavContent>
-                <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
-                    }
-                  </div>
-<!--                  @switch (renderMode) {-->
-<!--                    @case (PageLayoutMode.Cards) {-->
-<!--                      <div class="card-container row g-0" #container>-->
-<!--                        @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                          <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>-->
-<!--                        }-->
-<!--                      </div>-->
-<!--                    }-->
-<!--                    @case (PageLayoutMode.List) {-->
-<!--                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {-->
-<!--                        <ng-container [ngTemplateOutlet]="specialChapterListItem" [ngTemplateOutletContext]="{$implicit: item}"></ng-container>-->
-<!--                      }-->
-<!--                    }-->
-<!--                  }-->
-                </virtual-scroller>
+                @defer (when activeTabId === TabID.Specials; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
+                      }
+                    </div>
+                  </virtual-scroller>
+                }
               </ng-template>
             </li>
           }
@@ -313,13 +250,15 @@
                 <span class="badge rounded-pill text-bg-secondary">{{relations.length}}</span>
               </a>
               <ng-template ngbNavContent>
-                <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
-                      <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
-                    }
-                  </div>
-                </virtual-scroller>
+                @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
+                        <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                      }
+                    </div>
+                  </virtual-scroller>
+                }
 
 <!--                @if (relationShips.prequels.length > 0) {-->
 <!--                  <app-carousel-reel [items]="relationShips.prequels" title="Prequels">-->
@@ -444,51 +383,19 @@
             <li [ngbNavItem]="TabID.Recommendations">
               <a ngbNavLink>{{t('recommendations-tab')}}</a>
               <ng-template ngbNavContent>
-                <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track idx) {
-                      @if (!item.hasOwnProperty('coverUrl')) {
-                        <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
-                      } @else {
-                        <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
+                @defer (when activeTabId === TabID.Recommendations; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track idx) {
+                        @if (!item.hasOwnProperty('coverUrl')) {
+                          <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
+                        } @else {
+                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
+                        }
                       }
-                    }
-                  </div>
-<!--                  @switch (renderMode) {-->
-<!--                    @case (PageLayoutMode.Cards) {-->
-<!--                      <div class="card-container row g-0" #container>-->
-<!--                        @for(item of scroll.viewPortItems; let idx = $index; track idx) {-->
-<!--                          @if (!item.hasOwnProperty('coverUrl')) {-->
-<!--                            <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>-->
-<!--                          } @else {-->
-<!--                            <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>-->
-<!--                          }-->
-<!--                        }-->
-<!--                      </div>-->
-<!--                    }-->
-<!--                    @case (PageLayoutMode.List) {-->
-<!--                      @for(item of scroll.viewPortItems; let idx = $index; track idx) {-->
-<!--                        @if (!item.hasOwnProperty('coverUrl')) {-->
-<!--                          <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">-->
-<!--                            <ng-container title>-->
-<!--                            <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">-->
-<!--                              <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>-->
-<!--                            </span>-->
-<!--                            </ng-container>-->
-<!--                          </app-external-list-item>-->
-<!--                        } @else {-->
-<!--                          <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">-->
-<!--                            <ng-container title>-->
-<!--                            <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">-->
-<!--                              <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>-->
-<!--                            </span>-->
-<!--                            </ng-container>-->
-<!--                          </app-external-list-item>-->
-<!--                        }-->
-<!--                      }-->
-<!--                    }-->
-<!--                  }-->
-                </virtual-scroller>
+                    </div>
+                  </virtual-scroller>
+                }
               </ng-template>
             </li>
           }
@@ -496,24 +403,25 @@
           <li [ngbNavItem]="TabID.Reviews">
             <a ngbNavLink>{{t('reviews-tab')}}</a>
             <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+                <div class="mb-3">
+                  <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
+                                     iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
+                                     [clickableTitle]="true" (sectionClick)="openReviewModal()">
+                    <ng-template #carouselItem let-item let-position="idx">
+                      <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
 
-              <div class="mb-3">
-                <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
-                                   iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                                   [clickableTitle]="true" (sectionClick)="openReviewModal()">
-                  <ng-template #carouselItem let-item let-position="idx">
-                    <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
-                  </ng-template>
-                </app-carousel-reel>
-              </div>
-
-              <div class="mb-3">
-                <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
-                  <ng-template #carouselItem let-item let-position="idx">
-                    <app-review-card [review]="item"></app-review-card>
-                  </ng-template>
-                </app-carousel-reel>
-              </div>
+                <div class="mb-3">
+                  <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
+                    <ng-template #carouselItem let-item let-position="idx">
+                      <app-review-card [review]="item"></app-review-card>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+              }
 
             </ng-template>
           </li>
@@ -522,7 +430,9 @@
             <li [ngbNavItem]="TabID.Details">
               <a ngbNavLink>{{t('details-tab')}}</a>
               <ng-template ngbNavContent>
-                <app-cast-tab [metadata]="seriesMetadata"></app-cast-tab>
+                @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                  <app-cast-tab [metadata]="seriesMetadata"></app-cast-tab>
+                }
               </ng-template>
             </li>
           }

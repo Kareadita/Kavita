@@ -127,6 +127,7 @@ import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.com
 import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.component";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {RelationshipPipe} from "../../../_pipes/relationship.pipe";
+import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -1086,4 +1087,5 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   protected readonly RelationshipPipe = RelationshipPipe;
   protected readonly RelationKind = RelationKind;
+  protected readonly SettingsTabId = SettingsTabId;
 }
