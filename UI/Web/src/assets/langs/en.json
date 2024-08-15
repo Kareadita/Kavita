@@ -792,7 +792,7 @@
         "volumes-tab": "{{tabs.volumes-tab}}",
         "specials-tab": "{{tabs.specials-tab}}",
         "related-tab": "{{tabs.related-tab}}",
-        "cast-tab": "{{tabs.cast-tab}}",
+        "details-tab": "{{tabs.details-tab}}",
         "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "File emailed to {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
@@ -1039,7 +1039,7 @@
         "cannot-read": "Cannot Read"
     },
 
-    "cast-tab": {
+    "details-tab": {
         "writers-title": "{{series-metadata-detail.writers-title}}",
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
         "characters-title": "{{series-metadata-detail.characters-title}}",
@@ -1052,7 +1052,9 @@
         "editors-title": "{{series-metadata-detail.editors-title}}",
         "teams-title": "{{series-metadata-detail.teams-title}}",
         "locations-title": "{{series-metadata-detail.locations-title}}",
-        "imprints-title": "{{series-metadata-detail.imprints-title}}"
+        "imprints-title": "{{series-metadata-detail.imprints-title}}",
+        "genres-title": "{{series-metadata-detail.genres-title}}",
+        "tags-title": "{{series-metadata-detail.tags-title}}"
     },
 
     "chapter-metadata-detail": {
@@ -2518,7 +2520,7 @@
     },
 
     "tabs": {
-        "cast-tab": "Cast",
+        "details-tab": "Details",
         "reviews-tab": "Reviews",
         "storyline-tab": "Storyline",
         "books-tab": "Books",

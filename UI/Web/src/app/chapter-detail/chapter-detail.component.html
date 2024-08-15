@@ -155,6 +155,15 @@
       </div>
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+
+        <li [ngbNavItem]="TabID.Details">
+          <a ngbNavLink>{{t('details-tab')}}</a>
+          <ng-template ngbNavContent>
+            <app-cast-tab [metadata]="chapter"></app-cast-tab>
+          </ng-template>
+        </li>
+
+
         <li [ngbNavItem]="TabID.Related">
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
@@ -167,13 +176,6 @@
                   </ng-template>
                 </app-carousel-reel>
               }
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="TabID.Details">
-          <a ngbNavLink>{{t('cast-tab')}}</a>
-          <ng-template ngbNavContent>
-            <app-cast-tab [metadata]="chapter"></app-cast-tab>
           </ng-template>
         </li>
       </ul>

@@ -70,7 +70,6 @@ import {ReadingListService} from "../_services/reading-list.service";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
 
 enum TabID {
-  Chapters = 'chapter-tab',
   Related = 'related-tab',
   Reviews = 'review-tab', // Only applicable for books
   Details = 'details-tab'
@@ -161,7 +160,7 @@ export class ChapterDetailComponent implements OnInit {
   series: Series | null = null;
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
-  activeTabId = TabID.Chapters;
+  activeTabId = TabID.Details;
   canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
     map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),

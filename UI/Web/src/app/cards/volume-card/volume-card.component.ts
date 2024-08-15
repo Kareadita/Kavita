@@ -26,7 +26,6 @@ import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ReaderService} from "../../_services/reader.service";
-import {Chapter} from "../../_models/chapter";
 import {Observable} from "rxjs";
 import {User} from "../../_models/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -201,7 +200,10 @@ export class VolumeCardComponent implements OnInit {
   }
 
   handleClick(event: any) {
-    console.log('event target: ', event.target);
+    if (this.bulkSelectionService.hasSelections()) {
+      this.handleSelection(event);
+      return;
+    }
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', this.volume.id]);
   }
 

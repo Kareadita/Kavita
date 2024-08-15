@@ -188,7 +188,12 @@ export class ChapterCardComponent implements OnInit {
     }
   }
 
-  handleClick() {
+  handleClick(event: any) {
+    if (this.bulkSelectionService.hasSelections()) {
+      this.handleSelection(event);
+      return;
+    }
+
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', this.chapter.id]);
   }
 

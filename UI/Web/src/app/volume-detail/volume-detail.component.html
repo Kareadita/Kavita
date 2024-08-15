@@ -172,15 +172,16 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Cast">
-          <a ngbNavLink>{{t('cast-tab')}}</a>
+        <li [ngbNavItem]="TabID.Details">
+          <a ngbNavLink>{{t('details-tab')}}</a>
           <ng-template ngbNavContent>
             <app-cast-tab [metadata]="volumeCast"></app-cast-tab>
           </ng-template>
         </li>
       </ul>
 
-      <div [ngbNavOutlet]="nav"></div>
+      <!-- Min height helps with scroll jerking when switching from chapter -> related/details -->
+      <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
 
     }
 

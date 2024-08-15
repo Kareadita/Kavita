@@ -68,10 +68,11 @@ import {
 } from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 
 enum TabID {
-  Related = 0,
-  Chapters = 1,
-  Reviews = 6, // Only applicable for books
-  Cast = 7
+
+  Chapters = 'chapters-tab',
+  Related = 'related-tab',
+  Reviews = 'reviews-tab', // Only applicable for books
+  Details = 'details-tab',
 }
 
 interface VolumeCast extends IHasCast {
@@ -178,7 +179,7 @@ export class VolumeDetailComponent implements OnInit {
   series: Series | null = null;
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
-  activeTabId = TabID.Related;
+  activeTabId = TabID.Chapters;
 
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterAction.bind(this));
 
