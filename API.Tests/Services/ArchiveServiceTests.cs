@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -29,8 +29,8 @@ public class ArchiveServiceTests
     {
         _testOutputHelper = testOutputHelper;
         _archiveService = new ArchiveService(_logger, _directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>()),
-            Substitute.For<IMediaErrorService>());
+            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>()),
+            Substitute.For<IMediaErrorService>(), Substitute.For<IImageConverterService>());
     }
 
     [Theory]
@@ -167,7 +167,7 @@ public class ArchiveServiceTests
     public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
     {
         var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds, Substitute.For<IEasyCachingProviderFactory>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>());
         var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
@@ -198,7 +198,7 @@ public class ArchiveServiceTests
     [InlineData("sorting.zip", "sorting.expected.png")]
     public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
     {
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>());
         var archiveService =  Substitute.For<ArchiveService>(_logger,
             new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService,
             Substitute.For<IMediaErrorService>());
@@ -226,7 +226,7 @@ public class ArchiveServiceTests
         var imageService = Substitute.For<IImageService>();
         imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
             .Returns(x => "cover.jpg");
-        var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>());
+        var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>(),Substitute.For<IImageConverterService>());
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
         var inputPath = Path.GetFullPath(Path.Join(testDirectory, inputFile));
         var outputPath = Path.Join(testDirectory, Path.GetFileNameWithoutExtension(inputFile) + "_output");

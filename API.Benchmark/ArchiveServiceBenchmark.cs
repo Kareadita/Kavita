@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -32,8 +32,8 @@ public class ArchiveServiceBenchmark
     public ArchiveServiceBenchmark()
     {
         _directoryService = new DirectoryService(null, new FileSystem());
-        _imageService = new ImageService(null, _directoryService, Substitute.For<IEasyCachingProviderFactory>());
-        _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService, Substitute.For<IMediaErrorService>());
+        _imageService = new ImageService(null, _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>());
+        _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService, Substitute.For<IMediaErrorService>(), Substitute.For<IImageConverterService>());
     }
 
     [Benchmark(Baseline = true)]

@@ -14,15 +14,43 @@ public interface IImageConverterProvider
 
 public class JpegXLImageConverterProvider : IImageConverterProvider
 {
-    public bool IsSupported(string filename) => filename.EndsWith(".jxl", StringComparison.InvariantCultureIgnoreCase);
+    private bool? _appFound = null;
+
+    internal bool AppFound
+    {
+        get
+        {
+            if (_appFound == null)
+            {
+                try
+                {
+                    _appFound = OsInfo.RunAndCapture(exeFile, "--version", Timeout.Infinite).Contains("JPEG XL");
+                }
+                catch (Exception e)
+                {
+                    //Eat it
+                    _appFound = false;
+                }
+            }
+            return _appFound.Value;
+        }
+    }
+    private string exeFile => OsInfo.IsWindows ? "djxl.exe" : "djxl";
+
+    public bool IsSupported(string filename)
+    {
+        if (AppFound)
+            return filename.EndsWith(".jxl", StringComparison.InvariantCultureIgnoreCase);
+        return false;
+    }
+
     public string Extension => ".jxl";
     public string Convert(string filename)
     {
-        string exe = "djxl";
-        if (OsInfo.IsWindows)
-            exe = "djxl.exe";
+        if (!AppFound)
+            return filename;
         string destination = Path.ChangeExtension(filename, "jpg");
-        OsInfo.RunAndCapture(exe, "\"" + filename + "\" \"" + destination + "\"", Timeout.Infinite);
+        OsInfo.RunAndCapture(exeFile, "\"" + filename + "\" \"" + destination + "\"", Timeout.Infinite);
         File.Delete(filename);
         return destination;
     }
