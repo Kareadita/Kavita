@@ -140,6 +140,10 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {AgeRatingImageComponent} from "../../../_single-modules/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {IconAndTitleComponent} from "../../../shared/icon-and-title/icon-and-title.component";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
+import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -170,14 +174,14 @@ interface StoryLineItem {
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle,
     TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
-    VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe, RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe]
+    VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe, RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent, A11yClickDirective]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -383,6 +387,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   get UseBookLogic() {
     return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
+  }
+
+  get WebLinks() {
+    if (!this.seriesMetadata || this.seriesMetadata?.webLinks === '') return [];
+    return this.seriesMetadata.webLinks.split(',');
   }
 
   get ScrollingBlockHeight() {

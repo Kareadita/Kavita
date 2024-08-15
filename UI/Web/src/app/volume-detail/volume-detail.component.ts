@@ -73,6 +73,7 @@ import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 
 enum TabID {
 
@@ -145,7 +146,8 @@ interface VolumeCast extends IHasCast {
     DefaultValuePipe,
     RelatedTabComponent,
     AgeRatingImageComponent,
-    CompactNumberPipe
+    CompactNumberPipe,
+    BadgeExpanderComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',

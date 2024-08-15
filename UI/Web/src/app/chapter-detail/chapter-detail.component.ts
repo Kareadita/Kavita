@@ -72,6 +72,7 @@ import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
 import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -123,7 +124,8 @@ enum TabID {
     CardItemComponent,
     RelatedTabComponent,
     AgeRatingImageComponent,
-    CompactNumberPipe
+    CompactNumberPipe,
+    BadgeExpanderComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',

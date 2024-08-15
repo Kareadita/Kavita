@@ -135,27 +135,27 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('writers-title')}}</span>
                 <div>
-                  @for(writer of chapter.writers; track writer.id; let idx = $index; let last = $last;) {
-                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, writer.id)">{{writer.name}}</a>
-                    @if (!last) {
-                      ,
-                    }
-                  } @empty {
-                    {{null | defaultValue}}
-                  }
+                  <app-badge-expander [items]="chapter.writers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
+                      @if (!last) {
+                        ,
+                      }
+                    </ng-template>
+                  </app-badge-expander>
                 </div>
               </div>
               <div class="col-6">
                 <span class="fw-bold">{{t('cover-artists-title')}}</span>
                 <div>
-                  @for(artist of chapter.coverArtists; track artist.id; let idx = $index; let last = $last;) {
-                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, artist.id)">{{artist.name}}</a>
-                    @if (!last) {
-                      ,
-                    }
-                  } @empty {
-                    {{null | defaultValue}}
-                  }
+                  <app-badge-expander [items]="chapter.coverArtists">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
+                      @if (!last) {
+                        ,
+                      }
+                    </ng-template>
+                  </app-badge-expander>
                 </div>
               </div>
             </div>

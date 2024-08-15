@@ -139,7 +139,7 @@
 
               <div class="col-auto ms-2 d-none d-md-block">
                 <div class="card-actions">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline"></app-card-actionables>
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn-sm"></app-card-actionables>
                 </div>
               </div>
 
@@ -155,31 +155,46 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('writers-title')}}</span>
                 <div>
-                  @for(writer of seriesMetadata.writers; track writer.id; let idx = $index; let last = $last;) {
-                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, writer.id)">{{writer.name}}</a>
-                    @if (!last) {
-                      ,
-                    }
-                  } @empty {
-                    {{null | defaultValue}}
-                  }
+                  <app-badge-expander [items]="seriesMetadata.writers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
+                      @if (!last) {
+                        ,
+                      }
+                    </ng-template>
+                  </app-badge-expander>
                 </div>
               </div>
               <div class="col-6">
                 <span class="fw-bold">{{t('cover-artists-title')}}</span>
                 <div>
-                  @for(artist of seriesMetadata.coverArtists; track artist.id; let idx = $index; let last = $last;) {
-                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, artist.id)">{{artist.name}}</a>
-                    @if (!last) {
-                      ,
-                    }
-                  } @empty {
-                    {{null | defaultValue}}
-                  }
+                  <app-badge-expander [items]="seriesMetadata.coverArtists">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
+                      @if (!last) {
+                        ,
+                      }
+                    </ng-template>
+                  </app-badge-expander>
                 </div>
               </div>
             </div>
           </div>
+
+          @if (WebLinks.length > 0) {
+            <div class="mt-3 mb-2">
+              <span class="fw-bold">{{t('weblinks-title')}}</span>
+              <div>
+                @for(link of WebLinks; track link) {
+                  <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">
+                    <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
+                               [errorImage]="imageService.errorWebLinkImage"></app-image>
+                  </a>
+                }
+              </div>
+            </div>
+          }
+
         </div>
       </div>
 
@@ -421,7 +436,10 @@
 
         @if (hasRecommendations) {
           <li [ngbNavItem]="TabID.Recommendations">
-            <a ngbNavLink>{{t('recommendations-tab')}}</a>
+            <a ngbNavLink>
+              {{t('recommendations-tab')}}
+              <span class="badge rounded-pill text-bg-secondary">{{combinedRecs.length}}</span>
+            </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Recommendations; prefetch on idle) {
                 <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
