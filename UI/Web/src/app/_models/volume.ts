@@ -11,6 +11,7 @@ export interface Volume extends IHasCover {
     lastModifiedUtc: string;
     pages: number;
     pagesRead: number;
+    wordCount: number;
     chapters: Array<Chapter>;
     /**
      * This is only available on the object when fetched for SeriesDetail

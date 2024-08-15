@@ -72,6 +72,7 @@ import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.co
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
+import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 
 enum TabID {
 
@@ -143,7 +144,8 @@ interface VolumeCast extends IHasCast {
     ChapterCardComponent,
     DefaultValuePipe,
     RelatedTabComponent,
-    AgeRatingImageComponent
+    AgeRatingImageComponent,
+    CompactNumberPipe
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -247,6 +249,10 @@ export class VolumeDetailComponent implements OnInit {
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
+  }
+
+  get UseBookLogic() {
+    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
   }
 
   ngOnInit() {

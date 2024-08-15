@@ -6798,7 +6798,7 @@
         "tags": [
           "ReadingList"
         ],
-        "summary": "Returns all Reading Lists the user has access to that have a series within it.",
+        "summary": "Returns all Reading Lists the user has access to that the given series within it.",
         "parameters": [
           {
             "name": "seriesId",
@@ -6848,10 +6848,12 @@
         "tags": [
           "ReadingList"
         ],
+        "summary": "Returns all Reading Lists the user has access to that has the given chapter within it.",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -23178,6 +23180,10 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int64"
           },
           "coverImage": {
             "type": "string",

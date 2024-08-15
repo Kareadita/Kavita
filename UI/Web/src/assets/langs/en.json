@@ -818,7 +818,9 @@
         "locations-title": "Locations",
 
         "volume-num": "{{common.volume-num}}",
-        "reading-lists-title": "{{side-nav.reading-lists}}"
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "pages-count": "{{num}} Pages",
+        "words-count": "{{num}} Words"
     },
 
     "series-metadata-detail": {

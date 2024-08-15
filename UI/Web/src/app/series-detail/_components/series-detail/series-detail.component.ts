@@ -237,7 +237,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   hasDownloadingRole = false;
   isLoading = true;
   isLoadingExtra = false;
-  showBook = true;
 
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = false;

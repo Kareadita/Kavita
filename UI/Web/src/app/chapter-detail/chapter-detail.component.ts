@@ -71,6 +71,7 @@ import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
 import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
+import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -121,7 +122,8 @@ enum TabID {
     DefaultValuePipe,
     CardItemComponent,
     RelatedTabComponent,
-    AgeRatingImageComponent
+    AgeRatingImageComponent,
+    CompactNumberPipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -190,6 +192,10 @@ export class ChapterDetailComponent implements OnInit {
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
+  }
+
+  get UseBookLogic() {
+    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
   }
 
   ngOnInit() {

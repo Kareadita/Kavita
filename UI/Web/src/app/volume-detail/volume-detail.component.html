@@ -26,7 +26,7 @@
 
           <div class="mt-2 mb-2">
             @if (volumeCast.publishers.length > 0) {
-              <span class="me-2">{{volumeCast.publishers[0]}}</span>
+              <span class="me-2">{{volumeCast.publishers[0].name}}</span>
             }
             <span class="me-2">
               <app-age-rating-image [rating]="maxAgeRating"></app-age-rating-image>
@@ -36,7 +36,11 @@
               {{volume | readTime }}
             </span>
             <span class="ms-2 me-2">•</span>
-            <span>{{volume.pages}} pages</span>
+            <span>{{t('pages-count', {num: volume.pages | compactNumber})}}</span>
+            @if (UseBookLogic) {
+              <span class="ms-2 me-2">•</span>
+              <span>{{t('words-count', {num: volume.wordCount | compactNumber})}}</span>
+            }
           </div>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->

@@ -49,7 +49,7 @@
 
           <div class="mt-2 mb-2">
             @if (seriesMetadata.publishers.length > 0) {
-              <span class="me-2">{{seriesMetadata.publishers[0]}}</span>
+              <span class="me-2">{{seriesMetadata.publishers[0].name}}</span>
             }
             <span class="me-2">
               <app-age-rating-image [rating]="seriesMetadata.ageRating"></app-age-rating-image>
@@ -59,7 +59,11 @@
                {{series | readTime }}
               </span>
             <span class="ms-2 me-2">•</span>
-            <span>{{series.pages}} pages</span>
+            <span>{{t('pages-count', {num: series.pages | compactNumber})}}</span>
+            @if (UseBookLogic) {
+              <span class="ms-2 me-2">•</span>
+              <span>{{t('words-count', {num: series.wordCount | compactNumber})}}</span>
+            }
           </div>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
@@ -114,13 +118,6 @@
                 </div>
               }
 
-              <div class="col-auto ms-2 d-none d-md-block">
-                <div class="card-actions">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline"></app-card-actionables>
-                </div>
-              </div>
-
-
               @if (canDownload$ | async) {
                 <div class="col-auto ms-2 d-none d-md-block">
                   @if (download$ | async; as download) {
@@ -139,6 +136,12 @@
                   }
                 </div>
               }
+
+              <div class="col-auto ms-2 d-none d-md-block">
+                <div class="card-actions">
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline"></app-card-actionables>
+                </div>
+              </div>
 
             </div>
           </div>

@@ -41,7 +41,7 @@
 
           <div class="mt-2 mb-2">
             @if (chapter.publishers.length > 0) {
-              <span class="me-2">{{chapter.publishers[0]}}</span>
+              <span class="me-2">{{chapter.publishers[0].name}}</span>
             }
             <span class="me-2">
               <app-age-rating-image [rating]="chapter.ageRating"></app-age-rating-image>
@@ -51,7 +51,11 @@
               {{chapter | readTime }}
             </span>
             <span class="ms-2 me-2">•</span>
-            <span>{{chapter.pages}} pages</span>
+            <span>{{t('pages-count', {num: chapter.pages | compactNumber})}}</span>
+            @if (UseBookLogic) {
+              <span class="ms-2 me-2">•</span>
+              <span>{{t('words-count', {num: chapter.wordCount | compactNumber})}}</span>
+            }
           </div>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
