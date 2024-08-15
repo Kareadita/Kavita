@@ -183,7 +183,7 @@
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
         <li [ngbNavItem]="TabID.Info">
-          <a ngbNavLink>{{t('Info-tab')}}</a>
+          <a ngbNavLink>{{t('info-tab')}}</a>
           <ng-template ngbNavContent>
               <div class="mb-3">
                 <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
