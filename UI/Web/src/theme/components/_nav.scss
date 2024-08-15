@@ -30,6 +30,7 @@
         border-width: var(--nav-tab-border-width);
         border-radius: 0;
         text-align: center;
+        padding: 8px 20px;
 
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);

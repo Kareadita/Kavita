@@ -87,9 +87,10 @@ $image-width: 160px;
 
     .card-title {
         width: 100%;
-        max-width: 145px;
+        max-width: 130px;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin: 0 auto;
     }
 
     .card-overlay {

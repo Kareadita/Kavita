@@ -69,7 +69,7 @@
     </div>
 
     <div class="card-title-container">
-        <span class="card-title" id="{{series.id}}" tabindex="0">
+        <span class="card-title" [ngbTooltip]="series.name" id="{{series.id}}" tabindex="0">
           <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
             {{series.name}}
           </a>
