@@ -141,7 +141,7 @@ enum TabID {
   Chapters = 4,
   Recommendations = 5,
   Reviews = 6,
-  Cast = 7
+  Details = 7
 }
 
 interface StoryLineItem {
