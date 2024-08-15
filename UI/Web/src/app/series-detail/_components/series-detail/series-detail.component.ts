@@ -117,7 +117,7 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
 import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
-import {CastTabComponent} from "../../../_single-module/cast-tab/cast-tab.component";
+import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {
   EditChapterModalCloseResult,
   EditChapterModalComponent
@@ -163,7 +163,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, CastTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 

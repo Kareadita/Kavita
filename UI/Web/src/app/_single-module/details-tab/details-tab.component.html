@@ -3,7 +3,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="genres" [title]="t('genres-title')">
       <ng-template #carouselItem let-item>
-        <app-tag-badge (click)="openGeneric(FilterField.Genres, item.id)">
+        <app-tag-badge (click)="openGeneric(FilterField.Genres, item.id)" [selectionMode]="TagBadgeCursor.Clickable">
           {{item.title}}
         </app-tag-badge>
       </ng-template>
@@ -13,7 +13,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="tags" [title]="t('tags-title')">
       <ng-template #carouselItem let-item>
-        <app-tag-badge (click)="openGeneric(FilterField.Tags, item.id)">
+        <app-tag-badge (click)="openGeneric(FilterField.Tags, item.id)" [selectionMode]="TagBadgeCursor.Clickable">
           {{item.title}}
         </app-tag-badge>
       </ng-template>

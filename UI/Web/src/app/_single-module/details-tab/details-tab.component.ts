@@ -10,10 +10,10 @@ import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {Genre} from "../../_models/metadata/genre";
 import {Tag} from "../../_models/tag";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
-  selector: 'app-cast-tab',
+  selector: 'app-details-tab',
   standalone: true,
   imports: [
     CarouselReelComponent,
@@ -21,11 +21,11 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
     TranslocoDirective,
     TagBadgeComponent
   ],
-  templateUrl: './cast-tab.component.html',
-  styleUrl: './cast-tab.component.scss',
+  templateUrl: './details-tab.component.html',
+  styleUrl: './details-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CastTabComponent {
+export class DetailsTabComponent {
 
   private readonly router = inject(Router);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -48,4 +48,5 @@ export class CastTabComponent {
   }
 
 
+  protected readonly TagBadgeCursor = TagBadgeCursor;
 }

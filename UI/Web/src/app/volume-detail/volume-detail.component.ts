@@ -48,7 +48,7 @@ import {AgeRating} from '../_models/metadata/age-rating';
 import {Volume} from "../_models/volume";
 import {VolumeService} from "../_services/volume.service";
 import {LoadingComponent} from "../shared/loading/loading.component";
-import {CastTabComponent} from "../_single-module/cast-tab/cast-tab.component";
+import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {Person} from "../_models/metadata/person";
 import {IHasCast} from "../_models/common/i-has-cast";
@@ -66,6 +66,8 @@ import {
   EditVolumeModalCloseResult,
   EditVolumeModalComponent
 } from "../_single-module/edit-volume-modal/edit-volume-modal.component";
+import {Genre} from "../_models/metadata/genre";
+import {Tag} from "../_models/tag";
 
 enum TabID {
 
@@ -111,7 +113,7 @@ interface VolumeCast extends IHasCast {
   imports: [
     LoadingComponent,
     NgbNavOutlet,
-    CastTabComponent,
+    DetailsTabComponent,
     NgbNavItem,
     NgbNavLink,
     NgbNavContent,
@@ -153,7 +155,6 @@ export class VolumeDetailComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly downloadService = inject(DownloadService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
-  private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
@@ -223,7 +224,9 @@ export class VolumeDetailComponent implements OnInit {
     translators: [],
     writerLocked: false,
     writers: []
-  }
+  };
+  tags: Array<Tag> = [];
+  genres: Array<Genre> = [];
 
 
 
@@ -341,6 +344,18 @@ export class VolumeDetailComponent implements OnInit {
         .flatMap(c => c.publishers)
         .filter((person, index, self) =>
           index === self.findIndex(w => w.name === person.name)
+        );
+
+      this.genres = this.volume.chapters
+        .flatMap(c => c.genres)
+        .filter((tag, index, self) =>
+          index === self.findIndex(w => w.title === tag.title)
+        );
+
+      this.tags = this.volume.chapters
+        .flatMap(c => c.tags)
+        .filter((tag, index, self) =>
+          index === self.findIndex(w => w.title === tag.title)
         );
 
       this.maxAgeRating = Math.max(

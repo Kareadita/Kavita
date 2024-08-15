@@ -172,7 +172,7 @@
           <a ngbNavLink>{{t('details-tab')}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Details; prefetch on idle) {
-              <app-cast-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-cast-tab>
+              <app-details-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-details-tab>
             }
           </ng-template>
         </li>

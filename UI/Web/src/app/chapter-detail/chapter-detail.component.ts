@@ -56,7 +56,7 @@ import {ToastrService} from "ngx-toastr";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
-import {CastTabComponent} from "../_single-module/cast-tab/cast-tab.component";
+import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {ReadTimePipe} from "../_pipes/read-time.pipe";
@@ -112,7 +112,7 @@ enum TabID {
     ReadMoreComponent,
     NgbNavItem,
     NgbNavOutlet,
-    CastTabComponent,
+    DetailsTabComponent,
     RouterLink,
     EntityTitleComponent,
     ReadTimePipe,
