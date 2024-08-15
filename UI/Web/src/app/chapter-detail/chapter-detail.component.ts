@@ -70,6 +70,7 @@ import {ReadingListService} from "../_services/reading-list.service";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
+import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -119,7 +120,8 @@ enum TabID {
     ReadTimePipe,
     DefaultValuePipe,
     CardItemComponent,
-    RelatedTabComponent
+    RelatedTabComponent,
+    AgeRatingImageComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',

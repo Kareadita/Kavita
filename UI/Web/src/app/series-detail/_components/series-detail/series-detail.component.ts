@@ -138,6 +138,7 @@ import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
+import {AgeRatingImageComponent} from "../../../_single-modules/age-rating-image/age-rating-image.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -174,7 +175,7 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe, RouterLink, TimeAgoPipe]
+    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent, VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe, RouterLink, TimeAgoPipe, AgeRatingImageComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 

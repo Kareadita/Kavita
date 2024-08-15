@@ -71,6 +71,7 @@ import {Tag} from "../_models/tag";
 import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
+import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
 
 enum TabID {
 
@@ -141,7 +142,8 @@ interface VolumeCast extends IHasCast {
     VirtualScrollerModule,
     ChapterCardComponent,
     DefaultValuePipe,
-    RelatedTabComponent
+    RelatedTabComponent,
+    AgeRatingImageComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',

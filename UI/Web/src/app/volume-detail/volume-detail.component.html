@@ -28,15 +28,9 @@
             @if (volumeCast.publishers.length > 0) {
               <span class="me-2">{{volumeCast.publishers[0]}}</span>
             }
-            @if (maxAgeRating !== AgeRating.Unknown) {
-              <span class="me-2">
-              {{maxAgeRating | ageRating}}
+            <span class="me-2">
+              <app-age-rating-image [rating]="maxAgeRating"></app-age-rating-image>
             </span>
-            } @else {
-              <span class="me-2">
-              <app-image imageUrl="./assets/images/ratings/unknown-rating.png" height="32px" width="32px"></app-image>
-            </span>
-            }
 
             <span class=""><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
               {{volume | readTime }}

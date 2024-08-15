@@ -51,15 +51,9 @@
             @if (seriesMetadata.publishers.length > 0) {
               <span class="me-2">{{seriesMetadata.publishers[0]}}</span>
             }
-            @if (seriesMetadata.ageRating !== AgeRating.Unknown) {
-              <span class="me-2">
-                {{seriesMetadata.ageRating | ageRating}}
-              </span>
-            } @else {
-              <span class="me-2">
-                <app-image imageUrl="./assets/images/ratings/unknown-rating.png" height="32px" width="32px"></app-image>
-              </span>
-            }
+            <span class="me-2">
+              <app-age-rating-image [rating]="seriesMetadata.ageRating"></app-age-rating-image>
+            </span>
 
             <span class=""><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
                {{series | readTime }}
@@ -158,7 +152,7 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('writers-title')}}</span>
                 <div>
-                  @for(writer of seriesMetadata?.writers; track writer.id; let idx = $index; let last = $last;) {
+                  @for(writer of seriesMetadata.writers; track writer.id; let idx = $index; let last = $last;) {
                     <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, writer.id)">{{writer.name}}</a>
                     @if (!last) {
                       ,
@@ -171,7 +165,7 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('cover-artists-title')}}</span>
                 <div>
-                  @for(artist of seriesMetadata?.coverArtists; track artist.id; let idx = $index; let last = $last;) {
+                  @for(artist of seriesMetadata.coverArtists; track artist.id; let idx = $index; let last = $last;) {
                     <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, artist.id)">{{artist.name}}</a>
                     @if (!last) {
                       ,

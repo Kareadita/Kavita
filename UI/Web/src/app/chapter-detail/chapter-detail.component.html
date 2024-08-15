@@ -43,15 +43,9 @@
             @if (chapter.publishers.length > 0) {
               <span class="me-2">{{chapter.publishers[0]}}</span>
             }
-            @if (chapter.ageRating !== AgeRating.Unknown) {
-              <span class="me-2">
-              {{chapter.ageRating | ageRating}}
+            <span class="me-2">
+              <app-age-rating-image [rating]="chapter.ageRating"></app-age-rating-image>
             </span>
-            } @else {
-              <span class="me-2">
-              <app-image imageUrl="./assets/images/ratings/unknown-rating.webp" height="32px" width="32px"></app-image>
-            </span>
-            }
 
             <span class=""><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
               {{chapter | readTime }}
