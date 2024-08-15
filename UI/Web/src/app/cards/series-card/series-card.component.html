@@ -6,7 +6,7 @@
 
 
 <ng-container *transloco="let t; read: 'card-item'">
-  <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}" >
+  <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}" [ngClass]="{'active-selections' : bulkSelectionService.hasSelections()}">
     <div class="overlay" (click)="handleClick()">
       @if (series.pages > 0) {
         <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-image>

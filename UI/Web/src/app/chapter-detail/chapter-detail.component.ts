@@ -65,6 +65,9 @@ import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../_pipes/default-value.pipe";
+import {ReadingList} from "../_models/reading-list";
+import {ReadingListService} from "../_services/reading-list.service";
+import {CardItemComponent} from "../cards/card-item/card-item.component";
 
 enum TabID {
   Chapters = 'chapter-tab',
@@ -76,45 +79,46 @@ enum TabID {
 @Component({
   selector: 'app-chapter-detail',
   standalone: true,
-    imports: [
-        BulkOperationsComponent,
-        AsyncPipe,
-        CardActionablesComponent,
-        CarouselReelComponent,
-        DecimalPipe,
-        ExternalListItemComponent,
-        ExternalSeriesCardComponent,
-        ImageComponent,
-        LoadingComponent,
-        NgbDropdown,
-        NgbDropdownItem,
-        NgbDropdownMenu,
-        NgbDropdownToggle,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLink,
-        NgbProgressbar,
-        NgbTooltip,
-        PersonBadgeComponent,
-        ReviewCardComponent,
-        SeriesCardComponent,
-        SeriesMetadataDetailComponent,
-        TagBadgeComponent,
-        VirtualScrollerModule,
-        NgStyle,
-        AgeRatingPipe,
-        TimeDurationPipe,
-        ExternalRatingComponent,
-        TranslocoDirective,
-        ReadMoreComponent,
-        NgbNavItem,
-        NgbNavOutlet,
-        CastTabComponent,
-        RouterLink,
-        EntityTitleComponent,
-        ReadTimePipe,
-        DefaultValuePipe
-    ],
+  imports: [
+    BulkOperationsComponent,
+    AsyncPipe,
+    CardActionablesComponent,
+    CarouselReelComponent,
+    DecimalPipe,
+    ExternalListItemComponent,
+    ExternalSeriesCardComponent,
+    ImageComponent,
+    LoadingComponent,
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLink,
+    NgbProgressbar,
+    NgbTooltip,
+    PersonBadgeComponent,
+    ReviewCardComponent,
+    SeriesCardComponent,
+    SeriesMetadataDetailComponent,
+    TagBadgeComponent,
+    VirtualScrollerModule,
+    NgStyle,
+    AgeRatingPipe,
+    TimeDurationPipe,
+    ExternalRatingComponent,
+    TranslocoDirective,
+    ReadMoreComponent,
+    NgbNavItem,
+    NgbNavOutlet,
+    CastTabComponent,
+    RouterLink,
+    EntityTitleComponent,
+    ReadTimePipe,
+    DefaultValuePipe,
+    CardItemComponent
+  ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -125,7 +129,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
   private readonly chapterService = inject(ChapterService);
   private readonly seriesService = inject(SeriesService);
   private readonly libraryService = inject(LibraryService);
@@ -138,6 +142,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly modalService = inject(NgbModal);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly readingListService = inject(ReadingListService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -167,6 +172,7 @@ export class ChapterDetailComponent implements OnInit {
    */
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
+  readingLists: ReadingList[] = [];
 
 
 
@@ -218,6 +224,11 @@ export class ChapterDetailComponent implements OnInit {
       this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
         return this.downloadService.mapToEntityType(events, this.chapter!);
       }));
+
+      this.readingListService.getReadingListsForChapter(this.chapterId).subscribe(lists => {
+        this.readingLists = lists;
+        this.cdRef.markForCheck();
+      });
 
       this.isLoading = false;
       this.cdRef.markForCheck();
@@ -278,5 +289,8 @@ export class ChapterDetailComponent implements OnInit {
     });
   }
 
+  openReadingList(readingList: ReadingList) {
+
+  }
 
 }

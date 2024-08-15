@@ -816,7 +816,8 @@
         "teams-title": "Teams",
         "locations-title": "Locations",
 
-        "volume-num": "{{common.volume-num}}"
+        "volume-num": "{{common.volume-num}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}"
     },
 
     "series-metadata-detail": {
@@ -1050,7 +1051,8 @@
         "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
         "editors-title": "{{series-metadata-detail.editors-title}}",
         "teams-title": "{{series-metadata-detail.teams-title}}",
-        "locations-title": "{{series-metadata-detail.locations-title}}"
+        "locations-title": "{{series-metadata-detail.locations-title}}",
+        "imprints-title": "{{series-metadata-detail.imprints-title}}"
     },
 
     "chapter-metadata-detail": {

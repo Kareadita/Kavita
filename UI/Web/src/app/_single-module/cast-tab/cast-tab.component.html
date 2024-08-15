@@ -70,4 +70,28 @@
       </ng-template>
     </app-carousel-reel>
   </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.locations" [title]="t('locations-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Location, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.teams" [title]="t('teams-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Team, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.imprints" [title]="t('imprints-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Imprint, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
 </ng-container>

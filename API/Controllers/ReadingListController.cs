@@ -63,7 +63,7 @@ public class ReadingListController : BaseApiController
     }
 
     /// <summary>
-    /// Returns all Reading Lists the user has access to that have a series within it.
+    /// Returns all Reading Lists the user has access to that the given series within it.
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
@@ -72,6 +72,18 @@ public class ReadingListController : BaseApiController
     {
         return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtosForSeriesAndUserAsync(User.GetUserId(),
             seriesId, true));
+    }
+
+    /// <summary>
+    /// Returns all Reading Lists the user has access to that has the given chapter within it.
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("lists-for-chapter")]
+    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForChapter(int chapterId)
+    {
+        return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtosForChapterAndUserAsync(User.GetUserId(),
+            chapterId, true));
     }
 
     /// <summary>

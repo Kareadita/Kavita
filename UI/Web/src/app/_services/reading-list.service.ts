@@ -39,6 +39,10 @@ export class ReadingListService {
     return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-series?seriesId=' + seriesId);
   }
 
+  getReadingListsForChapter(chapterId: number) {
+    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-chapter?chapterId=' + chapterId);
+  }
+
   getListItems(readingListId: number) {
     return this.httpClient.get<ReadingListItem[]>(this.baseUrl + 'readinglist/items?readingListId=' + readingListId);
   }

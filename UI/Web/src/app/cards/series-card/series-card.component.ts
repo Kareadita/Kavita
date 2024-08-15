@@ -85,7 +85,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   private readonly actionService = inject(ActionService);
   private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly downloadService = inject(DownloadService);
   private readonly scrollService = inject(ScrollService);
   private readonly readerService = inject(ReaderService);
