@@ -113,14 +113,11 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 })
 export class EditVolumeModalComponent implements OnInit {
   public readonly modal = inject(NgbActiveModal);
-  private readonly seriesService = inject(SeriesService);
   public readonly utilityService = inject(UtilityService);
   public readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
-  private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
@@ -137,7 +134,7 @@ export class EditVolumeModalComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.General;
+  activeId = TabID.CoverImage;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
@@ -156,7 +153,7 @@ export class EditVolumeModalComponent implements OnInit {
 
   ngOnInit() {
     this.initVolume = Object.assign({}, this.volume);
-    this.imageUrls.push(this.imageService.getChapterCoverImage(this.volume.id));
+    this.imageUrls.push(this.imageService.getVolumeCoverImage(this.volume.id));
 
     this.files = this.volume.chapters.flatMap(c => c.files);
     this.size = this.files.reduce((sum, v) => sum + v.bytes, 0);

@@ -2011,7 +2011,8 @@
         "last-read-label": "{{entity-info-cards.last-read-title}}",
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "{{series-info-cards.read-time-title}}",
-        "files-label": "{{edit-chapter-modal.files-label}}"
+        "files-label": "{{edit-chapter-modal.files-label}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
     "day-breakdown": {
