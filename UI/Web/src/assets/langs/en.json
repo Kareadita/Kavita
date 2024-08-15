@@ -1057,6 +1057,10 @@
         "tags-title": "{{series-metadata-detail.tags-title}}"
     },
 
+    "related-tab": {
+        "reading-lists-title": "{{reading-lists.title}}"
+    },
+
     "chapter-metadata-detail": {
         "no-data": "No metadata available",
         "writers-title": "{{series-metadata-detail.writers-title}}",

@@ -20,7 +20,9 @@
     </app-carousel-reel>
   </div>
 
-  <div class="setting-section-break" aria-hidden="true"></div>
+  @if (genres.length > 0 || tags.length > 0) {
+    <div class="setting-section-break" aria-hidden="true"></div>
+  }
 
 
   <div class="mb-3">
@@ -47,13 +49,6 @@
     </app-carousel-reel>
   </div>
 
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" (click)="openPerson(FilterField.Characters, item)"></app-person-badge>
-      </ng-template>
-    </app-carousel-reel>
-  </div>
 
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.coverArtists" [title]="t('cover-artists-title')">
@@ -91,6 +86,14 @@
     <app-carousel-reel [items]="metadata.translators" [title]="t('translators-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" (click)="openPerson(FilterField.Translators, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Characters, item)"></app-person-badge>
       </ng-template>
     </app-carousel-reel>
   </div>

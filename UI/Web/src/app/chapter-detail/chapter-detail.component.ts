@@ -69,6 +69,7 @@ import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {PageBookmark} from "../_models/readers/page-bookmark";
+import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -117,7 +118,8 @@ enum TabID {
     EntityTitleComponent,
     ReadTimePipe,
     DefaultValuePipe,
-    CardItemComponent
+    CardItemComponent,
+    RelatedTabComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -294,9 +296,4 @@ export class ChapterDetailComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
-  openReadingList(readingList: ReadingList) {
-
-  }
-
 }

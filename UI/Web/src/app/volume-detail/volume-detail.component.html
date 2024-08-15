@@ -170,14 +170,16 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Related">
-          <a ngbNavLink>{{t('related-tab')}}</a>
-          <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Related; prefetch on idle) {
-              If a part of any reading lists and any web links
-            }
-          </ng-template>
-        </li>
+        @if (volume.chapters.length === 1) {
+          <li [ngbNavItem]="TabID.Related">
+            <a ngbNavLink>{{t('related-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                <app-related-tab [readingLists]="readingLists"></app-related-tab>
+              }
+            </ng-template>
+          </li>
+        }
 
         <li [ngbNavItem]="TabID.Details">
           <a ngbNavLink>{{t('details-tab')}}</a>

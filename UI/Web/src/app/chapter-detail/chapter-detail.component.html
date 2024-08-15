@@ -182,15 +182,7 @@
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Related; prefetch on idle) {
-              @if (readingLists.length > 0) {
-                <app-carousel-reel [items]="readingLists" [title]="t('reading-lists-title')">
-                  <ng-template #carouselItem let-item>
-                    <app-card-item [title]="item.title" [entity]="item"
-                                   [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                                   (clicked)="openReadingList(item)"></app-card-item>
-                  </ng-template>
-                </app-carousel-reel>
-              }
+              <app-related-tab [readingLists]="readingLists"></app-related-tab>
 
               @if (bookmarks.length > 0) {
                 Has Bookmarks

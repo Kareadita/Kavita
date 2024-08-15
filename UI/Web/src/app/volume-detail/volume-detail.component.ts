@@ -68,6 +68,9 @@ import {
 } from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
 import {Tag} from "../_models/tag";
+import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
+import {ReadingList} from "../_models/reading-list";
+import {ReadingListService} from "../_services/reading-list.service";
 
 enum TabID {
 
@@ -137,7 +140,8 @@ interface VolumeCast extends IHasCast {
     CardItemComponent,
     VirtualScrollerModule,
     ChapterCardComponent,
-    DefaultValuePipe
+    DefaultValuePipe,
+    RelatedTabComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -162,6 +166,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly utilityService = inject(UtilityService);
+  private readonly readingListService = inject(ReadingListService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -181,8 +186,9 @@ export class VolumeDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
   activeTabId = TabID.Chapters;
+  readingLists: ReadingList[] = [];
 
-  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterAction.bind(this));
+  volumeActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
 
   canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
@@ -278,6 +284,13 @@ export class VolumeDetailComponent implements OnInit {
       this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
         return this.downloadService.mapToEntityType(events, this.volume!);
       }));
+
+      if (this.volume.chapters.length === 1) {
+        this.readingListService.getReadingListsForChapter(this.volume.chapters[0].id).subscribe(lists => {
+          this.readingLists = lists;
+          this.cdRef.markForCheck();
+        });
+      }
 
       // Calculate all the writes/artists for all chapters
       this.volumeCast.writers = this.volume.chapters
@@ -411,7 +424,7 @@ export class VolumeDetailComponent implements OnInit {
     });
   }
 
-  handleChapterAction(action: ActionItem<Chapter>) {
+  handleVolumeAction(action: ActionItem<Volume>) {
     switch (action.action) {
       case Action.Delete:
         break;
