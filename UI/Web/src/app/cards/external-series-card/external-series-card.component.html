@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'external-series-card'">
-  <ng-container *ngIf="data !== undefined">
+  @if (data !== undefined) {
     <div class="card-item-container card clickable position-relative">
       <div class="overlay" (click)="handleClick()">
         <ng-container>
@@ -19,7 +19,7 @@
 
       <div class="card-title-container">
         @if (data.name.length > 0) {
-        <a #link class="card-title" [href]="data.url" target="_blank" rel="noreferrer nofollow">
+          <a #link class="card-title" [href]="data.url" target="_blank" rel="noreferrer nofollow">
             <span class="card-title" placement="top" id="{{data.name}}" [ngbTooltip]="data.name" (click)="handleClick()" tabindex="0">
               <img class="me-1" [ngSrc]="data.provider | providerImage" width="20" height="20" alt="">
               {{data.name}}
@@ -27,10 +27,8 @@
           </a>
         }
 
-    </div>
+      </div>
 
     </div>
-
-  </ng-container>
-
+  }
 </ng-container>

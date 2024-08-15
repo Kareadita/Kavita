@@ -67,9 +67,10 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../_pipes/default-value.pipe";
 
 enum TabID {
-  Related = 0,
-  Reviews = 6, // Only applicable for books
-  Cast = 7
+  Chapters = 'chapter-tab',
+  Related = 'related-tab',
+  Reviews = 'review-tab', // Only applicable for books
+  Details = 'details-tab'
 }
 
 @Component({
@@ -155,7 +156,7 @@ export class ChapterDetailComponent implements OnInit {
   series: Series | null = null;
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
-  activeTabId = TabID.Related;
+  activeTabId = TabID.Chapters;
   canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
     map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),

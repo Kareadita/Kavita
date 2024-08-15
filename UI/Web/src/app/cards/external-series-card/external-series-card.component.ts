@@ -5,7 +5,7 @@ import {
   Input,
   ViewChild
 } from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {RouterLinkActive} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -19,7 +19,7 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 @Component({
   selector: 'app-external-series-card',
   standalone: true,
-  imports: [CommonModule, ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, SafeHtmlPipe],
+  imports: [ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, SafeHtmlPipe],
   templateUrl: './external-series-card.component.html',
   styleUrls: ['./external-series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
