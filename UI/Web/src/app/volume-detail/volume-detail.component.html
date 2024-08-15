@@ -155,27 +155,33 @@
         <li [ngbNavItem]="TabID.Chapters">
           <a ngbNavLink>{{utilityService.formatChapterName(libraryType!)}}</a>
           <ng-template ngbNavContent>
-            <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
-              <div class="card-container row g-0" #container>
-                @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                  <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId"></app-chapter-card>
-                }
-              </div>
-            </virtual-scroller>
+            @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
+              <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+                <div class="card-container row g-0" #container>
+                  @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId"></app-chapter-card>
+                  }
+                </div>
+              </virtual-scroller>
+            }
           </ng-template>
         </li>
 
         <li [ngbNavItem]="TabID.Related">
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
-            If a part of any reading lists and any web links
+            @defer (when activeTabId === TabID.Related; prefetch on idle) {
+              If a part of any reading lists and any web links
+            }
           </ng-template>
         </li>
 
         <li [ngbNavItem]="TabID.Details">
           <a ngbNavLink>{{t('details-tab')}}</a>
           <ng-template ngbNavContent>
-            <app-cast-tab [metadata]="volumeCast"></app-cast-tab>
+            @defer (when activeTabId === TabID.Details; prefetch on idle) {
+              <app-cast-tab [metadata]="volumeCast"></app-cast-tab>
+            }
           </ng-template>
         </li>
       </ul>

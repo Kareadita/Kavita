@@ -171,7 +171,9 @@
         <li [ngbNavItem]="TabID.Details">
           <a ngbNavLink>{{t('details-tab')}}</a>
           <ng-template ngbNavContent>
-            <app-cast-tab [metadata]="chapter"></app-cast-tab>
+            @defer (when activeTabId === TabID.Details; prefetch on idle) {
+              <app-cast-tab [metadata]="chapter"></app-cast-tab>
+            }
           </ng-template>
         </li>
 
@@ -179,6 +181,7 @@
         <li [ngbNavItem]="TabID.Related">
           <a ngbNavLink>{{t('related-tab')}}</a>
           <ng-template ngbNavContent>
+            @defer (when activeTabId === TabID.Related; prefetch on idle) {
               @if (readingLists.length > 0) {
                 <app-carousel-reel [items]="readingLists" [title]="t('reading-lists-title')">
                   <ng-template #carouselItem let-item>
@@ -188,6 +191,7 @@
                   </ng-template>
                 </app-carousel-reel>
               }
+            }
           </ng-template>
         </li>
       </ul>
@@ -198,7 +202,7 @@
 
 
 
-    <app-loading [loading]="isLoading"></app-loading>
+    <app-loading [loading]="isLoading" style="min-height: 300px"></app-loading>
   </div>
 
 </ng-container>
