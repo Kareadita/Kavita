@@ -70,7 +70,7 @@
           @if (libraryType !== null && series) {
             <div class="mt-2 mb-2">
               <app-external-rating [seriesId]="series.id"
-                                   [ratings]="[]"
+                                   [ratings]="ratings"
                                    [userRating]="series.userRating"
                                    [hasUserRated]="series.hasUserRated"
                                    [libraryType]="libraryType">

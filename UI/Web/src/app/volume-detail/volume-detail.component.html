@@ -149,7 +149,7 @@
         </div>
       </div>
 
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Chapters">
           <a ngbNavLink>
             {{utilityService.formatChapterName(libraryType!, false, false, true)}}
