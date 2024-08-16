@@ -38,7 +38,7 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
 import {Chapter} from "../_models/chapter";
 import {Series} from "../_models/series";
 import {LibraryType} from "../_models/library/library";
-import {forkJoin, map, Observable, shareReplay} from "rxjs";
+import {forkJoin, map, Observable, shareReplay, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
@@ -298,6 +298,14 @@ export class VolumeDetailComponent implements OnInit {
         return this.downloadService.mapToEntityType(events, this.volume!);
       }));
 
+      this.route.fragment.pipe(tap(frag => {
+        if (frag !== null && this.activeTabId !== (frag as TabID)) {
+          this.activeTabId = frag as TabID;
+          this.updateUrl(this.activeTabId);
+          this.cdRef.markForCheck();
+        }
+      }), takeUntilDestroyed(this.destroyRef)).subscribe();
+
       if (this.volume.chapters.length === 1) {
         this.readingListService.getReadingListsForChapter(this.volume.chapters[0].id).subscribe(lists => {
           this.readingLists = lists;
@@ -423,7 +431,13 @@ export class VolumeDetailComponent implements OnInit {
 
   onNavChange(event: NgbNavChangeEvent) {
     this.bulkSelectionService.deselectAll();
+    this.updateUrl(event.nextId);
     this.cdRef.markForCheck();
+  }
+
+  updateUrl(activeTab: TabID) {
+    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
+    this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
   }
 
   openPerson(field: FilterField, value: number) {

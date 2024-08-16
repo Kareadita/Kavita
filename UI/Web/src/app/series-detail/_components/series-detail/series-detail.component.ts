@@ -549,7 +549,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   onNavChange(event: NgbNavChangeEvent) {
     this.bulkSelectionService.deselectAll();
     this.updateUrl(event.nextId);
-
     this.cdRef.markForCheck();
   }
 

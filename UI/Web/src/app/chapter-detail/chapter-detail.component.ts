@@ -39,7 +39,7 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
 import {Chapter} from "../_models/chapter";
-import {forkJoin, map, Observable, shareReplay} from "rxjs";
+import {forkJoin, map, Observable, shareReplay, tap} from "rxjs";
 import {SeriesService} from "../_services/series.service";
 import {Series} from "../_models/series";
 import {AgeRating} from "../_models/metadata/age-rating";
@@ -248,6 +248,14 @@ export class ChapterDetailComponent implements OnInit {
         this.cdRef.markForCheck();
       });
 
+      this.route.fragment.pipe(tap(frag => {
+        if (frag !== null && this.activeTabId !== (frag as TabID)) {
+          this.activeTabId = frag as TabID;
+          this.updateUrl(this.activeTabId);
+          this.cdRef.markForCheck();
+        }
+      }), takeUntilDestroyed(this.destroyRef)).subscribe();
+
       this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 || (this.chapter.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
@@ -294,7 +302,13 @@ export class ChapterDetailComponent implements OnInit {
 
   onNavChange(event: NgbNavChangeEvent) {
     this.bulkSelectionService.deselectAll();
+    this.updateUrl(event.nextId);
     this.cdRef.markForCheck();
+  }
+
+  updateUrl(activeTab: TabID) {
+    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
+    this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
   }
 
   openPerson(field: FilterField, value: number) {
