@@ -143,6 +143,7 @@ import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../download-button/download-button.component";
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
+import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -1017,7 +1018,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditVolume(volume: Volume) {
-    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditVolumeModalComponent, { size: 'xl' });
     ref.componentInstance.volume = volume;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.seriesId = this.series?.id;
