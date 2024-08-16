@@ -88,3 +88,15 @@
 .progress {
   border-radius: 0;
 }
+
+.progress-banner.series {
+  position: relative;
+}
+
+::ng-deep .progress-banner.series span {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  top: 50%;
+}
