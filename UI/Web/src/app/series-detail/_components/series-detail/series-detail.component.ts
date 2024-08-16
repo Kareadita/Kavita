@@ -125,8 +125,6 @@ import {
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.component";
 import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.component";
-import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
-import {RelationshipPipe} from "../../../_pipes/relationship.pipe";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {AgeRating} from "../../../_models/metadata/age-rating";
@@ -144,6 +142,10 @@ import {IconAndTitleComponent} from "../../../shared/icon-and-title/icon-and-tit
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
+import {ScrobblingService} from "../../../_services/scrobbling.service";
+import {HourEstimateRange} from "../../../_models/series-detail/hour-estimate-range";
+import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
+import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -181,7 +183,9 @@ interface StoryLineItem {
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
-    VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe, RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent, A11yClickDirective]
+    VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
+    RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
+    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -212,18 +216,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly readerService = inject(ReaderService);
   protected readonly themeService = inject(ThemeService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly scrobbleService = inject(ScrobblingService);
 
   protected readonly LibraryType = LibraryType;
-  protected readonly PageLayoutMode = PageLayoutMode;
   protected readonly TabID = TabID;
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-  protected readonly RelationshipPipe = RelationshipPipe;
-  protected readonly RelationKind = RelationKind;
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly FilterField = FilterField;
   protected readonly AgeRating = AgeRating;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -243,6 +246,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   hasDownloadingRole = false;
   isLoading = true;
   isLoadingExtra = false;
+  libraryAllowsScrobbling = false;
+  isScrobbling: boolean = true;
 
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = false;
@@ -265,6 +270,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isWantToRead: boolean = false;
   unreadCount: number = 0;
   totalCount: number = 0;
+  readingTimeLeft: HourEstimateRange | null = null;
   /**
    * Poster image for the Series
    */
@@ -471,6 +477,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
+
     // Set up the download in progress
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
       return this.downloadService.mapToEntityType(events, this.series);
@@ -501,6 +508,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
+
+    this.scrobbleService.hasHold(this.seriesId).subscribe(res => {
+      this.isScrobbling = !res;
+      this.cdRef.markForCheck();
+    });
+
+    this.scrobbleService.libraryAllowsScrobbling(this.seriesId).subscribe(res => {
+      this.libraryAllowsScrobbling = res;
+      this.cdRef.markForCheck();
+    });
+
     this.loadSeries(this.seriesId, true);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
@@ -691,6 +709,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.readingLists = lists;
       this.cdRef.markForCheck();
     });
+
+    this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
+      this.readingTimeLeft = timeLeft;
+      this.cdRef.markForCheck();
+    });
+
     this.setContinuePoint();
 
 
@@ -1117,9 +1141,23 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   }
 
-  openPerson(field: FilterField, value: number) {
+  openFilter(field: FilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
-  protected readonly Breakpoint = Breakpoint;
+
+  toggleScrobbling(evt: any) {
+    evt.stopPropagation();
+    if (this.isScrobbling) {
+      this.scrobbleService.addHold(this.series.id).subscribe(() => {
+        this.isScrobbling = !this.isScrobbling;
+        this.cdRef.markForCheck();
+      });
+    } else {
+      this.scrobbleService.removeHold(this.series.id).subscribe(() => {
+        this.isScrobbling = !this.isScrobbling;
+        this.cdRef.markForCheck();
+      });
+    }
+  }
 }
