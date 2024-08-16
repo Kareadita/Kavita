@@ -55,14 +55,25 @@
         </div>
       </div>
     </div>
-    <div class="card-body meta-title" [ngbTooltip]="chapter.titleName.length > 34 ? chapter.titleName : null">
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;" [ngbTooltip]="chapter.titleName">
-          {{chapter.titleName | defaultValue}}
+
+    @if (chapter.isSpecial) {
+      <div class="card-body meta-title" [ngbTooltip]="chapter.title.length > 34 ? chapter.title : null">
+        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+          {{chapter.title || chapter.range}}
         </div>
-    </div>
+      </div>
+
+    } @else if (chapter.titleName) {
+      <div class="card-body meta-title" [ngbTooltip]="chapter.titleName.length > 34 ? chapter.titleName : null">
+        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+          {{chapter.titleName}}
+        </div>
+      </div>
+    }
+
 
     <div class="card-title-container">
-        <span class="card-title" id="{{chapter.id}}" tabindex="0">
+        <span class="card-title" id="{{chapter.id}}" tabindex="0" [ngbTooltip]="chapter.isSpecial ? (chapter.title || chapter.range) : null">
           <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{chapter.id}}">
             @if (chapter.isSpecial) {
              {{chapter.title || chapter.range}}
