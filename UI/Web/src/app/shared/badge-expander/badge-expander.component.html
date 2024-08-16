@@ -3,6 +3,8 @@
     <div class="content">
       @for(item of visibleItems; track item; let i = $index; let last = $last) {
         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i, last: last }"></ng-container>
+      } @empty {
+        {{null | defaultValue}}
       }
       @if (!isCollapsed && itemsLeft !== 0) {
         <button type="button" class="btn btn-sm btn-outline-primary" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">

@@ -1,8 +1,9 @@
 import { Chapter } from './chapter';
 import { HourEstimateRange } from './series-detail/hour-estimate-range';
 import {IHasCover} from "./common/i-has-cover";
+import {IHasReadingTime} from "./common/i-has-reading-time";
 
-export interface Volume extends IHasCover {
+export interface Volume extends IHasCover, IHasReadingTime {
     id: number;
     minNumber: number;
     maxNumber: number;
