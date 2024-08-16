@@ -147,6 +147,7 @@ import {HourEstimateRange} from "../../../_models/series-detail/hour-estimate-ra
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail-row.component";
+import {DownloadButtonComponent} from "../download-button/download-button.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -186,7 +187,7 @@ interface StoryLineItem {
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
     RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
-    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent]
+    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -905,8 +906,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
 
       // Reviews
-      //this.reviews = [...data.reviews];
-      this.plusReviews = data.reviews;
+      this.reviews = data.reviews.filter(r => !r.isExternal);
+      this.plusReviews = data.reviews.filter(r => r.isExternal);
 
       if (data.ratings) {
         this.ratings = [...data.ratings];
