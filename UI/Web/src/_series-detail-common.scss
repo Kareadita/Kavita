@@ -8,10 +8,6 @@
   align-self: flex-start;
 }
 
-::ng-deep .image-container img {
-  vertical-align: unset !important;
-}
-
 .subtitle {
   color: lightgrey;
   font-weight: bold;
@@ -73,8 +69,24 @@
     visibility: hidden;
 
     &:hover {
-      background-color: var(--primary-color-scrollbar) !important;
+      background-color: var(--primary-color) !important;
       cursor: pointer;
     }
+
+    div {
+      width: 60px;
+      height: 60px;
+      i {
+        font-size: 1.6rem;
+        line-height: 60px;
+        width: 100%;
+      }
+    }
   }
+}
+
+.progress {
+  position: absolute;
+  bottom: 24px;
+  border-radius: 0;
 }

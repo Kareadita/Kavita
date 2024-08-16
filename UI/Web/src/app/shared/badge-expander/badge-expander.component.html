@@ -5,7 +5,7 @@
         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i, last: last }"></ng-container>
       }
       @if (!isCollapsed && itemsLeft !== 0) {
-        <button type="button" class="btn btn-sm btn-outline-primary" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
+        <button type="button" class="btn btn-sm btn-outline-primary ms-2" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
           {{t('more-items', {count: itemsLeft})}}
         </button>
       }

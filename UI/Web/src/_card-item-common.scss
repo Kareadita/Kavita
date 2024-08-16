@@ -139,7 +139,7 @@ $image-width: 160px;
           z-index: 115;
 
           &:hover {
-              background-color: var(--primary-color-scrollbar) !important;
+              background-color: var(--primary-color) !important;
               cursor: pointer;
           }
       }
@@ -184,4 +184,19 @@ $image-width: 160px;
 .overlay-information {
   visibility: hidden;
   display: none;
+}
+
+.chapter, 
+.volume,
+.series {
+  .overlay-information--centered {
+    div {
+      height: 32px;
+      width: 32px;
+      i {
+        font-size: 1.4rem;
+        line-height: 32px;
+      }
+    }
+  }
 }
