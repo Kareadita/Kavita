@@ -1120,7 +1120,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   previewSeries(item: Series | ExternalSeries, isExternal: boolean) {
-    const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: 'navbar-offset'});
+    const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
     ref.componentInstance.isExternalSeries = isExternal;
     ref.componentInstance.name = item.name;
 

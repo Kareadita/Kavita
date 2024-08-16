@@ -324,7 +324,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   handleClick() {
     if (this.previewOnClick) {
-      const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: 'navbar-offset'});
+      const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
       ref.componentInstance.isExternalSeries = false;
       ref.componentInstance.seriesId = this.series.id;
       ref.componentInstance.libraryId = this.series.libraryId;

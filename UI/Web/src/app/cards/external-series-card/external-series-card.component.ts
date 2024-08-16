@@ -37,7 +37,7 @@ export class ExternalSeriesCardComponent {
 
   handleClick() {
     if (this.previewOnClick) {
-      const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: 'navbar-offset'});
+      const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
       ref.componentInstance.isExternalSeries = true;
       ref.componentInstance.aniListId = this.data.aniListId;
       ref.componentInstance.malId = this.data.malId;
