@@ -78,6 +78,7 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
+import {hasAnyCast} from "../_models/common/i-has-cast";
 
 enum TabID {
   Related = 'related-tab',
@@ -183,6 +184,7 @@ export class ChapterDetailComponent implements OnInit {
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
   readingLists: ReadingList[] = [];
+  showDetailsTab: boolean = true;
 
 
 
@@ -242,6 +244,7 @@ export class ChapterDetailComponent implements OnInit {
         this.cdRef.markForCheck();
       });
 
+      this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 || (this.chapter.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });

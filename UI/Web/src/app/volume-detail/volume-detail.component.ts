@@ -51,7 +51,7 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {Person} from "../_models/metadata/person";
-import {IHasCast} from "../_models/common/i-has-cast";
+import {hasAnyCast, IHasCast} from "../_models/common/i-has-cast";
 import {ReadTimePipe} from "../_pipes/read-time.pipe";
 import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
@@ -206,7 +206,7 @@ export class VolumeDetailComponent implements OnInit {
    * This is the download we get from download service.
    */
   download$: Observable<DownloadEvent | null> | null = null;
-  downloadInProgress: boolean = false;
+  showDetailsTab: boolean = true;
 
   maxAgeRating: AgeRating = AgeRating.Unknown;
   volumeCast: VolumeCast = {
@@ -273,6 +273,8 @@ export class VolumeDetailComponent implements OnInit {
     this.libraryId = parseInt(libraryId, 10);
 
     this.coverImage = this.imageService.getVolumeCoverImage(this.volumeId);
+
+
 
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
@@ -387,7 +389,7 @@ export class VolumeDetailComponent implements OnInit {
           .flatMap(c => c.ageRating)
       );
 
-
+      this.showDetailsTab = hasAnyCast(this.volumeCast) || (this.genres || []).length > 0 || (this.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -428,14 +430,8 @@ export class VolumeDetailComponent implements OnInit {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
-  downloadVolume() {
-    this.downloadService.download('volume', this.volume!, (d) => {
-      this.downloadInProgress = !!d;
-      this.cdRef.markForCheck();
-    });
-  }
-
   handleVolumeAction(action: ActionItem<Volume>) {
+    // TODO: Implement actionables
     switch (action.action) {
       case Action.Delete:
         break;

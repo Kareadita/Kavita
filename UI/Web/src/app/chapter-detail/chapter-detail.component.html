@@ -139,14 +139,16 @@
 
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
 
-        <li [ngbNavItem]="TabID.Details">
-          <a ngbNavLink>{{t('details-tab')}}</a>
-          <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Details; prefetch on idle) {
-              <app-details-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-details-tab>
-            }
-          </ng-template>
-        </li>
+        @if (showDetailsTab) {
+          <li [ngbNavItem]="TabID.Details">
+            <a ngbNavLink>{{t('details-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                <app-details-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-details-tab>
+              }
+            </ng-template>
+          </li>
+        }
 
         @if(readingLists.length > 0) {
           <li [ngbNavItem]="TabID.Related">

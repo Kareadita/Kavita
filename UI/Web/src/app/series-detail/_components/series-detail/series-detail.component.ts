@@ -148,6 +148,7 @@ import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../download-button/download-button.component";
+import {hasAnyCast} from "../../../_models/common/i-has-cast";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -333,11 +334,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   showVolumeTab = true;
   showStorylineTab = true;
   showChapterTab = true;
-  canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
-      shareReplay({bufferSize: 1, refCount: true})
-    ));
+  showDetailsTab = true;
 
   /**
    * This is the download we get from download service.
@@ -847,6 +844,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.showVolumeTab = this.shouldShowVolumeTab();
     this.showStorylineTab = this.shouldShowStorylineTab();
     this.showChapterTab = this.shouldShowChaptersTab();
+    this.showDetailsTab = hasAnyCast(this.seriesMetadata) || (this.seriesMetadata?.genres || []).length > 0 || (this.seriesMetadata?.tags || []).length > 0;
     this.cdRef.markForCheck();
   }
 

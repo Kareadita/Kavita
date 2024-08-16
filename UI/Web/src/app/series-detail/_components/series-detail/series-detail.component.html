@@ -446,7 +446,10 @@
         }
 
         <li [ngbNavItem]="TabID.Reviews">
-          <a ngbNavLink>{{t('reviews-tab')}}</a>
+          <a ngbNavLink>
+            {{t('reviews-tab')}}
+            <span class="badge rounded-pill text-bg-secondary">{{reviews.length + plusReviews.length}}</span>
+          </a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
               <div class="mb-3">
@@ -471,7 +474,7 @@
           </ng-template>
         </li>
 
-        @if (seriesMetadata) {
+        @if (seriesMetadata && showDetailsTab) {
           <li [ngbNavItem]="TabID.Details">
             <a ngbNavLink>{{t('details-tab')}}</a>
             <ng-template ngbNavContent>

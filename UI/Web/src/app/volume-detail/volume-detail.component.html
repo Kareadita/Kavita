@@ -141,7 +141,7 @@
           </ng-template>
         </li>
 
-        @if (volume.chapters.length === 1) {
+        @if (volume.chapters.length === 1 && readingLists.length > 0) {
           <li [ngbNavItem]="TabID.Related">
             <a ngbNavLink>{{t('related-tab')}}</a>
             <ng-template ngbNavContent>
@@ -152,14 +152,16 @@
           </li>
         }
 
-        <li [ngbNavItem]="TabID.Details">
-          <a ngbNavLink>{{t('details-tab')}}</a>
-          <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Details; prefetch on idle) {
-              <app-details-tab [metadata]="volumeCast" [genres]="genres" [tags]="tags"></app-details-tab>
-            }
-          </ng-template>
-        </li>
+        @if (showDetailsTab) {
+          <li [ngbNavItem]="TabID.Details">
+            <a ngbNavLink>{{t('details-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                <app-details-tab [metadata]="volumeCast" [genres]="genres" [tags]="tags"></app-details-tab>
+              }
+            </ng-template>
+          </li>
+        }
       </ul>
 
       <!-- Min height helps with scroll jerking when switching from chapter -> related/details -->
