@@ -6,7 +6,7 @@
       <div class="row mb-0 mb-xl-3 info-container">
         <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
 
-          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'height': '350px', 'max-height': '350px'}"  [imageUrl]="seriesImage"></app-image>
+          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="seriesImage"></app-image>
           @if (series.pagesRead < series.pages && hasReadingProgress) {
             <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}%">
               <ngb-progressbar type="primary" [value]="series.pagesRead" [max]="series.pages" [showValue]="true"></ngb-progressbar>
