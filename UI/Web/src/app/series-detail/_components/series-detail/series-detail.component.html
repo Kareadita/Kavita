@@ -199,294 +199,294 @@
       <div class="carousel-tabs-container">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
-        @if (showStorylineTab) {
-          <li [ngbNavItem]="TabID.Storyline">
-            <a ngbNavLink>{{t('storyline-tab')}}</a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
-                <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+          @if (showStorylineTab) {
+            <li [ngbNavItem]="TabID.Storyline">
+              <a ngbNavLink>{{t(TabID.Storyline)}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      @if (item.isChapter) {
-                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
-                      } @else {
-                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        @if (item.isChapter) {
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
+                        } @else {
+                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                        }
                       }
-                    }
 
-                    <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
-                  </div>
-                </virtual-scroller>
-              }
-            </ng-template>
-          </li>
-        }
-
-
-        @if (showVolumeTab) {
-          <li [ngbNavItem]="TabID.Volumes">
-            <a ngbNavLink>
-              {{UseBookLogic ? t('books-tab') : t('volumes-tab')}}
-              <span class="badge rounded-pill text-bg-secondary">{{volumes.length}}</span>
-            </a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
-                <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
-                    }
-                    <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
-                  </div>
-                </virtual-scroller>
-              }
-            </ng-template>
-          </li>
-        }
-
-        @if (showChapterTab) {
-          <li [ngbNavItem]="TabID.Chapters">
-            <a ngbNavLink>
-              {{utilityService.formatChapterName(libraryType)}}
-              <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
-            </a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
-                <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
-                    }
-                    <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
-                  </div>
-                </virtual-scroller>
-              }
-            </ng-template>
-          </li>
-        }
-
-        @if (hasSpecials) {
-          <li [ngbNavItem]="TabID.Specials">
-            <a ngbNavLink>
-              {{t('specials-tab')}}
-              <span class="badge rounded-pill text-bg-secondary">{{specials.length}}</span>
-            </a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Specials; prefetch on idle) {
-                <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                      <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
-                    }
-                  </div>
-                </virtual-scroller>
-              }
-            </ng-template>
-          </li>
-        }
-
-        @if (hasRelations && relationShips) {
-          <li [ngbNavItem]="TabID.Related">
-            <a ngbNavLink>
-              {{t('related-tab')}}
-              <span class="badge rounded-pill text-bg-secondary">{{relations.length}}</span>
-            </a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
-                      <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
-                    }
-                  </div>
-                </virtual-scroller>
-              }
-
-              <!--                @if (relationShips.prequels.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.prequels" title="Prequels">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Prequel"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.sequels.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.sequels" title="Sequels">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Sequel"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.parent.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.parent" title="Parent">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Parent"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.contains.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.contains" title="Contains">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Contains"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.adaptations.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.adaptations" title="Contains">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Adaptation"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.annuals.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.annuals" title="Annuals">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Annual"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
+                    </div>
+                  </virtual-scroller>
+                }
+              </ng-template>
+            </li>
+          }
 
 
-              <!--                @if (relationShips.characters.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.characters" title="Characters">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Character"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.alternativeSettings.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.alternativeSettings" title="Alternative Settings">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.AlternativeSetting"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.doujinshis.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.doujinshis" title="Doujinshis">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Doujinshi"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.alternativeVersions.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.alternativeVersions" title="Alternative Versions">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.AlternativeVersion"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.editions.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.editions" title="Editions">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Edition"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.others.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.others" title="Other">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Other"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-              <!--                @if (relationShips.sideStories.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.sideStories" title="Side Stories">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.SideStory"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-
-              <!--                @if (relationShips.spinOffs.length > 0) {-->
-              <!--                  <app-carousel-reel [items]="relationShips.spinOffs" title="Spin Offs">-->
-              <!--                    <ng-template #carouselItem let-item>-->
-              <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.SpinOff"></app-series-card>-->
-              <!--                    </ng-template>-->
-              <!--                  </app-carousel-reel>-->
-              <!--                }-->
-
-
-            </ng-template>
-          </li>
-        }
-
-        @if (hasRecommendations) {
-          <li [ngbNavItem]="TabID.Recommendations">
-            <a ngbNavLink>
-              {{t('recommendations-tab')}}
-              <span class="badge rounded-pill text-bg-secondary">{{combinedRecs.length}}</span>
-            </a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Recommendations; prefetch on idle) {
-                <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
-                  <div class="card-container row g-0" #container>
-                    @for(item of scroll.viewPortItems; let idx = $index; track idx) {
-                      @if (!item.hasOwnProperty('coverUrl')) {
-                        <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
-                      } @else {
-                        <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
+          @if (showVolumeTab) {
+            <li [ngbNavItem]="TabID.Volumes">
+              <a ngbNavLink>
+                {{UseBookLogic ? t('books-tab') : t('volumes-tab')}}
+                <span class="badge rounded-pill text-bg-secondary">{{volumes.length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
                       }
-                    }
-                  </div>
-                </virtual-scroller>
-              }
-            </ng-template>
-          </li>
-        }
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
+                    </div>
+                  </virtual-scroller>
+                }
+              </ng-template>
+            </li>
+          }
 
-        <li [ngbNavItem]="TabID.Reviews">
-          <a ngbNavLink>
-            {{t('reviews-tab')}}
-            <span class="badge rounded-pill text-bg-secondary">{{reviews.length + plusReviews.length}}</span>
-          </a>
-          <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-              <div class="mb-3">
-                <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
-                                   iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                                   [clickableTitle]="true" (sectionClick)="openReviewModal()">
-                  <ng-template #carouselItem let-item let-position="idx">
-                    <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
-                  </ng-template>
-                </app-carousel-reel>
-              </div>
+          @if (showChapterTab) {
+            <li [ngbNavItem]="TabID.Chapters">
+              <a ngbNavLink>
+                {{utilityService.formatChapterName(libraryType)}}
+                <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
+                      }
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
+                    </div>
+                  </virtual-scroller>
+                }
+              </ng-template>
+            </li>
+          }
 
-              <div class="mb-3">
-                <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
-                  <ng-template #carouselItem let-item let-position="idx">
-                    <app-review-card [review]="item"></app-review-card>
-                  </ng-template>
-                </app-carousel-reel>
-              </div>
-            }
+          @if (hasSpecials) {
+            <li [ngbNavItem]="TabID.Specials">
+              <a ngbNavLink>
+                {{t(TabID.Specials)}}
+                <span class="badge rounded-pill text-bg-secondary">{{specials.length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Specials; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
+                      }
+                    </div>
+                  </virtual-scroller>
+                }
+              </ng-template>
+            </li>
+          }
 
-          </ng-template>
-        </li>
+          @if (hasRelations && relationShips) {
+            <li [ngbNavItem]="TabID.Related">
+              <a ngbNavLink>
+                {{t(TabID.Related)}}
+                <span class="badge rounded-pill text-bg-secondary">{{relations.length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
+                        <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                      }
+                    </div>
+                  </virtual-scroller>
+                }
 
-        @if (seriesMetadata && showDetailsTab) {
-          <li [ngbNavItem]="TabID.Details">
-            <a ngbNavLink>{{t('details-tab')}}</a>
+                <!--                @if (relationShips.prequels.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.prequels" title="Prequels">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Prequel"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.sequels.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.sequels" title="Sequels">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Sequel"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.parent.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.parent" title="Parent">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Parent"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.contains.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.contains" title="Contains">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Contains"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.adaptations.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.adaptations" title="Contains">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Adaptation"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.annuals.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.annuals" title="Annuals">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Annual"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+
+                <!--                @if (relationShips.characters.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.characters" title="Characters">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Character"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.alternativeSettings.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.alternativeSettings" title="Alternative Settings">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.AlternativeSetting"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.doujinshis.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.doujinshis" title="Doujinshis">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Doujinshi"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.alternativeVersions.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.alternativeVersions" title="Alternative Versions">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.AlternativeVersion"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.editions.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.editions" title="Editions">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Edition"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.others.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.others" title="Other">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Other"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+                <!--                @if (relationShips.sideStories.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.sideStories" title="Side Stories">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.SideStory"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+
+                <!--                @if (relationShips.spinOffs.length > 0) {-->
+                <!--                  <app-carousel-reel [items]="relationShips.spinOffs" title="Spin Offs">-->
+                <!--                    <ng-template #carouselItem let-item>-->
+                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.SpinOff"></app-series-card>-->
+                <!--                    </ng-template>-->
+                <!--                  </app-carousel-reel>-->
+                <!--                }-->
+
+
+              </ng-template>
+            </li>
+          }
+
+          @if (hasRecommendations) {
+            <li [ngbNavItem]="TabID.Recommendations">
+              <a ngbNavLink>
+                {{t(TabID.Recommendations)}}
+                <span class="badge rounded-pill text-bg-secondary">{{combinedRecs.length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Recommendations; prefetch on idle) {
+                  <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
+                    <div class="card-container row g-0" #container>
+                      @for(item of scroll.viewPortItems; let idx = $index; track idx) {
+                        @if (!item.hasOwnProperty('coverUrl')) {
+                          <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
+                        } @else {
+                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
+                        }
+                      }
+                    </div>
+                  </virtual-scroller>
+                }
+              </ng-template>
+            </li>
+          }
+
+          <li [ngbNavItem]="TabID.Reviews">
+            <a ngbNavLink>
+              {{t(TabID.Reviews)}}
+              <span class="badge rounded-pill text-bg-secondary">{{reviews.length + plusReviews.length}}</span>
+            </a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags"></app-details-tab>
+              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+                <div class="mb-3">
+                  <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
+                                     iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
+                                     [clickableTitle]="true" (sectionClick)="openReviewModal()">
+                    <ng-template #carouselItem let-item let-position="idx">
+                      <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
+
+                <div class="mb-3">
+                  <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
+                    <ng-template #carouselItem let-item let-position="idx">
+                      <app-review-card [review]="item"></app-review-card>
+                    </ng-template>
+                  </app-carousel-reel>
+                </div>
               }
+
             </ng-template>
           </li>
-        }
 
-      </ul>
+          @if (seriesMetadata && showDetailsTab) {
+            <li [ngbNavItem]="TabID.Details">
+              <a ngbNavLink>{{t(TabID.Details)}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                  <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags"></app-details-tab>
+                }
+              </ng-template>
+            </li>
+          }
+
+        </ul>
       </div>
       <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
     </div>

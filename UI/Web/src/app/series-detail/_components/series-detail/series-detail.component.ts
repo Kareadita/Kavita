@@ -40,7 +40,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, forkJoin, Observable, of, shareReplay} from 'rxjs';
+import {catchError, forkJoin, Observable, of, shareReplay, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
@@ -151,15 +151,14 @@ interface RelatedSeriesPair {
 }
 
 enum TabID {
-  Related = 0,
-  Specials = 1,
-  Storyline = 2,
-  Volumes = 3,
-  Chapters = 4,
-  Recommendations = 5,
-  Reviews = 6,
-  Details = 7,
-  Info = 8
+  Related = 'related-tab',
+  Specials = 'specials-tab',
+  Storyline = 'storyline-tab',
+  Volumes = 'volume-tab',
+  Chapters = 'chapter-tab',
+  Recommendations = 'recommendations-tab',
+  Reviews = 'reviews-tab',
+  Details = 'details-tab',
 }
 
 interface StoryLineItem {
@@ -218,7 +217,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   protected readonly LibraryType = LibraryType;
   protected readonly TabID = TabID;
-  protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
   protected readonly SettingsTabId = SettingsTabId;
@@ -448,7 +446,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   constructor(@Inject(DOCUMENT) private document: Document) {
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    //this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+
+
     this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.user = user;
@@ -515,6 +515,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
 
+    this.route.fragment.pipe(tap(frag => {
+      if (frag !== null && this.activeTabId !== (frag as TabID)) {
+        this.activeTabId = frag as TabID;
+        this.updateUrl(this.activeTabId);
+        this.cdRef.markForCheck();
+      }
+    }), takeUntilDestroyed(this.destroyRef)).subscribe();
+
     this.loadSeries(this.seriesId, true);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
@@ -540,7 +548,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   onNavChange(event: NgbNavChangeEvent) {
     this.bulkSelectionService.deselectAll();
+    this.updateUrl(event.nextId);
+
     this.cdRef.markForCheck();
+  }
+
+  updateUrl(activeTab: TabID) {
+    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
+    this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
@@ -800,7 +815,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.storylineItems.push(...c);
 
         this.updateWhichTabsToShow();
-        this.updateSelectedTab();
+
+        if (!this.router.url.includes('#')) {
+          this.updateSelectedTab();
+        }
+
 
 
         this.isLoading = false;
@@ -851,6 +870,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
+    console.log('updateSelectedTab')
     // Book libraries only have Volumes or Specials enabled
     if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
@@ -863,6 +883,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else {
         this.activeTabId = TabID.Volumes;
       }
+      this.updateUrl(this.activeTabId);
       this.cdRef.markForCheck();
       return;
     }
@@ -883,8 +904,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else {
         this.activeTabId = TabID.Storyline;
       }
-
     }
+
+    this.updateUrl(this.activeTabId);
     this.cdRef.markForCheck();
   }
 

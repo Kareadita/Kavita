@@ -41,7 +41,6 @@ import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 })
 export class SideNavComponent implements OnInit {
 
-  protected readonly SideNavStreamType = SideNavStreamType;
   private readonly router = inject(Router);
   private readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
@@ -52,8 +51,11 @@ export class SideNavComponent implements OnInit {
   public readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+
   protected readonly WikiLink = WikiLink;
   protected readonly ItemLimit = 10;
+  protected readonly SideNavStreamType = SideNavStreamType;
+  protected readonly SettingsTabId = SettingsTabId;
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
@@ -207,6 +209,4 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
-
-  protected readonly SettingsTabId = SettingsTabId;
 }
