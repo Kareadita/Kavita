@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {NgClass} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-read-more',
   standalone: true,
-  imports: [CommonModule, SafeHtmlPipe, TranslocoDirective],
+  imports: [SafeHtmlPipe, TranslocoDirective, NgClass],
   templateUrl: './read-more.component.html',
   styleUrls: ['./read-more.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
