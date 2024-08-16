@@ -784,8 +784,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Edit Series Information",
-        "download-tooltip": "Download",
-        "downloading-status": "Downloading…",
         "reviews-tab": "{{tabs.reviews-tab}}",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "books-tab": "{{tabs.books-tab}}",
@@ -856,6 +854,11 @@
         "see-more": "See More",
         "see-less": "See Less"
 
+    },
+
+    "download-button": {
+        "download-tooltip": "Download",
+        "downloading-status": "Downloading…"
     },
 
     "external-rating": {

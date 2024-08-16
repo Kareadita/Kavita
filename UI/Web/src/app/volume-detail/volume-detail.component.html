@@ -77,24 +77,9 @@
                 </div>
               }
 
-              @if (canDownload$ | async) {
-                <div class="col-auto ms-2 d-none d-md-block">
-                  @if (download$ | async; as download) {
-                    <button class="btn btn-secondary-outline" (click)="downloadVolume()" [ngbTooltip]="t('download-tooltip')" [disabled]="download !== null">
-                      @if (download) {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span class="visually-hidden">{{t('downloading-status')}}</span>
-                      } @else {
-                        <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
-                      }
-                    </button>
-                  } @else {
-                    <button class="btn btn-secondary-outline" (click)="downloadVolume()" [ngbTooltip]="t('download-tooltip')">
-                      <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
-                    </button>
-                  }
-                </div>
-              }
+              <div class="col-auto ms-2 d-none d-md-block">
+                <app-download-button [download$]="download$" [entity]="volume" entityType="volume"></app-download-button>
+              </div>
 
             </div>
           </div>

@@ -77,6 +77,7 @@ import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.co
 import {
   MetadataDetailRowComponent
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
+import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 
 enum TabID {
 
@@ -151,7 +152,8 @@ interface VolumeCast extends IHasCast {
     AgeRatingImageComponent,
     CompactNumberPipe,
     BadgeExpanderComponent,
-    MetadataDetailRowComponent
+    MetadataDetailRowComponent,
+    DownloadButtonComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -200,11 +202,6 @@ export class VolumeDetailComponent implements OnInit {
 
   volumeActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
 
-  canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
-      shareReplay({bufferSize: 1, refCount: true})
-    ));
   /**
    * This is the download we get from download service.
    */

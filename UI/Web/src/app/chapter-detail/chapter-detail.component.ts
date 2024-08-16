@@ -77,6 +77,7 @@ import {
   MetadataDetailRowComponent
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
+import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -130,7 +131,8 @@ enum TabID {
     AgeRatingImageComponent,
     CompactNumberPipe,
     BadgeExpanderComponent,
-    MetadataDetailRowComponent
+    MetadataDetailRowComponent,
+    DownloadButtonComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -175,18 +177,12 @@ export class ChapterDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
   activeTabId = TabID.Details;
-  canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
-    shareReplay({bufferSize: 1, refCount: true})
-  ));
   /**
    * This is the download we get from download service.
    */
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
   readingLists: ReadingList[] = [];
-  bookmarks: Array<PageBookmark> = [];
 
 
 
@@ -218,10 +214,6 @@ export class ChapterDetailComponent implements OnInit {
 
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
 
-    this.readerService.getBookmarks(this.chapterId).subscribe(b => {
-      this.bookmarks = b;
-      this.cdRef.markForCheck();
-    });
 
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
