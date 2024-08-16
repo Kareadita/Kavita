@@ -27,3 +27,15 @@
   justify-content: space-around;
 }
 
+::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen{
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--primary-color);
+  padding: 5px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: var(--primary-color-dark-shade);
+  }
+}
