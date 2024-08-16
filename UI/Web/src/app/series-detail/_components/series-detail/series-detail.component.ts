@@ -3,12 +3,8 @@ import {
   DecimalPipe,
   DOCUMENT, JsonPipe,
   NgClass,
-  NgFor,
-  NgIf,
   NgOptimizedImage,
   NgStyle,
-  NgSwitch,
-  NgSwitchCase,
   NgTemplateOutlet
 } from '@angular/common';
 import {
@@ -87,11 +83,9 @@ import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {ExternalListItemComponent} from '../../../cards/external-list-item/external-list-item.component';
 import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/external-series-card.component';
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
-import {ListItemComponent} from '../../../cards/list-item/list-item.component';
 import {CardItemComponent} from '../../../cards/card-item/card-item.component';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
@@ -149,6 +143,7 @@ import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../download-button/download-button.component";
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
+import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -182,9 +177,9 @@ interface StoryLineItem {
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle,
     TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
-    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent,
-    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet,
-    LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NgSwitch, NgSwitchCase, NextExpectedCardComponent,
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, CardItemComponent,
+    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent,  NgbNavOutlet,
+    LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
     RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
@@ -1023,7 +1018,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditVolume(volume: Volume) {
-    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditVolumeModalComponent, { size: 'xl' });
     ref.componentInstance.volume = volume;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.seriesId = this.series?.id;

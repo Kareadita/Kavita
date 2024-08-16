@@ -10,9 +10,7 @@ import {
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {LibraryService} from "../../_services/library.service";
 import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
-import {UtilityService} from "../../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
@@ -34,6 +32,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {filter, map} from "rxjs/operators";
 import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
 import {ReaderService} from "../../_services/reader.service";
+import {LibraryType} from "../../_models/library/library";
 
 @Component({
   selector: 'app-chapter-card',
@@ -71,6 +70,7 @@ export class ChapterCardComponent implements OnInit {
   @Input({required: true}) libraryId: number = 0;
   @Input({required: true}) seriesId: number = 0;
   @Input({required: true}) chapter!: Chapter;
+  @Input({required: true}) libraryType!: LibraryType;
   /**
    * Any actions to perform on the card
    */
@@ -203,4 +203,5 @@ export class ChapterCardComponent implements OnInit {
   }
 
 
+  protected readonly LibraryType = LibraryType;
 }

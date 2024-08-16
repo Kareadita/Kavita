@@ -22,7 +22,7 @@ import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";

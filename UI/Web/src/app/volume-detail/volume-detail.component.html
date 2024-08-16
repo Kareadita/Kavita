@@ -133,7 +133,7 @@
               <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
                 <div class="card-container row g-0" #container>
                   @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId"></app-chapter-card>
+                    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId" [libraryType]="libraryType"></app-chapter-card>
                   }
                 </div>
               </virtual-scroller>

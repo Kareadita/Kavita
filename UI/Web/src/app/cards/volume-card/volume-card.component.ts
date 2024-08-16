@@ -34,23 +34,25 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
+import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 
 @Component({
   selector: 'app-volume-card',
   standalone: true,
-    imports: [
-        CardActionablesComponent,
-        DecimalPipe,
-        DefaultValuePipe,
-        DownloadIndicatorComponent,
-        EntityTitleComponent,
-        ImageComponent,
-        NgbProgressbar,
-        NgbTooltip,
-        RouterLink,
-        Select2Module,
-        TranslocoDirective
-    ],
+  imports: [
+    CardActionablesComponent,
+    DecimalPipe,
+    DefaultValuePipe,
+    DownloadIndicatorComponent,
+    EntityTitleComponent,
+    ImageComponent,
+    NgbProgressbar,
+    NgbTooltip,
+    RouterLink,
+    Select2Module,
+    TranslocoDirective,
+    RelationshipPipe
+  ],
   templateUrl: './volume-card.component.html',
   styleUrl: './volume-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

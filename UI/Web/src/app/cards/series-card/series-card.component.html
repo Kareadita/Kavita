@@ -1,10 +1,3 @@
-<!--<app-card-item [title]="data.name" [actions]="actions" [suppressLibraryLink]="suppressLibraryLink" [imageUrl]="imageUrl"-->
-<!--               [entity]="data" [total]="data.pages" [read]="data.pagesRead" (clicked)="handleClick()"-->
-<!--               [allowSelection]="allowSelection" (selection)="selection.emit(selected)" [selected]="selected"-->
-<!--               [overlayInformation]="(relation | relationship)"-->
-<!--&gt;</app-card-item>-->
-
-
 <ng-container *transloco="let t; read: 'card-item'">
   <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick()">
