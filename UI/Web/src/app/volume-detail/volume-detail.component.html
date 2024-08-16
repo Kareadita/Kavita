@@ -122,7 +122,8 @@
         </div>
       </div>
 
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
+      <div class="carousel-tabs-container">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Chapters">
           <a ngbNavLink>
             {{utilityService.formatChapterName(libraryType!, false, false, true)}}
@@ -163,7 +164,7 @@
           </li>
         }
       </ul>
-
+      </div>
       <!-- Min height helps with scroll jerking when switching from chapter -> related/details -->
       <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
 

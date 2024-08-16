@@ -79,6 +79,8 @@ import {
 import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
+import {CarouselTabComponent} from "../carousel/_components/carousel-tab/carousel-tab.component";
+import {CarouselTabsComponent, TabId} from "../carousel/_components/carousel-tabs/carousel-tabs.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -133,7 +135,9 @@ enum TabID {
     CompactNumberPipe,
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
-    DownloadButtonComponent
+    DownloadButtonComponent,
+    CarouselTabComponent,
+    CarouselTabsComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -303,4 +307,6 @@ export class ChapterDetailComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+
+  protected readonly TabId = TabId;
 }

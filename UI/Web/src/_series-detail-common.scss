@@ -100,3 +100,17 @@
   color: white;
   top: 50%;
 }
+
+.carousel-tabs-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  scrollbar-width: none;
+}
+.carousel-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+.nav-tabs {
+  flex-wrap: nowrap;
+}

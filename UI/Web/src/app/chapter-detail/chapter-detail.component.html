@@ -137,7 +137,16 @@
         </div>
       </div>
 
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
+<!--      <app-carousel-tabs [(activeTabId)]="activeTabId">-->
+<!--        <app-carousel-tab [id]="TabId.Details">-->
+<!--          @defer (when activeTabId === TabId.Details; prefetch on idle) {-->
+<!--            <app-details-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-details-tab>-->
+<!--          }-->
+<!--        </app-carousel-tab>-->
+<!--      </app-carousel-tabs>-->
+
+      <div class="carousel-tabs-container">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
 
         @if (showDetailsTab) {
           <li [ngbNavItem]="TabID.Details">
@@ -161,7 +170,7 @@
           </li>
         }
       </ul>
-
+      </div>
       <div [ngbNavOutlet]="nav"></div>
 
     }

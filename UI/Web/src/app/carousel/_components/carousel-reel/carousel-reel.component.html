@@ -25,7 +25,7 @@
             [freeMode]="true">
             @for(item of items; track item; let i = $index;) {
               <ng-template swiperSlide>
-                <ng-container swiperSlide [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+                <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
               </ng-template>
             } @empty {
               @if (alwaysShow) {

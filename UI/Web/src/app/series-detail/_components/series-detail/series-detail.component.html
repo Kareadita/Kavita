@@ -196,7 +196,8 @@
         </div>
       </div>
 
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+      <div class="carousel-tabs-container">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
         @if (showStorylineTab) {
           <li [ngbNavItem]="TabID.Storyline">
@@ -486,6 +487,7 @@
         }
 
       </ul>
+      </div>
       <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
     </div>
 
