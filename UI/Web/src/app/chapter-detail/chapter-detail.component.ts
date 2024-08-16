@@ -73,6 +73,10 @@ import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.co
 import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
+import {
+  MetadataDetailRowComponent
+} from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
+import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
 
 enum TabID {
   Related = 'related-tab',
@@ -125,7 +129,8 @@ enum TabID {
     RelatedTabComponent,
     AgeRatingImageComponent,
     CompactNumberPipe,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    MetadataDetailRowComponent
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -196,9 +201,6 @@ export class ChapterDetailComponent implements OnInit {
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-  get UseBookLogic() {
-    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
-  }
 
   ngOnInit() {
     const seriesId = this.route.snapshot.paramMap.get('seriesId');

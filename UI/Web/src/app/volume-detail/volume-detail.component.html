@@ -2,7 +2,7 @@
 
   <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
 
-    @if (volume && series) {
+    @if (volume && series && libraryType !== null) {
       <div class="row mb-0 mb-xl-3 info-container">
         <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3">
 
@@ -24,24 +24,12 @@
             </span>
           </div>
 
-          <div class="mt-2 mb-2">
-            @if (volumeCast.publishers.length > 0) {
-              <span class="me-2">{{volumeCast.publishers[0].name}}</span>
-            }
-            <span class="me-2">
-              <app-age-rating-image [rating]="maxAgeRating"></app-age-rating-image>
-            </span>
-
-            <span class=""><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
-              {{volume | readTime }}
-            </span>
-            <span class="ms-2 me-2">•</span>
-            <span>{{t('pages-count', {num: volume.pages | compactNumber})}}</span>
-            @if (UseBookLogic) {
-              <span class="ms-2 me-2">•</span>
-              <span>{{t('words-count', {num: volume.wordCount | compactNumber})}}</span>
-            }
-          </div>
+          <app-metadata-detail-row [entity]="volumeCast"
+                                   [ageRating]="maxAgeRating"
+                                   [hasReadingProgress]="hasReadingProgress"
+                                   [readingTimeEntity]="volume"
+                                   [libraryType]="libraryType">
+          </app-metadata-detail-row>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
 <!--          @if (libraryType !== null && series) {-->

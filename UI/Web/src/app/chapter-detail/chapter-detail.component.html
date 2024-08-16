@@ -2,7 +2,7 @@
 
   <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
 
-    @if (chapter && series) {
+    @if (chapter && series && libraryType !== null) {
       <div class="row mb-0 mb-xl-3 info-container">
         <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
 
@@ -39,36 +39,24 @@
             }
           </div>
 
-          <div class="mt-2 mb-2">
-            @if (chapter.publishers.length > 0) {
-              <span class="me-2">{{chapter.publishers[0].name}}</span>
-            }
-            <span class="me-2">
-              <app-age-rating-image [rating]="chapter.ageRating"></app-age-rating-image>
-            </span>
+          <app-metadata-detail-row [entity]="chapter"
+                                   [ageRating]="chapter.ageRating"
+                                   [hasReadingProgress]="hasReadingProgress"
+                                   [readingTimeEntity]="chapter"
+                                   [libraryType]="libraryType">
+          </app-metadata-detail-row>
 
-            <span class=""><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
-              {{chapter | readTime }}
-            </span>
-            <span class="ms-2 me-2">•</span>
-            <span>{{t('pages-count', {num: chapter.pages | compactNumber})}}</span>
-            @if (UseBookLogic) {
-              <span class="ms-2 me-2">•</span>
-              <span>{{t('words-count', {num: chapter.wordCount | compactNumber})}}</span>
-            }
-          </div>
+
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
-          @if (libraryType !== null && series) {
-            <div class="mt-2 mb-2">
-              <app-external-rating [seriesId]="series.id"
-                                   [ratings]="[]"
-                                   [userRating]="series.userRating"
-                                   [hasUserRated]="series.hasUserRated"
-                                   [libraryType]="libraryType">
-              </app-external-rating>
-            </div>
-          }
+<!--          <div class="mt-2 mb-2">-->
+<!--            <app-external-rating [seriesId]="series.id"-->
+<!--                                 [ratings]="[]"-->
+<!--                                 [userRating]="series.userRating"-->
+<!--                                 [hasUserRated]="series.hasUserRated"-->
+<!--                                 [libraryType]="libraryType!">-->
+<!--            </app-external-rating>-->
+<!--          </div>-->
 
           <div class="mt-3 mb-3">
             <div class="row g-0">

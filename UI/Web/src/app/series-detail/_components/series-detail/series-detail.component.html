@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'series-detail'">
   <app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>
 
-  @if (series && seriesMetadata) {
+  @if (series && seriesMetadata && libraryType !== null) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
       <div class="row mb-0 mb-xl-3 info-container">
         <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
@@ -47,45 +47,23 @@
             }
           </div>
 
-          <div class="mt-2 mb-2">
-            @if (seriesMetadata.publishers.length > 0) {
-              <span class="me-2">{{seriesMetadata.publishers[0].name}}</span>
-            }
-            <span class="me-2">
-              <app-age-rating-image [rating]="seriesMetadata.ageRating"></app-age-rating-image>
-            </span>
-
-
-              @if (hasReadingProgress && readingTimeLeft && readingTimeLeft.avgHours !== 0) {
-                <span [ngbTooltip]="t('time-left-alt')">
-                  <i class="fa-solid fa-clock me-1" aria-hidden="true"></i>
-                  {{readingTimeLeft | readTimeLeft }}
-                </span>
-              } @else {
-                <span [ngbTooltip]="t('time-to-read-alt')">
-                  <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
-                  {{series | readTime }}
-                </span>
-              }
-            <span class="ms-2 me-2">•</span>
-            @if (UseBookLogic) {
-              <span>{{t('words-count', {num: series.wordCount | compactNumber})}}</span>
-            } @else {
-              <span>{{t('pages-count', {num: series.pages | compactNumber})}}</span>
-            }
-          </div>
+          <app-metadata-detail-row [entity]="seriesMetadata"
+                                   [readingTimeLeft]="readingTimeLeft"
+                                   [ageRating]="seriesMetadata.ageRating"
+                                   [hasReadingProgress]="hasReadingProgress"
+                                   [readingTimeEntity]="series"
+                                   [libraryType]="libraryType">
+          </app-metadata-detail-row>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
-          @if (libraryType !== null && series) {
-            <div class="mt-2 mb-2">
-              <app-external-rating [seriesId]="series.id"
-                                   [ratings]="ratings"
-                                   [userRating]="series.userRating"
-                                   [hasUserRated]="series.hasUserRated"
-                                   [libraryType]="libraryType">
-              </app-external-rating>
-            </div>
-          }
+          <div class="mt-2 mb-2">
+            <app-external-rating [seriesId]="series.id"
+                                 [ratings]="ratings"
+                                 [userRating]="series.userRating"
+                                 [hasUserRated]="series.hasUserRated"
+                                 [libraryType]="libraryType">
+            </app-external-rating>
+          </div>
 
           <div class="mt-3 mb-3">
             <div class="row g-0">
