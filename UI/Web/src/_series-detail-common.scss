@@ -40,9 +40,14 @@
   -webkit-box-orient: vertical;
 }
 
+.under-image  ~ .overlay-information {
+  top: -404px;
+  height: 364px;
+}
+
 .overlay-information {
   position: relative;
-  top: -404px;
+  top: -364px;
   height: 364px;
   transition: all 0.2s;
   border-top-left-radius: 4px;
