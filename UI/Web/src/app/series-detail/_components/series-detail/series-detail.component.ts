@@ -370,6 +370,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case Action.MarkAsRead:
         this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
+          // TODO: BUG: This doesn't update series pagesRead
           this.bulkSelectionService.deselectAll();
           this.cdRef.markForCheck();
         });
@@ -378,6 +379,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case Action.MarkAsUnread:
         this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
+          // TODO: BUG: This doesn't update series pagesRead
           this.bulkSelectionService.deselectAll();
           this.cdRef.markForCheck();
         });

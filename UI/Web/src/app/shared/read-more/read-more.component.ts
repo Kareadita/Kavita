@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnChanges} from '@angular/core';
 import {NgClass} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -12,8 +12,10 @@ import {TranslocoDirective} from "@jsverse/transloco";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReadMoreComponent implements OnChanges {
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   /**
-   * String to apply readmore on
+   * String to apply read more on
    */
   @Input({required: true}) text!: string;
   /**
@@ -33,7 +35,6 @@ export class ReadMoreComponent implements OnChanges {
   hideToggle: boolean = true;
   isCollapsed: boolean = true;
 
-  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
@@ -45,8 +46,10 @@ export class ReadMoreComponent implements OnChanges {
         this.currentText = this.text;
         this.isCollapsed = true;
         this.hideToggle = true;
+        this.cdRef.markForCheck();
         return;
     }
+
     this.hideToggle = false;
     if (this.isCollapsed) {
       this.currentText = this.text.substring(0, this.maxLength);

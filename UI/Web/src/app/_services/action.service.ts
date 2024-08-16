@@ -332,7 +332,7 @@ export class ActionService {
    * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
    * @param seriesId Series Id
    * @param volumes Volumes, should have id, chapters and pagesRead populated
-   * @param chapters? Chapters, should have id
+   * @param chapters Optional Chapters, should have id
    * @param callback Optional callback to perform actions after API completes
    */
    markMultipleAsRead(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
@@ -354,6 +354,7 @@ export class ActionService {
    * Mark all chapters and the volumes as Unread. All volumes must belong to a series
    * @param seriesId Series Id
    * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param chapters Optional Chapters, should have id
    * @param callback Optional callback to perform actions after API completes
    */
    markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
