@@ -906,8 +906,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
 
       // Reviews
-      //this.reviews = [...data.reviews];
-      this.plusReviews = data.reviews;
+      this.reviews = data.reviews.filter(r => !r.isExternal);
+      this.plusReviews = data.reviews.filter(r => r.isExternal);
 
       if (data.ratings) {
         this.ratings = [...data.ratings];
