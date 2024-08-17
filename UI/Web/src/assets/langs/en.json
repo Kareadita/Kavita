@@ -802,7 +802,7 @@
         "user-reviews-plus": "External Reviews",
 
         "writers-title": "{{metadata-fields.writers-title}}",
-        "cover-artists-title": "{{metadata-fields.cover-artist-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",
         "colorists-title": "{{metadata-fields.colorists-title}}",
         "editors-title": "{{metadata-fields.editors-title}}",
