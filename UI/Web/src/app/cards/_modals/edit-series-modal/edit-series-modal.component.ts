@@ -61,6 +61,7 @@ import {Action, ActionFactoryService, ActionItem} from "../../../_services/actio
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {ActionService} from "../../../_services/action.service";
 import {DownloadService} from "../../../shared/_services/download.service";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 
 enum TabID {
   General = 0,
@@ -114,6 +115,7 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     UtcToLocalTimePipe,
     EditListComponent,
     SettingButtonComponent,
+    SettingItemComponent,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
