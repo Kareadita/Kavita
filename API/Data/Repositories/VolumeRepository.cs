@@ -44,6 +44,7 @@ public interface IVolumeRepository
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
     Task<Volume?> GetVolumeByIdAsync(int volumeId);
     Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
+    Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync();
 }
 public class VolumeRepository : IVolumeRepository
 {
@@ -251,5 +252,18 @@ public class VolumeRepository : IVolumeRepository
                 .Where(p => p.VolumeId == v.Id)
                 .Sum(p => p.PagesRead);
         }
+    }
+
+    /// <summary>
+    /// Returns cover images for locked chapters
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync()
+    {
+        return (await _context.Volume
+            .Where(c => c.CoverImageLocked)
+            .Select(c => c.CoverImage)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .ToListAsync())!;
     }
 }
