@@ -1417,7 +1417,7 @@
         "bust-cache-task-success": "Kavita+ Cache busted",
 
         "bust-locale-task": "Bust Locale Cache",
-        "bust-locale-task-desc": "Busts the Locale Cache. This can fix issues with strings not showing correctly after an update",
+        "bust-locale-task-desc": "Busts the Locale Cache. This can fix issues with strings not showing correctly after an update. A browser refresh is needed.",
         "bust-locale-task-success": "Locale Cache busted",
 
         "clear-reading-cache-task": "Clear Reading Cache",

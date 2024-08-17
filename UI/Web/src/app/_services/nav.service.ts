@@ -99,6 +99,7 @@ export class NavService {
    */
   showNavBar() {
     this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', 'var(--nav-offset)');
+    this.renderer.removeStyle(this.document.querySelector('body'), 'scrollbar-gutter');
     this.renderer.setStyle(this.document.querySelector('body'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
     this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
     this.navbarVisibleSource.next(true);
@@ -109,6 +110,7 @@ export class NavService {
    */
   hideNavBar() {
     this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');
+    this.renderer.setStyle(this.document.querySelector('body'), 'scrollbar-gutter', 'initial');
     this.renderer.removeStyle(this.document.querySelector('body'), 'height');
     this.renderer.removeStyle(this.document.querySelector('html'), 'height');
     this.navbarVisibleSource.next(false);

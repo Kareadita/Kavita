@@ -214,7 +214,6 @@
                 <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
                   @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
-                    <i class="fa-solid fa-hourglass-{{pubStatus === t('ongoing') ? 'empty' : 'end'}}" aria-hidden="true"></i>
                     <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
                        href="javascript:void(0);"
                        [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
