@@ -8,8 +8,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
-import {TagBadgeComponent, TagBadgeCursor} from "../shared/tag-badge/tag-badge.component";
-import {PageLayoutMode} from "../_models/page-layout-mode";
+import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
 import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
@@ -31,15 +30,12 @@ import {
 import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
 import {SeriesCardComponent} from "../cards/series-card/series-card.component";
-import {
-  SeriesMetadataDetailComponent
-} from "../series-detail/_components/series-metadata-detail/series-metadata-detail.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
 import {Chapter} from "../_models/chapter";
-import {forkJoin, map, Observable, shareReplay, tap} from "rxjs";
+import {forkJoin, map, Observable, tap} from "rxjs";
 import {SeriesService} from "../_services/series.service";
 import {Series} from "../_models/series";
 import {AgeRating} from "../_models/metadata/age-rating";
@@ -68,7 +64,6 @@ import {DefaultValuePipe} from "../_pipes/default-value.pipe";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
-import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
 import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
@@ -76,7 +71,6 @@ import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.co
 import {
   MetadataDetailRowComponent
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
-import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
 import {CarouselTabComponent} from "../carousel/_components/carousel-tab/carousel-tab.component";
@@ -113,7 +107,6 @@ enum TabID {
     PersonBadgeComponent,
     ReviewCardComponent,
     SeriesCardComponent,
-    SeriesMetadataDetailComponent,
     TagBadgeComponent,
     VirtualScrollerModule,
     NgStyle,

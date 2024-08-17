@@ -801,19 +801,19 @@
         "user-reviews-local": "Local Reviews",
         "user-reviews-plus": "External Reviews",
 
-        "writers-title": "Writers",
-        "cover-artists-title": "Artists",
-        "characters-title": "Characters",
-        "colorists-title": "Colorists",
-        "editors-title": "Editors",
-        "inkers-title": "Inkers",
-        "letterers-title": "Letterers",
-        "translators-title": "Translators",
-        "pencillers-title": "Pencillers",
-        "publishers-title": "Publishers",
-        "imprints-title": "Imprints",
-        "teams-title": "Teams",
-        "locations-title": "Locations",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artist-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "pencillers-title": "{{metadata-fields.pencillers-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "imprints-title": "{{metadata-fields.imprints-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}",
 
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -828,16 +828,13 @@
         "publication-status-tooltip": "Publication Status"
     },
 
-    "series-metadata-detail": {
-        "links-title": "Links",
-        "rating-title": "Ratings",
-        "genres-title": "Genres",
-        "tags-title": "Tags",
+    "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
-
+        "genres-title": "Genres",
+        "tags-title": "Tags",
         "writers-title": "Writers",
-        "cover-artists-title": "Cover Artists",
+        "cover-artists-title": "Artists",
         "characters-title": "Characters",
         "colorists-title": "Colorists",
         "editors-title": "Editors",
@@ -848,12 +845,7 @@
         "publishers-title": "Publishers",
         "imprints-title": "Imprints",
         "teams-title": "Teams",
-        "locations-title": "Locations",
-
-        "promoted": "{{common.promoted}}",
-        "see-more": "See More",
-        "see-less": "See Less"
-
+        "locations-title": "Locations"
     },
 
     "download-button": {
@@ -1641,7 +1633,7 @@
         "chapters": "Chapters",
         "people": "People",
         "tags": "Tags",
-        "genres": "Genres",
+        "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "libraries": "Libraries",
         "reading-lists": "Reading Lists",
@@ -1842,8 +1834,8 @@
         "format-label": "Format",
         "libraries-label": "Libraries",
         "collections-label": "Collections",
-        "genres-label": "Genres",
-        "tags-label": "Tags",
+        "genres-label": "{{metadata-fields.genres-title}}",
+        "tags-label": "{{metadata-fields.tags-title}}",
         "cover-artist-label": "Cover Artist",
         "writer-label": "Writer",
         "publisher-label": "Publisher",
@@ -1898,8 +1890,8 @@
         "info-tab": "{{tabs.info-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
 
-        "genres-label": "Genres",
-        "tags-label": "Tags",
+        "genres-label": "{{metadata-fields.genres-title}}",
+        "tags-label": "{{metadata-fields.tags-title}}",
         "cover-artist-label": "Cover Artist",
         "writer-label": "Writer",
         "publisher-label": "Publisher",
@@ -2149,9 +2141,9 @@
         "genre-count": "{{num}} Genres",
         "tag-count": "{{num}} Tags",
         "people-count": "{{num}} People",
-        "tags": "Tags",
+        "tags": "{{metadata-fields.tags-title}}",
         "people": "People",
-        "genres": "Genres"
+        "genres": "{{metadata-fields.genres-title}}"
     },
 
     "errors": {
@@ -2259,13 +2251,13 @@
 
     "filter-field-pipe": {
         "age-rating": "Age Rating",
-        "characters": "Characters",
+        "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Collection Tags",
         "colorist": "Colorist",
         "cover-artist": "Cover Artist",
         "editor": "Editor",
         "formats": "Formats",
-        "genres": "Genres",
+        "genres": "{{metadata-fields.genres-title}}",
         "inker": "Inker",
         "team": "Team",
         "location": "Location",
@@ -2281,10 +2273,10 @@
         "release-year": "Release Year",
         "series-name": "Series Name",
         "summary": "Summary",
-        "tags": "Tags",
+        "tags": "{{metadata-fields.tags-title}}",
         "translators": "Translators",
         "user-rating": "User Rating",
-        "writers": "Writers",
+        "writers": "{{metadata-fields.writers-title}}",
         "path": "Path",
         "file-path": "File Path",
         "want-to-read": "Want to Read",
