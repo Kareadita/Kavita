@@ -151,6 +151,48 @@ public static class TagHelper
             onModified();
         }
     }
+
+    public static void UpdateTagList(ICollection<TagDto>? tags, Chapter chapter, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
+    {
+        if (tags == null) return;
+
+        var isModified = false;
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = chapter.Tags.ToList();
+        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
+        {
+            // Remove tag
+            chapter.Tags.Remove(existing);
+            isModified = true;
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tagTitle in tags.Select(t => t.Title))
+        {
+            var normalizedTitle = tagTitle.ToNormalized();
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
+            if (existingTag != null)
+            {
+                if (chapter.Tags.All(t => t.NormalizedTitle != normalizedTitle))
+                {
+
+                    handleAdd(existingTag);
+                    isModified = true;
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(new TagBuilder(tagTitle).Build());
+                isModified = true;
+            }
+        }
+
+        if (isModified)
+        {
+            onModified();
+        }
+    }
 }
 
 #nullable disable

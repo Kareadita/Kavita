@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs.Metadata;
@@ -7,6 +8,7 @@ namespace API.DTOs.Metadata;
 /// <summary>
 /// Exclusively metadata about a given chapter
 /// </summary>
+[Obsolete("Will not be maintained as of v0.8.1")]
 public class ChapterMetadataDto
 {
     public int Id { get; set; }

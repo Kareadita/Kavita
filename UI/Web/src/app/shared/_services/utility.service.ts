@@ -59,22 +59,25 @@ export class UtilityService {
    * @param libraryType
    * @param includeHash For comics only, includes a # which is used for numbering on cards
    * @param includeSpace Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.
+   * @param plural Pluralize word
    * @returns
    */
-   formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false) {
-    switch(libraryType) {
+   formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false, plural: boolean = false) {
+    const extra = plural ? 's' : '';
+
+     switch(libraryType) {
       case LibraryType.Book:
       case LibraryType.LightNovel:
-        return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
+        return this.translocoService.translate('common.book-num' + extra) + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
       case LibraryType.ComicVine:
         if (includeHash) {
           return this.translocoService.translate('common.issue-hash-num');
         }
-        return this.translocoService.translate('common.issue-num') + (includeSpace ? ' ' : '');
+        return this.translocoService.translate('common.issue-num' + extra) + (includeSpace ? ' ' : '');
       case LibraryType.Images:
       case LibraryType.Manga:
-        return this.translocoService.translate('common.chapter-num') + (includeSpace ? ' ' : '');
+        return this.translocoService.translate('common.chapter-num' + extra) + (includeSpace ? ' ' : '');
     }
   }
 

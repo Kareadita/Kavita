@@ -13,6 +13,7 @@
     --elevation-layer7: rgba(255,255,255,0.14);
     --elevation-layer8: rgba(255,255,255,0.15);
     --elevation-layer9: rgba(255,255,255,0.16);
+    --elevation-layer10: rgba(255,255,255,0.4);
 
     --elevation-layer0-dark: rgba(0, 0, 0,0);
     --elevation-layer1-dark: rgba(0, 0, 0,0.05);
@@ -43,6 +44,7 @@
     --primary-color-darker-shade: #338A67;
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
+    --warning-color: #FFECB5;
     --bs-body-bg: #121212;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
@@ -159,26 +161,29 @@
     --bs-btn-disabled-border-color: transparent;
 
     /* Nav (Tabs) */
+    --nav-item-min-width: 150px;
+    --nav-item-max-width: 150px;
     --nav-tab-border-color: rgba(44, 118, 88, 0.7);
-    --nav-tab-text-color: var(--body-text-color);
-    --nav-tab-bg-color: var(--primary-color);
+    --nav-tab-text-color: var(--elevation-layer10);
+    --nav-tab-bg-color: transparent;
+    --nav-tab-border-width: 0 0 3px 0;
     --nav-tab-hover-border-color: var(--primary-color);
     --nav-tab-active-text-color: white;
     --nav-tab-border-hover-color: transparent;
-    --nav-tab-hover-text-color: var(--body-text-color);
+    --nav-tab-hover-text-color: white
     --nav-tab-hover-bg-color: transparent;
-    --nav-tab-border-top: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-left: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-bottom: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-right: rgba(44, 118, 88, 0.7);
-    --nav-tab-hover-border-top: rgba(44, 118, 88, 0.7);
-    --nav-tab-hover-border-left: rgba(44, 118, 88, 0.7);
-    --nav-tab-hover-border-bottom: var(--bs-body-bg);
-    --nav-tab-hover-border-right: rgba(44, 118, 88, 0.7);
-    --nav-tab-active-hover-bg-color: var(--primary-color);
+    --nav-tab-border-top: transparent;
+    --nav-tab-border-left: transparent;
+    --nav-tab-border-bottom: var(--primary-color);
+    --nav-tab-border-right: transparent;
+    --nav-tab-hover-border-top: transparent;
+    --nav-tab-hover-border-left: transparent;
+    --nav-tab-hover-border-bottom: var(--primary-color);
+    --nav-tab-hover-border-right: transparent;
+    --nav-tab-active-hover-bg-color: transparent;
     --nav-link-bg-color: var(--primary-color);
     --nav-link-active-text-color: white;
-    --nav-link-text-color: white;
+    --nav-link-text-color: var(--elevation-layer10);
 
     /* Modal */
     --modal-bg-color: #202122; // var(--bs-body-bg)
@@ -192,6 +197,11 @@
     --toast-error-bg-color: #BD362F;
     --toast-info-bg-color: #2F96B4;
     --toast-warning-bg-color: #F89406;
+
+    /* Alerts */
+    --alert-text-color: #fff3cd;
+    --alert-bg-color: transparent;
+
 
     /* Checkboxes/Switch */
     --checkbox-checked-bg-color: var(--primary-color);
@@ -227,6 +237,8 @@
     --side-nav-item-active-text-color: white;
     --side-nav-active-bg-color: transparent;
     --side-nav-overlay-color: var(--elevation-layer1);
+    --side-nav-item-closed-color: var(--elevation-layer10);
+    --side-nav-item-closed-hover-color: white;
 
 
     /* List items */
@@ -317,6 +329,7 @@
     --card-border-width: 0 1px 1px 1px;
     --card-border-style: solid;
     --card-border-color: transparent;
+    --card-border-radius: 5px;
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);

@@ -167,10 +167,6 @@ export class ThemeService {
     }));
   }
 
-  scan() {
-    return this.httpClient.post(this.baseUrl + 'theme/scan', {});
-  }
-
   /**
    * Sets the book theme on the body tag so css variable overrides can take place
    * @param selector brtheme- prefixed string

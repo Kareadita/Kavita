@@ -1,51 +1,51 @@
 <ng-container *transloco="let t; read: 'entity-title'">
-  <ng-container [ngSwitch]="libraryType">
-    <ng-container *ngSwitchCase="LibraryType.Comic">
-      <ng-container *ngIf="titleName !== '' && prioritizeTitleName; else fullComicTitle">
+  @switch (libraryType) {
+    @case (LibraryType.Comic) {
+      @if (titleName !== '' && prioritizeTitleName) {
         {{titleName}}
-      </ng-container>
-      <ng-template #fullComicTitle>
+      } @else {
         {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
-        <ng-container *ngIf="includeVolume && volumeTitle !== ''">
-          {{Number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
-        </ng-container>
-        {{Number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + Number : volumeTitle) : t('special')}}
-      </ng-template>
-    </ng-container>
+        @if (includeVolume && volumeTitle !== '') {
+          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+        }
+        {{number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + number : volumeTitle) : t('special')}}
+      }
+    }
 
-    <ng-container *ngSwitchCase="LibraryType.ComicVine">
-      <ng-container *ngIf="titleName !== '' && prioritizeTitleName; else fullComicTitle">
+    @case (LibraryType.ComicVine) {
+      @if (titleName !== '' && prioritizeTitleName) {
         {{titleName}}
-      </ng-container>
-      <ng-template #fullComicTitle>
+      } @else {
         {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
-        <ng-container *ngIf="includeVolume && volumeTitle !== ''">
-          {{Number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
-        </ng-container>
-        {{Number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + Number : volumeTitle) : t('special')}}
-      </ng-template>
-    </ng-container>
+        @if (includeVolume && volumeTitle !== '') {
+          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+        }
+        {{number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + number : volumeTitle) : t('special')}}
+      }
+    }
 
-    <ng-container *ngSwitchCase="LibraryType.Manga">
-      <ng-container *ngIf="titleName !== '' && prioritizeTitleName; else fullMangaTitle">
+    @case (LibraryType.Manga) {
+      @if (titleName !== '' && prioritizeTitleName) {
         {{titleName}}
-      </ng-container>
-      <ng-template #fullMangaTitle>
+      } @else {
         {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
-        <ng-container *ngIf="includeVolume && volumeTitle !== ''">
-          {{Number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
-        </ng-container>
-        {{Number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + Number : volumeTitle) : t('special')}}
-      </ng-template>
-    </ng-container>
-    <ng-container *ngSwitchCase="LibraryType.Book">
+        @if (includeVolume && volumeTitle !== '') {
+          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+        }
+        {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}
+      }
+    }
+
+    @case (LibraryType.Book) {
       {{volumeTitle}}
-    </ng-container>
-    <ng-container *ngSwitchCase="LibraryType.LightNovel">
+    }
+
+    @case (LibraryType.LightNovel) {
       {{volumeTitle}}
-    </ng-container>
-    <ng-container *ngSwitchCase="LibraryType.Images">
-      {{Number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + Number : volumeTitle) : t('special')}}
-    </ng-container>
-  </ng-container>
+    }
+
+    @case (LibraryType.Images) {
+      {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}
+    }
+  }
 </ng-container>

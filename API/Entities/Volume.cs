@@ -32,13 +32,13 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// The maximum number in the Name field (same as Minimum if Name isn't a range)
     /// </summary>
     public required float MaxNumber { get; set; }
-    public IList<Chapter> Chapters { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
     public string? CoverImage { get; set; }
+    public bool CoverImageLocked { get; set; }
     public string PrimaryColor { get; set; }
     public string SecondaryColor { get; set; }
 
@@ -57,6 +57,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 
 
     // Relationships
+    public IList<Chapter> Chapters { get; set; } = null!;
     public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
 

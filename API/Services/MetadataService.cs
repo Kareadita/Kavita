@@ -75,8 +75,10 @@ public class MetadataService : IMetadataService
     /// <param name="chapter"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     /// <param name="encodeFormat">Convert image to Encoding Format when extracting the cover</param>
-    private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize)
+    private Task<bool> UpdateChapterCoverImage(Chapter? chapter, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize)
     {
+        if (chapter == null) return Task.FromResult(false);
+
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null) return Task.FromResult(false);
 
@@ -133,7 +135,9 @@ public class MetadataService : IMetadataService
     private Task<bool> UpdateVolumeCoverImage(Volume? volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(
+        if (volume == null) return Task.FromResult(false);
+
+        if (!_cacheHelper.ShouldUpdateCoverImage(
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
                 null, volume.Created, forceUpdate))
         {
@@ -146,18 +150,20 @@ public class MetadataService : IMetadataService
             return Task.FromResult(false);
         }
 
-        // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
-        volume.Chapters ??= new List<Chapter>();
-
-        var firstChapter = volume.Chapters.FirstOrDefault(x => x.MinNumber.Is(1f));
-        if (firstChapter == null)
+        if (!volume.CoverImageLocked)
         {
-            firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
-            if (firstChapter == null) return Task.FromResult(false);
+            // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
+            volume.Chapters ??= new List<Chapter>();
+
+            var firstChapter = volume.Chapters.FirstOrDefault(x => x.MinNumber.Is(1f));
+            if (firstChapter == null)
+            {
+                firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
+                if (firstChapter == null) return Task.FromResult(false);
+            }
+
+            volume.CoverImage = firstChapter.CoverImage;
         }
-
-
-        volume.CoverImage = firstChapter.CoverImage;
         _imageService.UpdateColorScape(volume);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));

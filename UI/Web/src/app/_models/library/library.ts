@@ -1,4 +1,5 @@
 import {FileTypeGroup} from "./file-type-group.enum";
+import {IHasCover} from "../common/i-has-cover";
 
 export enum LibraryType {
     Manga = 0,

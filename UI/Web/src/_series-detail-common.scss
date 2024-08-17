@@ -1,0 +1,121 @@
+.title {
+  color: white;
+  font-weight: bold;
+  font-size: 1.75rem;
+}
+
+.image-container {
+  align-self: flex-start;
+  max-height: 400px;
+  max-width: 280px;
+}
+
+.subtitle {
+  color: lightgrey;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.btn {
+  //padding: 4px 8px !important;
+  //font-size: 0.8rem !important;
+}
+
+.btn-group > .btn.dropdown-toggle-split:not(first-child){
+  border-top-right-radius: var(--bs-border-radius) !important;
+  border-bottom-right-radius: var(--bs-border-radius) !important;
+  border-width: 1px 1px 1px 0 !important;
+}
+
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
+  border-width: 1px 0 1px 1px !important;
+}
+
+.card-body > div:nth-child(2) {
+  height: 50px;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.under-image  ~ .overlay-information {
+  top: -404px;
+  height: 364px;
+}
+
+.overlay-information {
+  position: relative;
+  top: -364px;
+  height: 364px;
+  transition: all 0.2s;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--card-overlay-hover-bg-color) !important;
+
+    .overlay-information--centered {
+      visibility: visible;
+    }
+  }
+
+  .overlay-information--centered {
+    position: absolute;
+    border-radius: 15px;
+    background-color: rgba(0, 0, 0, .7);
+    border-radius: 50px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 115;
+    visibility: hidden;
+
+    &:hover {
+      background-color: var(--primary-color) !important;
+      cursor: pointer;
+    }
+
+    div {
+      width: 60px;
+      height: 60px;
+      i {
+        font-size: 1.6rem;
+        line-height: 60px;
+        width: 100%;
+      }
+    }
+  }
+}
+
+.progress {
+  border-radius: 0;
+}
+
+.progress-banner.series {
+  position: relative;
+}
+
+::ng-deep .progress-banner.series span {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  top: 50%;
+}
+
+.carousel-tabs-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  scrollbar-width: none;
+}
+.carousel-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+.nav-tabs {
+  flex-wrap: nowrap;
+}

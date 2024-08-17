@@ -8,13 +8,14 @@ import {
   OnInit,
   TemplateRef
 } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
   selector: 'app-badge-expander',
   standalone: true,
-  imports: [CommonModule, TranslocoDirective],
+  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
   templateUrl: './badge-expander.component.html',
   styleUrls: ['./badge-expander.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

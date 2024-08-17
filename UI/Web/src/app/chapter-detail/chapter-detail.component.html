@@ -1,71 +1,183 @@
+<ng-container *transloco="let t; read: 'series-detail'">
 
-<!--<app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>-->
+  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
 
-<div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+    @if (chapter && series && libraryType !== null) {
+      <div class="row mb-0 mb-xl-3 info-container">
+        <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
 
-  @if (chapter) {
-    <div class="row mb-0 mb-xl-3 info-container">
-      <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block mt-2">
+          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
+            @if (chapter.pagesRead < chapter.pages && hasReadingProgress) {
+              <div class="progress-banner" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
+                <ngb-progressbar type="primary" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
+              </div>
+            }
+            <div class="card-overlay"></div>
+            <div class="overlay-information">
+              <div class="overlay-information--centered">
+                    <span class="card-title library mx-auto" style="width: auto;" (click)="read()">
+                      <!-- Card Image -->
+                      <div style="height: 60px; width: 60px;">
+                        <i class="fa-solid fa-book text-center" aria-hidden="true" style="font-size: 2rem;line-height: 60px;width: 60px"></i>
+                      </div>
+                    </span>
+              </div>
+            </div>
 
-        <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px', 'height': '100%'}" height="400px"  [imageUrl]="coverImage"></app-image>
-        <!--      @if (series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial) {-->
-        <!--        <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) * 100 | number:'1.0-1'}}% Read">-->
-        <!--          <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages" [showValue]="true"></ngb-progressbar>-->
-        <!--        </div>-->
-        <!--        <div class="under-image">-->
-        <!--          {{t('continue-from', {title: ContinuePointTitle})}}-->
-        <!--        </div>-->
-        <!--      }-->
-      </div>
-      <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
-        <h4 class="title">
-          {{series?.name}}
-        </h4>
-        <div class="subtitle">
-          <span>Issue #{{chapter.minNumber}}</span>
-          @if (chapter.titleName) {
-            <span class="ms-3">{{chapter.titleName}}</span>
-          }
         </div>
-
-        <div class="mt-2">
-          @if (chapter.publishers.length > 0) {
-            <span class="me-2">{{chapter.publishers[0]}}</span>
-          }
-          @if (chapter.ageRating !== AgeRating.Unknown) {
-            <span class="me-2">
-              {{chapter.ageRating | ageRating}}
+        <div class="col-xl-10 col-lg-7 col-md-7 col-xs-8 col-sm-6">
+          <h4 class="title mb-2">
+            <a routerLink="/library/{{series.libraryId}}/series/{{series.id}}" class="dark-exempt btn-icon">{{series.name}}</a>
+          </h4>
+          <div class="subtitle mt-2 mb-2">
+            <span>
+              <app-entity-title [libraryType]="libraryType!" [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
             </span>
-          } @else {
-            <span class="me-2">
-              <app-image imageUrl="./assets/images/ratings/unknown-rating.png" height="32px" width="32px"></app-image>
-            </span>
-          }
-
-
-          <span class="me-2"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i> {{chapter.avgHoursToRead | timeDuration }}</span>
-
-          <span>• {{chapter.pages}} pages</span>
-        </div>
-
-        <!-- Rating goes here (after I implement support for rating individual issues -->
-        @if (libraryType !== null && series) {
-          <div class="mt-2">
-            <app-external-rating [seriesId]="series.id"
-                                 [ratings]="[]"
-                                 [userRating]="series.userRating"
-                                 [hasUserRated]="series.hasUserRated"
-                                 [libraryType]="libraryType">
-            </app-external-rating>
+            @if (chapter.titleName) {
+              <span class="ms-2 me-2"></span>
+              <span>{{chapter.titleName}}</span>
+            }
           </div>
+
+          <app-metadata-detail-row [entity]="chapter"
+                                   [ageRating]="chapter.ageRating"
+                                   [hasReadingProgress]="hasReadingProgress"
+                                   [readingTimeEntity]="chapter"
+                                   [libraryType]="libraryType">
+          </app-metadata-detail-row>
+
+
+
+          <!-- Rating goes here (after I implement support for rating individual issues -->
+<!--          <div class="mt-2 mb-2">-->
+<!--            <app-external-rating [seriesId]="series.id"-->
+<!--                                 [ratings]="[]"-->
+<!--                                 [userRating]="series.userRating"-->
+<!--                                 [hasUserRated]="series.hasUserRated"-->
+<!--                                 [libraryType]="libraryType!">-->
+<!--            </app-external-rating>-->
+<!--          </div>-->
+
+          <div class="mt-3 mb-3">
+            <div class="row g-0">
+              <div class="col-auto">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-primary-outline" (click)="read()">
+                  <span>
+                <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
+              </span>
+                  </button>
+                  <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
+                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <div class="dropdown-menu" ngbDropdownMenu>
+                      <button ngbDropdownItem (click)="read(true)">
+                      <span>
+                        <i class="fa fa-glasses" aria-hidden="true"></i>
+                        <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
+                      </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+              @if (accountService.isAdmin$ | async) {
+                <div class="col-auto ms-2">
+                  <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
+                    <span><i class="fa fa-pen" aria-hidden="true"></i></span>
+                  </button>
+                </div>
+              }
+
+              <div class="col-auto ms-2 d-none d-md-block">
+                <app-download-button [download$]="download$" [entity]="chapter" entityType="chapter"></app-download-button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="mt-2 mb-3">
+            <app-read-more [text]="chapter.summary || ''"></app-read-more>
+          </div>
+
+          <div class="mt-2">
+            <div class="row g-0">
+              <div class="col-6">
+                <span class="fw-bold">{{t('writers-title')}}</span>
+                <div>
+                  <app-badge-expander [items]="chapter.writers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
+                      @if (!last) {
+                        ,
+                      }
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+              <div class="col-6">
+                <span class="fw-bold">{{t('cover-artists-title')}}</span>
+                <div>
+                  <app-badge-expander [items]="chapter.coverArtists">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
+                      @if (!last) {
+                        ,
+                      }
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+<!--      <app-carousel-tabs [(activeTabId)]="activeTabId">-->
+<!--        <app-carousel-tab [id]="TabId.Details">-->
+<!--          @defer (when activeTabId === TabId.Details; prefetch on idle) {-->
+<!--            <app-details-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-details-tab>-->
+<!--          }-->
+<!--        </app-carousel-tab>-->
+<!--      </app-carousel-tabs>-->
+
+      <div class="carousel-tabs-container">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
+
+        @if (showDetailsTab) {
+          <li [ngbNavItem]="TabID.Details">
+            <a ngbNavLink>{{t('details-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                <app-details-tab [metadata]="chapter" [genres]="chapter.genres" [tags]="chapter.tags"></app-details-tab>
+              }
+            </ng-template>
+          </li>
         }
 
-
+        @if(readingLists.length > 0) {
+          <li [ngbNavItem]="TabID.Related">
+            <a ngbNavLink>{{t('related-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                <app-related-tab [readingLists]="readingLists"></app-related-tab>
+              }
+            </ng-template>
+          </li>
+        }
+      </ul>
       </div>
-    </div>
-  }
+      <div [ngbNavOutlet]="nav"></div>
+
+    }
 
 
 
-  <app-loading [loading]="isLoading"></app-loading>
-</div>
+    <app-loading [loading]="isLoading" style="min-height: 300px"></app-loading>
+  </div>
+
+</ng-container>

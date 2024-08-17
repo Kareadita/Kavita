@@ -3,8 +3,9 @@ import { AgeRating } from "./age-rating";
 import { PublicationStatus } from "./publication-status";
 import { Person } from "./person";
 import { Tag } from "../tag";
+import {IHasCast} from "../common/i-has-cast";
 
-export interface SeriesMetadata {
+export interface SeriesMetadata extends IHasCast {
     seriesId: number;
     summary: string;
 

@@ -1,0 +1,28 @@
+<ng-container *transloco="let t; read: 'series-detail'">
+  <div class="mt-2 mb-2">
+    @if (entity.publishers.length > 0) {
+      <span class="me-2">{{entity.publishers[0].name}}</span>
+    }
+    <span class="me-2">
+      <app-age-rating-image [rating]="ageRating"></app-age-rating-image>
+    </span>
+
+    @if (hasReadingProgress && readingTimeLeft && readingTimeLeft.avgHours !== 0) {
+      <span [ngbTooltip]="t('time-left-alt')">
+        <i class="fa-solid fa-clock me-1" aria-hidden="true"></i>
+        {{readingTimeLeft | readTimeLeft }}
+      </span>
+    } @else {
+      <span [ngbTooltip]="t('time-to-read-alt')">
+        <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
+        {{readingTimeEntity | readTime }}
+      </span>
+    }
+    <span class="ms-2 me-2">•</span>
+    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
+      <span>{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
+    } @else {
+      <span>{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
+    }
+  </div>
+</ng-container>

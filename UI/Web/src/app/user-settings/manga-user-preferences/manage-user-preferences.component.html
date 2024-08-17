@@ -112,7 +112,7 @@
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="image-reader-heading"
-                      formControlName="globalPageLayoutMode">
+                      formControlName="readingDirection">
                 @for (opt of readingDirections; track opt) {
                   <option [value]="opt.value">{{opt.value | readingDirection}}</option>
                 }
@@ -365,9 +365,14 @@
               <span class="range-text">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
             </ng-template>
             <ng-template #edit>
-              <input type="range" class="form-range" id="fontsize" min="50" max="300" step="10"
-                     formControlName="bookReaderFontSize">
-              <span class="ms-2">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
+              <div class="row g-0">
+                <div class="col-11">
+                  <input type="range" class="form-range" id="fontsize" min="50" max="300" step="10"
+                        formControlName="bookReaderFontSize">
+                  
+                </div>
+                <span class="ps-2 col-1 align-middle">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
+              </div>
             </ng-template>
           </app-setting-item>
         </div>
@@ -378,8 +383,13 @@
               <span class="range-text">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
             </ng-template>
             <ng-template #edit>
-              <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
+              <div class="row g-0">
+                <div class="col-11">
+                  <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
                      formControlName="bookReaderLineSpacing">
+                </div>
+                <span class="ps-2 col-1 align-middle">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
+                </div>
             </ng-template>
           </app-setting-item>
         </div>
@@ -390,8 +400,13 @@
               <span class="range-text">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
             </ng-template>
             <ng-template #edit>
-              <input type="range" class="form-range" id="margin" min="0" max="30" step="5"
+              <div class="row g-0">
+                <div class="col-11">
+                  <input type="range" class="form-range" id="margin" min="0" max="30" step="5"
                      formControlName="bookReaderMargin">
+                </div>
+                <span class="ps-2 col-1 align-middle">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
+              </div>
             </ng-template>
           </app-setting-item>
         </div>

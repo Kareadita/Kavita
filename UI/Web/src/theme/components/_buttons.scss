@@ -28,6 +28,7 @@
   color: var(--btn-secondary-outline-text-color);
   background-color: var(--btn-secondary-outline-bg-color);
   border-color: var(--btn-secondary-outline-border-color);
+  border-radius: 0;
 
   &:hover {
     color: var(--btn-secondary-outline-hover-text-color);

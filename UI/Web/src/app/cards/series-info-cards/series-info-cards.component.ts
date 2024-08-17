@@ -35,11 +35,12 @@ import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {ReadTimeLeftPipe} from "../../_pipes/read-time-left.pipe";
 
 @Component({
   selector: 'app-series-info-cards',
   standalone: true,
-  imports: [CommonModule, IconAndTitleComponent, AgeRatingPipe, DefaultValuePipe, LanguageNamePipe, PublicationStatusPipe, MangaFormatPipe, TimeAgoPipe, CompactNumberPipe, MangaFormatIconPipe, NgbTooltip, TranslocoDirective],
+  imports: [CommonModule, IconAndTitleComponent, AgeRatingPipe, DefaultValuePipe, LanguageNamePipe, PublicationStatusPipe, MangaFormatPipe, TimeAgoPipe, CompactNumberPipe, MangaFormatIconPipe, NgbTooltip, TranslocoDirective, ReadTimeLeftPipe],
   templateUrl: './series-info-cards.component.html',
   styleUrls: ['./series-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,7 +1,9 @@
 import { MangaFormat } from './manga-format';
 import { Volume } from './volume';
+import {IHasCover} from "./common/i-has-cover";
+import {IHasReadingTime} from "./common/i-has-reading-time";
 
-export interface Series {
+export interface Series extends IHasCover, IHasReadingTime {
     id: number;
     name: string;
     /**
@@ -60,11 +62,11 @@ export interface Series {
      * Highest level folder containing this series
      */
     folderPath: string;
-  /**
-   * This is currently only used on Series detail page for recommendations
-   */
-  summary?: string;
-  coverImage?: string;
-  primaryColor: string;
-  secondaryColor: string;
+    /**
+     * This is currently only used on Series detail page for recommendations
+     */
+    summary?: string;
+    coverImage?: string;
+    primaryColor: string;
+    secondaryColor: string;
 }

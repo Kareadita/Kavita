@@ -22,11 +22,15 @@
 }
 
 .nav-tabs {
-    border-color: var(--nav-tab-border-color);
+    border-color: var(--elevation-layer9);
 
     .nav-link {
         color: var(--nav-link-text-color);
         position: relative;
+        border-width: var(--nav-tab-border-width);
+        border-radius: 0;
+        text-align: center;
+        padding: 8px 20px;
 
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);

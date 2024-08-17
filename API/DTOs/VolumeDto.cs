@@ -44,6 +44,7 @@ public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public int AvgHoursToRead { get; set; }
+    public long WordCount { get; set; }
 
     /// <summary>
     /// Is this a loose leaf volume
@@ -64,6 +65,7 @@ public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
     }
 
     public string CoverImage { get; set; }
+    private bool CoverImageLocked { get; set; }
     public string PrimaryColor { get; set; }
     public string SecondaryColor { get; set; }
 

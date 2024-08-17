@@ -239,6 +239,7 @@ export class ActionFactoryService {
       }
 
       for (let child of parent.children) {
+        if (child.action === Action.SendTo) continue;
         actionItem = {...child};
         actionItem.title = translate('actionable.' + actionItem.title);
         if (actionItem.description !== '') {
@@ -413,6 +414,22 @@ export class ActionFactoryService {
             requiresAdmin: false,
             children: [],
           },
+          // {
+          //   action: Action.AddToScrobbleHold,
+          //   title: 'add-to-scrobble-hold',
+          //   description: 'add-to-scrobble-hold-tooltip',
+          //   callback: this.dummyCallback,
+          //   requiresAdmin: true,
+          //   children: [],
+          // },
+          // {
+          //   action: Action.RemoveFromScrobbleHold,
+          //   title: 'remove-from-scrobble-hold',
+          //   description: 'remove-from-scrobble-hold-tooltip',
+          //   callback: this.dummyCallback,
+          //   requiresAdmin: true,
+          //   children: [],
+          // },
         ],
       },
       {
@@ -558,12 +575,29 @@ export class ActionFactoryService {
         ],
       },
       {
-        action: Action.Download,
-        title: 'download',
-        description: 'download-tooltip',
+        action: Action.Submenu,
+        title: 'others',
+        description: '',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: [],
+        children: [
+          {
+            action: Action.Delete,
+            title: 'delete',
+            description: 'delete-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.Download,
+            title: 'download',
+            description: 'download-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+        ]
       },
       {
         action: Action.Edit,
@@ -639,16 +673,33 @@ export class ActionFactoryService {
       },
       // RBS will handle rendering this, so non-admins with download are applicable
       {
-        action: Action.Download,
-        title: 'download',
-        description: 'download-tooltip',
+        action: Action.Submenu,
+        title: 'others',
+        description: '',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: [],
+        children: [
+          {
+            action: Action.Delete,
+            title: 'delete',
+            description: 'delete-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.Download,
+            title: 'download',
+            description: 'download-tooltip',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+        ]
       },
       {
         action: Action.Edit,
-        title: 'details',
+        title: 'edit',
         description: 'edit-tooltip',
         callback: this.dummyCallback,
         requiresAdmin: false,
