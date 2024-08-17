@@ -318,7 +318,7 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces volume cover image and locks it with a base64 encoded image.
     /// </summary>
-    /// <remarks>This is a helper API for Komf - Kavita UI does not use. Volume will find first chapter to update.</remarks>
+    /// <remarks>This will not update the underlying chapter</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
