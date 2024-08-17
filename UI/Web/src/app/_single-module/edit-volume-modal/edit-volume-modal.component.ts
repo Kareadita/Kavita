@@ -156,11 +156,9 @@ export class EditVolumeModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.value;
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     const apis = [];
-
 
     if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));

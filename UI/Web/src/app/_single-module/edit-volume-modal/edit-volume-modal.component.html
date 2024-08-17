@@ -16,7 +16,7 @@
                 {{t('cover-image-description')}}
               </p>
               <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
-                                       [showReset]="volume.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                                       [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
             </ng-template>
           </li>
 
@@ -34,15 +34,15 @@
                     </app-setting-item>
                   </div>
                 </div>
-<!--                <div class="col-lg-6 col-md-12 pe-2">-->
-<!--                  <div class="mb-3">-->
-<!--                    <app-setting-item [title]="t('words-label')" [toggleOnViewClick]="false" [showEdit]="false">-->
-<!--                      <ng-template #view>-->
-<!--                        {{t('words-count', {num: volume.wordCount | compactNumber})}}-->
-<!--                      </ng-template>-->
-<!--                    </app-setting-item>-->
-<!--                  </div>-->
-<!--                </div>-->
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('words-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{t('words-count', {num: volume.wordCount | compactNumber})}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
               </div>
 
               <div class="row g-0">

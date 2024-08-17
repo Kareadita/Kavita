@@ -446,7 +446,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   constructor(@Inject(DOCUMENT) private document: Document) {
-    //this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
 
     this.accountService.currentUser$.subscribe(user => {
@@ -560,7 +560,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     //   return;
     // }
     console.log('url:', newUrl);
-    this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true, onSameUrlNavigation: 'ignore' });
+
+    this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true });
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
