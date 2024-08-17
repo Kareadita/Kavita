@@ -550,6 +550,7 @@ public class ReadingListService : IReadingListService
             Results = new List<CblBookResult>(),
             SuccessfulInserts = new List<CblBookResult>()
         };
+
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
         // Is there another reading list with the same name?

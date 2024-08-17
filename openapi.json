@@ -1120,17 +1120,6 @@
           "Cbl"
         ],
         "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
-        "parameters": [
-          {
-            "name": "comicVineMatching",
-            "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1140,11 +1129,18 @@
                   "cbl": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
               "encoding": {
                 "cbl": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
