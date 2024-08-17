@@ -814,6 +814,9 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "teams-title": "{{metadata-fields.teams-title}}",
         "locations-title": "{{metadata-fields.locations-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "ongoing": "{{publication-status-pipe.ongoing}}",
 
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",

@@ -560,7 +560,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     // }
     console.log('url:', newUrl);
 
-    this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true });
+    //this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true });
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {

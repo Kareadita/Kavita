@@ -301,7 +301,7 @@ export class ChapterDetailComponent implements OnInit {
 
   updateUrl(activeTab: TabID) {
     const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
+    //this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
   }
 
   openPerson(field: FilterField, value: number) {
