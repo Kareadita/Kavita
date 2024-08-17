@@ -1,3 +1,9 @@
+@include media-breakpoint-down(md) {
+    .card-actions {
+        visibility: visible !important;
+    }
+}
+
 .card {
     background-color: var(--card-bg-color);
     color: var(--card-text-color);
@@ -21,7 +27,7 @@
     }
 }
 
-$image-height: 230px;
+$image-height: 232.91px;
 $image-filter-height: 160px;
 $image-width: 160px;
 

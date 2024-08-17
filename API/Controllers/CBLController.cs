@@ -34,7 +34,7 @@ public class CblController : BaseApiController
     /// <param name="comicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
     [HttpPost("validate")]
-    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, bool comicVineMatching = false)
+    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, [FromForm] bool comicVineMatching = false)
     {
         var userId = User.GetUserId();
         try
@@ -85,7 +85,7 @@ public class CblController : BaseApiController
     /// <param name="comicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
     [HttpPost("import")]
-    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, bool dryRun = false, bool comicVineMatching = false)
+    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, [FromForm] bool dryRun = false, [FromForm] bool comicVineMatching = false)
     {
         try
         {

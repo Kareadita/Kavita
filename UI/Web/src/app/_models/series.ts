@@ -62,6 +62,7 @@ export interface Series extends IHasCover, IHasReadingTime {
      * Highest level folder containing this series
      */
     folderPath: string;
+    lowestFolderPath: string;
     /**
      * This is currently only used on Series detail page for recommendations
      */

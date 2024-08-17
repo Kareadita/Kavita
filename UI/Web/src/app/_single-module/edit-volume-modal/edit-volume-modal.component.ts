@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {
   NgbActiveModal,
   NgbInputDatepicker,
@@ -29,26 +29,15 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {Volume} from "../../_models/volume";
-import {SeriesService} from "../../_services/series.service";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
-import {MetadataService} from "../../_services/metadata.service";
 import {AccountService} from "../../_services/account.service";
 import {ActionService} from "../../_services/action.service";
 import {DownloadService} from "../../shared/_services/download.service";
-import {Chapter} from "../../_models/chapter";
 import {LibraryType} from "../../_models/library/library";
-import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
-import {Tag} from "../../_models/tag";
-import {Language} from "../../_models/metadata/language";
-import {Person, PersonRole} from "../../_models/metadata/person";
-import {Genre} from "../../_models/metadata/genre";
-import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {forkJoin, Observable, of} from "rxjs";
-import {map} from "rxjs/operators";
-import {EditChapterModalCloseResult} from "../edit-chapter-modal/edit-chapter-modal.component";
+import {PersonRole} from "../../_models/metadata/person";
+import {forkJoin} from "rxjs";
 import { MangaFormat } from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {VolumeService} from "../../_services/volume.service";
@@ -167,18 +156,16 @@ export class EditVolumeModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.value;
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     const apis = [];
 
-
     if (selectedIndex > 0 || this.coverImageReset) {
-      apis.push(this.uploadService.updateVolumeCoverImage(model.id, this.selectedCover, !this.coverImageReset));
+      apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));
     }
 
     forkJoin(apis).subscribe(results => {
-      this.modal.close({success: true, volume: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: false, isDeleted: false} as EditVolumeModalCloseResult);
+      this.modal.close({success: true, volume: this.volume, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: false, isDeleted: false} as EditVolumeModalCloseResult);
     });
   }
 

@@ -49,7 +49,7 @@ $image-width: 160px;
   pointer-events: none;
   position: absolute;
   top: 0;
-  width: 158px;
+  width: 160px;
 }
 
 .not-read-badge {
@@ -158,7 +158,6 @@ $image-width: 160px;
   bottom: 0;
   right: 0;
   z-index: 115;
-  visibility: hidden;
 }
 
 .library {
@@ -186,7 +185,7 @@ $image-width: 160px;
   display: none;
 }
 
-.chapter, 
+.chapter,
 .volume,
 .series,
 .expected {

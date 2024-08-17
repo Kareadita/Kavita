@@ -482,10 +482,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor(@Inject(DOCUMENT) private document: Document) {
-      this.navService.hideNavBar();
-      this.themeService.clearThemes();
-      this.navService.hideSideNav();
-      this.cdRef.markForCheck();
+    this.navService.hideNavBar();
+    this.navService.hideSideNav();
+    this.themeService.clearThemes();
+    this.cdRef.markForCheck();
   }
 
   /**

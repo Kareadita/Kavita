@@ -318,7 +318,7 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces volume cover image and locks it with a base64 encoded image.
     /// </summary>
-    /// <remarks>This is a helper API for Komf - Kavita UI does not use. Volume will find first chapter to update.</remarks>
+    /// <remarks>This will not update the underlying chapter</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
@@ -333,24 +333,15 @@ public class UploadController : BaseApiController
             var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(uploadFileDto.Id, VolumeIncludes.Chapters);
             if (volume == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
 
-            // Find the first chapter of the volume
-            var chapter = volume.Chapters[0];
-
             var filePath = string.Empty;
             var lockState = false;
             if (!string.IsNullOrEmpty(uploadFileDto.Url))
             {
-                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetChapterFormat(chapter.Id, uploadFileDto.Id)}");
+                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetVolumeFormat(uploadFileDto.Id)}");
                 lockState = uploadFileDto.LockCover;
             }
 
-
-            chapter.CoverImage = filePath;
-            chapter.CoverImageLocked = lockState;
-            _imageService.UpdateColorScape(chapter);
-            _unitOfWork.ChapterRepository.Update(chapter);
-
-            volume.CoverImage = chapter.CoverImage;
+            volume.CoverImage = filePath;
             volume.CoverImageLocked = lockState;
             _imageService.UpdateColorScape(volume);
             _unitOfWork.VolumeRepository.Update(volume);
@@ -368,7 +359,7 @@ public class UploadController : BaseApiController
 
 
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false);
+                    MessageFactory.CoverUpdateEvent(uploadFileDto.Id, MessageFactoryEntityTypes.Volume), false);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                     MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Chapter), false);
                 return Ok();

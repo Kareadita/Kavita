@@ -91,7 +91,6 @@ import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
 import {ReviewCardComponent} from '../../../_single-module/review-card/review-card.component';
 import {CarouselReelComponent} from '../../../carousel/_components/carousel-reel/carousel-reel.component';
-import {SeriesMetadataDetailComponent} from '../series-metadata-detail/series-metadata-detail.component';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {TagBadgeComponent} from '../../../shared/tag-badge/tag-badge.component';
 import {
@@ -175,7 +174,7 @@ interface StoryLineItem {
     standalone: true,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle,
     TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
-    NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
+    NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, CardItemComponent,
     EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent,  NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
@@ -446,7 +445,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   constructor(@Inject(DOCUMENT) private document: Document) {
-    //this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
 
     this.accountService.currentUser$.subscribe(user => {
@@ -553,8 +552,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   updateUrl(activeTab: TabID) {
-    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
+    var tokens = this.router.url.split('#');
+    const newUrl = `${tokens[0]}#${activeTab}`;
+
+    // if (tokens.length === 1 || tokens[1] === activeTab + '') {
+    //   return;
+    // }
+    console.log('url:', newUrl);
+
+    //this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true });
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
@@ -869,7 +875,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
-    console.log('updateSelectedTab')
     // Book libraries only have Volumes or Specials enabled
     if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {

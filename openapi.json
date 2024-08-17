@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.3",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.4",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -1120,17 +1120,6 @@
           "Cbl"
         ],
         "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
-        "parameters": [
-          {
-            "name": "comicVineMatching",
-            "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1140,11 +1129,18 @@
                   "cbl": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
               "encoding": {
                 "cbl": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -1181,26 +1177,6 @@
           "Cbl"
         ],
         "summary": "Performs the actual import (assuming dryRun = false)",
-        "parameters": [
-          {
-            "name": "dryRun",
-            "in": "query",
-            "description": "If true, will only emulate the import but not perform. This should be done to preview what will happen",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "comicVineMatching",
-            "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1210,11 +1186,25 @@
                   "cbl": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "comicVineMatching": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
               "encoding": {
                 "cbl": {
+                  "style": "form"
+                },
+                "dryRun": {
+                  "style": "form"
+                },
+                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -12778,7 +12768,7 @@
           "Upload"
         ],
         "summary": "Replaces volume cover image and locks it with a base64 encoded image.",
-        "description": "This is a helper API for Komf - Kavita UI does not use. Volume will find first chapter to update.",
+        "description": "This will not update the underlying chapter",
         "requestBody": {
           "description": "",
           "content": {

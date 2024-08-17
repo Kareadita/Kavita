@@ -2,9 +2,9 @@
   <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick()">
       @if (series.pages > 0) {
-        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-image>
       } @else if (series.pages === 0) {
-        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
       }
 
       <div class="progress-banner">

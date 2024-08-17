@@ -17,7 +17,7 @@
       }
 
       <ul class="list-group">
-        @for(collectionTag of lists | filter: filterList; let i = $index; track collectionTag.title) {
+        @for(collectionTag of lists | filter: filterList; let i = $index; track collectionTag.title + collectionTag.promoted) {
           <li class="list-group-item clickable" tabindex="0" role="option"  (click)="addToCollection(collectionTag)">
             {{collectionTag.title}}
             @if (collectionTag.promoted) {

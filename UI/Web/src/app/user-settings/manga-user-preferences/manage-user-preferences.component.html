@@ -7,22 +7,6 @@
     <form [formGroup]="settingsForm">
       <h4>{{t('global-settings-title')}}</h4>
       <ng-container>
-        <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('page-layout-mode-label')" [subtitle]="t('page-layout-mode-tooltip')">
-            <ng-template #view>
-              {{settingsForm.get('globalPageLayoutMode')!.value | pageLayoutMode}}
-            </ng-template>
-            <ng-template #edit>
-              <select class="form-select" aria-describedby="manga-header"
-                      formControlName="globalPageLayoutMode">
-                @for (opt of pageLayoutModes; track opt) {
-                  <option [value]="opt.value">{{opt.value | pageLayoutMode}}</option>
-                }
-              </select>
-            </ng-template>
-          </app-setting-item>
-        </div>
-
 
         <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')">

@@ -216,4 +216,5 @@ export class VolumeCardComponent implements OnInit {
     this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
   }
 
+  protected readonly LibraryType = LibraryType;
 }

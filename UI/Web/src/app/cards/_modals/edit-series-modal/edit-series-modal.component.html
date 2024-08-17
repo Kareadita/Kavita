@@ -489,85 +489,215 @@
             <a ngbNavLink>{{t(tabs[TabID.Info])}}</a>
             <ng-template ngbNavContent>
               <h5>{{t('info-title')}}</h5>
-              <div class="row g-0 mt-3 mb-3">
-                <div class="col-md-6" *ngIf="libraryName"><span class="fw-bold text-uppercase">{{t('library-title')}}</span> {{libraryName | sentenceCase}}</div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('format-title')}}</span> <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
-              </div>
-              <div class="row g-0 mt-3 mb-3">
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('created-title')}}</span> {{series.created | date:'shortDate'}}</div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('last-read-title')}}</span> {{series.latestReadDate | defaultDate | timeAgo}}</div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('last-added-title')}}</span> {{series.lastChapterAdded | defaultDate | timeAgo}}</div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('last-scanned-title')}}</span> {{series.lastFolderScanned | defaultDate | timeAgo}}</div>
+
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('library-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{libraryName! | sentenceCase}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('format-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge>
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
               </div>
 
-              <div class="row g-0 mt-3 mb-3">
-                <div class="col-auto"><span class="fw-bold text-uppercase">{{t('folder-path-title')}}</span> {{series.folderPath | defaultValue}}</div>
-              </div>
-              <div class="row g-0 mt-3 mb-3" *ngIf="metadata">
-                <div class="col-md-6">
-                  <span class="fw-bold text-uppercase">{{t('max-items-title')}}</span> {{metadata.maxCount}}
-                  <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="t('highest-count-tooltip')" role="button" tabindex="0"></i>
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('folder-path-title')" [subtitle]="t('folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.folderPath | defaultValue}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <span class="fw-bold text-uppercase">{{t('total-items-title')}}</span> {{metadata.totalCount}}
-                  <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="t('max-issue-tooltip')" role="button" tabindex="0"></i>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('lowest-folder-path-title')" [subtitle]="t('lowest-folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.lowestFolderPath | defaultValue}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
                 </div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('publication-status-title')}}</span> {{metadata.publicationStatus | publicationStatus}}</div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('total-pages-title')}}</span> {{series.pages}}</div>
-                <div class="col-md-6"><span class="fw-bold text-uppercase">{{t('size-title')}}</span> {{size | bytes}}</div>
               </div>
-              <h4>Volumes</h4>
-              <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
-                <span class="visually-hidden">{{t('loading')}}</span>
-              </div>
-              <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
-                <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
-                  <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
-                  <div class="flex-grow-1">
-                    <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
-                    <div>
-                      <div class="row g-0">
-                        <div class="col">
-                          {{t('added-title')}} {{volume.createdUtc | utcToLocalTime | defaultDate}}
-                        </div>
-                        <div class="col">
-                          {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime | translocoDate: {dateStyle: 'short' } | defaultDate}}
-                        </div>
-                      </div>
-                      <div class="row g-0">
-                        <div class="col">
-                          <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
-                                  [attr.aria-expanded]="!volumeCollapsed[volume.name]">
-                            {{t('view-files')}}
-                          </button>
-                        </div>
-                        <div class="col">
-                          {{t('pages-title')}} {{volume.pages}}
-                        </div>
-                      </div>
 
-                      <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
-                        <ul class="list-group mt-2">
-                          <li *ngFor="let file of volume.volumeFiles" class="list-group-item">
-                            <span>{{file.filePath}}</span>
-                            <div class="row g-0">
-                              <div class="col">
-                                {{t('chapter-title')}} {{file.chapter}}
-                              </div>
-                              <div class="col">
-                                {{t('pages-title')}} {{file.pages}}
-                              </div>
-                              <div class="col">
-                                {{t('format-title')}} <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
-                              </div>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
+              @if (metadata) {
+                <div class="row g-0">
+                  <div class="col-lg-6 col-md-12 pe-2">
+                    <div class="mb-3">
+                      <app-setting-item [title]="t('max-items-title')" [subtitle]="t('highest-count-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          {{metadata.maxCount}}
+                        </ng-template>
+                      </app-setting-item>
                     </div>
                   </div>
-                </li>
-              </ul>
+                  <div class="col-lg-6 col-md-12 pe-2">
+                    <div class="mb-3">
+                      <app-setting-item [title]="t('total-items-title')" [subtitle]="t('max-issue-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          {{metadata.totalCount}}
+                        </ng-template>
+                      </app-setting-item>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="col-lg-6 col-md-12 pe-2">
+                    <div class="mb-3">
+                      <app-setting-item [title]="t('publication-status-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          {{metadata.publicationStatus | publicationStatus}}
+                        </ng-template>
+                      </app-setting-item>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-md-12 pe-2">
+                    <div class="mb-3">
+                      <app-setting-item [title]="t('size-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          {{size | bytes}}
+                        </ng-template>
+                      </app-setting-item>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('created-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.created | date:'shortDate'}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('last-added-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.lastChapterAdded | defaultDate | timeAgo}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('last-scanned-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.lastFolderScanned | defaultDate | timeAgo}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('last-read-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.lastChapterAdded | defaultDate | timeAgo}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('total-pages-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.pages | number}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('total-words-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{series.wordCount | number}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+              </div>
+
+              <h4>Volumes</h4>
+              @if (isLoadingVolumes) {
+                <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
+                  <span class="visually-hidden">{{t('loading')}}</span>
+                </div>
+              } @else {
+                <ul class="list-unstyled">
+                  @for (volume of seriesVolumes; track volume.id) {
+                    <li class="d-flex my-4">
+                      <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
+                      <div class="flex-grow-1">
+                        <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
+                        <div>
+                          <div class="row g-0">
+                            <div class="col">
+                              {{t('added-title')}} {{volume.createdUtc | utcToLocalTime | defaultDate}}
+                            </div>
+                            <div class="col">
+                              {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime | translocoDate: {dateStyle: 'short' } | defaultDate}}
+                            </div>
+                          </div>
+                          <div class="row g-0">
+                            <div class="col">
+                              <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
+                                      [attr.aria-expanded]="!volumeCollapsed[volume.name]">
+                                {{t('view-files')}}
+                              </button>
+                            </div>
+                            <div class="col">
+                              {{t('pages-title')}} {{volume.pages}}
+                            </div>
+                          </div>
+
+                          <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
+                            <ul class="list-group mt-2">
+                              @for(file of volume.volumeFiles; track file.id) {
+                                <li class="list-group-item">
+                                  <span>{{file.filePath}}</span>
+                                  <div class="row g-0">
+                                    <div class="col">
+                                      {{t('chapter-title')}} {{file.chapter}}
+                                    </div>
+                                    <div class="col">
+                                      {{t('pages-title')}} {{file.pages}}
+                                    </div>
+                                    <div class="col">
+                                      {{t('format-title')}} <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                    </div>
+                                  </div>
+                                </li>
+                              }
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
             </ng-template>
           </li>
 

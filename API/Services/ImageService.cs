@@ -740,6 +740,16 @@ public class ImageService : IImageService
     }
 
     /// <summary>
+    /// Returns the name format for a volume cover image (custom)
+    /// </summary>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
+    public static string GetVolumeFormat(int volumeId)
+    {
+        return $"v{volumeId}";
+    }
+
+    /// <summary>
     /// Returns the name format for a library cover image
     /// </summary>
     /// <param name="libraryId"></param>

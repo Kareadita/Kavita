@@ -54,7 +54,6 @@ import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
-import {LibraryType} from "../../../_models/library/library";
 import {ToastrService} from "ngx-toastr";
 import {Volume} from "../../../_models/volume";
 import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
@@ -62,6 +61,7 @@ import {SettingButtonComponent} from "../../../settings/_components/setting-butt
 import {ActionService} from "../../../_services/action.service";
 import {DownloadService} from "../../../shared/_services/download.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
 
 enum TabID {
   General = 0,
@@ -116,6 +116,7 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     EditListComponent,
     SettingButtonComponent,
     SettingItemComponent,
+    ReadTimePipe,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
