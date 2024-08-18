@@ -108,6 +108,16 @@ public class ScannerServiceTests : AbstractDbTest
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
         var testcase = "Publisher - ComicVine.json";
+        var postLib = await GenerateScannerData(testcase);
+
+        Assert.NotNull(postLib);
+        Assert.Equal(4, postLib.Series.Count);
+
+        Assert.True(true);
+    }
+
+    private async Task<Library> GenerateScannerData(string testcase)
+    {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase));
         _testOutputHelper.WriteLine($"Test Directory Path: {testDirectoryPath}");
 
@@ -143,12 +153,7 @@ public class ScannerServiceTests : AbstractDbTest
         await scanner.ScanLibrary(library.Id);
 
         var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-
-        Assert.NotNull(postLib);
-        Assert.Equal(4, postLib.Series.Count);
-
-        Assert.True(true);
-
+        return postLib;
     }
 
     private static (string Publisher, LibraryType Type) SplitPublisherAndLibraryType(string input)
@@ -161,8 +166,8 @@ public class ScannerServiceTests : AbstractDbTest
             throw new ArgumentException("Input must be in the format 'Publisher - LibraryType'");
         }
 
-        string publisher = parts[0].Trim();
-        string libraryTypeString = parts[1].Trim();
+        var publisher = parts[0].Trim();
+        var libraryTypeString = parts[1].Trim();
 
         // Try to parse the right-hand side as a LibraryType enum
         if (!Enum.TryParse<LibraryType>(libraryTypeString, out var libraryType))
@@ -239,11 +244,9 @@ public class ScannerServiceTests : AbstractDbTest
             {
                 var comicInfo = GenerateComicInfo();
                 var entry = archive.CreateEntry("ComicInfo.xml");
-                using (var entryStream = entry.Open())
-                using (var writer = new StreamWriter(entryStream, Encoding.UTF8))
-                {
-                    writer.Write(comicInfo);
-                }
+                using var entryStream = entry.Open();
+                using var writer = new StreamWriter(entryStream, Encoding.UTF8);
+                writer.Write(comicInfo);
             }
         }
         Console.WriteLine($"Created minimal CBZ archive: {filePath} with{(includeMetadata ? "" : "out")} metadata.");
