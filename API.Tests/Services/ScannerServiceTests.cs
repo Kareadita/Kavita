@@ -104,8 +104,7 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
     }
 
-    // This is working but actually shows a bug.
-    //[Fact]
+    [Fact]
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
         var testcase = "Publisher - ComicVine.json";
@@ -119,7 +118,7 @@ public class ScannerServiceTests : AbstractDbTest
             .Build();
 
         var admin = new AppUserBuilder("admin", "admin@kavita.com", Seed.DefaultThemes[0])
-            .WithLibrary(library, false)
+            .WithLibrary(library)
             .Build();
 
         _unitOfWork.UserRepository.Add(admin); // Admin is needed for generating collections/reading lists
@@ -127,7 +126,7 @@ public class ScannerServiceTests : AbstractDbTest
         await _unitOfWork.CommitAsync();
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-        var mockReadingService = new MockReadingItemService(new BasicParser(ds, new ImageParser(ds)));
+        var mockReadingService = new MockReadingItemService(ds, Substitute.For<IBookService>());
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
             Substitute.For<IEventHub>(),
             ds, Substitute.For<ICacheHelper>(), mockReadingService, Substitute.For<IFileService>(),
