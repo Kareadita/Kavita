@@ -2483,7 +2483,6 @@
         "import-mal-stack": "Import MAL Stack",
         "import-mal-stack-tooltip": "Creates a Smart Collection from your MAL Interest Stacks",
         "read": "Read",
-        "read-tooltip": "",
         "customize": "Customize",
         "customize-tooltip": "TODO",
         "mark-visible": "Mark as Visible",

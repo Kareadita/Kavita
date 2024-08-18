@@ -146,7 +146,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
-    this.chapterActions.push({title: 'read', description: 'read-tooltip', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
+    this.chapterActions.push({title: 'read', description: '', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
     if (this.isChapter) {
       const chapter = this.utilityService.asChapter(this.data);
       this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, chapter);
