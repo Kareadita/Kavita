@@ -25,7 +25,7 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-internal class MockReadingItemService : IReadingItemService
+public class MockReadingItemService : IReadingItemService
 {
     private readonly IDefaultParser _defaultParser;
 
