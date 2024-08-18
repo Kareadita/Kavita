@@ -61,7 +61,8 @@
                                  [ratings]="ratings"
                                  [userRating]="series.userRating"
                                  [hasUserRated]="series.hasUserRated"
-                                 [libraryType]="libraryType">
+                                 [libraryType]="libraryType"
+                                 [webLinks]="WebLinks">
             </app-external-rating>
           </div>
 
@@ -71,9 +72,9 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-primary-outline" (click)="read()">
                     <span>
-                  <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                  <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
-                </span>
+                      <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                      <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
+                    </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
                     <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
@@ -127,7 +128,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 1000 : 250"></app-read-more>
+            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 750 : 250"></app-read-more>
           </div>
 
           <div class="mt-2">
@@ -146,16 +147,15 @@
                 </div>
               </div>
               <div class="col-6">
-                <span class="fw-bold">{{t('cover-artists-title')}}</span>
+                <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.coverArtists">
-                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.CoverArtist, item.id)">{{item.name}}</a>
-                      @if (!last) {
-                        ,
-                      }
-                    </ng-template>
-                  </app-badge-expander>
+                  @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
+                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
+                       href="javascript:void(0);"
+                       [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
+                      {{pubStatus}}
+                    </a>
+                  }
                 </div>
               </div>
             </div>
@@ -194,36 +194,36 @@
           </div>
 
 
-          <div class="mt-3 mb-2">
-            <div class="row g-0">
-              <div class="col-6">
-                <span class="fw-bold">{{t('weblinks-title')}}</span>
-                <div>
-                  @for(link of WebLinks; track link) {
-                    <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">
-                      <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
-                                 [errorImage]="imageService.errorWebLinkImage"></app-image>
-                    </a>
-                  } @empty {
-                    {{null | defaultValue}}
-                  }
-                </div>
-              </div>
+<!--          <div class="mt-3 mb-2">-->
+<!--            <div class="row g-0">-->
+<!--              <div class="col-6">-->
+<!--                <span class="fw-bold">{{t('weblinks-title')}}</span>-->
+<!--                <div>-->
+<!--                  @for(link of WebLinks; track link) {-->
+<!--                    <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">-->
+<!--                      <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"-->
+<!--                                 [errorImage]="imageService.errorWebLinkImage"></app-image>-->
+<!--                    </a>-->
+<!--                  } @empty {-->
+<!--                    {{null | defaultValue}}-->
+<!--                  }-->
+<!--                </div>-->
+<!--              </div>-->
 
-              <div class="col-6">
-                <span class="fw-bold">{{t('publication-status-title')}}</span>
-                <div>
-                  @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
-                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
-                       href="javascript:void(0);"
-                       [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
-                      {{pubStatus}}
-                    </a>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
+<!--              <div class="col-6">-->
+<!--                <span class="fw-bold">{{t('publication-status-title')}}</span>-->
+<!--                <div>-->
+<!--                  @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {-->
+<!--                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"-->
+<!--                       href="javascript:void(0);"-->
+<!--                       [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">-->
+<!--                      {{pubStatus}}-->
+<!--                    </a>-->
+<!--                  }-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
 
 
         </div>
@@ -513,7 +513,7 @@
               <a ngbNavLink>{{t(TabID.Details)}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                  <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags"></app-details-tab>
+                  <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags" [webLinks]="WebLinks"></app-details-tab>
                 }
               </ng-template>
             </li>
