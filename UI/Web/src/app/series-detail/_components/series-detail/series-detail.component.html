@@ -128,7 +128,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 585 : 250"></app-read-more>
+            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 585 : 200"></app-read-more>
           </div>
 
           <div class="mt-2">
@@ -136,12 +136,11 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('writers-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.writers">
+                  <app-badge-expander [items]="seriesMetadata.writers"
+                                      [itemsTillExpander]="3"
+                                      [allowToggle]="false">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Writers, item.id)">{{item.name}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -166,12 +165,11 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('genres-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.genres" [itemsTillExpander]="5">
+                  <app-badge-expander [items]="seriesMetadata.genres"
+                                      [itemsTillExpander]="3"
+                                      [allowToggle]="false">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Genres, item.id)">{{item.title}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -180,12 +178,11 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('tags-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.tags" [itemsTillExpander]="5">
+                  <app-badge-expander [items]="seriesMetadata.tags"
+                                      [itemsTillExpander]="3"
+                                      [allowToggle]="false">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>

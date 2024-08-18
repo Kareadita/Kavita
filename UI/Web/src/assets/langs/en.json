@@ -1079,18 +1079,18 @@
 
     "chapter-metadata-detail": {
         "no-data": "No metadata available",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "translators-title": "{{series-metadata-detail.translators-title}}",
-        "letterers-title": "{{series-metadata-detail.letterers-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}",
-        "inkers-title": "{{series-metadata-detail.inkers-title}}",
-        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
-        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}",
-        "teams-title": "{{series-metadata-detail.teams-title}}",
-        "locations-title": "{{series-metadata-detail.locations-title}}"
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "pencillers-title": "{metadata-fields.pencillers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}"
     },
 
     "cover-image-chooser": {
@@ -1124,8 +1124,8 @@
     },
 
     "entity-info-cards": {
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
         "release-date-title": "Release",
         "release-date-tooltip": "Release Date",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
@@ -1137,7 +1137,7 @@
         "date-added-title": "Date Added",
         "size-title": "Size",
         "id-title": "ID",
-        "links-title": "{{series-metadata-detail.links-title}}",
+        "links-title": "{{metadata-fields.links-title}}",
         "isbn-title": "ISBN",
         "sort-order-title": "Sort Order",
         "last-read-title": "Last Read",
@@ -1605,7 +1605,7 @@
         "read-options-alt": "Read options",
         "incognito-alt": "(Incognito)",
         "no-data": "Nothing added",
-        "characters-title": "{{series-metadata-detail.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}"
     },
 
     "events-widget": {

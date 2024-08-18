@@ -96,9 +96,6 @@
                   <app-badge-expander [items]="volumeCast.writers">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -109,9 +106,6 @@
                   <app-badge-expander [items]="volumeCast.coverArtists">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>
