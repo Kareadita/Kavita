@@ -227,7 +227,7 @@
         "title": "Age Rating Restriction",
         "description": "When selected, all series and reading lists that have at least one item that is greater than the selected restriction will be pruned from results.",
         "not-applicable-for-admins": "This is not applicable for admins.",
-        "age-rating-label": "Age Rating",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "no-restriction": "No Restriction",
         "include-unknowns-label": "Include Unknowns",
         "include-unknowns-tooltip": "If true, Unknowns will be allowed with Age Restriction. This could lead to untagged media leaking to users with Age restrictions."
@@ -848,7 +848,9 @@
         "publishers-title": "Publishers",
         "imprints-title": "Imprints",
         "teams-title": "Teams",
-        "locations-title": "Locations"
+        "locations-title": "Locations",
+        "language-title": "Language",
+        "age-rating-title": "Age Rating"
     },
 
     "download-button": {
@@ -1052,21 +1054,21 @@
     },
 
     "details-tab": {
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "translators-title": "{{series-metadata-detail.translators-title}}",
-        "letterers-title": "{{series-metadata-detail.letterers-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}",
-        "inkers-title": "{{series-metadata-detail.inkers-title}}",
-        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
-        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}",
-        "teams-title": "{{series-metadata-detail.teams-title}}",
-        "locations-title": "{{series-metadata-detail.locations-title}}",
-        "imprints-title": "{{series-metadata-detail.imprints-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "tags-title": "{{series-metadata-detail.tags-title}}"
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "pencillers-title": "{{metadata-fields.pencillers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}",
+        "imprints-title": "{{metadata-fields.imprints-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}"
     },
 
     "related-tab": {
@@ -1124,7 +1126,7 @@
         "characters-title": "{{series-metadata-detail.characters-title}}",
         "release-date-title": "Release",
         "release-date-tooltip": "Release Date",
-        "age-rating-title": "Age Rating",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "length-title": "Length",
         "pages-count": "{{num}} Pages",
         "words-count": "{{num}} Words",
@@ -1148,7 +1150,7 @@
         "release-date-title": "{{entity-info-cards.release-date-title}}",
         "release-year-tooltip": "Release Year",
         "age-rating-title": "{{entity-info-cards.age-rating-title}}",
-        "language-title": "Language",
+        "language-title": "{{metadata-fields.language-title}}",
         "publication-status-title": "Publication",
         "publication-status-tooltip": "Publication Status",
         "scrobbling-title": "Scrobbling",
@@ -1854,8 +1856,8 @@
         "read": "Read",
         "in-progress": "In Progress",
         "rating-label": "Rating",
-        "age-rating-label": "Age Rating",
-        "language-label": "Language",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
+        "language-label": "{{metadata-fields.language-title}}",
         "publication-status-label": "Publication Status",
         "series-name-label": "Series Name",
         "series-name-tooltip": "Series name will filter against Name, Sort Name, or Localized Name",
@@ -1895,21 +1897,21 @@
 
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
-        "cover-artist-label": "Cover Artist",
-        "writer-label": "Writer",
-        "publisher-label": "Publisher",
-        "imprint-label": "Imprint",
-        "penciller-label": "Penciller",
-        "letterer-label": "Letterer",
-        "inker-label": "Inker",
-        "editor-label": "Editor",
-        "colorist-label": "Colorist",
-        "character-label": "Character",
-        "translator-label": "Translator",
-        "team-label": "{{filter-field-pipe.team}}",
-        "location-label": "{{filter-field-pipe.location}}",
-        "language-label": "Language",
-        "age-rating-label": "Age Rating",
+        "cover-artist-label": "{{metadata-fields.cover-artists-title}}",
+        "writer-label": "{{metadata-fields.writers-title}}",
+        "publisher-label": "{{metadata-fields.publishers-title}}",
+        "imprint-label": "{{metadata-fields.imprints-title}}",
+        "penciller-label": "{{metadata-fields.pencillers-title}}",
+        "letterer-label": "{{metadata-fields.letterers-title}}",
+        "inker-label": "{{metadata-fields.inkers-title}}",
+        "editor-label": "{{metadata-fields.editors-title}}",
+        "colorist-label": "{{metadata-fields.colorists-title}}",
+        "character-label": "{{metadata-fields.characters-title}}",
+        "translator-label": "{{metadata-fields.translators-title}}",
+        "team-label": "{{metadata-fields.teams-title}}",
+        "location-label": "{{metadata-fields.locations-title}}",
+        "language-label": "{{metadata-fields.language-title}}",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
 
         "publication-status-label": "Publication Status",
         "required-field": "{{validation.required-field}}",
@@ -1920,7 +1922,7 @@
         "summary-label": "Summary",
         "release-year-label": "Release Year",
         "web-link-description": "Here you can add many different links to external services.",
-        "web-link-label": "Web Link",
+        "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "Upload and choose a new cover image. Press Save to upload and override the cover.",
         "save": "{{common.save}}",
         "field-locked-alt": "Field is locked",
@@ -1937,6 +1939,7 @@
         "lowest-folder-path-tooltip": "Lowest path from library root that contains all series files",
         "publication-status-title": "Publication Status",
         "total-pages-title": "Total Pages",
+        "total-words-title": "Total Words",
         "total-items-title": "Total Items",
         "max-items-title": "Max Items",
         "size-title": "Size",
@@ -1953,7 +1956,8 @@
         "force-refresh": "Force Refresh",
         "force-refresh-tooltip": "Force refresh external metadata from Kavita+",
         "loose-leaf-volume": "Loose Leaf Chapters",
-        "specials-volume": "Specials"
+        "specials-volume": "Specials",
+        "release-year-validation": "{{validation.year-validation}}"
     },
 
     "edit-chapter-modal": {
@@ -2253,7 +2257,7 @@
     },
 
     "filter-field-pipe": {
-        "age-rating": "Age Rating",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Collection Tags",
         "colorist": "Colorist",
@@ -2531,7 +2535,8 @@
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email",
-        "password-validation": "Password must be between 6 and 32 characters in length"
+        "password-validation": "Password must be between 6 and 32 characters in length",
+        "year-validation": "This must be a valid year greater than 1000 and 4 characters long"
     },
 
     "entity-type": {
