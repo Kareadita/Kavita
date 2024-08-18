@@ -85,7 +85,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="volume.chapters[0].summary || ''"></app-read-more>
+            <app-read-more [text]="volume.chapters[0].summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 585 : 250"></app-read-more>
           </div>
 
           <div class="mt-2">
