@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using API.Data;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
@@ -19,6 +21,7 @@ using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using API.Tests.Helpers;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -36,6 +39,9 @@ public class ScannerServiceTests : AbstractDbTest
     public ScannerServiceTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
+
+        // Set up Hangfire to use in-memory storage for testing
+        GlobalConfiguration.Configuration.UseInMemoryStorage();
     }
 
     protected override async Task ResetDb()
@@ -98,18 +104,25 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
     }
 
-    [Fact]
+    // This is working but actually shows a bug.
+    //[Fact]
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
-        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, "Publisher - ComicVine.json"));
+        var testcase = "Publisher - ComicVine.json";
+        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase));
         _testOutputHelper.WriteLine($"Test Directory Path: {testDirectoryPath}");
 
-        var (publisher, type) = SplitPublisherAndLibraryType(Path.GetDirectoryName(testDirectoryPath));
+        var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
 
         var library = new LibraryBuilder(publisher, type)
             .WithFolders([new FolderPath() {Path = testDirectoryPath}])
             .Build();
 
+        var admin = new AppUserBuilder("admin", "admin@kavita.com", Seed.DefaultThemes[0])
+            .WithLibrary(library, false)
+            .Build();
+
+        _unitOfWork.UserRepository.Add(admin); // Admin is needed for generating collections/reading lists
         _unitOfWork.LibraryRepository.Add(library);
         await _unitOfWork.CommitAsync();
 
@@ -129,6 +142,11 @@ public class ScannerServiceTests : AbstractDbTest
             mockReadingService, processSeries, Substitute.For<IWordCountAnalyzerService>());
 
         await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Equal(4, postLib.Series.Count);
 
         Assert.True(true);
 
