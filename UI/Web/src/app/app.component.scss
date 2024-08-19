@@ -68,6 +68,9 @@
   z-index: -1;
   pointer-events: none;
   background-color: #121212;
+  filter: blur(20px);
+  object-fit: contain;
+  transform: scale(1.1);
 
   .background-area {
     position: absolute;
