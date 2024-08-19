@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Koreader;
+using API.Helpers;
 
 namespace API.Services;
 
@@ -9,8 +10,8 @@ namespace API.Services;
 
 public interface IKoreaderService
 {
-    Task SaveProgress(double progress, string bookHash, int userId);
-    Task<double> GetProgress(string bookHash, int userId);
+    Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId);
+    Task<KoreaderBookDto> GetProgress(string bookHash, int userId);
 }
 
 public class KoreaderService : IKoreaderService
@@ -24,22 +25,28 @@ public class KoreaderService : IKoreaderService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task SaveProgress(double progress, string bookHash, int userId)
+    public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId)
     {
-        var file = await _unitOfWork.MangaFileRepository.GetByHash(bookHash);
-        var userProgress = await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(file.ChapterId, userId);
-        userProgress.PagesRead = (int)Math.Floor(progress * file.Pages);
-        userProgress.MarkModified();
-        _unitOfWork.AppUserProgressRepository.Update(userProgress);
+        var file = await _unitOfWork.MangaFileRepository.GetByHash(koreaderBookDto.Document);
+        var userProgressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+        KoreaderHelper.UpdateProgressDto(koreaderBookDto.Progress, userProgressDto);
+        _readerService.SaveReadingProgress(userProgressDto, userId);
         await _unitOfWork.CommitAsync();
     }
 
-    public async Task<double> GetProgress(string bookHash, int userId)
+    public async Task<KoreaderBookDto> GetProgress(string bookHash, int userId)
     {
         var file = await _unitOfWork.MangaFileRepository.GetByHash(bookHash);
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
-
-        var chapterProgress = (double)progressDto.PageNum / (double)file.Pages;
-        return chapterProgress;
+        var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
+        return new KoreaderBookDto
+        {
+            Document = bookHash,
+            Device_id = "kavita",
+            Device = "kavita",
+            Progress = koreaderProgress,
+            Percentage = 0.5f
+            // We can potentially calculate percentage later if needed.
+        };
     }
 }

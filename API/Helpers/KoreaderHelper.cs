@@ -1,7 +1,11 @@
+using API.DTOs.Koreader;
+using API.DTOs.Progress;
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace API.Helpers;
 
@@ -57,5 +61,34 @@ public static class KoreaderHelper
         var fileNameBytes = Encoding.ASCII.GetBytes(fileName);
         byte[] bytes = md5.ComputeHash(fileNameBytes);
         return BitConverter.ToString(bytes).Replace("-", "");
+    }
+
+    public static void UpdateProgressDto(string koreaderPosition, ProgressDto progress)
+    {
+        var path = koreaderPosition.Split('/');
+        var docNumber = path[2].Replace("DocFragment[", "").Replace("]", "");
+        progress.PageNum = Int32.Parse(docNumber) - 1;
+        string lastTag = path[5].ToUpper();
+        if (lastTag == "A")
+        {
+            Console.WriteLine("It's an A tag!");
+            progress.BookScrollId = null;
+        }
+        else
+        {
+            progress.BookScrollId = $"//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/{lastTag}";
+        }
+    }
+
+
+    public static string GetKoreaderPosition(ProgressDto progressDto)
+    {
+        string lastTag;
+        int koreaderPageNumber = progressDto.PageNum + 1;
+        if (string.IsNullOrEmpty(progressDto.BookScrollId))
+            lastTag = "a";
+        else
+            lastTag = progressDto.BookScrollId.Split('/').Last().ToLower();
+        return $"/body/DocFragment[{koreaderPageNumber}]/body/div/{lastTag}";
     }
 }

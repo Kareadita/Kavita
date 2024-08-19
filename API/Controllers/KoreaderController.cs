@@ -56,7 +56,7 @@ public class KoreaderController : BaseApiController
     public async Task<IActionResult> UpdateProgress(string apiKey, KoreaderBookDto request)
     {
         var userId = await GetUserId(apiKey);
-        await _koreaderService.SaveProgress(request.Percentage, request.Document, userId);
+        await _koreaderService.SaveProgress(request, userId);
         var response = new
         {
             document = request.Document,
@@ -69,10 +69,10 @@ public class KoreaderController : BaseApiController
     public async Task<IActionResult> GetProgress(string apiKey, string ebookHash)
     {
         var userId = await GetUserId(apiKey);
-        _unitOfWork.VolumeRepository.GetVolumeAsync(1);
-        var response = new KoreaderBookDto();
+        var response = await _koreaderService.GetProgress(ebookHash, userId);
+        Console.WriteLine(response.Progress);
+        Console.WriteLine(response.Percentage);
         return Ok(response);
-
     }
 
 
@@ -88,8 +88,7 @@ public class KoreaderController : BaseApiController
         }
         catch
         {
-            /* Do nothing */
+            throw new KavitaException(await _localizationService.Get("en", "user-doesnt-exist"));
         }
-        throw new KavitaException(await _localizationService.Get("en", "user-doesnt-exist"));
     }
 }
