@@ -1120,7 +1120,19 @@
           "Cbl"
         ],
         "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
+        "parameters": [
+          {
+            "name": "comicVineMatching",
+            "in": "query",
+            "description": "Use comic vine matching or not. Defaults to false",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
+          "description": "FormBody with parameter name of cbl",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -1129,18 +1141,11 @@
                   "cbl": {
                     "type": "string",
                     "format": "binary"
-                  },
-                  "comicVineMatching": {
-                    "type": "boolean",
-                    "default": false
                   }
                 }
               },
               "encoding": {
                 "cbl": {
-                  "style": "form"
-                },
-                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -1177,7 +1182,28 @@
           "Cbl"
         ],
         "summary": "Performs the actual import (assuming dryRun = false)",
+        "parameters": [
+          {
+            "name": "dryRun",
+            "in": "query",
+            "description": "If true, will only emulate the import but not perform. This should be done to preview what will happen",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "comicVineMatching",
+            "in": "query",
+            "description": "Use comic vine matching or not. Defaults to false",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
+          "description": "FormBody with parameter name of cbl",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -1186,25 +1212,11 @@
                   "cbl": {
                     "type": "string",
                     "format": "binary"
-                  },
-                  "dryRun": {
-                    "type": "boolean",
-                    "default": false
-                  },
-                  "comicVineMatching": {
-                    "type": "boolean",
-                    "default": false
                   }
                 }
               },
               "encoding": {
                 "cbl": {
-                  "style": "form"
-                },
-                "dryRun": {
-                  "style": "form"
-                },
-                "comicVineMatching": {
                   "style": "form"
                 }
               }
@@ -12567,6 +12579,7 @@
         ],
         "summary": "Uploads a new theme file",
         "requestBody": {
+          "description": "",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -14995,7 +15008,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "nullable": true
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
@@ -15944,7 +15958,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "nullable": true
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
