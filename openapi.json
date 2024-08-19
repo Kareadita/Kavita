@@ -2848,6 +2848,37 @@
         }
       }
     },
+    "/api/Image/publisher": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns the image associated with a publisher",
+        "parameters": [
+          {
+            "name": "publisherName",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Image/cover-upload": {
       "get": {
         "tags": [
