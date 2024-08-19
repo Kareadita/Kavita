@@ -10,11 +10,11 @@ export class ProviderImagePipe implements PipeTransform {
   transform(value: ScrobbleProvider): string {
     switch (value) {
       case ScrobbleProvider.AniList:
-        return 'assets/images/ExternalServices/AniList.png';
+        return 'assets/images/ExternalServices/AniList-lg.png';
       case ScrobbleProvider.Mal:
-        return 'assets/images/ExternalServices/MAL.png';
+        return 'assets/images/ExternalServices/MAL-lg.png';
       case ScrobbleProvider.GoogleBooks:
-        return 'assets/images/ExternalServices/GoogleBooks.png';
+        return 'assets/images/ExternalServices/GoogleBooks-lg.png';
       case ScrobbleProvider.Kavita:
         return 'assets/images/logo-32.png';
     }
