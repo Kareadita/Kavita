@@ -23,7 +23,7 @@
       <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
            [popoverTitle]="rating.provider | providerName" popoverClass="sm-popover">
       <span class="badge rounded-pill me-1">
-        <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="" aria-hidden="true">
+        <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" alt="" aria-hidden="true">
         {{rating.averageScore}}%
       </span>
       </div>
