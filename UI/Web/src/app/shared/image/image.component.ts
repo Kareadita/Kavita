@@ -143,7 +143,7 @@ export class ImageComponent implements OnChanges {
         this.renderer.removeClass(image, 'fade-in');
 
         if (this.hideOnError) {
-          this.renderer.addClass(image, 'visually-hidden');
+          this.renderer.addClass(image, 'd-none');
         }
         this.cdRef.markForCheck();
         break;
