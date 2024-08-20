@@ -217,10 +217,10 @@ export class ColorscapeService {
   private setColorsImmediately(colors: ColorSpaceRGBA) {
     this.injectStyleElement(colorScapeSelector, `
       :root, :root .default {
-        --colorscape-primary-color: ${this.rgbaToString(colors.primary)};
-        --colorscape-lighter-color: ${this.rgbaToString(colors.lighter)};
-        --colorscape-darker-color: ${this.rgbaToString(colors.darker)};
-        --colorscape-complementary-color: ${this.rgbaToString(colors.complementary)};
+        --colorscape-primary-color: ${this.rgbToString(colors.primary)};
+        --colorscape-lighter-color: ${this.rgbToString(colors.lighter)};
+        --colorscape-darker-color: ${this.rgbToString(colors.darker)};
+        --colorscape-complementary-color: ${this.rgbToString(colors.complementary)};
         --colorscape-primary-alpha-color: ${this.rgbaToString({ ...colors.primary, a: 0 })};
         --colorscape-lighter-alpha-color: ${this.rgbaToString({ ...colors.lighter, a: 0 })};
         --colorscape-darker-alpha-color: ${this.rgbaToString({ ...colors.darker, a: 0 })};
@@ -359,7 +359,11 @@ export class ColorscapeService {
   }
 
   private rgbaToString(color: RGBAColor): string {
-    return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+    return `rgba(${color.r}, ${color.g}, ${color.b}, 0)`;
+  }
+
+  private rgbToString(color: RGBAColor): string {
+    return `rgb(${color.r}, ${color.g}, ${color.b})`;
   }
 
   private getCssVariable(variableName: string): string {
