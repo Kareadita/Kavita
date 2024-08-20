@@ -1518,7 +1518,7 @@
     "settings": {
         "account-section-title": "Account",
         "server-section-title": "Server",
-        "manage-section-title": "Manage",
+        "info-section-title": "Info",
         "import-section-title": "Import",
         "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
         "admin-general": "General",
