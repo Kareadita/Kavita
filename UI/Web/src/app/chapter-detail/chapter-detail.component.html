@@ -7,7 +7,7 @@
         <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
 
           <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
-            @if (chapter.pagesRead < chapter.pages && hasReadingProgress) {
+            @if (chapter.pagesRead < chapter.pages && chapter.pagesRead > 0) {
               <div class="progress-banner" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
                 <ngb-progressbar type="primary" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
               </div>
@@ -41,7 +41,7 @@
 
           <app-metadata-detail-row [entity]="chapter"
                                    [ageRating]="chapter.ageRating"
-                                   [hasReadingProgress]="hasReadingProgress"
+                                   [hasReadingProgress]="chapter.pagesRead > 0"
                                    [readingTimeEntity]="chapter"
                                    [libraryType]="libraryType">
           </app-metadata-detail-row>
@@ -64,8 +64,8 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-primary-outline" (click)="read()">
                   <span>
-                <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
+                <i class="fa {{chapter.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{(chapter.pagesRead > 0) ? t('continue') : t('read')}}</span>
               </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
@@ -74,7 +74,7 @@
                       <button ngbDropdownItem (click)="read(true)">
                       <span>
                         <i class="fa fa-glasses" aria-hidden="true"></i>
-                        <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
+                        <span class="read-btn--text">&nbsp;{{(chapter.pagesRead > 0) ? t('continue-incognito') : t('read-incognito')}}</span>
                       </span>
                       </button>
                     </div>

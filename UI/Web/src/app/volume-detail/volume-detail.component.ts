@@ -196,7 +196,6 @@ export class VolumeDetailComponent implements OnInit {
   volume: Volume | null = null;
   series: Series | null = null;
   libraryType: LibraryType | null = null;
-  hasReadingProgress = false;
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
 
