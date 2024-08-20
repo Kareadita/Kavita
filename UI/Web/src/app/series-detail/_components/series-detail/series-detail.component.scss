@@ -14,6 +14,36 @@
   border-bottom-right-radius: 5px;
   text-align: center;
 }
+
+::ng-deep .image-container app-image img {
+  max-height: 400px;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 576px) {
+  .image-container{
+    width: 100vw;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    position: absolute !important;
+    display: block !important;
+    max-height: unset !important;
+    max-width: unset !important;
+  }
+
+  ::ng-deep .image-container app-image img {
+    max-height: unset !important;
+    width: 100dvw !important;
+    opacity: 0.1 !important;
+    filter: blur(5px) !important;
+    max-width: 100dvw;
+    height: 100dvh;
+    overflow: hidden;
+    object-fit: cover;
+  }
+  
+}
 //
 //.rating-star {
 //  margin-top: 2px;
@@ -25,6 +55,10 @@
   grid-template-columns: repeat(auto-fill, 160px);
   grid-gap: 0.5rem;
   justify-content: space-around;
+}
+
+.upper-details {
+  font-size: 0.9rem;
 }
 
 ::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen{
