@@ -4,7 +4,7 @@
       <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
         <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
                   aria-hidden="true"></app-image>
-        <span (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</span>
+        <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>
       </div>
     }
     <span class="me-2">
