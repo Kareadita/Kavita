@@ -12,18 +12,18 @@
     </span>
 
     @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
-      <span class="me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
+      <span class="word-count me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
     } @else {
-      <span class="me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
+      <span class="word-count me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
     }
 
     @if (hasReadingProgress && readingTimeLeft && readingTimeLeft.avgHours !== 0) {
-      <span [ngbTooltip]="t('time-left-alt')">
+      <span class="time-left" [ngbTooltip]="t('time-left-alt')">
         <i class="fa-solid fa-clock" aria-hidden="true"></i>
         {{readingTimeLeft | readTimeLeft }}
       </span>
     } @else {
-      <span [ngbTooltip]="t('time-to-read-alt')">
+      <span class="time-left" [ngbTooltip]="t('time-to-read-alt')">
         <i class="fa-regular fa-clock" aria-hidden="true"></i>
         {{readingTimeEntity | readTime }}
       </span>
