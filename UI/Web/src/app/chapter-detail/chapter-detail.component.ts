@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
@@ -110,6 +110,7 @@ enum TabID {
     TagBadgeComponent,
     VirtualScrollerModule,
     NgStyle,
+    NgClass,
     AgeRatingPipe,
     TimeDurationPipe,
     ExternalRatingComponent,
@@ -182,6 +183,7 @@ export class ChapterDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
   readingLists: ReadingList[] = [];
   showDetailsTab: boolean = true;
+  mobileSeriesImgBackground: string | undefined;
 
 
 
@@ -206,7 +208,8 @@ export class ChapterDetailComponent implements OnInit {
       return;
     }
 
-
+    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--mobile-series-img-background').trim();
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.libraryId = parseInt(libraryId, 10);
