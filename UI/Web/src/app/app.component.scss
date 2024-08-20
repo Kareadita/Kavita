@@ -46,16 +46,16 @@
 .default-background {
   background: radial-gradient(circle farthest-side at 0% 100%,
     var(--colorscape-darker-color) 0%,
-    var(--colorscape-darker-alpha-color) 100%),
+    var(--colorscape-darker-no-alpha-color) 100%),
               radial-gradient(circle farthest-side at 100% 100%,
       var(--colorscape-primary-color) 0%,
-      var(--colorscape-primary-alpha-color) 100%),
+      var(--colorscape-primary-no-alpha-color) 100%),
               radial-gradient(circle farthest-side at 100% 0%,
       var(--colorscape-lighter-color) 0%,
-      var(--colorscape-lighter-alpha-color) 100%),
+      var(--colorscape-lighter-no-alpha-color) 100%),
               radial-gradient(circle farthest-side at 0% 0%,
       var(--colorscape-complementary-color) 0%,
-      var(--colorscape-complementary-alpha-color) 100%),
+      var(--colorscape-complementary-no-alpha-color) 100%),
     var(--bs-body-bg);
 }
 
