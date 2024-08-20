@@ -11,22 +11,22 @@
       <app-age-rating-image [rating]="ageRating"></app-age-rating-image>
     </span>
 
+    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
+      <span class="me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
+    } @else {
+      <span class="me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
+    }
+
     @if (hasReadingProgress && readingTimeLeft && readingTimeLeft.avgHours !== 0) {
       <span [ngbTooltip]="t('time-left-alt')">
-        <i class="fa-solid fa-clock me-1" aria-hidden="true"></i>
+        <i class="fa-solid fa-clock" aria-hidden="true"></i>
         {{readingTimeLeft | readTimeLeft }}
       </span>
     } @else {
       <span [ngbTooltip]="t('time-to-read-alt')">
-        <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
+        <i class="fa-regular fa-clock" aria-hidden="true"></i>
         {{readingTimeEntity | readTime }}
       </span>
-    }
-    <span class="ms-2 me-2">•</span>
-    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
-      <span>{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
-    } @else {
-      <span>{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
     }
   </div>
 </ng-container>
