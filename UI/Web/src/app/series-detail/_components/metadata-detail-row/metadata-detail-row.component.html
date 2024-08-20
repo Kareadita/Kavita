@@ -1,8 +1,8 @@
 <ng-container *transloco="let t; read: 'series-detail'">
   <div class="mt-2 mb-2">
     @if (entity.publishers.length > 0) {
-      <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [hideOnError]="true" width="32px" height="32px"
-                 aria-hidden="true" class="me-2"></app-image>
+      <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
+                 aria-hidden="true"></app-image>
       <span class="me-2" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</span>
     }
     <span class="me-2">

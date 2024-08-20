@@ -68,7 +68,6 @@ export class ImageComponent implements OnChanges {
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
-
   constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (!this.processEvents) return;
@@ -141,7 +140,6 @@ export class ImageComponent implements OnChanges {
         // The image could not be loaded for some reason.
         // `event.data` is the error in this case
         this.renderer.removeClass(image, 'fade-in');
-
         if (this.hideOnError) {
           this.renderer.addClass(image, 'd-none');
         }
