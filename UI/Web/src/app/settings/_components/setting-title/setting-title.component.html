@@ -9,7 +9,7 @@
         </h6>
       </div>
       <div class="col-1">
-        <button class="btn btn-text btn-sm" (click)="toggleViewMode()" [disabled]="!canEdit">{{isEditMode ? t('common.close') : t('common.edit')}}</button>
+        <button type="button" class="btn btn-text btn-sm" (click)="toggleViewMode()" [disabled]="!canEdit">{{isEditMode ? t('common.close') : t('common.edit')}}</button>
       </div>
     </div>
   </div>
