@@ -154,7 +154,8 @@
   object-fit: cover !important;
 }
 
-@media screen and (max-width: 800px) {
+/* col-lg */
+@media screen and (max-width: 991px) {
   .image-container.mobile-bg{
     width: 100vw;
     top: calc(var(--nav-offset) - 20px);
