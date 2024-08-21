@@ -75,6 +75,7 @@ import {DownloadButtonComponent} from "../series-detail/_components/download-but
 import {hasAnyCast} from "../_models/common/i-has-cast";
 import {CarouselTabComponent} from "../carousel/_components/carousel-tab/carousel-tab.component";
 import {CarouselTabsComponent, TabId} from "../carousel/_components/carousel-tabs/carousel-tabs.component";
+import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
 
 enum TabID {
   Related = 'related-tab',
@@ -156,6 +157,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly readingListService = inject(ReadingListService);
+  protected readonly utilityService = inject(UtilityService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -316,4 +318,5 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   protected readonly TabId = TabId;
+  protected readonly Breakpoint = Breakpoint;
 }

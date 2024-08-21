@@ -34,5 +34,4 @@ public enum LibraryType
     /// </summary>
     [Description("Comic (Comic Vine)")]
     ComicVine = 5,
-
 }

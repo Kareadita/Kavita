@@ -3,13 +3,16 @@
     <div class="content">
       @for(item of visibleItems; track item; let i = $index; let last = $last) {
         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i, last: last }"></ng-container>
+        @if (!last) {
+          <span>, </span>
+        }
       } @empty {
         {{null | defaultValue}}
       }
       @if (!isCollapsed && itemsLeft !== 0) {
-        <button type="button" class="btn btn-sm btn-outline-primary ms-2" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
+        <a href="javascript:void(0);" type="button" class="dark-exempt btn-icon ms-1" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
           {{t('more-items', {count: itemsLeft})}}
-        </button>
+        </a>
       }
     </div>
   </div>

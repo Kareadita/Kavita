@@ -97,6 +97,7 @@ export class AppComponent implements OnInit {
     // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
     const vh = window.innerHeight * 0.01;
     this.document.documentElement.style.setProperty('--vh', `${vh}px`);
+    this.utilityService.activeBreakpointSource.next(this.utilityService.getActiveBreakpoint());
   }
 
   ngOnInit(): void {

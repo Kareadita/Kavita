@@ -7,16 +7,16 @@ import {ScrobbleProvider} from "../_services/scrobbling.service";
 })
 export class ProviderImagePipe implements PipeTransform {
 
-  transform(value: ScrobbleProvider): string {
+  transform(value: ScrobbleProvider, large: boolean = false): string {
     switch (value) {
       case ScrobbleProvider.AniList:
-        return 'assets/images/ExternalServices/AniList.png';
+        return `assets/images/ExternalServices/AniList${large ? '-lg' : ''}.png`;
       case ScrobbleProvider.Mal:
-        return 'assets/images/ExternalServices/MAL.png';
+        return `assets/images/ExternalServices/MAL${large ? '-lg' : ''}.png`;
       case ScrobbleProvider.GoogleBooks:
-        return 'assets/images/ExternalServices/GoogleBooks.png';
+        return `assets/images/ExternalServices/GoogleBooks${large ? '-lg' : ''}.png`;
       case ScrobbleProvider.Kavita:
-        return 'assets/images/logo-32.png';
+        return `assets/images/logo-${large ? '64' : '32'}.png`;
     }
   }
 

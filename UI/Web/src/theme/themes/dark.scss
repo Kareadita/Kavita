@@ -88,6 +88,7 @@
     --h6-text-color: #d5d5d5;
     --h6-font-size: 1.2rem;
     --h6-font-weight: bold;
+    --setting-break-color: rgba(255, 255, 255, 0.2);
 
 
     /* Table */
@@ -170,7 +171,7 @@
     --nav-tab-hover-border-color: var(--primary-color);
     --nav-tab-active-text-color: white;
     --nav-tab-border-hover-color: transparent;
-    --nav-tab-hover-text-color: white
+    --nav-tab-hover-text-color: white;
     --nav-tab-hover-bg-color: transparent;
     --nav-tab-border-top: transparent;
     --nav-tab-border-left: transparent;
@@ -332,7 +333,7 @@
     --card-border-radius: 5px;
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
-    --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
+    --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
     --card-progress-triangle-size: 28px;
 
     /* Slider */

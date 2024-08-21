@@ -39,3 +39,14 @@
     background-color: var(--primary-color-dark-shade);
   }
 }
+
+.upper-details {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .carousel-tabs-container {
+    mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+  }
+}

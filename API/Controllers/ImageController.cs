@@ -242,6 +242,46 @@ public class ImageController : BaseApiController
         return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
     }
 
+
+    /// <summary>
+    /// Returns the image associated with a publisher
+    /// </summary>
+    /// <param name="publisherName"></param>
+    /// <param name="apiKey"></param>
+    /// <returns></returns>
+    [HttpGet("publisher")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["publisherName", "apiKey"])]
+    public async Task<ActionResult> GetPublisherImage(string publisherName, string apiKey)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
+        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await _localizationService.Translate(userId, "must-be-defined", "publisherName"));
+        if (publisherName.Contains("..")) return BadRequest();
+
+        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+
+        // Check if the domain exists
+        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.PublisherDirectory, ImageService.GetPublisherFormat(publisherName, encodeFormat));
+        if (!_directoryService.FileSystem.File.Exists(domainFilePath))
+        {
+            // We need to request the favicon and save it
+            try
+            {
+                domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.PublisherDirectory,
+                    await _imageService.DownloadPublisherImageAsync(publisherName, encodeFormat));
+            }
+            catch (Exception)
+            {
+                return BadRequest(await _localizationService.Translate(userId, "generic-favicon"));
+            }
+        }
+
+        var file = new FileInfo(domainFilePath);
+        var format = Path.GetExtension(file.FullName);
+
+        return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+    }
+
     /// <summary>
     /// Returns a temp coverupload image
     /// </summary>

@@ -6,7 +6,8 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { PaginatedResult } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
-import {TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoService} from "@jsverse/transloco";
+import {debounceTime, ReplaySubject, shareReplay} from "rxjs";
 
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -37,9 +38,10 @@ export enum Breakpoint {
 })
 export class UtilityService {
 
-  mangaFormatKeys: string[] = [];
+  public readonly activeBreakpointSource = new ReplaySubject<Breakpoint>(1);
+  public readonly activeBreakpoint$ = this.activeBreakpointSource.asObservable().pipe(debounceTime(60), shareReplay({bufferSize: 1, refCount: true}));
 
-  constructor(private translocoService: TranslocoService) { }
+  mangaFormatKeys: string[] = [];
 
 
   sortChapters = (a: Chapter, b: Chapter) => {
@@ -68,16 +70,16 @@ export class UtilityService {
      switch(libraryType) {
       case LibraryType.Book:
       case LibraryType.LightNovel:
-        return this.translocoService.translate('common.book-num' + extra) + (includeSpace ? ' ' : '');
+        return translate('common.book-num' + extra) + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
       case LibraryType.ComicVine:
         if (includeHash) {
-          return this.translocoService.translate('common.issue-hash-num');
+          return translate('common.issue-hash-num');
         }
-        return this.translocoService.translate('common.issue-num' + extra) + (includeSpace ? ' ' : '');
+        return translate('common.issue-num' + extra) + (includeSpace ? ' ' : '');
       case LibraryType.Images:
       case LibraryType.Manga:
-        return this.translocoService.translate('common.chapter-num' + extra) + (includeSpace ? ' ' : '');
+        return translate('common.chapter-num' + extra) + (includeSpace ? ' ' : '');
     }
   }
 
