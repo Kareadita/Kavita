@@ -117,7 +117,8 @@
             <h5>{{t('characters-title')}}</h5>
             <app-badge-expander [items]="characters">
               <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-person-badge a11y-click="13,32" class="col-auto" [person]="item" (click)="goToCharacter(item)"></app-person-badge>
+                <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="goToCharacter(item)">{{item.name}}</a>
+<!--                <app-person-badge a11y-click="13,32" class="col-auto" [person]="item" (click)="goToCharacter(item)"></app-person-badge>-->
               </ng-template>
             </app-badge-expander>
           </div>

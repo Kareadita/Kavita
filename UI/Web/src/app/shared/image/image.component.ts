@@ -15,7 +15,6 @@ import {CoverUpdateEvent} from 'src/app/_models/events/cover-update-event';
 import {ImageService} from 'src/app/_services/image.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule, NgOptimizedImage} from "@angular/common";
 import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
 
 /**
@@ -24,7 +23,7 @@ import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
 @Component({
   selector: 'app-image',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, LazyLoadImageModule],
+  imports: [LazyLoadImageModule],
   templateUrl: './image.component.html',
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -62,9 +61,12 @@ export class ImageComponent implements OnChanges {
    */
   @Input() styles: {[key: string]: string} = {};
   @Input() errorImage: string = this.imageService.errorImage;
+  /**
+   * If the image load fails, instead of showing an error image, hide the image (visibility)
+   */
+  @Input() hideOnError: boolean = false;
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
-
 
   constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
@@ -138,6 +140,9 @@ export class ImageComponent implements OnChanges {
         // The image could not be loaded for some reason.
         // `event.data` is the error in this case
         this.renderer.removeClass(image, 'fade-in');
+        if (this.hideOnError) {
+          this.renderer.addClass(image, 'd-none');
+        }
         this.cdRef.markForCheck();
         break;
       case 'finally':

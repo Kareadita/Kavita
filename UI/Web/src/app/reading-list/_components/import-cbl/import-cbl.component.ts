@@ -3,7 +3,7 @@ import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
 import {FileUploadComponent, FileUploadValidators} from "@iplab/ngx-file-upload";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {NgForOf, NgIf, NgTemplateOutlet} from "@angular/common";
+import {NgTemplateOutlet} from "@angular/common";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -11,7 +11,6 @@ import {
   NgbAccordionDirective,
   NgbAccordionHeader,
   NgbAccordionItem,
-  NgbActiveModal
 } from "@ng-bootstrap/ng-bootstrap";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {StepTrackerComponent, TimelineStep} from "../step-tracker/step-tracker.component";
@@ -133,7 +132,7 @@ export class ImportCblComponent {
           formData.append('cbl', files[i]);
           formData.append('dryRun', 'true');
           formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
-          pages.push(this.readingListService.validateCbl(formData));
+          pages.push(this.readingListService.validateCbl(formData, true, this.cblSettingsForm.get('comicVineMatching')?.value as boolean));
         }
 
         forkJoin(pages).subscribe(results => {
@@ -225,7 +224,7 @@ export class ImportCblComponent {
       formData.append('cbl', files[i]);
       formData.append('dryRun', 'true');
       formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
-      pages.push(this.readingListService.importCbl(formData));
+      pages.push(this.readingListService.importCbl(formData, true, this.cblSettingsForm.get('comicVineMatching')?.value as boolean));
     }
     forkJoin(pages).subscribe(results => {
       results.forEach(cblImport => {
@@ -250,7 +249,7 @@ export class ImportCblComponent {
       formData.append('cbl', files[i]);
       formData.append('dryRun', 'false');
       formData.append('comicVineMatching', this.cblSettingsForm.get('comicVineMatching')?.value + '');
-      pages.push(this.readingListService.importCbl(formData));
+      pages.push(this.readingListService.importCbl(formData, false, this.cblSettingsForm.get('comicVineMatching')?.value as boolean));
     }
 
     forkJoin(pages).subscribe(results => {

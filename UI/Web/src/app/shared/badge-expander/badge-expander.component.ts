@@ -26,6 +26,7 @@ export class BadgeExpanderComponent implements OnInit {
 
   @Input() items: Array<any> = [];
   @Input() itemsTillExpander: number = 4;
+  @Input() allowToggle: boolean = true;
   @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
 
 
@@ -42,6 +43,8 @@ export class BadgeExpanderComponent implements OnInit {
   }
 
   toggleVisible() {
+    if (!this.allowToggle) return;
+
     this.isCollapsed = !this.isCollapsed;
     this.visibleItems = this.items;
     this.cdRef.markForCheck();
