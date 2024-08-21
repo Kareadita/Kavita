@@ -87,7 +87,6 @@ label, select, .clickable {
 app-root {
   background-color: transparent;
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color-scrollbar);
 }
 
 ::-webkit-scrollbar {
@@ -96,7 +95,6 @@ app-root {
 
 ::-webkit-scrollbar-thumb {
   background-clip: padding-box;
-  background-color: var(--primary-color-scrollbar);
   border: 3px solid transparent;
   border-radius: 8px;
   min-height: 50px;
@@ -109,6 +107,6 @@ body {
 
 .setting-section-break {
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--setting-break-color);
   margin: 30px 0;
 }

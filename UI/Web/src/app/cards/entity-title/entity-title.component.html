@@ -37,11 +37,19 @@
     }
 
     @case (LibraryType.Book) {
-      {{volumeTitle}}
+      @if (titleName !== '' && prioritizeTitleName) {
+        {{titleName}}
+      } @else {
+        {{volumeTitle}}
+      }
     }
 
     @case (LibraryType.LightNovel) {
-      {{volumeTitle}}
+      @if (titleName !== '' && prioritizeTitleName) {
+        {{titleName}}
+      } @else {
+        {{volumeTitle}}
+      }
     }
 
     @case (LibraryType.Images) {

@@ -227,7 +227,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         this.scanLibrary(series);
         break;
       case(Action.RefreshMetadata):
-        this.refreshMetadata(series);
+        this.refreshMetadata(series, true);
         break;
       case(Action.GenerateColorScape):
         this.refreshMetadata(series, false);

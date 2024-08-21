@@ -524,6 +524,7 @@ UI/Web/dist/
 /API/config/Hangfire.db
 /API/config/Hangfire-log.db
 API/config/covers/
+API/config/images/*
 API/config/stats/*
 API/config/stats/app_stats.json
 API/config/pre-metadata/
@@ -539,3 +540,6 @@ BenchmarkDotNet.Artifacts
 API.Tests/Services/Test Data/ImageService/**/*_output*
 API.Tests/Services/Test Data/ImageService/**/*_baseline*
 API.Tests/Services/Test Data/ImageService/**/*.html
+
+
+API.Tests/Services/Test Data/ScannerService/ScanTests/**/*

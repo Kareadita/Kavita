@@ -20,6 +20,17 @@
     </app-carousel-reel>
   </div>
 
+  <div class="mb-3">
+    <app-carousel-reel [items]="webLinks" [title]="t('weblinks-title')">
+      <ng-template #carouselItem let-item>
+        <a class="me-1" [href]="item | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="item">
+          <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(item)"
+                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+        </a>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
   @if (genres.length > 0 || tags.length > 0) {
     <div class="setting-section-break" aria-hidden="true"></div>
   }

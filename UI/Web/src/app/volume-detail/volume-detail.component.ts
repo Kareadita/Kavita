@@ -59,7 +59,7 @@ import {ImageComponent} from "../shared/image/image.component";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {UtilityService} from "../shared/_services/utility.service";
+import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {DefaultValuePipe} from "../_pipes/default-value.pipe";
 import {
@@ -197,7 +197,6 @@ export class VolumeDetailComponent implements OnInit {
   volume: Volume | null = null;
   series: Series | null = null;
   libraryType: LibraryType | null = null;
-  hasReadingProgress = false;
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
   mobileSeriesImgBackground: string | undefined;
@@ -461,4 +460,5 @@ export class VolumeDetailComponent implements OnInit {
     }
   }
 
+  protected readonly Breakpoint = Breakpoint;
 }

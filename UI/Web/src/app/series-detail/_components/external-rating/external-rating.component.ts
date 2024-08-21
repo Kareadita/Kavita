@@ -20,11 +20,13 @@ import {ThemeService} from "../../../_services/theme.service";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {ImageService} from "../../../_services/image.service";
 
 @Component({
   selector: 'app-external-rating',
   standalone: true,
-  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent, TranslocoDirective],
+  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent, TranslocoDirective, SafeHtmlPipe],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +39,8 @@ export class ExternalRatingComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
+  public readonly imageService = inject(ImageService);
+
   protected readonly Breakpoint = Breakpoint;
 
   @Input({required: true}) seriesId!: number;
@@ -44,6 +48,7 @@ export class ExternalRatingComponent implements OnInit {
   @Input({required: true}) hasUserRated!: boolean;
   @Input({required: true}) libraryType!: LibraryType;
   @Input({required: true}) ratings: Array<Rating> = [];
+  @Input() webLinks: Array<string> = [];
 
   isLoading: boolean = false;
   overallRating: number = -1;

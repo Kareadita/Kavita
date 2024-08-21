@@ -57,3 +57,26 @@
   justify-content: space-around;
 }
 
+::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen{
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--primary-color);
+  padding: 5px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: var(--primary-color-dark-shade);
+  }
+}
+
+.upper-details {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .carousel-tabs-container {
+    mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+  }
+}

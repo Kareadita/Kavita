@@ -11,30 +11,37 @@ import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.se
 import {Genre} from "../../_models/metadata/genre";
 import {Tag} from "../../_models/tag";
 import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
+import {ImageComponent} from "../../shared/image/image.component";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {ImageService} from "../../_services/image.service";
 
 @Component({
   selector: 'app-details-tab',
   standalone: true,
-  imports: [
-    CarouselReelComponent,
-    PersonBadgeComponent,
-    TranslocoDirective,
-    TagBadgeComponent
-  ],
+    imports: [
+        CarouselReelComponent,
+        PersonBadgeComponent,
+        TranslocoDirective,
+        TagBadgeComponent,
+        ImageComponent,
+        SafeHtmlPipe
+    ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DetailsTabComponent {
 
-  private readonly router = inject(Router);
+  protected readonly imageService = inject(ImageService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+
   protected readonly PersonRole = PersonRole;
   protected readonly FilterField = FilterField;
 
   @Input({required: true}) metadata!: IHasCast;
   @Input() genres: Array<Genre> = [];
   @Input() tags: Array<Tag> = [];
+  @Input() webLinks: Array<string> = [];
 
 
   openPerson(queryParamName: FilterField, filter: Person) {

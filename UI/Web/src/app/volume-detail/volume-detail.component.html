@@ -6,12 +6,8 @@
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3">
 
-          @if(mobileSeriesImgBackground === 'true') {
-            <app-image [styles]="{'background': 'none'}"  [imageUrl]="coverImage"></app-image>
-          } @else {
-            <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
-          }
-          @if (volume.pagesRead < volume.pages && hasReadingProgress) {
+          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
+          @if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
             <div class="progress-banner" ngbTooltip="{{(volume.pagesRead / volume.pages) * 100 | number:'1.0-1'}}%">
               <ngb-progressbar type="primary" height="5px" [value]="volume.pagesRead" [max]="volume.pages" [showValue]="true"></ngb-progressbar>
             </div>
@@ -24,13 +20,13 @@
           <div class="subtitle mt-2 mb-2">
             <span>
               {{t('volume-num')}}
-              <app-entity-title [libraryType]="libraryType!" [entity]="volume" [prioritizeTitleName]="true"></app-entity-title>
+              <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="true"></app-entity-title>
             </span>
           </div>
 
           <app-metadata-detail-row [entity]="volumeCast"
                                    [ageRating]="maxAgeRating"
-                                   [hasReadingProgress]="hasReadingProgress"
+                                   [hasReadingProgress]="volume.pagesRead > 0"
                                    [readingTimeEntity]="volume"
                                    [libraryType]="libraryType">
           </app-metadata-detail-row>
@@ -53,8 +49,8 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-primary-outline" (click)="readVolume()">
                   <span>
-                <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
+                <i class="fa {{volume.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{(volume.pagesRead > 0) ? t('continue') : t('read')}}</span>
               </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
@@ -63,7 +59,7 @@
                       <button ngbDropdownItem (click)="readVolume(true)">
                       <span>
                         <i class="fa fa-glasses" aria-hidden="true"></i>
-                        <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
+                        <span class="read-btn--text">&nbsp;{{(volume.pagesRead > 0) ? t('continue-incognito') : t('read-incognito')}}</span>
                       </span>
                       </button>
                     </div>
@@ -89,7 +85,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="volume.chapters[0].summary || ''"></app-read-more>
+            <app-read-more [text]="volume.chapters[0].summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 585 : 250"></app-read-more>
           </div>
 
           <div class="mt-2">
@@ -100,9 +96,6 @@
                   <app-badge-expander [items]="volumeCast.writers">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -113,9 +106,6 @@
                   <app-badge-expander [items]="volumeCast.coverArtists">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
-                      @if (!last) {
-                        ,
-                      }
                     </ng-template>
                   </app-badge-expander>
                 </div>
