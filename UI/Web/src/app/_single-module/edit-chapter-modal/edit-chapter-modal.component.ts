@@ -120,7 +120,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 export class EditChapterModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
-  private readonly seriesService = inject(SeriesService);
   public readonly utilityService = inject(UtilityService);
   public readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
@@ -183,7 +182,7 @@ export class EditChapterModalComponent implements OnInit {
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(this.chapter.sortOrder, [Validators.required, Validators.min(0)]));
-    this.editForm.addControl('summary', new FormControl(this.chapter.summary, []));
+    this.editForm.addControl('summary', new FormControl(this.chapter.summary || '', []));
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
