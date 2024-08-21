@@ -150,31 +150,52 @@
 }
 
 ::ng-deep .image-container.mobile-bg app-image img {
-  max-height: 400px;
-  object-fit: contain;
+  max-height: 100dvh !important;
+  object-fit: cover !important;
 }
 
 @media screen and (max-width: 576px) {
   .image-container.mobile-bg{
     width: 100vw;
-    top: 0;
+    top: calc(var(--nav-offset) - 20px);
     left: 0;
     pointer-events: none;
-    position: absolute !important;
+    position: fixed !important;
     display: block !important;
     max-height: unset !important;
     max-width: unset !important;
+    height: 100dvh !important;
   }
 
   ::ng-deep .image-container.mobile-bg app-image img {
     max-height: unset !important;
-    width: 100dvw !important;
     opacity: 0.05 !important;
     filter: blur(5px) !important;
     max-width: 100dvw;
-    height: 100dvh;
+    height: 100dvh !important;
     overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
     object-fit: cover;
   }
 
+  .progress-banner {
+    display:none;
+  }
+
+  .under-image {
+    display: none;
+  }
+
+}
+.upper-details {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .carousel-tabs-container {
+    mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+  }
 }

@@ -28,11 +28,5 @@
         {{readingTimeEntity | readTime }}
       </span>
     }
-    <span class="ms-2 me-2">•</span>
-    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
-      <span>{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
-    } @else {
-      <span>{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
-    }
   </div>
 </ng-container>
