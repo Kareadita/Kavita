@@ -16,8 +16,8 @@
             <div class="input-group">
               <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
                      [class.is-invalid]="formControl.invalid && formControl.touched">
-              <button class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
-              <button class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
+              <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
+              <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
             </div>
 
             @if(settingsForm.dirty || settingsForm.touched) {
@@ -39,7 +39,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="senderAddress" id="settings-sender-address" />
+            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" />
           </ng-template>
         </app-setting-item>
       }
@@ -52,7 +52,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="senderDisplayName" id="settings-sender-displayname" />
+            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" />
           </ng-template>
         </app-setting-item>
       }
@@ -78,7 +78,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" aria-describedby="email-header" formControlName="port" id="settings-port" />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" />
           </ng-template>
         </app-setting-item>
       }
@@ -89,7 +89,7 @@
         <app-setting-switch [title]="t('enable-ssl-label')">
           <ng-template #switch>
             <div class="form-check form-switch">
-              <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableOpds">
+              <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableSsl">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -103,7 +103,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="userName" id="settings-username" />
+            <input type="text" class="form-control" formControlName="userName" id="settings-username" />
           </ng-template>
         </app-setting-item>
       }
@@ -116,7 +116,7 @@
             {{formControl.value ? '********' : null | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="password" id="settings-password" />
+            <input type="text" class="form-control" formControlName="password" id="settings-password" />
           </ng-template>
         </app-setting-item>
       }
@@ -129,7 +129,7 @@
             {{formControl.value | bytes}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" aria-describedby="email-header" formControlName="sizeLimit" id="settings-size-limit" />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" />
           </ng-template>
         </app-setting-item>
       }

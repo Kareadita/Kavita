@@ -4,14 +4,22 @@
 
     @if (chapter && series && libraryType !== null) {
       <div class="row mb-0 mb-xl-3 info-container">
-        <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
+        <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
 
-          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
-            @if (chapter.pagesRead < chapter.pages && chapter.pagesRead > 0) {
+          @if(mobileSeriesImgBackground === 'true') {
+            <app-image [styles]="{'background': 'none'}"  [imageUrl]="coverImage"></app-image>
+          } @else {
+            <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
+          }
+          <!-- TODO: For when continue on chapter/issue is hooked up -->
+<!--             @if (chapter.pagesRead < chapter.pages && chapter.pagesRead > 0) {
               <div class="progress-banner" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
                 <ngb-progressbar type="primary" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
               </div>
-            }
+              <div class="under-image">
+                {{t('continue-from', {title: ContinuePointTitle})}}
+              </div>
+            } -->
             <div class="card-overlay"></div>
             <div class="overlay-information">
               <div class="overlay-information--centered">

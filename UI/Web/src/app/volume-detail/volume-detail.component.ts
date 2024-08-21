@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -143,6 +143,7 @@ interface VolumeCast extends IHasCast {
     NgbTooltip,
     ImageComponent,
     NgStyle,
+    NgClass,
     TranslocoDirective,
     CardItemComponent,
     VirtualScrollerModule,
@@ -198,6 +199,7 @@ export class VolumeDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
+  mobileSeriesImgBackground: string | undefined;
 
   volumeActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
 
@@ -266,7 +268,8 @@ export class VolumeDetailComponent implements OnInit {
       return;
     }
 
-
+    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--mobile-series-img-background').trim();
     this.seriesId = parseInt(seriesId, 10);
     this.volumeId = parseInt(volumeId, 10);
     this.libraryId = parseInt(libraryId, 10);

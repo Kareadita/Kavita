@@ -4,14 +4,22 @@
 
     @if (volume && series && libraryType !== null) {
       <div class="row mb-0 mb-xl-3 info-container">
-        <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3">
+        <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3">
 
-          <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
-          @if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+          @if(mobileSeriesImgBackground === 'true') {
+            <app-image [styles]="{'background': 'none'}"  [imageUrl]="coverImage"></app-image>
+          } @else {
+            <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
+          }
+          <!-- TODO: For when continue on volume is hooked up -->
+<!--           @if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
             <div class="progress-banner" ngbTooltip="{{(volume.pagesRead / volume.pages) * 100 | number:'1.0-1'}}%">
               <ngb-progressbar type="primary" height="5px" [value]="volume.pagesRead" [max]="volume.pages" [showValue]="true"></ngb-progressbar>
             </div>
-          }
+            <div class="under-image">
+              {{t('continue-from', {title: ContinuePointTitle})}}
+            </div>
+          } -->
         </div>
         <div class="col-xl-10 col-lg-7 col-md-7 col-xs-8 col-sm-6">
           <h4 class="title mb-2">

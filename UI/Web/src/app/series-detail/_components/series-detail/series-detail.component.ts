@@ -243,6 +243,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isLoadingExtra = false;
   libraryAllowsScrobbling = false;
   isScrobbling: boolean = true;
+  mobileSeriesImgBackground: string | undefined;
 
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = false;
@@ -384,6 +385,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
+
   get UseBookLogic() {
     return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
   }
@@ -471,6 +473,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.router.navigateByUrl('/home');
       return;
     }
+
+    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--mobile-series-img-background').trim();
 
 
     // Set up the download in progress
