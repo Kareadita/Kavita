@@ -88,6 +88,7 @@ public class ChapterController : BaseApiController
             chapter.AgeRating = dto.AgeRating;
         }
 
+        dto.Summary ??= string.Empty;
 
         if (chapter.Summary != dto.Summary.Trim())
         {
