@@ -143,6 +143,7 @@ import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail
 import {DownloadButtonComponent} from "../download-button/download-button.component";
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
+import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -491,12 +492,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.router.navigateByUrl('/home');
         }
       } else if (event.event === EVENTS.ScanSeries) {
-        const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
-        if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
+        const seriesScanEvent = event.payload as ScanSeriesEvent;
+        if (seriesScanEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
         }
       } else if (event.event === EVENTS.CoverUpdate) {
-        this.themeService.refreshColorScape('series', this.seriesId).subscribe();
+        const coverUpdateEvent = event.payload as CoverUpdateEvent;
+        if (coverUpdateEvent.id === this.seriesId) {
+          this.themeService.refreshColorScape('series', this.seriesId).subscribe();
+        }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
         if (removedEvent.seriesId !== this.seriesId) return;

@@ -76,6 +76,9 @@ import {hasAnyCast} from "../_models/common/i-has-cast";
 import {CarouselTabComponent} from "../carousel/_components/carousel-tab/carousel-tab.component";
 import {CarouselTabsComponent, TabId} from "../carousel/_components/carousel-tabs/carousel-tabs.component";
 import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
+import {EVENTS, MessageHubService} from "../_services/message-hub.service";
+import {CoverUpdateEvent} from "../_models/events/cover-update-event";
+import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
 
 enum TabID {
   Related = 'related-tab',
@@ -159,6 +162,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly readingListService = inject(ReadingListService);
   protected readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -217,8 +221,22 @@ export class ChapterDetailComponent implements OnInit {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.libraryId = parseInt(libraryId, 10);
-
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
+
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      if (event.event === EVENTS.CoverUpdate) {
+        const coverUpdateEvent = event.payload as CoverUpdateEvent;
+        if (coverUpdateEvent.id === this.chapterId) {
+          this.themeService.refreshColorScape('chapter', coverUpdateEvent.id).subscribe();
+        }
+      } else if (event.event === EVENTS.ChapterRemoved) {
+        const removedEvent = event.payload as ChapterRemovedEvent;
+        if (removedEvent.chapterId !== this.chapterId) return;
+
+        // This series has been deleted from disk, redirect to series
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+      }
+    });
 
 
     forkJoin({

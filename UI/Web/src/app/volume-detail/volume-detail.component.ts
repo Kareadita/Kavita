@@ -78,6 +78,11 @@ import {
   MetadataDetailRowComponent
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
+import {EVENTS, MessageHubService} from "../_services/message-hub.service";
+import {SeriesRemovedEvent} from "../_models/events/series-removed-event";
+import {ScanSeriesEvent} from "../_models/events/scan-series-event";
+import {CoverUpdateEvent} from "../_models/events/cover-update-event";
+import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
 
 enum TabID {
 
@@ -180,6 +185,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly utilityService = inject(UtilityService);
   private readonly readingListService = inject(ReadingListService);
+  private readonly messageHub = inject(MessageHubService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -274,8 +280,25 @@ export class VolumeDetailComponent implements OnInit {
     this.seriesId = parseInt(seriesId, 10);
     this.volumeId = parseInt(volumeId, 10);
     this.libraryId = parseInt(libraryId, 10);
-
     this.coverImage = this.imageService.getVolumeCoverImage(this.volumeId);
+
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      if (event.event === EVENTS.CoverUpdate) {
+        const coverUpdateEvent = event.payload as CoverUpdateEvent;
+        if (coverUpdateEvent.id === this.volumeId) {
+          this.themeService.refreshColorScape('volume', coverUpdateEvent.id).subscribe();
+        }
+      } else if (event.event === EVENTS.ChapterRemoved) {
+        const removedEvent = event.payload as ChapterRemovedEvent;
+        if (removedEvent.seriesId !== this.seriesId) return;
+
+        // remove the chapter from the tab
+        if (this.volume) {
+          this.volume.chapters = this.volume.chapters.filter(c => c.id !== removedEvent.chapterId);
+          this.cdRef.detectChanges();
+        }
+      }
+    });
 
 
 
