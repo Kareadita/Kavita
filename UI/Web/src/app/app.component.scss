@@ -4,16 +4,17 @@
     mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     height: calc(var(--vh)* 100 - var(--nav-offset));
-
-
 }
+
+
 
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
     margin-left: 40px;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     height: calc(var(--vh)* 100 - var(--nav-offset));
-    width: calc(100dvw - 80px);
+    width: calc(100% - 170px);
     padding-right: 10px;
 
     &::-webkit-scrollbar {
@@ -40,7 +41,6 @@
 
 .companion-bar-content {
     margin-left: 190px;
-    width: auto;
 }
 
 @media (max-width: 576px) {
@@ -49,9 +49,9 @@
     }
 
     .content-wrapper {
-        padding: 0 5px 0;
         overflow: hidden;
-        height: calc(var(--vh)*100 - var(--nav-offset));
+        height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
+        padding: 15px 10px 0;
 
         &.closed {
             overflow: auto;
@@ -61,6 +61,7 @@
     .companion-bar {
         margin-left: 0;
         padding-left: 0;
+        width: 100%;
 
         &::-webkit-scrollbar {
             width: inherit;
@@ -79,7 +80,6 @@
 
     .companion-bar-content {
         margin-left: 0;
-        width: auto;
     }
 }
 
@@ -120,4 +120,3 @@
     height: 113vh;
   }
 }
-

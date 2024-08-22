@@ -15,7 +15,7 @@
             @if (streams.length > ItemLimit && (navService.sideNavCollapsed$ | async) === false) {
               <div class="mb-2 mt-3 ms-2 me-2">
                 <label for="filter" class="form-label visually-hidden">{{t('filter-label')}}</label>
-                <div class="form-group">
+                <div class="form-group position-relative">
                   <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
                   <button type="button" [attr.aria-label]="t('clear')" class="btn-close" id="reset-input" (click)="filterQuery = '';"></button>
                 </div>
