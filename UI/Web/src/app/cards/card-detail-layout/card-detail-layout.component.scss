@@ -32,6 +32,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     align-items: start;
+
+
 }
 
 @media (max-width: 576px) {
@@ -93,10 +95,30 @@
 .virtual-scroller, virtual-scroller {
   width: 100%;
   height: calc(var(--vh) * 100 - 173px);
+  mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+  overflow: auto;
+
 }
 
 virtual-scroller.empty {
     display: none;
+}
+
+.vertical.selfScroll {
+  &::-webkit-scrollbar {
+    width: inherit;
+}
+
+&::-webkit-scrollbar-thumb {
+    background-color: transparent; /*makes it invisible when not hovering*/
+}
+
+&:hover {
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+      }
+}
 }
 
 h2 {

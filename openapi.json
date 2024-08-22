@@ -21,7 +21,7 @@
           ]
         },
         "hostpath": {
-          "default": "localhost:5000"
+          "default": "192.168.1.150:5000"
         }
       }
     }
