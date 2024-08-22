@@ -132,6 +132,11 @@ export class SideNavComponent implements OnInit {
 
 
   constructor() {
+    // Ensure that on mobile, we are collapsed by default
+    if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+      this.navService.collapseSideNav(true);
+    }
+
     this.collapseSideNavOnMobileNav$.subscribe(() => {
         this.navService.collapseSideNav(false);
         this.cdRef.markForCheck();

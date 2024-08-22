@@ -296,7 +296,10 @@ export class NavHeaderComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  hideSideNav() {
+  toggleSideNav(event: any) {
+    event.stopPropagation();
+    event.cancelBubble = true;
+    console.log('toggling side nav');
     this.navService.toggleSideNav();
   }
 

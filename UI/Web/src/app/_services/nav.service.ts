@@ -97,11 +97,14 @@ export class NavService {
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
   showNavBar() {
-    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', 'var(--nav-offset)');
-    this.renderer.removeStyle(this.document.querySelector('body'), 'scrollbar-gutter');
-    this.renderer.setStyle(this.document.querySelector('body'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
-    this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
-    this.navbarVisibleSource.next(true);
+    setTimeout(() => {
+      const bodyElem = this.document.querySelector('body');
+      this.renderer.setStyle(bodyElem, 'margin-top', 'var(--nav-offset)');
+      this.renderer.removeStyle(bodyElem, 'scrollbar-gutter');
+      this.renderer.setStyle(bodyElem, 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.navbarVisibleSource.next(true);
+    }, 10);
   }
 
   /**
@@ -141,8 +144,8 @@ export class NavService {
     });
   }
 
-  collapseSideNav(state: boolean) {
-    this.sideNavCollapseSource.next(state);
-    localStorage.setItem(this.localStorageSideNavKey, state + '');
+  collapseSideNav(isCollapsed: boolean) {
+    this.sideNavCollapseSource.next(isCollapsed);
+    localStorage.setItem(this.localStorageSideNavKey, isCollapsed + '');
   }
 }

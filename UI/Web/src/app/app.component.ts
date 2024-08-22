@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -32,7 +33,7 @@ import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
   imports: [NgClass, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
 
   transitionState$!: Observable<boolean>;
 
@@ -46,11 +47,12 @@ export class AppComponent implements OnInit {
   private readonly ngbModal = inject(NgbModal);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly Breakpoint = Breakpoint;
 
 
-  constructor(ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document, modalConfig: NgbModalConfig) {
+  constructor(ratingConfig: NgbRatingConfig, modalConfig: NgbModalConfig) {
 
     modalConfig.fullscreen = 'md';
 
@@ -103,18 +105,27 @@ export class AppComponent implements OnInit {
     this.setDocHeight();
     this.setCurrentUser();
     this.themeService.setColorScape('');
+  }
 
-    // fromEvent(window, 'click')
-    //   .pipe(
-    //     switchMap(_ => this.navService.sideNavCollapsed$),
-    //     filter(collapsed => !collapsed),
-    //     switchMap(_ => this.utilityService.activeBreakpoint$),
-    //     filter(breakpoint => breakpoint <= Breakpoint.Tablet),
-    //     tap(() => {
-    //       this.navService.collapseSideNav(true)
-    //     })
-    //   )
-    //   .subscribe();
+  ngAfterViewInit() {
+
+    fromEvent<MouseEvent>(window, 'click')
+      .pipe(
+        switchMap(event =>
+          this.utilityService.activeBreakpoint$.pipe(
+            filter(breakpoint => breakpoint < Breakpoint.Tablet), // Ensure we are on a mobile device
+            switchMap(() => this.navService.sideNavCollapsed$), // Check the current state of the side nav
+            filter(collapsed => !collapsed), // Proceed only if the side nav is open
+            tap(() => {
+              const sideNavContainer = document.querySelector('.side-nav-container');
+              if (sideNavContainer && !sideNavContainer.contains(event.target as Node)) {
+                this.navService.collapseSideNav(false); // Collapse the side nav if click is outside
+              }
+            })
+          )
+        )
+      )
+      .subscribe();
 
   }
 
