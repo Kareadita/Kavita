@@ -4,13 +4,15 @@ import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
 import {AccountService, Role} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
-import {ActivatedRoute, RouterLink} from "@angular/router";
+import {ActivatedRoute, NavigationEnd, Router, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
 import {map, Observable, of, shareReplay, switchMap, take} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {User} from "../../_models/user";
+import {filter} from "rxjs/operators";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 
 export enum SettingsTabId {
 
@@ -82,8 +84,11 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly serverService = inject(ServerService);
   private readonly scrobbleService = inject(ScrobblingService);
+  private readonly router = inject(Router);
+  private readonly utilityService = inject(UtilityService);
   private readonly document = inject(DOCUMENT);
 
+  hasActiveLicense = false;
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
    */
@@ -147,13 +152,25 @@ export class PreferenceNavComponent implements AfterViewInit {
       ]
     }
   ];
+  collapseSideNavOnMobileNav$ = this.router.events.pipe(
+    filter(event => event instanceof NavigationEnd),
+    takeUntilDestroyed(this.destroyRef),
+    map(evt => evt as NavigationEnd),
+    filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet),
+    switchMap(() => this.navService.sideNavCollapsed$),
+    take(1),
+    filter(collapsed => !collapsed)
+  );
 
-
-  hasActiveLicense = false;
 
   constructor() {
 
-    this.navService.collapseSideNav(false);
+    this.collapseSideNavOnMobileNav$.subscribe((val) => {
+      console.log('collapse: ', val)
+      this.navService.collapseSideNav(false);
+      this.cdRef.markForCheck();
+    });
+
 
     this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {

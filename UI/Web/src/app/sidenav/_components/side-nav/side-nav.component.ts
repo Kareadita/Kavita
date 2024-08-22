@@ -133,7 +133,7 @@ export class SideNavComponent implements OnInit {
 
   constructor() {
     this.collapseSideNavOnMobileNav$.subscribe(() => {
-        this.navService.toggleSideNav();
+        this.navService.collapseSideNav(false);
         this.cdRef.markForCheck();
     });
   }

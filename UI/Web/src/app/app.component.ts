@@ -14,7 +14,7 @@ import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import {filter, interval, Observable, switchMap} from 'rxjs';
+import {filter, fromEvent, interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
@@ -80,7 +80,6 @@ export class AppComponent implements OnInit {
           const currentRoute = this.router.routerState;
           await this.router.navigateByUrl(currentRoute.snapshot.url, { skipLocationChange: true });
         }
-
       });
 
 
@@ -104,6 +103,19 @@ export class AppComponent implements OnInit {
     this.setDocHeight();
     this.setCurrentUser();
     this.themeService.setColorScape('');
+
+    // fromEvent(window, 'click')
+    //   .pipe(
+    //     switchMap(_ => this.navService.sideNavCollapsed$),
+    //     filter(collapsed => !collapsed),
+    //     switchMap(_ => this.utilityService.activeBreakpoint$),
+    //     filter(breakpoint => breakpoint <= Breakpoint.Tablet),
+    //     tap(() => {
+    //       this.navService.collapseSideNav(true)
+    //     })
+    //   )
+    //   .subscribe();
+
   }
 
   setCurrentUser() {
