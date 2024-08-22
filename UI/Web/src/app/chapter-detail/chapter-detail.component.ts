@@ -226,7 +226,7 @@ export class ChapterDetailComponent implements OnInit {
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
-        if (coverUpdateEvent.id === this.chapterId) {
+        if (coverUpdateEvent.entityType === 'chapter' && coverUpdateEvent.id === this.chapterId) {
           this.themeService.refreshColorScape('chapter', coverUpdateEvent.id).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
