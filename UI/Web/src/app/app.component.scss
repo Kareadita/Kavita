@@ -1,12 +1,38 @@
 .content-wrapper {
     padding: 0 10px 0;
     height: 100%;
+    mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
+    height: calc(var(--vh)* 100 - var(--nav-offset));
+
+
 }
 
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
     margin-left: 40px;
+    overflow: auto;
+    height: calc(var(--vh)* 100 - var(--nav-offset));
+    width: calc(100dvw - 80px);
+    padding-right: 10px;
+
+    &::-webkit-scrollbar {
+        background-color: transparent;  /*make scrollbar space invisible */
+        width: inherit;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: transparent; /*makes it invisible when not hovering*/
+    }
+
+    &:hover {
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+        }
+    }
 }
+
 
 .companion-bar-collapsed {
   margin-left: 0 !important;

@@ -74,6 +74,15 @@
     overflow: auto;
     border: var(--side-nav-border);
 
+    &::-webkit-scrollbar {
+        background-color: transparent;  /*make scrollbar space invisible */
+        width: inherit;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: transparent; /*makes it invisible when not hovering*/
+    }
+
     &.no-donate {
         height: calc((var(--vh)*100) - 82px);
     }
@@ -94,6 +103,12 @@
     .side-nav-item:first {
         border-top-left-radius: var(--side-nav-border-radius);
         border-top-right-radius: var(--side-nav-border-radius);
+    }
+
+    &:hover {
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+          }
     }
 }
 
