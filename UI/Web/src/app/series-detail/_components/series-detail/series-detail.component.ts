@@ -140,11 +140,10 @@ import {DownloadButtonComponent} from "../download-button/download-button.compon
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
+import {RelatedSeriesPair, RelatedTabComponent} from "../../../_single-modules/related-tab/related-tab.component";
+import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {UserCollection} from "../../../_models/collection-tag";
 
-interface RelatedSeriesPair {
-  series: Series;
-  relation: RelationKind;
-}
 
 enum TabID {
   Related = 'related-tab',
@@ -173,12 +172,12 @@ interface StoryLineItem {
     TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, CardItemComponent,
-    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent,  NgbNavOutlet,
+    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
     RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
-    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent]
+    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -197,10 +196,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly readingListService = inject(ReadingListService);
-  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly collectionTagService = inject(CollectionTagService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
-  private readonly deviceService = inject(DeviceService);
   private readonly translocoService = inject(TranslocoService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
@@ -260,6 +258,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
+  collections: Array<UserCollection> = [];
   isWantToRead: boolean = false;
   unreadCount: number = 0;
   totalCount: number = 0;
@@ -726,6 +725,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.readingLists = lists;
       this.cdRef.markForCheck();
     });
+
+    this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
+      this.collections = tags;
+      this.cdRef.markForCheck();
+    })
 
     this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
       this.readingTimeLeft = timeLeft;

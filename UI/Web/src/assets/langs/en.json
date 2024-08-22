@@ -1074,7 +1074,9 @@
     },
 
     "related-tab": {
-        "reading-lists-title": "{{reading-lists.title}}"
+        "reading-lists-title": "{{reading-lists.title}}",
+        "collections-title": "{{side-nav.title}}",
+        "relations-title": "{{tabs.related-tab}}"
     },
 
     "chapter-metadata-detail": {

@@ -322,137 +322,16 @@
             </li>
           }
 
-          @if (hasRelations && relationShips) {
+          @if (hasRelations || readingLists.length > 0 || collections.length > 0) {
             <li [ngbNavItem]="TabID.Related">
               <a ngbNavLink>
                 {{t(TabID.Related)}}
-                <span class="badge rounded-pill text-bg-secondary">{{relations.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{relations.length + readingLists.length + collections.length}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock" [childHeight]="1">
-                    <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
-                        <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
-                      }
-                    </div>
-                  </virtual-scroller>
+                  <app-related-tab [readingLists]="readingLists" [collections]="collections" [relations]="relations"></app-related-tab>
                 }
-
-                <!--                @if (relationShips.prequels.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.prequels" title="Prequels">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Prequel"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.sequels.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.sequels" title="Sequels">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Sequel"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.parent.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.parent" title="Parent">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Parent"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.contains.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.contains" title="Contains">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Contains"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.adaptations.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.adaptations" title="Contains">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Adaptation"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.annuals.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.annuals" title="Annuals">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Annual"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-
-                <!--                @if (relationShips.characters.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.characters" title="Characters">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Character"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.alternativeSettings.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.alternativeSettings" title="Alternative Settings">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.AlternativeSetting"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.doujinshis.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.doujinshis" title="Doujinshis">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Doujinshi"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.alternativeVersions.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.alternativeVersions" title="Alternative Versions">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.AlternativeVersion"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.editions.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.editions" title="Editions">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Edition"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.others.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.others" title="Other">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.Other"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-                <!--                @if (relationShips.sideStories.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.sideStories" title="Side Stories">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.SideStory"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
-
-                <!--                @if (relationShips.spinOffs.length > 0) {-->
-                <!--                  <app-carousel-reel [items]="relationShips.spinOffs" title="Spin Offs">-->
-                <!--                    <ng-template #carouselItem let-item>-->
-                <!--                      <app-series-card class="col-auto mt-2 mb-2" [series]="item" [libraryId]="item.libraryId" [relation]="RelationKind.SpinOff"></app-series-card>-->
-                <!--                    </ng-template>-->
-                <!--                  </app-carousel-reel>-->
-                <!--                }-->
-
 
               </ng-template>
             </li>
