@@ -84,6 +84,7 @@ import {VolumeRemovedEvent} from "../_models/events/volume-removed-event";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {Device} from "../_models/device/device";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
+import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 
 enum TabID {
 
@@ -161,7 +162,8 @@ interface VolumeCast extends IHasCast {
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
     DownloadButtonComponent,
-    CardActionablesComponent
+    CardActionablesComponent,
+    BulkOperationsComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -215,6 +217,46 @@ export class VolumeDetailComponent implements OnInit {
   volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+  bulkActionCallback = (action: ActionItem<Chapter>, data: any) => {
+    if (this.volume === null) {
+      return;
+    }
+    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+    const selectedChapterIds = this.volume.chapters.filter((_chapter, index: number) => {
+      return selectedChapterIndexes.includes(index + '');
+    });
+
+    switch (action.action) {
+      case Action.AddToReadingList:
+        this.actionService.addMultipleToReadingList(this.seriesId, [], selectedChapterIds, (success) => {
+          if (success) this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.MarkAsRead:
+        this.actionService.markMultipleAsRead(this.seriesId, [], selectedChapterIds,  () => {
+          this.bulkSelectionService.deselectAll();
+          this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
+            this.volume = v;
+            this.cdRef.markForCheck();
+          });
+          this.cdRef.markForCheck();
+        });
+
+        break;
+      case Action.MarkAsUnread:
+        this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {
+          this.bulkSelectionService.deselectAll();
+          this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
+            this.volume = v;
+            this.cdRef.markForCheck();
+          });
+          this.cdRef.markForCheck();
+        });
+        break;
+    }
+  }
+
   /**
    * This is the download we get from download service.
    */
@@ -267,9 +309,6 @@ export class VolumeDetailComponent implements OnInit {
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-  get UseBookLogic() {
-    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
-  }
 
   ngOnInit() {
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
