@@ -236,20 +236,14 @@ export class VolumeDetailComponent implements OnInit {
       case Action.MarkAsRead:
         this.actionService.markMultipleAsRead(this.seriesId, [], selectedChapterIds,  () => {
           this.bulkSelectionService.deselectAll();
-          this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
-            this.volume = v;
-            this.cdRef.markForCheck();
-          });
+          this.loadVolume();
           this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {
           this.bulkSelectionService.deselectAll();
-          this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
-            this.volume = v;
-            this.cdRef.markForCheck();
-          });
+          this.loadVolume();
           this.cdRef.markForCheck();
         });
         break;
@@ -348,8 +342,6 @@ export class VolumeDetailComponent implements OnInit {
         this.navigateToSeries();
       }
     });
-
-
 
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
@@ -478,6 +470,13 @@ export class VolumeDetailComponent implements OnInit {
     });
 
     this.cdRef.markForCheck();
+  }
+
+  loadVolume() {
+    this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
+      this.volume = v;
+      this.cdRef.markForCheck();
+    });
   }
 
   readVolume(incognitoMode: boolean = false) {

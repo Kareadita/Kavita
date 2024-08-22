@@ -21,7 +21,7 @@
           ]
         },
         "hostpath": {
-          "default": "192.168.1.150:5000"
+          "default": "localhost:5000"
         }
       }
     }
@@ -6570,10 +6570,12 @@
         "tags": [
           "Reader"
         ],
+        "summary": "Deletes the user's personal table of content for the given chapter",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6582,6 +6584,7 @@
           {
             "name": "pageNum",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6590,6 +6593,7 @@
           {
             "name": "title",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }

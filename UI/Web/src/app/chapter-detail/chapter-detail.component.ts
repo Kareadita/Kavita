@@ -79,6 +79,10 @@ import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
+import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {Volume} from "../_models/volume";
+import {Device} from "../_models/device/device";
+import {ActionService} from "../_services/action.service";
 
 enum TabID {
   Related = 'related-tab',
@@ -163,7 +167,8 @@ export class ChapterDetailComponent implements OnInit {
   private readonly readingListService = inject(ReadingListService);
   protected readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
-
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
@@ -192,7 +197,7 @@ export class ChapterDetailComponent implements OnInit {
   readingLists: ReadingList[] = [];
   showDetailsTab: boolean = true;
   mobileSeriesImgBackground: string | undefined;
-
+  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
 
   get ScrollingBlockHeight() {
@@ -334,6 +339,7 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   downloadChapter() {
+    if (this.downloadInProgress) return;
     this.downloadService.download('chapter', this.chapter!, (d) => {
       this.downloadInProgress = !!d;
       this.cdRef.markForCheck();
@@ -347,5 +353,45 @@ export class ChapterDetailComponent implements OnInit {
   switchTabsToDetail() {
     this.activeTabId = TabID.Details;
     this.cdRef.markForCheck();
+  }
+
+  performAction(action: ActionItem<Chapter>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, this.chapter!);
+    }
+  }
+
+  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+    switch (action.action) {
+      case(Action.MarkAsRead):
+        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => {
+          this.loadData();
+        });
+        break;
+      case(Action.MarkAsUnread):
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, () => {
+          this.loadData();
+        });
+        break;
+      case(Action.Edit):
+        this.openEditModal();
+        break;
+      case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
+        break;
+      case(Action.IncognitoRead):
+        this.readerService.readChapter(this.libraryId, this.seriesId, chapter, true);
+        break;
+      case (Action.SendTo):
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice([chapter.id], device);
+        break;
+      case Action.Download:
+        this.downloadChapter();
+        break;
+      case Action.Delete:
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        break;
+    }
   }
 }
