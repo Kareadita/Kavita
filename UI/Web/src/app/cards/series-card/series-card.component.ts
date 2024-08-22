@@ -284,7 +284,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   async refreshMetadata(series: Series, forceUpdate = false) {
-    await this.actionService.refreshSeriesMetadata(series, undefined, forceUpdate);
+    await this.actionService.refreshSeriesMetadata(series, undefined, forceUpdate, forceUpdate);
   }
 
   async scanLibrary(series: Series) {

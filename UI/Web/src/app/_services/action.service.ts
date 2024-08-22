@@ -91,9 +91,10 @@ export class ActionService {
    * @param library Partial Library, must have id and name populated
    * @param callback Optional callback to perform actions after API completes
    * @param forceUpdate Optional Should we force
+   * @param forceColorscape Optional Should we force colorscape gen
    * @returns
    */
-  async refreshLibraryMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true) {
+  async refreshLibraryMetadata(library: Partial<Library>, callback?: LibraryActionCallback, forceUpdate: boolean = true, forceColorscape: boolean = false) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;
     }
@@ -110,7 +111,7 @@ export class ActionService {
 
     const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
 
-    this.libraryService.refreshMetadata(library?.id, forceUpdate).subscribe((res: any) => {
+    this.libraryService.refreshMetadata(library?.id, forceUpdate, forceColorscape).subscribe((res: any) => {
       this.toastr.info(translate(message, {name: library.name}));
 
       if (callback) {
@@ -236,8 +237,9 @@ export class ActionService {
    * @param series Series, must have libraryId, id and name populated
    * @param callback Optional callback to perform actions after API completes
    * @param forceUpdate If cache should be checked or not
+   * @param forceColorscape If cache should be checked or not
    */
-  async refreshSeriesMetadata(series: Series, callback?: SeriesActionCallback, forceUpdate: boolean = true) {
+  async refreshSeriesMetadata(series: Series, callback?: SeriesActionCallback, forceUpdate: boolean = true, forceColorscape: boolean = false) {
 
     // Prompt the user if we are doing a forced call
     if (forceUpdate) {
@@ -251,7 +253,7 @@ export class ActionService {
 
     const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
 
-    this.seriesService.refreshMetadata(series, forceUpdate).pipe(take(1)).subscribe((res: any) => {
+    this.seriesService.refreshMetadata(series, forceUpdate, forceColorscape).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info(translate(message, {name: series.name}));
       if (callback) {
         callback(series);

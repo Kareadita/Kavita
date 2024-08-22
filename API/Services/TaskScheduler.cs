@@ -27,8 +27,8 @@ public interface ITaskScheduler
     Task ScanLibrary(int libraryId, bool force = false);
     Task ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
-    void RefreshMetadata(int libraryId, bool forceUpdate = true);
-    void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
+    void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true);
+    void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
@@ -371,12 +371,12 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
     }
 
-    public void RefreshMetadata(int libraryId, bool forceUpdate = true)
+    public void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true)
     {
         var alreadyEnqueued = HasAlreadyEnqueuedTask(MetadataService.Name, "GenerateCoversForLibrary",
-                                  [libraryId, true]) ||
+                                  [libraryId, true, true]) ||
                               HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
-                                  [libraryId, false]);
+                                  [libraryId, false, false]);
         if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
@@ -384,19 +384,19 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Enqueuing library metadata refresh for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate, forceColorscape));
     }
 
-    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
+    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false)
     {
-        if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries", [libraryId, seriesId, forceUpdate]))
+        if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries", [libraryId, seriesId, forceUpdate, forceColorscape]))
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
         }
 
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate, forceColorscape));
     }
 
     public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)

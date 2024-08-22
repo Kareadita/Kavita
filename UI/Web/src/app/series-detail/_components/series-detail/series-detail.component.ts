@@ -585,10 +585,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshSeriesMetadata(series, undefined, true);
+        this.actionService.refreshSeriesMetadata(series, undefined, true, false);
         break;
       case(Action.GenerateColorScape):
-        this.actionService.refreshSeriesMetadata(series, undefined, false);
+        this.actionService.refreshSeriesMetadata(series, undefined, false, true);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
