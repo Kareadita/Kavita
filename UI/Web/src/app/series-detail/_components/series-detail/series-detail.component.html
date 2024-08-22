@@ -141,7 +141,8 @@
                 <div>
                   <app-badge-expander [items]="seriesMetadata.writers"
                                       [itemsTillExpander]="3"
-                                      [allowToggle]="false">
+                                      [allowToggle]="false"
+                                      (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Writers, item.id)">{{item.name}}</a>
                     </ng-template>
@@ -170,7 +171,8 @@
                 <div>
                   <app-badge-expander [items]="seriesMetadata.genres"
                                       [itemsTillExpander]="3"
-                                      [allowToggle]="false">
+                                      [allowToggle]="false"
+                                      (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Genres, item.id)">{{item.title}}</a>
                     </ng-template>
@@ -183,7 +185,8 @@
                 <div>
                   <app-badge-expander [items]="seriesMetadata.tags"
                                       [itemsTillExpander]="3"
-                                      [allowToggle]="false">
+                                      [allowToggle]="false"
+                                      (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
                     </ng-template>

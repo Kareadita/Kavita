@@ -2,10 +2,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  ContentChild, EventEmitter,
   inject,
   Input,
-  OnInit,
+  OnInit, Output,
   TemplateRef
 } from '@angular/core';
 import {CommonModule, NgTemplateOutlet} from "@angular/common";
@@ -27,6 +27,10 @@ export class BadgeExpanderComponent implements OnInit {
   @Input() items: Array<any> = [];
   @Input() itemsTillExpander: number = 4;
   @Input() allowToggle: boolean = true;
+  /**
+   * Invoked when the "and more" is clicked
+   */
+  @Output() toggle = new EventEmitter<void>();
   @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
 
 
@@ -43,6 +47,7 @@ export class BadgeExpanderComponent implements OnInit {
   }
 
   toggleVisible() {
+    this.toggle.emit();
     if (!this.allowToggle) return;
 
     this.isCollapsed = !this.isCollapsed;

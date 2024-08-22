@@ -185,6 +185,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -460,5 +461,13 @@ export class VolumeDetailComponent implements OnInit {
     }
   }
 
-  protected readonly Breakpoint = Breakpoint;
+  openFilter(field: FilterField, value: string | number) {
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
+
+  switchTabsToDetail() {
+    this.activeTabId = TabID.Details;
+    this.cdRef.markForCheck();
+  }
 }

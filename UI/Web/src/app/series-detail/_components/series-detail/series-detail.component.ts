@@ -1188,4 +1188,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       });
     }
   }
+
+  switchTabsToDetail() {
+    this.activeTabId = TabID.Details;
+    this.cdRef.markForCheck();
+  }
 }

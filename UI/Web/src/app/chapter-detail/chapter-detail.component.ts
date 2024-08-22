@@ -164,6 +164,8 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
+  protected readonly TabId = TabId;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -320,6 +322,12 @@ export class ChapterDetailComponent implements OnInit {
     });
   }
 
-  protected readonly TabId = TabId;
-  protected readonly Breakpoint = Breakpoint;
+  openFilter(field: FilterField, value: string | number) {
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
+  switchTabsToDetail() {
+    this.activeTabId = TabID.Details;
+    this.cdRef.markForCheck();
+  }
 }
