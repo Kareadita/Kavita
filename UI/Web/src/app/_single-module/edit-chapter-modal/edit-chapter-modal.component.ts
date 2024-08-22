@@ -56,6 +56,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
+import {AgeRating} from "../../_models/metadata/age-rating";
 
 enum TabID {
   General = 'general-tab',
@@ -250,6 +251,14 @@ export class EditChapterModalComponent implements OnInit {
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     this.chapter.releaseDate = model.releaseDate;
+    this.chapter.ageRating = model.ageRating as AgeRating;
+    this.chapter.genres = model.genres;
+    this.chapter.tags = model.tags;
+    this.chapter.sortOrder = model.sortOrder;
+    this.chapter.language = model.language;
+    this.chapter.titleName = model.titleName;
+    this.chapter.summary = model.summary;
+    this.chapter.isbn = model.isbn;
 
 
     const apis = [

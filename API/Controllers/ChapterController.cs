@@ -261,6 +261,8 @@ public class ChapterController : BaseApiController
         #endregion
 
 
+        _unitOfWork.ChapterRepository.Update(chapter);
+
         if (!_unitOfWork.HasChanges())
         {
             return Ok();
