@@ -98,10 +98,6 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {ExternalSeries} from "../../../_models/series-detail/external-series";
-import {
-  SeriesPreviewDrawerComponent
-} from "../../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
@@ -682,13 +678,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.openChapter(chapter, true);
         break;
       case (Action.SendTo):
-        {
-          const device = (action._extra!.data as Device);
-          this.deviceService.sendTo([chapter.id], device.id).subscribe(() => {
-            this.toastr.success(this.translocoService.translate('series-detail.send-to', {deviceName: device.name}));
-          });
-          break;
-        }
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice([chapter.id], device);
+        break;
       default:
         break;
     }
@@ -1156,22 +1148,22 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.cdRef.markForCheck();
   }
 
-  previewSeries(item: Series | ExternalSeries, isExternal: boolean) {
-    const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
-    ref.componentInstance.isExternalSeries = isExternal;
-    ref.componentInstance.name = item.name;
-
-    if (isExternal) {
-      const external = item as ExternalSeries;
-      ref.componentInstance.aniListId = external.aniListId;
-      ref.componentInstance.malId = external.malId;
-    } else {
-      const local = item as Series;
-      ref.componentInstance.seriesId = local.id;
-      ref.componentInstance.libraryId = local.libraryId;
-    }
-
-  }
+  // previewSeries(item: Series | ExternalSeries, isExternal: boolean) {
+  //   const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
+  //   ref.componentInstance.isExternalSeries = isExternal;
+  //   ref.componentInstance.name = item.name;
+  //
+  //   if (isExternal) {
+  //     const external = item as ExternalSeries;
+  //     ref.componentInstance.aniListId = external.aniListId;
+  //     ref.componentInstance.malId = external.malId;
+  //   } else {
+  //     const local = item as Series;
+  //     ref.componentInstance.seriesId = local.id;
+  //     ref.componentInstance.libraryId = local.libraryId;
+  //   }
+  //
+  // }
 
   openFilter(field: FilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();

@@ -375,7 +375,7 @@ export class ReaderService {
     }
 
     // Sort the chapters, then grab first if no reading progress
-    this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0]);
+    this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0], incognitoMode);
   }
 
   readChapter(libraryId: number, seriesId: number, chapter: Chapter, incognitoMode: boolean = false) {

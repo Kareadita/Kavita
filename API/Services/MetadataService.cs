@@ -86,7 +86,7 @@ public class MetadataService : IMetadataService
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage),
                 firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
         {
-            if (NeedsColorSpace(chapter) || forceColorScape)
+            if (NeedsColorSpace(chapter, forceColorScape))
             {
                 _imageService.UpdateColorScape(chapter);
                 _unitOfWork.ChapterRepository.Update(chapter);
@@ -118,9 +118,11 @@ public class MetadataService : IMetadataService
         firstFile.UpdateLastModified();
     }
 
-    private static bool NeedsColorSpace(IHasCoverImage? entity)
+    private static bool NeedsColorSpace(IHasCoverImage? entity, bool force)
     {
         if (entity == null) return false;
+        if (force) return true;
+
         return !string.IsNullOrEmpty(entity.CoverImage) &&
                (string.IsNullOrEmpty(entity.PrimaryColor) || string.IsNullOrEmpty(entity.SecondaryColor));
     }
@@ -142,7 +144,7 @@ public class MetadataService : IMetadataService
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
                 null, volume.Created, forceUpdate))
         {
-            if (NeedsColorSpace(volume) || forceColorScape)
+            if (NeedsColorSpace(volume, forceColorScape))
             {
                 _imageService.UpdateColorScape(volume);
                 _unitOfWork.VolumeRepository.Update(volume);
@@ -186,7 +188,7 @@ public class MetadataService : IMetadataService
                 null, series.Created, forceUpdate, series.CoverImageLocked))
         {
             // Check if we don't have a primary/seconary color
-            if (NeedsColorSpace(series) && forceColorScape)
+            if (NeedsColorSpace(series, forceColorScape))
             {
                 _imageService.UpdateColorScape(series);
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));

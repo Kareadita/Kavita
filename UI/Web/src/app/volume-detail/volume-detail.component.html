@@ -86,6 +86,12 @@
               }
 
               <div class="col-auto ms-2 d-none d-md-block">
+                <div class="card-actions" [ngbTooltip]="t('more-alt')">
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="volumeActions" [labelBy]="series.name + ' ' + volume.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn"></app-card-actionables>
+                </div>
+              </div>
+
+              <div class="col-auto ms-2 d-none d-md-block">
                 <app-download-button [download$]="download$" [entity]="volume" entityType="volume"></app-download-button>
               </div>
 
@@ -169,7 +175,12 @@
               <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
                 <div class="card-container row g-0" #container>
                   @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
-                    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesId" [libraryId]="libraryId" [libraryType]="libraryType"></app-chapter-card>
+                    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item"
+                                      [seriesId]="seriesId"
+                                      [libraryId]="libraryId"
+                                      [libraryType]="libraryType"
+                                      [actions]="chapterActions"
+                    ></app-chapter-card>
                   }
                 </div>
               </virtual-scroller>

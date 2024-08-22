@@ -79,6 +79,11 @@ import {DownloadButtonComponent} from "../series-detail/_components/download-but
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
+import {ActionService} from "../_services/action.service";
+import {VolumeRemovedEvent} from "../_models/events/volume-removed-event";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
+import {Device} from "../_models/device/device";
+import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 
 enum TabID {
 
@@ -155,7 +160,8 @@ interface VolumeCast extends IHasCast {
     CompactNumberPipe,
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
-    DownloadButtonComponent
+    DownloadButtonComponent,
+    CardActionablesComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -179,6 +185,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
   protected readonly utilityService = inject(UtilityService);
   private readonly readingListService = inject(ReadingListService);
   private readonly messageHub = inject(MessageHubService);
@@ -203,8 +210,10 @@ export class VolumeDetailComponent implements OnInit {
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
   mobileSeriesImgBackground: string | undefined;
+  downloadInProgress: boolean = false;
 
-  volumeActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
+  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
+  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
   /**
    * This is the download we get from download service.
@@ -293,6 +302,12 @@ export class VolumeDetailComponent implements OnInit {
           this.volume.chapters = this.volume.chapters.filter(c => c.id !== removedEvent.chapterId);
           this.cdRef.detectChanges();
         }
+      } else if (event.event === EVENTS.VolumeRemoved) {
+        const removedEvent = event.payload as VolumeRemovedEvent;
+        if (removedEvent.volumeId !== this.volumeId) return;
+
+        // remove the chapter from the tab
+        this.navigateToSeries();
       }
     });
 
@@ -427,12 +442,6 @@ export class VolumeDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  readChapter(chapter: Chapter, incognitoMode: boolean = false) {
-    if (this.bulkSelectionService.hasSelections()) return;
-
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
-  }
-
   readVolume(incognitoMode: boolean = false) {
     if (!this.volume) return;
 
@@ -446,9 +455,20 @@ export class VolumeDetailComponent implements OnInit {
     ref.componentInstance.libraryId = this.libraryId;
     ref.componentInstance.seriesId = this.series!.id;
 
-    ref.closed.subscribe((res: EditVolumeModalCloseResult) => {
-      // TODO
+    ref.closed.subscribe();
+  }
+
+  openEditChapterModal(chapter: Chapter) {
+    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    ref.componentInstance.chapter = chapter;
+    ref.componentInstance.libraryType = this.libraryType;
+    ref.componentInstance.libraryId = this.libraryId;
+    ref.componentInstance.seriesId = this.series!.id;
+
+    ref.closed.subscribe(() => {
+
     });
+
   }
 
   onNavChange(event: NgbNavChangeEvent) {
@@ -458,7 +478,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   updateUrl(activeTab: TabID) {
-    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
+    //const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
     //this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
   }
 
@@ -466,16 +486,75 @@ export class VolumeDetailComponent implements OnInit {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
-  handleVolumeAction(action: ActionItem<Volume>) {
-    // TODO: Implement actionables
+  performAction(action: ActionItem<Volume>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, this.volume!);
+    }
+  }
+
+  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+    switch (action.action) {
+      case(Action.MarkAsRead):
+        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter);
+        break;
+      case(Action.MarkAsUnread):
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter);
+        break;
+      case(Action.Edit):
+        this.openEditChapterModal(chapter);
+        break;
+      case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
+        break;
+      case(Action.IncognitoRead):
+        this.readerService.readChapter(this.libraryId, this.seriesId, chapter, true);
+        break;
+      case (Action.SendTo):
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice([chapter.id], device);
+        break;
+    }
+  }
+
+  async handleVolumeAction(action: ActionItem<Volume>) {
     switch (action.action) {
       case Action.Delete:
+        await this.actionService.deleteVolume(this.volumeId, (res) => {
+          if (!res) return;
+          this.navigateToSeries();
+        });
         break;
       case Action.MarkAsRead:
+        this.actionService.markVolumeAsRead(this.seriesId, this.volume!, res => {
+          this.volume!.pagesRead = this.volume!.pages;
+          this.cdRef.markForCheck();
+        });
         break;
       case Action.MarkAsUnread:
+        this.actionService.markVolumeAsUnread(this.seriesId, this.volume!, res => {
+          this.volume!.pagesRead = 0;
+          this.cdRef.markForCheck();
+        });
         break;
-      case Action.MarkAsRead:
+      case Action.AddToReadingList:
+        break;
+      case Action.Download:
+        if (this.downloadInProgress) return;
+        this.downloadService.download('volume', this.volume!, (d) => {
+          this.downloadInProgress = !!d;
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.IncognitoRead:
+        this.readVolume(true);
+        break;
+      case Action.SendTo:
+        const chapterIds = this.volume!.chapters.map(c => c.id);
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice(chapterIds, device);
+        break;
+      case Action.Edit:
+        this.openEditModal();
         break;
     }
   }
@@ -488,5 +567,9 @@ export class VolumeDetailComponent implements OnInit {
   switchTabsToDetail() {
     this.activeTabId = TabID.Details;
     this.cdRef.markForCheck();
+  }
+
+  navigateToSeries() {
+    this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
   }
 }
