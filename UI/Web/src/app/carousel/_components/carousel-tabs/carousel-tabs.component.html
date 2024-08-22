@@ -3,9 +3,9 @@
     <button class="scroll-button left" (click)="scroll('left')" [class.visible]="showLeftArrow">
       <i class="fas fa-chevron-left"></i>
     </button>
-    <div class="carousel-tabs-container" #scrollContainer (scroll)="onScroll()">
+    <div class="carousel-tabs-container mb-2" #scrollContainer (scroll)="onScroll()">
 
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
         @for (tab of tabComponents; track tab) {
           <li [ngbNavItem]="tab.id">
             <a ngbNavLink>{{t('tabs.' + tab.id)}}</a>

@@ -157,8 +157,8 @@
         </div>
       </div>
 
-      <div class="carousel-tabs-container">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" (navChange)="onNavChange($event)">
+      <div class="carousel-tabs-container mb-2">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Chapters">
           <a ngbNavLink>
             {{utilityService.formatChapterName(libraryType!, false, false, true)}}

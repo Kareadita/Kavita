@@ -112,6 +112,7 @@
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: -ms-autohiding-scrollbar;
   scrollbar-width: none;
+  box-shadow: inset -1px -2px 0px -1px var(--elevation-layer9);
 }
 .carousel-tabs-container::-webkit-scrollbar {
   display: none;
