@@ -224,7 +224,7 @@ public class MetadataService : IMetadataService
                 var index = 0;
                 foreach (var chapter in volume.Chapters)
                 {
-                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize);
+                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
                     // If cover was update, either the file has changed or first scan and we should force a metadata update
                     UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)

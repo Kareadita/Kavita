@@ -16,7 +16,6 @@ import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
 import {DownloadEvent, DownloadService} from "../shared/_services/download.service";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
-import {ToastrService} from "ngx-toastr";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {
@@ -38,10 +37,9 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
 import {Chapter} from "../_models/chapter";
 import {Series} from "../_models/series";
 import {LibraryType} from "../_models/library/library";
-import {forkJoin, map, Observable, shareReplay, tap} from "rxjs";
+import {forkJoin, map, Observable, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from '../_models/metadata/v2/filter-field';
 import {AgeRating} from '../_models/metadata/age-rating';
@@ -79,8 +77,6 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
-import {SeriesRemovedEvent} from "../_models/events/series-removed-event";
-import {ScanSeriesEvent} from "../_models/events/scan-series-event";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
 
@@ -285,7 +281,7 @@ export class VolumeDetailComponent implements OnInit {
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
-        if (coverUpdateEvent.id === this.volumeId) {
+        if (coverUpdateEvent.entityType === 'volume' && coverUpdateEvent.id === this.volumeId) {
           this.themeService.refreshColorScape('volume', coverUpdateEvent.id).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
