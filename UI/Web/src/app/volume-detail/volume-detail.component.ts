@@ -242,7 +242,6 @@ export class VolumeDetailComponent implements OnInit {
           });
           this.cdRef.markForCheck();
         });
-
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {

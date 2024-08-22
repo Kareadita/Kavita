@@ -1,13 +1,12 @@
-import { DOCUMENT } from '@angular/common';
-import {DestroyRef, inject, Inject, Injectable, OnDestroy, Renderer2, RendererFactory2} from '@angular/core';
-import {filter, ReplaySubject, Subject, take} from 'rxjs';
+import {DOCUMENT} from '@angular/common';
+import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
+import {filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {TextResonse} from "../_types/text-response";
-import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 import {AccountService} from "./account.service";
-import {map, tap} from "rxjs/operators";
+import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
@@ -109,11 +108,14 @@ export class NavService {
    * Hides the top nav bar.
    */
   hideNavBar() {
-    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');
-    this.renderer.setStyle(this.document.querySelector('body'), 'scrollbar-gutter', 'initial');
-    this.renderer.removeStyle(this.document.querySelector('body'), 'height');
-    this.renderer.removeStyle(this.document.querySelector('html'), 'height');
-    this.navbarVisibleSource.next(false);
+    setTimeout(() => {
+      const bodyElem = this.document.querySelector('body');
+      this.renderer.removeStyle(bodyElem, 'height');
+      this.renderer.removeStyle(this.document.querySelector('html'), 'height');
+      this.navbarVisibleSource.next(false);
+      this.renderer.setStyle(bodyElem, 'margin-top', '0px');
+      this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important)
+    }, 10);
   }
 
   /**
