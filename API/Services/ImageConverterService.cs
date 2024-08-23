@@ -6,14 +6,16 @@ using System.IO.Abstractions;
 using System.Linq;
 using API.Services.ImageConversion;
 using static Org.BouncyCastle.Bcpg.Attr.ImageAttrib;
+using API.DTOs.Reader;
 
 namespace API.Services
 {
     public interface IImageConverterService
     {
         Stream ConvertStream(string filename, Stream source);
-        string ConvertFile(string filename);
+        string ConvertFile(string filename, List<string> supportedImageFormats);
         void ConvertDirectory(string directory);
+        (int Width, int Height)? GetDimensions(string fileName, int pageNumber);
     }
 
     public class ImageConverterService : IImageConverterService
@@ -41,8 +43,18 @@ namespace API.Services
             return File.OpenRead(provider.Convert(tempFile));
         }
 
-        public string ConvertFile(string filename)
+        private bool CheckDirectSupport(string filename, List<string> supportedImageFormats)
         {
+            if (supportedImageFormats == null)
+                return false;
+            string ext = Path.GetExtension(filename).ToLowerInvariant().Substring(1);
+            return supportedImageFormats.Contains(ext);
+        }
+
+        public string ConvertFile(string filename, List<string> supportedImageFormats)
+        {
+            if (CheckDirectSupport(filename, supportedImageFormats))
+                return filename;
             IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(filename));
             if (provider == null)
                 return filename;
@@ -57,6 +69,14 @@ namespace API.Services
                 if (provider != null)
                     provider.Convert(filename);
             }
+        }
+
+        public (int Width, int Height)? GetDimensions(string fileName, int pageNumber)
+        {
+            IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(fileName));
+            if (provider == null)
+                return null;
+            return provider.GetDimensions(fileName, pageNumber);
         }
     }
 }

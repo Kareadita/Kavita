@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1229,7 +1229,7 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
+            return _imageService.WriteCoverThumbnail(fileFilePath, stream, fileName, outputDirectory, encodeFormat, size);
         }
         catch (Exception ex)
         {
@@ -1252,7 +1252,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
+            return _imageService.WriteCoverThumbnail(fileFilePath, stream, fileName, outputDirectory, encodeFormat, size);
 
         }
         catch (Exception ex)

@@ -1227,7 +1227,7 @@ public class OpdsController : BaseApiController
 
         try
         {
-            var path = _cacheService.GetCachedPagePath(chapter.Id, pageNumber);
+            var path = _cacheService.GetCachedPagePath(chapter.Id, pageNumber, Request.SupportedImageTypesFromRequest());
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", pageNumber));
 
@@ -1251,7 +1251,7 @@ public class OpdsController : BaseApiController
                 }, userId);
             }
 
-            return File(content, MimeTypeMap.GetMimeType(format));
+            return File(content, format.GetMimeType());
         }
         catch (Exception)
         {
