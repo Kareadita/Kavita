@@ -68,7 +68,8 @@
         margin-left: 0;
         padding-left: 0;
         width: 100%;
-        margin-top: 20px;
+        padding-top: 20px;
+        height: calc(100dvh - var(--nav-mobile-offset));
 
         &::-webkit-scrollbar {
             width: inherit;
