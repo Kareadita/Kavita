@@ -4,7 +4,7 @@
     @if((navService.sideNavCollapsed$ | async) === false) {
       <div class="preference side-nav-container"  [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
       'hidden': (navService.sideNavVisibility$ | async) === false,
-      'no-donate': (accountService.hasValidLicense$ | async) === true}">>
+      'no-donate': (accountService.hasValidLicense$ | async) === true}">
         <div class="side-nav">
 
           @for(section of sections; track section.title + section.children.length; let idx = $index;) {
@@ -27,6 +27,6 @@
       }
     }
 
-  } 
+  }
 
 </ng-container>
