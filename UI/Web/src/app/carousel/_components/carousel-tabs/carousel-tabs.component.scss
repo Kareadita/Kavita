@@ -1,0 +1,45 @@
+.carousel-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.carousel-tabs-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  scrollbar-width: none;
+  flex-grow: 1;
+}
+.carousel-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+.nav-tabs {
+  flex-wrap: nowrap;
+}
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+.scroll-button.left {
+  left: 0;
+}
+.scroll-button.right {
+  right: 0;
+}
+.scroll-button.visible {
+  opacity: 1;
+}

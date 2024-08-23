@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import {Subject, tap} from 'rxjs';
@@ -25,6 +25,8 @@ import {CollectionTagService} from "./collection-tag.service";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {FilterService} from "./filter.service";
 import {ReadingListService} from "./reading-list.service";
+import {ChapterService} from "./chapter.service";
+import {VolumeService} from "./volume.service";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -40,22 +42,26 @@ export type BooleanActionCallback = (result: boolean) => void;
 @Injectable({
   providedIn: 'root'
 })
-export class ActionService implements OnDestroy {
+export class ActionService {
 
-  private readonly onDestroy = new Subject<void>();
+  private readonly chapterService = inject(ChapterService);
+  private readonly volumeService = inject(VolumeService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly readerService = inject(ReaderService);
+  private readonly toastr = inject(ToastrService);
+  private readonly modalService = inject(NgbModal);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly memberService = inject(MemberService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly collectionTagService = inject(CollectionTagService);
+  private readonly filterService = inject(FilterService);
+  private readonly readingListService = inject(ReadingListService);
+
+
   private readingListModalRef: NgbModalRef | null = null;
   private collectionModalRef: NgbModalRef | null = null;
 
-  constructor(private libraryService: LibraryService, private seriesService: SeriesService,
-    private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
-    private readonly collectionTagService: CollectionTagService, private filterService: FilterService,
-              private readonly readingListService: ReadingListService) { }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   /**
    * Request a file scan for a given Library
@@ -290,6 +296,7 @@ export class ActionService implements OnDestroy {
 
   /**
    * Mark a chapter as read
+   * @param libraryId Library Id
    * @param seriesId Series Id
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
@@ -306,6 +313,7 @@ export class ActionService implements OnDestroy {
 
   /**
    * Mark a chapter as unread
+   * @param libraryId Library Id
    * @param seriesId Series Id
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
@@ -324,7 +332,7 @@ export class ActionService implements OnDestroy {
    * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
    * @param seriesId Series Id
    * @param volumes Volumes, should have id, chapters and pagesRead populated
-   * @param chapters? Chapters, should have id
+   * @param chapters Optional Chapters, should have id
    * @param callback Optional callback to perform actions after API completes
    */
    markMultipleAsRead(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
@@ -346,6 +354,7 @@ export class ActionService implements OnDestroy {
    * Mark all chapters and the volumes as Unread. All volumes must belong to a series
    * @param seriesId Series Id
    * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param chapters Optional Chapters, should have id
    * @param callback Optional callback to perform actions after API completes
    */
    markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
@@ -547,7 +556,7 @@ export class ActionService implements OnDestroy {
     if (this.collectionModalRef != null) { return; }
       this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
-      this.collectionModalRef.componentInstance.title = translate('action.new-collection');
+      this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
 
       this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;
@@ -681,6 +690,48 @@ export class ActionService implements OnDestroy {
       if (callback) {
         if (res) {
           this.toastr.success(translate('toasts.series-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
+        callback(res);
+      }
+    });
+  }
+
+  async deleteChapter(chapterId: number, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-chapter'))) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.chapterService.deleteChapter(chapterId).subscribe((res: boolean) => {
+      if (callback) {
+        if (res) {
+          this.toastr.success(translate('toasts.chapter-deleted'));
+        } else {
+          this.toastr.error(translate('errors.generic'));
+        }
+
+        callback(res);
+      }
+    });
+  }
+
+  async deleteVolume(volumeId: number, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-volume'))) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.volumeService.deleteVolume(volumeId).subscribe((res: boolean) => {
+      if (callback) {
+        if (res) {
+          this.toastr.success(translate('toasts.volume-deleted'));
         } else {
           this.toastr.error(translate('errors.generic'));
         }

@@ -10,7 +10,7 @@
   <div class="offcanvas-body">
     <ng-container *ngIf="CoverUrl as coverUrl">
       <div style="width: 160px" class="mx-auto mb-3">
-        <app-image *ngIf="coverUrl" height="230px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '230px'}" [imageUrl]="coverUrl"></app-image>
+        <app-image *ngIf="coverUrl" height="232.91px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '232.91px'}" [imageUrl]="coverUrl"></app-image>
       </div>
     </ng-container>
 
@@ -51,9 +51,9 @@
       <div class="mt-3">
         <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="t('series-preview-drawer.staff-label')">
           <ng-template #itemTemplate let-item>
-            <div class="card mb-3" style="max-width: 180px;">
+            <div class="card mb-3">
               <div class="row g-0">
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <ng-container *ngIf="item.imageUrl && !item.imageUrl.endsWith('default.jpg'); else localPerson">
                     <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
                   </ng-container>
@@ -61,7 +61,7 @@
                     <i class="fa fa-user-circle align-self-center person-img" style="font-size: 28px;" aria-hidden="true"></i>
                   </ng-template>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-9">
                   <div class="card-body">
                     <h6 class="card-title">{{item.name}}</h6>
                     <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
@@ -109,7 +109,7 @@
         <div class="mt-3">
           <app-metadata-detail [tags]="localStaff" [libraryId]="0" [heading]="t('series-preview-drawer.staff-label')">
             <ng-template #itemTemplate let-item>
-              <div class="card mb-3" style="max-width: 180px;">
+              <div class="card mb-3">
                 <div class="row g-0">
                   <div class="col-md-4">
                     <i class="fa fa-user-circle align-self-center" style="font-size: 28px; margin-top: 24px; margin-left: 24px" aria-hidden="true"></i>

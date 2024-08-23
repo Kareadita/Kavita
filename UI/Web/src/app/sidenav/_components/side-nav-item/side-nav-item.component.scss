@@ -73,6 +73,19 @@
             color: var(--side-nav-item-active-color);
             background-color: unset;
         }
+
+        i {
+            color: var(--side-nav-item-closed-color);
+        }
+
+        &:hover {
+            color: var(--side-nav-hover-text-color);
+            background-color: var(--side-nav-hover-bg-color);
+
+            i {
+                color: var(--side-nav-item-closed-hover-color);
+            }
+        }
     }
 
     &:hover {

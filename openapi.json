@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.2",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.5",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -1132,6 +1132,7 @@
           }
         ],
         "requestBody": {
+          "description": "FormBody with parameter name of cbl",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -1202,6 +1203,7 @@
           }
         ],
         "requestBody": {
+          "description": "FormBody with parameter name of cbl",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -1250,10 +1252,12 @@
         "tags": [
           "Chapter"
         ],
+        "summary": "Gets a single chapter",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1280,6 +1284,78 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chapter"
+        ],
+        "summary": "Removes a Chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chapter/update": {
+      "post": {
+        "tags": [
+          "Chapter"
+        ],
+        "summary": "Update chapter metadata",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -2764,6 +2840,37 @@
           {
             "name": "url",
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Image/publisher": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns the image associated with a publisher",
+        "parameters": [
+          {
+            "name": "publisherName",
+            "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -6724,10 +6831,60 @@
         "tags": [
           "ReadingList"
         ],
-        "summary": "Returns all Reading Lists the user has access to that have a series within it.",
+        "summary": "Returns all Reading Lists the user has access to that the given series within it.",
         "parameters": [
           {
             "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ReadingList/lists-for-chapter": {
+      "get": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Returns all Reading Lists the user has access to that has the given chapter within it.",
+        "parameters": [
+          {
+            "name": "chapterId",
             "in": "query",
             "description": "",
             "schema": {
@@ -12422,6 +12579,7 @@
         ],
         "summary": "Uploads a new theme file",
         "requestBody": {
+          "description": "",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -12654,7 +12812,7 @@
           "Upload"
         ],
         "summary": "Replaces volume cover image and locks it with a base64 encoded image.",
-        "description": "This is a helper API for Komf - Kavita UI does not use. Volume will find first chapter to update.",
+        "description": "This will not update the underlying chapter",
         "requestBody": {
           "description": "",
           "content": {
@@ -12745,7 +12903,8 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/Users/delete-user": {
@@ -13045,6 +13204,82 @@
                   "items": {
                     "type": "string"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Volume": {
+      "get": {
+        "tags": [
+          "Volume"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Volume"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -14773,7 +15008,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "nullable": true
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
@@ -15138,6 +15374,69 @@
             "type": "string",
             "nullable": true
           },
+          "ageRatingLocked": {
+            "type": "boolean"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "isbnLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
           "people": {
             "type": "array",
             "items": {
@@ -15472,6 +15771,68 @@
             "description": "Total number of issues for the series",
             "format": "int32"
           },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "publicationStatusLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "releaseYearLocked": {
+            "type": "boolean"
+          },
           "coverImage": {
             "type": "string",
             "nullable": true
@@ -15597,7 +15958,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "nullable": true
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
@@ -19868,6 +20230,11 @@
             "description": "The highest level folder for this Series",
             "nullable": true
           },
+          "lowestFolderPath": {
+            "type": "string",
+            "description": "Lowest path (that is under library root) that contains all files for the series.",
+            "nullable": true
+          },
           "lastFolderScanned": {
             "type": "string",
             "description": "The last time the folder for this series was scanned",
@@ -21273,6 +21640,247 @@
         },
         "additionalProperties": false
       },
+      "UpdateChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "description": "Genres for the Chapter",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Chapter",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Highest Age Rating from all Chapters",
+            "format": "int32"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the content (BCP-47 code)",
+            "nullable": true
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "isbnLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
+          },
+          "sortOrderLocked": {
+            "type": "boolean",
+            "description": "Can the sort order be updated on scan or is it locked from UI"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "Date which chapter was released",
+            "format": "date-time"
+          },
+          "titleName": {
+            "type": "string",
+            "description": "Chapter title",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateDefaultThemeDto": {
         "type": "object",
         "properties": {
@@ -22002,6 +22610,10 @@
             "type": "string",
             "description": "Base Url encoding of the file to upload from (can be null)",
             "nullable": true
+          },
+          "lockCover": {
+            "type": "boolean",
+            "description": "Lock the cover or not"
           }
         },
         "additionalProperties": false
@@ -22466,13 +23078,6 @@
             "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
             "format": "float"
           },
-          "chapters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Chapter"
-            },
-            "nullable": true
-          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -22492,6 +23097,9 @@
           "coverImage": {
             "type": "string",
             "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
           },
           "primaryColor": {
             "type": "string",
@@ -22522,6 +23130,13 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chapter"
+            },
+            "nullable": true
           },
           "series": {
             "$ref": "#/components/schemas/Series"
@@ -22606,6 +23221,10 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int64"
           },
           "coverImage": {
             "type": "string",

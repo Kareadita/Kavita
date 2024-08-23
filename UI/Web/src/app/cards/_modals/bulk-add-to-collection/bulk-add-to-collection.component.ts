@@ -10,15 +10,16 @@ import {
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 import {UserCollection} from 'src/app/_models/collection-tag';
-import { ReadingList } from 'src/app/_models/reading-list';
-import { CollectionTagService } from 'src/app/_services/collection-tag.service';
+import {ReadingList} from 'src/app/_models/reading-list';
+import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 
 @Component({
   selector: 'app-bulk-add-to-collection',
@@ -60,7 +61,8 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.cdRef.markForCheck();
     this.collectionService.allCollections(true).subscribe(tags => {
-      this.lists = tags;
+      // Don't allow Smart Collections in
+      this.lists = tags.filter(t => t.source === ScrobbleProvider.Kavita);
       this.loading = false;
       this.cdRef.markForCheck();
     });

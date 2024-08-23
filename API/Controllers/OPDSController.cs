@@ -881,6 +881,8 @@ public class OpdsController : BaseApiController
             foreach (var chapter in chaptersForVolume)
             {
                 var chapterId = chapter.Id;
+                if (chapterDict.ContainsKey(chapterId)) continue;
+
                 var chapterDto = _mapper.Map<ChapterDto>(chapter);
                 foreach (var mangaFile in chapter.Files)
                 {
@@ -889,7 +891,6 @@ public class OpdsController : BaseApiController
                         chapterDto, apiKey, prefix, baseUrl));
                 }
             }
-
         }
 
         var chapters = seriesDetail.StorylineChapters;

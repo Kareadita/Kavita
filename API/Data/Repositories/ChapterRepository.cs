@@ -22,12 +22,15 @@ public enum ChapterIncludes
     None = 1,
     Volumes = 2,
     Files = 4,
-    People = 8
+    People = 8,
+    Genres = 16,
+    Tags = 32
 }
 
 public interface IChapterRepository
 {
     void Update(Chapter chapter);
+    void Remove(Chapter chapter);
     Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None);
     Task<IChapterInfoDto?> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
@@ -58,6 +61,11 @@ public class ChapterRepository : IChapterRepository
     public void Update(Chapter chapter)
     {
         _context.Entry(chapter).State = EntityState.Modified;
+    }
+
+    public void Remove(Chapter chapter)
+    {
+        _context.Chapter.Remove(chapter);
     }
 
     public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None)

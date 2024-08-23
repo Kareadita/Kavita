@@ -217,14 +217,22 @@ export class ColorscapeService {
   private setColorsImmediately(colors: ColorSpaceRGBA) {
     this.injectStyleElement(colorScapeSelector, `
       :root, :root .default {
-        --colorscape-primary-color: ${this.rgbaToString(colors.primary)};
-        --colorscape-lighter-color: ${this.rgbaToString(colors.lighter)};
-        --colorscape-darker-color: ${this.rgbaToString(colors.darker)};
-        --colorscape-complementary-color: ${this.rgbaToString(colors.complementary)};
-        --colorscape-primary-alpha-color: ${this.rgbaToString({ ...colors.primary, a: 0 })};
-        --colorscape-lighter-alpha-color: ${this.rgbaToString({ ...colors.lighter, a: 0 })};
-        --colorscape-darker-alpha-color: ${this.rgbaToString({ ...colors.darker, a: 0 })};
-        --colorscape-complementary-alpha-color: ${this.rgbaToString({ ...colors.complementary, a: 0 })};
+        --colorscape-primary-color: ${this.rgbToString(colors.primary)};
+        --colorscape-lighter-color: ${this.rgbToString(colors.lighter)};
+        --colorscape-darker-color: ${this.rgbToString(colors.darker)};
+        --colorscape-complementary-color: ${this.rgbToString(colors.complementary)};
+        --colorscape-primary-no-alpha-color: ${this.rgbaToString({ ...colors.primary, a: 0 })};
+        --colorscape-lighter-no-alpha-color: ${this.rgbaToString({ ...colors.lighter, a: 0 })};
+        --colorscape-darker-no-alpha-color: ${this.rgbaToString({ ...colors.darker, a: 0 })};
+        --colorscape-complementary-no-alpha-color: ${this.rgbaToString({ ...colors.complementary, a: 0 })};
+        --colorscape-primary-full-alpha-color: ${this.rgbaToString({ ...colors.primary, a: 1 })};
+        --colorscape-lighter-full-alpha-color: ${this.rgbaToString({ ...colors.lighter, a: 1 })};
+        --colorscape-darker-full-alpha-color: ${this.rgbaToString({ ...colors.darker, a: 1 })};
+        --colorscape-complementary-full-alpha-color: ${this.rgbaToString({ ...colors.complementary, a: 1 })};
+        --colorscape-primary-half-alpha-color: ${this.rgbaToString({ ...colors.primary, a: 0.5 })};
+        --colorscape-lighter-half-alpha-color: ${this.rgbaToString({ ...colors.lighter, a: 0.5 })};
+        --colorscape-darker-half-alpha-color: ${this.rgbaToString({ ...colors.darker, a: 0.5 })};
+        --colorscape-complementary-half-alpha-color: ${this.rgbaToString({ ...colors.complementary, a: 0.5 })};
       }
     `);
   }
@@ -360,6 +368,10 @@ export class ColorscapeService {
 
   private rgbaToString(color: RGBAColor): string {
     return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+  }
+
+  private rgbToString(color: RGBAColor): string {
+    return `rgb(${color.r}, ${color.g}, ${color.b})`;
   }
 
   private getCssVariable(variableName: string): string {

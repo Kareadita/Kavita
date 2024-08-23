@@ -3,7 +3,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.8.2.3</AssemblyVersion>
+        <AssemblyVersion>0.8.2.6</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <TieredPGO>true</TieredPGO>
     </PropertyGroup>
@@ -14,7 +14,7 @@
       <PackageReference Include="Flurl.Http" Version="3.2.4" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.31.0.96804">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

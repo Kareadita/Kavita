@@ -54,13 +54,14 @@ import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
-import {LibraryType} from "../../../_models/library/library";
 import {ToastrService} from "ngx-toastr";
 import {Volume} from "../../../_models/volume";
 import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {ActionService} from "../../../_services/action.service";
 import {DownloadService} from "../../../shared/_services/download.service";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
 
 enum TabID {
   General = 0,
@@ -114,6 +115,8 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     UtcToLocalTimePipe,
     EditListComponent,
     SettingButtonComponent,
+    SettingItemComponent,
+    ReadTimePipe,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -418,7 +421,8 @@ export class EditSeriesModalComponent implements OnInit {
         const presetIds = presetField.map(p => p.id);
         personSettings.savedData = people.filter(person => presetIds.includes(person.id));
         this.peopleSettings[role] = personSettings;
-        this.updatePerson(personSettings.savedData as Person[], role);
+        this.metadataService.updatePerson(this.metadata, personSettings.savedData as Person[], role);
+        this.cdRef.markForCheck();
         return true;
       }));
     } else {
@@ -550,8 +554,8 @@ export class EditSeriesModalComponent implements OnInit {
     }
 
 
-    if (selectedIndex > 0 && this.selectedCover !== '') {
-      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
+    if (selectedIndex > 0 || this.coverImageReset) {
+      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
     }
 
     this.saveNestedComponents.emit();
@@ -574,62 +578,18 @@ export class EditSeriesModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  updatePerson(persons: Person[], role: PersonRole) {
+    this.metadataService.updatePerson(this.metadata, persons, role);
+    this.metadata.locationLocked = true;
+    this.cdRef.markForCheck();
+  }
+
   updateLanguage(language: Array<Language>) {
     if (language.length === 0) {
       this.metadata.language = '';
       return;
     }
     this.metadata.language = language[0].isoCode;
-    this.cdRef.markForCheck();
-  }
-
-  updatePerson(persons: Person[], role: PersonRole) {
-    switch (role) {
-      case PersonRole.Other:
-        break;
-      case PersonRole.Artist:
-        break;
-      case PersonRole.CoverArtist:
-        this.metadata.coverArtists = persons;
-        break;
-      case PersonRole.Character:
-        this.metadata.characters = persons;
-        break;
-      case PersonRole.Colorist:
-        this.metadata.colorists = persons;
-        break;
-      case PersonRole.Editor:
-        this.metadata.editors = persons;
-        break;
-      case PersonRole.Inker:
-        this.metadata.inkers = persons;
-        break;
-      case PersonRole.Letterer:
-        this.metadata.letterers = persons;
-        break;
-      case PersonRole.Penciller:
-        this.metadata.pencillers = persons;
-        break;
-      case PersonRole.Publisher:
-        this.metadata.publishers = persons;
-        break;
-        case PersonRole.Imprint:
-        this.metadata.imprints = persons;
-        break;
-      case PersonRole.Team:
-        this.metadata.teams = persons;
-        break;
-      case PersonRole.Location:
-        this.metadata.locations = persons;
-        break;
-      case PersonRole.Writer:
-        this.metadata.writers = persons;
-        break;
-      case PersonRole.Translator:
-        this.metadata.translators = persons;
-        break;
-
-    }
     this.cdRef.markForCheck();
   }
 

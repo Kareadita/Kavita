@@ -88,6 +88,7 @@ export class SideNavItemComponent implements OnInit {
   triggerHighlightCheck(routeUrl: string) {
     const [url, queryParams] = routeUrl.split('?');
     const [page, fragment = ''] = url.split('#');
+
     this.updateHighlight(page, queryParams, url.includes('#') ? fragment : undefined);
   }
 
@@ -99,7 +100,7 @@ export class SideNavItemComponent implements OnInit {
       return;
     }
 
-    if (!page.endsWith('/') && !queryParams && this.fragment === undefined) {
+    if (!page.endsWith('/') && !queryParams && this.fragment === undefined && queryParams === undefined) {
       page = page + '/';
     }
 
@@ -111,8 +112,9 @@ export class SideNavItemComponent implements OnInit {
       fragmentEqual = true;
     }
 
+    const queryParamsEqual = this.queryParams === queryParams;
 
-    if (this.comparisonMethod === 'equals' && page === this.link && fragmentEqual) {
+    if (this.comparisonMethod === 'equals' && page === this.link && fragmentEqual && queryParamsEqual) {
       this.highlighted = true;
       this.cdRef.markForCheck();
       return;

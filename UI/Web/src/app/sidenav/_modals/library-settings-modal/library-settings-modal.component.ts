@@ -347,7 +347,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, '').subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe(() => {});
   }
 
   openDirectoryPicker() {

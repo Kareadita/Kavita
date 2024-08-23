@@ -1,20 +1,33 @@
+@include media-breakpoint-down(md) {
+    .card-actions {
+        visibility: visible !important;
+    }
+}
+
 .card {
     background-color: var(--card-bg-color);
     color: var(--card-text-color);
     border-color: var(--card-border-color);
     position: relative;
     border: var(--card-border);
+    border-radius: var(--card-border-radius);
+    &:hover {
+        .card-actions {
+            visibility: visible;
+        }
+    }
 
     .card-overlay {
         background-color: var(--card-overlay-bg-color);
 
         &:hover {
             background-color: var(--card-overlay-hover-bg-color);
+            cursor: pointer;
         }
     }
 }
 
-$image-height: 230px;
+$image-height: 232.91px;
 $image-filter-height: 160px;
 $image-width: 160px;
 
@@ -32,29 +45,15 @@ $image-width: 160px;
     }
 
     .card-title {
-        font-size: 13px;
-        width: 140px;
+        font-size: 0.85rem;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
         display: block;
-        margin-top: 2px;
-        margin-bottom: 0px;
+        margin-top: 0;
+        margin-bottom: 0;
         text-align: center;
-    }
-
-    .overlay-information {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        border-radius: 15px;
-        padding: 0 10px;
-        background-color: var(--card-bg-color);
-
-        &.overlay-information--centered {
-            top: 95px;
-            left: 36px;
-        }
+        padding: 10px;
     }
 
     .overlay {
@@ -70,22 +69,35 @@ $image-width: 160px;
                 height: $image-filter-height;
             }
         }
-
-        &:hover {
-            visibility: visible;
-        }
     }
 
 
     .card-body {
-        padding: 5px !important;
-        background-color: var(--card-bg-color);
+        padding: 0 5px !important;
+        background-color: rgba(0,0,0,0.7);
         border-width: var(--card-border-width);
         border-style: var(--card-border-style);
         border-color: var(--card-border-color);
-        border-radius: 0.25em;
+        position: absolute;
+        bottom: 0;
+        z-index: 115;
+        width: 100%;
+        bottom: 39px;
+        font-size: 0.8rem;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        max-height: 58px;
+        overflow: hidden;
     }
 
+    .card-title {
+        width: 100%;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0 auto;
+    }
 
     .card-overlay {
         position: absolute;

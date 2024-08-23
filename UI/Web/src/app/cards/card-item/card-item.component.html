@@ -2,9 +2,9 @@
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       @if (total > 0 || suppressArchiveWarning) {
-        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
       } @else if (total === 0 && !suppressArchiveWarning) {
-        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
       }
 
       <div class="progress-banner">
@@ -45,7 +45,7 @@
 
       <div class="card-overlay"></div>
       @if (overlayInformation | safeHtml; as info) {
-        @if (info !== '' ||  info !== null) {
+        @if (info) {
           <div class="overlay-information {{centerOverlay ? 'overlay-information--centered' : ''}}">
             <div class="position-relative">
               <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="info" placement="top" [innerHTML]="info"></span>
@@ -54,8 +54,20 @@
         }
       }
     </div>
+    <div class="card-body meta-title">
+      @if (subtitleTemplate) {
+        <div style="text-align: center">
+          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+        </div>
+      }
+      @if (!suppressLibraryLink && libraryName) {
+        <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
+          {{libraryName | sentenceCase}}
+        </a>
+      }
+    </div>
     @if (title.length > 0 || actions.length > 0) {
-      <div class="card-body">
+      <div class="card-title-container">
         <div>
           <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
             <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
@@ -68,17 +80,6 @@
             </span>
           }
         </div>
-
-        @if (subtitleTemplate) {
-          <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
-          </div>
-        }
-        @if (!suppressLibraryLink && libraryName) {
-          <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
-            {{libraryName | sentenceCase}}
-          </a>
-        }
       </div>
     }
   </div>

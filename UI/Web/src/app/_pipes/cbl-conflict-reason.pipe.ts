@@ -23,7 +23,7 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.EmptyFile:
         return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.empty-file');
       case CblImportReason.NameConflict:
-        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.chapter-missing', {readingListName: result.readingListName});
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.name-conflict', {readingListName: result.readingListName});
       case CblImportReason.SeriesCollision:
         return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.series-collision', {seriesLink: `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>`});
       case CblImportReason.SeriesMissing:

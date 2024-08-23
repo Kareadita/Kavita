@@ -48,6 +48,8 @@ import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.compo
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {EditChapterProgressComponent} from "../edit-chapter-progress/edit-chapter-progress.component";
+import {CarouselTabsComponent} from "../../carousel/_components/carousel-tabs/carousel-tabs.component";
+import {CarouselTabComponent} from "../../carousel/_components/carousel-tab/carousel-tab.component";
 
 enum TabID {
   General = 0,
@@ -60,7 +62,7 @@ enum TabID {
 @Component({
   selector: 'app-card-detail-drawer',
   standalone: true,
-  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective, EditChapterProgressComponent],
+  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective, EditChapterProgressComponent, CarouselTabsComponent, CarouselTabComponent],
   templateUrl: './card-detail-drawer.component.html',
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -144,7 +146,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
-    this.chapterActions.push({title: 'read', description: 'read-tooltip', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
+    this.chapterActions.push({title: 'read', description: '', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
     if (this.isChapter) {
       const chapter = this.utilityService.asChapter(this.data);
       this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, chapter);

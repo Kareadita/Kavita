@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
@@ -124,6 +123,32 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public string WebLinks { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
+
+    #region Locks
+
+    public bool AgeRatingLocked { get; set; }
+    public bool TitleNameLocked { get; set; }
+    public bool GenresLocked { get; set; }
+    public bool TagsLocked { get; set; }
+    public bool WriterLocked { get; set; }
+    public bool CharacterLocked { get; set; }
+    public bool ColoristLocked { get; set; }
+    public bool EditorLocked { get; set; }
+    public bool InkerLocked { get; set; }
+    public bool ImprintLocked { get; set; }
+    public bool LettererLocked { get; set; }
+    public bool PencillerLocked { get; set; }
+    public bool PublisherLocked { get; set; }
+    public bool TranslatorLocked { get; set; }
+    public bool TeamLocked { get; set; }
+    public bool LocationLocked { get; set; }
+    public bool CoverArtistLocked { get; set; }
+    public bool LanguageLocked { get; set; }
+    public bool SummaryLocked { get; set; }
+    public bool ISBNLocked { get; set; }
+    public bool ReleaseDateLocked { get; set; }
+
+    #endregion
 
     /// <summary>
     /// All people attached at a Chapter level. Usually Comics will have different people per issue.

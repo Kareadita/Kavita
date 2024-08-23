@@ -67,6 +67,7 @@ public interface IImageService
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
     Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
+    Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     void UpdateColorScape(IHasCoverImage entity);
 }
 
@@ -387,7 +388,7 @@ public class ImageService : IImageService
         {
             if (string.IsNullOrEmpty(correctSizeLink))
             {
-                correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
+                correctSizeLink = await FallbackToKavitaReaderFavicon(baseUrl);
             }
             if (string.IsNullOrEmpty(correctSizeLink))
             {
@@ -431,11 +432,57 @@ public class ImageService : IImageService
             }
 
 
-            _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
+            _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
             return filename;
         } catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
+            _logger.LogError(ex, "Error downloading favicon for {Domain}", domain);
+            throw;
+        }
+    }
+
+    public async Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat)
+    {
+        try
+        {
+            var publisherLink = await FallbackToKavitaReaderPublisher(publisherName);
+            if (string.IsNullOrEmpty(publisherLink))
+            {
+                throw new KavitaException($"Could not grab publisher image for {publisherName}");
+            }
+
+            var finalUrl = publisherLink;
+
+            _logger.LogTrace("Fetching publisher image from {Url}", finalUrl);
+            // Download the favicon.ico file using Flurl
+            var publisherStream = await finalUrl
+                .AllowHttpStatus("2xx,304")
+                .GetStreamAsync();
+
+            // Create the destination file path
+            using var image = Image.PngloadStream(publisherStream);
+            var filename = GetPublisherFormat(publisherName, encodeFormat);
+            switch (encodeFormat)
+            {
+                case EncodeFormat.PNG:
+                    image.Pngsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    break;
+                case EncodeFormat.WEBP:
+                    image.Webpsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    break;
+                case EncodeFormat.AVIF:
+                    image.Heifsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+            }
+
+
+            _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName);
+            return filename;
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading image for {PublisherName}", publisherName);
             throw;
         }
     }
@@ -572,23 +619,17 @@ public class ImageService : IImageService
         return centroids;
     }
 
-    // public static Vector3 GetComplementaryColor(Vector3 color)
-    // {
-    //     // Simple complementary color calculation
-    //     return new Vector3(255 - color.X, 255 - color.Y, 255 - color.Z);
-    // }
-
     public static List<Vector3> SortByBrightness(List<Vector3> colors)
     {
         return colors.OrderBy(c => 0.299 * c.X + 0.587 * c.Y + 0.114 * c.Z).ToList();
     }
 
-    public static List<Vector3> SortByVibrancy(List<Vector3> colors)
+    private static List<Vector3> SortByVibrancy(List<Vector3> colors)
     {
         return colors.OrderByDescending(c =>
         {
-            float max = Math.Max(c.X, Math.Max(c.Y, c.Z));
-            float min = Math.Min(c.X, Math.Min(c.Y, c.Z));
+            var max = Math.Max(c.X, Math.Max(c.Y, c.Z));
+            var min = Math.Min(c.X, Math.Min(c.Y, c.Z));
             return (max - min) / max;
         }).ToList();
     }
@@ -693,10 +734,10 @@ public class ImageService : IImageService
         };
     }
 
-    private static string FallbackToKavitaReaderFavicon(string baseUrl)
+    private static async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
     {
         var correctSizeLink = string.Empty;
-        var allOverrides = "https://kavitareader.com/assets/favicons/urls.txt".GetStringAsync().Result;
+        var allOverrides = await "https://www.kavitareader.com/assets/favicons/urls.txt".GetStringAsync();
         if (!string.IsNullOrEmpty(allOverrides))
         {
             var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
@@ -706,15 +747,49 @@ public class ImageService : IImageService
                     cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
                     cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
                     ));
+
             if (string.IsNullOrEmpty(externalFile))
             {
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
             }
 
-            correctSizeLink = "https://kavitareader.com/assets/favicons/" + externalFile;
+            correctSizeLink = "https://www.kavitareader.com/assets/favicons/" + externalFile;
         }
 
         return correctSizeLink;
+    }
+
+    private static async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
+    {
+        var externalLink = string.Empty;
+        var allOverrides = await "https://www.kavitareader.com/assets/publishers/publishers.txt".GetStringAsync();
+        if (!string.IsNullOrEmpty(allOverrides))
+        {
+            var externalFile = allOverrides
+                .Split("\n")
+                .Select(publisherLine =>
+                {
+                    var tokens = publisherLine.Split("|");
+                    if (tokens.Length != 2) return null;
+                    var aliases = tokens[0];
+                    // Multiple publisher aliases are separated by #
+                    if (aliases.Split("#").Any(name => name.ToLowerInvariant().Trim().Equals(publisherName.ToLowerInvariant().Trim())))
+                    {
+                        return tokens[1];
+                    }
+                    return null;
+                })
+                .FirstOrDefault(url => !string.IsNullOrEmpty(url));
+
+            if (string.IsNullOrEmpty(externalFile))
+            {
+                throw new KavitaException($"Could not grab publisher image for {publisherName}");
+            }
+
+            externalLink = "https://www.kavitareader.com/assets/publishers/" + externalFile;
+        }
+
+        return externalLink;
     }
 
     /// <inheritdoc />
@@ -744,6 +819,16 @@ public class ImageService : IImageService
     public static string GetChapterFormat(int chapterId, int volumeId)
     {
         return $"v{volumeId}_c{chapterId}";
+    }
+
+    /// <summary>
+    /// Returns the name format for a volume cover image (custom)
+    /// </summary>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
+    public static string GetVolumeFormat(int volumeId)
+    {
+        return $"v{volumeId}";
     }
 
     /// <summary>
@@ -800,6 +885,11 @@ public class ImageService : IImageService
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
         return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.GetExtension()}";
+    }
+
+    public static string GetPublisherFormat(string publisher, EncodeFormat encodeFormat)
+    {
+        return $"{publisher}{encodeFormat.GetExtension()}";
     }
 
 
@@ -888,4 +978,6 @@ public class ImageService : IImageService
 
         return Color.FromArgb(r, g, b);
     }
+
+
 }

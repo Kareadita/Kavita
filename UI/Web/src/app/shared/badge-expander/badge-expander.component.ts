@@ -8,13 +8,14 @@ import {
   OnInit,
   TemplateRef
 } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
   selector: 'app-badge-expander',
   standalone: true,
-  imports: [CommonModule, TranslocoDirective],
+  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
   templateUrl: './badge-expander.component.html',
   styleUrls: ['./badge-expander.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +26,7 @@ export class BadgeExpanderComponent implements OnInit {
 
   @Input() items: Array<any> = [];
   @Input() itemsTillExpander: number = 4;
+  @Input() allowToggle: boolean = true;
   @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
 
 
@@ -41,6 +43,8 @@ export class BadgeExpanderComponent implements OnInit {
   }
 
   toggleVisible() {
+    if (!this.allowToggle) return;
+
     this.isCollapsed = !this.isCollapsed;
     this.visibleItems = this.items;
     this.cdRef.markForCheck();
