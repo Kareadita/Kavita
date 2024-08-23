@@ -1,7 +1,7 @@
 import {Component, inject, Input} from '@angular/core';
 import {WikiLink} from "../../../_models/wiki";
 import {NgbActiveModal, NgbDropdownItem} from "@ng-bootstrap/ng-bootstrap";
-import {ActivatedRoute, RouterLink, UrlSegment} from "@angular/router";
+import {ActivatedRoute, Router, RouterLink, UrlSegment} from "@angular/router";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {ReactiveFormsModule} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";
@@ -27,7 +27,7 @@ export class NavLinkModalComponent {
   @Input({required: true}) logoutFn!: () => void;
 
   private readonly modal = inject(NgbActiveModal);
-  private readonly router = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly WikiLink = WikiLink;
   protected readonly SettingsTabId = SettingsTabId;
@@ -41,13 +41,12 @@ export class NavLinkModalComponent {
   }
 
   closeIfOnSettings() {
-    // const currentUrl =  this.router.url ;
-    // if (this.router.snapshot.url.includes(new UrlSegment('settings'))) {
-    //
-    // }
-    // if (currentUrl === '/settings') {
-    //   this.close();
-    // }
+    setTimeout(() => {
+      const currentUrl =  this.router.url ;
+      if (currentUrl.startsWith('/settings')) {
+        this.close();
+      }
+    }, 10);
   }
 
 
