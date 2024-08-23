@@ -33,7 +33,7 @@ public class ArchiveServiceBenchmark
     {
         _directoryService = new DirectoryService(null, new FileSystem());
         _imageService = new ImageService(null, _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>());
-        _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService, Substitute.For<IMediaErrorService>(), Substitute.For<IImageConverterService>());
+        _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService, Substitute.For<IMediaErrorService>());
     }
 
     [Benchmark(Baseline = true)]
