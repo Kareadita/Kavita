@@ -518,8 +518,8 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   updateUrl(activeTab: TabID) {
-    //const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    //this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
+    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
+    window.history.replaceState({}, '', newUrl);
   }
 
   openPerson(field: FilterField, value: number) {

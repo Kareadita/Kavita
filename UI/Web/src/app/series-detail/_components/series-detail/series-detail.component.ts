@@ -558,13 +558,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   updateUrl(activeTab: TabID) {
     var tokens = this.router.url.split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
-
-    // if (tokens.length === 1 || tokens[1] === activeTab + '') {
-    //   return;
-    // }
-    console.log('url:', newUrl);
-
-    //this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true });
+    window.history.replaceState({}, '', newUrl);
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
