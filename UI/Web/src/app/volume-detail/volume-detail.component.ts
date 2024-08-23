@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -85,6 +85,7 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
 import {Device} from "../_models/device/device";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
+import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 
 enum TabID {
 
@@ -127,44 +128,46 @@ interface VolumeCast extends IHasCast {
 @Component({
   selector: 'app-volume-detail',
   standalone: true,
-  imports: [
-    LoadingComponent,
-    NgbNavOutlet,
-    DetailsTabComponent,
-    NgbNavItem,
-    NgbNavLink,
-    NgbNavContent,
-    NgbNav,
-    ReadMoreComponent,
-    AsyncPipe,
-    NgbDropdownItem,
-    NgbDropdownMenu,
-    NgbDropdown,
-    NgbDropdownToggle,
-    ReadTimePipe,
-    AgeRatingPipe,
-    EntityTitleComponent,
-    RouterLink,
-    NgbProgressbar,
-    DecimalPipe,
-    NgbTooltip,
-    ImageComponent,
-    NgStyle,
-    NgClass,
-    TranslocoDirective,
-    CardItemComponent,
-    VirtualScrollerModule,
-    ChapterCardComponent,
-    DefaultValuePipe,
-    RelatedTabComponent,
-    AgeRatingImageComponent,
-    CompactNumberPipe,
-    BadgeExpanderComponent,
-    MetadataDetailRowComponent,
-    DownloadButtonComponent,
-    CardActionablesComponent,
-    BulkOperationsComponent
-  ],
+    imports: [
+        LoadingComponent,
+        NgbNavOutlet,
+        DetailsTabComponent,
+        NgbNavItem,
+        NgbNavLink,
+        NgbNavContent,
+        NgbNav,
+        ReadMoreComponent,
+        AsyncPipe,
+        NgbDropdownItem,
+        NgbDropdownMenu,
+        NgbDropdown,
+        NgbDropdownToggle,
+        ReadTimePipe,
+        AgeRatingPipe,
+        EntityTitleComponent,
+        RouterLink,
+        NgbProgressbar,
+        DecimalPipe,
+        NgbTooltip,
+        ImageComponent,
+        NgStyle,
+        NgClass,
+        TranslocoDirective,
+        CardItemComponent,
+        VirtualScrollerModule,
+        ChapterCardComponent,
+        DefaultValuePipe,
+        RelatedTabComponent,
+        AgeRatingImageComponent,
+        CompactNumberPipe,
+        BadgeExpanderComponent,
+        MetadataDetailRowComponent,
+        DownloadButtonComponent,
+        CardActionablesComponent,
+        BulkOperationsComponent,
+        DatePipe,
+        DefaultDatePipe
+    ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

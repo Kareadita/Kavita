@@ -84,6 +84,7 @@ import {Volume} from "../_models/volume";
 import {Device} from "../_models/device/device";
 import {ActionService} from "../_services/action.service";
 import {PublicationStatusPipe} from "../_pipes/publication-status.pipe";
+import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -142,7 +143,8 @@ enum TabID {
     CarouselTabComponent,
     CarouselTabsComponent,
     PublicationStatusPipe,
-    DatePipe
+    DatePipe,
+    DefaultDatePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -397,4 +399,6 @@ export class ChapterDetailComponent implements OnInit {
         break;
     }
   }
+
+  protected readonly LibraryType = LibraryType;
 }
