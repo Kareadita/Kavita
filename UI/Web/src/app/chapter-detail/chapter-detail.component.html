@@ -38,13 +38,13 @@
             <a routerLink="/library/{{series.libraryId}}/series/{{series.id}}" class="dark-exempt btn-icon">{{series.name}}</a>
           </h4>
           <div class="subtitle mt-2 mb-2">
-            <span>
-              <app-entity-title [libraryType]="libraryType!" [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
+            <span class="me-2">
+              <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="true" [includeChapter]="true"></app-entity-title>
             </span>
-            @if (chapter.titleName) {
-              <span class="ms-2 me-2"></span>
-              <span>{{chapter.titleName}}</span>
-            }
+
+<!--            @if (chapter.titleName !== '') {-->
+<!--              <span class="ms-2">{{chapter.titleName}}</span>-->
+<!--            }-->
           </div>
 
           <app-metadata-detail-row [entity]="chapter"

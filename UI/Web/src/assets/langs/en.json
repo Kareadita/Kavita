@@ -1023,29 +1023,6 @@
         "deselect-all": "{{common.deselect-all}}"
     },
 
-    "card-detail-drawer": {
-        "general-tab": "{{tabs.general-tab}}",
-        "metadata-tab": "{{tabs.metadata-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
-        "no-summary": "No Summary available.",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "imprints-title": "{{series-metadata-detail.imprints-title}}",
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "teams-title": "{{series-metadata-detail.teams-title}}",
-        "locations-title": "{{series-metadata-detail.locations-title}}",
-        "not-defined": "Not defined",
-        "read": "{{common.read}}",
-        "unread": "Unread",
-        "files": "Files",
-        "pages": "Pages:",
-        "added": "Added:",
-        "size": "Size:"
-    },
-
     "card-detail-layout": {
         "total-items": "{{count}} total items",
         "jumpkey-count": "{{count}} Series"
@@ -1200,9 +1177,6 @@
         "open-external": "Open External"
     },
 
-    "list-item": {
-        "read": "{{common.read}}"
-    },
 
     "manage-media-issues": {
         "description-part-1": "This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
