@@ -2,8 +2,10 @@
   @if (accountService.currentUser$ | async; as user) {
 
     @if((navService.sideNavCollapsed$ | async) === false) {
-      <div class="side-nav-container">
-        <div class="side-nav no-donate">
+      <div class="side-nav-container"  [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
+      'hidden': (navService.sideNavVisibility$ | async) === false,
+      'no-donate': (accountService.hasValidLicense$ | async) === true}">>
+        <div class="side-nav">
 
           @for(section of sections; track section.title + section.children.length; let idx = $index;) {
             @if (hasAnyChildren(user, section)) {
@@ -25,6 +27,6 @@
       }
     }
 
-  }
+  } 
 
 </ng-container>

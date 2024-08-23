@@ -1,8 +1,5 @@
 .content-wrapper {
     padding: 0 10px 0;
-    height: 100%;
-    mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     height: calc(var(--vh)* 100 - var(--nav-offset));
 }
 
@@ -41,6 +38,8 @@
 
 .companion-bar-content {
     margin-left: 190px;
+    mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
 }
 
 @media (max-width: 576px) {
