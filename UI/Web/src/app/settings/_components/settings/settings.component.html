@@ -34,7 +34,7 @@
 
         @defer (when fragment === SettingsTabId.Users; prefetch on idle) {
           @if (fragment === SettingsTabId.Users) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-manage-users></app-manage-users>
             </div>
           }
@@ -42,7 +42,7 @@
 
         @defer (when fragment === SettingsTabId.Libraries; prefetch on idle) {
           @if (fragment === SettingsTabId.Libraries) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-manage-library></app-manage-library>
             </div>
           }
@@ -50,7 +50,7 @@
 
         @defer (when fragment === SettingsTabId.MediaIssues; prefetch on idle) {
           @if (fragment === SettingsTabId.MediaIssues) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-manage-media-issues></app-manage-media-issues>
             </div>
           }
@@ -58,7 +58,7 @@
 
         @defer (when fragment === SettingsTabId.System; prefetch on idle) {
           @if (fragment === SettingsTabId.System) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-manage-system></app-manage-system>
             </div>
           }
@@ -66,7 +66,7 @@
 
         @defer (when fragment === SettingsTabId.Statistics; prefetch on idle) {
           @if (fragment === SettingsTabId.Statistics) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-server-stats></app-server-stats>
             </div>
           }
@@ -74,7 +74,7 @@
 
         @defer (when fragment === SettingsTabId.Tasks; prefetch on idle) {
           @if (fragment === SettingsTabId.Tasks) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-manage-tasks-settings></app-manage-tasks-settings>
             </div>
           }
@@ -82,7 +82,7 @@
 
         @defer (when fragment === SettingsTabId.KavitaPlus; prefetch on idle) {
           @if (fragment === SettingsTabId.KavitaPlus) {
-            <div class="col-md-12">
+            <div class="scale col-md-12">
               <app-manage-kavitaplus></app-manage-kavitaplus>
             </div>
           }
@@ -114,7 +114,7 @@
 
       @defer (when fragment === SettingsTabId.Customize; prefetch on idle) {
         @if (fragment === SettingsTabId.Customize) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-manage-customization></app-manage-customization>
           </div>
         }
@@ -130,7 +130,7 @@
 
       @defer (when fragment === SettingsTabId.Theme; prefetch on idle) {
         @if (fragment === SettingsTabId.Theme) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-theme-manager></app-theme-manager>
           </div>
         }
@@ -138,7 +138,7 @@
 
       @defer (when fragment === SettingsTabId.Devices; prefetch on idle) {
         @if (fragment === SettingsTabId.Devices) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-manage-devices></app-manage-devices>
           </div>
         }
@@ -146,7 +146,7 @@
 
       @defer (when fragment === SettingsTabId.UserStats; prefetch on idle) {
         @if (fragment === SettingsTabId.UserStats) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-user-stats></app-user-stats>
           </div>
         }
@@ -154,7 +154,7 @@
 
       @defer (when fragment === SettingsTabId.CBLImport; prefetch on idle) {
         @if (fragment === SettingsTabId.CBLImport) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-import-cbl></app-import-cbl>
           </div>
         }
@@ -162,7 +162,7 @@
 
       @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
         @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-manage-scrobling></app-manage-scrobling>
           </div>
         }
@@ -170,7 +170,7 @@
 
       @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
         @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {
-          <div class="col-md-12">
+          <div class="scale col-md-12">
             <app-import-mal-collection></app-import-mal-collection>
           </div>
         }
