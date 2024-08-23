@@ -1152,23 +1152,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.cdRef.markForCheck();
   }
 
-  // previewSeries(item: Series | ExternalSeries, isExternal: boolean) {
-  //   const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
-  //   ref.componentInstance.isExternalSeries = isExternal;
-  //   ref.componentInstance.name = item.name;
-  //
-  //   if (isExternal) {
-  //     const external = item as ExternalSeries;
-  //     ref.componentInstance.aniListId = external.aniListId;
-  //     ref.componentInstance.malId = external.malId;
-  //   } else {
-  //     const local = item as Series;
-  //     ref.componentInstance.seriesId = local.id;
-  //     ref.componentInstance.libraryId = local.libraryId;
-  //   }
-  //
-  // }
-
   openFilter(field: FilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }

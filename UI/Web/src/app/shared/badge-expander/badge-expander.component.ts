@@ -27,6 +27,7 @@ export class BadgeExpanderComponent implements OnInit {
   @Input() items: Array<any> = [];
   @Input() itemsTillExpander: number = 4;
   @Input() allowToggle: boolean = true;
+  @Input() includeComma: boolean = true;
   /**
    * Invoked when the "and more" is clicked
    */
