@@ -32,8 +32,13 @@
       @if (externalSeries.summary) {
         <app-read-more [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
       }
+    }
 
+      <a class="btn btn-primary col-12 mt-2" [href]="url" target="_blank" rel="noopener noreferrer">
+        {{t('series-preview-drawer.view-series')}}
+      </a>
 
+    @if (externalSeries) {  
       <div class="mt-3">
         <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
           <ng-template #itemTemplate let-item>
@@ -124,9 +129,5 @@
     }
 
     <app-loading [loading]="isLoading"></app-loading>
-
-    <a class="btn btn-primary col-12 mt-2" [href]="url" target="_blank" rel="noopener noreferrer">
-      {{t('series-preview-drawer.view-series')}}
-    </a>
   </div>
 </ng-container>
