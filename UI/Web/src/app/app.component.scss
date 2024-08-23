@@ -14,7 +14,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     height: calc(var(--vh)* 100 - var(--nav-offset));
-    width: calc(100% - 170px);
+    width: 100%;
     padding-right: 10px;
 
     &::-webkit-scrollbar {
