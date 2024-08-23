@@ -42,7 +42,7 @@ export class NavLinkModalComponent {
 
   closeIfOnSettings() {
     setTimeout(() => {
-      const currentUrl =  this.router.url ;
+      const currentUrl =  this.router.url;
       if (currentUrl.startsWith('/settings')) {
         this.close();
       }

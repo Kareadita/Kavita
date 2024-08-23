@@ -159,6 +159,7 @@ export class PreferenceNavComponent implements AfterViewInit {
     switchMap(_ => this.utilityService.activeBreakpoint$),
     filter((b) => b < Breakpoint.Tablet),
     switchMap(() => this.navService.sideNavCollapsed$),
+    take(1),
     filter(collapsed => !collapsed),
     tap(c => {
       this.navService.collapseSideNav(true);
