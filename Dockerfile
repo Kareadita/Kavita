@@ -22,7 +22,7 @@ COPY API/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl3t64 libgdiplus curl libjxl-tools \
+  && apt-get install -y libicu-dev libssl3t64 libgdiplus curl libjxl0.10 libavif-bin libheif1 libopenjp2-7 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh

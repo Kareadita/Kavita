@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -91,9 +91,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _mapper = mapper;
         _licenseService = licenseService;
 
-
-        FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
 
     /// <summary>

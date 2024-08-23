@@ -36,6 +36,9 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IArchiveService, ArchiveService>();
 
         services.AddScoped<IImageConverterProvider, JpegXLImageConverterProvider>();
+        services.AddScoped<IImageConverterProvider, Jpeg2000ImageConverterProvider>();
+        services.AddScoped<IImageConverterProvider, AvifImageConverterProvider>();
+        services.AddScoped<IImageConverterProvider, HeifImageConverterProvider>();
         services.AddScoped<IImageConverterService, ImageConverterService>();
 
         services.AddScoped<IBackupService, BackupService>();

@@ -1,12 +1,9 @@
-using NetVips;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using API.Services.ImageConversion;
-using static Org.BouncyCastle.Bcpg.Attr.ImageAttrib;
-using API.DTOs.Reader;
 
 namespace API.Services
 {
@@ -14,17 +11,16 @@ namespace API.Services
     {
         Stream ConvertStream(string filename, Stream source);
         string ConvertFile(string filename, List<string> supportedImageFormats);
-        void ConvertDirectory(string directory);
-        (int Width, int Height)? GetDimensions(string fileName, int pageNumber);
+        (int Width, int Height)? GetDimensions(string fileName);
+
+        public bool IsVipsSupported(string filename);
     }
 
     public class ImageConverterService : IImageConverterService
     {
         private IEnumerable<IImageConverterProvider> _converters;
-        private readonly IDirectoryService _directoryService;
-        public ImageConverterService(IDirectoryService directoryService, IEnumerable<IImageConverterProvider> converters)
+        public ImageConverterService(IEnumerable<IImageConverterProvider> converters)
         {
-            _directoryService = directoryService;
             _converters = converters;
         }
 
@@ -35,7 +31,7 @@ namespace API.Services
             IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(filename));
             if (provider == null)
                 return source;
-            string tempFile = Path.ChangeExtension(Path.GetFileName(filename), provider.Extension);
+            string tempFile = Path.GetFileName(filename);
             Stream dest = File.OpenWrite(tempFile);
             source.CopyTo(dest);
             source.Close();
@@ -61,22 +57,21 @@ namespace API.Services
             return provider.Convert(filename);
         }
 
-        public void ConvertDirectory(string directory)
-        {
-            foreach (string filename in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
-            {
-                IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(filename));
-                if (provider != null)
-                    provider.Convert(filename);
-            }
-        }
 
-        public (int Width, int Height)? GetDimensions(string fileName, int pageNumber)
+        public (int Width, int Height)? GetDimensions(string fileName)
         {
             IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(fileName));
             if (provider == null)
                 return null;
-            return provider.GetDimensions(fileName, pageNumber);
+            return provider.GetDimensions(fileName);
+        }
+
+        public bool IsVipsSupported(string filename)
+        {
+            IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(filename));
+            if (provider == null)
+                return true;
+            return provider.IsVipsSupported;
         }
     }
 }

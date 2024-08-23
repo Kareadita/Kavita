@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -46,8 +46,7 @@ public class StatsService : IStatsService
         _context = context;
         _statisticService = statisticService;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(ApiUrl);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -107,8 +107,7 @@ public class ScrobblingService : IScrobblingService
         _licenseService = licenseService;
         _localizationService = localizationService;
 
-        FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
 
 

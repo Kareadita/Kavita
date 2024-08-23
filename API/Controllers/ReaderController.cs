@@ -43,6 +43,7 @@ public class ReaderController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly IImageConverterService _converterService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
@@ -50,7 +51,8 @@ public class ReaderController : BaseApiController
         IReaderService readerService, IBookmarkService bookmarkService,
         IAccountService accountService, IEventHub eventHub,
         IScrobblingService scrobblingService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IImageConverterService converterService)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -61,6 +63,7 @@ public class ReaderController : BaseApiController
         _eventHub = eventHub;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+        _converterService = converterService;
     }
 
     /// <summary>
@@ -119,9 +122,10 @@ public class ReaderController : BaseApiController
             var chapter = await _cacheService.Ensure(chapterId, extractPdf);
             if (chapter == null) return NoContent();
             _logger.LogInformation("Fetching Page {PageNum} on Chapter {ChapterId}", page, chapterId);
-            var path = _cacheService.GetCachedPagePath(chapter.Id, page, Request.SupportedImageTypesFromRequest());
+            var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
+            path = _converterService.ConvertFile(path, Request.SupportedImageTypesFromRequest());
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, format.GetMimeType(), Path.GetFileName(path), true);
@@ -183,8 +187,9 @@ public class ReaderController : BaseApiController
 
         try
         {
-            var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page, Request.SupportedImageTypesFromRequest());
+            var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
+            path = _converterService.ConvertFile(path, Request.SupportedImageTypesFromRequest());
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, format.GetMimeType(), Path.GetFileName(path));
@@ -732,7 +737,7 @@ public class ReaderController : BaseApiController
         if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
 
         bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
-        var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page, Request.SupportedImageTypesFromRequest());
+        var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
 
         if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));

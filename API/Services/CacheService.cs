@@ -13,8 +13,9 @@ using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using MimeKit.Tnef;
 using NetVips;
+using static System.Net.Mime.MediaTypeNames;
+using Image = NetVips.Image;
 
 namespace API.Services;
 #nullable enable
@@ -35,12 +36,12 @@ public interface ICacheService
     /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
-    string GetCachedPagePath(int chapterId, int page, List<string> supportedImageFormats = null);
+    string GetCachedPagePath(int chapterId, int page);
     string GetCachePath(int chapterId);
     string GetBookmarkCachePath(int seriesId);
     IEnumerable<string> GetCachedPages(int chapterId);
     IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
-    string GetCachedBookmarkPagePath(int seriesId, int page, List<string> supportedImageFormats = null);
+    string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId);
@@ -54,6 +55,7 @@ public class CacheService : ICacheService
     private readonly IReadingItemService _readingItemService;
     private readonly IBookmarkService _bookmarkService;
     private readonly IImageConverterService _converterService;
+
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
 
     public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
@@ -100,13 +102,13 @@ public class CacheService : ICacheService
             for (var i = 0; i < files.Length; i++)
             {
                 var file = files[i];
-                var dimension = _converterService.GetDimensions(file, i);
+                var dimension = _converterService.GetDimensions(file);
                 if (dimension == null)
                 {
                     using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
                     dimension = (image.Width, image.Height);
                 }
-                
+
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
@@ -130,7 +132,7 @@ public class CacheService : ICacheService
         return dimensions;
     }
 
-    public string GetCachedBookmarkPagePath(int seriesId, int page, List<string> supportedImageFormats = null)
+    public string GetCachedBookmarkPagePath(int seriesId, int page)
     {
         // Calculate what chapter the page belongs to
         var path = GetBookmarkCachePath(seriesId);
@@ -146,8 +148,7 @@ public class CacheService : ICacheService
         }
 
         // Since array is 0 based, we need to keep that in account (only affects last image)
-        string file=page == files.Length ? files[page - 1] : files[page];
-        return _converterService.ConvertFile(file, supportedImageFormats);
+        return page == files.Length ? files[page - 1] : files[page];
     }
 
     /// <summary>
@@ -247,23 +248,23 @@ public class CacheService : ICacheService
                     break;
                 case MangaFormat.Epub:
                 case MangaFormat.Pdf:
-                {
-                    if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
                     {
-                        _logger.LogError("{File} does not exist on disk", files[0].FilePath);
-                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
-                    }
-                    if (extractPdfImages)
-                    {
-                        _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
+                        if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                        {
+                            _logger.LogError("{File} does not exist on disk", files[0].FilePath);
+                            throw new KavitaException($"{files[0].FilePath} does not exist on disk");
+                        }
+                        if (extractPdfImages)
+                        {
+                            _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
+                            break;
+                        }
+                        removeNonImages = false;
+
+                        _directoryService.ExistOrCreate(extractPath);
+                        _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
                         break;
                     }
-                    removeNonImages = false;
-
-                    _directoryService.ExistOrCreate(extractPath);
-                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
-                    break;
-                }
             }
         }
 
@@ -325,7 +326,7 @@ public class CacheService : ICacheService
     /// <param name="chapterId">Chapter id with Files populated.</param>
     /// <param name="page">Page number to look for</param>
     /// <returns>Page filepath or empty if no files found.</returns>
-    public string GetCachedPagePath(int chapterId, int page, List<string> supportedImageFormats = null)
+    public string GetCachedPagePath(int chapterId, int page)
     {
         // Calculate what chapter the page belongs to
         var path = GetCachePath(chapterId);
@@ -334,8 +335,7 @@ public class CacheService : ICacheService
             //.OrderByNatural(Path.GetFileNameWithoutExtension) // This is already done in GetPageFromFiles
             .ToArray();
 
-        string file = GetPageFromFiles(files, page);
-        return _converterService.ConvertFile(file, supportedImageFormats);
+        return GetPageFromFiles(files, page);
     }
 
     public async Task<int> CacheBookmarkForSeries(int userId, int seriesId)

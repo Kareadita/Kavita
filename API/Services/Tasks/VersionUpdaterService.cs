@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -64,10 +64,8 @@ public class VersionUpdaterService : IVersionUpdaterService
         _logger = logger;
         _eventHub = eventHub;
 
-        FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
-        FlurlHttp.ConfigureClient(GithubAllReleasesUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(GithubLatestReleasesUrl);
+        FlurlConfiguration.ConfigureClientForUrl(GithubAllReleasesUrl);
     }
 
     /// <summary>

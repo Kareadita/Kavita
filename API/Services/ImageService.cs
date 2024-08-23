@@ -137,7 +137,6 @@ public class ImageService : IImageService
             _directoryService.CopyDirectoryToDirectory(_directoryService.FileSystem.Path.GetDirectoryName(fileFilePath), targetDirectory,
                 Tasks.Scanner.Parser.Parser.ImageFileExtensions);
         }
-        _converterService.ConvertDirectory(targetDirectory);
     }
 
     /// <summary>
@@ -218,7 +217,8 @@ public class ImageService : IImageService
 
         try
         {
-            fileName = _converterService.ConvertFile(fileName, null);
+            if (!_converterService.IsVipsSupported(fileName))
+                fileName = _converterService.ConvertFile(fileName, null);
             var (width, height) = size.GetDimensions();
             using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
 
@@ -248,7 +248,8 @@ public class ImageService : IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(string sourceFile, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        stream = _converterService.ConvertStream(sourceFile, stream);
+        if (!_converterService.IsVipsSupported(sourceFile))
+            stream = _converterService.ConvertStream(sourceFile, stream);
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);
@@ -291,8 +292,8 @@ public class ImageService : IImageService
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        sourceFile = _converterService.ConvertFile(sourceFile,null);
-
+        if (!_converterService.IsVipsSupported(sourceFile))
+            sourceFile = _converterService.ConvertFile(sourceFile, null);
         var (width, height) = size.GetDimensions();
         using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
 

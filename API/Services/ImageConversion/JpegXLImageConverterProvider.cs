@@ -1,73 +1,57 @@
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using System.Threading;
+using ImageMagick;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Services.ImageConversion;
 
 public interface IImageConverterProvider
 {
-    string Extension { get; }
     bool IsSupported(string filename);
     string Convert(string filename);
-    (int Width, int Height)? GetDimensions(string fileName, int pageNumber);
+    (int Width, int Height)? GetDimensions(string fileName);
+
+    bool IsVipsSupported { get; }
 }
 
-public class JpegXLImageConverterProvider : IImageConverterProvider
+public class ImageMagickConverterProvider
 {
-    private bool? _appFound = null;
-
-    internal bool AppFound
+    public virtual string Convert(string filename)
     {
-        get
-        {
-            if (_appFound == null)
-            {
-                try
-                {
-                    _appFound = OsInfo.RunAndCapture(exeFile, "--version", Timeout.Infinite).Contains("JPEG XL");
-                }
-                catch (Exception e)
-                {
-                    //Eat it
-                    _appFound = false;
-                }
-            }
-            return _appFound.Value;
-        }
-    }
-    private string exeFile => OsInfo.IsWindows ? "djxl.exe" : "djxl";
-
-    private string infoFile => OsInfo.IsWindows ? "jxlinfo.exe" : "jxlinfo";
-
-    public bool IsSupported(string filename)
-    {
-        if (AppFound)
-            return filename.EndsWith(".jxl", StringComparison.InvariantCultureIgnoreCase);
-        return false;
-    }
-
-    private static Regex dimensions = new Regex(@",\s?(\d+)x(\d+),", RegexOptions.Compiled);
-    public (int Width, int Height)? GetDimensions(string fileName, int pageNumber)
-    {
-        if (!AppFound)
-            return null;
-        string output = OsInfo.RunAndCapture(infoFile, "\"" + fileName + "\"", Timeout.Infinite);
-        Match m= dimensions.Match(output);
-        if (!m.Success)
-            return null;
-        return (int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value));
-    }
-
-    public string Extension => ".jxl";
-    public string Convert(string filename)
-    {
-        if (!AppFound)
-            return filename;
         string destination = Path.ChangeExtension(filename, "jpg");
-        OsInfo.RunAndCapture(exeFile, "\"" + filename + "\" \"" + destination + "\"", Timeout.Infinite);
+        using var sourceImage = new MagickImage(filename);
+        sourceImage.Quality = 99;
+        sourceImage.Write(destination);
         File.Delete(filename);
         return destination;
     }
+
+    public virtual (int Width, int Height)? GetDimensions(string filename)
+    {
+        var info = new MagickImageInfo(filename);
+        return (info.Width, info.Height);
+    }
+}
+
+//NetVips do not support Jpeg-XL, Vips does but generate the right bindings is a pain in the ass
+public class JpegXLImageConverterProvider : ImageMagickConverterProvider, IImageConverterProvider
+{
+    private readonly ILogger<JpegXLImageConverterProvider> _logger;
+    public JpegXLImageConverterProvider(ILogger<JpegXLImageConverterProvider> logger)
+    {
+        _logger = logger;
+    }
+    public bool IsVipsSupported => false;
+
+    public bool IsSupported(string filename)
+    {
+        return filename.EndsWith(".jxl", StringComparison.InvariantCultureIgnoreCase);
+    }
+
+  
 }

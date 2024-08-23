@@ -68,17 +68,26 @@ public static class HttpExtensions
         defaultExtensions.Add("jpg");
         defaultExtensions.Add("png");
         defaultExtensions.Add("gif");
-
+        defaultExtensions.Add("webp");
         foreach (string v in split)
         {
             if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
             {
-                string n = v.Substring(6);
+                string n = v.Substring(6).ToLowerInvariant();
                 if (n == "svg+xml")
                     n = "svg";
+                if (n=="jp2")
+                    defaultExtensions.Add("j2k");
+                if (n == "j2k")
+                    defaultExtensions.Add("jp2");
+                if (n=="heif")
+                    defaultExtensions.Add("heic");
+                if (n == "heic")
+                    defaultExtensions.Add("heif");
                 if (n.StartsWith("*"))
                     continue;
-                defaultExtensions.Add(n.ToLowerInvariant());
+                if (!defaultExtensions.Contains(n))
+                   defaultExtensions.Add(n);
             }
         }
         return defaultExtensions;
