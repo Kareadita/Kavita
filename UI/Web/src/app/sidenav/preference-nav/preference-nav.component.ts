@@ -85,7 +85,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly serverService = inject(ServerService);
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly router = inject(Router);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly utilityService = inject(UtilityService);
   private readonly document = inject(DOCUMENT);
 
   hasActiveLicense = false;
@@ -228,4 +228,9 @@ export class PreferenceNavComponent implements AfterViewInit {
     return section.children.filter(item => this.accountService.hasAnyRole(user, item.roles)).length > 0;
   }
 
+  collapse() {
+    this.navService.toggleSideNav();
+  }
+
+  protected readonly Breakpoint = Breakpoint;
 }

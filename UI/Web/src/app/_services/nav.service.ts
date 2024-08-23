@@ -1,6 +1,6 @@
 import {DOCUMENT} from '@angular/common';
 import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
-import {filter, ReplaySubject, take} from 'rxjs';
+import {distinctUntilChanged, filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
@@ -145,6 +145,7 @@ export class NavService {
   }
 
   collapseSideNav(isCollapsed: boolean) {
+    console.log('forcing side nav collapse state: ', isCollapsed);
     this.sideNavCollapseSource.next(isCollapsed);
     localStorage.setItem(this.localStorageSideNavKey, isCollapsed + '');
   }

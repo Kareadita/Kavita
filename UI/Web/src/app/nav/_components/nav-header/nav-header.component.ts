@@ -298,8 +298,6 @@ export class NavHeaderComponent implements OnInit {
 
   toggleSideNav(event: any) {
     event.stopPropagation();
-    event.cancelBubble = true;
-    console.log('toggling side nav');
     this.navService.toggleSideNav();
   }
 

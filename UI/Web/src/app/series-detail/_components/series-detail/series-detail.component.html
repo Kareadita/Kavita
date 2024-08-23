@@ -195,40 +195,6 @@
               </div>
             </div>
           </div>
-
-
-<!--          <div class="mt-3 mb-2">-->
-<!--            <div class="row g-0">-->
-<!--              <div class="col-6">-->
-<!--                <span class="fw-bold">{{t('weblinks-title')}}</span>-->
-<!--                <div>-->
-<!--                  @for(link of WebLinks; track link) {-->
-<!--                    <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">-->
-<!--                      <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"-->
-<!--                                 [errorImage]="imageService.errorWebLinkImage"></app-image>-->
-<!--                    </a>-->
-<!--                  } @empty {-->
-<!--                    {{null | defaultValue}}-->
-<!--                  }-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="col-6">-->
-<!--                <span class="fw-bold">{{t('publication-status-title')}}</span>-->
-<!--                <div>-->
-<!--                  @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {-->
-<!--                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"-->
-<!--                       href="javascript:void(0);"-->
-<!--                       [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">-->
-<!--                      {{pubStatus}}-->
-<!--                    </a>-->
-<!--                  }-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-
-
         </div>
       </div>
 

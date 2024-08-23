@@ -1,11 +1,9 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
   HostListener,
   inject,
-  Inject,
   OnInit
 } from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
@@ -15,7 +13,7 @@ import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import {filter, fromEvent, interval, Observable, switchMap} from 'rxjs';
+import {filter, interval, Observable, switchMap} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
@@ -33,7 +31,7 @@ import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
   imports: [NgClass, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit {
 
   transitionState$!: Observable<boolean>;
 
@@ -107,27 +105,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.themeService.setColorScape('');
   }
 
-  ngAfterViewInit() {
-
-    fromEvent<MouseEvent>(window, 'click')
-      .pipe(
-        switchMap(event =>
-          this.utilityService.activeBreakpoint$.pipe(
-            filter(breakpoint => breakpoint < Breakpoint.Tablet), // Ensure we are on a mobile device
-            switchMap(() => this.navService.sideNavCollapsed$), // Check the current state of the side nav
-            filter(collapsed => !collapsed), // Proceed only if the side nav is open
-            tap(() => {
-              const sideNavContainer = document.querySelector('.side-nav-container');
-              if (sideNavContainer && !sideNavContainer.contains(event.target as Node)) {
-                this.navService.collapseSideNav(false); // Collapse the side nav if click is outside
-              }
-            })
-          )
-        )
-      )
-      .subscribe();
-
-  }
 
   setCurrentUser() {
     const user = this.accountService.getUserFromLocalStorage();

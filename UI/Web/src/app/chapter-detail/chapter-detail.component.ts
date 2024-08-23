@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
@@ -83,6 +83,7 @@ import {Action, ActionFactoryService, ActionItem} from "../_services/action-fact
 import {Volume} from "../_models/volume";
 import {Device} from "../_models/device/device";
 import {ActionService} from "../_services/action.service";
+import {PublicationStatusPipe} from "../_pipes/publication-status.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -139,7 +140,9 @@ enum TabID {
     MetadataDetailRowComponent,
     DownloadButtonComponent,
     CarouselTabComponent,
-    CarouselTabsComponent
+    CarouselTabsComponent,
+    PublicationStatusPipe,
+    DatePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
