@@ -6,21 +6,22 @@
     <div class="card-overlay"></div>
   </div>
 
-  <ng-container *ngIf="entity.title | safeHtml as info">
-    <div class="card-body meta-title" *ngIf="info !== ''">
-      <div class="card-content d-flex flex-column pt-2 pb-2 justify-content-center align-items-center text-center">
+  @if (entity.title | safeHtml; as info) {
+    @if (info !== '') {
+      <div class="card-body meta-title">
+        <div class="card-content d-flex flex-column pt-2 pb-2 justify-content-center align-items-center text-center">
 
-        <div class="upcoming-header"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>Upcoming</div>
-        <span [innerHTML]="info"></span>
+          <div class="upcoming-header"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>Upcoming</div>
+          <span [innerHTML]="info"></span>
+        </div>
       </div>
-    </div>
-  </ng-container>
+    }
+  }
 
-
-<div class="card-title-container">
-  <span class="card-title" tabindex="0">
-    {{title}}
-  </span>
-</div>
+  <div class="card-title-container">
+    <span class="card-title" tabindex="0">
+      {{title}}
+    </span>
+  </div>
 
 </div>

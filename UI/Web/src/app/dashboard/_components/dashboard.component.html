@@ -66,9 +66,20 @@
         <app-carousel-reel [items]="data" [title]="t('recently-updated-title')" (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)">
           <ng-template #carouselItem let-item>
             <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
-                           [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
+                           [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"
+                           [showReadButton]="true" (readClicked)="handleRecentlyAddedChapterRead(item)">
+
+            </app-card-item>
           </ng-template>
         </app-carousel-reel>
+
+        <ng-template #itemOverlay let-item="item">
+          <span (click)="handleRecentlyAddedChapterClick(item)">
+            <div>
+              <i class="fa-solid fa-book" aria-hidden="true"></i>
+            </div>
+          </span>
+        </ng-template>
       }
     </ng-template>
 
