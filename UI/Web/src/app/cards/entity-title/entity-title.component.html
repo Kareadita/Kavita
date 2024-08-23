@@ -2,9 +2,12 @@
   @switch (libraryType) {
     @case (LibraryType.Comic) {
       @if (titleName !== '' && prioritizeTitleName) {
+        @if (isChapter && includeChapter) {
+          {{t('issue-num') + ' '  + number + ' - ' }}
+        }
+
         {{titleName}}
       } @else {
-        {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
         @if (includeVolume && volumeTitle !== '') {
           {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
         }
@@ -14,9 +17,12 @@
 
     @case (LibraryType.ComicVine) {
       @if (titleName !== '' && prioritizeTitleName) {
+        @if (isChapter && includeChapter) {
+          {{t('issue-num') + ' '  + number + ' - ' }}
+        }
+
         {{titleName}}
       } @else {
-        {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
         @if (includeVolume && volumeTitle !== '') {
           {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
         }
@@ -26,12 +32,15 @@
 
     @case (LibraryType.Manga) {
       @if (titleName !== '' && prioritizeTitleName) {
+        @if (isChapter && includeChapter) {
+          {{t('chapter') + ' '  + number + ' - ' }}
+        }
         {{titleName}}
       } @else {
-        {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
         @if (includeVolume && volumeTitle !== '') {
           {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
         }
+
         {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}
       }
     }
