@@ -115,9 +115,9 @@ export class NavService {
       const bodyElem = this.document.querySelector('body');
       this.renderer.removeStyle(bodyElem, 'height');
       this.renderer.removeStyle(this.document.querySelector('html'), 'height');
+      this.renderer.setStyle(bodyElem, 'margin-top', '0px', RendererStyleFlags2.Important);
+      this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important);
       this.navbarVisibleSource.next(false);
-      this.renderer.setStyle(bodyElem, 'margin-top', '0px');
-      this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important)
     }, 10);
   }
 
@@ -145,7 +145,6 @@ export class NavService {
   }
 
   collapseSideNav(isCollapsed: boolean) {
-    console.log('forcing side nav collapse state: ', isCollapsed);
     this.sideNavCollapseSource.next(isCollapsed);
     localStorage.setItem(this.localStorageSideNavKey, isCollapsed + '');
   }
