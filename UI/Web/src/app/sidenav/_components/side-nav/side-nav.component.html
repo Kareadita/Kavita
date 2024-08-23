@@ -75,7 +75,12 @@
     </div>
     }
 
-    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
+    @if (utilityService.activeBreakpoint$ | async; as breakpoint) {
+      @if (breakpoint < Breakpoint.Tablet) {
+        <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
+      }
+    }
+
     <div class="bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
         'hidden': (navService.sideNavVisibility$ | async) === false || (accountService.hasValidLicense$ | async) === true}">
       @if ((accountService.hasValidLicense$ | async) === false) {
