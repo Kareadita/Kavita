@@ -47,7 +47,7 @@
     }
 
     ::ng-deep body {
-        height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
+        //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
     }
     
     .container-fluid {

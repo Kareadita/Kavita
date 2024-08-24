@@ -107,7 +107,7 @@ body {
 
   @media (max-width: 576px) {
     margin-top: var(--nav-mobile-offset) !important;
-    height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
+    //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
 }
 }
 
