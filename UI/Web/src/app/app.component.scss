@@ -49,7 +49,7 @@
     ::ng-deep body {
         //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
     }
-    
+
     .container-fluid {
         padding: 0;
     }
@@ -74,7 +74,7 @@
         &::-webkit-scrollbar {
             width: inherit;
         }
-    
+
         &::-webkit-scrollbar-thumb {
             background-color: transparent; /*makes it invisible when not hovering*/
         }
@@ -115,7 +115,7 @@
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  background-color: #121212;
+  background-color: var(--bs-body-bg);
   filter: blur(20px);
   object-fit: contain;
   transform: scale(1.1);
