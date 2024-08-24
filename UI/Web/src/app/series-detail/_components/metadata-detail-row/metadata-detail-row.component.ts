@@ -15,6 +15,10 @@ import {ImageService} from "../../../_services/image.service";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {MangaFormat} from "../../../_models/manga-format";
+import {MangaFormatIconPipe} from "../../../_pipes/manga-format-icon.pipe";
+import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 
 @Component({
   selector: 'app-metadata-detail-row',
@@ -26,7 +30,10 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
     ReadTimePipe,
     NgbTooltip,
     TranslocoDirective,
-    ImageComponent
+    ImageComponent,
+    MangaFormatPipe,
+    MangaFormatIconPipe,
+    SeriesFormatComponent
   ],
   templateUrl: './metadata-detail-row.component.html',
   styleUrl: './metadata-detail-row.component.scss',
@@ -44,6 +51,7 @@ export class MetadataDetailRowComponent {
   @Input() readingTimeLeft: HourEstimateRange | null = null;
   @Input({required: true}) ageRating: AgeRating = AgeRating.Unknown;
   @Input({required: true}) libraryType!: LibraryType;
+  @Input({required: true}) mangaFormat!: MangaFormat;
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;

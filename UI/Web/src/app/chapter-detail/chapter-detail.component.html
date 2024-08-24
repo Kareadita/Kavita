@@ -38,16 +38,14 @@
             <span class="me-2">
               <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="true" [includeChapter]="true"></app-entity-title>
             </span>
-            <span class="ms-3">
-              {{series.format  | mangaFormat}}
-            </span>
           </div>
 
           <app-metadata-detail-row [entity]="chapter"
                                    [ageRating]="chapter.ageRating"
                                    [hasReadingProgress]="chapter.pagesRead > 0"
                                    [readingTimeEntity]="chapter"
-                                   [libraryType]="libraryType">
+                                   [libraryType]="libraryType"
+                                   [mangaFormat]="series.format">
           </app-metadata-detail-row>
 
 

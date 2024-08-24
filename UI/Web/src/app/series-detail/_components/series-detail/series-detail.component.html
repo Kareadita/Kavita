@@ -48,9 +48,6 @@
             @if (series.localizedName !== series.name) {
               <span>{{series.localizedName | defaultValue}}</span>
             }
-            <span class="ms-3">
-              {{series.format  | mangaFormat}}
-            </span>
           </div>
 
           <app-metadata-detail-row [entity]="seriesMetadata"
@@ -58,7 +55,8 @@
                                    [ageRating]="seriesMetadata.ageRating"
                                    [hasReadingProgress]="hasReadingProgress"
                                    [readingTimeEntity]="series"
-                                   [libraryType]="libraryType">
+                                   [libraryType]="libraryType"
+                                   [mangaFormat]="series.format">
           </app-metadata-detail-row>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->

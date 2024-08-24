@@ -44,16 +44,14 @@
               {{t('volume-num')}}
               <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="true"></app-entity-title>
             </span>
-            <span class="ms-3">
-              {{series.format  | mangaFormat}}
-            </span>
           </div>
 
           <app-metadata-detail-row [entity]="volumeCast"
                                    [ageRating]="maxAgeRating"
                                    [hasReadingProgress]="volume.pagesRead > 0"
                                    [readingTimeEntity]="volume"
-                                   [libraryType]="libraryType">
+                                   [libraryType]="libraryType"
+                                   [mangaFormat]="series.format">
           </app-metadata-detail-row>
 
           <!-- Rating goes here (after I implement support for rating individual issues -->
