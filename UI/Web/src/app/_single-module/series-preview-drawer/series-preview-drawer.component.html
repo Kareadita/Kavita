@@ -38,7 +38,7 @@
         {{t('series-preview-drawer.view-series')}}
       </a>
 
-    @if (externalSeries) {  
+    @if (externalSeries) {
       <div class="mt-3">
         <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
           <ng-template #itemTemplate let-item>
@@ -80,7 +80,7 @@
       </div>
     }
     @else if(localSeries) {
-      <div class="d-inline-block mb-2" style="width: 100%">
+      <div class="d-inline-block mb-2 mt-2" style="width: 100%">
         <span class="text-muted muted">{{localSeries.publicationStatus | publicationStatus}}</span>
         <button class="btn btn-secondary btn-sm float-end me-3"
                 (click)="toggleWantToRead()"
