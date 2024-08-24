@@ -1057,22 +1057,6 @@
         "relations-title": "{{tabs.related-tab}}"
     },
 
-    "chapter-metadata-detail": {
-        "no-data": "No metadata available",
-        "writers-title": "{{metadata-fields.writers-title}}",
-        "publishers-title": "{{metadata-fields.publishers-title}}",
-        "characters-title": "{{metadata-fields.characters-title}}",
-        "translators-title": "{{metadata-fields.translators-title}}",
-        "letterers-title": "{{metadata-fields.letterers-title}}",
-        "colorists-title": "{{metadata-fields.colorists-title}}",
-        "inkers-title": "{{metadata-fields.inkers-title}}",
-        "pencillers-title": "{metadata-fields.pencillers-title}}",
-        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "editors-title": "{{metadata-fields.editors-title}}",
-        "teams-title": "{{metadata-fields.teams-title}}",
-        "locations-title": "{{metadata-fields.locations-title}}"
-    },
-
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "Url",
