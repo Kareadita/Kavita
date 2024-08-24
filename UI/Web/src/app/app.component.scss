@@ -38,6 +38,7 @@
     margin-left: 190px;
     mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
+    width: calc(100% - 190px);
 }
 
 @media (max-width: 768px) {
@@ -62,7 +63,7 @@
     .companion-bar {
         margin-left: 0;
         padding-left: 0;
-        width: 100%;
+        width: calc(100vw - 30px);
         padding-top: 20px;
         height: calc(100dvh - var(--nav-mobile-offset));
 

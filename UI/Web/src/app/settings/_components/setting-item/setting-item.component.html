@@ -13,7 +13,7 @@
           }
         </h6>
       </div>
-      <div class="col-2">
+      <div class="col-2 text-end align-self-end justify-content-end">
         @if (showEdit) {
           <button type="button" class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">
             {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}

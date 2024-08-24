@@ -1,10 +1,10 @@
 <ng-container *transloco="let t;">
   <div class="container-fluid">
     <div class="row g-0 mb-2">
-      <div class="col-10">
+      <div class="col-11">
         <h6 class="section-title" [id]="id || title">{{title}}</h6>
       </div>
-      <div class="col-2">
+      <div class="col-1">
         @if (switchRef) {
           <ng-container [ngTemplateOutlet]="switchRef"></ng-container>
         }
