@@ -3,7 +3,7 @@
     <div class="row g-0">
       <div class="col-md-2 col-sm-2 col-2 d-block p-2">
         @if (isMyReview) {
-          <i class="d-md-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
+          <i class="d-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
           <img class="me-2" [ngSrc]="ScrobbleProvider.Kavita | providerImage:true" width="40" height="40" alt="">
         } @else {
           <img class="me-2" [ngSrc]="review.provider | providerImage:true" width="40" height="40" alt="">

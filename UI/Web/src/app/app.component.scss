@@ -40,7 +40,7 @@
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     ::ng-deep html {
         height: 100dvh !important;
     }
