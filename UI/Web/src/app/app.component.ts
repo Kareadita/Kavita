@@ -114,8 +114,6 @@ export class AppComponent implements OnInit {
       // Bootstrap anything that's needed
       this.themeService.getThemes().subscribe();
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
-      // On load, make an initial call for valid license
-      this.accountService.hasValidLicense().subscribe();
 
       // Every hour, have the UI check for an update. People seriously stay out of date
       interval(2* 60 * 60 * 1000) // 2 hours in milliseconds
