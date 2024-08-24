@@ -46,10 +46,6 @@
         height: 100dvh !important;
     }
 
-    ::ng-deep body {
-        //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
-    }
-
     .container-fluid {
         padding: 0;
     }

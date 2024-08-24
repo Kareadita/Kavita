@@ -4,7 +4,7 @@
 
     @if (chapter && series && libraryType !== null) {
       <div class="row mb-0 mb-xl-3 info-container">
-        <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
+        <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-12 col-md-12 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
 
           @if(mobileSeriesImgBackground === 'true') {
             <app-image [styles]="{'background': 'none'}"  [imageUrl]="coverImage"></app-image>
@@ -33,7 +33,7 @@
             </div>
 
         </div>
-        <div class="col-xl-10 col-lg-7 col-md-7 col-xs-8 col-sm-6">
+        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
           <h4 class="title mb-2">
             <a routerLink="/library/{{series.libraryId}}/series/{{series.id}}" class="dark-exempt btn-icon">{{series.name}}</a>
           </h4>
