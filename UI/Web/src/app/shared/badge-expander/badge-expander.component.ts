@@ -8,7 +8,7 @@ import {
   OnInit, Output,
   TemplateRef
 } from '@angular/core';
-import {CommonModule, NgTemplateOutlet} from "@angular/common";
+import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 

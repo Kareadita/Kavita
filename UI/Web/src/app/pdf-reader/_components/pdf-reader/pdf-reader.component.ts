@@ -13,7 +13,7 @@ import {
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgxExtendedPdfViewerModule, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
 import {ToastrService} from 'ngx-toastr';
-import {Observable, take} from 'rxjs';
+import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
 import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
@@ -24,7 +24,7 @@ import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from 'src/app/_services/reader.s
 import {SeriesService} from 'src/app/_services/series.service';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, DOCUMENT, NgIf, NgStyle} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {PdfLayoutMode} from "../../../_models/preferences/pdf-layout-mode";
 import {PdfScrollMode} from "../../../_models/preferences/pdf-scroll-mode";
@@ -41,7 +41,7 @@ import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
     styleUrls: ['./pdf-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
+  imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
     PdfLayoutModePipe, PdfScrollModeTypePipe, PdfSpreadTypePipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {

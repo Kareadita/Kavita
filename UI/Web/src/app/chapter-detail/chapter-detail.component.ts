@@ -12,7 +12,6 @@ import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
 import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
-import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
 import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
 import {ImageComponent} from "../shared/image/image.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
@@ -73,14 +72,11 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
-import {CarouselTabComponent} from "../carousel/_components/carousel-tab/carousel-tab.component";
-import {CarouselTabsComponent, TabId} from "../carousel/_components/carousel-tabs/carousel-tabs.component";
 import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {Volume} from "../_models/volume";
 import {Device} from "../_models/device/device";
 import {ActionService} from "../_services/action.service";
 import {PublicationStatusPipe} from "../_pipes/publication-status.pipe";
@@ -101,7 +97,6 @@ enum TabID {
     CardActionablesComponent,
     CarouselReelComponent,
     DecimalPipe,
-    ExternalListItemComponent,
     ExternalSeriesCardComponent,
     ImageComponent,
     LoadingComponent,
@@ -140,8 +135,6 @@ enum TabID {
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
     DownloadButtonComponent,
-    CarouselTabComponent,
-    CarouselTabsComponent,
     PublicationStatusPipe,
     DatePipe,
     DefaultDatePipe
@@ -178,7 +171,6 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
-  protected readonly TabId = TabId;
   protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
