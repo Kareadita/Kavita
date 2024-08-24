@@ -34,12 +34,12 @@ import {
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
-import {Chapter} from "../_models/chapter";
+import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {Series} from "../_models/series";
 import {LibraryType} from "../_models/library/library";
 import {forkJoin, map, Observable, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from '../_models/metadata/v2/filter-field';
 import {AgeRating} from '../_models/metadata/age-rating';
@@ -86,6 +86,7 @@ import {Device} from "../_models/device/device";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
+import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 
 enum TabID {
 
@@ -128,46 +129,47 @@ interface VolumeCast extends IHasCast {
 @Component({
   selector: 'app-volume-detail',
   standalone: true,
-    imports: [
-        LoadingComponent,
-        NgbNavOutlet,
-        DetailsTabComponent,
-        NgbNavItem,
-        NgbNavLink,
-        NgbNavContent,
-        NgbNav,
-        ReadMoreComponent,
-        AsyncPipe,
-        NgbDropdownItem,
-        NgbDropdownMenu,
-        NgbDropdown,
-        NgbDropdownToggle,
-        ReadTimePipe,
-        AgeRatingPipe,
-        EntityTitleComponent,
-        RouterLink,
-        NgbProgressbar,
-        DecimalPipe,
-        NgbTooltip,
-        ImageComponent,
-        NgStyle,
-        NgClass,
-        TranslocoDirective,
-        CardItemComponent,
-        VirtualScrollerModule,
-        ChapterCardComponent,
-        DefaultValuePipe,
-        RelatedTabComponent,
-        AgeRatingImageComponent,
-        CompactNumberPipe,
-        BadgeExpanderComponent,
-        MetadataDetailRowComponent,
-        DownloadButtonComponent,
-        CardActionablesComponent,
-        BulkOperationsComponent,
-        DatePipe,
-        DefaultDatePipe
-    ],
+  imports: [
+    LoadingComponent,
+    NgbNavOutlet,
+    DetailsTabComponent,
+    NgbNavItem,
+    NgbNavLink,
+    NgbNavContent,
+    NgbNav,
+    ReadMoreComponent,
+    AsyncPipe,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdown,
+    NgbDropdownToggle,
+    ReadTimePipe,
+    AgeRatingPipe,
+    EntityTitleComponent,
+    RouterLink,
+    NgbProgressbar,
+    DecimalPipe,
+    NgbTooltip,
+    ImageComponent,
+    NgStyle,
+    NgClass,
+    TranslocoDirective,
+    CardItemComponent,
+    VirtualScrollerModule,
+    ChapterCardComponent,
+    DefaultValuePipe,
+    RelatedTabComponent,
+    AgeRatingImageComponent,
+    CompactNumberPipe,
+    BadgeExpanderComponent,
+    MetadataDetailRowComponent,
+    DownloadButtonComponent,
+    CardActionablesComponent,
+    BulkOperationsComponent,
+    DatePipe,
+    DefaultDatePipe,
+    MangaFormatPipe
+  ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -258,6 +260,7 @@ export class VolumeDetailComponent implements OnInit {
    */
   download$: Observable<DownloadEvent | null> | null = null;
   showDetailsTab: boolean = true;
+  currentlyReadingChapter: Chapter | undefined = undefined;
 
   maxAgeRating: AgeRating = AgeRating.Unknown;
   volumeCast: VolumeCast = {
@@ -292,6 +295,34 @@ export class VolumeDetailComponent implements OnInit {
   tags: Array<Tag> = [];
   genres: Array<Genre> = [];
 
+
+  get ContinuePointTitle() {
+    if (this.currentlyReadingChapter === undefined || !this.volume || this.volume.chapters.length <= 1) return '';
+
+    if (this.currentlyReadingChapter.isSpecial) {
+      return this.currentlyReadingChapter.title;
+    }
+
+    let chapterLocaleKey = 'common.chapter-num-shorthand';
+    switch (this.libraryType) {
+      case LibraryType.ComicVine:
+      case LibraryType.Comic:
+        chapterLocaleKey = 'common.issue-num-shorthand';
+        break;
+      case LibraryType.Book:
+      case LibraryType.Manga:
+      case LibraryType.LightNovel:
+      case LibraryType.Images:
+        chapterLocaleKey = 'common.chapter-num-shorthand';
+        break;
+    }
+
+    if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
+      return translate(chapterLocaleKey, {num: this.volume.chapters[0].minNumber});
+    }
+
+    return translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
+  }
 
 
   get ScrollingBlockHeight() {
@@ -467,6 +498,9 @@ export class VolumeDetailComponent implements OnInit {
           .flatMap(c => c.ageRating)
       );
 
+      this.setContinuePoint();
+
+
       this.showDetailsTab = hasAnyCast(this.volumeCast) || (this.genres || []).length > 0 || (this.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
@@ -478,6 +512,7 @@ export class VolumeDetailComponent implements OnInit {
   loadVolume() {
     this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
       this.volume = v;
+      this.setContinuePoint();
       this.cdRef.markForCheck();
     });
   }
@@ -495,7 +530,7 @@ export class VolumeDetailComponent implements OnInit {
     ref.componentInstance.libraryId = this.libraryId;
     ref.componentInstance.seriesId = this.series!.id;
 
-    ref.closed.subscribe();
+    ref.closed.subscribe(_ => this.setContinuePoint());
   }
 
   openEditChapterModal(chapter: Chapter) {
@@ -505,9 +540,7 @@ export class VolumeDetailComponent implements OnInit {
     ref.componentInstance.libraryId = this.libraryId;
     ref.componentInstance.seriesId = this.series!.id;
 
-    ref.closed.subscribe(() => {
-
-    });
+    ref.closed.subscribe(_ => this.setContinuePoint());
 
   }
 
@@ -535,10 +568,10 @@ export class VolumeDetailComponent implements OnInit {
   handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
       case(Action.MarkAsRead):
-        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter);
+        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, _ => this.setContinuePoint());
         break;
       case(Action.MarkAsUnread):
-        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter);
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, _ => this.setContinuePoint());
         break;
       case(Action.Edit):
         this.openEditChapterModal(chapter);
@@ -567,12 +600,14 @@ export class VolumeDetailComponent implements OnInit {
       case Action.MarkAsRead:
         this.actionService.markVolumeAsRead(this.seriesId, this.volume!, res => {
           this.volume!.pagesRead = this.volume!.pages;
+          this.setContinuePoint();
           this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsUnread:
         this.actionService.markVolumeAsUnread(this.seriesId, this.volume!, res => {
           this.volume!.pagesRead = 0;
+          this.setContinuePoint();
           this.cdRef.markForCheck();
         });
         break;
@@ -611,5 +646,18 @@ export class VolumeDetailComponent implements OnInit {
 
   navigateToSeries() {
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+  }
+
+  setContinuePoint() {
+    if (!this.volume) return;
+
+    const chaptersWithProgress = this.volume.chapters.filter(c => c.pagesRead < c.pages);
+    if (chaptersWithProgress.length > 0 && this.volume.chapters.length > 1) {
+      this.currentlyReadingChapter =  chaptersWithProgress[0];
+      console.log('Updating currentlyReading chapter', this.currentlyReadingChapter)
+      this.cdRef.markForCheck();
+    } else {
+      this.currentlyReadingChapter = undefined;
+    }
   }
 }

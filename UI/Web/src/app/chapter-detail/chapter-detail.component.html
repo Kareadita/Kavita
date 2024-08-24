@@ -12,14 +12,11 @@
             <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
           }
           <!-- TODO: For when continue on chapter/issue is hooked up -->
-<!--             @if (chapter.pagesRead < chapter.pages && chapter.pagesRead > 0) {
-              <div class="progress-banner" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
+             @if (chapter.pagesRead < chapter.pages && chapter.pagesRead > 0) {
+              <div class="progress-banner series" ngbTooltip="{{(chapter.pagesRead / chapter.pages) * 100 | number:'1.0-1'}}%">
                 <ngb-progressbar type="primary" [value]="chapter.pagesRead" [max]="chapter.pages" [showValue]="true"></ngb-progressbar>
               </div>
-              <div class="under-image">
-                {{t('continue-from', {title: ContinuePointTitle})}}
-              </div>
-            } -->
+            }
             <div class="card-overlay"></div>
             <div class="overlay-information">
               <div class="overlay-information--centered">
@@ -40,6 +37,9 @@
           <div class="subtitle mt-2 mb-2">
             <span class="me-2">
               <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="true" [includeChapter]="true"></app-entity-title>
+            </span>
+            <span class="ms-3">
+              {{series.format  | mangaFormat}}
             </span>
           </div>
 

@@ -48,6 +48,9 @@
             @if (series.localizedName !== series.name) {
               <span>{{series.localizedName | defaultValue}}</span>
             }
+            <span class="ms-3">
+              {{series.format  | mangaFormat}}
+            </span>
           </div>
 
           <app-metadata-detail-row [entity]="seriesMetadata"

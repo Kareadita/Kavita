@@ -20,11 +20,6 @@
   overflow: unset !important;
 }
 
-.btn {
-  //padding: 4px 8px !important;
-  //font-size: 0.8rem !important;
-}
-
 .btn-group > .btn.dropdown-toggle-split:not(first-child){
   border-top-right-radius: var(--bs-border-radius) !important;
   border-bottom-right-radius: var(--bs-border-radius) !important;
@@ -204,4 +199,12 @@
     mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
   }
+}
+
+.under-image {
+  background-color: var(--breadcrumb-bg-color);
+  color: white;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  text-align: center;
 }
