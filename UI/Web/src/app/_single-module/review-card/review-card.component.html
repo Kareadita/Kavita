@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read:'review-card'">
   <div class="card review-card clickable mb-3" (click)="showModal()">
     <div class="row g-0">
-      <div class="col-md-2 d-none d-md-block p-2">
+      <div class="col-md-2 col-sm-2 col-2 d-block p-2">
         @if (isMyReview) {
           <i class="d-md-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
           <img class="me-2" [ngSrc]="ScrobbleProvider.Kavita | providerImage:true" width="40" height="40" alt="">
@@ -9,7 +9,7 @@
           <img class="me-2" [ngSrc]="review.provider | providerImage:true" width="40" height="40" alt="">
         }
       </div>
-      <div class="col-md-10">
+      <div class="col-md-10 col-sm-10 col-10">
         <div class="card-body p-2">
           <!--
           <h6 class="card-title">
