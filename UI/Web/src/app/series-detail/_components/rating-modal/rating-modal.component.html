@@ -1,0 +1,16 @@
+<ng-container *transloco="let t; read: 'external-rating'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('kavita-rating-title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row g-0">
+      <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="2"
+                 [maxStars]="5" [color]="starColor"></ngx-stars>
+      {{userRating * 20}}%
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+  </div>
+</ng-container>

@@ -1,31 +1,27 @@
 <ng-container *transloco="let t; read: 'external-rating'">
   <div class="row g-0">
-    <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
-         [popoverTitle]="t('kavita-tooltip')" [popoverClass]="utilityService.getActiveBreakpoint() > Breakpoint.Mobile ? 'md-popover' : 'lg-popover'">
-      <span class="badge rounded-pill ps-0 me-1">
-        <app-image classes="me-1" imageUrl="assets/images/logo-32.png" width="24px" height="24px" />
-        @if (hasUserRated) {
-          {{userRating * 20}}
-        } @else {
-          N/A
-        }
 
-        @if (overallRating > 0) {
-          + {{overallRating}}
+
+      @if (utilityService.activeBreakpoint$ | async; as activeBreakpoint) {
+        @if (activeBreakpoint <= Breakpoint.Tablet) {
+          <div class="col-auto custom-col clickable" tabindex="0" role="button" (click)="openRatingModal()">
+            <ng-container [ngTemplateOutlet]="kavitaRating"></ng-container>
+          </div>
+        } @else {
+          <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
+               [popoverTitle]="t('kavita-tooltip')" popoverClass="md-popover">
+            <ng-container [ngTemplateOutlet]="kavitaRating"></ng-container>
+          </div>
         }
-        @if (hasUserRated || overallRating > 0) {
-          %
-        }
-      </span>
-    </div>
+      }
 
     @for (rating of ratings; track rating.provider + rating.averageScore) {
       <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
            [popoverTitle]="rating.provider | providerName" popoverClass="sm-popover">
-      <span class="badge rounded-pill me-1">
-        <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" alt="" aria-hidden="true">
-        {{rating.averageScore}}%
-      </span>
+        <span class="badge rounded-pill me-1">
+          <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" alt="" aria-hidden="true">
+          {{rating.averageScore}}%
+        </span>
       </div>
     }
 
@@ -43,18 +39,38 @@
     </div>
   </div>
 
+  <ng-template #kavitaRating>
+    <span class="badge rounded-pill ps-0 me-1">
+        <app-image classes="me-1" imageUrl="assets/images/logo-32.png" width="24px" height="24px" />
+        @if (hasUserRated) {
+          {{userRating * 20}}
+        } @else {
+          N/A
+        }
+
+        @if (overallRating > 0) {
+          + {{overallRating}}
+        }
+        @if (hasUserRated || overallRating > 0) {
+          %
+        }
+    </span>
+  </ng-template>
+
   <ng-template #popContent>
-    <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="utilityService.getActiveBreakpoint() > Breakpoint.Mobile ? 1 : 2"
+    <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="2"
                [maxStars]="5" [color]="starColor"></ngx-stars>
     {{userRating * 20}}%
   </ng-template>
 
   <ng-template #externalPopContent let-rating="rating">
-    <div><i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}</div>
+    <div>
+      <i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}
+    </div>
+
     @if (rating.providerUrl) {
       <a [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">{{t('entry-label')}}</a>
     }
-
   </ng-template>
 
 </ng-container>
