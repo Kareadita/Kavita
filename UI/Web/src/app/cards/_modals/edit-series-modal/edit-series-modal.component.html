@@ -647,7 +647,7 @@
                   </div>
                 </div>
 
-                <h4>Volumes</h4>
+                <h4>{{t('volumes-title')}}</h4>
                 @if (isLoadingVolumes) {
                   <div class="spinner-border text-secondary" role="status">
                     <span class="visually-hidden">{{t('loading')}}</span>
@@ -671,7 +671,7 @@
                             <div class="row g-0">
                               <div class="col">
                                 <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
-                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]">
+                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!isAdmin">
                                   {{t('view-files')}}
                                 </button>
                               </div>

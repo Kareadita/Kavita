@@ -553,15 +553,17 @@
                 </div>
               }
 
-              <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                <ng-template #view>
-                  @for (file of chapter.files; track file.id) {
-                    <div>
-                      <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
-                    </div>
-                  }
-                </ng-template>
-              </app-setting-item>
+              @if (accountService.isAdmin$ | async) {
+                <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                  <ng-template #view>
+                    @for (file of chapter.files; track file.id) {
+                      <div>
+                        <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
+                      </div>
+                    }
+                  </ng-template>
+                </app-setting-item>
+              }
 
             </ng-template>
           </li>
