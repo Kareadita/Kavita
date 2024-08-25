@@ -109,7 +109,6 @@
 }
 
 .under-image {
-
     position: relative;
 
     .continue-from {
@@ -124,18 +123,14 @@
 }
 
 @media screen and (max-width: 991px) {
-
     .overlay-information {
         visibility: hidden;
-
-        :hover {
-            .overlay-information--centered {
-                visibility: hidden;
-            }
+        .overlay-information--centered {
+            visibility: hidden !important;
         }
     }
     .progress-banner {
-        display:none;
+        display: none;
     }
 
     .under-image {
