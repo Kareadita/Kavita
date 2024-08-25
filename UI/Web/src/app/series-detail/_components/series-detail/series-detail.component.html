@@ -5,7 +5,7 @@
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''"
-             class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
+             class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
           <app-cover-image [entity]="series" [coverImage]="imageService.getSeriesCoverImage(series.id)" [continueTitle]="ContinuePointTitle" (read)="read()"></app-cover-image>
 <!--          @if(mobileSeriesImgBackground === 'true') {-->
 <!--            <app-image [styles]="{'background': 'none'}" [imageUrl]="seriesImage"></app-image>-->
