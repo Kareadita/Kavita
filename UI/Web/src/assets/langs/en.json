@@ -1055,7 +1055,7 @@
 
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
-        "collections-title": "{{side-nav.title}}",
+        "collections-title": "{{side-nav.collections}}",
         "relations-title": "{{tabs.related-tab}}"
     },
 
