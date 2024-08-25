@@ -13,14 +13,16 @@
                   <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" [minlength]="minLength"
                             [class.is-invalid]="reviewGroup.get('reviewBody')?.invalid && reviewGroup.get('reviewBody')?.touched" aria-describedby="body-validations"
                   ></textarea>
-                <div id="body-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                  @if (reviewGroup.get('reviewBody')?.errors?.required) {
-                    <div>{{t('required')}}</div>
-                  }
-                  @if (reviewGroup.get('reviewBody')?.errors?.minlength) {
-                    <div>{{t('min-length', {count: minLength})}}</div>
-                  }
-                </div>
+                @if (reviewGroup.dirty || reviewGroup.touched) {
+                  <div id="body-validations" class="invalid-feedback">
+                    @if (reviewGroup.get('reviewBody')?.errors?.required) {
+                      <div>{{t('required')}}</div>
+                    }
+                    @if (reviewGroup.get('reviewBody')?.errors?.minlength) {
+                      <div>{{t('min-length', {count: minLength})}}</div>
+                    }
+                  </div>
+                }
               </div>
           </form>
 
