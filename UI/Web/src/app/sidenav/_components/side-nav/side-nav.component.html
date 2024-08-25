@@ -81,7 +81,7 @@
       }
     }
 
-    <div class="bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
+    <div class="sidenav-bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
         'hidden': (navService.sideNavVisibility$ | async) === false || (accountService.hasValidLicense$ | async) === true}">
       @if ((accountService.hasValidLicense$ | async) === false) {
         <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"

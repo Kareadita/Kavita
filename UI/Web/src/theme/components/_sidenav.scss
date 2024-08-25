@@ -1,5 +1,5 @@
 
-.bottom {
+.sidenav-bottom {
     position: absolute;
     bottom: 12px;
     width: 190px;
@@ -18,7 +18,7 @@
     }
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item {
     justify-content: center;
     min-height: 25px;
     align-items: center;
@@ -28,35 +28,35 @@
     }
  }
 
-:host ::ng-deep .bottom .donate .side-nav-item span {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item span {
     flex-grow: unset !important;
     min-width: unset !important;;
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item span div {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div {
     min-width: unset !important;
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item span div i{
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div i{
     font-size: 12px !important;
 }
 
 
 
-:host ::ng-deep .bottom .donate .side-nav-item.closed span.phone-hidden div {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.phone-hidden div {
     width: 100%;
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item.closed span.side-nav-text div {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.side-nav-text div {
     width: 0;
 }
 
 @media (max-width: 768px) {
-    :host ::ng-deep .bottom .donate .side-nav-item.closed {
+    :host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed {
         display: none;
     }
 
-    :host ::ng-deep .bottom .donate .side-nav-item span.phone-hidden {
+    :host ::ng-deep .sidenav-bottom .donate .side-nav-item span.phone-hidden {
         display: block !important;
     }
 }
@@ -100,21 +100,21 @@
         height: 100%;
         mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
-    
+
         &::-webkit-scrollbar {
             width: inherit;
         }
-    
+
         &::-webkit-scrollbar-thumb {
             background-color: transparent; /*makes it invisible when not hovering*/
         }
-    
+
         &:hover {
             &::-webkit-scrollbar-thumb {
                 background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
               }
         }
-    
+
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
@@ -155,7 +155,7 @@
         }
     }
 
-    .bottom {
+    .sidenav-bottom {
         display:none;
 
     }
