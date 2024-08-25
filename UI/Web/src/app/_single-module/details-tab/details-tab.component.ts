@@ -14,18 +14,20 @@ import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badg
 import {ImageComponent} from "../../shared/image/image.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ImageService} from "../../_services/image.service";
+import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 
 @Component({
   selector: 'app-details-tab',
   standalone: true,
-    imports: [
-        CarouselReelComponent,
-        PersonBadgeComponent,
-        TranslocoDirective,
-        TagBadgeComponent,
-        ImageComponent,
-        SafeHtmlPipe
-    ],
+  imports: [
+    CarouselReelComponent,
+    PersonBadgeComponent,
+    TranslocoDirective,
+    TagBadgeComponent,
+    ImageComponent,
+    SafeHtmlPipe,
+    BadgeExpanderComponent
+  ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
