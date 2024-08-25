@@ -2522,6 +2522,7 @@
         "chapter-num": "Chapter",
         "volume-num": "Volume",
         "chapter-num-shorthand": "Ch {{num}}",
+        "book-num-shorthand": "Book {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol {{num}}",
 
