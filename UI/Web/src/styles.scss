@@ -103,7 +103,7 @@ app-root {
 body {
   scrollbar-gutter: stable both-edges;
   font-family: 'Poppins', sans-serif;
-  overflow: hidden;
+  overflow: hidden; // When this is enabled, it will break the webtoon reader. The nav.service will automatically remove/apply on toggling them
 
   @media (max-width: 576px) {
     margin-top: var(--nav-mobile-offset) !important;
