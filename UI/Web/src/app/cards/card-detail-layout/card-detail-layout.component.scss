@@ -94,10 +94,12 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(var(--vh) * 100 - 143px);
+  height: calc(var(--vh) * 100 - 165px);
   mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
   overflow: auto;
+  scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+  scrollbar-width: thin;
 
 }
 

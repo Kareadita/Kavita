@@ -1,3 +1,4 @@
+@import '../../../theme/variables';
 // TODO: Move this to a common file so it applies both ways
 .side-nav {
   padding-bottom: 10px;
@@ -36,7 +37,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
   .side-nav {
     padding: 10px 0;
     width: 55vw;

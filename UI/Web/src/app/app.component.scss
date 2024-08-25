@@ -1,5 +1,6 @@
+@import '../theme/variables';
 .content-wrapper {
-    padding: 0 10px 0;
+    padding: 0 0 0 10px;
     height: calc(var(--vh)* 100 - var(--nav-offset));
 }
 
@@ -9,8 +10,10 @@
     margin-left: 40px;
     overflow-y: auto;
     overflow-x: hidden;
-    height: calc(var(--vh)* 100 - var(--nav-offset));
-    width: 100%;
+    height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
+    scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+    scrollbar-width: thin;
+    padding-right: 10px;
 
     &::-webkit-scrollbar {
         background-color: transparent;  /*make scrollbar space invisible */
@@ -38,10 +41,10 @@
     margin-left: 190px;
     mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
-    width: calc(100% - 190px);
+    width: calc(100% - 170px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
     ::ng-deep html {
         height: 100dvh !important;
     }
@@ -52,34 +55,24 @@
 
     .content-wrapper {
         overflow: hidden;
-        height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
+        height: calc(var(--vh)* 100);
         padding: 0 10px 0;
 
         &.closed {
             overflow: auto;
+            height: calc(var(--vh) * 100);
         }
     }
 
     .companion-bar {
         margin-left: 0;
         padding-left: 0;
-        width: calc(100vw - 30px);
-        padding-top: 20px;
-        height: calc(100dvh - var(--nav-mobile-offset));
-
-        &::-webkit-scrollbar {
-            width: inherit;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background-color: transparent; /*makes it invisible when not hovering*/
-        }
-
-        &:hover {
-            &::-webkit-scrollbar-thumb {
-                background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
-              }
-        }
+        width: 100%;
+        padding: 20px 0 0;
+        height: calc(100dvh - 20px);
+        scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+        scrollbar-width: thin;
+        margin-bottom: 20px;
     }
 
     .companion-bar-content {

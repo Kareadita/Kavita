@@ -1,4 +1,5 @@
 
+@import '../variables';
 .sidenav-bottom {
     position: absolute;
     bottom: 12px;
@@ -51,7 +52,7 @@
     width: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
     :host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed {
         display: none;
     }
@@ -85,12 +86,18 @@
     &.hidden {
         display: none;
         opacity: 0;
+
+
+
+
+
+
     }
 
     &.closed {
         width: 55px;
         overflow-x: hidden;
-        overflow-y: auto;
+        overflow-y: hidden;
         background-color: var(--side-nav-closed-bg-color);
         border: var(--side-nav-border-closed);
     }
@@ -100,6 +107,8 @@
         height: 100%;
         mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+        scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+        scrollbar-width: thin;
 
         &::-webkit-scrollbar {
             width: inherit;
@@ -122,7 +131,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
     .side-nav-container {
         padding: 10px 0;
         width: 55vw;
