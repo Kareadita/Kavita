@@ -2,8 +2,9 @@ import { MangaFormat } from './manga-format';
 import { Volume } from './volume';
 import {IHasCover} from "./common/i-has-cover";
 import {IHasReadingTime} from "./common/i-has-reading-time";
+import {IHasProgress} from "./common/i-has-progress";
 
-export interface Series extends IHasCover, IHasReadingTime {
+export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
     id: number;
     name: string;
     /**

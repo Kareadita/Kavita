@@ -145,6 +145,7 @@ import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
 
 
 enum TabID {
@@ -179,7 +180,7 @@ interface StoryLineItem {
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
     RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
-    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, SeriesFormatComponent, MangaFormatPipe]
+    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, SeriesFormatComponent, MangaFormatPipe, CoverImageComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
