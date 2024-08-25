@@ -7,7 +7,7 @@
   </div>
   <div class="modal-body">
     <div class="mb-3">
-      <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" [title]="t('settings')">{{t('settings')}}</a>
+      <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" (click)="closeIfOnSettings()" [title]="t('settings')">{{t('settings')}}</a>
     </div>
     <div class="mb-3">
       <a routerLink="/all-filters/">{{t('all-filters')}}</a>

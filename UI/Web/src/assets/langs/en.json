@@ -817,6 +817,7 @@
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
+        "release-date-title": "Release",
 
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -825,7 +826,7 @@
         "weblinks-title": "Links",
         "more-alt": "More",
         "time-left-alt": "Time Left",
-        "time-to-read-alt": "Time to Read",
+        "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
         "scrobbling-tooltip": "{{settings.scrobbling}}",
         "publication-status-title": "Publication",
         "publication-status-tooltip": "Publication Status"
@@ -860,7 +861,9 @@
 
     "external-rating": {
         "entry-label": "See Details",
-        "kavita-tooltip": "Your Rating + Overall"
+        "kavita-tooltip": "Your Rating + Overall",
+        "kavita-rating-title": "Your Rating",
+        "close": "{{common.close}}"
     },
 
     "badge-expander": {
@@ -1022,29 +1025,6 @@
         "deselect-all": "{{common.deselect-all}}"
     },
 
-    "card-detail-drawer": {
-        "general-tab": "{{tabs.general-tab}}",
-        "metadata-tab": "{{tabs.metadata-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
-        "no-summary": "No Summary available.",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "imprints-title": "{{series-metadata-detail.imprints-title}}",
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "teams-title": "{{series-metadata-detail.teams-title}}",
-        "locations-title": "{{series-metadata-detail.locations-title}}",
-        "not-defined": "Not defined",
-        "read": "{{common.read}}",
-        "unread": "Unread",
-        "files": "Files",
-        "pages": "Pages:",
-        "added": "Added:",
-        "size": "Size:"
-    },
-
     "card-detail-layout": {
         "total-items": "{{count}} total items",
         "jumpkey-count": "{{count}} Series"
@@ -1074,23 +1054,9 @@
     },
 
     "related-tab": {
-        "reading-lists-title": "{{reading-lists.title}}"
-    },
-
-    "chapter-metadata-detail": {
-        "no-data": "No metadata available",
-        "writers-title": "{{metadata-fields.writers-title}}",
-        "publishers-title": "{{metadata-fields.publishers-title}}",
-        "characters-title": "{{metadata-fields.characters-title}}",
-        "translators-title": "{{metadata-fields.translators-title}}",
-        "letterers-title": "{{metadata-fields.letterers-title}}",
-        "colorists-title": "{{metadata-fields.colorists-title}}",
-        "inkers-title": "{{metadata-fields.inkers-title}}",
-        "pencillers-title": "{metadata-fields.pencillers-title}}",
-        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "editors-title": "{{metadata-fields.editors-title}}",
-        "teams-title": "{{metadata-fields.teams-title}}",
-        "locations-title": "{{metadata-fields.locations-title}}"
+        "reading-lists-title": "{{reading-lists.title}}",
+        "collections-title": "{{side-nav.title}}",
+        "relations-title": "{{tabs.related-tab}}"
     },
 
     "cover-image-chooser": {
@@ -1123,58 +1089,6 @@
         "parent": "{{relationship-pipe.parent}}"
     },
 
-    "entity-info-cards": {
-        "tags-title": "{{metadata-fields.tags-title}}",
-        "characters-title": "{{metadata-fields.characters-title}}",
-        "release-date-title": "Release",
-        "release-date-tooltip": "Release Date",
-        "age-rating-title": "{{metadata-fields.age-rating-title}}",
-        "length-title": "Length",
-        "pages-count": "{{num}} Pages",
-        "words-count": "{{num}} Words",
-
-        "reading-time-title": "Read Time",
-        "date-added-title": "Date Added",
-        "size-title": "Size",
-        "id-title": "ID",
-        "links-title": "{{metadata-fields.links-title}}",
-        "isbn-title": "ISBN",
-        "sort-order-title": "Sort Order",
-        "last-read-title": "Last Read",
-        "less-than-hour": "<1 Hour",
-        "range-hours": "{{value}} {{hourWord}}",
-        "hour": "Hour",
-        "hours": "Hours",
-        "read-time-title": "{{series-info-cards.read-time-title}}"
-    },
-
-    "series-info-cards": {
-        "release-date-title": "{{entity-info-cards.release-date-title}}",
-        "release-year-tooltip": "Release Year",
-        "age-rating-title": "{{entity-info-cards.age-rating-title}}",
-        "language-title": "{{metadata-fields.language-title}}",
-        "publication-status-title": "Publication",
-        "publication-status-tooltip": "Publication Status",
-        "scrobbling-title": "Scrobbling",
-        "scrobbling-tooltip": "Scrobbling Status",
-        "on": "On",
-        "off": "Off",
-        "disabled": "Disabled",
-        "format-title": "Format",
-        "last-read-title": "Last Read",
-        "length-title": "Length",
-        "read-time-title": "Read Time",
-        "less-than-hour": "{{entity-info-cards.less-than-hour}}",
-        "hour": "{{entity-info-cards.hour}}",
-        "hours": "{{entity-info-cards.hours}}",
-        "time-left-title": "Time Left",
-
-
-        "ongoing": "{{publication-status-pipe.ongoing}}",
-        "pages-count": "{{entity-info-cards.pages-count}}",
-        "words-count": "{{entity-info-cards.words-count}}"
-    },
-
     "bulk-add-to-collection": {
         "title": "Add to Collection",
         "promoted": "{{common.promoted}}",
@@ -1197,9 +1111,6 @@
         "open-external": "Open External"
     },
 
-    "list-item": {
-        "read": "{{common.read}}"
-    },
 
     "manage-media-issues": {
         "description-part-1": "This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
@@ -1922,7 +1833,7 @@
         "sort-name-label": "Sort Name",
         "localized-name-label": "Localized Name",
         "summary-label": "Summary",
-        "release-year-label": "Release Year",
+        "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-description": "Here you can add many different links to external services.",
         "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "Upload and choose a new cover image. Press Save to upload and override the cover.",
@@ -1932,7 +1843,7 @@
         "library-title": "Library",
         "format-title": "Format",
         "created-title": "Created",
-        "last-read-title": "Last Read",
+        "last-read-title": "{{sort-field-pipe.read-progress}}",
         "last-added-title": "Last Item Added",
         "last-scanned-title": "Last Scanned",
         "folder-path-title": "Folder Path",
@@ -1970,7 +1881,7 @@
         "sort-order-label": "Sort Order",
         "sort-order-tooltip": "The reading order in which this chapter is ordered within the volume",
         "isbn-label": "ISBN",
-        "release-date-label": "{{entity-info-cards.release-date-title}}",
+        "release-date-label": "Release",
         "summary-label": "{{edit-series-modal.summary-label}}",
         "genres-label": "{{edit-series-modal.genres-label}}",
         "tags-label": "{{edit-series-modal.tags-label}}",
@@ -2002,19 +1913,19 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
 
-        "pages-label": "{{entity-info-cards.pages-count}}",
-        "words-label": "{{entity-info-cards.length-title}}",
+        "pages-label": "Pages",
+        "words-label": "Length",
         "pages-count": "{{num}} Pages",
         "words-count": "{{num}} Words",
 
-        "reading-time-label": "{{entity-info-cards.reading-time-title}}",
-        "date-added-label": "{{entity-info-cards.date-added-title}}",
-        "size-label": "{{entity-info-cards.size-title}}",
-        "id-label": "{{entity-info-cards.id-title}}",
-        "links-label": "{{series-metadata-detail.links-title}}",
-        "last-read-label": "{{entity-info-cards.last-read-title}}",
+        "reading-time-label": "Read Time",
+        "date-added-label": "Date Added",
+        "size-label": "{{edit-series-modal.size-title}}",
+        "id-label": "ID",
+        "links-label": "{{metadata-fields.links-title}}",
+        "last-read-label": "{{sort-field-pipe.read-progress}}",
         "range-hours": "{{value}} {{hourWord}}",
-        "read-time-label": "{{series-info-cards.read-time-title}}",
+        "read-time-label": "Read Time",
         "files-label": "Files"
     },
 
@@ -2027,18 +1938,18 @@
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
 
-        "pages-label": "{{entity-info-cards.pages-count}}",
-        "words-label": "{{entity-info-cards.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-count}}",
+        "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{entity-info-cards.reading-time-title}}",
-        "date-added-label": "{{entity-info-cards.date-added-title}}",
-        "size-label": "{{entity-info-cards.size-title}}",
-        "id-label": "{{entity-info-cards.id-title}}",
+        "reading-time-label": "{{edit-chapter-modal.reading-time-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "size-label": "{{edit-chapter-modal.size-title}}",
+        "id-label": "{{edit-chapter-modal.id-title}}",
         "links-label": "{{series-metadata-detail.links-title}}",
-        "last-read-label": "{{entity-info-cards.last-read-title}}",
+        "last-read-label": "{{edit-chapter-modal.last-read-title}}",
         "range-hours": "{{value}} {{hourWord}}",
-        "read-time-label": "{{series-info-cards.read-time-title}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
@@ -2279,7 +2190,7 @@
         "publisher": "Publisher",
         "read-progress": "Read Progress",
         "read-time": "Read Time",
-        "release-year": "Release Year",
+        "release-year": "{{sort-field-pipe.release-year}}",
         "series-name": "Series Name",
         "summary": "Summary",
         "tags": "{{metadata-fields.tags-title}}",

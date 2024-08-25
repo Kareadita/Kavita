@@ -153,6 +153,7 @@ export class SideNavItemComponent implements OnInit {
   // If on mobile, automatically collapse the side nav after making a selection
   collapseNavIfApplicable() {
     if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+      console.log('collapsing side nav');
       this.navService.collapseSideNav(true);
     }
   }

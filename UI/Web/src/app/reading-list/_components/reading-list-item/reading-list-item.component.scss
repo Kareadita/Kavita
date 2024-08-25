@@ -34,3 +34,44 @@ $image-height: 125px;
     border-width: 0 var(--card-progress-triangle-size) var(--card-progress-triangle-size) 0;
     border-color: transparent var(--primary-color) transparent transparent;
 }
+
+::ng-deep .read-more-cont div {
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display:-webkit-box;
+    ;
+}
+
+@media (max-width: 576px) {
+    ::ng-deep .read-more-cont div {
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        display:-webkit-box;
+        ;
+    }
+}
+
+@media (max-width: 800px) {
+    ::ng-deep .read-more-cont div {
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        display:-webkit-box;
+        ;
+    }
+}
+
+@media (max-width: 768px) {
+    .actions {
+        display:flex;
+        flex-direction: column-reverse;
+        margin-left: 10px;
+
+        .btn-primary {
+            margin-bottom: 10px;
+            margin-left: 0 !important;
+        }
+    }
+}

@@ -5,7 +5,9 @@
       @if (readingList?.promoted) {
         <span class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
       }
-      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.aria-labelledby]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
+      @if (actions.length > 0) {
+        <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.aria-labelledby]="readingList?.title"></app-card-actionables>
+      }
     </h4>
     <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: items.length | number})}}</h5>
 
@@ -90,50 +92,66 @@
               </div>
             </div>
           </div>
-          <div class="row g-0 mt-2" *ngIf="readingList.startingYear !== 0">
-            <h4 class="reading-list-years">
-              <ng-container *ngIf="readingList.startingMonth > 0">{{(readingList.startingMonth +'/01/2020')| date:'MMM'}}</ng-container>
-              <ng-container *ngIf="readingList.startingMonth > 0 && readingList.startingYear > 0">, </ng-container>
-              <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
-              —
-              <ng-container *ngIf="readingList.endingYear > 0">
-                <ng-container *ngIf="readingList.endingMonth > 0">{{(readingList.endingMonth +'/01/2020') | date:'MMM'}}</ng-container>
-                <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
-                <ng-container *ngIf="readingList.endingYear > 0">{{readingList.endingYear}}</ng-container>
-              </ng-container>
 
-            </h4>
-          </div>
+          @if (readingList.startingYear !== 0) {
+            <div class="row g-0 mt-2">
+              <h4 class="reading-list-years">
+                @if (readingList.startingMonth > 0) {
+                  {{(readingList.startingMonth +'/01/2020')| date:'MMM'}}
+                }
+                @if (readingList.startingMonth > 0 && readingList.startingYear > 0) {
+                  ,
+                }
+                @if (readingList.startingYear > 0) {
+                  {{readingList.startingYear}}
+                }
+                —
+                @if (readingList.endingYear > 0) {
+                  @if (readingList.endingMonth > 0) {
+                    {{(readingList.endingMonth +'/01/2020')| date:'MMM'}}
+                  }
+                  @if (readingList.endingMonth > 0 && readingList.endingYear > 0) {
+                    ,
+                  }
+                  @if (readingList.endingYear > 0) {
+                    {{readingList.endingYear}}
+                  }
+                }
+              </h4>
+            </div>
+          }
+
+
           <!-- Summary row-->
           <div class="row g-0 mt-2">
             <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
           </div>
+
+          @if (characters$ | async; as characters) {
+            @if (characters && characters.length > 0) {
+              <div class="row mb-2">
+                <div class="row">
+                  <h5>{{t('characters-title')}}</h5>
+                  <app-badge-expander [items]="characters">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="goToCharacter(item)">{{item.name}}</a>
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+            }
+          }
         </div>
       </div>
 
-      <ng-container *ngIf="characters$ | async as characters">
-        <div class="row mb-2">
-          <div class="row" *ngIf="characters && characters.length > 0">
-            <h5>{{t('characters-title')}}</h5>
-            <app-badge-expander [items]="characters">
-              <ng-template #badgeExpanderItem let-item let-position="idx">
-                <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="goToCharacter(item)">{{item.name}}</a>
-<!--                <app-person-badge a11y-click="13,32" class="col-auto" [person]="item" (click)="goToCharacter(item)"></app-person-badge>-->
-              </ng-template>
-            </app-badge-expander>
-          </div>
-        </div>
-      </ng-container>
-
       <div class="row mb-1 scroll-container" #scrollingBlock>
-        <ng-container *ngIf="items.length === 0 && !isLoading; else loading">
+        @if (items.length === 0 && !isLoading) {
           <div class="mx-auto" style="width: 200px;">
             {{t('no-data')}}
           </div>
-        </ng-container>
-        <ng-template #loading>
-          <app-loading *ngIf="isLoading" [loading]="isLoading"></app-loading>
-        </ng-template>
+        } @else if(isLoading) {
+          <app-loading [loading]="isLoading"></app-loading>
+        }
 
         <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
                                     [showRemoveButton]="false">

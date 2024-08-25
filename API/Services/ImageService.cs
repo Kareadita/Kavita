@@ -82,7 +82,7 @@ public class ImageService : IImageService
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
 
-    private const double WhiteThreshold = 0.90; // Colors with lightness above this are considered too close to white
+    private const double WhiteThreshold = 0.95; // Colors with lightness above this are considered too close to white
     private const double BlackThreshold = 0.25; // Colors with lightness below this are considered too close to black
 
 
@@ -486,9 +486,11 @@ public class ImageService : IImageService
         // Resize the image to speed up processing
         var resizedImage = image.Resize(0.1);
 
+        var processedImage = PreProcessImage(resizedImage);
+
 
         // Convert image to RGB array
-        var pixels = resizedImage.WriteToMemory().ToArray();
+        var pixels = processedImage.WriteToMemory().ToArray();
 
         // Convert to list of Vector3 (RGB)
         var rgbPixels = new List<Vector3>();
@@ -501,6 +503,9 @@ public class ImageService : IImageService
         var clusters = KMeansClustering(rgbPixels, 4);
 
         var sorted = SortByVibrancy(clusters);
+
+        // Ensure white and black are not selected as primary/secondary colors
+        sorted = sorted.Where(c => !IsCloseToWhiteOrBlack(c)).ToList();
 
         if (sorted.Count >= 2)
         {
@@ -535,17 +540,18 @@ public class ImageService : IImageService
 
     private static Image PreProcessImage(Image image)
     {
+        return image;
         // Create a mask for white and black pixels
         var whiteMask = image.Colourspace(Enums.Interpretation.Lab)[0] > (WhiteThreshold * 100);
         var blackMask = image.Colourspace(Enums.Interpretation.Lab)[0] < (BlackThreshold * 100);
 
         // Create a replacement color (e.g., medium gray)
-        var replacementColor = new[] { 128.0, 128.0, 128.0 };
+        var replacementColor = new[] { 240.0, 240.0, 240.0 };
 
         // Apply the masks to replace white and black pixels
         var processedImage = image.Copy();
         processedImage = processedImage.Ifthenelse(whiteMask, replacementColor);
-        processedImage = processedImage.Ifthenelse(blackMask, replacementColor);
+        //processedImage = processedImage.Ifthenelse(blackMask, replacementColor);
 
         return processedImage;
     }
@@ -625,6 +631,13 @@ public class ImageService : IImageService
             var min = Math.Min(c.X, Math.Min(c.Y, c.Z));
             return (max - min) / max;
         }).ToList();
+    }
+
+    private static bool IsCloseToWhiteOrBlack(Vector3 color)
+    {
+        var threshold = 30;
+        return (color.X > 255 - threshold && color.Y > 255 - threshold && color.Z > 255 - threshold) ||
+               (color.X < threshold && color.Y < threshold && color.Z < threshold);
     }
 
     private static string RgbToHex(Vector3 color)

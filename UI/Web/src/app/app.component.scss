@@ -1,12 +1,34 @@
 .content-wrapper {
     padding: 0 10px 0;
-    height: 100%;
+    height: calc(var(--vh)* 100 - var(--nav-offset));
 }
+
 
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
     margin-left: 40px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(var(--vh)* 100 - var(--nav-offset));
+    width: 100%;
+
+    &::-webkit-scrollbar {
+        background-color: transparent;  /*make scrollbar space invisible */
+        width: inherit;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: transparent; /*makes it invisible when not hovering*/
+    }
+
+    &:hover {
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+        }
+    }
 }
+
 
 .companion-bar-collapsed {
   margin-left: 0 !important;
@@ -14,18 +36,24 @@
 
 .companion-bar-content {
     margin-left: 190px;
-    width: auto;
+    mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
+    width: calc(100% - 190px);
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
+    ::ng-deep html {
+        height: 100dvh !important;
+    }
+
     .container-fluid {
         padding: 0;
     }
 
     .content-wrapper {
-        padding: 0 5px 0;
         overflow: hidden;
-        height: calc(var(--vh)*100 - var(--nav-offset));
+        height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
+        padding: 0 10px 0;
 
         &.closed {
             overflow: auto;
@@ -35,11 +63,27 @@
     .companion-bar {
         margin-left: 0;
         padding-left: 0;
+        width: calc(100vw - 30px);
+        padding-top: 20px;
+        height: calc(100dvh - var(--nav-mobile-offset));
+
+        &::-webkit-scrollbar {
+            width: inherit;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: transparent; /*makes it invisible when not hovering*/
+        }
+
+        &:hover {
+            &::-webkit-scrollbar-thumb {
+                background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+              }
+        }
     }
 
     .companion-bar-content {
         margin-left: 0;
-        width: auto;
     }
 }
 
@@ -67,7 +111,7 @@
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  background-color: #121212;
+  background-color: var(--bs-body-bg);
   filter: blur(20px);
   object-fit: contain;
   transform: scale(1.1);
@@ -80,4 +124,3 @@
     height: 113vh;
   }
 }
-

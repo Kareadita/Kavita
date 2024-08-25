@@ -39,7 +39,7 @@
               <div class="input-group">
                 <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
                        [class.is-invalid]="formControl.invalid && formControl.touched">
-                <button class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
+                <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
               </div>
 
               @if(settingsForm.dirty || settingsForm.touched) {
@@ -64,7 +64,7 @@
               <div class="input-group">
                 <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
                        [class.is-invalid]="formControl.invalid && formControl.touched">
-                <button class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
+                <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
               </div>
 
               @if(settingsForm.dirty || settingsForm.touched) {

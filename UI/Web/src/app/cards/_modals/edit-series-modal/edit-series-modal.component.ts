@@ -629,7 +629,7 @@ export class EditSeriesModalComponent implements OnInit {
         await this.actionService.refreshSeriesMetadata(this.series);
         break;
       case Action.GenerateColorScape:
-        await this.actionService.refreshSeriesMetadata(this.series, undefined, false);
+        await this.actionService.refreshSeriesMetadata(this.series, undefined, false, true);
         break;
       case Action.AnalyzeFiles:
         this.actionService.analyzeFilesForSeries(this.series);

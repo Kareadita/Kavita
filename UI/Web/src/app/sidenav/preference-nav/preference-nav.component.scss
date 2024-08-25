@@ -3,7 +3,7 @@
   padding-bottom: 10px;
   width: 190px;
   background-color: var(--side-nav-bg-color);
-  height: calc((var(--vh)*100) - 115px);
+  height: calc((var(--vh)*100) - 75px);
   position: fixed;
   margin: 0;
   left: 10px;
@@ -36,16 +36,16 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .side-nav {
     padding: 10px 0;
     width: 55vw;
     background-color: var(--side-nav-mobile-bg-color);
-    height: calc((var(--vh)*100) - 125px);
+    height: 100dvh;
     position: fixed;
     margin: 0;
     left: 0;
-    top: var(--nav-mobile-offset);
+    top: 0;
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
     overflow: auto;

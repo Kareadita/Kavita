@@ -85,12 +85,12 @@ label, select, .clickable {
 
 // Needed for fullscreen
 app-root {
-  background-color: transparent;
   scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.3);
 }
 
 ::-webkit-scrollbar {
-  width: 14px;
+  width: 10px !important;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -103,6 +103,13 @@ app-root {
 body {
   scrollbar-gutter: stable both-edges;
   font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+
+  @media (max-width: 576px) {
+    margin-top: var(--nav-mobile-offset) !important;
+    height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
+  }
+
 }
 
 .setting-section-break {

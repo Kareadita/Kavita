@@ -39,6 +39,7 @@ import {BulkSelectionService} from "../bulk-selection.service";
 import {User} from "../../_models/user";
 import {ScrollService} from "../../_services/scroll.service";
 import {ReaderService} from "../../_services/reader.service";
+import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 
 function deepClone(obj: any): any {
   if (obj === null || typeof obj !== 'object') {
@@ -67,7 +68,7 @@ function deepClone(obj: any): any {
 @Component({
   selector: 'app-series-card',
   standalone: true,
-  imports: [CommonModule, CardItemComponent, RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent, EntityTitleComponent, FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective],
+  imports: [CommonModule, CardItemComponent, RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent, EntityTitleComponent, FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective, SeriesFormatComponent],
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -284,7 +285,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   async refreshMetadata(series: Series, forceUpdate = false) {
-    await this.actionService.refreshSeriesMetadata(series, undefined, forceUpdate);
+    await this.actionService.refreshSeriesMetadata(series, undefined, forceUpdate, forceUpdate);
   }
 
   async scanLibrary(series: Series) {

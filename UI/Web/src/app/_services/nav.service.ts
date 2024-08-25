@@ -1,13 +1,12 @@
-import { DOCUMENT } from '@angular/common';
-import {DestroyRef, inject, Inject, Injectable, OnDestroy, Renderer2, RendererFactory2} from '@angular/core';
-import {filter, ReplaySubject, Subject, take} from 'rxjs';
+import {DOCUMENT} from '@angular/common';
+import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
+import {distinctUntilChanged, filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {TextResonse} from "../_types/text-response";
-import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 import {AccountService} from "./account.service";
-import {map, tap} from "rxjs/operators";
+import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
@@ -98,22 +97,28 @@ export class NavService {
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
   showNavBar() {
-    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', 'var(--nav-offset)');
-    this.renderer.removeStyle(this.document.querySelector('body'), 'scrollbar-gutter');
-    this.renderer.setStyle(this.document.querySelector('body'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
-    this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
-    this.navbarVisibleSource.next(true);
+    setTimeout(() => {
+      const bodyElem = this.document.querySelector('body');
+      this.renderer.setStyle(bodyElem, 'margin-top', 'var(--nav-offset)');
+      this.renderer.removeStyle(bodyElem, 'scrollbar-gutter');
+      this.renderer.setStyle(bodyElem, 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.navbarVisibleSource.next(true);
+    }, 10);
   }
 
   /**
    * Hides the top nav bar.
    */
   hideNavBar() {
-    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');
-    this.renderer.setStyle(this.document.querySelector('body'), 'scrollbar-gutter', 'initial');
-    this.renderer.removeStyle(this.document.querySelector('body'), 'height');
-    this.renderer.removeStyle(this.document.querySelector('html'), 'height');
-    this.navbarVisibleSource.next(false);
+    setTimeout(() => {
+      const bodyElem = this.document.querySelector('body');
+      this.renderer.removeStyle(bodyElem, 'height');
+      this.renderer.removeStyle(this.document.querySelector('html'), 'height');
+      this.renderer.setStyle(bodyElem, 'margin-top', '0px', RendererStyleFlags2.Important);
+      this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important);
+      this.navbarVisibleSource.next(false);
+    }, 10);
   }
 
   /**
@@ -139,8 +144,8 @@ export class NavService {
     });
   }
 
-  collapseSideNav(state: boolean) {
-    this.sideNavCollapseSource.next(state);
-    localStorage.setItem(this.localStorageSideNavKey, state + '');
+  collapseSideNav(isCollapsed: boolean) {
+    this.sideNavCollapseSource.next(isCollapsed);
+    localStorage.setItem(this.localStorageSideNavKey, isCollapsed + '');
   }
 }

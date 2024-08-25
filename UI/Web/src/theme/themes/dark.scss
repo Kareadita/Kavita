@@ -26,6 +26,7 @@
     --elevation-layer8-dark: rgba(0, 0, 0,0.15);
     --elevation-layer9-dark: rgba(0, 0, 0,0.16);
     --elevation-layer10-dark: rgba(0, 0, 0, 0.4);
+    --elevation-layer11-dark: rgba(0, 0, 0, 0.6);
 
     --elevation-layer0-dark-solid: #121212;
     --elevation-layer1-dark-solid: #1D1D1D;
@@ -45,7 +46,7 @@
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
     --warning-color: #FFECB5;
-    --bs-body-bg: #121212;
+    --bs-body-bg: #1f2020; //#343a40;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
@@ -101,7 +102,7 @@
 
 
     /* Navbar */
-    --navbar-bg-color: var(--elevation-layer10-dark);
+    --navbar-bg-color: var(--elevation-layer11-dark);
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
@@ -219,8 +220,8 @@
     --tagbadge-filled-bg-color: var(--primary-color);
 
     /* Side Nav */
-    --side-nav-bg-color: var(--elevation-layer4-dark);
-    --side-nav-mobile-bg-color: var(--colorscape-darker-color);
+    --side-nav-bg-color: var(--elevation-layer9-dark);
+    --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
     --side-nav-openclose-transition: 0.15s ease-in-out;
     --side-nav-box-shadow: var(--elevation-layer0);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
@@ -237,7 +238,7 @@
     --side-nav-item-active-color: var(--primary-color);
     --side-nav-item-active-text-color: white;
     --side-nav-active-bg-color: transparent;
-    --side-nav-overlay-color: var(--elevation-layer1);
+    --side-nav-overlay-color: var(--elevation-layer11-dark);
     --side-nav-item-closed-color: var(--elevation-layer10);
     --side-nav-item-closed-hover-color: white;
 
@@ -417,4 +418,6 @@
     --login-input-font-family: 'League Spartan', sans-serif;
     --login-input-placeholder-opacity: 0.5;
     --login-input-placeholder-color: #fff;
+
+    --mobile-series-img-background: true;
 }

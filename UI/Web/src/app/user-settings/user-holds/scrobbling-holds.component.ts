@@ -13,7 +13,6 @@ import {
   NgbAccordionItem
 } from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ListItemComponent} from "../../cards/list-item/list-item.component";
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 
@@ -21,7 +20,7 @@ import {ImageComponent} from "../../shared/image/image.component";
   selector: 'app-user-holds',
   standalone: true,
   imports: [ScrobbleEventTypePipe, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody,
-    NgbAccordionItem, NgbAccordionHeader, TranslocoDirective, AsyncPipe, ListItemComponent, ImageComponent],
+    NgbAccordionItem, NgbAccordionHeader, TranslocoDirective, AsyncPipe, ImageComponent],
   templateUrl: './scrobbling-holds.component.html',
   styleUrls: ['./scrobbling-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -17,7 +17,6 @@ import {EntityTitleComponent} from "../../cards/entity-title/entity-title.compon
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
-import {EntityInfoCardsComponent} from "../../cards/entity-info-cards/entity-info-cards.component";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
@@ -83,7 +82,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     CoverImageChooserComponent,
     EditChapterProgressComponent,
     NgbInputDatepicker,
-    EntityInfoCardsComponent,
     CompactNumberPipe,
     IconAndTitleComponent,
     DefaultDatePipe,

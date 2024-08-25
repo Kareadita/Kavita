@@ -296,7 +296,8 @@ export class NavHeaderComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  hideSideNav() {
+  toggleSideNav(event: any) {
+    event.stopPropagation();
     this.navService.toggleSideNav();
   }
 

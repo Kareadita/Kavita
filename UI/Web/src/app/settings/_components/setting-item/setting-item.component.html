@@ -1,7 +1,7 @@
 <ng-container *transloco="let t;">
   <div class="container-fluid">
     <div class="row g-0">
-      <div class="col-11">
+      <div class="col-10">
         <h6 class="section-title">
           @if(labelId) {
             <label class="reset-label" [for]="labelId">{{title}}</label>
@@ -13,9 +13,9 @@
           }
         </h6>
       </div>
-      <div class="col-1">
+      <div class="col-2 text-end align-self-end justify-content-end">
         @if (showEdit) {
-          <button class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">
+          <button type="button" class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">
             {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}
           </button>
         }

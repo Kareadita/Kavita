@@ -9,10 +9,9 @@ import {
 } from '@angular/core';
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
-import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
 import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
 import {ImageComponent} from "../shared/image/image.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
@@ -73,9 +72,16 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
-import {CarouselTabComponent} from "../carousel/_components/carousel-tab/carousel-tab.component";
-import {CarouselTabsComponent, TabId} from "../carousel/_components/carousel-tabs/carousel-tabs.component";
 import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
+import {EVENTS, MessageHubService} from "../_services/message-hub.service";
+import {CoverUpdateEvent} from "../_models/events/cover-update-event";
+import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
+import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {Device} from "../_models/device/device";
+import {ActionService} from "../_services/action.service";
+import {PublicationStatusPipe} from "../_pipes/publication-status.pipe";
+import {DefaultDatePipe} from "../_pipes/default-date.pipe";
+import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -86,53 +92,55 @@ enum TabID {
 @Component({
   selector: 'app-chapter-detail',
   standalone: true,
-  imports: [
-    BulkOperationsComponent,
-    AsyncPipe,
-    CardActionablesComponent,
-    CarouselReelComponent,
-    DecimalPipe,
-    ExternalListItemComponent,
-    ExternalSeriesCardComponent,
-    ImageComponent,
-    LoadingComponent,
-    NgbDropdown,
-    NgbDropdownItem,
-    NgbDropdownMenu,
-    NgbDropdownToggle,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLink,
-    NgbProgressbar,
-    NgbTooltip,
-    PersonBadgeComponent,
-    ReviewCardComponent,
-    SeriesCardComponent,
-    TagBadgeComponent,
-    VirtualScrollerModule,
-    NgStyle,
-    AgeRatingPipe,
-    TimeDurationPipe,
-    ExternalRatingComponent,
-    TranslocoDirective,
-    ReadMoreComponent,
-    NgbNavItem,
-    NgbNavOutlet,
-    DetailsTabComponent,
-    RouterLink,
-    EntityTitleComponent,
-    ReadTimePipe,
-    DefaultValuePipe,
-    CardItemComponent,
-    RelatedTabComponent,
-    AgeRatingImageComponent,
-    CompactNumberPipe,
-    BadgeExpanderComponent,
-    MetadataDetailRowComponent,
-    DownloadButtonComponent,
-    CarouselTabComponent,
-    CarouselTabsComponent
-  ],
+    imports: [
+        BulkOperationsComponent,
+        AsyncPipe,
+        CardActionablesComponent,
+        CarouselReelComponent,
+        DecimalPipe,
+        ExternalSeriesCardComponent,
+        ImageComponent,
+        LoadingComponent,
+        NgbDropdown,
+        NgbDropdownItem,
+        NgbDropdownMenu,
+        NgbDropdownToggle,
+        NgbNav,
+        NgbNavContent,
+        NgbNavLink,
+        NgbProgressbar,
+        NgbTooltip,
+        PersonBadgeComponent,
+        ReviewCardComponent,
+        SeriesCardComponent,
+        TagBadgeComponent,
+        VirtualScrollerModule,
+        NgStyle,
+        NgClass,
+        AgeRatingPipe,
+        TimeDurationPipe,
+        ExternalRatingComponent,
+        TranslocoDirective,
+        ReadMoreComponent,
+        NgbNavItem,
+        NgbNavOutlet,
+        DetailsTabComponent,
+        RouterLink,
+        EntityTitleComponent,
+        ReadTimePipe,
+        DefaultValuePipe,
+        CardItemComponent,
+        RelatedTabComponent,
+        AgeRatingImageComponent,
+        CompactNumberPipe,
+        BadgeExpanderComponent,
+        MetadataDetailRowComponent,
+        DownloadButtonComponent,
+        PublicationStatusPipe,
+        DatePipe,
+        DefaultDatePipe,
+        MangaFormatPipe
+    ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -158,11 +166,14 @@ export class ChapterDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly readingListService = inject(ReadingListService);
   protected readonly utilityService = inject(UtilityService);
-
+  private readonly messageHub = inject(MessageHubService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -184,7 +195,8 @@ export class ChapterDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
   readingLists: ReadingList[] = [];
   showDetailsTab: boolean = true;
-
+  mobileSeriesImgBackground: string | undefined;
+  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
 
   get ScrollingBlockHeight() {
@@ -208,12 +220,27 @@ export class ChapterDetailComponent implements OnInit {
       return;
     }
 
-
+    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--mobile-series-img-background').trim();
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.libraryId = parseInt(libraryId, 10);
-
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
+
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      if (event.event === EVENTS.CoverUpdate) {
+        const coverUpdateEvent = event.payload as CoverUpdateEvent;
+        if (coverUpdateEvent.entityType === 'chapter' && coverUpdateEvent.id === this.chapterId) {
+          this.themeService.refreshColorScape('chapter', coverUpdateEvent.id).subscribe();
+        }
+      } else if (event.event === EVENTS.ChapterRemoved) {
+        const removedEvent = event.payload as ChapterRemovedEvent;
+        if (removedEvent.chapterId !== this.chapterId) return;
+
+        // This series has been deleted from disk, redirect to series
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+      }
+    });
 
 
     forkJoin({
@@ -303,7 +330,7 @@ export class ChapterDetailComponent implements OnInit {
 
   updateUrl(activeTab: TabID) {
     const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    //this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
+    window.history.replaceState({}, '', newUrl);
   }
 
   openPerson(field: FilterField, value: number) {
@@ -311,12 +338,61 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   downloadChapter() {
+    if (this.downloadInProgress) return;
     this.downloadService.download('chapter', this.chapter!, (d) => {
       this.downloadInProgress = !!d;
       this.cdRef.markForCheck();
     });
   }
 
-  protected readonly TabId = TabId;
-  protected readonly Breakpoint = Breakpoint;
+  openFilter(field: FilterField, value: string | number) {
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
+  switchTabsToDetail() {
+    this.activeTabId = TabID.Details;
+    this.cdRef.markForCheck();
+  }
+
+  performAction(action: ActionItem<Chapter>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, this.chapter!);
+    }
+  }
+
+  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+    switch (action.action) {
+      case(Action.MarkAsRead):
+        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => {
+          this.loadData();
+        });
+        break;
+      case(Action.MarkAsUnread):
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, () => {
+          this.loadData();
+        });
+        break;
+      case(Action.Edit):
+        this.openEditModal();
+        break;
+      case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
+        break;
+      case(Action.IncognitoRead):
+        this.readerService.readChapter(this.libraryId, this.seriesId, chapter, true);
+        break;
+      case (Action.SendTo):
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice([chapter.id], device);
+        break;
+      case Action.Download:
+        this.downloadChapter();
+        break;
+      case Action.Delete:
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        break;
+    }
+  }
+
+  protected readonly LibraryType = LibraryType;
 }

@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -16,7 +16,6 @@ import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
 import {DownloadEvent, DownloadService} from "../shared/_services/download.service";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
-import {ToastrService} from "ngx-toastr";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {
@@ -35,13 +34,12 @@ import {
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
-import {Chapter} from "../_models/chapter";
+import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {Series} from "../_models/series";
 import {LibraryType} from "../_models/library/library";
-import {forkJoin, map, Observable, shareReplay, tap} from "rxjs";
+import {forkJoin, map, Observable, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoDirective} from "@jsverse/transloco";
-import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from '../_models/metadata/v2/filter-field';
 import {AgeRating} from '../_models/metadata/age-rating';
@@ -78,6 +76,17 @@ import {
   MetadataDetailRowComponent
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
+import {EVENTS, MessageHubService} from "../_services/message-hub.service";
+import {CoverUpdateEvent} from "../_models/events/cover-update-event";
+import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
+import {ActionService} from "../_services/action.service";
+import {VolumeRemovedEvent} from "../_models/events/volume-removed-event";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
+import {Device} from "../_models/device/device";
+import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
+import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
+import {DefaultDatePipe} from "../_pipes/default-date.pipe";
+import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 
 enum TabID {
 
@@ -143,6 +152,7 @@ interface VolumeCast extends IHasCast {
     NgbTooltip,
     ImageComponent,
     NgStyle,
+    NgClass,
     TranslocoDirective,
     CardItemComponent,
     VirtualScrollerModule,
@@ -153,7 +163,12 @@ interface VolumeCast extends IHasCast {
     CompactNumberPipe,
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
-    DownloadButtonComponent
+    DownloadButtonComponent,
+    CardActionablesComponent,
+    BulkOperationsComponent,
+    DatePipe,
+    DefaultDatePipe,
+    MangaFormatPipe
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -177,13 +192,16 @@ export class VolumeDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
   protected readonly utilityService = inject(UtilityService);
   private readonly readingListService = inject(ReadingListService);
+  private readonly messageHub = inject(MessageHubService);
 
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -198,14 +216,51 @@ export class VolumeDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
+  mobileSeriesImgBackground: string | undefined;
+  downloadInProgress: boolean = false;
 
-  volumeActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
+  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
+  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+
+  bulkActionCallback = (action: ActionItem<Chapter>, data: any) => {
+    if (this.volume === null) {
+      return;
+    }
+    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+    const selectedChapterIds = this.volume.chapters.filter((_chapter, index: number) => {
+      return selectedChapterIndexes.includes(index + '');
+    });
+
+    switch (action.action) {
+      case Action.AddToReadingList:
+        this.actionService.addMultipleToReadingList(this.seriesId, [], selectedChapterIds, (success) => {
+          if (success) this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.MarkAsRead:
+        this.actionService.markMultipleAsRead(this.seriesId, [], selectedChapterIds,  () => {
+          this.bulkSelectionService.deselectAll();
+          this.loadVolume();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.MarkAsUnread:
+        this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {
+          this.bulkSelectionService.deselectAll();
+          this.loadVolume();
+          this.cdRef.markForCheck();
+        });
+        break;
+    }
+  }
 
   /**
    * This is the download we get from download service.
    */
   download$: Observable<DownloadEvent | null> | null = null;
   showDetailsTab: boolean = true;
+  currentlyReadingChapter: Chapter | undefined = undefined;
 
   maxAgeRating: AgeRating = AgeRating.Unknown;
   volumeCast: VolumeCast = {
@@ -241,6 +296,34 @@ export class VolumeDetailComponent implements OnInit {
   genres: Array<Genre> = [];
 
 
+  get ContinuePointTitle() {
+    if (this.currentlyReadingChapter === undefined || !this.volume || this.volume.chapters.length <= 1) return '';
+
+    if (this.currentlyReadingChapter.isSpecial) {
+      return this.currentlyReadingChapter.title;
+    }
+
+    let chapterLocaleKey = 'common.chapter-num-shorthand';
+    switch (this.libraryType) {
+      case LibraryType.ComicVine:
+      case LibraryType.Comic:
+        chapterLocaleKey = 'common.issue-num-shorthand';
+        break;
+      case LibraryType.Book:
+      case LibraryType.Manga:
+      case LibraryType.LightNovel:
+      case LibraryType.Images:
+        chapterLocaleKey = 'common.chapter-num-shorthand';
+        break;
+    }
+
+    if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
+      return translate(chapterLocaleKey, {num: this.volume.chapters[0].minNumber});
+    }
+
+    return translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
+  }
+
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -253,9 +336,6 @@ export class VolumeDetailComponent implements OnInit {
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-  get UseBookLogic() {
-    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
-  }
 
   ngOnInit() {
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
@@ -266,14 +346,36 @@ export class VolumeDetailComponent implements OnInit {
       return;
     }
 
-
+    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--mobile-series-img-background').trim();
     this.seriesId = parseInt(seriesId, 10);
     this.volumeId = parseInt(volumeId, 10);
     this.libraryId = parseInt(libraryId, 10);
-
     this.coverImage = this.imageService.getVolumeCoverImage(this.volumeId);
 
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      if (event.event === EVENTS.CoverUpdate) {
+        const coverUpdateEvent = event.payload as CoverUpdateEvent;
+        if (coverUpdateEvent.entityType === 'volume' && coverUpdateEvent.id === this.volumeId) {
+          this.themeService.refreshColorScape('volume', coverUpdateEvent.id).subscribe();
+        }
+      } else if (event.event === EVENTS.ChapterRemoved) {
+        const removedEvent = event.payload as ChapterRemovedEvent;
+        if (removedEvent.seriesId !== this.seriesId) return;
 
+        // remove the chapter from the tab
+        if (this.volume) {
+          this.volume.chapters = this.volume.chapters.filter(c => c.id !== removedEvent.chapterId);
+          this.cdRef.detectChanges();
+        }
+      } else if (event.event === EVENTS.VolumeRemoved) {
+        const removedEvent = event.payload as VolumeRemovedEvent;
+        if (removedEvent.volumeId !== this.volumeId) return;
+
+        // remove the chapter from the tab
+        this.navigateToSeries();
+      }
+    });
 
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
@@ -396,6 +498,9 @@ export class VolumeDetailComponent implements OnInit {
           .flatMap(c => c.ageRating)
       );
 
+      this.setContinuePoint();
+
+
       this.showDetailsTab = hasAnyCast(this.volumeCast) || (this.genres || []).length > 0 || (this.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
@@ -404,10 +509,12 @@ export class VolumeDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  readChapter(chapter: Chapter, incognitoMode: boolean = false) {
-    if (this.bulkSelectionService.hasSelections()) return;
-
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
+  loadVolume() {
+    this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
+      this.volume = v;
+      this.setContinuePoint();
+      this.cdRef.markForCheck();
+    });
   }
 
   readVolume(incognitoMode: boolean = false) {
@@ -423,9 +530,18 @@ export class VolumeDetailComponent implements OnInit {
     ref.componentInstance.libraryId = this.libraryId;
     ref.componentInstance.seriesId = this.series!.id;
 
-    ref.closed.subscribe((res: EditVolumeModalCloseResult) => {
-      // TODO
-    });
+    ref.closed.subscribe(_ => this.setContinuePoint());
+  }
+
+  openEditChapterModal(chapter: Chapter) {
+    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    ref.componentInstance.chapter = chapter;
+    ref.componentInstance.libraryType = this.libraryType;
+    ref.componentInstance.libraryId = this.libraryId;
+    ref.componentInstance.seriesId = this.series!.id;
+
+    ref.closed.subscribe(_ => this.setContinuePoint());
+
   }
 
   onNavChange(event: NgbNavChangeEvent) {
@@ -436,26 +552,112 @@ export class VolumeDetailComponent implements OnInit {
 
   updateUrl(activeTab: TabID) {
     const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    //this.router.navigateByUrl(newUrl, { onSameUrlNavigation: 'ignore' });
+    window.history.replaceState({}, '', newUrl);
   }
 
   openPerson(field: FilterField, value: number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
-  handleVolumeAction(action: ActionItem<Volume>) {
-    // TODO: Implement actionables
+  performAction(action: ActionItem<Volume>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, this.volume!);
+    }
+  }
+
+  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
-      case Action.Delete:
+      case(Action.MarkAsRead):
+        this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, _ => this.setContinuePoint());
         break;
-      case Action.MarkAsRead:
+      case(Action.MarkAsUnread):
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, _ => this.setContinuePoint());
         break;
-      case Action.MarkAsUnread:
+      case(Action.Edit):
+        this.openEditChapterModal(chapter);
         break;
-      case Action.MarkAsRead:
+      case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
+        break;
+      case(Action.IncognitoRead):
+        this.readerService.readChapter(this.libraryId, this.seriesId, chapter, true);
+        break;
+      case (Action.SendTo):
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice([chapter.id], device);
         break;
     }
   }
 
-  protected readonly Breakpoint = Breakpoint;
+  async handleVolumeAction(action: ActionItem<Volume>) {
+    switch (action.action) {
+      case Action.Delete:
+        await this.actionService.deleteVolume(this.volumeId, (res) => {
+          if (!res) return;
+          this.navigateToSeries();
+        });
+        break;
+      case Action.MarkAsRead:
+        this.actionService.markVolumeAsRead(this.seriesId, this.volume!, res => {
+          this.volume!.pagesRead = this.volume!.pages;
+          this.setContinuePoint();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.MarkAsUnread:
+        this.actionService.markVolumeAsUnread(this.seriesId, this.volume!, res => {
+          this.volume!.pagesRead = 0;
+          this.setContinuePoint();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.AddToReadingList:
+        break;
+      case Action.Download:
+        if (this.downloadInProgress) return;
+        this.downloadService.download('volume', this.volume!, (d) => {
+          this.downloadInProgress = !!d;
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.IncognitoRead:
+        this.readVolume(true);
+        break;
+      case Action.SendTo:
+        const chapterIds = this.volume!.chapters.map(c => c.id);
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice(chapterIds, device);
+        break;
+      case Action.Edit:
+        this.openEditModal();
+        break;
+    }
+  }
+
+  openFilter(field: FilterField, value: string | number) {
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
+
+  switchTabsToDetail() {
+    this.activeTabId = TabID.Details;
+    this.cdRef.markForCheck();
+  }
+
+  navigateToSeries() {
+    this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+  }
+
+  setContinuePoint() {
+    if (!this.volume) return;
+
+    const chaptersWithProgress = this.volume.chapters.filter(c => c.pagesRead < c.pages);
+    if (chaptersWithProgress.length > 0 && this.volume.chapters.length > 1) {
+      this.currentlyReadingChapter =  chaptersWithProgress[0];
+      console.log('Updating currentlyReading chapter', this.currentlyReadingChapter)
+      this.cdRef.markForCheck();
+    } else {
+      this.currentlyReadingChapter = undefined;
+    }
+  }
 }

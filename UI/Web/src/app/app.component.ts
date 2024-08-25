@@ -4,7 +4,6 @@ import {
   DestroyRef,
   HostListener,
   inject,
-  Inject,
   OnInit
 } from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
@@ -46,11 +45,12 @@ export class AppComponent implements OnInit {
   private readonly ngbModal = inject(NgbModal);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly Breakpoint = Breakpoint;
 
 
-  constructor(ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document, modalConfig: NgbModalConfig) {
+  constructor(ratingConfig: NgbRatingConfig, modalConfig: NgbModalConfig) {
 
     modalConfig.fullscreen = 'md';
 
@@ -80,7 +80,6 @@ export class AppComponent implements OnInit {
           const currentRoute = this.router.routerState;
           await this.router.navigateByUrl(currentRoute.snapshot.url, { skipLocationChange: true });
         }
-
       });
 
 
@@ -106,6 +105,7 @@ export class AppComponent implements OnInit {
     this.themeService.setColorScape('');
   }
 
+
   setCurrentUser() {
     const user = this.accountService.getUserFromLocalStorage();
     this.accountService.setCurrentUser(user);
@@ -114,8 +114,6 @@ export class AppComponent implements OnInit {
       // Bootstrap anything that's needed
       this.themeService.getThemes().subscribe();
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
-      // On load, make an initial call for valid license
-      this.accountService.hasValidLicense().subscribe();
 
       // Every hour, have the UI check for an update. People seriously stay out of date
       interval(2* 60 * 60 * 1000) // 2 hours in milliseconds

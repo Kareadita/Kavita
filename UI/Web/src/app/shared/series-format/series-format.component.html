@@ -1,4 +1,8 @@
-<ng-container *ngIf="format !== MangaFormat.UNKNOWN">
+@if (format !== MangaFormat.UNKNOWN) {
+  @if (useTitle) {
     <i class="{{format | mangaFormatIcon}} me-1" aria-hidden="true" title="{{format | mangaFormat}}"></i>
-    <ng-content></ng-content>
-</ng-container>
+  } @else {
+    <i class="{{format | mangaFormatIcon}} me-1" aria-hidden="true" ngbTooltip="{{format | mangaFormat}}"></i>
+  }
+  <ng-content></ng-content>
+}

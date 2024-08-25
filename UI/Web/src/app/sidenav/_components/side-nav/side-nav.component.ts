@@ -42,7 +42,7 @@ import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 export class SideNavComponent implements OnInit {
 
   private readonly router = inject(Router);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
   private readonly actionService = inject(ActionService);
   public readonly navService = inject(NavService);
@@ -132,8 +132,13 @@ export class SideNavComponent implements OnInit {
 
 
   constructor() {
+    // Ensure that on mobile, we are collapsed by default
+    if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+      this.navService.collapseSideNav(true);
+    }
+
     this.collapseSideNavOnMobileNav$.subscribe(() => {
-        this.navService.toggleSideNav();
+        this.navService.collapseSideNav(false);
         this.cdRef.markForCheck();
     });
   }
@@ -209,4 +214,6 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }
