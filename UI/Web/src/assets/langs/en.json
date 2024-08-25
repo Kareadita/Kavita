@@ -9,7 +9,7 @@
     },
 
     "dashboard": {
-        "no-libraries": "There are no libraries setup yet. Configure some in",
+        "no-libraries": "There are no libraries setup yet. Create some in",
         "server-settings-link": "Server settings",
         "not-granted": "You haven't been granted access to any libraries.",
         "on-deck-title": "On Deck",
@@ -246,7 +246,7 @@
         "platform-label": "Platform",
         "email-label": "Email",
         "name-label": "Name",
-        "email-setup-alert": "Want to send files to your devices? Have the your admin setup Email settings first!",
+        "email-setup-alert": "Want to send files to your devices? Have your admin setup Email settings first!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -288,7 +288,7 @@
         "email-not-confirmed": "This email is not confirmed",
         "email-confirmed": "This email is confirmed",
         "email-updated-title": "Email Updated",
-        "email-updated-description": "You can use the following link below to confirm the email for your account. If your server is externally accessible, an email will have been sent to the email and the link can be used to confirm the email.",
+        "email-updated-description": "You can use the following link below to confirm the email for your account. If email settings have been configured, an email will have been sent and the link can be used to confirm the email.",
         "setup-user-account": "Setup user's account",
         "invite-url-label": "Invite Url",
         "invite-url-tooltip": "Copy this and paste in a new tab",
@@ -404,11 +404,11 @@
     },
 
     "directory-picker": {
-        "title": "Choose a Directory",
+        "title": "Choose a Folder",
         "close": "{{common.close}}",
         "path-label": "Path",
         "path-placeholder": "Start typing or select path",
-        "instructions": "Select a folder to view breadcrumb. Don't see your directory? Try checking / first.",
+        "instructions": "Select a folder to enter it. Don't see your folder? Try checking / first.",
         "type-header": "Type",
         "name-header": "Name",
         "cancel": "{{common.cancel}}",
@@ -574,7 +574,7 @@
 
     "reset-password": {
         "title": "Password Reset",
-        "description": "Enter the email of your account. Kavita will send you an email if a valid one on file, otherwise ask the admin for the link from logs.",
+        "description": "Enter the email of your account. Kavita will send you an email if a valid one is on file, otherwise ask the admin to reset your password.",
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
