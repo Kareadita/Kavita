@@ -18,13 +18,12 @@
     }
 
     &::-webkit-scrollbar-thumb {
-        background-color: transparent; /*makes it invisible when not hovering*/
+        background-color: var(--default-state-scrollbar); /*makes it invisible when not hovering*/
     }
 
     &:hover {
-
         &::-webkit-scrollbar-thumb {
-            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+            background-color: var(--primary-color-scrollbar); /*On hover, it will turn grey*/
         }
     }
 }
