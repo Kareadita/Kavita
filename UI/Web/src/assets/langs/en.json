@@ -1860,7 +1860,7 @@
         "added-title": "Added",
         "last-modified-title": "Last Modified",
         "view-files": "View Files",
-        "pages-title": "Pages",
+        "pages-title": "{{edit-chapter-modal.pages-label}}",
         "words-title": "Words",
         "chapter-title": "Chapter",
         "volume-num": "{{common.volume-num}}",
@@ -1870,7 +1870,8 @@
         "force-refresh-tooltip": "Force refresh external metadata from Kavita+",
         "loose-leaf-volume": "Loose Leaf Chapters",
         "specials-volume": "Specials",
-        "release-year-validation": "{{validation.year-validation}}"
+        "release-year-validation": "{{validation.year-validation}}",
+        "volumes-title": "{{tab.volumes-tab}}"
     },
 
     "edit-chapter-modal": {
@@ -1942,12 +1943,12 @@
         "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-title}}",
+        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-title}}",
-        "size-label": "{{edit-chapter-modal.size-title}}",
-        "id-label": "{{edit-chapter-modal.id-title}}",
-        "links-label": "{{series-metadata-detail.links-title}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-title}}",
+        "size-label": "{{edit-chapter-modal.size-label}}",
+        "id-label": "{{edit-chapter-modal.id-label}}",
+        "links-label": "{{series-metadata-detail.links-label}}",
+        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",

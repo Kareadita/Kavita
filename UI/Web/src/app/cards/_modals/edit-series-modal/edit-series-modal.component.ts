@@ -17,7 +17,7 @@ import {
   NgbNavOutlet,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin, Observable, of } from 'rxjs';
+import {forkJoin, Observable, of, tap} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
@@ -184,6 +184,7 @@ export class EditSeriesModalComponent implements OnInit {
    */
   selectedCover: string = '';
   coverImageReset = false;
+  isAdmin: boolean = false;
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -201,6 +202,11 @@ export class EditSeriesModalComponent implements OnInit {
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
+
+    this.accountService.isAdmin$.pipe(takeUntilDestroyed(this.destroyRef), tap(isAdmin => {
+      this.isAdmin = isAdmin;
+      this.cdRef.markForCheck();
+    })).subscribe();
 
     this.initSeries = Object.assign({}, this.series);
 

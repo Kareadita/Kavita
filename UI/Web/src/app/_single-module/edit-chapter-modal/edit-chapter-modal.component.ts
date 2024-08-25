@@ -28,7 +28,6 @@ import {Language} from "../../_models/metadata/language";
 import {Person, PersonRole} from "../../_models/metadata/person";
 import {Genre} from "../../_models/metadata/genre";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {SeriesService} from "../../_services/series.service";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
