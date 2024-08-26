@@ -1,5 +1,5 @@
 <app-side-nav-companion-bar></app-side-nav-companion-bar>
-<div class="main-container container-fluid">
+<div class="main-container">
   <ng-container *transloco="let t; read: 'dashboard'">
     @if (libraries$ | async; as libraries) {
       @if (libraries.length === 0) {

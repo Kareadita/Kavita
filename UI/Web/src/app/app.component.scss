@@ -4,15 +4,13 @@
     height: calc(var(--vh)* 100 - var(--nav-offset));
 }
 
-
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
-    margin-left: 40px;
+    margin-left: 60px;
     overflow-y: hidden;
     overflow-x: hidden;
     height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
-    padding-right: 10px;
-    scrollbar-gutter: stable both-edges;
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
     mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
