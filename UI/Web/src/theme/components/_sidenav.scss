@@ -1,15 +1,25 @@
 
 @import '../variables';
+
 .sidenav-bottom {
     position: absolute;
-    bottom: 12px;
+    bottom: 0;
     width: 190px;
-    background: var(--side-nav-bg-color);
-    border-radius: var(--side-nav-border-radius);
     font-size: 12px;
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
     left: 10px;
+
+    .donate {
+        .side-nav-item {
+            width: 100%;
+            padding: 0 80px;
+
+            &:hover {
+                background-color: unset;
+            }
+        }
+    }
 
     &.closed {
         width: 45px;
