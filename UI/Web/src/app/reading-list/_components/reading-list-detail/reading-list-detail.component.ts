@@ -46,7 +46,7 @@ import {Title} from "@angular/platform-browser";
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, NgbDropdown,
     NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
     PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent,
     ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective,

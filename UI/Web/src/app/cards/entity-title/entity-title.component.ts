@@ -28,12 +28,15 @@ export class EntityTitleComponent implements OnInit {
    * Library type for which the entity belongs
    */
   @Input() libraryType: LibraryType = LibraryType.Manga;
-  @Input() seriesName: string = '';
   @Input({required: true}) entity!: Volume | Chapter;
   /**
    * When generating the title, should this prepend 'Volume number' before the Chapter wording
    */
   @Input() includeVolume: boolean = false;
+  /**
+   * When generating the title, should this prepend 'Chapter number' before the Chapter titlename
+   */
+  @Input() includeChapter: boolean = false;
   /**
    * When a titleName (aka a title) is available on the entity, show it over Volume X Chapter Y
    */

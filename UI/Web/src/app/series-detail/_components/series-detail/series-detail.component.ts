@@ -98,10 +98,6 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {ExternalSeries} from "../../../_models/series-detail/external-series";
-import {
-  SeriesPreviewDrawerComponent
-} from "../../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
@@ -143,11 +139,14 @@ import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail
 import {DownloadButtonComponent} from "../download-button/download-button.component";
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
+import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
+import {RelatedSeriesPair, RelatedTabComponent} from "../../../_single-modules/related-tab/related-tab.component";
+import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {UserCollection} from "../../../_models/collection-tag";
+import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
 
-interface RelatedSeriesPair {
-  series: Series;
-  relation: RelationKind;
-}
 
 enum TabID {
   Related = 'related-tab',
@@ -176,12 +175,12 @@ interface StoryLineItem {
     TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, CardItemComponent,
-    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent,  NgbNavOutlet,
+    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
     RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
-    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent]
+    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, SeriesFormatComponent, MangaFormatPipe, CoverImageComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -200,10 +199,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly readingListService = inject(ReadingListService);
-  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly collectionTagService = inject(CollectionTagService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
-  private readonly deviceService = inject(DeviceService);
   private readonly translocoService = inject(TranslocoService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
@@ -243,6 +241,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isLoadingExtra = false;
   libraryAllowsScrobbling = false;
   isScrobbling: boolean = true;
+  mobileSeriesImgBackground: string | undefined;
 
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = false;
@@ -262,6 +261,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
+  collections: Array<UserCollection> = [];
   isWantToRead: boolean = false;
   unreadCount: number = 0;
   totalCount: number = 0;
@@ -384,6 +384,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
+
   get UseBookLogic() {
     return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
   }
@@ -418,8 +419,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           chapterLocaleKey = 'common.issue-num-shorthand';
           break;
         case LibraryType.Book:
-        case LibraryType.Manga:
         case LibraryType.LightNovel:
+          chapterLocaleKey = 'common.book-num-shorthand';
+          break;
+        case LibraryType.Manga:
         case LibraryType.Images:
           chapterLocaleKey = 'common.chapter-num-shorthand';
           break;
@@ -472,6 +475,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
+    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--mobile-series-img-background').trim();
+
 
     // Set up the download in progress
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
@@ -486,12 +492,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.router.navigateByUrl('/home');
         }
       } else if (event.event === EVENTS.ScanSeries) {
-        const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
-        if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
+        const seriesScanEvent = event.payload as ScanSeriesEvent;
+        if (seriesScanEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
         }
       } else if (event.event === EVENTS.CoverUpdate) {
-        this.themeService.refreshColorScape('series', this.seriesId).subscribe();
+        const coverUpdateEvent = event.payload as CoverUpdateEvent;
+        if (coverUpdateEvent.id === this.seriesId) {
+          this.themeService.refreshColorScape('series', this.seriesId).subscribe();
+        }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
         if (removedEvent.seriesId !== this.seriesId) return;
@@ -554,13 +563,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   updateUrl(activeTab: TabID) {
     var tokens = this.router.url.split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
-
-    // if (tokens.length === 1 || tokens[1] === activeTab + '') {
-    //   return;
-    // }
-    console.log('url:', newUrl);
-
-    //this.router.navigateByUrl(newUrl, { skipLocationChange: true, replaceUrl: true });
+    window.history.replaceState({}, '', newUrl);
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
@@ -580,10 +583,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshSeriesMetadata(series, undefined, true);
+        this.actionService.refreshSeriesMetadata(series, undefined, true, false);
         break;
       case(Action.GenerateColorScape):
-        this.actionService.refreshSeriesMetadata(series, undefined, false);
+        this.actionService.refreshSeriesMetadata(series, undefined, false, true);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
@@ -673,13 +676,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.openChapter(chapter, true);
         break;
       case (Action.SendTo):
-        {
-          const device = (action._extra!.data as Device);
-          this.deviceService.sendTo([chapter.id], device.id).subscribe(() => {
-            this.toastr.success(this.translocoService.translate('series-detail.send-to', {deviceName: device.name}));
-          });
-          break;
-        }
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice([chapter.id], device);
+        break;
       default:
         break;
     }
@@ -725,6 +724,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.readingLists = lists;
       this.cdRef.markForCheck();
     });
+
+    this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
+      this.collections = tags;
+      this.cdRef.markForCheck();
+    })
 
     this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
       this.readingTimeLeft = timeLeft;
@@ -1147,23 +1151,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.cdRef.markForCheck();
   }
 
-  previewSeries(item: Series | ExternalSeries, isExternal: boolean) {
-    const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
-    ref.componentInstance.isExternalSeries = isExternal;
-    ref.componentInstance.name = item.name;
-
-    if (isExternal) {
-      const external = item as ExternalSeries;
-      ref.componentInstance.aniListId = external.aniListId;
-      ref.componentInstance.malId = external.malId;
-    } else {
-      const local = item as Series;
-      ref.componentInstance.seriesId = local.id;
-      ref.componentInstance.libraryId = local.libraryId;
-    }
-
-  }
-
   openFilter(field: FilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
@@ -1182,5 +1169,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.cdRef.markForCheck();
       });
     }
+  }
+
+  switchTabsToDetail() {
+    this.activeTabId = TabID.Details;
+    this.cdRef.markForCheck();
   }
 }

@@ -1,3 +1,5 @@
+@import '../../../../theme/variables';
+
 ::ng-deep .side-nav.closed {
     .side-nav-item {
         .side-nav-text {
@@ -133,11 +135,11 @@ a {
     color: var(--side-nav-text-color);
 }
 
-@media (max-width: 576px) {
+@media (max-width: $grid-breakpoints-lg) {
     .side-nav-item {
         align-items: center;
-        padding: 15px 10px;
-        height: 70px;
+        padding: 0 10px;
+        height: 55px;
         font-size: 1rem;
 
         .side-nav-text {

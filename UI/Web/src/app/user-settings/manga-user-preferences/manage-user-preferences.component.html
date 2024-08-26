@@ -26,7 +26,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('blur-unread-summaries-label')" [subtitle]="t('blur-unread-summaries-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end float-end">
                 <input type="checkbox" role="switch"
                        formControlName="blurUnreadSummaries" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -39,7 +39,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('prompt-on-download-label')" [subtitle]="t('prompt-on-download-tooltip', {size: '100'})">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="promptForDownloadSize" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -51,7 +51,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('disable-animations-label')" [subtitle]="t('disable-animations-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="noTransitions" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -63,7 +63,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('collapse-series-relationships-label')" [subtitle]="t('collapse-series-relationships-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="collapseSeriesRelationships" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -75,7 +75,7 @@
         <div class="row g-0 mt-2">
           <app-setting-switch [title]="t('share-series-reviews-label')" [subtitle]="t('share-series-reviews-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="shareReviews" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -189,7 +189,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('auto-close-menu-label')" [subtitle]="t('auto-close-menu-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="autoCloseMenu" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -201,7 +201,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('show-screen-hints-label')" [subtitle]="t('show-screen-hints-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="showScreenHints" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -213,7 +213,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="emulateBook" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -225,7 +225,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="swipeToPaginate" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -242,7 +242,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="bookReaderTapToPaginate" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -254,7 +254,7 @@
         <div class="row g-0 mt-4 mb-4">
           <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
+              <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
                        formControlName="bookReaderImmersiveMode" class="form-check-input"
                        aria-labelledby="auto-close-label">
@@ -350,12 +350,12 @@
             </ng-template>
             <ng-template #edit>
               <div class="row g-0">
-                <div class="col-11">
+                <div class="col-10">
                   <input type="range" class="form-range" id="fontsize" min="50" max="300" step="10"
                         formControlName="bookReaderFontSize">
                   
                 </div>
-                <span class="ps-2 col-1 align-middle">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
+                <span class="ps-2 col-2 align-middle">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
               </div>
             </ng-template>
           </app-setting-item>
@@ -368,11 +368,11 @@
             </ng-template>
             <ng-template #edit>
               <div class="row g-0">
-                <div class="col-11">
+                <div class="col-10">
                   <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
                      formControlName="bookReaderLineSpacing">
                 </div>
-                <span class="ps-2 col-1 align-middle">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
+                <span class="ps-2 col-2 align-middle">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
                 </div>
             </ng-template>
           </app-setting-item>
@@ -385,11 +385,11 @@
             </ng-template>
             <ng-template #edit>
               <div class="row g-0">
-                <div class="col-11">
+                <div class="col-10">
                   <input type="range" class="form-range" id="margin" min="0" max="30" step="5"
                      formControlName="bookReaderMargin">
                 </div>
-                <span class="ps-2 col-1 align-middle">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
+                <span class="ps-2 col-2 align-middle">{{settingsForm.get('bookReaderMargin')?.value + '%'}}</span>
               </div>
             </ng-template>
           </app-setting-item>

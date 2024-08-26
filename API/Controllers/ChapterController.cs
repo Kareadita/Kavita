@@ -88,6 +88,7 @@ public class ChapterController : BaseApiController
             chapter.AgeRating = dto.AgeRating;
         }
 
+        dto.Summary ??= string.Empty;
 
         if (chapter.Summary != dto.Summary.Trim())
         {
@@ -259,6 +260,8 @@ public class ChapterController : BaseApiController
         chapter.ReleaseDateLocked = dto.ReleaseDateLocked;
         #endregion
 
+
+        _unitOfWork.ChapterRepository.Update(chapter);
 
         if (!_unitOfWork.HasChanges())
         {

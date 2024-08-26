@@ -1,23 +1,21 @@
 <ng-container *transloco="let t; read: 'details-tab'">
-
+<div class="details pb-3">
   <div class="mb-3">
-    <app-carousel-reel [items]="genres" [title]="t('genres-title')">
-      <ng-template #carouselItem let-item>
-        <app-tag-badge (click)="openGeneric(FilterField.Genres, item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-          {{item.title}}
-        </app-tag-badge>
+    <h4 class="header">{{t('genres-title')}}</h4>
+    <app-badge-expander [includeComma]="true" [items]="genres">
+      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
       </ng-template>
-    </app-carousel-reel>
+    </app-badge-expander>
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="tags" [title]="t('tags-title')">
-      <ng-template #carouselItem let-item>
-        <app-tag-badge (click)="openGeneric(FilterField.Tags, item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-          {{item.title}}
-        </app-tag-badge>
+    <h4 class="header">{{t('tags-title')}}</h4>
+    <app-badge-expander [includeComma]="true" [items]="tags">
+      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
       </ng-template>
-    </app-carousel-reel>
+    </app-badge-expander>
   </div>
 
   <div class="mb-3">
@@ -132,4 +130,5 @@
       </ng-template>
     </app-carousel-reel>
   </div>
+</div>
 </ng-container>

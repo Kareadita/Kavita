@@ -34,6 +34,7 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {ToastrService} from "ngx-toastr";
 import {ServerService} from "../../_services/server.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {ReaderService} from "../../_services/reader.service";
 
 enum StreamId {
   OnDeck,
@@ -69,7 +70,7 @@ export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
-  private readonly serverService = inject(ServerService);
+  private readonly readerService = inject(ReaderService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
@@ -201,6 +202,13 @@ export class DashboardComponent implements OnInit {
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
     await this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);
+  }
+
+  async handleRecentlyAddedChapterRead(item: RecentlyAddedItem) {
+    // Get Continue Reading point and open directly
+    this.readerService.getCurrentChapter(item.seriesId).subscribe(chapter => {
+      this.readerService.readChapter(item.libraryId, item.seriesId, chapter, false);
+    });
   }
 
   async handleFilterSectionClick(stream: DashboardStream) {

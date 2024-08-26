@@ -11,6 +11,10 @@
       <app-age-rating-image [rating]="ageRating"></app-age-rating-image>
     </span>
 
+    <span class="me-2">
+       <app-series-format [format]="mangaFormat" [useTitle]="false"></app-series-format>
+    </span>
+
     @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
       <span class="word-count me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
     } @else {

@@ -1,3 +1,5 @@
+@import './theme/variables';
+
 .title {
   color: white;
   font-weight: bold;
@@ -16,9 +18,8 @@
   font-size: 0.8rem;
 }
 
-.btn {
-  //padding: 4px 8px !important;
-  //font-size: 0.8rem !important;
+.main-container {
+  overflow: unset !important;
 }
 
 .btn-group > .btn.dropdown-toggle-split:not(first-child){
@@ -112,10 +113,92 @@
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: -ms-autohiding-scrollbar;
   scrollbar-width: none;
+  box-shadow: inset -1px -2px 0px -1px var(--elevation-layer9);
 }
 .carousel-tabs-container::-webkit-scrollbar {
   display: none;
 }
 .nav-tabs {
   flex-wrap: nowrap;
+}
+
+.upper-details {
+  font-size: 0.9rem;
+}
+
+::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen{
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--primary-color);
+  padding: 5px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: var(--primary-color-dark-shade);
+  }
+}
+
+::ng-deep .image-container.mobile-bg app-image img {
+  max-height: 400px;
+  object-fit: contain;
+}
+
+@media (max-width: $grid-breakpoints-lg) {
+  .carousel-tabs-container {
+    mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+  }
+}
+
+::ng-deep .image-container.mobile-bg app-image img {
+  max-height: 100dvh !important;
+  object-fit: cover !important;
+}
+
+/* col-lg */
+@media (max-width: $grid-breakpoints-lg) {
+  .image-container.mobile-bg{
+    width: 100vw;
+    top: calc(var(--nav-offset) - 20px);
+    left: 0;
+    pointer-events: none;
+    position: fixed !important;
+    display: block !important;
+    max-height: unset !important;
+    max-width: unset !important;
+    height: 100dvh !important;
+  }
+
+  ::ng-deep .image-container.mobile-bg app-image img {
+    max-height: unset !important;
+    opacity: 0.05 !important;
+    filter: blur(5px) !important;
+    max-width: 100dvw;
+    height: 100dvh !important;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+  }
+
+  .progress-banner {
+    display:none;
+  }
+
+  .under-image {
+    display: none;
+  }
+
+}
+.upper-details {
+  font-size: 0.9rem;
+}
+
+@media (max-width: $grid-breakpoints-lg) {
+  .carousel-tabs-container {
+    mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+  }
 }

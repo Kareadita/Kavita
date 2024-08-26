@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.5",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.6",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -3255,6 +3255,14 @@
           },
           {
             "name": "force",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "forceColorscape",
             "in": "query",
             "schema": {
               "type": "boolean",
@@ -6562,10 +6570,12 @@
         "tags": [
           "Reader"
         ],
+        "summary": "Deletes the user's personal table of content for the given chapter",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6574,6 +6584,7 @@
           {
             "name": "pageNum",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6582,6 +6593,7 @@
           {
             "name": "title",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -19292,6 +19304,10 @@
           "forceUpdate": {
             "type": "boolean",
             "description": "Should the task force opening/re-calculation."
+          },
+          "forceColorscape": {
+            "type": "boolean",
+            "description": "Should the task force re-calculation of colorscape."
           }
         },
         "additionalProperties": false,

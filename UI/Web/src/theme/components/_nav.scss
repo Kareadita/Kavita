@@ -24,9 +24,8 @@
 .nav-tabs {
     border-color: transparent;
     .nav-item {
-        border-color: var(--elevation-layer9);
+        border-color: transparent;
         border-width: 0 0 1px 0;
-        border-style: solid;
     }
     .nav-link {
         color: var(--nav-link-text-color);

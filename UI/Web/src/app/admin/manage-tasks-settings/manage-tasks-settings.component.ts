@@ -70,7 +70,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       api: defer(() => {
         localStorage.removeItem('@transloco/translations/timestamp');
         localStorage.removeItem('@transloco/translations');
-        localStorage.removeItem('translocoLang');
+        location.reload();
         return of();
       }),
       successMessage: 'bust-locale-task-success',

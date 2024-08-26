@@ -28,7 +28,6 @@ import {Language} from "../../_models/metadata/language";
 import {Person, PersonRole} from "../../_models/metadata/person";
 import {Genre} from "../../_models/metadata/genre";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {SeriesService} from "../../_services/series.service";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
@@ -44,7 +43,6 @@ import {SettingButtonComponent} from "../../settings/_components/setting-button/
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {EntityInfoCardsComponent} from "../../cards/entity-info-cards/entity-info-cards.component";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
 import {MangaFormat} from "../../_models/manga-format";
@@ -56,6 +54,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
+import {AgeRating} from "../../_models/metadata/age-rating";
 
 enum TabID {
   General = 'general-tab',
@@ -100,7 +99,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     CoverImageChooserComponent,
     EditChapterProgressComponent,
     NgbInputDatepicker,
-    EntityInfoCardsComponent,
     CompactNumberPipe,
     IconAndTitleComponent,
     DefaultDatePipe,
@@ -120,7 +118,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 export class EditChapterModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
-  private readonly seriesService = inject(SeriesService);
   public readonly utilityService = inject(UtilityService);
   public readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
@@ -183,7 +180,7 @@ export class EditChapterModalComponent implements OnInit {
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(this.chapter.sortOrder, [Validators.required, Validators.min(0)]));
-    this.editForm.addControl('summary', new FormControl(this.chapter.summary, []));
+    this.editForm.addControl('summary', new FormControl(this.chapter.summary || '', []));
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
@@ -251,6 +248,14 @@ export class EditChapterModalComponent implements OnInit {
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     this.chapter.releaseDate = model.releaseDate;
+    this.chapter.ageRating = model.ageRating as AgeRating;
+    this.chapter.genres = model.genres;
+    this.chapter.tags = model.tags;
+    this.chapter.sortOrder = model.sortOrder;
+    this.chapter.language = model.language;
+    this.chapter.titleName = model.titleName;
+    this.chapter.summary = model.summary;
+    this.chapter.isbn = model.isbn;
 
 
     const apis = [

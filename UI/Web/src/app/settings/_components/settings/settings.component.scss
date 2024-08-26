@@ -2,3 +2,9 @@ h2 {
   color: white;
   font-weight: bold;
 }
+
+::ng-deep .content-wrapper:not(.closed) {
+  .scale {
+    width: calc(100dvw - 200px) !important;
+  }
+}

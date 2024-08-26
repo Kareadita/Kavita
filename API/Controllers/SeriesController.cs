@@ -402,7 +402,7 @@ public class SeriesController : BaseApiController
     [HttpPost("refresh-metadata")]
     public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
     {
-        _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate);
+        _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate, refreshSeriesDto.ForceColorscape);
         return Ok();
     }
 
