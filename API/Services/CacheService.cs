@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,6 @@ using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using MimeKit.Tnef;
 using NetVips;
 
 namespace API.Services;
@@ -35,12 +34,12 @@ public interface ICacheService
     /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
-    string GetCachedPagePath(int chapterId, int page, List<string> supportedImageFormats = null);
+    string GetCachedPagePath(int chapterId, int page);
     string GetCachePath(int chapterId);
     string GetBookmarkCachePath(int seriesId);
     IEnumerable<string> GetCachedPages(int chapterId);
     IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
-    string GetCachedBookmarkPagePath(int seriesId, int page, List<string> supportedImageFormats = null);
+    string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId);
@@ -53,19 +52,18 @@ public class CacheService : ICacheService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IBookmarkService _bookmarkService;
-    private readonly IImageConverterService _converterService;
+
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
 
     public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IBookmarkService bookmarkService, IImageConverterService converterService)
+        IBookmarkService bookmarkService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _bookmarkService = bookmarkService;
-        _converterService = converterService;
     }
 
     public IEnumerable<string> GetCachedPages(int chapterId)
@@ -100,19 +98,13 @@ public class CacheService : ICacheService
             for (var i = 0; i < files.Length; i++)
             {
                 var file = files[i];
-                var dimension = _converterService.GetDimensions(file, i);
-                if (dimension == null)
-                {
-                    using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
-                    dimension = (image.Width, image.Height);
-                }
-                
+                using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
-                    Height = dimension.Value.Height,
-                    Width = dimension.Value.Width,
-                    IsWide = dimension.Value.Width > dimension.Value.Height,
+                    Height = image.Height,
+                    Width = image.Width,
+                    IsWide = image.Width > image.Height,
                     FileName = file.Replace(cachePath, string.Empty)
                 });
             }
@@ -130,7 +122,7 @@ public class CacheService : ICacheService
         return dimensions;
     }
 
-    public string GetCachedBookmarkPagePath(int seriesId, int page, List<string> supportedImageFormats = null)
+    public string GetCachedBookmarkPagePath(int seriesId, int page)
     {
         // Calculate what chapter the page belongs to
         var path = GetBookmarkCachePath(seriesId);
@@ -146,8 +138,7 @@ public class CacheService : ICacheService
         }
 
         // Since array is 0 based, we need to keep that in account (only affects last image)
-        string file=page == files.Length ? files[page - 1] : files[page];
-        return _converterService.ConvertFile(file, supportedImageFormats);
+        return page == files.Length ? files[page - 1] : files[page];
     }
 
     /// <summary>
@@ -325,7 +316,7 @@ public class CacheService : ICacheService
     /// <param name="chapterId">Chapter id with Files populated.</param>
     /// <param name="page">Page number to look for</param>
     /// <returns>Page filepath or empty if no files found.</returns>
-    public string GetCachedPagePath(int chapterId, int page, List<string> supportedImageFormats = null)
+    public string GetCachedPagePath(int chapterId, int page)
     {
         // Calculate what chapter the page belongs to
         var path = GetCachePath(chapterId);
@@ -334,8 +325,7 @@ public class CacheService : ICacheService
             //.OrderByNatural(Path.GetFileNameWithoutExtension) // This is already done in GetPageFromFiles
             .ToArray();
 
-        string file = GetPageFromFiles(files, page);
-        return _converterService.ConvertFile(file, supportedImageFormats);
+        return GetPageFromFiles(files, page);
     }
 
     public async Task<int> CacheBookmarkForSeries(int userId, int seriesId)

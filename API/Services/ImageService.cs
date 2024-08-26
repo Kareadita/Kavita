@@ -47,7 +47,7 @@ public interface IImageService
     /// <param name="outputDirectory"></param>
     /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    string WriteCoverThumbnail(string sourceFile, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     /// <summary>
     /// Writes out a thumbnail by file path input
     /// </summary>
@@ -218,7 +218,7 @@ public class ImageService : IImageService
 
         try
         {
-            fileName = _converterService.ConvertFile(fileName, null);
+            fileName = _converterService.ConvertFile(fileName);
             var (width, height) = size.GetDimensions();
             using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
 
@@ -246,9 +246,8 @@ public class ImageService : IImageService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="encodeFormat">Export the file as the passed encoding</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(string sourceFile, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        stream = _converterService.ConvertStream(sourceFile, stream);
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);
@@ -291,8 +290,6 @@ public class ImageService : IImageService
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        sourceFile = _converterService.ConvertFile(sourceFile,null);
-
         var (width, height) = size.GetDimensions();
         using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
 

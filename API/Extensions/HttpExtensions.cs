@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -55,32 +52,5 @@ public static class HttpExtensions
         {
             response.Headers.CacheControl =  $"max-age={maxAge}";
         }
-    }
-
-    public static List<string> SupportedImageTypesFromRequest(this HttpRequest request)
-    {
-        var acceptHeader = request.Headers["Accept"];
-        string[] spl1 = acceptHeader.ToString().Split(';');
-        acceptHeader = spl1[0];
-        string[] split = acceptHeader.ToString().Split(',');
-        List<string> defaultExtensions = new List<string>();
-        defaultExtensions.Add("jpeg");
-        defaultExtensions.Add("jpg");
-        defaultExtensions.Add("png");
-        defaultExtensions.Add("gif");
-
-        foreach (string v in split)
-        {
-            if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
-            {
-                string n = v.Substring(6);
-                if (n == "svg+xml")
-                    n = "svg";
-                if (n.StartsWith("*"))
-                    continue;
-                defaultExtensions.Add(n.ToLowerInvariant());
-            }
-        }
-        return defaultExtensions;
     }
 }

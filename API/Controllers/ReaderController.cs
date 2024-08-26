@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MimeTypes;
-using Org.BouncyCastle.Ocsp;
 
 namespace API.Controllers;
 
@@ -119,12 +118,12 @@ public class ReaderController : BaseApiController
             var chapter = await _cacheService.Ensure(chapterId, extractPdf);
             if (chapter == null) return NoContent();
             _logger.LogInformation("Fetching Page {PageNum} on Chapter {ChapterId}", page, chapterId);
-            var path = _cacheService.GetCachedPagePath(chapter.Id, page, Request.SupportedImageTypesFromRequest());
+            var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
             var format = Path.GetExtension(path);
 
-            return PhysicalFile(path, format.GetMimeType(), Path.GetFileName(path), true);
+            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
         }
         catch (Exception)
         {
@@ -132,8 +131,6 @@ public class ReaderController : BaseApiController
             throw;
         }
     }
-
-
 
     /// <summary>
     /// Returns a thumbnail for the given page number
@@ -183,11 +180,11 @@ public class ReaderController : BaseApiController
 
         try
         {
-            var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page, Request.SupportedImageTypesFromRequest());
+            var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
             var format = Path.GetExtension(path);
 
-            return PhysicalFile(path, format.GetMimeType(), Path.GetFileName(path));
+            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path));
         }
         catch (Exception)
         {
@@ -732,7 +729,7 @@ public class ReaderController : BaseApiController
         if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
 
         bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
-        var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page, Request.SupportedImageTypesFromRequest());
+        var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
 
         if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
