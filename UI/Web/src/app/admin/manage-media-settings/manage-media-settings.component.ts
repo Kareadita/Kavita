@@ -75,6 +75,12 @@ export class ManageMediaSettingsComponent implements OnInit {
           return this.settingsService.updateServerSettings(data);
         }),
         tap(settings => {
+
+          const encodingChanged = this.serverSettings.encodeMediaAs !== settings.encodeMediaAs;
+          if (encodingChanged) {
+            this.toastr.info(translate('manage-media-settings.media-warning'));
+          }
+
           this.serverSettings = settings;
           this.resetForm();
           this.cdRef.markForCheck();
