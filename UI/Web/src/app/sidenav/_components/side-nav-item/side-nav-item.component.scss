@@ -22,7 +22,7 @@
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding: 0 10px;
+    padding: 0 0 0 10px;
     width: 100%;
     height: auto;
     min-height: 40px;
@@ -32,6 +32,11 @@
     .side-nav-text {
         opacity: 1;
         min-width: 100px;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+        text-overflow: ellipsis;
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical;
 
         div {
             min-width: 102px;
@@ -49,7 +54,6 @@
 
         div {
             align-items: center;
-            display: flex;
             height: 100%;
             justify-content: inherit;
             min-width: 30px;

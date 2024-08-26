@@ -23,6 +23,10 @@
   margin-top: 15px;
 }
 
+::ng-deep .badge-expander .content a {
+  font-size: 0.8rem;
+}
+
 .btn-group > .btn.dropdown-toggle-split:not(first-child){
   border-top-right-radius: var(--bs-border-radius) !important;
   border-bottom-right-radius: var(--bs-border-radius) !important;
