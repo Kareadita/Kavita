@@ -672,7 +672,7 @@
         "discord-validation": "This is not a valid Discord User Id. Your user id is not your discord username.",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
-        "activate-reset-tooltip": "Invalidate an previous registration using your license. Requires both License and Email",
+        "activate-reset-tooltip": "Invalidate a previous registration using your license. Requires both License and Email",
         "activate-save": "{{common.save}}",
 
         "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
