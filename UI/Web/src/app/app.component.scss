@@ -73,7 +73,7 @@
     .content-wrapper {
         overflow: hidden;
         height: calc(var(--vh)* 100);
-        padding: 0 10px 0;
+        padding: 0;
 
         &.closed {
             overflow: auto;
