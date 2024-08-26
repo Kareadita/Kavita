@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {JumpKey} from "../_models/jumpbar/jump-key";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
@@ -19,11 +18,12 @@ import {ActionService} from "../_services/action.service";
 import {FilterPipe} from "../_pipes/filter.pipe";
 import {filter} from "rxjs";
 import {ManageSmartFiltersComponent} from "../sidenav/_components/manage-smart-filters/manage-smart-filters.component";
+import {DecimalPipe} from "@angular/common";
 
 @Component({
   selector: 'app-all-filters',
   standalone: true,
-  imports: [CommonModule, TranslocoDirective, CardItemComponent, SideNavCompanionBarComponent, CardDetailLayoutComponent, SafeHtmlPipe, CardActionablesComponent, RouterLink, FilterPipe, ManageSmartFiltersComponent],
+  imports: [TranslocoDirective, CardItemComponent, SideNavCompanionBarComponent, CardDetailLayoutComponent, SafeHtmlPipe, CardActionablesComponent, RouterLink, FilterPipe, ManageSmartFiltersComponent, DecimalPipe],
   templateUrl: './all-filters.component.html',
   styleUrl: './all-filters.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,7 +40,6 @@ export class AllFiltersComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
   filters: SmartFilter[] = [];
   isLoading = true;
-  trackByIdentity = (index: number, item: SmartFilter) => item.name;
 
   ngOnInit() {
     this.loadData();
@@ -53,14 +52,6 @@ export class AllFiltersComponent implements OnInit {
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
-  }
-
-  async loadSmartFilter(filter: SmartFilter) {
-    await this.router.navigateByUrl('all-series?' + filter.filter);
-  }
-
-  isErrored(filter: SmartFilter) {
-    return !decodeURIComponent(filter.filter).includes('¦');
   }
 
   async deleteFilter(filter: SmartFilter) {
@@ -80,6 +71,4 @@ export class AllFiltersComponent implements OnInit {
         break;
     }
   }
-
-  protected readonly filter = filter;
 }

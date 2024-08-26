@@ -14,7 +14,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ConfirmService} from "../../shared/confirm.service";
-import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
@@ -69,7 +69,6 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
-      this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));

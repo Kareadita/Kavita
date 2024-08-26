@@ -102,6 +102,7 @@ export class NavService {
       this.renderer.setStyle(bodyElem, 'margin-top', 'var(--nav-offset)');
       this.renderer.removeStyle(bodyElem, 'scrollbar-gutter');
       this.renderer.setStyle(bodyElem, 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.renderer.setStyle(bodyElem, 'overflow', 'hidden');
       this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
       this.navbarVisibleSource.next(true);
     }, 10);
@@ -114,9 +115,10 @@ export class NavService {
     setTimeout(() => {
       const bodyElem = this.document.querySelector('body');
       this.renderer.removeStyle(bodyElem, 'height');
-      this.renderer.removeStyle(this.document.querySelector('html'), 'height');
       this.renderer.setStyle(bodyElem, 'margin-top', '0px', RendererStyleFlags2.Important);
       this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important);
+      this.renderer.removeStyle(this.document.querySelector('html'), 'height');
+      this.renderer.setStyle(bodyElem, 'overflow', 'auto');
       this.navbarVisibleSource.next(false);
     }, 10);
   }

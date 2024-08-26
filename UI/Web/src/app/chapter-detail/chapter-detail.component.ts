@@ -82,6 +82,7 @@ import {ActionService} from "../_services/action.service";
 import {PublicationStatusPipe} from "../_pipes/publication-status.pipe";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
+import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -139,7 +140,8 @@ enum TabID {
         PublicationStatusPipe,
         DatePipe,
         DefaultDatePipe,
-        MangaFormatPipe
+        MangaFormatPipe,
+        CoverImageComponent
     ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',

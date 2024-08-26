@@ -1,14 +1,25 @@
 
-.bottom {
+@import '../variables';
+
+.sidenav-bottom {
     position: absolute;
-    bottom: 12px;
+    bottom: 0;
     width: 190px;
-    background: var(--side-nav-bg-color);
-    border-radius: var(--side-nav-border-radius);
     font-size: 12px;
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
     left: 10px;
+
+    .donate {
+        .side-nav-item {
+            width: 100%;
+            padding: 0 80px;
+
+            &:hover {
+                background-color: unset;
+            }
+        }
+    }
 
     &.closed {
         width: 45px;
@@ -18,7 +29,7 @@
     }
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item {
     justify-content: center;
     min-height: 25px;
     align-items: center;
@@ -28,35 +39,35 @@
     }
  }
 
-:host ::ng-deep .bottom .donate .side-nav-item span {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item span {
     flex-grow: unset !important;
     min-width: unset !important;;
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item span div {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div {
     min-width: unset !important;
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item span div i{
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div i{
     font-size: 12px !important;
 }
 
 
 
-:host ::ng-deep .bottom .donate .side-nav-item.closed span.phone-hidden div {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.phone-hidden div {
     width: 100%;
 }
 
-:host ::ng-deep .bottom .donate .side-nav-item.closed span.side-nav-text div {
+:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.side-nav-text div {
     width: 0;
 }
 
-@media (max-width: 768px) {
-    :host ::ng-deep .bottom .donate .side-nav-item.closed {
+@media (max-width: $grid-breakpoints-lg) {
+    :host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed {
         display: none;
     }
 
-    :host ::ng-deep .bottom .donate .side-nav-item span.phone-hidden {
+    :host ::ng-deep .sidenav-bottom .donate .side-nav-item span.phone-hidden {
         display: block !important;
     }
 }
@@ -74,6 +85,10 @@
     transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
     border: var(--side-nav-border);
 
+    &::-webkit-scrollbar {
+        visibility: hidden;
+    }
+
     &.preference {
         height: calc((var(--vh)*100));
     }
@@ -90,31 +105,52 @@
     &.closed {
         width: 55px;
         overflow-x: hidden;
-        overflow-y: auto;
+        overflow-y: hidden;
         background-color: var(--side-nav-closed-bg-color);
         border: var(--side-nav-border-closed);
     }
 
     .side-nav {
-        overflow: auto;
+        overflow-y: hidden;
         height: 100%;
-        mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
     
-        &::-webkit-scrollbar {
-            width: inherit;
+    // For firefox
+    @supports (-moz-appearance:none) {
+        scrollbar-color: transparent transparent;
+        scrollbar-width: thin;
+    }
+
+    &::-webkit-scrollbar {
+        background-color: transparent;  /*make scrollbar space invisible */
+        width: inherit;
+        display: none;
+        visibility: hidden;
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: transparent; /*makes it invisible when not hovering*/
+    }
+
+    &:hover {
+        scrollbar-width: thin;
+        overflow-y: auto;
+
+        // For firefox
+        @supports (-moz-appearance:none) {
+            scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
         }
-    
+
         &::-webkit-scrollbar-thumb {
-            background-color: transparent; /*makes it invisible when not hovering*/
+            visibility: visible;
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
         }
-    
-        &:hover {
-            &::-webkit-scrollbar-thumb {
-                background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
-              }
-        }
-    
+    }
+
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
@@ -122,7 +158,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
     .side-nav-container {
         padding: 10px 0;
         width: 55vw;
@@ -155,7 +191,7 @@
         }
     }
 
-    .bottom {
+    .sidenav-bottom {
         display:none;
 
     }

@@ -1,3 +1,4 @@
+@import '../../../theme/variables';
 // TODO: Move this to a common file so it applies both ways
 .side-nav {
   padding-bottom: 10px;
@@ -8,10 +9,46 @@
   margin: 0;
   left: 10px;
   top: 73px;
+  overflow-y: hidden;
+  overflow-x: hidden;
   border-radius: var(--side-nav-border-radius);
   transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
-  overflow: auto;
   border: var(--side-nav-border);
+  scrollbar-gutter: stable both-edges;
+  scrollbar-width: thin;
+
+  // For firefox
+  @supports (-moz-appearance:none) {
+      scrollbar-color: transparent transparent;
+      scrollbar-width: thin;
+  }
+
+  &::-webkit-scrollbar {
+      background-color: transparent;  /*make scrollbar space invisible */
+      width: inherit;
+      display: none;
+      visibility: hidden;
+      background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+      background: transparent; /*makes it invisible when not hovering*/
+  }
+
+  &:hover {
+      scrollbar-width: thin;
+      overflow-y: auto;
+
+      // For firefox
+      @supports (-moz-appearance:none) {
+          scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+      }
+
+      &::-webkit-scrollbar-thumb {
+          visibility: visible;
+          background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+      }
+  }
 
   &.no-donate {
     height: calc((var(--vh)*100) - 82px);
@@ -36,7 +73,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
   .side-nav {
     padding: 10px 0;
     width: 55vw;

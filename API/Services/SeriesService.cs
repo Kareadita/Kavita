@@ -175,6 +175,10 @@ public class SeriesService : ISeriesService
                     series.Metadata.Genres.Add(genre);
                 }, () => series.Metadata.GenresLocked = true);
             }
+            else
+            {
+                series.Metadata.Genres = new List<Genre>();
+            }
 
 
             if (updateSeriesMetadataDto.SeriesMetadata?.Tags is {Count: > 0})
@@ -187,6 +191,10 @@ public class SeriesService : ISeriesService
                 {
                     series.Metadata.Tags.Add(tag);
                 }, () => series.Metadata.TagsLocked = true);
+            }
+            else
+            {
+                series.Metadata.Tags = new List<Tag>();
             }
 
             if (updateSeriesMetadataDto.SeriesMetadata != null)

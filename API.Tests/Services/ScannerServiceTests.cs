@@ -259,7 +259,7 @@ public class ScannerServiceTests : AbstractDbTest
         comicInfo.AppendLine("<ComicInfo>");
 
         // People Tags
-        string[] people = { /* Your list of people here */ };
+        string[] people = { "Joe Shmo", "Tommy Two Hands"};
         string[] genres = { /* Your list of genres here */ };
 
         void AddRandomTag(string tagName, string[] choices)

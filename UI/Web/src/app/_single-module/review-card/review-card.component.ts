@@ -8,13 +8,12 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {UserReview} from "./user-review";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
 import {
-  ReviewSeriesModalCloseAction,
   ReviewSeriesModalCloseEvent,
   ReviewSeriesModalComponent
 } from "../review-series-modal/review-series-modal.component";

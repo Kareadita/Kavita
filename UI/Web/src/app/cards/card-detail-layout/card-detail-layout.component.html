@@ -26,7 +26,7 @@
   <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
   <div class="viewport-container ms-1" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">
-      <div class="card-container mt-2 mb-2">
+      <div class="card-container mt-">
         @if (items.length === 0 && !isLoading) {
           <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
         }

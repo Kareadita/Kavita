@@ -4,6 +4,9 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {AsyncPipe} from "@angular/common";
+import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
+import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
 
 const basePath = './assets/images/ratings/';
 
@@ -22,9 +25,11 @@ const basePath = './assets/images/ratings/';
 })
 export class AgeRatingImageComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+
+  protected readonly AgeRating = AgeRating;
 
   @Input({required: true}) rating: AgeRating = AgeRating.Unknown;
-  protected readonly AgeRating = AgeRating;
 
   imageUrl: string = 'unknown-rating.png';
 
@@ -78,5 +83,10 @@ export class AgeRatingImageComponent implements OnInit {
     }
     this.cdRef.markForCheck();
   }
+
+  openRating() {
+    this.filterUtilityService.applyFilter(['all-series'], FilterField.AgeRating, FilterComparison.Equal, `${this.rating}`).subscribe();
+  }
+
 
 }

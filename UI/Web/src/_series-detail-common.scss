@@ -1,3 +1,5 @@
+@import './theme/variables';
+
 .title {
   color: white;
   font-weight: bold;
@@ -142,7 +144,7 @@
   object-fit: contain;
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
   .carousel-tabs-container {
     mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
@@ -155,7 +157,7 @@
 }
 
 /* col-lg */
-@media screen and (max-width: 991px) {
+@media (max-width: $grid-breakpoints-lg) {
   .image-container.mobile-bg{
     width: 100vw;
     top: calc(var(--nav-offset) - 20px);
@@ -194,17 +196,9 @@
   font-size: 0.9rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: $grid-breakpoints-lg) {
   .carousel-tabs-container {
     mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
   }
-}
-
-.under-image {
-  background-color: var(--breadcrumb-bg-color);
-  color: white;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  text-align: center;
 }

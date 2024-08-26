@@ -4,6 +4,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    mask-image: linear-gradient(to right, transparent, black 0%, black 99%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 99%, transparent 100%);
 }
 
 .carousel-container {

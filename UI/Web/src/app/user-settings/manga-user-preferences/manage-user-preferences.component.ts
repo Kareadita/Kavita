@@ -1,10 +1,9 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {
   bookLayoutModes,
   bookWritingStyles,
   layoutModes,
-  pageLayoutModes,
   pageSplitOptions,
   pdfScrollModes,
   pdfSpreadModes,
@@ -15,7 +14,6 @@ import {
   scalingOptions
 } from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
 import {BookService} from "../../book-reader/_services/book.service";
 import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
@@ -37,7 +35,7 @@ import {
   NgbAccordionDirective, NgbAccordionHeader,
   NgbAccordionItem, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {NgForOf, NgIf, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {ColorPickerModule} from "ngx-color-picker";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -68,12 +66,10 @@ import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
     NgbAccordionBody,
     NgbAccordionHeader,
     NgbAccordionButton,
-    NgIf,
     NgbTooltip,
     NgTemplateOutlet,
     TitleCasePipe,
     ColorPickerModule,
-    NgForOf,
     SettingTitleComponent,
     SettingItemComponent,
     PageLayoutModePipe,
@@ -113,7 +109,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   protected readonly readerModes = readingModes;
   protected readonly layoutModes = layoutModes;
   protected readonly bookWritingStyles = bookWritingStyles;
-  protected readonly pageLayoutModes = pageLayoutModes;
   protected readonly bookLayoutModes = bookLayoutModes;
   protected readonly pdfSpreadModes = pdfSpreadModes;
   protected readonly pdfThemes = pdfThemes;
@@ -219,7 +214,6 @@ export class ManageUserPreferencesComponent implements OnInit {
         tap(prefs => {
           if (this.user) {
             this.user.preferences = {...prefs};
-            this.reset();
             this.cdRef.markForCheck();
           }
         })

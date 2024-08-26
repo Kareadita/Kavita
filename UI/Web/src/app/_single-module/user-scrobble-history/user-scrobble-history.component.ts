@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
 
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -21,7 +20,7 @@ import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapt
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule,
+  imports: [ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule,
     DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
