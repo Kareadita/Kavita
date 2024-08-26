@@ -199,8 +199,9 @@ export class PreferenceNavComponent implements AfterViewInit {
                 ))
             );
           }
-          if (this.sections[3].children.length === 1) {
-            this.sections[3].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
+
+          if (this.sections[2].children.length === 1) {
+            this.sections[2].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
           }
 
         }
