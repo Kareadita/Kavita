@@ -30,7 +30,7 @@ public class ArchiveServiceTests
         _testOutputHelper = testOutputHelper;
         _archiveService = new ArchiveService(_logger, _directoryService,
             new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>()),
-            Substitute.For<IMediaErrorService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IMediaErrorService>());
     }
 
     [Theory]
@@ -224,9 +224,9 @@ public class ArchiveServiceTests
     public void CanParseCoverImage(string inputFile)
     {
         var imageService = Substitute.For<IImageService>();
-        imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
+        imageService.WriteCoverThumbnail(Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
             .Returns(x => "cover.jpg");
-        var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>(),Substitute.For<IImageConverterService>());
+        var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>());
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
         var inputPath = Path.GetFullPath(Path.Join(testDirectory, inputFile));
         var outputPath = Path.Join(testDirectory, Path.GetFileNameWithoutExtension(inputFile) + "_output");
