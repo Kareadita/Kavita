@@ -8,25 +8,43 @@
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
     margin-left: 40px;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
-    height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
-    scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
-    scrollbar-width: thin;
+    height: calc(var(--vh)* 100 - var(--nav-offset));
     padding-right: 10px;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: thin;
+
+    // For firefox
+    @supports (-moz-appearance:none) {
+        scrollbar-color: transparent transparent;
+        scrollbar-width: thin;
+    }
 
     &::-webkit-scrollbar {
         background-color: transparent;  /*make scrollbar space invisible */
         width: inherit;
+        display: none;
+        visibility: hidden;
+        background: transparent;
     }
 
     &::-webkit-scrollbar-thumb {
-        background-color: var(--default-state-scrollbar); /*makes it invisible when not hovering*/
+        background: transparent; /*makes it invisible when not hovering*/
     }
 
     &:hover {
+        scrollbar-width: thin;
+        overflow-y: auto;
+
+        // For firefox
+        @supports (-moz-appearance:none) {
+            scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+        }
+
         &::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color-scrollbar); /*On hover, it will turn grey*/
+            visibility: visible;
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
         }
     }
 }
@@ -40,7 +58,7 @@
     margin-left: 190px;
     mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
-    width: calc(100% - 170px);
+    width: calc(100% - 180px);
 }
 
 @media (max-width: $grid-breakpoints-lg) {
@@ -67,8 +85,8 @@
         margin-left: 0;
         padding-left: 0;
         width: 100%;
-        padding: 20px 0 0;
-        height: calc(100dvh - 20px);
+        padding: 10px 0 0;
+        height: calc(var(--vh) * 100 - var(--nav-mobile-offset));
         scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
         scrollbar-width: thin;
         margin-bottom: 20px;

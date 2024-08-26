@@ -94,7 +94,7 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(var(--vh) * 100 - 165px);
+  height: calc(var(--vh) * 100 - 175px);
   mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
   overflow: auto;

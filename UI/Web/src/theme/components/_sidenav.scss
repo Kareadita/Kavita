@@ -75,6 +75,10 @@
     transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
     border: var(--side-nav-border);
 
+    &::-webkit-scrollbar {
+        visibility: hidden;
+    }
+
     &.preference {
         height: calc((var(--vh)*100));
     }
@@ -86,12 +90,6 @@
     &.hidden {
         display: none;
         opacity: 0;
-
-
-
-
-
-
     }
 
     &.closed {
@@ -103,26 +101,45 @@
     }
 
     .side-nav {
-        overflow: auto;
+        overflow-y: hidden;
         height: 100%;
         mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
-        scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+        scrollbar-gutter: stable;
         scrollbar-width: thin;
+    
+    // For firefox
+    @supports (-moz-appearance:none) {
+        scrollbar-color: transparent transparent;
+        scrollbar-width: thin;
+    }
 
-        &::-webkit-scrollbar {
-            width: inherit;
+    &::-webkit-scrollbar {
+        background-color: transparent;  /*make scrollbar space invisible */
+        width: inherit;
+        display: none;
+        visibility: hidden;
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: transparent; /*makes it invisible when not hovering*/
+    }
+
+    &:hover {
+        scrollbar-width: thin;
+        overflow-y: auto;
+
+        // For firefox
+        @supports (-moz-appearance:none) {
+            scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
         }
 
         &::-webkit-scrollbar-thumb {
-            background-color: transparent; /*makes it invisible when not hovering*/
+            visibility: visible;
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
         }
-
-        &:hover {
-            &::-webkit-scrollbar-thumb {
-                background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
-              }
-        }
+    }
 
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
