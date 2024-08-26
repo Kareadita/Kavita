@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: calc((var(--vh) *100) - 173px);
+    height: calc((var(--vh) *100) - 157px);
     margin-bottom: 10px;
 
     &.empty {
@@ -94,9 +94,9 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(var(--vh) * 100 - 175px);
-  mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+  height: calc(var(--vh) * 100 - 155px);
+  mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
   overflow: auto;
   scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
   scrollbar-width: thin;

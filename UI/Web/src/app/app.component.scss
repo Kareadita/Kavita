@@ -10,10 +10,12 @@
     margin-left: 40px;
     overflow-y: hidden;
     overflow-x: hidden;
-    height: calc(var(--vh)* 100 - var(--nav-offset));
+    height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
     padding-right: 10px;
     scrollbar-gutter: stable both-edges;
     scrollbar-width: thin;
+    mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
 
     // For firefox
     @supports (-moz-appearance:none) {
@@ -56,8 +58,6 @@
 
 .companion-bar-content {
     margin-left: 190px;
-    mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 96%, transparent 100%);
     width: calc(100% - 180px);
 }
 

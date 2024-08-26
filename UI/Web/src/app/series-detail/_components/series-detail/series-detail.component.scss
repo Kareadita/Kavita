@@ -13,6 +13,7 @@
   grid-template-columns: repeat(auto-fill, 160px);
   grid-gap: 0.5rem;
   justify-content: space-around;
+  padding-bottom: 20px;
 }
 
 ::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen {
