@@ -102,8 +102,18 @@
             justify-content: center;
             align-items: center;
 
+
             &:hover {
-                background-color: unset;
+                background-color: unset !important;
+                color: white !important;
+
+                i {
+                    color: var(--side-nav-item-closed-color) !important;
+
+                    &:hover {
+                        color: white !important;
+                    }
+                };
             }
 
             span {
