@@ -158,6 +158,24 @@
     }
 }
 
+.sidenav-bottom {
+    &.closed {
+        left: 15px !important;
+        text-align: center;
+
+        
+        .donate {
+            .side-nav-item {
+                padding: 0;
+
+                .side-nav-text {
+                    opacity: 1 !important;
+                }
+            }
+        }
+    }
+}
+
 @media (max-width: $grid-breakpoints-lg) {
     .side-nav-container {
         padding: 10px 0;
@@ -190,11 +208,7 @@
             border-top-right-radius: var(--side-nav-border-radius);
         }
     }
-
-    .sidenav-bottom {
-        display:none;
-
-    }
+    
 
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);

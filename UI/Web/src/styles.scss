@@ -109,8 +109,9 @@ body {
   margin: 0;
 
   @media (max-width: $grid-breakpoints-lg) {
-    margin-top: var(--nav-mobile-offset) !important;
-    height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
+    /* Setting this break the readers */
+    //margin-top: var(--nav-mobile-offset) !important;
+    //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
   }
 
 }
