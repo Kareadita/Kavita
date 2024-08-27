@@ -1,77 +1,6 @@
 
 @import '../variables';
 
-.sidenav-bottom {
-    position: absolute;
-    bottom: 0;
-    width: 190px;
-    font-size: 12px;
-    transition: width var(--side-nav-openclose-transition);
-    z-index: 999;
-    left: 10px;
-
-    .donate {
-        .side-nav-item {
-            width: 100%;
-            padding: 0 80px;
-
-            &:hover {
-                background-color: unset;
-            }
-        }
-    }
-
-    &.closed {
-        width: 45px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        left: -50px;
-    }
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item {
-    justify-content: center;
-    min-height: 25px;
-    align-items: center;
-
-    :hover {
-        background-color: unset;
-    }
- }
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item span {
-    flex-grow: unset !important;
-    min-width: unset !important;;
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div {
-    min-width: unset !important;
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div i{
-    font-size: 12px !important;
-}
-
-
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.phone-hidden div {
-    width: 100%;
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.side-nav-text div {
-    width: 0;
-}
-
-@media (max-width: $grid-breakpoints-lg) {
-    :host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed {
-        display: none;
-    }
-
-    :host ::ng-deep .sidenav-bottom .donate .side-nav-item span.phone-hidden {
-        display: block !important;
-    }
-}
-
 .side-nav-container {
     padding-bottom: 10px;
     width: 190px;
@@ -159,14 +88,36 @@
 }
 
 .sidenav-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 190px;
+    font-size: 12px;
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 999;
+    left: 10px;
+
     &.closed {
-        left: 15px !important;
+        left: 5px;
         text-align: center;
+        width: 55px;
+        overflow-x: hidden;
+        overflow-y: auto;
 
         
         .donate {
             .side-nav-item {
                 padding: 0;
+                display: block;
+                background-color: transparent !important;
+                line-height: 40px;
+                justify-content: center;
+                min-height: 25px;
+                align-items: center;
+                width: 100%;
+            
+                :hover {
+                    background-color: unset;
+                }
 
                 .side-nav-text {
                     opacity: 1 !important;
@@ -222,6 +173,10 @@
         &.closed {
             display: none;
         }
+    }
+
+    .sidenav-bottom {
+        display: none;
     }
 }
 
