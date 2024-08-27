@@ -22,6 +22,11 @@ public class LocaleController : BaseApiController
     [HttpGet]
     public ActionResult<IEnumerable<string>> GetAllLocales()
     {
+        // Check if temp/locale_map.json exists
+
+        // If not, scan the 2 locale files and calculate empty keys or empty values
+
+        // Formulate the Locale object with Percentage
         var languages = _localizationService.GetLocales().Select(c =>
             {
                 try
