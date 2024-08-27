@@ -77,7 +77,11 @@
           <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
             <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
             <app-series-format [format]="format"></app-series-format>
-            {{title}}
+            @if (linkUrl) {
+              <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
+            } @else {
+              {{title}}
+            }
           </span>
           @if (actions && actions.length > 0) {
             <span class="card-actions float-end">
