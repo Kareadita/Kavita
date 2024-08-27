@@ -89,12 +89,6 @@ export class ReadingListsComponent implements OnInit {
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
   }
 
-  performAction(action: ActionItem<ReadingList>, readingList: ReadingList) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, readingList);
-    }
-  }
-
   performGlobalAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action, undefined);
@@ -157,10 +151,6 @@ export class ReadingListsComponent implements OnInit {
       this.lists.forEach(l => this.actions[l.id] = this.getActions(l));
       this.cdRef.markForCheck();
     });
-  }
-
-  handleClick(list: ReadingList) {
-    this.router.navigateByUrl('lists/' + list.id);
   }
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {

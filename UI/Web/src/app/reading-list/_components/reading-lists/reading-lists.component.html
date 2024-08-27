@@ -1,4 +1,4 @@
-<div class="main-container container-fluid"> 
+<div class="main-container container-fluid">
   <ng-container *transloco="let t; read: 'reading-lists'">
     <app-side-nav-companion-bar>
       <h4 title>
@@ -23,7 +23,7 @@
       <ng-template #cardItem let-item let-position="idx" >
         <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]"
                       [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                      (clicked)="handleClick(item)"
+                       [linkUrl]="'/lists/' + item.id"
                       (selection)="bulkSelectionService.handleCardSelection('readingList', position, lists.length, $event)"
                       [selected]="bulkSelectionService.isCardSelected('readingList', position)" [allowSelection]="true"></app-card-item>
       </ng-template>

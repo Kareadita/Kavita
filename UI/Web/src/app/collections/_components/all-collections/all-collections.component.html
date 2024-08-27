@@ -16,7 +16,7 @@
       <ng-template #cardItem let-item let-position="idx">
         <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions"
                       [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                      (clicked)="loadCollection(item)"
+                       [linkUrl]="'/collections/' + item.id"
                       (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
                       [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true">
 
