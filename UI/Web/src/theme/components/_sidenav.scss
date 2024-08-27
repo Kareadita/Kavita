@@ -1,4 +1,3 @@
-
 @import '../variables';
 
 .side-nav-container {
@@ -96,32 +95,62 @@
     z-index: 999;
     left: 10px;
 
+    .donate {
+        .side-nav-item {
+            width: 100%;
+            padding: 0 80px;
+            justify-content: center;
+            align-items: center;
+
+            &:hover {
+                background-color: unset;
+            }
+
+            span {
+                flex-grow: unset !important;
+                min-width: unset !important;
+
+                div {
+                    min-width: unset !important;
+
+                    i {
+                        font-size: 1rem !important;
+                    }
+                }
+            }
+
+            &.closed {
+                span {
+                    &.phone-hidden {
+                        div {
+                            width: 100%;
+                        }
+                    }
+
+                    .side-nav-text {
+                        div {
+                            width: 0;
+                        }
+                    }
+                }
+            } 
+        }
+    }
+
     &.closed {
-        left: 5px;
-        text-align: center;
-        width: 55px;
+        width: 45px;
         overflow-x: hidden;
         overflow-y: auto;
 
-        
-        .donate {
-            .side-nav-item {
-                padding: 0;
-                display: block;
-                background-color: transparent !important;
-                line-height: 40px;
-                justify-content: center;
-                min-height: 25px;
-                align-items: center;
-                width: 100%;
-            
-                :hover {
-                    background-color: unset;
-                }
+        .side-nav-item {
+            width: 100%;
+            padding: 0;
+            display: block;
+            line-height: 40px;
+            text-align: center;
 
-                .side-nav-text {
-                    opacity: 1 !important;
-                }
+            &:hover {
+                background-color: unset;
             }
         }
     }
@@ -142,8 +171,6 @@
         overflow: auto;
         border: var(--side-nav-mobile-border);
 
-
-
         &.no-donate {
             height: 100dvh;
         }
@@ -154,12 +181,22 @@
             box-shadow: none;
         }
 
+        .side-nav-item {
+            padding: 0;
+        }
+
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
         }
     }
-    
+
+    .sidenav-bottom {
+        display:none;
+        &.closed {
+            left: 10px;
+        }
+    }
 
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
@@ -173,10 +210,6 @@
         &.closed {
             display: none;
         }
-    }
-
-    .sidenav-bottom {
-        display: none;
     }
 }
 
