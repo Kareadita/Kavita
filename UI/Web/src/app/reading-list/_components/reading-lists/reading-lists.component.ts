@@ -95,6 +95,10 @@ export class ReadingListsComponent implements OnInit {
     }
   }
 
+  handleClick(list: ReadingList) {
+    this.router.navigateByUrl('lists/' + list.id);
+  }
+
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
     switch(action.action) {
       case Action.Delete:

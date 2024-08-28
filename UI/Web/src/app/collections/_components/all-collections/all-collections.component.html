@@ -15,10 +15,11 @@
     >
       <ng-template #cardItem let-item let-position="idx">
         <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions"
-                      [imageUrl]="imageService.getCollectionCoverImage(item.id)"
+                       [imageUrl]="imageService.getCollectionCoverImage(item.id)"
                        [linkUrl]="'/collections/' + item.id"
-                      (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
-                      [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true">
+                       (clicked)="loadCollection(item)"
+                       (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
+                       [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true">
 
           <ng-template #subtitle>
             <app-collection-owner [collection]="item"></app-collection-owner>

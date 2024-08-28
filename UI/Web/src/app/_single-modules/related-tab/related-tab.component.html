@@ -13,7 +13,7 @@
       <ng-template #carouselItem let-item>
         <app-card-item [title]="item.title" [entity]="item"
                        [suppressLibraryLink]="true" [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                       [linkUrl]="'/collections/' + item.id"></app-card-item>
+                       (clicked)="openCollection(item)" [linkUrl]="'/collections/' + item.id"></app-card-item>
       </ng-template>
     </app-carousel-reel>
   }
@@ -24,7 +24,7 @@
       <ng-template #carouselItem let-item>
         <app-card-item [title]="item.title" [entity]="item"
                        [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                       [linkUrl]="'/lists/' + item.id"></app-card-item>
+                       (clicked)="openReadingList(item)" [linkUrl]="'/lists/' + item.id"></app-card-item>
       </ng-template>
     </app-carousel-reel>
   }
