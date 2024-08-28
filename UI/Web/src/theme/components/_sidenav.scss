@@ -1,16 +1,19 @@
-@import '../variables';
+@import "../variables";
 
 .side-nav-container {
     padding-bottom: 10px;
     width: 190px;
     background-color: var(--side-nav-bg-color);
-    height: calc((var(--vh)*100) - 115px);
+    height: calc((var(--vh) * 100) - 115px);
     position: fixed;
     margin: 0;
     left: 10px;
     top: 73px;
     border-radius: var(--side-nav-border-radius);
-    transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
+    transition:
+        width var(--side-nav-openclose-transition),
+        background-color var(--side-nav-bg-color-transition),
+        border-color var(--side-nav-border-transition);
     border: var(--side-nav-border);
 
     &::-webkit-scrollbar {
@@ -18,11 +21,11 @@
     }
 
     &.preference {
-        height: calc((var(--vh)*100));
+        height: calc((var(--vh) * 100));
     }
 
     &.no-donate {
-        height: calc((var(--vh)*100) - 82px);
+        height: calc((var(--vh) * 100) - 82px);
     }
 
     &.hidden {
@@ -45,39 +48,39 @@
         -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
         scrollbar-gutter: stable;
         scrollbar-width: thin;
-    
-    // For firefox
-    @supports (-moz-appearance:none) {
-        scrollbar-color: transparent transparent;
-        scrollbar-width: thin;
-    }
-
-    &::-webkit-scrollbar {
-        background-color: transparent;  /*make scrollbar space invisible */
-        width: inherit;
-        display: none;
-        visibility: hidden;
-        background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: transparent; /*makes it invisible when not hovering*/
-    }
-
-    &:hover {
-        scrollbar-width: thin;
-        overflow-y: auto;
 
         // For firefox
-        @supports (-moz-appearance:none) {
-            scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+        @supports (-moz-appearance: none) {
+            scrollbar-color: transparent transparent;
+            scrollbar-width: thin;
+        }
+
+        &::-webkit-scrollbar {
+            background-color: transparent; /*make scrollbar space invisible */
+            width: inherit;
+            display: none;
+            visibility: hidden;
+            background: transparent;
         }
 
         &::-webkit-scrollbar-thumb {
-            visibility: visible;
-            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+            background: transparent; /*makes it invisible when not hovering*/
         }
-    }
+
+        &:hover {
+            scrollbar-width: thin;
+            overflow-y: auto;
+
+            // For firefox
+            @supports (-moz-appearance: none) {
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0);
+            }
+
+            &::-webkit-scrollbar-thumb {
+                visibility: visible;
+                background-color: rgba(255, 255, 255, 0.3); /*On hover, it will turn grey*/
+            }
+        }
 
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
@@ -102,7 +105,6 @@
             justify-content: center;
             align-items: center;
 
-
             &:hover {
                 background-color: unset !important;
                 color: white !important;
@@ -113,7 +115,7 @@
                     &:hover {
                         color: white !important;
                     }
-                };
+                }
             }
 
             span {
@@ -143,7 +145,7 @@
                         }
                     }
                 }
-            } 
+            }
         }
     }
 
@@ -178,7 +180,7 @@
         top: 0;
         transition: width var(--side-nav-openclose-transition);
         z-index: 1050;
-        overflow: auto;
+        overflow-y: auto;
         border: var(--side-nav-mobile-border);
 
         &.no-donate {
@@ -189,6 +191,10 @@
             width: 0;
             overflow: hidden;
             box-shadow: none;
+        }
+
+        .side-nav {
+            overflow: auto;
         }
 
         .side-nav-item {
@@ -202,7 +208,7 @@
     }
 
     .sidenav-bottom {
-        display:none;
+        display: none;
         &.closed {
             left: 10px;
         }
@@ -211,7 +217,7 @@
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc((var(--vh)*100) - var(--nav-mobile-offset));
+        height: calc((var(--vh) * 100) - var(--nav-mobile-offset));
         position: absolute;
         left: 0;
         top: var(--nav-mobile-offset);
