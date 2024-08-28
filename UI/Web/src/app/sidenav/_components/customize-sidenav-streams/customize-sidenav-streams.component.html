@@ -1,32 +1,31 @@
 <ng-container *transloco="let t; read: 'customize-sidenav-streams'">
   <form [formGroup]="listForm">
-    <div class="row g-0 mb-3 justify-content-between">
-      @if (items.length > 3) {
-        <div class="col-9">
-          <label for="sidenav-stream-filter" class="form-label">{{t('filter')}}</label>
-          <div class="input-group">
-            <input id="sidenav-stream-filter" autocomplete="off" class="form-control" formControlName="filterSideNavStream" type="text" aria-describedby="reset-sidenav-stream-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-sidenav-stream-input" (click)="resetSideNavFilter()">{{t('clear')}}</button>
-          </div>
-          @if (listForm.get('filterSideNavStream')?.value) {
-            <p role="alert" class="mt-2">{{t('reorder-when-filter-present')}}</p>
-          }
+    @if (items.length > 3) {
+      <div class="row g-0 mb-2">
+        <label for="sidenav-stream-filter" class="form-label">{{t('filter')}}</label>
+        <div class="input-group">
+          <input id="sidenav-stream-filter" autocomplete="off" class="form-control" formControlName="filterSideNavStream" type="text" aria-describedby="reset-sidenav-stream-input">
+          <button class="btn btn-outline-secondary" type="button" id="reset-sidenav-stream-input" (click)="resetSideNavFilter()">{{t('clear')}}</button>
         </div>
-      }
-
-      <div class="col-3">
-        <form [formGroup]="pageOperationsForm">
-          <div class="form-check form-check-inline" style="margin-top: 40px; margin-left: 10px">
-            <input class="form-check-input" type="checkbox" id="accessibility-mode" formControlName="accessibilityMode">
-            <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
-          </div>
-          <div class="form-check form-check-inline" style="margin-left: 10px">
-            <input class="form-check-input" type="checkbox" id="bulk-mode" formControlName="bulkMode" >
-            <label class="form-check-label" for="bulk-mode">{{t('bulk-mode-label')}}</label>
-          </div>
-        </form>
+        @if (listForm.get('filterSideNavStream')?.value) {
+          <p role="alert" class="mt-2">{{t('reorder-when-filter-present')}}</p>
+        }
       </div>
+    }
+
+    <div class="row g-0 mb-3 ">
+      <form [formGroup]="pageOperationsForm">
+        <div class="form-check form-check-inline" style="margin-top: 40px; margin-left: 10px">
+          <input class="form-check-input" type="checkbox" id="accessibility-mode" formControlName="accessibilityMode">
+          <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
+        </div>
+        <div class="form-check form-check-inline" style="margin-left: 10px">
+          <input class="form-check-input" type="checkbox" id="bulk-mode" formControlName="bulkMode" >
+          <label class="form-check-label" for="bulk-mode">{{t('bulk-mode-label')}}</label>
+        </div>
+      </form>
     </div>
+
     <app-bulk-operations [modalMode]="true" [topOffset]="0" [actionCallback]="bulkActionCallback"></app-bulk-operations>
     <div style="max-height: 500px; overflow-y: auto">
       <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
