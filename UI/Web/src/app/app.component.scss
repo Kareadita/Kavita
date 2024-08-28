@@ -36,7 +36,6 @@
     &:hover {
         scrollbar-width: thin;
         overflow-y: auto;
-        overflow-x: auto;
 
         // For firefox
         @supports (-moz-appearance:none) {
