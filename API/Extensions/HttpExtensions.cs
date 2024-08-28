@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -57,6 +57,14 @@ public static class HttpExtensions
         }
     }
 
+    private static void AddExtension(List<string> extensions, string extension)
+    {
+        if (string.IsNullOrEmpty(extension))
+            return;
+        if (!extensions.Contains(extension))
+            extensions.Add(extension);
+    }
+
     /// <summary>
     /// Retrieves the supported image types extensions from the Accept header of the HTTP request.
     /// </summary>
@@ -64,37 +72,40 @@ public static class HttpExtensions
     /// <returns>A list of supported image types extensions.</returns>
     public static List<string> SupportedImageTypesFromRequest(this HttpRequest request)
     {
-        var acceptHeader = request.Headers["Accept"];
-        string[] spl1 = acceptHeader.ToString().Split(';');
+        var acceptHeader = request.Headers["Accept"].ToString();
+        string[] spl1 = acceptHeader.Split(';');
         acceptHeader = spl1[0];
-        string[] split = acceptHeader.ToString().Split(',');
-        List<string> defaultExtensions = new List<string>();
-        defaultExtensions.Add("jpeg");
-        defaultExtensions.Add("jpg");
-        defaultExtensions.Add("png");
-        defaultExtensions.Add("gif");
-        defaultExtensions.Add("webp");
+        string[] split = acceptHeader.Split(',');
+        List<string> supportedExtensions = new List<string>();
+
+        //Add default extensions supported by all browsers.
+        supportedExtensions.Add("jpeg");
+        supportedExtensions.Add("jpg");
+        supportedExtensions.Add("png");
+        supportedExtensions.Add("gif");
+        supportedExtensions.Add("webp");
+        //Browser add specific image mime types, when the image type is not a global standard.
+        //Let's reuse that to identify the additional image types supported by the browser.
         foreach (string v in split)
         {
             if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
             {
                 string n = v.Substring(6).ToLowerInvariant();
+                if (n.StartsWith("*"))
+                    continue;
                 if (n == "svg+xml")
                     n = "svg";
                 if (n == "jp2")
-                    defaultExtensions.Add("j2k");
+                    AddExtension(supportedExtensions, "j2k");
                 if (n == "j2k")
-                    defaultExtensions.Add("jp2");
+                    AddExtension(supportedExtensions, "jp2");
                 if (n == "heif")
-                    defaultExtensions.Add("heic");
+                    AddExtension(supportedExtensions, "heic");
                 if (n == "heic")
-                    defaultExtensions.Add("heif");
-                if (n.StartsWith("*"))
-                    continue;
-                if (!defaultExtensions.Contains(n))
-                    defaultExtensions.Add(n);
+                    AddExtension(supportedExtensions, "heif");
+                AddExtension(supportedExtensions, n);
             }
         }
-        return defaultExtensions;
+        return supportedExtensions;
     }
 }
