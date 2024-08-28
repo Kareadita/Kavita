@@ -1,42 +1,44 @@
-<ng-container *transloco="let t; read: 'changelog'">
-  <div class="changelog">
-    <p class="pb-2">
-      {{t('description', {installed: ''})}}
-      <span class="badge bg-secondary">{{t('installed')}}</span>
-      {{t('description-continued', {installed: ''})}}
-    </p>
+<div class="main-container container-fluid">
+  <ng-container *transloco="let t; read: 'changelog'">
+    <div class="changelog">
+      <p class="pb-2">
+        {{t('description', {installed: ''})}}
+        <span class="badge bg-secondary">{{t('installed')}}</span>
+        {{t('description-continued', {installed: ''})}}
+      </p>
 
-    @for(update of updates; track update; let indx = $index) {
-      <div class="card w-100 mb-2" style="width: 18rem;">
-        <div class="card-body">
-          <h4 class="card-title">{{update.updateTitle}}&nbsp;
-            @if (update.isOnNightlyInRelease) {
-              <span class="badge bg-secondary">{{t('nightly', {version: update.currentVersion})}}</span>
-            } @else if (update.isReleaseEqual) {
-              <span class="badge bg-secondary">{{t('installed')}}</span>
-            } @else if (update.isReleaseNewer && indx === 0) {
-              <span class="badge bg-secondary">{{t('available')}}</span>
+      @for(update of updates; track update; let indx = $index) {
+        <div class="card w-100 mb-2" style="width: 18rem;">
+          <div class="card-body">
+            <h4 class="card-title">{{update.updateTitle}}&nbsp;
+              @if (update.isOnNightlyInRelease) {
+                <span class="badge bg-secondary">{{t('nightly', {version: update.currentVersion})}}</span>
+              } @else if (update.isReleaseEqual) {
+                <span class="badge bg-secondary">{{t('installed')}}</span>
+              } @else if (update.isReleaseNewer && indx === 0) {
+                <span class="badge bg-secondary">{{t('available')}}</span>
+              }
+            </h4>
+            <h6 class="card-subtitle mb-1 mt-1 text-muted">{{t('published-label')}}{{update.publishDate | date: 'short'}}</h6>
+
+
+            <pre class="card-text update-body">
+              <app-read-more [text]="update.updateBody" [maxLength]="500"></app-read-more>
+            </pre>
+            @if (!update.isDocker && (accountService.isAdmin$ | async)) {
+              @if (update.updateVersion === update.currentVersion) {
+                <a href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
+              } @else {
+                <a href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('download')}}</a>
+              }
             }
-          </h4>
-          <h6 class="card-subtitle mb-1 mt-1 text-muted">{{t('published-label')}}{{update.publishDate | date: 'short'}}</h6>
-
-
-          <pre class="card-text update-body">
-            <app-read-more [text]="update.updateBody" [maxLength]="500"></app-read-more>
-          </pre>
-          @if (!update.isDocker && (accountService.isAdmin$ | async)) {
-            @if (update.updateVersion === update.currentVersion) {
-              <a href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
-            } @else {
-              <a href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('download')}}</a>
-            }
-          }
+          </div>
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
 
 
-  <app-loading [loading]="isLoading"></app-loading>
+    <app-loading [loading]="isLoading"></app-loading>
 
-</ng-container>
+  </ng-container>
+</div>

@@ -38,6 +38,7 @@
         text-overflow: ellipsis;
         display: -webkit-box !important;
         -webkit-box-orient: vertical;
+        overflow: hidden;
 
         div {
             min-width: 102px;

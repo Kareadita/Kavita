@@ -120,6 +120,12 @@
         position: absolute;
         width: 100%;
         font-size: 0.8rem;
+        -webkit-line-clamp: 1;
+        font-size: 0.8rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        padding: 0 10px 0 0;
     }
 }
 
