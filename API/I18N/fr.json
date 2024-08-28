@@ -195,5 +195,7 @@
     "account-email-invalid": "L'adresse électronique figurant dans le fichier du compte administrateur n'est pas valide. Impossible d'envoyer un courriel de test.",
     "email-settings-invalid": "Informations manquantes dans les paramètres de l'e-mail. Assurez-vous que tous les paramètres de l'email sont sauvegardés.",
     "collection-already-exists": "Collection déjà existante",
-    "error-import-stack": "Il y a eu un problème lors de l'importation de la pile MAL"
+    "error-import-stack": "Il y a eu un problème lors de l'importation de la pile MAL",
+    "generic-cover-person-save": "Impossible d'enregistrer l'image de couverture pour cette personne",
+    "generic-cover-volume-save": "Impossible d'enregistrer l'image de couverture sur le volume"
 }

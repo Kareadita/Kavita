@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "登入",
+        "title": "登入您的賬戶",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "忘記密碼?",
-        "submit": "{{common.submit}}"
+        "submit": "登入"
     },
     "dashboard": {
         "no-libraries": "還沒有設定資料庫，設定位置在",

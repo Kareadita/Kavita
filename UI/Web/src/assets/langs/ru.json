@@ -312,9 +312,6 @@
         "close": "{{common.close}}",
         "read": "{{common.read}}"
     },
-    "series-metadata-detail": {
-        "promoted": "{{common.promoted}}"
-    },
     "update-notification-modal": {
         "close": "{{common.close}}"
     },
@@ -330,9 +327,6 @@
     "bulk-operations": {
         "deselect-all": "{{common.deselect-all}}"
     },
-    "card-detail-drawer": {
-        "read": "{{common.read}}"
-    },
     "cover-image-chooser": {
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}"
@@ -343,9 +337,6 @@
         "clear": "{{common.clear}}",
         "loading": "{{common.loading}}",
         "create": "{{common.create}}"
-    },
-    "list-item": {
-        "read": "{{common.read}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",

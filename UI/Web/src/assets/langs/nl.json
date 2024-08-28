@@ -596,9 +596,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Serie-informatie bewerken",
-        "download-series--tooltip": "Serie downloaden",
-        "downloading-status": "Downloaden…",
-        "user-reviews-alt": "Gebruiker reviews",
         "storyline-tab": "Verhaallijn",
         "books-tab": "Boeken",
         "volumes-tab": "Volumes",
@@ -611,26 +608,6 @@
         "cover-change": "Het kan tot een minuut duren voordat uw browser de afbeelding ververst. Tot die tijd kan op sommige pagina's de oude afbeelding worden getoond.",
         "continue-incognito": "Ga incognito verder",
         "read-incognito": "Incognito lezen"
-    },
-    "series-metadata-detail": {
-        "links-title": "Koppelingen",
-        "genres-title": "Genres",
-        "tags-title": "Labels",
-        "collections-title": "{{side-nav.collections}}",
-        "reading-lists-title": "{{side-nav.reading-lists}}",
-        "writers-title": "Auteurs",
-        "cover-artists-title": "Coverartiesten",
-        "characters-title": "Karakters",
-        "colorists-title": "Coloristen",
-        "editors-title": "Redacteuren",
-        "inkers-title": "Inkers",
-        "letterers-title": "Beletterers",
-        "translators-title": "Vertalers",
-        "pencillers-title": "Tekenaars",
-        "publishers-title": "Uitgevers",
-        "promoted": "{{common.promoted}}",
-        "see-more": "Zie meer",
-        "see-less": "Zie minder"
     },
     "badge-expander": {
         "more-items": "en {{count}} meer"
@@ -697,8 +674,6 @@
         "folder-watching-tooltip": "Negeer het bewaken van servermappen voor deze bibliotheek. Indien uitgeschakeld, wordt mapbewaking niet uitgevoerd op de mappen die deze bibliotheek bevat. Als bibliotheken mappen delen, kunnen mappen nog steeds worden aangevallen.",
         "include-in-dashboard-label": "Opnemen in dashboard",
         "include-in-dashboard-tooltip": "Moeten series uit de bibliotheek worden opgenomen op het Dashboard. Dit is van invloed op alle streams, zoals Aan Het Lezen, Onlangs bijgewerkt, Onlangs toegevoegd of andere aangepaste toevoegingen.",
-        "include-in-recommendation-label": "Opnemen in Aanbevolen",
-        "include-in-recommendation-tooltip": "Moeten series uit de bibliotheek worden opgenomen op de Aanbevolen pagina.",
         "include-in-search-label": "Opnemen in Zoeken",
         "include-in-search-tooltip": "Moeten series en eventueel afgeleide informatie (genres, personen, bestanden) uit de bibliotheek worden opgenomen in zoekresultaten.",
         "force-scan": "Forceer scannen",
@@ -765,42 +740,11 @@
         "mark-as-read": "Markeer als gelezen",
         "deselect-all": "{{common.deselect-all}}"
     },
-    "card-detail-drawer": {
-        "general-tab": "Algemeen",
-        "metadata-tab": "Metadata",
-        "cover-tab": "Omslag",
-        "info-tab": "Info",
-        "no-summary": "Geen samenvatting beschikbaar.",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "not-defined": "Niet gedefinieerd",
-        "read": "{{common.read}}",
-        "unread": "Ongelezen",
-        "files": "Bestanden",
-        "pages": "Pagina's:",
-        "added": "Toegevoegd:",
-        "size": "Grootte:"
-    },
     "card-detail-layout": {
         "total-items": "{{count}} items in totaal"
     },
     "card-item": {
         "cannot-read": "Kan niet lezen"
-    },
-    "chapter-metadata-detail": {
-        "no-data": "Geen metadata beschikbaar",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "translators-title": "{{series-metadata-detail.translators-title}}",
-        "letterers-title": "{{series-metadata-detail.letterers-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}",
-        "inkers-title": "{{series-metadata-detail.inkers-title}}",
-        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
-        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}"
     },
     "cover-image-chooser": {
         "drag-n-drop": "Slepen en neerzetten",
@@ -827,52 +771,6 @@
         "add-relationship": "Relatie toevoegen",
         "parent": "{{relationship-pipe.parent}}"
     },
-    "entity-info-cards": {
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "release-date-title": "Uitgave",
-        "release-date-tooltip": "Publicatiedatum",
-        "age-rating-title": "Leeftijdsclassificatie",
-        "length-title": "Lengte",
-        "pages-count": "{{num}} pagina's",
-        "words-count": "{{num}} Woorden",
-        "reading-time-title": "Leestijd",
-        "date-added-title": "Datum toegevoegd",
-        "size-title": "Grootte",
-        "id-title": "ID",
-        "links-title": "{{series-metadata-detail.links-title}}",
-        "isbn-title": "ISBN",
-        "last-read-title": "Laatst gelezen",
-        "less-than-hour": "<1 uur",
-        "range-hours": "{{value}} {{hourWord}}",
-        "hour": "Uur",
-        "hours": "Uren",
-        "read-time-title": "{{series-info-cards.read-time-title}}"
-    },
-    "series-info-cards": {
-        "release-date-title": "{{entity-info-cards.release-date-title}}",
-        "release-year-tooltip": "Uitgave jaar",
-        "age-rating-title": "{{entity-info-cards.age-rating-title}}",
-        "language-title": "Taal",
-        "publication-status-title": "Publicatie",
-        "publication-status-tooltip": "Publicatiestatus",
-        "scrobbling-title": "Scrobbelen",
-        "scrobbling-tooltip": "Scrobbelstatus",
-        "on": "Aan",
-        "off": "Uit",
-        "disabled": "Uitgeschakeld",
-        "format-title": "Indeling",
-        "last-read-title": "Laatst gelezen",
-        "length-title": "Lengte",
-        "read-time-title": "Leestijd",
-        "less-than-hour": "{{entity-info-cards.less-than-hour}}",
-        "hour": "{{entity-info-cards.hour}}",
-        "hours": "{{entity-info-cards.hours}}",
-        "time-left-title": "Resterende tijd",
-        "ongoing": "{{publication-status-pipe.ongoing}}",
-        "pages-count": "{{entity-info-cards.pages-count}}",
-        "words-count": "{{entity-info-cards.words-count}}"
-    },
     "bulk-add-to-collection": {
         "title": "Toevoegen aan collectie",
         "promoted": "{{common.promoted}}",
@@ -891,9 +789,6 @@
     },
     "external-series-card": {
         "open-external": "Open extern"
-    },
-    "list-item": {
-        "read": "{{common.read}}"
     },
     "manage-email-settings": {
         "description": "Kavita komt standaard met een e-mailservice om taken mogelijk te maken, zoals het uitnodigen van gebruikers, verzoeken om wachtwoord opnieuw in te stellen, enz. E-mails die via onze service worden verzonden, worden onmiddellijk verwijderd. U kunt uw eigen e-mailservice gebruiken door de {{link}}  service in te stellen. Stel de URL van de e-mailservice in en gebruik de testknop om te controleren of deze werkt. U kunt deze instellingen op elk moment terugzetten naar de standaardinstellingen. Er is geen manier om e-mails voor authenticatie uit te schakelen, hoewel u niet verplicht bent om een geldig e-mailadres voor gebruikers te gebruiken. Bevestigingslinks worden altijd opgeslagen in logboeken en gepresenteerd in de gebruikersinterface. Registratie-/bevestigings-e-mails worden niet verzonden als u Kavita niet opent via een openbaar bereikbare URL of tenzij de functie Hostnaam is geconfigureerd.",
@@ -1029,7 +924,6 @@
         "cron-header": "Cron",
         "convert-media-task": "Converteer media naar doelcodering",
         "convert-media-task-desc": "Voert een langlopende taak uit die alle door kavita beheerde media zal converteren naar de doelcodering. Dit is traag (vooral op ARM-apparaten).",
-        "convert-media-success": "Conversie van media naar doelcodering is in de wachtrij geplaatst",
         "bust-cache-task": "Breek Cache",
         "bust-cache-task-desc": "Breekt de Kavita+ Cache kapot - mag alleen worden gebruikt bij het debuggen van slechte matches.",
         "bust-cache-task-success": "Kavita+ Cache gebroken",
@@ -1089,10 +983,6 @@
         "summary-label": "Samenvatting",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
-    },
-    "library-detail": {
-        "library-tab": "Bibliotheek",
-        "recommended-tab": "Aanbevolen"
     },
     "library-recommended": {
         "no-data": "Hier is niets te zien. Voeg wat metadata toe aan je bibliotheek, lees iets of beoordeel iets. Voor deze bibliotheek zijn aanbevelingen mogelijk ook uitgeschakeld.",
