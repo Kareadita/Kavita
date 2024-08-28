@@ -16,3 +16,13 @@ h2 {
 
   }
 }
+
+
+@media (max-width: $grid-breakpoints-lg) {
+  ::ng-deep .content-wrapper:not(.closed) {
+    .scale {
+      width: 100% !important;
+      overflow-x: auto;
+    }
+  }
+}
