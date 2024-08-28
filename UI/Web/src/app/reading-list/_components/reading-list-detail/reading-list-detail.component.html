@@ -125,7 +125,7 @@
 
             <!-- Summary row-->
             <div class="row g-0 mt-2">
-              <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
+              <app-read-more [text]="readingListSummary" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 585 : 200"></app-read-more>
             </div>
 
             @if (characters$ | async; as characters) {

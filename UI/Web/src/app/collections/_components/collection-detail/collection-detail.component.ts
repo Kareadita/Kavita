@@ -1,4 +1,4 @@
-import {DatePipe, DOCUMENT, NgIf, NgStyle} from '@angular/common';
+import {AsyncPipe, DatePipe, DOCUMENT, NgIf, NgStyle} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -67,7 +67,7 @@ import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
   styleUrls: ['./collection-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip, SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip, SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
