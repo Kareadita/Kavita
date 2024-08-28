@@ -57,7 +57,7 @@ public static class OsInfo
         }
     }
 
-    public static string RunAndCapture(string filename, string args, int waitInMilliseconds = 1000)
+    private static string RunAndCapture(string filename, string args)
     {
         var p = new Process
         {
@@ -75,7 +75,7 @@ public static class OsInfo
 
         // To avoid deadlocks, always read the output stream first and then wait.
         var output = p.StandardOutput.ReadToEnd();
-        p.WaitForExit(waitInMilliseconds);
+        p.WaitForExit(1000);
 
         return output;
     }
