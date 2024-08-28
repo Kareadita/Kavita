@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
