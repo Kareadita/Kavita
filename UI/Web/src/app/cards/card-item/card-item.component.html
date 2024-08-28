@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'card-item'">
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
-    <div class="overlay" (click)="handleClick($event)">
+    <div class="overlay" [routerLink]="linkUrl" (click)="handleClick($event)">
       @if (total > 0 || suppressArchiveWarning) {
         <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
       } @else if (total === 0 && !suppressArchiveWarning) {
