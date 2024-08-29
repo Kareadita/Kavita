@@ -1,88 +1,19 @@
-
-@import '../variables';
-
-.sidenav-bottom {
-    position: absolute;
-    bottom: 0;
-    width: 190px;
-    font-size: 12px;
-    transition: width var(--side-nav-openclose-transition);
-    z-index: 999;
-    left: 10px;
-
-    .donate {
-        .side-nav-item {
-            width: 100%;
-            padding: 0 80px;
-
-            &:hover {
-                background-color: unset;
-            }
-        }
-    }
-
-    &.closed {
-        width: 45px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        left: -50px;
-    }
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item {
-    justify-content: center;
-    min-height: 25px;
-    align-items: center;
-
-    :hover {
-        background-color: unset;
-    }
- }
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item span {
-    flex-grow: unset !important;
-    min-width: unset !important;;
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div {
-    min-width: unset !important;
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item span div i{
-    font-size: 12px !important;
-}
-
-
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.phone-hidden div {
-    width: 100%;
-}
-
-:host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed span.side-nav-text div {
-    width: 0;
-}
-
-@media (max-width: $grid-breakpoints-lg) {
-    :host ::ng-deep .sidenav-bottom .donate .side-nav-item.closed {
-        display: none;
-    }
-
-    :host ::ng-deep .sidenav-bottom .donate .side-nav-item span.phone-hidden {
-        display: block !important;
-    }
-}
+@import "../variables";
 
 .side-nav-container {
     padding-bottom: 10px;
     width: 190px;
     background-color: var(--side-nav-bg-color);
-    height: calc((var(--vh)*100) - 115px);
+    height: calc((var(--vh) * 100) - 115px);
     position: fixed;
     margin: 0;
     left: 10px;
     top: 73px;
     border-radius: var(--side-nav-border-radius);
-    transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
+    transition:
+        width var(--side-nav-openclose-transition),
+        background-color var(--side-nav-bg-color-transition),
+        border-color var(--side-nav-border-transition);
     border: var(--side-nav-border);
 
     &::-webkit-scrollbar {
@@ -90,11 +21,11 @@
     }
 
     &.preference {
-        height: calc((var(--vh)*100));
+        height: calc((var(--vh) * 100));
     }
 
     &.no-donate {
-        height: calc((var(--vh)*100) - 82px);
+        height: calc((var(--vh) * 100) - 82px);
     }
 
     &.hidden {
@@ -117,43 +48,122 @@
         -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
         scrollbar-gutter: stable;
         scrollbar-width: thin;
-    
-    // For firefox
-    @supports (-moz-appearance:none) {
-        scrollbar-color: transparent transparent;
-        scrollbar-width: thin;
-    }
-
-    &::-webkit-scrollbar {
-        background-color: transparent;  /*make scrollbar space invisible */
-        width: inherit;
-        display: none;
-        visibility: hidden;
-        background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: transparent; /*makes it invisible when not hovering*/
-    }
-
-    &:hover {
-        scrollbar-width: thin;
-        overflow-y: auto;
 
         // For firefox
-        @supports (-moz-appearance:none) {
-            scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+        @supports (-moz-appearance: none) {
+            scrollbar-color: transparent transparent;
+            scrollbar-width: thin;
+        }
+
+        &::-webkit-scrollbar {
+            background-color: transparent; /*make scrollbar space invisible */
+            width: inherit;
+            display: none;
+            visibility: hidden;
+            background: transparent;
         }
 
         &::-webkit-scrollbar-thumb {
-            visibility: visible;
-            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+            background: transparent; /*makes it invisible when not hovering*/
         }
-    }
+
+        &:hover {
+            scrollbar-width: thin;
+            overflow-y: auto;
+
+            // For firefox
+            @supports (-moz-appearance: none) {
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0);
+            }
+
+            &::-webkit-scrollbar-thumb {
+                visibility: visible;
+                background-color: rgba(255, 255, 255, 0.3); /*On hover, it will turn grey*/
+            }
+        }
 
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
+        }
+    }
+}
+
+.sidenav-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 190px;
+    font-size: 12px;
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 999;
+    left: 10px;
+
+    .donate {
+        .side-nav-item {
+            width: 100%;
+            padding: 0 80px;
+            justify-content: center;
+            align-items: center;
+
+            &:hover {
+                background-color: unset !important;
+                color: white !important;
+
+                i {
+                    color: var(--side-nav-item-closed-color) !important;
+
+                    &:hover {
+                        color: white !important;
+                    }
+                }
+            }
+
+            span {
+                flex-grow: unset !important;
+                min-width: unset !important;
+
+                div {
+                    min-width: unset !important;
+
+                    i {
+                        font-size: 1rem !important;
+                    }
+                }
+            }
+
+            &.closed {
+                span {
+                    &.phone-hidden {
+                        div {
+                            width: 100%;
+                        }
+                    }
+
+                    .side-nav-text {
+                        div {
+                            width: 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &.closed {
+        width: 45px;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        .side-nav-item {
+            width: 100%;
+            padding: 0;
+            display: block;
+            line-height: 40px;
+            text-align: center;
+
+            &:hover {
+                background-color: unset;
+            }
         }
     }
 }
@@ -170,10 +180,8 @@
         top: 0;
         transition: width var(--side-nav-openclose-transition);
         z-index: 1050;
-        overflow: auto;
+        overflow-y: auto;
         border: var(--side-nav-mobile-border);
-
-
 
         &.no-donate {
             height: 100dvh;
@@ -185,6 +193,14 @@
             box-shadow: none;
         }
 
+        .side-nav {
+            overflow: auto;
+        }
+
+        .side-nav-item {
+            padding: 0;
+        }
+
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
@@ -192,14 +208,16 @@
     }
 
     .sidenav-bottom {
-        display:none;
-
+        display: none;
+        &.closed {
+            left: 10px;
+        }
     }
 
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc((var(--vh)*100) - var(--nav-mobile-offset));
+        height: calc((var(--vh) * 100) - var(--nav-mobile-offset));
         position: absolute;
         left: 0;
         top: var(--nav-mobile-offset);

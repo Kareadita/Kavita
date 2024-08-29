@@ -199,7 +199,6 @@
         "specials-tab": "Špeciály",
         "continue": "Pokračovať",
         "read-incognito": "Čitať v móde Inkognito",
-        "user-reviews-alt": "Užívateľské Recenzie",
         "no-chapters": "Tento zväzok neobsahuje žiadne kapitoly. Nedá sa čítať.",
         "layout-mode-option-card": "Karta",
         "read-options-alt": "Možnosti čítania",
@@ -210,8 +209,6 @@
         "continue-from": "Pokračovať {{title}}",
         "continue-incognito": "Pokračovať Inkognito",
         "edit-series-alt": "Upraviť Informácie o Sérii",
-        "download-series--tooltip": "Stiahnuť Sériu",
-        "downloading-status": "Sťahuje sa…",
         "cover-change": "Môže trvať až minútu, kým váš prehliadač obnoví obrázok. Dovtedy sa na niektorých stránkach môže zobrazovať starý obrázok.",
         "recommendations-tab": "Odporúčania"
     },
@@ -244,7 +241,6 @@
         "folder-watching-label": "Sledovanie Priečinka",
         "folder-watching-tooltip": "Prepísať sledovanie priečinka servera pre túto knižnicu. Ak je vypnutá, sledovanie priečinkov sa nespustí v priečinkoch, ktoré táto knižnica obsahuje. Ak knižnice zdieľajú priečinky, priečinky môžu byť stále spustené. Pred spustením skenovania vždy počká 10 minút.",
         "include-in-dashboard-label": "Zahrnúť v Dashboarde",
-        "include-in-recommendation-tooltip": "Mali by byť na stránke Odporúčané zahrnuté série z knižnice.",
         "force-scan-tooltip": "Toto vynúti skenovanie v knižnici a bude sa s ním zaobchádzať ako s novým skenom",
         "advanced-tab": "Pokročilé",
         "library-name-unique": "Názov knižnice musí byť jedinečný",
@@ -266,7 +262,6 @@
         "include-in-search-tooltip": "Mali by byť do výsledkov vyhľadávania zahrnuté série a akékoľvek odvodené informácie (žánre, ľudia, súbory) z knižnice.",
         "force-scan": "Vynútiť skenovanie",
         "naming-conventions-part-1": "Kavita má ",
-        "include-in-recommendation-label": "Zahrnúť medzi odporúčané",
         "include-in-dashboard-tooltip": "Mali by byť v Dashboarde zahrnuté série z knižnice. Ovplyvní to všetky streamy, ako sú Pokračovať v čítaní, Naposledy aktualizované, Nedávno pridané alebo akékoľvek vlastné doplnky.",
         "exclude-patterns-tooltip": "Nakonfigurujte sadu vzorov (Glob syntax), s ktorými bude Kavita zhodovať pri skenovaní adresárov a vylúči ich z výsledkov Scanner.",
         "edit-title": "Upraviť {{name}}",
@@ -303,19 +298,6 @@
         "theme-white": "Biely",
         "theme-paper": "Papier",
         "immersive-mode-tooltip": "Ponuka sa skryje pri kliknutí na dokument čítačky a zapne dotyk pre listovanie strán"
-    },
-    "card-detail-drawer": {
-        "cover-tab": "Obal",
-        "info-tab": "Info",
-        "size": "Veľkosť:",
-        "files": "Súbory",
-        "metadata-tab": "Metadáta",
-        "no-summary": "Nie je k dispozícii žiadny súhrn.",
-        "unread": "Neprečítané",
-        "general-tab": "Všeobecné",
-        "not-defined": "Neurčené",
-        "pages": "Stránky:",
-        "added": "Pridané:"
     },
     "edit-series-relation": {
         "target-series": "Cieľová séria",
@@ -381,7 +363,6 @@
         "weekly": "Týždenne",
         "convert-media-task": "Previesť médiá na cieľové kódovanie",
         "convert-media-task-desc": "Spustí dlhotrvajúcu úlohu, ktorá skonvertuje všetky médiá spravované kavitou na cieľové kódovanie. Je to pomalé (najmä na zariadeniach ARM).",
-        "convert-media-success": "Konverzia médií na cieľové kódovanie bola zaradená do poradia",
         "bust-cache-task-success": "Vyrovnávacia pamäť Kavita+ bola prerušená",
         "clear-reading-cache-task": "Vymazať vyrovnávaciu pamäť čítania",
         "clear-reading-cache-task-success": "Vyrovnávacia pamäť bola vymazaná",
@@ -843,20 +824,6 @@
         "description-2": "Pozrite sa na <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pre inštrukcie, ako aktualizovať.",
         "description-3": "Ak existuje konkrétny dôvod, prečo ste ešte neaktualizovali, radi by sme vedeli, čo vás drží na zastaranej verzii! Zastavte sa na našom Discorde a dajte nám vedieť, čo bráni vašej ceste inovácie."
     },
-    "series-metadata-detail": {
-        "cover-artists-title": "Umelci Obálky",
-        "tags-title": "Tagy",
-        "characters-title": "Postavy",
-        "editors-title": "Redaktori",
-        "publishers-title": "Vydavatelia",
-        "rating-title": "Hodnotenia",
-        "see-more": "Pozrieť viac",
-        "links-title": "Odkazy",
-        "writers-title": "Spisovatelia",
-        "translators-title": "Prekladatelia",
-        "genres-title": "Žánre",
-        "see-less": "Pozri menej"
-    },
     "default-date-pipe": {
         "never": "Nikdy"
     },
@@ -1015,16 +982,13 @@
         "mark-visible": "Označiť ako viditeľné",
         "add-to-want-to-read": "Pridať do zoznamu Chcete si prečítať",
         "details": "Detaily",
-        "add-rule-group-and": "Pridať skupinu pravidiel (A)",
         "edit": "Upraviť",
         "mark-as-unread": "Označiť ako neprečítané",
-        "add-rule-group-or": "Pridať skupinu pravidiel (ALEBO)",
         "mark-invisible": "Označiť ako neviditeľné",
         "download": "Stiahnuť",
         "add-to": "Pridať do",
         "view-series": "Zobraziť sériu",
         "remove-from-want-to-read": "Odstrániť zo Chcete prečítať",
-        "remove-rule-group": "Odstrániť skupinu pravidiel",
         "read": "Čítať",
         "scan-library": "Skenovať knižnicu",
         "analyze-files": "Analyzovať súbory",
@@ -1157,9 +1121,6 @@
     "card-item": {
         "cannot-read": "Nedá sa čítať"
     },
-    "chapter-metadata-detail": {
-        "no-data": "Nie sú k dispozícii žiadne metadáta"
-    },
     "cover-image-chooser": {
         "drag-n-drop": "Potiahni a pusť",
         "upload": "Nahrať",
@@ -1171,38 +1132,6 @@
         "back": "Naspäť",
         "reset-cover-tooltip": "Obnoviť titulný obrázok",
         "image-num": "Obrázok {{num}}"
-    },
-    "entity-info-cards": {
-        "age-rating-title": "Vekové hodnotenie",
-        "length-title": "Dĺžka",
-        "id-title": "ID",
-        "hour": "Hodina",
-        "hours": "Hodín",
-        "release-date-title": "Vydanie",
-        "words-count": "{{num}} Slov",
-        "size-title": "Veľkosť",
-        "pages-count": "{{num}} Strán",
-        "reading-time-title": "Čas čítania",
-        "date-added-title": "Dátum pridaný",
-        "last-read-title": "Naposledy čítané",
-        "less-than-hour": "<1 Hodina",
-        "release-date-tooltip": "Dátum vydania"
-    },
-    "series-info-cards": {
-        "release-year-tooltip": "Rok Vydania",
-        "publication-status-tooltip": "Stav Publikácie",
-        "read-time-title": "Čas Čítania",
-        "on": "Zapnuté",
-        "format-title": "Formát",
-        "language-title": "Jazyk",
-        "publication-status-title": "Publikácia",
-        "off": "Vypnuté",
-        "disabled": "Deaktivované",
-        "scrobbling-tooltip": "Stav Scrobblingu",
-        "time-left-title": "Zostávajúci čas",
-        "last-read-title": "Naposledy čítané",
-        "length-title": "Dĺžka",
-        "scrobbling-title": "Scrobblovanie"
     },
     "entity-title": {
         "chapter": "Kapitola",
@@ -1526,10 +1455,6 @@
     "carousel-reel": {
         "prev-items": "Predchádzajúce položky",
         "next-items": "Nasledujúce položky"
-    },
-    "library-detail": {
-        "library-tab": "Knižnica",
-        "recommended-tab": "Odporúčané"
     },
     "restriction-selector": {
         "description": "Keď vyberiete túto možnosť, všetky série a zoznamy čítaní, ktoré majú aspoň jednu položku, ktorá je väčšia ako vybraté obmedzenie, budú z výsledkov vyradené."

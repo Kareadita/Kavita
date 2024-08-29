@@ -1,0 +1,21 @@
+@import "../../../theme/variables";
+
+.table {
+    @media (max-width: $grid-breakpoints-sm) {
+        overflow-x: auto;
+        width: 100% !important;
+        display: block;
+    }
+    .btn-container {
+        @media (max-width: $grid-breakpoints-lg) {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn {
+            width: 32px;
+        }
+    }
+}

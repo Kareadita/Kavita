@@ -146,6 +146,10 @@ export class CardItemComponent implements OnInit {
    */
   @Input() hasReadButton = false;
   /**
+   * A method that if defined will return the url
+   */
+  @Input() linkUrl?: string;
+  /**
    * Event emitted when item is clicked
    */
   @Output() clicked = new EventEmitter<string>();

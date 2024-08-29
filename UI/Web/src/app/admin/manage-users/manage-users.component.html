@@ -67,26 +67,28 @@
             }
           </td>
           <td>
-            @if (canEditMember(member)) {
-              <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(member)"
-                      placement="top" [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
-                <i class="fa fa-trash" aria-hidden="true"></i>
-              </button>
-              <button class="btn btn-primary btn-sm me-2" (click)="openEditUser(member)"
-                      placement="top" [ngbTooltip]="t('edit-user-tooltip')" [attr.aria-label]="t('edit-user-alt', {user: member.username | titlecase})">
-                <i class="fa fa-pen" aria-hidden="true"></i>
-              </button>
+            <div class="btn-container">
+              @if (canEditMember(member)) {
+                <button class="btn btn-danger btn-sm me-2 mb-2" (click)="deleteUser(member)"
+                        placement="top" [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
+                  <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-primary btn-sm me-2 mb-2" (click)="openEditUser(member)"
+                        placement="top" [ngbTooltip]="t('edit-user-tooltip')" [attr.aria-label]="t('edit-user-alt', {user: member.username | titlecase})">
+                  <i class="fa fa-pen" aria-hidden="true"></i>
+                </button>
 
-              @if (member.isPending) {
-                <button class="btn btn-secondary btn-sm me-2" (click)="resendEmail(member)"
-                        placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})"><i class="fa-solid fa-share-from-square" aria-hidden="true"></i></button>
-                <button class="btn btn-secondary btn-sm" (click)="setup(member)"
-                        placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
-              } @else {
-                <button class="btn btn-secondary btn-sm" (click)="updatePassword(member)"
-                        placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
+                @if (member.isPending) {
+                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="resendEmail(member)"
+                          placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})"><i class="fa-solid fa-share-from-square" aria-hidden="true"></i></button>
+                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="setup(member)"
+                          placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+                } @else {
+                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="updatePassword(member)"
+                          placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
+                }
               }
-            }
+            </div>
           </td>
         </tr>
       }

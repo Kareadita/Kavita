@@ -48,12 +48,12 @@
     flex-shrink: 0;
     font-size: 13px;
     overflow: hidden;
-    padding: 0 10px;
+    padding: 0 5px;
     align-items: center;
     justify-content: space-around;
 
     @media (max-width: 576px) {
-        padding: 0 10px 0 5px;
+        padding: 0 5px 0 5px;
     }
 
     .btn {
@@ -133,7 +133,7 @@ h2 {
   cursor: pointer;
   padding: 0;
   margin: 0;
-  width: 40px;
+  width: 25px;
   height: 25px;
   position: relative;
   overflow: hidden;

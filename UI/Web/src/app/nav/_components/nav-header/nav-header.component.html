@@ -31,7 +31,7 @@
                 >
 
                   <ng-template #libraryTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
                       <div class="ms-1">
                         <span>{{item.name}}</span>
                       </div>
@@ -39,7 +39,7 @@
                   </ng-template>
 
                   <ng-template #seriesTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
                       <div style="width: 24px" class="me-1">
                         <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
                       </div>
@@ -58,7 +58,7 @@
                   </ng-template>
 
                   <ng-template #bookmarkTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
                       <div style="width: 24px" class="me-1">
                         <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
                       </div>
@@ -77,7 +77,7 @@
                   </ng-template>
 
                   <ng-template #collectionTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
                       <div style="width: 24px" class="me-1">
                         <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                       </div>
@@ -92,7 +92,7 @@
                   </ng-template>
 
                   <ng-template #readingListTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
                       <div class="ms-1">
                         <span>{{item.title}}</span>
                         <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
@@ -101,7 +101,7 @@
                   </ng-template>
 
                   <ng-template #tagTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="goToOther(FilterField.Tags, item.id)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="goToOther(FilterField.Tags, item.id)">
                       <div class="ms-1">
                         <span>{{item.title}}</span>
                       </div>
@@ -141,7 +141,7 @@
                   </ng-template>
 
                   <ng-template #fileTemplate let-item>
-                    <div style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
                       <div class="ms-1">
                         <app-series-format [format]="item.format"></app-series-format>
                         <span>{{item.filePath}}</span>
