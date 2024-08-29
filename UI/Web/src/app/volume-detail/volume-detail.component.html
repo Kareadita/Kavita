@@ -155,7 +155,7 @@
 
       <div class="carousel-tabs-container mb-2">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
-        <li [ngbNavItem]="TabID.Chapters">
+          <li [ngbNavItem]="TabID.Chapters">
           <a ngbNavLink>
             {{utilityService.formatChapterName(libraryType!, false, false, true)}}
             <span class="badge rounded-pill text-bg-secondary">{{volume.chapters.length}}</span>
@@ -180,28 +180,28 @@
           </ng-template>
         </li>
 
-        @if (volume.chapters.length === 1 && readingLists.length > 0) {
-          <li [ngbNavItem]="TabID.Related">
-            <a ngbNavLink>{{t('related-tab')}}</a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <app-related-tab [readingLists]="readingLists"></app-related-tab>
-              }
-            </ng-template>
-          </li>
-        }
+          @if (volume.chapters.length === 1 && readingLists.length > 0) {
+            <li [ngbNavItem]="TabID.Related">
+              <a ngbNavLink>{{t('related-tab')}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                  <app-related-tab [readingLists]="readingLists"></app-related-tab>
+                }
+              </ng-template>
+            </li>
+          }
 
-        @if (showDetailsTab) {
-          <li [ngbNavItem]="TabID.Details" id="details-tab">
-            <a ngbNavLink>{{t('details-tab')}}</a>
-            <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                <app-details-tab [metadata]="volumeCast" [genres]="genres" [tags]="tags"></app-details-tab>
-              }
-            </ng-template>
-          </li>
-        }
-      </ul>
+          @if (showDetailsTab) {
+            <li [ngbNavItem]="TabID.Details" id="details-tab">
+              <a ngbNavLink>{{t('details-tab')}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                  <app-details-tab [metadata]="volumeCast" [genres]="genres" [tags]="tags"></app-details-tab>
+                }
+              </ng-template>
+            </li>
+          }
+        </ul>
       </div>
       <!-- Min height helps with scroll jerking when switching from chapter -> related/details -->
       <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
