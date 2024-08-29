@@ -183,7 +183,6 @@
         "valid-email": "{{validation.valid-email}}"
     },
     "series-detail": {
-        "downloading-status": "ダウンロード中…",
         "close": "{{common.close}}",
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
         "read": "{{common.read}}",
@@ -203,36 +202,12 @@
         "no-chapters": "この巻にはチャプターが存在しません。読むことはできません。",
         "continue-incognito": "シークレットモードで続ける",
         "page-settings-title": "ページ設定",
-        "user-reviews-alt": "ユーザーレビュー",
         "related-tab": "関連",
         "read-incognito": "シークレットモードで読む",
         "specials-tab": "Specials",
         "recommendations-tab": "おすすめ",
         "edit-series-alt": "シリーズ情報を編集",
-        "layout-mode-option-list": "リスト",
-        "download-series--tooltip": "ダウンロードシリーズ"
-    },
-    "entity-info-cards": {
-        "isbn-title": "ISBN",
-        "range-hours": "{{value}} {{hourWord}}",
-        "read-time-title": "{{series-info-cards.read-time-title}}",
-        "pages-count": "{{num}} ページ",
-        "words-count": "{{num}} ワード",
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "links-title": "{{series-metadata-detail.links-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "less-than-hour": "<1時間",
-        "release-date-title": "リリース",
-        "last-read-title": "最後に読んだ",
-        "release-date-tooltip": "リリース日",
-        "hour": "時間",
-        "hours": "時間",
-        "length-title": "長さ",
-        "id-title": "ID",
-        "age-rating-title": "年齢制限",
-        "size-title": "サイズ",
-        "reading-time-title": "読書時間",
-        "date-added-title": "追加された日付"
+        "layout-mode-option-list": "リスト"
     },
     "publication-status-stats": {
         "year-header": "年",
@@ -261,17 +236,14 @@
         "read": "読む",
         "analyze-files": "ファイル分析",
         "settings": "設定",
-        "add-rule-group-or": "ルールグループを追加する(または)",
         "mark-visible": "可視としてマーク",
         "mark-invisible": "目に見えないマーク",
         "remove-from-want-to-read": "読書したいから削除",
         "add-to-reading-list": "読書リストに追加",
         "others": "その他",
         "import-cbl": "CBLをインポート",
-        "add-rule-group-and": "ルールグループを追加(AND)",
         "read-incognito": "シークレットモードで読む",
-        "details": "詳細",
-        "remove-rule-group": "ルールグループを削除"
+        "details": "詳細"
     },
     "common": {
         "close": "閉じる",
@@ -305,40 +277,6 @@
         "issue-hash-num": "問題 #",
         "deselect-all": "すべて選択解除"
     },
-    "series-metadata-detail": {
-        "reading-lists-title": "{{side-nav.reading-lists}}",
-        "promoted": "{{common.promoted}}",
-        "collections-title": "{{side-nav.collections}}",
-        "colorists-title": "カラーリスト",
-        "writers-title": "作者",
-        "publishers-title": "出版社",
-        "see-less": "あまり見ない",
-        "see-more": "もっと見る",
-        "genres-title": "ジャンル",
-        "inkers-title": "インキサー",
-        "pencillers-title": "下書き",
-        "links-title": "リンク",
-        "editors-title": "編集者",
-        "tags-title": "タグ",
-        "cover-artists-title": "カバーアーティスト",
-        "letterers-title": "校正",
-        "translators-title": "翻訳者",
-        "characters-title": "キャラクター",
-        "rating-title": "評価"
-    },
-    "chapter-metadata-detail": {
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
-        "letterers-title": "{{series-metadata-detail.letterers-title}}",
-        "translators-title": "{{series-metadata-detail.translators-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "inkers-title": "{{series-metadata-detail.inkers-title}}",
-        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}",
-        "no-data": "メタデータなし"
-    },
     "side-nav": {
         "bookmarks": "ブックマーク",
         "all-series": "すべてのシリーズ",
@@ -356,24 +294,6 @@
     "all-series": {
         "title": "すべてのシリーズ",
         "series-count": "{{common.series-count}}"
-    },
-    "card-detail-drawer": {
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "writers-title": "{{common.series-count}}",
-        "read": "{{common.read}}",
-        "general-tab": "一般",
-        "pages": "ページ:",
-        "added": "追加:",
-        "files": "ファイル",
-        "no-summary": "概要はありません",
-        "unread": "未読",
-        "cover-tab": "カバー",
-        "metadata-tab": "メタデータ",
-        "size": "サイズ:",
-        "not-defined": "定義されていません",
-        "info-tab": "情報"
     },
     "edit-series-relation": {
         "parent": "{{relationship-pipe.parent}}",
@@ -527,7 +447,6 @@
         "include-in-search-tooltip": "ライブラリから派生した情報(ジャンル、人、ファイル)を検索結果に含めます。",
         "folder-watching-tooltip": "このライブラリのフォルダー監視設定を変更します。オフにすると、このライブラリが含むフォルダーに対する監視が停止します。ライブラリがフォルダーを共有している場合、それらのフォルダーは引き続き監視の対象となります。スキャンをトリガーする前には、必ず10分待機します。",
         "include-in-dashboard-tooltip": "ライブラリのシリーズをダッシュボードに表示しますか？これにより、最近読んでいる本、最近更新されたシリーズ、最近追加されたシリーズなどのすべての表示が影響を受けます。",
-        "include-in-recommendation-label": "おすすめに含める",
         "naming-conventions-part-2": "フォルダーの要件",
         "manage-reading-list-tooltip": "ComicInfo.xml/opfファイル内のStoryArc/StoryArcNumberおよびAlternativeSeries/AlternativeCountタグからReading Listsを自動的に作成",
         "help-us-part-1": "フォローしてくれると助かります。 ",
@@ -552,7 +471,6 @@
         "help-us-part-2": "私達のガイド",
         "allow-scrobbling-label": "Scrobblingを許可する",
         "help": "{{common.help}}",
-        "include-in-recommendation-tooltip": "おすすめページにライブラリのシリーズを含める",
         "file-type-group-label": "ファイルの種類",
         "save": "{{common.save}}",
         "file-type-group-tooltip": "どの種類のファイルでも、Kavitaのスキャンが必要です。 たとえば、アーカイブにはすべてのcb*、zip、rarなどのファイルが含まれます。",
@@ -933,10 +851,6 @@
         "pdf": "PDF",
         "image": "画像"
     },
-    "library-detail": {
-        "library-tab": "ライブラリー",
-        "recommended-tab": "おすすめ商品"
-    },
     "edit-collection-tags": {
         "promote-tooltip": "「Promotion」は、そのタグがサーバー全体で見えるようになることを意味します。ただし、このタグを持つすべてのシリーズには引き続きユーザーアクセスの制限が適用されます。",
         "promote-label": "プロモーション",
@@ -1171,30 +1085,6 @@
         "provided-by-label": "提供:",
         "staff-label": "スタッフ",
         "view-series": "シリーズを見る"
-    },
-    "series-info-cards": {
-        "less-than-hour": "{{entity-info-cards.less-than-hour}}",
-        "pages-count": "{{entity-info-cards.pages-count}}",
-        "age-rating-title": "{{entity-info-cards.age-rating-title}}",
-        "release-date-title": "{{entity-info-cards.release-date-title}}",
-        "hours": "{{entity-info-cards.hours}}",
-        "ongoing": "{{publication-status-pipe.ongoing}}",
-        "words-count": "{{entity-info-cards.words-count}}",
-        "hour": "{{entity-info-cards.hour}}",
-        "publication-status-title": "出版物",
-        "scrobbling-title": "Scrobbling",
-        "disabled": "無効",
-        "format-title": "フォーマット",
-        "last-read-title": "最後に読んだ",
-        "read-time-title": "読書時間",
-        "length-title": "長さ",
-        "language-title": "言語",
-        "on": "ON",
-        "time-left-title": "残り時間",
-        "release-year-tooltip": "出版年",
-        "publication-status-tooltip": "出版状況",
-        "scrobbling-tooltip": "Scrobbling ステータス",
-        "off": "OFF"
     },
     "reading-activity": {
         "last-30-days": "{{time-periods.last-30-days}}",
@@ -1507,9 +1397,6 @@
         "next-chapter-tooltip": "次回/次巻",
         "first-time-reading-manga": "いつでも画像をタップしてメニューを開くことができます。異なる設定を構成したり、進行バーをクリックしてページに移動したりできます。画像の側面をタップして次の/前のページに移動できます。"
     },
-    "list-item": {
-        "read": "{{common.read}}"
-    },
     "nav-header": {
         "help": "{{common.help}}",
         "server-settings": "サーバー設定",
@@ -1633,7 +1520,6 @@
         "custom": "カスタム",
         "convert-media-task": "メディアをターゲットエンコーディングに変換する",
         "convert-media-task-desc": "すべてのkavita-managedメディアをターゲットエンコーディングに変換する長時間実行タスクを実行します。 これは遅いです(特にARMデバイスで).",
-        "convert-media-success": "メディアをターゲットエンコーディングに変換する処理がキューに追加されました｡",
         "bust-cache-task": "バストキャッシュ",
         "bust-cache-task-desc": "Kavita+キャッシュをクリアします。悪い一致のデバッグ時にのみ使用するべきです。",
         "bust-cache-task-success": "Kavita+キャッシュがクリアされました｡",
