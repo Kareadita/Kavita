@@ -646,6 +646,12 @@ export class VolumeDetailComponent implements OnInit {
   switchTabsToDetail() {
     this.activeTabId = TabID.Details;
     this.cdRef.markForCheck();
+    setTimeout(() => {
+      const tabElem = this.document.querySelector('#details-tab');
+      if (tabElem) {
+        (tabElem as HTMLLIElement).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }, 10);
   }
 
   navigateToSeries() {

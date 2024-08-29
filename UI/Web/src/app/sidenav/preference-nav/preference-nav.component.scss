@@ -73,6 +73,15 @@
   }
 }
 
+::ng-deep .side-nav-text {
+  div {
+    display: flex;
+  }
+  span {
+    font-size: 0.6rem;
+  }
+}
+
 @media (max-width: $grid-breakpoints-lg) {
   .side-nav {
     padding: 10px 0;

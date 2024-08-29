@@ -53,8 +53,6 @@
     --default-state-scrollbar: transparent;
     --text-muted-color: hsla(0,0%,100%,.45);
 
-    /* New Color scheme */
-    --bulk-background-color: rgba(39,39,39,1);
 
     /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
      * --colorscape-primary-color and the alpha variants will be updated in real time. the default variant is fixed and represents the default state and should
@@ -82,14 +80,15 @@
     --theme-color: #000000;
     --color-scheme: dark;
     --tile-color: var(--primary-color);
-    --nav-offset: 70px;
+    --nav-offset: 60px;
     --nav-mobile-offset: 55px;
+    /* Should we render the series cover as background on mobile */
+    --mobile-series-img-background: true;
 
     /* Setting Item */
-    // TODO: Robbie let's refactor this so all setting classes inherit from this area
-    --h6-text-color: #d5d5d5;
-    --h6-font-size: 1.2rem;
-    --h6-font-weight: bold;
+    --setting-header-text-color: #d5d5d5;
+    --setting-header-font-size: 1.2rem;
+    --setting-header-font-weight: bold;
     --setting-break-color: rgba(255, 255, 255, 0.2);
 
 
@@ -100,6 +99,7 @@
     --table-body-text-color: hsla(0,0%,100%,.85);
     --table-body-striped-bg-color: hsla(0,0%,100%,.25);
     --table-body-border: hidden;
+    --table-body-striped-bg-color: var(--elevation-layer2);
 
 
     /* Navbar */
@@ -383,6 +383,7 @@
     /* Bulk Selection */
     --bulk-selection-text-color: var(--navbar-text-color);
     --bulk-selection-highlight-text-color: var(--primary-color);
+    --bulk-selection-bg-color: rgba(39,39,39,1);
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
@@ -410,7 +411,6 @@
     --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
     --login-input-background-color: #353535;
     --login-input-color: #fff;
-    --login-input-placeholder-color: #cecece;
     --login-forgot-password-color: var(--primary-color);
     --login-background-url: url('../../assets/images/login-bg.jpg');
     --login-background-size: cover;
@@ -419,6 +419,4 @@
     --login-input-font-family: 'League Spartan', sans-serif;
     --login-input-placeholder-opacity: 0.5;
     --login-input-placeholder-color: #fff;
-
-    --mobile-series-img-background: true;
 }

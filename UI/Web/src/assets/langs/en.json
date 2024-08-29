@@ -250,13 +250,15 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
 
     "edit-device-modal": {
         "title": "Edit Device",
         "device-name-label": "{{manage-devices.name-label}}",
         "platform-label": "{{manage-devices.platform-label}}",
+        
         "email-label": "{{common.email}}",
         "email-tooltip": "This email will be used to accept the file via Send To",
         "device-platform-label": "Device Platform",
@@ -672,7 +674,7 @@
         "discord-validation": "This is not a valid Discord User Id. Your user id is not your discord username.",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
-        "activate-reset-tooltip": "Invalidate an previous registration using your license. Requires both License and Email",
+        "activate-reset-tooltip": "Invalidate a previous registration using your license. Requires both License and Email",
         "activate-save": "{{common.save}}",
 
         "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",

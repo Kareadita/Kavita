@@ -20,6 +20,11 @@
 
 .main-container {
   overflow: unset !important;
+  margin-top: 15px;
+}
+
+::ng-deep .badge-expander .content a {
+  font-size: 0.8rem;
 }
 
 .btn-group > .btn.dropdown-toggle-split:not(first-child){
