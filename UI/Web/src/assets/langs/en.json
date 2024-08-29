@@ -258,7 +258,7 @@
         "title": "Edit Device",
         "device-name-label": "{{manage-devices.name-label}}",
         "platform-label": "{{manage-devices.platform-label}}",
-        
+
         "email-label": "{{common.email}}",
         "email-tooltip": "This email will be used to accept the file via Send To",
         "device-platform-label": "Device Platform",
@@ -731,7 +731,6 @@
     "confirm-email": {
         "title": "Register",
         "description": "Complete the form to complete your registration",
-        "error-label": "Errors: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
