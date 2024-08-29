@@ -2449,7 +2449,7 @@
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email",
-        "password-validation": "Password must be between 6 and 32 characters in length",
+        "password-validation": "Password must be between 6 and 256 characters in length",
         "year-validation": "This must be a valid year greater than 1000 and 4 characters long"
     },
 
