@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
 using MimeTypes;
@@ -38,8 +38,9 @@ public static class FileTypeGroupExtensions
     {
         // Add jxl format
         format = format.ToLowerInvariant();
-        if (format == ".jxl")
-            return "image/jxl";
+
+        if (format == ".jxl") return "image/jxl";
+
         return MimeTypeMap.GetMimeType(format);
     }
 }

@@ -73,12 +73,16 @@ public static class HttpExtensions
     public static List<string> SupportedImageTypesFromRequest(this HttpRequest request)
     {
         var acceptHeader = request.Headers["Accept"].ToString();
-        string[] spl1 = acceptHeader.Split(';');
-        acceptHeader = spl1[0];
-        string[] split = acceptHeader.Split(',');
+        var split = acceptHeader.Split(';');
+        acceptHeader = split[0];
+        split = acceptHeader.Split(',');
+
         List<string> supportedExtensions = new List<string>();
 
         //Add default extensions supported by all browsers.
+
+        //NOTE: Will user parser, instead of this list, but first fixing low-hanging fruits, and showstopper issues.
+
         supportedExtensions.Add("jpeg");
         supportedExtensions.Add("jpg");
         supportedExtensions.Add("png");
@@ -90,22 +94,38 @@ public static class HttpExtensions
         {
             if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
             {
-                string n = v.Substring(6).ToLowerInvariant();
-                if (n.StartsWith("*"))
-                    continue;
-                if (n == "svg+xml")
-                    n = "svg";
-                if (n == "jp2")
+                string mimeimagepart = v.Substring(6).ToLowerInvariant();
+                if (mimeimagepart.StartsWith("*")) continue;
+
+                if (mimeimagepart == "svg+xml")
+                {
+                    mimeimagepart = "svg";
+                }
+
+                if (mimeimagepart == "jp2")
+                {
                     AddExtension(supportedExtensions, "j2k");
-                if (n == "j2k")
+                }
+
+                if (mimeimagepart == "j2k")
+                {
                     AddExtension(supportedExtensions, "jp2");
-                if (n == "heif")
+                }
+
+                if (mimeimagepart == "heif")
+                {
                     AddExtension(supportedExtensions, "heic");
-                if (n == "heic")
+                }
+
+                if (mimeimagepart == "heic")
+                {
                     AddExtension(supportedExtensions, "heif");
-                AddExtension(supportedExtensions, n);
+                }
+
+                AddExtension(supportedExtensions, mimeimagepart);
             }
         }
+
         return supportedExtensions;
     }
 }

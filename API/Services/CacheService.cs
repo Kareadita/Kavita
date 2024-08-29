@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -103,11 +103,6 @@ public class CacheService : ICacheService
             {
                 var file = files[i];
                 var dimension = _converterService.GetDimensions(file);
-                if (dimension == null)
-                {
-                    using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
-                    dimension = (image.Width, image.Height);
-                }
 
                 dimensions.Add(new FileDimensionDto()
                 {

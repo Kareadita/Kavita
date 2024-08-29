@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -47,7 +47,7 @@ public interface IImageService
     /// <param name="outputDirectory"></param>
     /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    string WriteCoverThumbnail(string sourceFile, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
+    string WriteCoverThumbnail(string originalNameWithExtension, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     /// <summary>
     /// Writes out a thumbnail by file path input
     /// </summary>
@@ -241,15 +241,17 @@ public class ImageService : IImageService
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
     /// fileName and the appropriate extension.
     /// </summary>
+    /// <param name="originalNameWithExtension">The OriginalNameWithExtension of the image
+    /// (Not a file,  only the name, if it came from the filesystem or an archive entry).</param>
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="encodeFormat">Export the file as the passed encoding</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(string sourceFile, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
+    public string WriteCoverThumbnail(string originalNameWithExtension, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        if (!_converterService.IsVipsSupported(sourceFile))
-            stream = _converterService.ConvertStream(sourceFile, stream);
+        if (!_converterService.IsVipsSupported(originalNameWithExtension))
+            stream = _converterService.ConvertStream(originalNameWithExtension, stream);
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
         using var sourceImage = Image.NewFromStream(stream);

@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MimeTypes;
-using Org.BouncyCastle.Ocsp;
 
 namespace API.Controllers;
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using API.Services.ImageConversion;
+using NetVips;
 
 namespace API.Services
 {
@@ -15,10 +16,11 @@ namespace API.Services
         /// <summary>
         /// Converts the input stream to jpg image format.
         /// </summary>
-        /// <param name="filename">The filename of the image.</param>
+        /// <param name="originalNameWithExtension">The OriginalNameWithExtension of the image
+        /// (Not a file,  only the name, if it came from the filesystem or an archive entry).</param>
         /// <param name="source">The input stream of the image.</param>
         /// <returns>The converted image stream.</returns>
-        Stream ConvertStream(string filename, Stream source);
+        Stream ConvertStream(string originalNameWithExtension, Stream source);
 
         /// <summary>
         /// Converts the specified image file to jpg image format.
@@ -60,17 +62,19 @@ namespace API.Services
         }
 
         /// <inheritdoc/>
-        public Stream ConvertStream(string filename, Stream source)
+        public Stream ConvertStream(string originalNameWithExtension, Stream source)
         {
-            IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(filename));
+            //Check if the name have one of our supported extensions.
+            IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(originalNameWithExtension));
             if (provider == null)
                 return source;
-            string tempFile = Path.GetFileName(filename);
-            Stream dest = File.OpenWrite(tempFile);
+            //We support it, create a temp file, and write the original content, so it can be transcoded into another stream.
+            string tempFileName = Path.ChangeExtension(Path.GetTempFileName(), Path.GetExtension(originalNameWithExtension));
+            Stream dest = File.OpenWrite(tempFileName);
             source.CopyTo(dest);
             source.Close();
             dest.Close();
-            return File.OpenRead(provider.Convert(tempFile));
+            return File.OpenRead(provider.Convert(tempFileName));
         }
 
         private bool CheckDirectSupport(string filename, List<string> supportedImageFormats)
@@ -95,10 +99,14 @@ namespace API.Services
         /// <inheritdoc/>
         public (int Width, int Height)? GetDimensions(string fileName)
         {
+            //Provider supported
             IImageConverterProvider provider = _converters.FirstOrDefault(a => a.IsSupported(fileName));
-            if (provider == null)
-                return null;
-            return provider.GetDimensions(fileName);
+            if (provider != null)
+                return provider.GetDimensions(fileName);
+
+            //No provider for this image type, so, is a common image format, use netvips and original code.
+            using var image = Image.NewFromFile(fileName, memory: false, access: Enums.Access.SequentialUnbuffered);
+            return (image.Width, image.Height);
         }
 
         /// <inheritdoc/>
