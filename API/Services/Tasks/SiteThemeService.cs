@@ -120,7 +120,11 @@ public class ThemeService : IThemeService
     public async Task<List<DownloadableSiteThemeDto>> GetDownloadableThemes()
     {
         const string cacheKey = "browse";
-        var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).ToDictionary(k => k.Name);
+        // Avoid a duplicate Dark issue some users faced during migration
+        var existingThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos())
+            .GroupBy(k => k.Name)
+            .ToDictionary(g => g.Key, g => g.First());
+
         if (_cache.TryGetValue(cacheKey, out List<DownloadableSiteThemeDto>? themes) && themes != null)
         {
             foreach (var t in themes)
