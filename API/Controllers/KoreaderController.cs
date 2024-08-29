@@ -9,29 +9,36 @@ using API.Entities;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using static System.Net.WebRequestMethods;
 
 namespace API.Controllers;
 
 #nullable enable
-
-// Koreader uses a different form of athentication. It stores the user name
-// and password in headers.
+/// <summary>
+/// The endpoint to interface with Koreader's Progress Sync plugin.
+/// </summary>
+/// <remarks>
+/// Koreader uses a different form of athentication. It stores the user name
+/// and password in headers.
+/// </remarks>
+/// <see cref="https://github.com/koreader/koreader/blob/master/plugins/kosync.koplugin/KOSyncClient.lua"/>
 [AllowAnonymous]
 public class KoreaderController : BaseApiController
 {
 
-    private readonly UserManager<AppUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
     private readonly IKoreaderService _koreaderService;
+    private readonly ILogger<KoreaderController> _logger;
 
-    public KoreaderController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager,
-            ILocalizationService localizationService, IKoreaderService koreaderService)
+    public KoreaderController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
+            IKoreaderService koreaderService, ILogger<KoreaderController> logger)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
-        _userManager = userManager;
         _koreaderService = koreaderService;
+        _logger = logger;
     }
 
     // We won't allow users to be created from Koreader. Rather, they
@@ -48,6 +55,7 @@ public class KoreaderController : BaseApiController
     {
         var userId = await GetUserId(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
         return Ok(new { username = user.UserName });
     }
 
@@ -55,14 +63,11 @@ public class KoreaderController : BaseApiController
     [HttpPut("{apiKey}/syncs/progress")]
     public async Task<IActionResult> UpdateProgress(string apiKey, KoreaderBookDto request)
     {
+        _logger.LogDebug("Koreader sync progress: {Progress}", request.Progress);
         var userId = await GetUserId(apiKey);
         await _koreaderService.SaveProgress(request, userId);
-        var response = new
-        {
-            document = request.Document,
-            timestamp = DateTime.Now
-        };
-        return Ok(response);
+        
+        return Ok(new { document = request.Document, timestamp = DateTime.UtcNow });
     }
 
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
@@ -70,8 +75,8 @@ public class KoreaderController : BaseApiController
     {
         var userId = await GetUserId(apiKey);
         var response = await _koreaderService.GetProgress(ebookHash, userId);
-        Console.WriteLine(response.Progress);
-        Console.WriteLine(response.Percentage);
+        _logger.LogDebug("Koreader response progress: {Progress}", response.Progress);
+
         return Ok(response);
     }
 
@@ -79,7 +84,7 @@ public class KoreaderController : BaseApiController
     /// <summary>
     /// Gets the user from the API key
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The user's Id</returns>
     private async Task<int> GetUserId(string apiKey)
     {
         try

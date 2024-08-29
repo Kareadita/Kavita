@@ -11,7 +11,7 @@ public interface IMangaFileRepository
 {
     void Update(MangaFile file);
     Task<IList<MangaFile>> GetAllWithMissingExtension();
-    Task<MangaFile> GetByHash(string hash);
+    Task<MangaFile> GetByKoreaderHash(string hash);
 }
 
 public class MangaFileRepository : IMangaFileRepository
@@ -35,9 +35,9 @@ public class MangaFileRepository : IMangaFileRepository
             .ToListAsync();
     }
 
-    public Task<MangaFile> GetByHash(string hash)
+    public Task<MangaFile> GetByKoreaderHash(string hash)
     {
         return _context.MangaFile
-            .FirstOrDefaultAsync(f => f.Hash == hash.ToUpper());
+            .FirstOrDefaultAsync(f => f.KoreaderHash == hash.ToUpper());
     }
 }

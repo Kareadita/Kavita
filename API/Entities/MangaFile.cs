@@ -21,9 +21,9 @@ public class MangaFile : IEntityDate
     /// </summary>
     public required string FilePath { get; set; }
     /// <summary>
-    /// MD5 hash of the file
+    /// A hash of the document using Koreader's unique hashing algorithm
     /// </summary>
-    public string Hash { get; set; }
+    public string KoreaderHash { get; set; }
     /// <summary>
     /// Number of pages for the given file
     /// </summary>

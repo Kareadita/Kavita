@@ -1,6 +1,7 @@
 using API.DTOs.Koreader;
 using API.DTOs.Progress;
 using API.Helpers;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -38,6 +39,12 @@ public class KoreaderHelperTests
         Assert.Equal(koreaderPosition, KoreaderHelper.GetKoreaderPosition(given));
     }
 
+    [Theory]
+    [InlineData("./Data/AesopsFables.epub", "8795ACA4BF264B57C1EEDF06A0CEE688")]
+    public void GetKoreaderHash(string filePath, string hash)
+    {
+        Assert.Equal(KoreaderHelper.HashContents(filePath), hash);
+    }
 
     private ProgressDto EmptyProgressDto()
     {

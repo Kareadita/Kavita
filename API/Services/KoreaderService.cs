@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Migrations;
 using API.DTOs.Koreader;
+using API.Entities;
 using API.Helpers;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 namespace API.Services;
 
@@ -27,23 +30,27 @@ public class KoreaderService : IKoreaderService
 
     public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId)
     {
-        var file = await _unitOfWork.MangaFileRepository.GetByHash(koreaderBookDto.Document);
+        var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.Document);
         var userProgressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+
         KoreaderHelper.UpdateProgressDto(koreaderBookDto.Progress, userProgressDto);
-        _readerService.SaveReadingProgress(userProgressDto, userId);
+        await _readerService.SaveReadingProgress(userProgressDto, userId);
+
         await _unitOfWork.CommitAsync();
     }
 
     public async Task<KoreaderBookDto> GetProgress(string bookHash, int userId)
     {
-        var file = await _unitOfWork.MangaFileRepository.GetByHash(bookHash);
+        var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
+        var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
         return new KoreaderBookDto
         {
             Document = bookHash,
-            Device_id = "kavita",
-            Device = "kavita",
+            Device_id = settingsDto.InstallId,
+            Device = "Kavita",
             Progress = koreaderProgress,
             Percentage = 0.5f
             // We can potentially calculate percentage later if needed.

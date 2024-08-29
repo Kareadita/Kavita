@@ -590,8 +590,8 @@ public class ProcessSeries : IProcessSeries
 
             var nonSpecialVolumes = series.Volumes.Where(v => v.MaxNumber.IsNot(Parser.Parser.SpecialVolumeNumber));
 
-            var maxVolume = (int)(nonSpecialVolumes.Any() ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
-            var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+            var maxVolume = (int) (nonSpecialVolumes.Any() ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
+            var maxChapter = (int) chapters.Max(c => c.MaxNumber);
 
             // Single books usually don't have a number in their Range (filename)
             if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
