@@ -192,7 +192,7 @@
         }
 
         @if (showDetailsTab) {
-          <li [ngbNavItem]="TabID.Details">
+          <li [ngbNavItem]="TabID.Details" id="details-tab">
             <a ngbNavLink>{{t('details-tab')}}</a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Details; prefetch on idle) {
