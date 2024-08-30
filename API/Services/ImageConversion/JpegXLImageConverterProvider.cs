@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ImageMagick;
@@ -40,6 +42,13 @@ public interface IImageConverterProvider
     /// Gets a value indicating whether the image type supports Vips.
     /// </summary>
     bool IsVipsSupported { get; }
+
+    /// <summary>
+    /// Creates a NetVips Image object from the specified image stream.
+    /// </summary>
+    /// <param name="source">The source image stream.</param>
+    /// <returns>The NetVips Image object created from the image stream.</returns>
+    Image ImageFromStream(Stream source);
 }
 
 public class ImageMagickConverterProvider
@@ -57,6 +66,30 @@ public class ImageMagickConverterProvider
         sourceImage.Write(destination);
         File.Delete(filename);
         return destination;
+    }
+
+    /// <summary>
+    /// Creates a NetVips Image object from the specified image stream.
+    /// </summary>
+    /// <param name="source">The source image stream.</param>
+    /// <returns>The NetVips Image object created from the image stream.</returns>
+    public virtual Image ImageFromStream(Stream source)
+    {
+        var settings = new MagickReadSettings
+        {
+            ColorSpace = ColorSpace.sRGB
+        };
+        using var sourceImage = new MagickImage(source, settings);
+        float[] pixels = sourceImage.GetPixels().ToArray();
+        float mul = 1F / 255F;
+        for (int x = 0; x < pixels.Length; x++)
+            pixels[x] *= mul;
+        GCHandle handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+        IntPtr pointer = handle.AddrOfPinnedObject();
+        ulong size = (ulong)(Marshal.SizeOf<float>() * pixels.Length);
+        Image im = Image.NewFromMemoryCopy(pointer, size, sourceImage.Width, sourceImage.Height,3, Enums.BandFormat.Float);
+        handle.Free();
+        return im;
     }
 
     /// <summary>

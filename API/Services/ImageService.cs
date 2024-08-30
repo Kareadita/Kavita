@@ -217,8 +217,9 @@ public class ImageService : IImageService
 
         try
         {
-            if (!_converterService.IsVipsSupported(fileName))
-                fileName = _converterService.ConvertFile(fileName, null);
+            if (!_converterService.IsVipsSupported(path)) //If Vips supports the format, there is no need to convert the image, since in this case the consumer is not the browser.
+                path = _converterService.ConvertFile(path);
+
             var (width, height) = size.GetDimensions();
             using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
 
@@ -250,11 +251,10 @@ public class ImageService : IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(string originalNameWithExtension, Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        if (!_converterService.IsVipsSupported(originalNameWithExtension))
-            stream = _converterService.ConvertStream(originalNameWithExtension, stream);
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
-        using var sourceImage = Image.NewFromStream(stream);
+
+        using var sourceImage = _converterService.GetImageFromStream(originalNameWithExtension, stream);
 
         var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
         var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);
@@ -294,8 +294,9 @@ public class ImageService : IImageService
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        if (!_converterService.IsVipsSupported(sourceFile))
-            sourceFile = _converterService.ConvertFile(sourceFile, null);
+        if (!_converterService.IsVipsSupported(sourceFile)) //If Vips supports the format, there is no need to convert the image, since in this case the consumer is not the browser.
+            sourceFile = _converterService.ConvertFile(sourceFile);
+
         var (width, height) = size.GetDimensions();
         using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
 

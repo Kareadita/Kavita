@@ -4,6 +4,7 @@ using System.Threading;
 using System;
 using System.IO;
 using NetVips;
+using System.IO.Abstractions;
 
 namespace API.Services.ImageConversion
 {
@@ -50,6 +51,15 @@ namespace API.Services.ImageConversion
             sourceImage.WriteToFile(destination + "[Q=99]");
             File.Delete(filename);
             return destination;
+        }
+        /// <summary>
+        /// Creates a NetVips Image object from the specified image stream.
+        /// </summary>
+        /// <param name="source">The source image stream.</param>
+        /// <returns>The NetVips Image object created from the image stream.</returns>
+        public virtual Image ImageFromStream(Stream source)
+        {
+            return Image.NewFromStream(source);
         }
 
         /// <summary>
