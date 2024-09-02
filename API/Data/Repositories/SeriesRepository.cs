@@ -159,7 +159,7 @@ public interface ISeriesRepository
     Task<int> GetAverageUserRating(int seriesId, int userId);
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
-    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
+    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None);
     Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId);
 }
 
@@ -693,9 +693,9 @@ public class SeriesRepository : ISeriesRepository
         return await query.ToListAsync();
     }
 
-    public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto)
+    public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None)
     {
-        var query = await CreateFilteredSearchQueryableV2(userId, filterDto, QueryContext.None);
+        var query = await CreateFilteredSearchQueryableV2(userId, filterDto, queryContext);
 
         var retSeries = query
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)

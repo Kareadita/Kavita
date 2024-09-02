@@ -34,6 +34,7 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {ToastrService} from "ngx-toastr";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ReaderService} from "../../_services/reader.service";
+import {QueryContext} from "../../_models/metadata/v2/query-context";
 
 enum StreamId {
   OnDeck,
@@ -157,7 +158,7 @@ export class DashboardComponent implements OnInit {
           case StreamType.SmartFilter:
             s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
               switchMap(filter => {
-                return this.seriesService.getAllSeriesV2(0, 20, filter);
+                return this.seriesService.getAllSeriesV2(0, 20, filter, QueryContext.Dashboard);
               }))
                 .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
