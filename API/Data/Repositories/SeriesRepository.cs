@@ -979,7 +979,7 @@ public class SeriesRepository : ISeriesRepository
             .HasReleaseYear(hasReleaseYearMaxFilter, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
             .HasReleaseYear(hasReleaseYearMinFilter, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
             .HasName(hasSeriesNameFilter, FilterComparison.Matches, filter.SeriesNameQuery)
-            .HasRating(hasRatingFilter, FilterComparison.GreaterThanEqual, filter.Rating, userId)
+            .HasRating(hasRatingFilter, FilterComparison.GreaterThanEqual, filter.Rating / 100f, userId)
             .HasAgeRating(hasAgeRating, FilterComparison.Contains, filter.AgeRating)
             .HasPublicationStatus(hasPublicationFilter, FilterComparison.Contains, filter.PublicationStatus)
             .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
@@ -1227,7 +1227,7 @@ public class SeriesRepository : ISeriesRepository
                 (IList<PublicationStatus>) value),
             FilterField.Languages => query.HasLanguage(true, statement.Comparison, (IList<string>) value),
             FilterField.AgeRating => query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value),
-            FilterField.UserRating => query.HasRating(true, statement.Comparison, (int) value, userId),
+            FilterField.UserRating => query.HasRating(true, statement.Comparison, (float) value , userId),
             FilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
             FilterField.Translators => query.HasPeople(true, statement.Comparison, (IList<int>) value),
             FilterField.Characters => query.HasPeople(true, statement.Comparison, (IList<int>) value),
