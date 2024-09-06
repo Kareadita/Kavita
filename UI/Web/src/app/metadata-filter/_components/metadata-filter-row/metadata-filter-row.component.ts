@@ -80,6 +80,19 @@ const NumberFieldsThatIncludeDateComparisons = [
   FilterField.ReleaseYear
 ];
 
+const FieldsThatShouldIncludeIsEmpty = [
+  FilterField.Summary, FilterField.UserRating, FilterField.Genres,
+  FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
+
+  // People are a bit more complicated, for now let's leave off
+  // FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+  // FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+  // FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+  // FilterField.Writers, FilterField.Imprint, FilterField.Team,
+  // FilterField.Location,
+
+];
+
 const StringComparisons = [
   FilterComparison.Equal,
   FilterComparison.NotEqual,
@@ -221,7 +234,10 @@ export class MetadataFilterRowComponent implements OnInit {
       stmt.value = stmt.value + '';
     }
 
-    if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field)  && !BooleanFields.includes(stmt.field))) return;
+    if (stmt.comparison !== FilterComparison.IsEmpty) {
+      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field) && !BooleanFields.includes(stmt.field))) return;
+    }
+
     this.filterStatement.emit(stmt);
   }
 
@@ -317,8 +333,15 @@ export class MetadataFilterRowComponent implements OnInit {
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;
 
+
     if (StringFields.includes(inputVal)) {
-      this.validComparisons$.next(StringComparisons);
+      const comps = [...StringComparisons];
+
+      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+        comps.push(FilterComparison.IsEmpty);
+      }
+
+      this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Text);
 
       if (this.loaded) {
@@ -330,9 +353,14 @@ export class MetadataFilterRowComponent implements OnInit {
 
     if (NumberFields.includes(inputVal)) {
       const comps = [...NumberComparisons];
+
       if (NumberFieldsThatIncludeDateComparisons.includes(inputVal)) {
         comps.push(...DateComparisons);
       }
+      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+        comps.push(FilterComparison.IsEmpty);
+      }
+
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
       if (this.loaded) {
@@ -343,7 +371,12 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (DateFields.includes(inputVal)) {
-      this.validComparisons$.next(DateComparisons);
+      const comps = [...DateComparisons];
+      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+        comps.push(FilterComparison.IsEmpty);
+      }
+
+      this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Date);
 
       if (this.loaded) {
@@ -354,7 +387,12 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (BooleanFields.includes(inputVal)) {
-      this.validComparisons$.next(BooleanComparisons);
+      const comps = [...DateComparisons];
+      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+        comps.push(FilterComparison.IsEmpty);
+      }
+
+      this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Boolean);
 
       if (this.loaded) {
@@ -372,6 +410,10 @@ export class MetadataFilterRowComponent implements OnInit {
       if (DropdownFieldsWithoutMustContains.includes(inputVal)) {
         comps = comps.filter(c => c !== FilterComparison.MustContains);
       }
+      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+        comps.push(FilterComparison.IsEmpty);
+      }
+
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Dropdown);
       if (this.loaded) {
@@ -391,4 +433,5 @@ export class MetadataFilterRowComponent implements OnInit {
     this.propagateFilterUpdate();
   }
 
+  protected readonly FilterComparison = FilterComparison;
 }

@@ -1215,6 +1215,7 @@ public class SeriesRepository : ISeriesRepository
 
     private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query)
     {
+
         var value = FilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
         return statement.Field switch
         {
