@@ -55,6 +55,7 @@ const unitLabels: Map<FilterField, FilterRowUi> = new Map([
     [FilterField.ReadingDate, new FilterRowUi('unit-reading-date')],
     [FilterField.AverageRating, new FilterRowUi('unit-average-rating')],
     [FilterField.ReadProgress, new FilterRowUi('unit-reading-progress')],
+    [FilterField.UserRating, new FilterRowUi('unit-user-rating')],
 ]);
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];

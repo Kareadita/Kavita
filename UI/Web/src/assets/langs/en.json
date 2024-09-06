@@ -1782,8 +1782,9 @@
 
     "metadata-filter-row": {
         "unit-reading-date": "Date",
-        "unit-average-rating": "Average Rating (Kavita+) - only for cached series",
-        "unit-reading-progress": "Percent"
+        "unit-average-rating": "Kavita+ external rating, percent",
+        "unit-reading-progress": "Percent",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
 
     "sort-field-pipe": {

@@ -308,6 +308,7 @@ public static class SeriesFilter
         FilterComparison comparison, float rating)
     {
         if (!condition) return queryable;
+        
 
         var subQuery = queryable
             .Where(s => s.ExternalSeriesMetadata != null)
