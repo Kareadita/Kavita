@@ -168,7 +168,7 @@ export class AccountService {
     );
   }
 
-  setCurrentUser(user?: User) {
+  setCurrentUser(user?: User, refreshConnections = true) {
     if (user) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
@@ -188,6 +188,8 @@ export class AccountService {
 
     this.currentUser = user;
     this.currentUserSource.next(user);
+
+    if (!refreshConnections) return;
 
     this.stopRefreshTokenTimer();
 
@@ -311,7 +313,7 @@ export class AccountService {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
       if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = settings;
-        this.setCurrentUser(this.currentUser);
+        this.setCurrentUser(this.currentUser, false);
 
         // Update the locale on disk (for logout and compact-number pipe)
         localStorage.setItem(AccountService.localeKey, this.currentUser.preferences.locale);
