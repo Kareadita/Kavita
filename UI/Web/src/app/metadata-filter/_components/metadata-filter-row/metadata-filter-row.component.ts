@@ -84,13 +84,11 @@ const NumberFieldsThatIncludeDateComparisons = [
 const FieldsThatShouldIncludeIsEmpty = [
   FilterField.Summary, FilterField.UserRating, FilterField.Genres,
   FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
-
-  // People are a bit more complicated, for now let's leave off
-  // FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-  // FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-  // FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-  // FilterField.Writers, FilterField.Imprint, FilterField.Team,
-  // FilterField.Location,
+  FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+  FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+  FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+  FilterField.Writers, FilterField.Imprint, FilterField.Team,
+  FilterField.Location,
 
 ];
 

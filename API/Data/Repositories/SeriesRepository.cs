@@ -987,7 +987,7 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-            .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
+            .HasPeopleLegacy(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
 
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
@@ -1229,19 +1229,19 @@ public class SeriesRepository : ISeriesRepository
             FilterField.AgeRating => query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value),
             FilterField.UserRating => query.HasRating(true, statement.Comparison, (float) value , userId),
             FilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
-            FilterField.Translators => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Characters => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Publisher => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Editor => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.CoverArtist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Letterer => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Team => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Location => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value),
-            FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value),
+            FilterField.Translators => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Translator),
+            FilterField.Characters => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Character),
+            FilterField.Publisher => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Publisher),
+            FilterField.Editor => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Editor),
+            FilterField.CoverArtist => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.CoverArtist),
+            FilterField.Letterer => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Letterer),
+            FilterField.Colorist => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Inker),
+            FilterField.Inker => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Inker),
+            FilterField.Imprint => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Imprint),
+            FilterField.Team => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Team),
+            FilterField.Location => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Location),
+            FilterField.Penciller => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Penciller),
+            FilterField.Writers => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Writer),
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
             FilterField.CollectionTags =>
                 // This is handled in the code before this as it's handled in a more general, combined manner
