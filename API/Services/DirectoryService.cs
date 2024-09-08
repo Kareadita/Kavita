@@ -94,7 +94,7 @@ public class DirectoryService : IDirectoryService
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
     private static readonly Regex ExcludeDirectories = new Regex(
-        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle",
+        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle|\.yacreaderlibrary",
         MatchOptions,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
