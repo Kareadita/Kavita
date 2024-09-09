@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; read: 'all-filters'">
   <div class="main-container">
     <app-side-nav-companion-bar [hasFilter]="false">
-      <h2 title>
+      <h4 title>
         {{t('title')}}
-      </h2>
+      </h4>
       <div subtitle>
         <h6>
           <span>{{t('count', {count: filters.length | number})}}</span>
