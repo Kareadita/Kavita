@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Text.RegularExpressions;
 using BenchmarkDotNet.Attributes;
@@ -36,7 +37,22 @@ public class ParserBenchmarks
         var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
         return string.IsNullOrEmpty(normalized) ? name : normalized;
     }
+	private static readonly ConcurrentDictionary<string, string> NormalizedCache = 
+        new ConcurrentDictionary<string, string>();
 
+    private static string New_Normalize(string name)
+    {
+        // Check cache first
+        if (NormalizedCache.TryGetValue(name, out string cachedResult))
+        {
+            return cachedResult;
+        }
+        string normalized = NormalizeRegex.Replace(name, string.Empty).Trim().ToLowerInvariant();
+
+        // Add to cache
+        NormalizedCache.TryAdd(name, normalized);
+        return normalized;
+    }
 
 
     [Benchmark]
@@ -47,7 +63,14 @@ public class ParserBenchmarks
             Normalize(name);
         }
     }
-
+	[Benchmark]
+    public void TestNormalizeName_New()
+    {
+        foreach (var name in _names)
+        {
+            New_Normalize(name);
+        }
+    }
 
     [Benchmark]
     public void TestIsEpub()

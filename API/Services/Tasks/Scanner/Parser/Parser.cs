@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1106,9 +1107,21 @@ public static class Parser
         }
     }
 
+    private static readonly ConcurrentDictionary<string, string> NormalizedCache = 
+        new ConcurrentDictionary<string, string>();
+
     public static string Normalize(string name)
     {
-        return NormalizeRegex.Replace(name, string.Empty).Trim().ToLower();
+        // Check cache first
+        if (NormalizedCache.TryGetValue(name, out string cachedResult))
+        {
+            return cachedResult;
+        }
+        string normalized = NormalizeRegex.Replace(name, string.Empty).Trim().ToLowerInvariant();
+
+        // Add to cache
+        NormalizedCache.TryAdd(name, normalized);
+        return normalized;
     }
 
     /// <summary>
