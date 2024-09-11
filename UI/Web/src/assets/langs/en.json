@@ -1462,7 +1462,8 @@
         "title-alt": "Kavita - {{collectionName}} Collection",
         "series-header": "Series",
         "sync-progress": "Series Collected: {{title}}",
-        "last-sync": "Last Sync: {{date}}"
+        "last-sync": "Last Sync: {{date}}",
+        "item-count": "{{common.item-count}}"
     },
 
     "all-collections": {
