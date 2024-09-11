@@ -36,14 +36,6 @@
   max-height: calc(var(--vh)*100 - 170px);
 }
 
-// This is responsible for ensuring we scroll down and only tabs and companion bar is visible
-.main-container {
-  // Height set dynamically by  get ScrollingBlockHeight()
-  overflow-y: auto;
-  position: relative;
-  overscroll-behavior-y: none;
-}
-
 h2 {
   margin-bottom: 0;
   word-break: break-all;
