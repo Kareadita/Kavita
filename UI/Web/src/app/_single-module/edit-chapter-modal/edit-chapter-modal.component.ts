@@ -36,7 +36,7 @@ import {ActionService} from "../../_services/action.service";
 import {DownloadService} from "../../shared/_services/download.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {forkJoin, Observable, of} from "rxjs";
+import {forkJoin, Observable, of, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
@@ -55,6 +55,7 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
+import {User} from "../../_models/user";
 
 enum TabID {
   General = 'general-tab',
@@ -163,6 +164,7 @@ export class EditChapterModalComponent implements OnInit {
   initChapter!: Chapter;
   imageUrls: Array<string> = [];
   size: number = 0;
+  user!: User;
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];
@@ -176,7 +178,16 @@ export class EditChapterModalComponent implements OnInit {
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
 
     this.size = this.utilityService.asChapter(this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), tap(u => {
+      if (!u) return;
+      this.user = u;
 
+      if (!this.accountService.hasAdminRole(this.user)) {
+        this.activeId = TabID.Info;
+      }
+      this.cdRef.markForCheck();
+
+    })).subscribe();
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(this.chapter.sortOrder, [Validators.required, Validators.min(0)]));
@@ -238,6 +249,7 @@ export class EditChapterModalComponent implements OnInit {
     this.setupTypeaheads();
 
   }
+
 
   close() {
     this.modal.dismiss();

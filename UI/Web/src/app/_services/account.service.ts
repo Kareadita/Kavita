@@ -14,6 +14,7 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {Action} from "./action-factory.service";
 
 export enum Role {
   Admin = 'Admin',
@@ -76,6 +77,18 @@ export class AccountService {
       this.isOnline = true;
       this.refreshToken().subscribe();
     });
+  }
+
+  canInvokeAction(user: User, action: Action) {
+    const isAdmin = this.hasAdminRole(user);
+    const canDownload = this.hasDownloadRole(user);
+    const canPromote = this.hasPromoteRole(user);
+
+    if (isAdmin) return true;
+    if (action === Action.Download) return canDownload;
+    if (action === Action.Promote || action === Action.UnPromote) return canPromote;
+    if (action === Action.Delete) return isAdmin;
+    return true;
   }
 
   hasAnyRole(user: User, roles: Array<Role>) {
