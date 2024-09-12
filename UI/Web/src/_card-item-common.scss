@@ -149,9 +149,6 @@ $image-width: 160px;
 }
 
 .card-actions {
-  position: absolute;
-  bottom: 0;
-  right: 0;
   z-index: 115;
 }
 
@@ -161,8 +158,41 @@ $image-width: 160px;
   margin-top: 0px;
 }
 
+.card-title-container {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding: 0 5px;
+
+    .card-title {
+      font-size: 0.8rem;
+      margin: 0;
+      padding: 10px 0;
+      text-align: center;
+      max-width: 120px;
+    
+      a {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+}
+
+::ng-deep app-card-actionables .dropdown .dropdown-toggle {
+  padding: 0 5px;
+}
+
 .card-title {
   font-size: 0.8rem;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  max-width: 120px;
+
+  a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .card-body > div:nth-child(2) {

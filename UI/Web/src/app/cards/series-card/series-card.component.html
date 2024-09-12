@@ -62,15 +62,16 @@
     </div>
 
     <div class="card-title-container">
+      <app-series-format [format]="series.format"></app-series-format>
         <span class="card-title" [ngbTooltip]="series.name" id="{{series.id}}">
-          <app-series-format [format]="series.format"></app-series-format>
-          <a class="dark-exempt btn-icon ms-1" routerLink="/library/{{libraryId}}/series/{{series.id}}">
+
+          <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
             {{series.name}}
           </a>
         </span>
 
       @if (actions && actions.length > 0) {
-        <span class="card-actions float-end">
+        <span class="card-actions">
             <app-card-actionables (actionHandler)="handleSeriesActionCallback($event, series)" [actions]="actions" [labelBy]="series.name"></app-card-actionables>
         </span>
       }
