@@ -63,12 +63,11 @@
 
     <div class="card-title-container">
       <app-series-format [format]="series.format"></app-series-format>
-        <span class="card-title" [ngbTooltip]="series.name" id="{{series.id}}">
-
-          <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
-            {{series.name}}
-          </a>
-        </span>
+      <span class="card-title" [ngbTooltip]="series.name" id="{{series.id}}">
+        <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
+          {{series.name}}
+        </a>
+      </span>
 
       @if (actions && actions.length > 0) {
         <span class="card-actions">
