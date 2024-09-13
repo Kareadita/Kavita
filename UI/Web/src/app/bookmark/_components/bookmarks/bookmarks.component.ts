@@ -30,7 +30,7 @@ import { CardItemComponent } from '../../../cards/card-item/card-item.component'
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";

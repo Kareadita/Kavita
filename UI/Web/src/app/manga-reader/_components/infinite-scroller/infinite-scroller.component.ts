@@ -24,7 +24,7 @@ import { PAGING_DIRECTION } from '../../_models/reader-enums';
 import { WebtoonImage } from '../../_models/webtoon-image';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {ReaderSetting} from "../../_models/reader-setting";
 import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
@@ -174,9 +174,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
   /**
-   * Width override for maunal width control
+   * Width override for manual width control
    * 2 observables needed to avoid flickering, probably due to data races, when changing the width
-   * this allows to precicely define execution order
+   * this allows to precisely define execution order
   */
   widthOverride$ : Observable<string> = new Observable<string>();
   widthSliderValue$ : Observable<string> = new Observable<string>();
@@ -247,7 +247,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     this.widthOverride$ = this.widthSliderValue$;
 
-    //perfom jump so the page stays in view
+    //perform jump so the page stays in view
     this.widthSliderValue$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
       if(!this.currentPageElem)

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'filterComparison',

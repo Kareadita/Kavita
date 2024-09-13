@@ -7,6 +7,7 @@ using API.DTOs.Device;
 using API.Extensions;
 using API.Services;
 using API.SignalR;
+using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,20 +25,27 @@ public class DeviceController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly IMapper _mapper;
 
     public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService,
-        IEmailService emailService, IEventHub eventHub, ILocalizationService localizationService)
+        IEmailService emailService, IEventHub eventHub, ILocalizationService localizationService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _deviceService = deviceService;
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _mapper = mapper;
     }
 
 
+    /// <summary>
+    /// Creates a new Device
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("create")]
-    public async Task<ActionResult> CreateOrUpdateDevice(CreateDeviceDto dto)
+    public async Task<ActionResult<DeviceDto>> CreateOrUpdateDevice(CreateDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
@@ -46,20 +54,22 @@ public class DeviceController : BaseApiController
             var device = await _deviceService.Create(dto, user);
             if (device == null)
                 return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-create"));
+
+            return Ok(_mapper.Map<DeviceDto>(device));
         }
         catch (KavitaException ex)
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
-
-
-
-
-        return Ok();
     }
 
+    /// <summary>
+    /// Updates an existing Device
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateDevice(UpdateDeviceDto dto)
+    public async Task<ActionResult<DeviceDto>> UpdateDevice(UpdateDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
@@ -67,7 +77,7 @@ public class DeviceController : BaseApiController
 
         if (device == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-update"));
 
-        return Ok();
+        return Ok(_mapper.Map<DeviceDto>(device));
     }
 
     /// <summary>

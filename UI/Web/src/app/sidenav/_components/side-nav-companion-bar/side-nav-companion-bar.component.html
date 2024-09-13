@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'side-nav-companion-bar'">
-  <div class="mt-0 d-flex justify-content-between align-items-center">
+  <div class="mt-0 ms-1 d-flex justify-content-between align-items-center">
     <div>
       <ng-content select="[title]"></ng-content>
       <ng-content select="[subtitle]"></ng-content>
@@ -8,18 +8,33 @@
       <ng-content select="[main]"></ng-content>
     </div>
     <div>
-      <button *ngIf="hasExtras" class="btn btn-secondary btn-small" (click)="openExtrasDrawer()" [attr.aria-expanded]="isExtrasOpen" placement="left" [ngbTooltip]="t('page-settings-title')">
-        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
-        <span class="visually-hidden">{{t('page-settings-title')}}</span>
-      </button>
-      <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleService.toggle()"
-              [attr.aria-expanded]="filterOpen" placement="left"
-              id="filter-btn--komf"
-              ngbTooltip="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}"
-              attr.aria-label="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}">
-        <i class="fa fa-filter" aria-hidden="true"></i>
-        <span class="visually-hidden">{{t('filter-and-sort-alt')}}</span>
-      </button>
+
+      @if (hasExtras) {
+        <button class="btn btn-secondary btn-small" (click)="openExtrasDrawer()" [attr.aria-expanded]="isExtrasOpen" placement="left" [ngbTooltip]="t('page-settings-title')">
+          <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('page-settings-title')}}</span>
+        </button>
+      }
+
+      @if (hasFilter) {
+        <button class="btn btn-icon btn-small" (click)="toggleService.toggle()"
+                id="filter-btn--komf"
+                attr.aria-label="{{isFilterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}">
+
+
+          <!-- For an underline if we ever fix so one filter doesn't count for library-detail pages ([class.icon-container]="!isFilterOpen") -->
+          <div>
+            <i class="fa fa-filter" aria-hidden="true"></i>
+            @if (isFilterOpen) {
+              <i class="fa-solid fa-gear icon-position" [class.active]="isFilterOpen" aria-hidden="true"></i>
+            }
+          </div>
+
+
+          <span class="visually-hidden">{{t('filter-and-sort-alt')}}</span>
+        </button>
+      }
+
     </div>
 
   </div>

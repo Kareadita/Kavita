@@ -195,5 +195,6 @@
     "report-stats": "Kimutatás Statisztikák",
     "check-scrobbling-tokens": "Ellenőrizd a Feldolgozó tokeneket",
     "process-scrobbling-events": "Feldolgozó események feldolgozása",
-    "process-processed-scrobbling-events": "A feldolgozott Feldolgozó események felolgozása"
+    "process-processed-scrobbling-events": "A feldolgozott Feldolgozó események felolgozása",
+    "generic-cover-volume-save": "Nem lehet borítóképet menteni a kötethez"
 }

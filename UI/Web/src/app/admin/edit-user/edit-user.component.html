@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'edit-user'">
     <div class="modal-container">
         <div class="modal-header">
-            <h4 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member.username | sentenceCase}}</h4>
+            <h5 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member.username | sentenceCase}}</h5>
             <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
 
             </button>
@@ -10,7 +10,7 @@
 
             <form [formGroup]="userForm">
                 <div class="row g-0">
-                    <div class="col-md-6 col-sm-12 pe-2">
+                    <div class="col-md-6 col-sm-12 pe-4">
                         <div class="mb-3">
                             <label for="username" class="form-label">{{t('username')}}</label>
                             <input id="username" class="form-control" formControlName="username" type="text"
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="row g-0">
-                    <div class="col-md-6">
+                    <div class="col-md-6 pe-4">
                         <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
                     </div>
 
@@ -54,7 +54,7 @@
                     </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row g-0 mt-3">
                     <div class="col-md-12">
                         <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
                     </div>

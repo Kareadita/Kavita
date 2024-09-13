@@ -7,20 +7,20 @@ import {
   ViewContainerRef,
   ViewEncapsulation
 } from '@angular/core';
-import {CommonModule, DOCUMENT, NgOptimizedImage} from '@angular/common';
+import {DOCUMENT, NgOptimizedImage} from '@angular/common';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
 import {UserReview} from "../review-card/user-review";
 import {SpoilerComponent} from "../spoiler/spoiler.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 
 @Component({
   selector: 'app-review-card-modal',
   standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe],
+    imports: [ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

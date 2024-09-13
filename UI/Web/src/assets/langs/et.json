@@ -63,7 +63,6 @@
     },
     "user-preferences": {
         "title": "Kasutaja kiirlinkide töölaud",
-        "3rd-party-clients-tab": "Kolmanda osapoole klientprogrammid",
         "theme-tab": "Teema",
         "devices-tab": "Seaded",
         "pref-description": "Need on süsteemiülesed seaded, mis rakenduvad sinu kontole.",

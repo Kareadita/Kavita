@@ -1142,6 +1142,41 @@ public class SeriesServiceTests : AbstractDbTest
     }
 
     [Fact]
+    public async Task UpdateRelatedSeries_ShouldAddPrequelWhenAddingSequel()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library
+        {
+            AppUsers = new List<AppUser>
+            {
+                new AppUser
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>
+            {
+                new SeriesBuilder("Test Series").Build(),
+                new SeriesBuilder("Test Series Prequels").Build(),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series2 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = CreateRelationsDto(series1);
+        addRelationDto.Sequels.Add(2);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.NotNull(series1);
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+        Assert.Equal(1, series2.Relations.Single(s => s.TargetSeriesId == 1).TargetSeriesId);
+    }
+
+    [Fact]
     public async Task UpdateRelatedSeries_DeleteAllRelations()
     {
         await ResetDb();

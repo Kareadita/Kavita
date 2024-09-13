@@ -310,9 +310,9 @@ public class LibraryController : BaseApiController
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("refresh-metadata")]
-    public ActionResult RefreshMetadata(int libraryId, bool force = true)
+    public ActionResult RefreshMetadata(int libraryId, bool force = true, bool forceColorscape = true)
     {
-        _taskScheduler.RefreshMetadata(libraryId, force);
+        _taskScheduler.RefreshMetadata(libraryId, force, forceColorscape);
         return Ok();
     }
 

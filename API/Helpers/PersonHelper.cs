@@ -165,18 +165,76 @@ public static class PersonHelper
         }
     }
 
-    public static bool HasAnyPeople(SeriesMetadataDto? seriesMetadata)
+    public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? people, Chapter chapter, IReadOnlyCollection<Person> allPeople,
+        Action<Person> handleAdd, Action onModified)
     {
-        if (seriesMetadata == null) return false;
-        return seriesMetadata.Writers.Any() ||
-               seriesMetadata.CoverArtists.Any() ||
-               seriesMetadata.Publishers.Any() ||
-               seriesMetadata.Characters.Any() ||
-               seriesMetadata.Pencillers.Any() ||
-               seriesMetadata.Inkers.Any() ||
-               seriesMetadata.Colorists.Any() ||
-               seriesMetadata.Letterers.Any() ||
-               seriesMetadata.Editors.Any() ||
-               seriesMetadata.Translators.Any();
+        if (people == null) return;
+        var isModified = false;
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = chapter.People.Where(p => p.Role == role).ToList();
+        foreach (var existing in existingTags)
+        {
+            if (people.SingleOrDefault(t => t.Id == existing.Id) == null) // This needs to check against role
+            {
+                // Remove tag
+                chapter.People.Remove(existing);
+                isModified = true;
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in people)
+        {
+            var existingTag = allPeople.FirstOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
+            if (existingTag != null)
+            {
+                if (chapter.People.Where(t => t.Role == tag.Role).All(t => t.Name != null && !t.Name.Equals(tag.Name)))
+                {
+                    handleAdd(existingTag);
+                    isModified = true;
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(new PersonBuilder(tag.Name, role).Build());
+                isModified = true;
+            }
+        }
+
+        if (isModified)
+        {
+            onModified();
+        }
+    }
+
+    public static bool HasAnyPeople(SeriesMetadataDto? dto)
+    {
+        if (dto == null) return false;
+        return dto.Writers.Count != 0 ||
+                dto.CoverArtists.Count != 0 ||
+                dto.Publishers.Count != 0 ||
+                dto.Characters.Count != 0 ||
+                dto.Pencillers.Count != 0 ||
+                dto.Inkers.Count != 0 ||
+                dto.Colorists.Count != 0 ||
+                dto.Letterers.Count != 0 ||
+                dto.Editors.Count != 0 ||
+                dto.Translators.Count != 0;
+    }
+
+    public static bool HasAnyPeople(UpdateChapterDto? dto)
+    {
+        if (dto == null) return false;
+        return dto.Writers.Count != 0 ||
+               dto.CoverArtists.Count != 0 ||
+               dto.Publishers.Count != 0 ||
+               dto.Characters.Count != 0 ||
+               dto.Pencillers.Count != 0 ||
+               dto.Inkers.Count != 0 ||
+               dto.Colorists.Count != 0 ||
+               dto.Letterers.Count != 0 ||
+               dto.Editors.Count != 0 ||
+               dto.Translators.Count != 0;
     }
 }

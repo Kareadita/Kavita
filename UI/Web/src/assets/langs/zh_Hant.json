@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "登入",
+        "title": "登入您的賬戶",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "忘記密碼?",
-        "submit": "{{common.submit}}"
+        "submit": "登入"
     },
     "dashboard": {
         "no-libraries": "還沒有設定資料庫，設定位置在",
@@ -90,7 +90,6 @@
         "pref-description": "這些是綁定到您帳戶的全局設置。",
         "account-tab": "帳號",
         "preferences-tab": "優先",
-        "3rd-party-clients-tab": "第三方帳號",
         "theme-tab": "主題",
         "devices-tab": "裝置",
         "stats-tab": "統計資料",
@@ -214,15 +213,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "想要將文件傳送至您的設備嗎？ 請先進入管理員設置電子郵件設定！"
-    },
-    "edit-device": {
-        "device-name-label": "裝置名稱",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "此接受文件將用於通過\"電子郵件\"發送到",
-        "device-platform-label": "設備",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",

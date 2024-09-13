@@ -1,0 +1,13 @@
+.text-muted {
+  font-size: 0.9rem;
+
+  a {
+    color: var(--primary-color);
+  }
+}
+
+.view-value {
+  font-size: 18px;
+  color: var(--primary-color);
+  cursor: pointer;
+}

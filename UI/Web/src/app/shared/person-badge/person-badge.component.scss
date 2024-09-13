@@ -4,16 +4,15 @@
     margin: 3px 5px 3px 0px;
     padding: 2px 10px;
     border-radius: 6px;
-    font-size: 14px;
-    border: 1px solid var(--tagbadge-border-color);
+    font-size: .8rem;
     display: inline-block;
     cursor: pointer;
-    width: auto;
+    width: 100px;
+    word-break: break-word;
 
     i {
-        font-size: 14px;
+        font-size: 2rem;
         font-weight: bold;
-        margin-right: 0px;
         cursor: pointer;
     }
 }

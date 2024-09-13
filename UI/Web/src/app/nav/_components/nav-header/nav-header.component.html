@@ -1,195 +1,213 @@
 <ng-container *transloco="let t; read: 'nav-header'">
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
-    <div class="container-fluid">
-      <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
-      <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
-      <a class="navbar-brand dark-exempt" routerLink="/home" routerLinkActive="active">
-        <app-image width="28px" height="28px" imageUrl="assets/images/logo-32.png" classes="logo" />
-        <span class="d-none d-md-inline logo"> Kavita</span>
-      </a>
-      <ul class="navbar-nav col me-auto">
+  @if (navService.navbarVisible$ | async) {
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top">
+      <div class="container-fluid">
+        <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
 
-        <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
-          <label for="nav-search" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
-          <div class="ng-autocomplete">
-            <app-grouped-typeahead
-              #search
-              id="nav-search"
-              [minQueryLength]="2"
-              [isLoading]="isLoading"
-              initialValue=""
-              [placeholder]="t('search-alt')"
-              [groupedData]="searchResults"
-              (inputChanged)="onChangeSearch($event)"
-              (clearField)="clearSearch()"
-              (focusChanged)="focusUpdate($event)"
-            >
+        @if (navService.sideNavVisibility$ | async) {
+          <a class="side-nav-toggle" (click)="toggleSideNav($event)"><i class="fas fa-bars" aria-hidden="true"></i></a>
+        }
 
-              <ng-template #libraryTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
-                  <div class="ms-1">
-                    <span>{{item.name}}</span>
-                  </div>
-                </div>
-              </ng-template>
+        <a class="navbar-brand dark-exempt" routerLink="/home" routerLinkActive="active">
+          <app-image width="28px" height="28px" imageUrl="assets/images/logo-32.png" classes="logo" />
+          <span class="d-none d-md-inline logo"> Kavita</span>
+        </a>
+        <ul class="navbar-nav col me-auto">
+          @if (accountService.currentUser$ | async; as user) {
+            <div class="nav-item">
+              <label for="nav-search" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
+              <div class="ng-autocomplete">
+                <app-grouped-typeahead
+                  #search
+                  id="nav-search"
+                  [minQueryLength]="2"
+                  [isLoading]="isLoading"
+                  initialValue=""
+                  [placeholder]="t('search-alt')"
+                  [groupedData]="searchResults"
+                  (inputChanged)="onChangeSearch($event)"
+                  (clearField)="clearSearch()"
+                  (focusChanged)="focusUpdate($event)"
+                >
 
-              <ng-template #seriesTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
-                  <div style="width: 24px" class="me-1">
-                    <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
-                  </div>
-                  <div class="ms-1">
-                    <app-series-format [format]="item.format"></app-series-format>
-                    <ng-container *ngIf="searchTerm.toLowerCase().trim() as st">
-                      <span *ngIf="item.name.toLowerCase().trim().indexOf(st) >= 0; else localizedName">{{item.name}}</span>
-                      <ng-template #localizedName>
-                        <span [innerHTML]="item.localizedName"></span>
-                      </ng-template>
-                    </ng-container>
-
-                    <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
-                  </div>
-                </div>
-              </ng-template>
-
-              <ng-template #bookmarkTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
-                  <div style="width: 24px" class="me-1">
-                    <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
-                  </div>
-                  <div class="ms-1">
-                    <app-series-format [format]="item.format"></app-series-format>
-                    <ng-container *ngIf="searchTerm.toLowerCase().trim() as st">
-                      <span *ngIf="item.seriesName.toLowerCase().trim().indexOf(st) >= 0; else localizedName">{{item.seriesName}}</span>
-                      <ng-template #localizedName>
-                        <span [innerHTML]="item.localizedSeriesName"></span>
-                      </ng-template>
-                    </ng-container>
-                  </div>
-                </div>
-              </ng-template>
-
-              <ng-template #collectionTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
-                  <div style="width: 24px" class="me-1">
-                    <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
-                  </div>
-                  <div class="ms-1">
-                    <div>
-                      <span>{{item.title}}</span>
-                      <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
+                  <ng-template #libraryTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
+                      <div class="ms-1">
+                        <span>{{item.name}}</span>
+                      </div>
                     </div>
-                    <app-collection-owner [collection]="item"></app-collection-owner>
-                  </div>
-                </div>
-              </ng-template>
+                  </ng-template>
 
-              <ng-template #readingListTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
-                  <div class="ms-1">
-                    <span>{{item.title}}</span>
-                    <span *ngIf="item.promoted">
-                    &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" [title]="t('promoted')"></i>
-                    <span class="visually-hidden">{{t('promoted')}}</span>
-                  </span>
-                  </div>
-                </div>
-              </ng-template>
+                  <ng-template #seriesTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
+                      <div style="width: 24px" class="me-1">
+                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                      </div>
+                      <div class="ms-1">
+                        <app-series-format [format]="item.format"></app-series-format>
+                        @if (searchTerm.toLowerCase().trim(); as st) {
+                          @if (item.name.toLowerCase().trim().indexOf(st) >= 0) {
+                            <span>{{item.name}}</span>
+                          } @else {
+                            <span [innerHTML]="item.localizedName"></span>
+                          }
+                        }
+                        <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
+                      </div>
+                    </div>
+                  </ng-template>
 
-              <ng-template #tagTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="goToOther(FilterField.Tags, item.id)">
-                  <div class="ms-1">
-                    <span>{{item.title}}</span>
-                  </div>
-                </div>
-              </ng-template>
+                  <ng-template #bookmarkTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
+                      <div style="width: 24px" class="me-1">
+                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                      </div>
+                      <div class="ms-1">
+                        <app-series-format [format]="item.format"></app-series-format>
 
-              <ng-template #personTemplate let-item>
-                <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
-                  <div class="ms-1">
+                        @if (searchTerm.toLowerCase().trim(); as st) {
+                          @if (item.seriesName.toLowerCase().trim().indexOf(st) >= 0) {
+                            <span>{{item.seriesName}}</span>
+                          } @else {
+                            <span [innerHTML]="item.localizedSeriesName"></span>
+                          }
+                        }
+                      </div>
+                    </div>
+                  </ng-template>
 
-                    <div [innerHTML]="item.name"></div>
-                    <div class="text-light fst-italic">{{item.role | personRole}}</div>
-                  </div>
-                </div>
-              </ng-template>
+                  <ng-template #collectionTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
+                      <div style="width: 24px" class="me-1">
+                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
+                      </div>
+                      <div class="ms-1">
+                        <div>
+                          <span>{{item.title}}</span>
+                          <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
+                        </div>
+                        <app-collection-owner [collection]="item"></app-collection-owner>
+                      </div>
+                    </div>
+                  </ng-template>
 
-              <ng-template #genreTemplate let-item>
-                <div style="display: flex;padding: 5px;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
-                  <div class="ms-1">
-                    <div [innerHTML]="item.title"></div>
-                  </div>
-                </div>
-              </ng-template>
+                  <ng-template #readingListTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
+                      <div class="ms-1">
+                        <span>{{item.title}}</span>
+                        <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
+                      </div>
+                    </div>
+                  </ng-template>
 
+                  <ng-template #tagTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="goToOther(FilterField.Tags, item.id)">
+                      <div class="ms-1">
+                        <span>{{item.title}}</span>
+                      </div>
+                    </div>
+                  </ng-template>
 
+                  <ng-template #personTemplate let-item>
+                    <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
+                      <div class="ms-1">
 
-              <ng-template #chapterTemplate let-item>
-                <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
-                  <div class="ms-1">
-                    <ng-container *ngIf="item.files.length > 0">
-                      <app-series-format [format]="item.files?.[0].format"></app-series-format>
-                    </ng-container>
-                    <!-- TODO: this needs the series name before the chapter issue -->
-                    <span>{{item.titleName || item.range}}</span>
-                  </div>
-                </div>
-              </ng-template>
+                        <div [innerHTML]="item.name"></div>
+                        <div class="text-light fst-italic">{{item.role | personRole}}</div>
+                      </div>
+                    </div>
+                  </ng-template>
 
-              <ng-template #fileTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
-                  <div class="ms-1">
-                    <app-series-format [format]="item.format"></app-series-format>
-                    <span>{{item.filePath}}</span>
-                  </div>
-                </div>
-              </ng-template>
-
-              <ng-template #noResultsTemplate let-notFound>
-                {{t('no-data')}}
-              </ng-template>
-            </app-grouped-typeahead>
-          </div>
-        </div>
-      </ul>
-
-      <ng-container *ngIf="!searchFocused">
-        <div class="back-to-top" *ngIf="backToTopNeeded">
-          <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
-            <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('scroll-to-top-alt')}}</span>
-          </button>
-        </div>
-
-        <ng-container *ngIf="(accountService.currentUser$ | async) as user">
-          <div class="nav-item">
-            <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
-          </div>
-          <div class="nav-item not-xs-only">
-            <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
-              <i class="fa fa-cogs nav" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('server-settings')}}</span>
-            </a>
-          </div>
+                  <ng-template #genreTemplate let-item>
+                    <div style="display: flex;padding: 5px;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
+                      <div class="ms-1">
+                        <div [innerHTML]="item.title"></div>
+                      </div>
+                    </div>
+                  </ng-template>
 
 
-          <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
-            <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-              <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
-              <span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
-            </button>
-            <div ngbDropdownMenu>
-              <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">{{t('server-settings')}}</a>
-              <a ngbDropdownItem routerLink="/preferences/">{{t('settings')}}</a>
-              <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
-              <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
-              <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">{{t('announcements')}}</a>
-              <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
+
+                  <ng-template #chapterTemplate let-item>
+                    <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
+                      <div class="ms-1">
+                        @if (item.files.length > 0) {
+                          <app-series-format [format]="item.files?.[0].format"></app-series-format>
+                        }
+                        <!-- TODO: this needs the series name before the chapter issue -->
+                        <span>{{item.titleName || item.range}}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #fileTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
+                      <div class="ms-1">
+                        <app-series-format [format]="item.format"></app-series-format>
+                        <span>{{item.filePath}}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #noResultsTemplate let-notFound>
+                    {{t('no-data')}}
+                  </ng-template>
+                </app-grouped-typeahead>
+              </div>
             </div>
-          </div>
-        </ng-container>
-      </ng-container>
-    </div>
-  </nav>
+          }
+        </ul>
+
+
+        @if (!searchFocused) {
+          @if((breakpoint$ | async)! > Breakpoint.Tablet) {
+            @if (backToTopNeeded) {
+              <div class="back-to-top">
+                <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
+                  <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('scroll-to-top-alt')}}</span>
+                </button>
+              </div>
+            }
+          }
+
+          @if (accountService.currentUser$ | async; as user) {
+            <div class="nav-item me-2">
+              <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
+            </div>
+
+            @if((breakpoint$ | async)! <= Breakpoint.Mobile) {
+              <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
+                <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
+                <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
+              </button>
+            } @else {
+              <div class="nav-item not-xs-only">
+                <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" class="dark-exempt btn btn-icon" [title]="t('settings')">
+                  <i class="fa fa-cogs nav" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('settings')}}</span>
+                </a>
+              </div>
+
+              <div ngbDropdown class="nav-item dropdown d-sm-none d-md-block" display="dynamic" placement="bottom-right">
+                <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+                  <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
+                  <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
+                </button>
+                <div ngbDropdownMenu>
+                  <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
+                  <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
+                  <a ngbDropdownItem [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
+                  <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
+                </div>
+              </div>
+            }
+          }
+        }
+
+      </div>
+    </nav>
+  }
+
 
 </ng-container>

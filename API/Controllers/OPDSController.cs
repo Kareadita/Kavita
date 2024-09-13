@@ -471,6 +471,7 @@ public class OpdsController : BaseApiController
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
 
+
         feed.Entries.AddRange(tags.Select(tag => new FeedEntry()
         {
             Id = tag.Id.ToString(),
@@ -539,6 +540,8 @@ public class OpdsController : BaseApiController
 
         var feed = CreateFeed("All Reading Lists", $"{apiKey}/reading-list", apiKey, prefix);
         SetFeedId(feed, "reading-list");
+        AddPagination(feed, readingLists, $"{prefix}{apiKey}/reading-list/");
+
         foreach (var readingListDto in readingLists)
         {
             feed.Entries.Add(new FeedEntry()
@@ -554,6 +557,7 @@ public class OpdsController : BaseApiController
                 }
             });
         }
+
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -877,6 +881,8 @@ public class OpdsController : BaseApiController
             foreach (var chapter in chaptersForVolume)
             {
                 var chapterId = chapter.Id;
+                if (chapterDict.ContainsKey(chapterId)) continue;
+
                 var chapterDto = _mapper.Map<ChapterDto>(chapter);
                 foreach (var mangaFile in chapter.Files)
                 {
@@ -885,7 +891,6 @@ public class OpdsController : BaseApiController
                         chapterDto, apiKey, prefix, baseUrl));
                 }
             }
-
         }
 
         var chapters = seriesDetail.StorylineChapters;
@@ -1014,7 +1019,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private static void AddPagination(Feed feed, PagedList<SeriesDto> list, string href)
+    private static void AddPagination<T>(Feed feed, PagedList<T> list, string href)
     {
         var url = href;
         if (href.Contains('?'))

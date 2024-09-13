@@ -1,29 +1,109 @@
 @import '../variables';
 
 :root, :root .default {
+
+    /* System styles (https://m2.material.io/design/color/dark-theme.html#properties)*/
+    --elevation-layer0: rgba(255,255,255,0);
+    --elevation-layer1: rgba(255,255,255,0.05);
+    --elevation-layer2: rgba(255,255,255,0.07);
+    --elevation-layer3: rgba(255,255,255,0.08);
+    --elevation-layer4: rgba(255,255,255,0.09);
+    --elevation-layer5: rgba(255,255,255,0.11);
+    --elevation-layer6: rgba(255,255,255,0.12);
+    --elevation-layer7: rgba(255,255,255,0.14);
+    --elevation-layer8: rgba(255,255,255,0.15);
+    --elevation-layer9: rgba(255,255,255,0.16);
+    --elevation-layer10: rgba(255,255,255,0.4);
+
+    --elevation-layer0-dark: rgba(0, 0, 0,0);
+    --elevation-layer1-dark: rgba(0, 0, 0,0.05);
+    --elevation-layer2-dark: rgba(0, 0, 0,0.07);
+    --elevation-layer3-dark: rgba(0, 0, 0,0.08);
+    --elevation-layer4-dark: rgba(0, 0, 0,0.09);
+    --elevation-layer5-dark: rgba(0, 0, 0,0.11);
+    --elevation-layer6-dark: rgba(0, 0, 0,0.12);
+    --elevation-layer7-dark: rgba(0, 0, 0,0.14);
+    --elevation-layer8-dark: rgba(0, 0, 0,0.15);
+    --elevation-layer9-dark: rgba(0, 0, 0,0.16);
+    --elevation-layer10-dark: rgba(0, 0, 0, 0.4);
+    --elevation-layer11-dark: rgba(0, 0, 0, 0.6);
+
+    --elevation-layer0-dark-solid: #121212;
+    --elevation-layer1-dark-solid: #1D1D1D;
+    --elevation-layer2-dark-solid: #212121;
+    --elevation-layer3-dark-solid: #242424;
+    --elevation-layer4-dark-solid: #272727;
+    --elevation-layer5-dark-solid: #2C2C2C;
+    --elevation-layer6-dark-solid: #2D2D2D;
+    --elevation-layer7-dark-solid: #323232;
+    --elevation-layer8-dark-solid: #353535;
+    --elevation-layer9-dark-solid: #373737;
+
     /* Base colors */
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
     --primary-color-darker-shade: #338A67;
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
-    --bs-body-bg: #343a40;
+    --warning-color: #FFECB5;
+    --bs-body-bg: #1f2020; //#343a40;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
-    --primary-color-scrollbar: rgba(74,198,148,0.75);
-    --text-muted-color: lightgrey;
+    --primary-color-scrollbar: rgba(255,255,255,0.3);
+    --default-state-scrollbar: transparent;
+    --text-muted-color: hsla(0,0%,100%,.45);
 
-    /* New Color scheme */
-    --secondary-color: #212328;
+
+    /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
+     * --colorscape-primary-color and the alpha variants will be updated in real time. the default variant is fixed and represents the default state and should
+     * match the non-default/alpha on launch.
+     */
+    --colorscape-enabled: true;
+    /* These are the default background colors for the app. These will be updated on different pages with the generated colors. Must be RGB */
+    --colorscape-primary-color: rgb(38, 38, 38);
+    --colorscape-lighter-color: rgb(32, 32, 32);
+    --colorscape-darker-color: rgb(28, 28, 28);
+    --colorscape-complementary-color: rgb(51, 51, 51);
+    /* These need to be an alpha 0 variant. */
+    --colorscape-primary-alpha-color: rgba(38, 38, 38, 0);
+    --colorscape-lighter-alpha-color: rgba(32, 32, 32, 0);
+    --colorscape-darker-alpha-color: rgba(28, 28, 28, 0);
+    --colorscape-complementary-alpha-color: rgba(51, 51, 51, 0);
+    /* These are the default background colors. They need to match and cannot be a var reference. They will not be updated. Must be RGB */
+    --colorscape-primary-default-color: rgb(38, 38, 38);
+    --colorscape-lighter-default-color: rgb(32, 32, 32);
+    --colorscape-darker-default-color: rgb(28, 28, 28);
+    --colorscape-complementary-default-color: rgb(51, 51, 51);
+
 
     /* Meta and Globals */
     --theme-color: #000000;
     --color-scheme: dark;
     --tile-color: var(--primary-color);
+    --nav-offset: 60px;
+    --nav-mobile-offset: 55px;
+    /* Should we render the series cover as background on mobile */
+    --mobile-series-img-background: true;
+
+    /* Setting Item */
+    --setting-header-text-color: #d5d5d5;
+    --setting-header-font-size: 1.2rem;
+    --setting-header-font-weight: bold;
+    --setting-break-color: rgba(255, 255, 255, 0.2);
+
+
+    /* Table */
+    --table-header-bg-color: rgba(0,0,0,.15);
+    --table-header-text-color: hsla(0,0%,100%,.9);
+    --table-body-bg-color: hsla(0,0%,100%,.02);
+    --table-body-text-color: hsla(0,0%,100%,.85);
+    --table-body-striped-bg-color: hsla(0,0%,100%,.25);
+    --table-body-border: hidden;
+    --table-body-striped-bg-color: var(--elevation-layer2);
 
 
     /* Navbar */
-    --navbar-bg-color: black;
+    --navbar-bg-color: var(--elevation-layer11-dark);
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
@@ -45,6 +125,33 @@
     --btn-primary-hover-text-color: white;
     --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
     --btn-primary-hover-border-color: var(--primary-color-darker-shade);
+
+    --btn-primary-outline-text-color: white;
+    --btn-primary-outline-bg-color: transparent;
+    --btn-primary-outline-border-color: var(--primary-color);
+    --btn-primary-outline-hover-text-color: white;
+    --btn-primary-outline-hover-bg-color: var(--primary-color-darker-shade);
+    --btn-primary-outline-hover-border-color: var(--primary-color-darker-shade);
+
+    --btn-secondary-text-color: white;
+    --btn-secondary-bg-color: #6c757d;
+    --btn-secondary-border-color: #6c757d;
+    --btn-secondary-hover-bg-color: var(--bs-btn-hover-bg);
+    --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
+    --btn-secondary-font-weight: bold;
+
+    --btn-secondary-outline-text-color: white;
+    --btn-secondary-outline-bg-color: transparent;
+    --btn-secondary-outline-border-color: transparent;
+    --btn-secondary-outline-hover-bg-color: transparent;
+    --btn-secondary-outline-hover-border-color: transparent;
+    --btn-secondary-outline-font-weight: bold;
+
+
+    --btn-primary-text-text-color: white;
+    --btn-secondary-text-text-color: lightgrey;
+    --btn-danger-text-text-color: var(--error-color);
+
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
@@ -57,26 +164,32 @@
     --bs-btn-disabled-border-color: transparent;
 
     /* Nav (Tabs) */
+    --nav-item-min-width: 150px;
+    --nav-item-max-width: 150px;
     --nav-tab-border-color: rgba(44, 118, 88, 0.7);
-    --nav-tab-text-color: var(--body-text-color);
-    --nav-tab-bg-color: var(--primary-color);
+    --nav-tab-text-color: var(--elevation-layer10);
+    --nav-tab-bg-color: transparent;
+    --nav-tab-border-width: 0 0 3px 0;
     --nav-tab-hover-border-color: var(--primary-color);
     --nav-tab-active-text-color: white;
     --nav-tab-border-hover-color: transparent;
-    --nav-tab-hover-text-color: var(--body-text-color);
+    --nav-tab-hover-text-color: white;
     --nav-tab-hover-bg-color: transparent;
-    --nav-tab-border-top: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-left: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-bottom: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-right: rgba(44, 118, 88, 0.7);
-    --nav-tab-hover-border-top: rgba(44, 118, 88, 0.7);
-    --nav-tab-hover-border-left: rgba(44, 118, 88, 0.7);
-    --nav-tab-hover-border-bottom: var(--bs-body-bg);
-    --nav-tab-hover-border-right: rgba(44, 118, 88, 0.7);
-    --nav-tab-active-hover-bg-color: var(--primary-color);
+    --nav-tab-border-top: transparent;
+    --nav-tab-border-left: transparent;
+    --nav-tab-border-bottom: var(--primary-color);
+    --nav-tab-border-right: transparent;
+    --nav-tab-hover-border-top: transparent;
+    --nav-tab-hover-border-left: transparent;
+    --nav-tab-hover-border-bottom: var(--primary-color);
+    --nav-tab-hover-border-right: transparent;
+    --nav-tab-active-hover-bg-color: transparent;
     --nav-link-bg-color: var(--primary-color);
     --nav-link-active-text-color: white;
-    --nav-link-text-color: white;
+    --nav-link-text-color: var(--elevation-layer10);
+
+    /* Modal */
+    --modal-bg-color: #202122; // var(--bs-body-bg)
 
     /* Header */
     --nav-header-text-color: white;
@@ -87,6 +200,11 @@
     --toast-error-bg-color: #BD362F;
     --toast-info-bg-color: #2F96B4;
     --toast-warning-bg-color: #F89406;
+
+    /* Alerts */
+    --alert-text-color: #fff3cd;
+    --alert-bg-color: transparent;
+
 
     /* Checkboxes/Switch */
     --checkbox-checked-bg-color: var(--primary-color);
@@ -103,10 +221,10 @@
     --tagbadge-filled-bg-color: var(--primary-color);
 
     /* Side Nav */
-    --side-nav-bg-color: rgba(0,0,0,0.2);
-    --side-nav-mobile-bg-color: rgb(25,26,28);
+    --side-nav-bg-color: var(--elevation-layer9-dark);
+    --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
     --side-nav-openclose-transition: 0.15s ease-in-out;
-    --side-nav-box-shadow: rgba(0,0,0,0.5);
+    --side-nav-box-shadow: var(--elevation-layer0);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
     --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
@@ -120,20 +238,31 @@
     --side-nav-closed-bg-color: transparent;
     --side-nav-item-active-color: var(--primary-color);
     --side-nav-item-active-text-color: white;
-    --side-nav-active-bg-color: rgba(0,0,0,0.5);
-    --side-nav-overlay-color: rgba(0,0,0,0.5);
+    --side-nav-active-bg-color: transparent;
+    --side-nav-overlay-color: var(--elevation-layer11-dark);
+    --side-nav-item-closed-color: var(--elevation-layer10);
+    --side-nav-item-closed-hover-color: white;
 
 
     /* List items */
     --list-group-item-text-color: var(--body-text-color);
-    --list-group-item-bg-color: #343a40;
-    --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+    --list-group-item-bg-color: transparent;
+    --search-list-group-item-bg-color: rgb(32, 38, 41);
     --list-group-hover-text-color: white;
     --list-group-hover-bg-color: rgb(22, 27, 34);
     --list-group-active-border-color: none;
+    --list-group-item-border-top-left-radius: 0px;
+    --list-group-item-border-top-right-radius: 0px;
+    --list-group-item-border-bottom-left-radius: 0px;
+    --list-group-item-border-bottom-right-radius: 0px;
+    --list-group-item-border-width: 1px 0 1px 0;
+    --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+    --list-group-item-border-style: solid;
+    --list-group-item-first-border-width: 0px 0px 1px 0px;
+    --list-group-item-last-border-width: 0px 0px 0px 0px;
 
     /* Popover */
-    --popover-body-bg-color: var(--navbar-bg-color);
+    --popover-body-bg-color: #2C2C2C;
     --popover-body-text-color: var(--navbar-text-color);
     --popover-outerarrow-color: transparent;
     --popover-arrow-color: transparent;
@@ -159,8 +288,8 @@
     --dropdown-item-hover-text-color: white;
     --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
     --dropdown-item-text-color: var(--navbar-text-color);
-    --dropdown-item-bg-color: var(--navbar-bg-color);
-    --dropdown-overlay-color: rgba(0,0,0,0.5);
+    --dropdown-item-bg-color: #2C2C2C;
+    --dropdown-overlay-color: var(--elevation-layer1);
 
     /* Accordion */
     --accordion-header-text-color: rgba(74, 198, 148, 0.9);
@@ -198,14 +327,15 @@
     --brand-font-family: "Spartan", sans-serif;
 
     /* Card */
-    --card-bg-color: rgba(22,27,34,0.5);
+    --card-bg-color: var(--elevation-layer3);
     --card-text-color: var(--body-text-color);
     --card-border-width: 0 1px 1px 1px;
     --card-border-style: solid;
     --card-border-color: transparent;
+    --card-border-radius: 5px;
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
-    --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
+    --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
     --card-progress-triangle-size: 28px;
 
     /* Slider */
@@ -253,6 +383,7 @@
     /* Bulk Selection */
     --bulk-selection-text-color: var(--navbar-text-color);
     --bulk-selection-highlight-text-color: var(--primary-color);
+    --bulk-selection-bg-color: rgba(39,39,39,1);
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
@@ -265,4 +396,27 @@
     /** Badge **/
     --badge-text-color: var(--bs-badge-color);
 
+    /** Login **/
+    --login-card-bg-color: #212121;
+    --login-logo-image: url("/assets/images/logo.png");
+    --login-logo-height: 55px;
+    --login-logo-width: 55px;
+    --login-logo-bg-size: contain;
+    --login-logo-bg-repeat: no-repeat;
+    --login-card-border-width: 3px 0px 0px 0px;
+    --login-card-border-style: solid;
+    --login-card-border-color: var(--primary-color);
+    --login-input-border-color: transparent;
+    --login-input-border-color-focus: transparent;
+    --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
+    --login-input-background-color: #353535;
+    --login-input-color: #fff;
+    --login-forgot-password-color: var(--primary-color);
+    --login-background-url: url('../../assets/images/login-bg.jpg');
+    --login-background-size: cover;
+    --login-background-opacity: 0.3;
+    --login-background-color: #000;
+    --login-input-font-family: 'League Spartan', sans-serif;
+    --login-input-placeholder-opacity: 0.5;
+    --login-input-placeholder-color: #fff;
 }

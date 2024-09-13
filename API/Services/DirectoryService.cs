@@ -29,6 +29,7 @@ public interface IDirectoryService
     string LocalizationDirectory { get; }
     string CustomizedTemplateDirectory { get; }
     string TemplateDirectory { get; }
+    string PublisherDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
@@ -89,6 +90,7 @@ public class DirectoryService : IDirectoryService
     public string LocalizationDirectory { get; }
     public string CustomizedTemplateDirectory { get; }
     public string TemplateDirectory { get; }
+    public string PublisherDirectory { get; }
     public string EpubFontDirectory { get; }
 
     private readonly ILogger<DirectoryService> _logger;
@@ -128,6 +130,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(CustomizedTemplateDirectory);
         TemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "EmailTemplates");
         ExistOrCreate(TemplateDirectory);
+        PublisherDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "images", "publishers");
+        ExistOrCreate(PublisherDirectory);
         EpubFontDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "fonts");
         ExistOrCreate(EpubFontDirectory);
     }

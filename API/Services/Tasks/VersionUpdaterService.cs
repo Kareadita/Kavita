@@ -97,7 +97,6 @@ public class VersionUpdaterService : IVersionUpdaterService
         // isNightly can be true when we compare something like v0.8.1 vs v0.8.1.0
         if (IsVersionEqualToBuildVersion(updateVersion))
         {
-            //latestRelease.UpdateVersion = BuildInfo.Version.ToString();
             isNightly = false;
         }
 

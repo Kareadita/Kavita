@@ -8,7 +8,7 @@ import {StatCount} from '../../_models/stat-count';
 import {DayOfWeekPipe} from '../../../_pipes/day-of-week.pipe';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {tap} from "rxjs/operators";
 
 @Component({

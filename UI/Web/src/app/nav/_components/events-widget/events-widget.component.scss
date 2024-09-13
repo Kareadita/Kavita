@@ -65,10 +65,6 @@
     white-space:nowrap;
 }
 
-.btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
-}
-
 .small-spinner {
     width: 1rem;
     height: 1rem;

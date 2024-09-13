@@ -6,7 +6,7 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { FilterPipe } from '../../../_pipes/filter.pipe';
 import { NgIf, NgFor } from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 
 export enum ADD_FLOW {
   Series = 0,

@@ -1,11 +1,12 @@
 ﻿using System;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Services.Plus;
 
 namespace API.DTOs.Collection;
 #nullable enable
 
-public class AppUserCollectionDto
+public class AppUserCollectionDto : IHasCoverImage
 {
     public int Id { get; init; }
     public string Title { get; set; } = default!;
@@ -17,6 +18,9 @@ public class AppUserCollectionDto
     /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
     /// </summary>
     public string? CoverImage { get; set; } = string.Empty;
+
+    public string PrimaryColor { get; set; } = string.Empty;
+    public string SecondaryColor { get; set; } = string.Empty;
     public bool CoverImageLocked { get; set; }
 
     /// <summary>
@@ -44,4 +48,10 @@ public class AppUserCollectionDto
     /// A <br/> separated string of all missing series
     /// </summary>
     public string? MissingSeriesFromSource { get; set; }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

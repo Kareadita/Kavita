@@ -1,0 +1,31 @@
+<ng-container *transloco="let t; read: 'series-detail'">
+    @if(mobileSeriesImgBackground === 'true') {
+      <app-image [styles]="{'background': 'none'}" [imageUrl]="coverImage"></app-image>
+    } @else {
+      <app-image [styles]="{'object-fit': 'contain', 'background': 'none', 'max-height': '400px'}"  [imageUrl]="coverImage"></app-image>
+    }
+    <div class="card-overlay"></div>
+    <div class="overlay-information">
+      <div class="overlay-information--centered">
+          <span class="card-title library mx-auto" style="width: auto;" (click)="read.emit()">
+            <!-- Card Image -->
+            <div>
+              <i class="fa-solid fa-book text-center" aria-hidden="true"></i>
+            </div>
+          </span>
+      </div>
+    </div>
+
+    @if (entity.pagesRead < entity.pages && entity.pagesRead > 0) {
+      <div class="progress-banner series" ngbTooltip="{{(entity.pagesRead / entity.pages) * 100 | number:'1.0-1'}}%">
+        <ngb-progressbar type="primary" [value]="entity.pagesRead" [max]="entity.pages" [showValue]="true"></ngb-progressbar>
+      </div>
+      @if (continueTitle !== '') {
+        <div class="under-image">
+          <div class="continue-from">
+            {{t('continue-from', {title: continueTitle})}}
+          </div>
+        </div>
+      }
+    }
+</ng-container>

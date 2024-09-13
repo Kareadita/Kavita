@@ -1,5 +1,5 @@
-import {ChangeDetectorRef, Component, ContentChild, DestroyRef, ElementRef, inject, OnInit} from '@angular/core';
-import {NgIf, NgOptimizedImage} from "@angular/common";
+import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {NgForOf, NgIf, NgOptimizedImage} from "@angular/common";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -9,25 +9,29 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-import {ManageAlertsComponent} from "../../admin/manage-alerts/manage-alerts.component";
+import {ManageMediaIssuesComponent} from "../../admin/manage-media-issues/manage-media-issues.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
   standalone: true,
   imports: [
-    NgIf,
     NgOptimizedImage,
     NgbTooltip,
     ReactiveFormsModule,
     Select2Module,
     TranslocoDirective,
     NgbCollapse,
-    ManageAlertsComponent,
+    ManageMediaIssuesComponent,
     NgbAccordionBody,
     NgbAccordionButton,
     NgbAccordionCollapse,
@@ -35,6 +39,12 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
     NgbAccordionHeader,
     NgbAccordionItem,
     LoadingComponent,
+    ScrobbleProviderItemComponent,
+    ScrobbleProviderNamePipe,
+    SettingTitleComponent,
+    NgForOf,
+    NgIf,
+    SettingItemComponent,
   ],
   templateUrl: './manage-scrobbling-providers.component.html',
   styleUrl: './manage-scrobbling-providers.component.scss'
@@ -46,6 +56,8 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+
   hasValidLicense: boolean = false;
 
   formGroup: FormGroup = new FormGroup({});
@@ -53,14 +65,12 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   malToken: string = '';
   malUsername: string = '';
 
-  aniListTokenExpired: boolean = false;
-  malTokenExpired: boolean = false;
 
   isViewMode: boolean = true;
   loaded: boolean = false;
 
   constructor() {
-    this.accountService.hasValidLicense$.subscribe(res => {
+    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.hasValidLicense = res;
       this.cdRef.markForCheck();
       if (this.hasValidLicense) {
@@ -77,10 +87,9 @@ export class ManageScrobblingProvidersComponent implements OnInit {
           this.formGroup.get('malUsername')?.setValue(this.malUsername);
           this.cdRef.markForCheck();
         });
-        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
-          this.aniListTokenExpired = hasExpired;
-          this.cdRef.markForCheck();
-        });
+      } else {
+        this.loaded = true;
+        this.cdRef.markForCheck();
       }
     });
   }
@@ -119,8 +128,9 @@ export class ManageScrobblingProvidersComponent implements OnInit {
     });
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
     this.resetForm();
+    this.cdRef.markForCheck();
   }
 }

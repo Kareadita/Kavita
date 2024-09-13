@@ -1,4 +1,4 @@
-$image-height: 230px;
+$image-height: 232.91px;
 $image-width: 160px;
 
 .card-img-top {
@@ -16,7 +16,7 @@ $image-width: 160px;
 
 .chooser {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 158px);
+    grid-template-columns: repeat(auto-fill, 160px);
     grid-gap: 0.5rem;
     justify-content: space-around;
 }

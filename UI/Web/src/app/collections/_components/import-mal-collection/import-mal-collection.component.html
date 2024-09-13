@@ -1,0 +1,27 @@
+<ng-container *transloco="let t; read: 'import-mal-collection-modal'">
+  <p>{{t('description')}}</p>
+
+  @if (stacks.length === 0) {
+    <p>{{t('nothing-found')}}</p>
+  }
+
+  <ul>
+    @for(stack of stacks; track stack.url) {
+      <li class="mb-2">
+        <div>
+          <a [href]="stack.url" rel="noreferrer noopener" target="_blank">{{stack.title}}</a>
+          <button class="btn btn-primary float-end" [disabled]="collectionMap && collectionMap.hasOwnProperty(stack.url)" (click)="importStack(stack)">{{t('track')}}</button>
+        </div>
+        <div>
+          @if (stack.author) {
+            by {{stack.author}} •
+          }
+          {{t('series-count', {num: stack.seriesCount | number})}} • <span><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>{{t('restack-count', {num: stack.restackCount | number})}}</span></div>
+      </li>
+    } @empty {
+      @if (isLoading) {
+        <app-loading [loading]="isLoading"></app-loading>
+      }
+    }
+  </ul>
+</ng-container>

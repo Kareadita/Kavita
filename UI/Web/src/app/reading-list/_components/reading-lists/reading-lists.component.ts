@@ -12,21 +12,17 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { ImportCblModalComponent } from '../../_modals/import-cbl-modal/import-cbl-modal.component';
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
-import {UserCollection} from "../../../_models/collection-tag";
-import {User} from "../../../_models/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-reading-lists',
@@ -50,8 +46,8 @@ export class ReadingListsComponent implements OnInit {
   hasPromote: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
-  globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
-  trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}`;
+  globalActions: Array<ActionItem<any>> = [];
+  trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}_${item.promoted}`;
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
@@ -88,14 +84,9 @@ export class ReadingListsComponent implements OnInit {
   getActions(readingList: ReadingList) {
     const d = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
+
     return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
-  }
-
-  performAction(action: ActionItem<ReadingList>, readingList: ReadingList) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, readingList);
-    }
   }
 
   performGlobalAction(action: ActionItem<any>) {
@@ -104,10 +95,8 @@ export class ReadingListsComponent implements OnInit {
     }
   }
 
-  importCbl() {
-    const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl', fullscreen: 'md'});
-    ref.closed.subscribe(result => this.loadPage());
-    ref.dismissed.subscribe(_ => this.loadPage());
+  handleClick(list: ReadingList) {
+    this.router.navigateByUrl('lists/' + list.id);
   }
 
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
@@ -122,6 +111,22 @@ export class ReadingListsComponent implements OnInit {
         this.actionService.editReadingList(readingList, (updatedList: ReadingList) => {
           // Reload information around list
           readingList = updatedList;
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.Promote:
+        this.actionService.promoteMultipleReadingLists([readingList], true, (res) => {
+          // Reload information around list
+          readingList.promoted = true;
+          this.loadPage();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.UnPromote:
+        this.actionService.promoteMultipleReadingLists([readingList], false, (res) => {
+          // Reload information around list
+          readingList.promoted = false;
+          this.loadPage();
           this.cdRef.markForCheck();
         });
         break;
@@ -150,10 +155,6 @@ export class ReadingListsComponent implements OnInit {
       this.lists.forEach(l => this.actions[l.id] = this.getActions(l));
       this.cdRef.markForCheck();
     });
-  }
-
-  handleClick(list: ReadingList) {
-    this.router.navigateByUrl('lists/' + list.id);
   }
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {

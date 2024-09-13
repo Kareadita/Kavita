@@ -108,4 +108,49 @@ public static class GenreHelper
             onModified();
         }
     }
+
+    public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Chapter chapter,
+        IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
+    {
+        // TODO: Write some unit tests
+        if (tags == null) return;
+        var isModified = false;
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = chapter.Genres.ToList();
+        foreach (var existing in existingTags)
+        {
+            if (tags.SingleOrDefault(t => t.Title.ToNormalized().Equals(existing.NormalizedTitle)) == null)
+            {
+                // Remove tag
+                chapter.Genres.Remove(existing);
+                isModified = true;
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tagTitle in tags.Select(t => t.Title))
+        {
+            var normalizedTitle = tagTitle.ToNormalized();
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
+            if (existingTag != null)
+            {
+                if (chapter.Genres.All(t => !t.NormalizedTitle.Equals(normalizedTitle)))
+                {
+                    handleAdd(existingTag);
+                    isModified = true;
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(new GenreBuilder(tagTitle).Build());
+                isModified = true;
+            }
+        }
+
+        if (isModified)
+        {
+            onModified();
+        }
+    }
 }

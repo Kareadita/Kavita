@@ -1,40 +1,134 @@
+@import '../theme/variables';
 .content-wrapper {
-    padding: 0 10px 0;
-    height: 100%;
+    padding: 0 0 0 10px;
+    height: calc(var(--vh)* 100 - var(--nav-offset));
 }
 
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
-    margin-left: 40px;
+    margin-left: 60px;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+
+    // For firefox
+    @supports (-moz-appearance:none) {
+        scrollbar-color: transparent transparent;
+        scrollbar-width: thin;
+    }
+
+    &::-webkit-scrollbar {
+        background-color: transparent;  /*make scrollbar space invisible */
+        width: inherit;
+        display: none;
+        visibility: hidden;
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: transparent; /*makes it invisible when not hovering*/
+    }
+
+    &:hover {
+        scrollbar-width: thin;
+        overflow-y: auto;
+
+        // For firefox
+        @supports (-moz-appearance:none) {
+            scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            visibility: visible;
+            background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+        }
+    }
+}
+
+
+.companion-bar-collapsed {
+  margin-left: 0 !important;
 }
 
 .companion-bar-content {
     margin-left: 190px;
-    width: auto;
 }
 
-@media (max-width: 576px) {
+@media (max-width: $grid-breakpoints-lg) {
+    ::ng-deep html {
+        height: 100dvh !important;
+    }
+
     .container-fluid {
         padding: 0;
     }
 
     .content-wrapper {
-        padding: 0 5px 0;
         overflow: hidden;
-        height: calc(var(--vh)*100 - 56px);
+        height: calc(var(--vh)* 100);
+        padding: 0;
 
         &.closed {
             overflow: auto;
+            height: calc(var(--vh) * 100);
         }
     }
 
     .companion-bar {
-        margin-left: 0px;
-        padding-left: 0px;
+        margin-left: 0;
+        padding-left: 0;
+        width: 100%;
+        padding: 10px 0 0;
+        height: calc(var(--vh) * 100 - var(--nav-mobile-offset));
+        scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+        scrollbar-width: thin;
+        margin-bottom: 20px;
+        overflow-y: auto;
     }
 
     .companion-bar-content {
-        margin-left: 0px;
-        width: auto;
+        margin-left: 0;
     }
+}
+
+.default-background {
+  background: radial-gradient(circle farthest-side at 0% 100%,
+    var(--colorscape-darker-color) 0%,
+    var(--colorscape-darker-no-alpha-color) 100%),
+              radial-gradient(circle farthest-side at 100% 100%,
+      var(--colorscape-primary-color) 0%,
+      var(--colorscape-primary-no-alpha-color) 100%),
+              radial-gradient(circle farthest-side at 100% 0%,
+      var(--colorscape-lighter-color) 0%,
+      var(--colorscape-lighter-no-alpha-color) 100%),
+              radial-gradient(circle farthest-side at 0% 0%,
+      var(--colorscape-complementary-color) 0%,
+      var(--colorscape-complementary-no-alpha-color) 100%),
+    var(--bs-body-bg);
+}
+
+.fullpage-background {
+  position: fixed; /* Make sure it's fixed to the viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--bs-body-bg);
+  filter: blur(20px);
+  object-fit: contain;
+  transform: scale(1.1);
+
+  .background-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 113vh;
+  }
 }

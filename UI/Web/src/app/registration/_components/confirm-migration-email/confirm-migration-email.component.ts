@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-confirm-migration-email',

@@ -1,24 +1,30 @@
 <ng-container *transloco="let t; read:'api-key'">
-  <div class="mb-3">
-      <label for="api-key--{{title}}" class="form-label">{{title}}</label><span *ngIf="tooltipText.length > 0">&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i></span>
-      <ng-template #tooltip>{{tooltipText}}</ng-template>
-      <div class="input-group">
-          <input #apiKey [type]="InputType" readonly class="form-control" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
-          <button class="btn btn-outline-secondary" type="button" (click)="toggleVisibility()" [title]="isDataHidden ? t('show') : t('hide')" *ngIf="hideData">
-              <span class="visually-hidden">{{isDataHidden ? t('show') : t('hide')}}</span><i class="fa {{isDataHidden ? 'fa-eye' : 'fa-eye-slash'}}" aria-hidden="true"></i>
-          </button>
-          <button class="btn btn-outline-secondary" type="button" (click)="copy()" [title]="t('copy')">
-              <span class="visually-hidden">Copy</span><i class="fa fa-copy" aria-hidden="true"></i>
-          </button>
-        @if (showRefresh) {
-          <button class="btn btn-danger" type="button" [ngbTooltip]="tipContent" (click)="refresh()">
-            <span class="visually-hidden">Regenerate</span><i class="fa fa-sync-alt" aria-hidden="true"></i>
+
+  <app-setting-item [title]="title" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText" [toggleOnViewClick]="false">
+    <ng-template #view>
+        <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
+
+      <div class="d-inline-flex">
+        @if (hideData) {
+          <button class="btn btn-secondary-text" type="button" (click)="toggleVisibility()">
+            {{isDataHidden ? t('show') : t('hide')}}
           </button>
         }
 
-          <ng-template #tipContent>
-              {{t('regen-warning')}}
-          </ng-template>
+        <button class="btn btn-primary-text" type="button" (click)="copy()" [title]="t('copy')">
+          {{t('copy')}}
+        </button>
       </div>
-  </div>
+    </ng-template>
+    @if (showRefresh) {
+      <ng-template #titleActions>
+          <button class="btn btn-danger-text" [ngbTooltip]="tipContent" (click)="refresh()">Reset</button>
+      </ng-template>
+    }
+  </app-setting-item>
+
+  <ng-template #tipContent>
+    {{t('regen-warning')}}
+  </ng-template>
+
 </ng-container>

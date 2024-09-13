@@ -28,6 +28,7 @@ export class MetadataDetailComponent {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) heading!: string;
   @Input() queryParam: FilterField = FilterField.None;
+  @Input() includeComma: boolean = true;
   @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 

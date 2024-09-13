@@ -1,5 +1,6 @@
 import { LibraryType } from "./library/library";
 import { MangaFormat } from "./manga-format";
+import {IHasCover} from "./common/i-has-cover";
 
 export interface ReadingListItem {
     pagesRead: number;
@@ -20,7 +21,7 @@ export interface ReadingListItem {
     summary?: string;
 }
 
-export interface ReadingList {
+export interface ReadingList extends IHasCover {
     id: number;
     title: string;
     summary: string;
@@ -30,7 +31,9 @@ export interface ReadingList {
     /**
      * If this is empty or null, the cover image isn't set. Do not use this externally.
      */
-     coverImage: string;
+     coverImage?: string;
+     primaryColor: string;
+     secondaryColor: string;
      startingYear: number;
      startingMonth: number;
      endingYear: number;

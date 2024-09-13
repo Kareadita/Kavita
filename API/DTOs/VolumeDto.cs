@@ -8,7 +8,7 @@ using API.Services.Tasks.Scanner.Parser;
 
 namespace API.DTOs;
 
-public class VolumeDto : IHasReadTimeEstimate
+public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <inheritdoc cref="Volume.MinNumber"/>
@@ -44,6 +44,7 @@ public class VolumeDto : IHasReadTimeEstimate
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public int AvgHoursToRead { get; set; }
+    public long WordCount { get; set; }
 
     /// <summary>
     /// Is this a loose leaf volume
@@ -61,5 +62,16 @@ public class VolumeDto : IHasReadTimeEstimate
     public bool IsSpecial()
     {
         return MinNumber.Is(Parser.SpecialVolumeNumber);
+    }
+
+    public string CoverImage { get; set; }
+    private bool CoverImageLocked { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
     }
 }

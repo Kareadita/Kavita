@@ -1,0 +1,53 @@
+<ng-container *transloco="let t; read: 'manage-media-issues'">
+  <p>{{t('description-part-1')}} <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.MediaIssues">{{t('description-part-2')}}</a></p>
+
+  <form [formGroup]="formGroup">
+    <div class="row g-0 mb-3">
+      <div class="col-md-12">
+        <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+        <div class="input-group">
+          <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+          <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="table-responsive-md">
+    <table class="table table-striped table-sm">
+    <thead #header>
+      <tr>
+        <th scope="col" sortable="filePath" (sort)="onSort($event)">
+          {{t('file-header')}}
+        </th>
+        <th scope="col" sortable="comment" (sort)="onSort($event)">
+          {{t('comment-header')}}
+        </th>
+        <th scope="col" sortable="details" (sort)="onSort($event)">
+          {{t('created-header')}}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for(item of data | filter: filterList; track item.filePath; let index = $index) {
+        <tr>
+          <td>
+            {{item.filePath}}
+          </td>
+          <td>
+            {{item.comment}}
+          </td>
+          <td>
+            {{item.createdUtc | utcToLocalTime | defaultDate}}
+          </td>
+        </tr>
+      } @empty {
+        @if (isLoading) {
+          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+        } @else {
+          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+  </div>
+</ng-container>

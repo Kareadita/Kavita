@@ -195,5 +195,7 @@
     "browse-external-sources": "瀏覽外部來源",
     "sidenav-stream-doesnt-exist": "側邊導覽串流不存在",
     "smart-filter-already-in-use": "已存在具有此智慧篩選器的串流",
-    "external-source-already-exists": "外部來源已存在"
+    "external-source-already-exists": "外部來源已存在",
+    "generic-cover-volume-save": "無法保存封面圖片",
+    "generic-cover-person-save": "無法保存封面圖片"
 }

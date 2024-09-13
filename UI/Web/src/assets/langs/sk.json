@@ -46,7 +46,6 @@
         "success-toast": "Používateľské preferencie aktualizované",
         "page-layout-mode-tooltip": "Zobraziť položky ako karty alebo zoznam na stránke Detaily série.",
         "preferences-tab": "Preferencie",
-        "3rd-party-clients-tab": "Klienti od tretej strany",
         "stats-tab": "Štatistiky",
         "devices-tab": "Zariadenia",
         "locale-label": "Lokál",
@@ -200,7 +199,6 @@
         "specials-tab": "Špeciály",
         "continue": "Pokračovať",
         "read-incognito": "Čitať v móde Inkognito",
-        "user-reviews-alt": "Užívateľské Recenzie",
         "no-chapters": "Tento zväzok neobsahuje žiadne kapitoly. Nedá sa čítať.",
         "layout-mode-option-card": "Karta",
         "read-options-alt": "Možnosti čítania",
@@ -211,8 +209,6 @@
         "continue-from": "Pokračovať {{title}}",
         "continue-incognito": "Pokračovať Inkognito",
         "edit-series-alt": "Upraviť Informácie o Sérii",
-        "download-series--tooltip": "Stiahnuť Sériu",
-        "downloading-status": "Sťahuje sa…",
         "cover-change": "Môže trvať až minútu, kým váš prehliadač obnoví obrázok. Dovtedy sa na niektorých stránkach môže zobrazovať starý obrázok.",
         "recommendations-tab": "Odporúčania"
     },
@@ -245,7 +241,6 @@
         "folder-watching-label": "Sledovanie Priečinka",
         "folder-watching-tooltip": "Prepísať sledovanie priečinka servera pre túto knižnicu. Ak je vypnutá, sledovanie priečinkov sa nespustí v priečinkoch, ktoré táto knižnica obsahuje. Ak knižnice zdieľajú priečinky, priečinky môžu byť stále spustené. Pred spustením skenovania vždy počká 10 minút.",
         "include-in-dashboard-label": "Zahrnúť v Dashboarde",
-        "include-in-recommendation-tooltip": "Mali by byť na stránke Odporúčané zahrnuté série z knižnice.",
         "force-scan-tooltip": "Toto vynúti skenovanie v knižnici a bude sa s ním zaobchádzať ako s novým skenom",
         "advanced-tab": "Pokročilé",
         "library-name-unique": "Názov knižnice musí byť jedinečný",
@@ -267,7 +262,6 @@
         "include-in-search-tooltip": "Mali by byť do výsledkov vyhľadávania zahrnuté série a akékoľvek odvodené informácie (žánre, ľudia, súbory) z knižnice.",
         "force-scan": "Vynútiť skenovanie",
         "naming-conventions-part-1": "Kavita má ",
-        "include-in-recommendation-label": "Zahrnúť medzi odporúčané",
         "include-in-dashboard-tooltip": "Mali by byť v Dashboarde zahrnuté série z knižnice. Ovplyvní to všetky streamy, ako sú Pokračovať v čítaní, Naposledy aktualizované, Nedávno pridané alebo akékoľvek vlastné doplnky.",
         "exclude-patterns-tooltip": "Nakonfigurujte sadu vzorov (Glob syntax), s ktorými bude Kavita zhodovať pri skenovaní adresárov a vylúči ich z výsledkov Scanner.",
         "edit-title": "Upraviť {{name}}",
@@ -304,19 +298,6 @@
         "theme-white": "Biely",
         "theme-paper": "Papier",
         "immersive-mode-tooltip": "Ponuka sa skryje pri kliknutí na dokument čítačky a zapne dotyk pre listovanie strán"
-    },
-    "card-detail-drawer": {
-        "cover-tab": "Obal",
-        "info-tab": "Info",
-        "size": "Veľkosť:",
-        "files": "Súbory",
-        "metadata-tab": "Metadáta",
-        "no-summary": "Nie je k dispozícii žiadny súhrn.",
-        "unread": "Neprečítané",
-        "general-tab": "Všeobecné",
-        "not-defined": "Neurčené",
-        "pages": "Stránky:",
-        "added": "Pridané:"
     },
     "edit-series-relation": {
         "target-series": "Cieľová séria",
@@ -382,7 +363,6 @@
         "weekly": "Týždenne",
         "convert-media-task": "Previesť médiá na cieľové kódovanie",
         "convert-media-task-desc": "Spustí dlhotrvajúcu úlohu, ktorá skonvertuje všetky médiá spravované kavitou na cieľové kódovanie. Je to pomalé (najmä na zariadeniach ARM).",
-        "convert-media-success": "Konverzia médií na cieľové kódovanie bola zaradená do poradia",
         "bust-cache-task-success": "Vyrovnávacia pamäť Kavita+ bola prerušená",
         "clear-reading-cache-task": "Vymazať vyrovnávaciu pamäť čítania",
         "clear-reading-cache-task-success": "Vyrovnávacia pamäť bola vymazaná",
@@ -420,7 +400,6 @@
         "you-alt": "(Ty)",
         "pending-title": "Čakajúce",
         "username-pattern": "Používateľské meno môže obsahovať iba nasledujúce znaky a medzery: {{characters}}",
-        "roles-title": "Roly:",
         "never": "Nikdy",
         "title": "Aktívni používatelia",
         "setup": "Nastaviť",
@@ -432,7 +411,6 @@
         "change-password-alt": "Zmeniť heslo {{user}}",
         "resend": "Znovu odoslať",
         "admin": "Administrátor",
-        "last-active-title": "Posledná aktivita:",
         "none": "Žiadne",
         "edit-user-tooltip": "Upraviť",
         "delete-user-alt": "Zmazať používateľa {{user}}",
@@ -440,8 +418,7 @@
         "setup-user-tooltip": "Nastaviť Používateľa",
         "edit-user-alt": "Upraviť používateľa {{user}}",
         "no-data": "Neexistujú žiadni iní používatelia.",
-        "online-now-tooltip": "Práve online",
-        "sharing-title": "Zdieľať:"
+        "online-now-tooltip": "Práve online"
     },
     "edit-collection-tags": {
         "general-tab": "Všeobecné",
@@ -453,24 +430,6 @@
         "promote-tooltip": "Povýšenie znamená, že tag možno vidieť na celom serveri, nielen pre správcov. Všetky série, ktoré majú tento tag, budú mať stále obmedzenia prístupu používateľov.",
         "summary-label": "Zhrnutie",
         "title": "Upraviť zbierku {{collectionName}}"
-    },
-    "admin-dashboard": {
-        "users-tab": "Používatelia",
-        "system-tab": "Systém",
-        "kavita+-desc-part-3": "dnes!",
-        "kavita+-tab": "Kavita+",
-        "title": "Administrátorský Dashboard",
-        "email-tab": "E-mail",
-        "statistics-tab": "Štatistiky",
-        "kavita+-requirement": "Kavita+ je navrhnutá tak, aby fungovala iba s najnovším vydaním – 2 verziami. Čokoľvek mimo toho môže byť nefunkčné.",
-        "kavita+-releases": "Pozrite si vydania",
-        "general-tab": "Všeobecné",
-        "logs-tab": "Logy",
-        "kavita+-desc-part-2": "prémiové benefity",
-        "libraries-tab": "Knižnice",
-        "media-tab": "Médiá",
-        "tasks-tab": "Úlohy",
-        "kavita+-desc-part-1": "Kavita+ je prémiová predplatená služba, ktorá odomyká funkcie pre všetkých používateľov v tejto inštancii Kavita. Ak ju chcete odomknúť, kúpte si predplatné "
     },
     "events-widget": {
         "dismiss-all": "Odmietnuť všetko",
@@ -731,10 +690,6 @@
     "badge-expander": {
         "more-items": "a {{count}} ďalších"
     },
-    "edit-device": {
-        "device-platform-label": "Platforma Zariadenia",
-        "device-name-label": "Názov Zariadenia"
-    },
     "change-password": {
         "current-password-label": "Súčasné Heslo",
         "new-password-label": "Nové Heslo",
@@ -868,20 +823,6 @@
         "description-1": "Zvážte aktualizáciu, aby ste používali najnovšiu verziu Kavity.",
         "description-2": "Pozrite sa na <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pre inštrukcie, ako aktualizovať.",
         "description-3": "Ak existuje konkrétny dôvod, prečo ste ešte neaktualizovali, radi by sme vedeli, čo vás drží na zastaranej verzii! Zastavte sa na našom Discorde a dajte nám vedieť, čo bráni vašej ceste inovácie."
-    },
-    "series-metadata-detail": {
-        "cover-artists-title": "Umelci Obálky",
-        "tags-title": "Tagy",
-        "characters-title": "Postavy",
-        "editors-title": "Redaktori",
-        "publishers-title": "Vydavatelia",
-        "rating-title": "Hodnotenia",
-        "see-more": "Pozrieť viac",
-        "links-title": "Odkazy",
-        "writers-title": "Spisovatelia",
-        "translators-title": "Prekladatelia",
-        "genres-title": "Žánre",
-        "see-less": "Pozri menej"
     },
     "default-date-pipe": {
         "never": "Nikdy"
@@ -1041,16 +982,13 @@
         "mark-visible": "Označiť ako viditeľné",
         "add-to-want-to-read": "Pridať do zoznamu Chcete si prečítať",
         "details": "Detaily",
-        "add-rule-group-and": "Pridať skupinu pravidiel (A)",
         "edit": "Upraviť",
         "mark-as-unread": "Označiť ako neprečítané",
-        "add-rule-group-or": "Pridať skupinu pravidiel (ALEBO)",
         "mark-invisible": "Označiť ako neviditeľné",
         "download": "Stiahnuť",
         "add-to": "Pridať do",
         "view-series": "Zobraziť sériu",
         "remove-from-want-to-read": "Odstrániť zo Chcete prečítať",
-        "remove-rule-group": "Odstrániť skupinu pravidiel",
         "read": "Čítať",
         "scan-library": "Skenovať knižnicu",
         "analyze-files": "Analyzovať súbory",
@@ -1183,9 +1121,6 @@
     "card-item": {
         "cannot-read": "Nedá sa čítať"
     },
-    "chapter-metadata-detail": {
-        "no-data": "Nie sú k dispozícii žiadne metadáta"
-    },
     "cover-image-chooser": {
         "drag-n-drop": "Potiahni a pusť",
         "upload": "Nahrať",
@@ -1198,50 +1133,10 @@
         "reset-cover-tooltip": "Obnoviť titulný obrázok",
         "image-num": "Obrázok {{num}}"
     },
-    "entity-info-cards": {
-        "age-rating-title": "Vekové hodnotenie",
-        "length-title": "Dĺžka",
-        "id-title": "ID",
-        "hour": "Hodina",
-        "hours": "Hodín",
-        "release-date-title": "Vydanie",
-        "words-count": "{{num}} Slov",
-        "size-title": "Veľkosť",
-        "pages-count": "{{num}} Strán",
-        "reading-time-title": "Čas čítania",
-        "date-added-title": "Dátum pridaný",
-        "last-read-title": "Naposledy čítané",
-        "less-than-hour": "<1 Hodina",
-        "release-date-tooltip": "Dátum vydania"
-    },
-    "series-info-cards": {
-        "release-year-tooltip": "Rok Vydania",
-        "publication-status-tooltip": "Stav Publikácie",
-        "read-time-title": "Čas Čítania",
-        "on": "Zapnuté",
-        "format-title": "Formát",
-        "language-title": "Jazyk",
-        "publication-status-title": "Publikácia",
-        "off": "Vypnuté",
-        "disabled": "Deaktivované",
-        "scrobbling-tooltip": "Stav Scrobblingu",
-        "time-left-title": "Zostávajúci čas",
-        "last-read-title": "Naposledy čítané",
-        "length-title": "Dĺžka",
-        "scrobbling-title": "Scrobblovanie"
-    },
     "entity-title": {
         "chapter": "Kapitola",
         "special": "Špeciál",
         "issue-num": "Chyba #"
-    },
-    "manage-alerts": {
-        "file-header": "Súbor",
-        "description-part-2": "wiki.",
-        "clear-alerts": "Vymazať upozornenia",
-        "comment-header": "Komentár",
-        "details-header": "Detaily",
-        "extension-header": "Rozšírenie"
     },
     "manage-email-settings": {
         "email-settings-title": "Nastavenia e-mailu",
@@ -1264,8 +1159,7 @@
         "sender-displayname-tooltip": "Meno, z ktorého príjemca uvidí, keď dostane e-mail",
         "username-tooltip": "Používateľské meno používané na overenie voči host-u",
         "description": "Aby ste mohli používať niektoré funkcie Kavity, ako je Zabudnuté heslo a Odoslať do zariadenia, musí byť nastavený poskytovateľ e-mailu. Ostatné funkcie, ako je zmena hesla, sú bez nastavenia e-mailu menej bezpečné.",
-        "send-to-warning": "Ak chcete, aby funkcia Odoslať do zariadenia fungovala, musíte nastaviť nastavenia e-mailu",
-        "title": "E-mailové služby (SMTP)"
+        "send-to-warning": "Ak chcete, aby funkcia Odoslať do zariadenia fungovala, musíte nastaviť nastavenia e-mailu"
     },
     "manage-library": {
         "delete-library": "Zmazať knižnicu",
@@ -1352,7 +1246,6 @@
     },
     "nav-header": {
         "skip-alt": "Preskočiť na hlavný obsah",
-        "promoted": "(povýšené)",
         "announcements": "Oznámenia",
         "settings": "Nastavenia",
         "no-data": "Neboli nájdené žiadne výsledky",
@@ -1562,10 +1455,6 @@
     "carousel-reel": {
         "prev-items": "Predchádzajúce položky",
         "next-items": "Nasledujúce položky"
-    },
-    "library-detail": {
-        "library-tab": "Knižnica",
-        "recommended-tab": "Odporúčané"
     },
     "restriction-selector": {
         "description": "Keď vyberiete túto možnosť, všetky série a zoznamy čítaní, ktoré majú aspoň jednu položku, ktorá je väčšia ako vybraté obmedzenie, budú z výsledkov vyradené."

@@ -139,7 +139,6 @@
         "prompt-on-download-tooltip": "Запрашивать, когда размер загрузки превышает {{size}} МБ",
         "blur-unread-summaries-label": "Размытие непрочитанных сводок",
         "page-layout-mode-tooltip": "Показывать элементы в виде карточек или списка на странице сведений о серии.",
-        "3rd-party-clients-tab": "Сторонние клиенты",
         "prompt-on-download-label": "Запрос на загрузку",
         "clients-api-key-tooltip": "Ключ API - это как пароль. Храните его в секрете, берегите его.",
         "clients-opds-alert": "OPDS не включен на этом сервере. Это не повлияет на пользователей Tachiyomi.",
@@ -170,15 +169,6 @@
         "platform-label": "Платформа: ",
         "devices-title": "Устройства",
         "email-label": "Электронная почта: "
-    },
-    "edit-device": {
-        "email-label": "{{common.email}}",
-        "save": "{{common.save}}",
-        "email-tooltip": "Это письмо будет использоваться для приема файла через Send To",
-        "device-platform-label": "Платформа устройства",
-        "device-name-label": "Имя устройства",
-        "valid-email": "{{validation.valid-email}}",
-        "required-field": "{{validation.required-field}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -322,9 +312,6 @@
         "close": "{{common.close}}",
         "read": "{{common.read}}"
     },
-    "series-metadata-detail": {
-        "promoted": "{{common.promoted}}"
-    },
     "update-notification-modal": {
         "close": "{{common.close}}"
     },
@@ -340,9 +327,6 @@
     "bulk-operations": {
         "deselect-all": "{{common.deselect-all}}"
     },
-    "card-detail-drawer": {
-        "read": "{{common.read}}"
-    },
     "cover-image-chooser": {
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}"
@@ -353,9 +337,6 @@
         "clear": "{{common.clear}}",
         "loading": "{{common.loading}}",
         "create": "{{common.create}}"
-    },
-    "list-item": {
-        "read": "{{common.read}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",

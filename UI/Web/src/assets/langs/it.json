@@ -5,7 +5,7 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Password dimenticata?",
-        "submit": "{{common.submit}}"
+        "submit": "Accedi"
     },
     "dashboard": {
         "no-libraries": "Non ci sono ancora librerie configurate. Configurale in",
@@ -88,7 +88,6 @@
         "pref-description": "Queste sono impostazioni globali che sono legate al tuo account.",
         "account-tab": "Account",
         "preferences-tab": "Preferenze",
-        "3rd-party-clients-tab": "Client di terze parti",
         "theme-tab": "Tema",
         "devices-tab": "Dispositivi",
         "stats-tab": "Statistiche",
@@ -200,15 +199,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "email-setup-alert": "Vuoi inviare file ai tuoi dispositivi? Il tuo ammistratore deve prima configurare le impostazioni della posta elettronica!"
-    },
-    "edit-device": {
-        "device-name-label": "Nome Dispositivo",
-        "email-label": "{{common.email}}",
-        "email-tooltip": "Questa e-mail verrà utilizzata per recapitare il file tramite Invia a",
-        "device-platform-label": "Piattaforma del dispositivo",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -650,9 +640,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Modifica informazione di serie",
-        "download-series--tooltip": "Scarica serie",
-        "downloading-status": "Scaricamento…",
-        "user-reviews-alt": "Recensioni degli utenti",
         "storyline-tab": "Trama",
         "books-tab": "Libri",
         "volumes-tab": "Volumi",
@@ -665,30 +652,6 @@
         "cover-change": "Puo servire piu di un minuto al tuo browser prima di ricaricare l'immagine. Fino ad allora, la vecchia immagine potrebbe essere mostrata su alcune pagine.",
         "continue-incognito": "Continua in Incognito",
         "read-incognito": "Leggi in Incoglito"
-    },
-    "series-metadata-detail": {
-        "links-title": "Collegamenti",
-        "genres-title": "Generi",
-        "tags-title": "Tags",
-        "collections-title": "{{side-nav.collections}}",
-        "reading-lists-title": "{{side-nav.reading-lists}}",
-        "writers-title": "Scrittori",
-        "cover-artists-title": "Artisti della copertina",
-        "characters-title": "Personaggi",
-        "colorists-title": "Coloristi",
-        "editors-title": "Editrici",
-        "inkers-title": "Inchiostratori",
-        "letterers-title": "Letteristi",
-        "translators-title": "Traduttori",
-        "pencillers-title": "Illustratori",
-        "publishers-title": "Case Editrici",
-        "promoted": "{{common.promoted}}",
-        "see-more": "Vedi ancora",
-        "see-less": "Vedi Meno",
-        "rating-title": "Valutazioni",
-        "teams-title": "Gruppi",
-        "locations-title": "Posizioni",
-        "imprints-title": "Impronte"
     },
     "badge-expander": {
         "more-items": "e {{count}} ancora"
@@ -756,8 +719,6 @@
         "folder-watching-tooltip": "Ignora il controllo della cartella del server per questa libreria. Se disattivato, il controllo delle cartelle non verrà eseguito sulle cartelle contenute in questa libreria. Se le librerie condividono le cartelle, è possibile che le cartelle vengano analizzate di nuovo. Il sistema aspetterà 10 minuti tra le scansioni.",
         "include-in-dashboard-label": "Includi in Dashboard",
         "include-in-dashboard-tooltip": "Le serie della biblioteca dovrebbero essere incluse nella Dashboard. Ciò riguarda tutti gli stream, come On Deck, Aggiornati di recente, Aggiunti di recente o qualsiasi aggiunta personalizzata.",
-        "include-in-recommendation-label": "Includi in Consigliato",
-        "include-in-recommendation-tooltip": "Le serie della biblioteca dovrebbero essere incluse nella pagina dei Consigliati.",
         "include-in-search-label": "Includi nella ricerca",
         "include-in-search-tooltip": "Le serie e qualsiasi informazione derivata (generi, persone, file) dalla biblioteca dovrebbero essere incluse nei risultati della ricerca.",
         "force-scan": "Forza Scansione",
@@ -831,49 +792,12 @@
         "mark-as-read": "Segna come letto",
         "deselect-all": "{{common.deselect-all}}"
     },
-    "card-detail-drawer": {
-        "general-tab": "Generale",
-        "metadata-tab": "Metadata",
-        "cover-tab": "Copertina",
-        "info-tab": "Informazioni su",
-        "no-summary": "Nessun riepilogo disponibile.",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "not-defined": "Non definito",
-        "read": "{{common.read}}",
-        "unread": "Non letto",
-        "files": "File",
-        "pages": "Pagine:",
-        "added": "Aggiunto:",
-        "size": "Dimensione:",
-        "locations-title": "{{series-metadata-detail.locations-title}}",
-        "imprints-title": "{{series-metadata-detail.imprints-title}}",
-        "teams-title": "{{series-metadata-detail.teams-title}}",
-        "progress-tab": "Progresso"
-    },
     "card-detail-layout": {
         "total-items": "{{count}} articoli totali",
         "jumpkey-count": "{{count}} Serie"
     },
     "card-item": {
         "cannot-read": "Non posso leggere"
-    },
-    "chapter-metadata-detail": {
-        "no-data": "Nessuno netadata disponibile",
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "translators-title": "{{series-metadata-detail.translators-title}}",
-        "letterers-title": "{{series-metadata-detail.letterers-title}}",
-        "colorists-title": "{{series-metadata-detail.colorists-title}}",
-        "inkers-title": "{{series-metadata-detail.inkers-title}}",
-        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
-        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
-        "editors-title": "{{series-metadata-detail.editors-title}}",
-        "teams-title": "{{series-metadata-detail.teams-title}}",
-        "locations-title": "{{series-metadata-detail.locations-title}}"
     },
     "cover-image-chooser": {
         "drag-n-drop": "Trascina e rilascia",
@@ -902,53 +826,6 @@
         "add-relationship": "Aggiungi Relazione",
         "parent": "{{relationship-pipe.parent}}"
     },
-    "entity-info-cards": {
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "release-date-title": "Pubblicazione",
-        "release-date-tooltip": "Data Pubblicazione",
-        "age-rating-title": "Valutazione età",
-        "length-title": "Lunghezza",
-        "pages-count": "{{num}} Pagine",
-        "words-count": "{{num}} Parole",
-        "reading-time-title": "Tempo Lettura",
-        "date-added-title": "Data Aggiunta",
-        "size-title": "Dimensione",
-        "id-title": "ID",
-        "links-title": "{{series-metadata-detail.links-title}}",
-        "isbn-title": "ISBN",
-        "last-read-title": "Ultimo Letto",
-        "less-than-hour": "<1 Ora",
-        "range-hours": "{{value}} {{hourWord}}",
-        "hour": "Ora",
-        "hours": "Ore",
-        "read-time-title": "{{series-info-cards.read-time-title}}",
-        "sort-order-title": "Ordinamento"
-    },
-    "series-info-cards": {
-        "release-date-title": "{{entity-info-cards.release-date-title}}",
-        "release-year-tooltip": "Anno Pubblicazione",
-        "age-rating-title": "{{entity-info-cards.age-rating-title}}",
-        "language-title": "Lingua",
-        "publication-status-title": "Pubblicazione",
-        "publication-status-tooltip": "Stato Pubblicazione",
-        "scrobbling-title": "Scrobbling",
-        "scrobbling-tooltip": "Stato Scrobbling",
-        "on": "Acceso",
-        "off": "Spento",
-        "disabled": "Disabilitato",
-        "format-title": "Formato",
-        "last-read-title": "Ultimo Letto",
-        "length-title": "Lunghezza",
-        "read-time-title": "Tempo Lettura",
-        "less-than-hour": "{{entity-info-cards.less-than-hour}}",
-        "hour": "{{entity-info-cards.hour}}",
-        "hours": "{{entity-info-cards.hours}}",
-        "time-left-title": "Tempo Rimasto",
-        "ongoing": "{{publication-status-pipe.ongoing}}",
-        "pages-count": "{{entity-info-cards.pages-count}}",
-        "words-count": "{{entity-info-cards.words-count}}"
-    },
     "bulk-add-to-collection": {
         "title": "Aggiungi alla Collezione",
         "promoted": "{{common.promoted}}",
@@ -968,21 +845,7 @@
     "external-series-card": {
         "open-external": "Apri Esternamente"
     },
-    "list-item": {
-        "read": "{{common.read}}"
-    },
-    "manage-alerts": {
-        "description-part-1": "Questa tabella contiene i problemi rilevati durante la scansione o la lettura dei file multimediali. Questo elenco non è gestito. È possibile cancellarlo in qualsiasi momento e utilizzare la Scansione libreria (forzata) per eseguire l'analisi. Un elenco di alcuni errori comuni e del loro significato è disponibile sul file ",
-        "description-part-2": "wiki.",
-        "filter-label": "{{common.filter}}",
-        "clear-alerts": "Cancella Avvisi",
-        "extension-header": "Estensione",
-        "file-header": "Documento",
-        "comment-header": "Commento",
-        "details-header": "Dettagli"
-    },
     "manage-email-settings": {
-        "title": "Servizio Email (SMTP)",
         "description": "Per utilizzare alcune funzioni di Kavita come Password Dimenticata e Invia Al Dispositivo, è necessario impostare un provider di posta elettronica. Altre funzionalità come la modifica della password sono meno sicure senza la configurazione dell'e-mail.",
         "send-to-warning": "Se vuoi che Invia Al Dispositivo funzioni, devi configurare le impostazioni e-mail",
         "email-url-label": "URL Servizio Email",
@@ -1139,7 +1002,6 @@
         "cron-header": "Cron",
         "convert-media-task": "Converti i media nella codifica di destinazione",
         "convert-media-task-desc": "Esegue un'attività a lunga esecuzione che convertirà tutti i media gestiti da Kavita nella codifica di destinazione. Questo è lento (specialmente sui dispositivi ARM).",
-        "convert-media-success": "La conversione dei contenuti multimediali nella codifica target è stata messa in coda",
         "bust-cache-task": "Cache Danneggiata",
         "bust-cache-task-desc": "Elimina la cache Kavita+: dovrebbe essere utilizzato solo durante il debug di corrispondenze errate.",
         "bust-cache-task-success": "Cache Kavita+ danneggiata",
@@ -1189,12 +1051,9 @@
         "change-password-alt": "Cambia Password {{user}}",
         "resend": "Rinvia",
         "setup": "Impostare",
-        "last-active-title": "Ultimo attivo:",
-        "roles-title": "Regole:",
         "none": "Nessuno",
         "never": "Mai",
         "online-now-tooltip": "Inlinea Adesso",
-        "sharing-title": "Condivisione:",
         "no-data": "Non ci sono altri utenti.",
         "loading": "{{common.loading}}",
         "username-pattern": "Il Nome Utente può contenere solo i caratteri seguenti e spazio: {{characters}}",
@@ -1218,10 +1077,6 @@
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}"
     },
-    "library-detail": {
-        "library-tab": "Libreria",
-        "recommended-tab": "Raccomandato"
-    },
     "library-recommended": {
         "no-data": "Niente da mostrare qui. Aggiungi alcuni metadati alla tua libreria, leggi qualcosa o valuta qualcosa. In questa libreria potrebbero anche essere disattivati i consigli.",
         "more-in-genre": "Altro in {{genre}}",
@@ -1230,24 +1085,6 @@
         "quick-catchups": "Recuperi rapidi",
         "quick-reads": "Letture veloci",
         "on-deck": "{{dashboard.on-deck-title}}"
-    },
-    "admin-dashboard": {
-        "title": "Pannello di amministrazione",
-        "general-tab": "Generale",
-        "users-tab": "Utenti",
-        "libraries-tab": "Librerie",
-        "media-tab": "Media",
-        "logs-tab": "Logs",
-        "email-tab": "Email",
-        "tasks-tab": "Tasks",
-        "statistics-tab": "Statistiche",
-        "system-tab": "Sistema",
-        "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ è un servizio in abbonamento premium che sblocca funzionalità per tutti gli utenti su questa istanza Kavita. Acquista un abbonamento per sbloccare ",
-        "kavita+-desc-part-2": "vantaggi premium",
-        "kavita+-desc-part-3": "oggi!",
-        "kavita+-releases": "Vedi versioni",
-        "kavita+-requirement": "Kavita+ è sviluppata per funzionare con l'ultima release - versione 2. Tutte le versioni precedenti non funzioneranno correttamente."
     },
     "collection-detail": {
         "no-data": "Non ci sono articoli. Prova ad aggiungere una serie.",
@@ -1334,7 +1171,6 @@
         "skip-alt": "Passa al contenuto principale",
         "search-series-alt": "Cerca Serie",
         "search-alt": "Ricerca…",
-        "promoted": "{{common.promoted}}",
         "no-data": "Nessun risultato trovato",
         "scroll-to-top-alt": "Scorri verso l'alto",
         "server-settings": "Impostazioni del server",
@@ -1768,9 +1604,6 @@
         "clear": "{{common.clear}}",
         "import-cbl": "Importa CBL",
         "read": "Leggi",
-        "add-rule-group-or": "Aggiungi gruppo di regole (OR)",
-        "remove-rule-group": "Rimuovi Gruppo di Regole",
-        "add-rule-group-and": "Aggiungi gruppo di regole (AND)",
         "mark-invisible": "Segna come Invisibile",
         "customize": "Personalizza",
         "mark-visible": "Segna come Visibile",

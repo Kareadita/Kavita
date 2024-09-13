@@ -18,16 +18,18 @@
     </div>
   </form>
 
-  <ng-container *ngFor="let externalSource of externalSources | filter: filterList; let idx = index">
+  @for(externalSource of externalSources | filter: filterList; track externalSource; let idx = $index) {
     <app-edit-external-source-item [source]="externalSource"
                                    (sourceUpdate)="updateSource(idx, $event)"
                                    (sourceDelete)="deleteSource(idx, $event)"
                                    [isViewMode]="externalSource.id !== 0"></app-edit-external-source-item>
-  </ng-container>
-  <ul>
-    <li class="list-group-item" *ngIf="externalSources.length === 0">
-      {{t('no-data')}}
-    </li>
-  </ul>
+  } @empty {
+    <ul>
+      <li class="list-group-item">
+        {{t('no-data')}}
+      </li>
+    </ul>
+  }
+
 </ng-container>
 

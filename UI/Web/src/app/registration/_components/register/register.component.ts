@@ -8,7 +8,7 @@ import { MemberService } from 'src/app/_services/member.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NavService} from "../../../_services/nav.service";
 
 /**
@@ -27,8 +27,8 @@ export class RegisterComponent {
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required]),
     username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(32),
-      Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(256),
+      Validators.minLength(6), Validators.pattern("^.{6,256}$")]),
   });
 
   private readonly navService = inject(NavService);

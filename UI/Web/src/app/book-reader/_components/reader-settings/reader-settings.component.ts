@@ -26,7 +26,7 @@ import { BookWhiteTheme } from '../../_models/book-white-theme';
 import { BookPaperTheme } from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FontService} from "../../../_services/font.service";
 import {EpubFont} from "../../../_models/preferences/epub-font";
 
@@ -210,7 +210,6 @@ export class ReaderSettingsComponent implements OnInit {
 
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(fontName => {
-          console.log('updating font-family to ', fontName);
           if (fontName === defaultFontFamily) {
             this.pageStyles['font-family'] = 'inherit';
           } else {

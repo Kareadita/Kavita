@@ -748,7 +748,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return new UnauthorizedResult();
-        if (user.Bookmarks.IsNullOrEmpty()) return Ok();
+        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok();
 
         if (!await _accountService.HasBookmarkPermission(user))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
@@ -835,16 +835,26 @@ public class ReaderController : BaseApiController
         return Ok(_unitOfWork.UserTableOfContentRepository.GetPersonalToC(User.GetUserId(), chapterId));
     }
 
+    /// <summary>
+    /// Deletes the user's personal table of content for the given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="pageNum"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
     [HttpDelete("ptoc")]
     public async Task<ActionResult> DeletePersonalToc([FromQuery] int chapterId, [FromQuery] int pageNum, [FromQuery] string title)
     {
         var userId = User.GetUserId();
         if (string.IsNullOrWhiteSpace(title)) return BadRequest(await _localizationService.Translate(userId, "name-required"));
         if (pageNum < 0) return BadRequest(await _localizationService.Translate(userId, "valid-number"));
+
         var toc = await _unitOfWork.UserTableOfContentRepository.Get(userId, chapterId, pageNum, title);
         if (toc == null) return Ok();
+
         _unitOfWork.UserTableOfContentRepository.Remove(toc);
         await _unitOfWork.CommitAsync();
+
         return Ok();
     }
 

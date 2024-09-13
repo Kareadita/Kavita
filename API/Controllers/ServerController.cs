@@ -210,9 +210,13 @@ public class ServerController : BaseApiController
     /// Pull the Changelog for Kavita from Github and display
     /// </summary>
     /// <returns></returns>
+    [AllowAnonymous]
     [HttpGet("changelog")]
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
     {
+        // Strange bug where [Authorize] doesn't work
+        if (User.GetUserId() == 0) return Unauthorized();
+
         return Ok(await _versionUpdaterService.GetAllReleases());
     }
 

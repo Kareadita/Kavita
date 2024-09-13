@@ -760,12 +760,14 @@ public class ProcessSeries : IProcessSeries
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
+            chapter.Range = chapter.GetNumberTitle();
+
             if (!chapter.SortOrderLocked)
             {
                 chapter.SortOrder = info.IssueOrder;
             }
-            chapter.Range = chapter.GetNumberTitle();
-            if (float.TryParse(chapter.Title, out var _))
+
+            if (float.TryParse(chapter.Title, out _))
             {
                 // If we have float based chapters, first scan can have the chapter formatted as Chapter 0.2 - .2 as the title is wrong.
                 chapter.Title = chapter.GetNumberTitle();
@@ -832,19 +834,22 @@ public class ProcessSeries : IProcessSeries
 
         _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
-        chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
+        if (!chapter.AgeRatingLocked)
+        {
+            chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
+        }
 
-        if (!string.IsNullOrEmpty(comicInfo.Title))
+        if (!chapter.TitleNameLocked && !string.IsNullOrEmpty(comicInfo.Title))
         {
             chapter.TitleName = comicInfo.Title.Trim();
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.Summary))
+        if (!chapter.SummaryLocked && !string.IsNullOrEmpty(comicInfo.Summary))
         {
             chapter.Summary = comicInfo.Summary;
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.LanguageISO))
+        if (!chapter.LanguageLocked && !string.IsNullOrEmpty(comicInfo.LanguageISO))
         {
             chapter.Language = comicInfo.LanguageISO;
         }
@@ -888,7 +893,7 @@ public class ProcessSeries : IProcessSeries
             // For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.Isbn))
+        if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
         {
             chapter.ISBN = comicInfo.Isbn;
         }
@@ -902,84 +907,129 @@ public class ProcessSeries : IProcessSeries
         chapter.Count = comicInfo.CalculatedCount();
 
 
-        if (comicInfo.Year > 0)
+        if (!chapter.ReleaseDateLocked && comicInfo.Year > 0)
         {
             var day = Math.Max(comicInfo.Day, 1);
             var month = Math.Max(comicInfo.Month, 1);
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        var people = TagHelper.GetTagValues(comicInfo.Colorist);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        await UpdatePeople(chapter, people, PersonRole.Colorist);
-
-        people = TagHelper.GetTagValues(comicInfo.Characters);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        await UpdatePeople(chapter, people, PersonRole.Character);
-
-
-        people = TagHelper.GetTagValues(comicInfo.Translator);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        await UpdatePeople(chapter, people, PersonRole.Translator);
-
-
-        people = TagHelper.GetTagValues(comicInfo.Writer);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        await UpdatePeople(chapter, people, PersonRole.Writer);
-
-        people = TagHelper.GetTagValues(comicInfo.Editor);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        await UpdatePeople(chapter, people, PersonRole.Editor);
-
-        people = TagHelper.GetTagValues(comicInfo.Inker);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        await UpdatePeople(chapter, people, PersonRole.Inker);
-
-        people = TagHelper.GetTagValues(comicInfo.Letterer);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        await UpdatePeople(chapter, people, PersonRole.Letterer);
-
-        people = TagHelper.GetTagValues(comicInfo.Penciller);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        await UpdatePeople(chapter, people, PersonRole.Penciller);
-
-        people = TagHelper.GetTagValues(comicInfo.CoverArtist);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        await UpdatePeople(chapter, people, PersonRole.CoverArtist);
-
-        people = TagHelper.GetTagValues(comicInfo.Publisher);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        await UpdatePeople(chapter, people, PersonRole.Publisher);
-
-        people = TagHelper.GetTagValues(comicInfo.Imprint);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
-        await UpdatePeople(chapter, people, PersonRole.Imprint);
-
-        people = TagHelper.GetTagValues(comicInfo.Teams);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
-        await UpdatePeople(chapter, people, PersonRole.Team);
-
-        people = TagHelper.GetTagValues(comicInfo.Locations);
-        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
-        await UpdatePeople(chapter, people, PersonRole.Location);
-
-        var genres = TagHelper.GetTagValues(comicInfo.Genre);
-        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
-            genres.Select(g => new GenreBuilder(g).Build()).ToList());
-        foreach (var genre in genres)
+        if (!chapter.ColoristLocked)
         {
-            var g = await _tagManagerService.GetGenre(genre);
-            if (g == null) continue;
-            chapter.Genres.Add(g);
+            var people = TagHelper.GetTagValues(comicInfo.Colorist);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
+            await UpdatePeople(chapter, people, PersonRole.Colorist);
         }
 
-        var tags = TagHelper.GetTagValues(comicInfo.Tags);
-        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
-        foreach (var tag in tags)
+        if (!chapter.CharacterLocked)
         {
-            var t = await _tagManagerService.GetTag(tag);
-            if (t == null) continue;
-            chapter.Tags.Add(t);
+            var people = TagHelper.GetTagValues(comicInfo.Characters);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
+            await UpdatePeople(chapter, people, PersonRole.Character);
+        }
+
+
+        if (!chapter.TranslatorLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Translator);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
+            await UpdatePeople(chapter, people, PersonRole.Translator);
+        }
+
+        if (!chapter.WriterLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Writer);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
+            await UpdatePeople(chapter, people, PersonRole.Writer);
+        }
+
+        if (!chapter.EditorLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Editor);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
+            await UpdatePeople(chapter, people, PersonRole.Editor);
+        }
+
+        if (!chapter.InkerLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Inker);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
+            await UpdatePeople(chapter, people, PersonRole.Inker);
+        }
+
+        if (!chapter.LettererLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Letterer);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
+            await UpdatePeople(chapter, people, PersonRole.Letterer);
+        }
+
+        if (!chapter.PencillerLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Penciller);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
+            await UpdatePeople(chapter, people, PersonRole.Penciller);
+        }
+
+        if (!chapter.CoverArtistLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.CoverArtist);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
+            await UpdatePeople(chapter, people, PersonRole.CoverArtist);
+        }
+
+        if (!chapter.PublisherLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Publisher);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
+            await UpdatePeople(chapter, people, PersonRole.Publisher);
+        }
+
+        if (!chapter.ImprintLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Imprint);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
+            await UpdatePeople(chapter, people, PersonRole.Imprint);
+        }
+
+        if (!chapter.TeamLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Teams);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
+            await UpdatePeople(chapter, people, PersonRole.Team);
+        }
+
+        if (!chapter.LocationLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Locations);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
+            await UpdatePeople(chapter, people, PersonRole.Location);
+        }
+
+
+        if (!chapter.GenresLocked)
+        {
+            var genres = TagHelper.GetTagValues(comicInfo.Genre);
+            GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
+                genres.Select(g => new GenreBuilder(g).Build()).ToList());
+            foreach (var genre in genres)
+            {
+                var g = await _tagManagerService.GetGenre(genre);
+                if (g == null) continue;
+                chapter.Genres.Add(g);
+            }
+        }
+
+        if (!chapter.TagsLocked)
+        {
+            var tags = TagHelper.GetTagValues(comicInfo.Tags);
+            TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
+            foreach (var tag in tags)
+            {
+                var t = await _tagManagerService.GetTag(tag);
+                if (t == null) continue;
+                chapter.Tags.Add(t);
+            }
         }
     }
 

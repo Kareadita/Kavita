@@ -8,7 +8,7 @@ import { MangaFormatPipe } from '../../../_pipes/manga-format.pipe';
 import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap';
 import { DatePipe } from '@angular/common';
 import { ImageComponent } from '../../../shared/image/image.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 

@@ -39,6 +39,10 @@ export class ReadingListService {
     return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-series?seriesId=' + seriesId);
   }
 
+  getReadingListsForChapter(chapterId: number) {
+    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-chapter?chapterId=' + chapterId);
+  }
+
   getListItems(readingListId: number) {
     return this.httpClient.get<ReadingListItem[]>(this.baseUrl + 'readinglist/items?readingListId=' + readingListId);
   }
@@ -102,12 +106,12 @@ export class ReadingListService {
     return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
   }
 
-  validateCbl(form: FormData) {
-    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/validate', form);
+  validateCbl(form: FormData, dryRun: boolean, useComicVineMatching: boolean) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + `cbl/validate?dryRun=${dryRun}&useComicVineMatching=${useComicVineMatching}`, form);
   }
 
-  importCbl(form: FormData) {
-    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/import', form);
+  importCbl(form: FormData, dryRun: boolean, useComicVineMatching: boolean) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + `cbl/import?dryRun=${dryRun}&useComicVineMatching=${useComicVineMatching}`, form);
   }
 
   getCharacters(readingListId: number) {

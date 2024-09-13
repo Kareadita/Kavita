@@ -56,12 +56,6 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
     },
-    "edit-device": {
-        "email-label": "{{common.email}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
-    },
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
@@ -186,11 +180,6 @@
         "read": "{{common.read}}",
         "no-pages": "{{toasts.no-pages}}"
     },
-    "series-metadata-detail": {
-        "collections-title": "{{side-nav.collections}}",
-        "reading-lists-title": "{{side-nav.reading-lists}}",
-        "promoted": "{{common.promoted}}"
-    },
     "update-notification-modal": {
         "close": "{{common.close}}"
     },
@@ -221,21 +210,7 @@
     "bulk-operations": {
         "deselect-all": "{{common.deselect-all}}"
     },
-    "card-detail-drawer": {
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "genres-title": "{{series-metadata-detail.genres-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "tags-title": "{{series-metadata-detail.tags-title}}",
-        "read": "{{common.read}}"
-    },
     "card-detail-layout": {
         "total-items": "{{count}} всього елементів"
-    },
-    "chapter-metadata-detail": {
-        "writers-title": "{{series-metadata-detail.writers-title}}",
-        "publishers-title": "{{series-metadata-detail.publishers-title}}",
-        "characters-title": "{{series-metadata-detail.characters-title}}",
-        "translators-title": "{{series-metadata-detail.translators-title}}",
-        "letterers-title": "{{series-metadata-detail.letterers-title}}"
     }
 }

@@ -10,8 +10,8 @@ import {
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, CommonModule} from "@angular/common";
-import {TranslocoModule} from "@ngneat/transloco";
+import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
+import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
@@ -19,11 +19,12 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
   selector: 'app-bulk-operations',
   standalone: true,
   imports: [
-    CommonModule,
     AsyncPipe,
     CardActionablesComponent,
     TranslocoModule,
-    NgbTooltip
+    NgbTooltip,
+    NgStyle,
+    DecimalPipe
   ],
   templateUrl: './bulk-operations.component.html',
   styleUrls: ['./bulk-operations.component.scss'],
@@ -36,7 +37,7 @@ export class BulkOperationsComponent implements OnInit {
    * Modal mode means don't fix to the top
    */
   @Input() modalMode = false;
-  @Input() topOffset: number = 56;
+  @Input() topOffset: number = 75;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];

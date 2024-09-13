@@ -129,62 +129,81 @@ public class ParseScannedFiles
 
         var result = new List<ScanResult>();
 
+        // Not to self: this whole thing can be parallelized because we don't deal with any DB or global state
         if (scanDirectoryByDirectory)
         {
-            var directories = _directoryService.GetDirectories(folderPath, matcher).Select(Parser.Parser.NormalizePath);
-            foreach (var directory in directories)
-            {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
-
-
-                if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
-                {
-                    if (result.Exists(r => r.Folder == directory))
-                    {
-                        _logger.LogDebug("[ProcessFiles] Skipping adding {Directory} as it's already added", directory);
-                        continue;
-                    }
-                    result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
-                }
-                else if (!forceCheck && seriesPaths.TryGetValue(directory, out var series) && series.Count > 1 && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
-                {
-                    // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
-                    // This is very helpful for ComicVine libraries by Publisher
-                    _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
-                    foreach (var seriesModified in series)
-                    {
-                        var hasFolderChangedSinceLastScan = seriesModified.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
-                                                            _directoryService
-                                                                .GetLastWriteTime(seriesModified.LowestFolderPath!)
-                                                                .Truncate(TimeSpan.TicksPerSecond);
-
-                        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                            MessageFactory.FileScanProgressEvent(seriesModified.LowestFolderPath!, library.Name, ProgressEventType.Updated));
-
-                        if (!hasFolderChangedSinceLastScan)
-                        {
-                            _logger.LogTrace("[ProcessFiles] {Directory} subfolder {Folder} did not change since last scan, adding entry to skip", directory, seriesModified.LowestFolderPath);
-                            result.Add(CreateScanResult(seriesModified.LowestFolderPath!, folderPath, false, ArraySegment<string>.Empty));
-                        }
-                        else
-                        {
-                            _logger.LogTrace("[ProcessFiles] {Directory} subfolder {Folder} changed for Series {SeriesName}", directory, seriesModified.LowestFolderPath, seriesModified.SeriesName);
-                            result.Add(CreateScanResult(directory, folderPath, true,
-                                _directoryService.ScanFiles(seriesModified.LowestFolderPath!, fileExtensions, matcher)));
-                        }
-                    }
-                }
-                else
-                {
-                    result.Add(CreateScanResult(directory, folderPath, true,
-                        _directoryService.ScanFiles(directory, fileExtensions, matcher)));
-                }
-            }
-
-            return result;
+            return await ScanDirectories(folderPath, seriesPaths, library, forceCheck, matcher, result, fileExtensions);
         }
 
+        return await ScanSingleDirectory(folderPath, seriesPaths, library, forceCheck, result, fileExtensions, matcher);
+    }
+
+    private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck,
+        GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
+    {
+        var directories = _directoryService.GetDirectories(folderPath, matcher).Select(Parser.Parser.NormalizePath);
+        foreach (var directory in directories)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
+
+
+            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
+            {
+                if (result.Exists(r => r.Folder == directory))
+                {
+                    _logger.LogDebug("[ProcessFiles] Skipping adding {Directory} as it's already added", directory);
+                    continue;
+                }
+                _logger.LogDebug("[ProcessFiles] Skipping {Directory} as it hasn't changed since last scan", directory);
+                result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
+            }
+            else if (!forceCheck && seriesPaths.TryGetValue(directory, out var series)
+                                 && series.Count > 1 && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath)))
+            {
+                // If there are multiple series inside this path, let's check each of them to see which was modified and only scan those
+                // This is very helpful for ComicVine libraries by Publisher
+
+                // TODO: BUG: We might miss new folders this way. Likely need to get all folder names and see if there are any that aren't in known series list
+
+                _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
+                foreach (var seriesModified in series)
+                {
+                    var hasFolderChangedSinceLastScan = seriesModified.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
+                                                        _directoryService
+                                                            .GetLastWriteTime(seriesModified.LowestFolderPath!)
+                                                            .Truncate(TimeSpan.TicksPerSecond);
+
+                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                        MessageFactory.FileScanProgressEvent(seriesModified.LowestFolderPath!, library.Name, ProgressEventType.Updated));
+
+                    if (!hasFolderChangedSinceLastScan)
+                    {
+                        _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} did not change since last scan, adding entry to skip", directory, seriesModified.LowestFolderPath);
+                        result.Add(CreateScanResult(seriesModified.LowestFolderPath!, folderPath, false, ArraySegment<string>.Empty));
+                    }
+                    else
+                    {
+                        _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} changed for Series {SeriesName}", directory, seriesModified.LowestFolderPath, seriesModified.SeriesName);
+                        result.Add(CreateScanResult(directory, folderPath, true,
+                            _directoryService.ScanFiles(seriesModified.LowestFolderPath!, fileExtensions, matcher)));
+                    }
+                }
+            }
+            else
+            {
+                _logger.LogDebug("[ProcessFiles] Performing file scan on {Directory}", directory);
+                var files = _directoryService.ScanFiles(directory, fileExtensions, matcher);
+                result.Add(CreateScanResult(directory, folderPath, true, files));
+            }
+        }
+
+        return result;
+    }
+
+    private async Task<IList<ScanResult>> ScanSingleDirectory(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck, List<ScanResult> result,
+        string fileExtensions, GlobMatcher matcher)
+    {
         var normalizedPath = Parser.Parser.NormalizePath(folderPath);
         var libraryRoot =
             library.Folders.FirstOrDefault(f =>
@@ -203,7 +222,6 @@ public class ParseScannedFiles
             result.Add(CreateScanResult(folderPath, libraryRoot, true,
                 _directoryService.ScanFiles(folderPath, fileExtensions, matcher)));
         }
-
 
         return result;
     }

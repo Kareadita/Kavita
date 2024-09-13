@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   inject,
   Input,
   OnInit
@@ -11,8 +10,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import { SeriesService } from 'src/app/_services/series.service';
 import {UserReview} from "../review-card/user-review";
-import {CommonModule} from "@angular/common";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
 
@@ -31,7 +29,7 @@ export interface ReviewSeriesModalCloseEvent {
 @Component({
   selector: 'app-review-series-modal',
   standalone: true,
-  imports: [CommonModule, NgbRating, ReactiveFormsModule, TranslocoDirective],
+  imports: [NgbRating, ReactiveFormsModule, TranslocoDirective],
   templateUrl: './review-series-modal.component.html',
   styleUrls: ['./review-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

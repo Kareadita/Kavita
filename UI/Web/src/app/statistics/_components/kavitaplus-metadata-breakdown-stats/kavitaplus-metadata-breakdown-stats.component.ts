@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
 import {KavitaPlusMetadataBreakdown} from "../../_models/kavitaplus-metadata-breakdown";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {PercentPipe} from "@angular/common";
 import {NgbProgressbar, NgbProgressbarStacked, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 

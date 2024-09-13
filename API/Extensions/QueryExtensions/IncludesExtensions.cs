@@ -59,6 +59,18 @@ public static class IncludesExtensions
                 .Include(c => c.People);
         }
 
+        if (includes.HasFlag(ChapterIncludes.Genres))
+        {
+            queryable = queryable
+                .Include(c => c.Genres);
+        }
+
+        if (includes.HasFlag(ChapterIncludes.Tags))
+        {
+            queryable = queryable
+                .Include(c => c.Tags);
+        }
+
         return queryable.AsSplitQuery();
     }
 
