@@ -416,7 +416,7 @@ public class LibraryController : BaseApiController
                 _taskScheduler.CleanupChapters(chapterIds);
             }
 
-            await _libraryWatcher.RestartWatching();
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
 
             foreach (var seriesId in seriesIds)
             {
@@ -503,16 +503,17 @@ public class LibraryController : BaseApiController
         _unitOfWork.LibraryRepository.Update(library);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(userId, "generic-library-update"));
+
+        if (folderWatchingUpdate || originalFoldersCount != dto.Folders.Count() || typeUpdate)
+        {
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
+        }
+
         if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
-            await _libraryWatcher.RestartWatching();
             await _taskScheduler.ScanLibrary(library.Id);
         }
 
-        if (folderWatchingUpdate)
-        {
-            await _libraryWatcher.RestartWatching();
-        }
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
 
