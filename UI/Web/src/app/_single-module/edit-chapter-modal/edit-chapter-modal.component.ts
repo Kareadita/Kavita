@@ -56,6 +56,7 @@ import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {User} from "../../_models/user";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 
 enum TabID {
   General = 'general-tab',
@@ -110,7 +111,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     SafeHtmlPipe,
     DecimalPipe,
     DatePipe,
-    ReadTimePipe
+    ReadTimePipe,
+    SettingTitleComponent
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',

@@ -554,30 +554,34 @@
 
               @if (WebLinks.length > 0) {
                 <div class="setting-section-break"></div>
-                <div class="row g-0">
-                  <div class="col-auto">
-                    <app-icon-and-title [label]="t('links-label')" [clickable]="false" fontClasses="fa-solid fa-link" [title]="t('links-label')">
+
+                <div class="container-fluid mb-3">
+                  <div class="row g-0">
+                    <h6 class="section-title">{{t('links-label')}}</h6>
+                    <div class="col-auto">
                       @for(link of WebLinks; track link) {
                         <a class="me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" [title]="link">
                           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
                                      [errorImage]="imageService.errorWebLinkImage"></app-image>
                         </a>
                       }
-                    </app-icon-and-title>
+                    </div>
                   </div>
                 </div>
               }
 
               @if (accountService.isAdmin$ | async) {
-                <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                  <ng-template #view>
-                    @for (file of chapter.files; track file.id) {
-                      <div>
-                        <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
-                      </div>
-                    }
-                  </ng-template>
-                </app-setting-item>
+                <div class="row g-0">
+                  <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                    <ng-template #view>
+                      @for (file of chapter.files; track file.id) {
+                        <div>
+                          <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
+                        </div>
+                      }
+                    </ng-template>
+                  </app-setting-item>
+                </div>
               }
 
             </ng-template>
