@@ -46,6 +46,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
         }
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
         logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
+
         return new UserDto
         {
             Username = user.UserName!,
