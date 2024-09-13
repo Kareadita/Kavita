@@ -1,10 +1,5 @@
 <ng-container *transloco="let t; read:'font-manager'">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <h3>{{t('title')}}</h3>
-    </div>
-
-    <p>{{t('description')}}</p>
+    <p class="ps-2">{{t('description')}}</p>
 
 
     <div class="row g-0 theme-container">
@@ -127,7 +122,6 @@
         </div>
       </div>
     </div>
-  </div>
 
   <ng-template #fontOption let-item>
     @if (item !== undefined) {

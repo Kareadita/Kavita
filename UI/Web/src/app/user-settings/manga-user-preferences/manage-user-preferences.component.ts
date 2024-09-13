@@ -53,6 +53,7 @@ import {PdfSpreadModePipe} from "../../_pipes/pdf-spread-mode.pipe";
 import {PdfThemePipe} from "../../_pipes/pdf-theme.pipe";
 import {PdfScrollModeTypePipe} from "../../pdf-reader/_pipe/pdf-scroll-mode.pipe";
 import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
+import {FontService} from "../../_services/font.service";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -97,7 +98,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  private readonly bookService = inject(BookService);
+  private readonly fontService = inject(FontService);
   private readonly titleService = inject(Title);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -134,8 +135,10 @@ export class ManageUserPreferencesComponent implements OnInit {
 
 
   constructor() {
-    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
-    this.cdRef.markForCheck();
+    this.fontService.getFonts().subscribe(fonts => {
+      this.fontFamilies = fonts.map(f => f.name);
+      this.cdRef.markForCheck();
+    })
 
     this.localizationService.getLocales().subscribe(res => {
       this.locales = res;
@@ -159,7 +162,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.user.preferences = results.pref;
 
       if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
-        this.user.preferences.bookReaderFontFamily = 'default';
+        this.user.preferences.bookReaderFontFamily = 'Default';
       }
 
       this.settingsForm.addControl('readingDirection', new FormControl(this.user.preferences.readingDirection, []));

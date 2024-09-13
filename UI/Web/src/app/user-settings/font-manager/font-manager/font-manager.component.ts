@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Inject, inject, OnInit} from '@angular/core';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {FontService} from "src/app/_services/font.service";
 import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
@@ -21,6 +20,7 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {animate, style, transition, trigger} from "@angular/animations";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-font-manager',

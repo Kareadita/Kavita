@@ -215,7 +215,7 @@
         "preview-default-admin": "Select a theme first or upload one manually",
         "preview-title": "Preview",
         "preview-title": "Preview",
-        "add-new-theme": "Add"
+        "add": "Add"
     },
 
     "font-manager": {
@@ -1474,6 +1474,7 @@
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
+        "font": "Font",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
         "mal-stack-import": "MAL Stack"
