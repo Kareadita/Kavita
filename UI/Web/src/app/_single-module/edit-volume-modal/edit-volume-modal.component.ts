@@ -123,7 +123,7 @@ export class EditVolumeModalComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.CoverImage;
+  activeId = TabID.Info;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;

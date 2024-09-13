@@ -8,21 +8,6 @@
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
-          <!-- Cover Tab -->
-          @if (user && accountService.hasAdminRole(user)) {
-            <li [ngbNavItem]="TabID.CoverImage">
-              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
-              <ng-template ngbNavContent>
-                <p class="alert alert-warning" role="alert">
-                  {{t('cover-image-description')}}
-                </p>
-                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
-                                         [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
-              </ng-template>
-            </li>
-          }
-
-
           <!-- Info Tab -->
           <li [ngbNavItem]="TabID.Info">
             <a ngbNavLink>{{t(TabID.Info)}}</a>
@@ -105,6 +90,20 @@
 
             </ng-template>
           </li>
+
+          <!-- Cover Tab -->
+          @if (user && accountService.hasAdminRole(user)) {
+            <li [ngbNavItem]="TabID.CoverImage">
+              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+              <ng-template ngbNavContent>
+                <p class="alert alert-warning" role="alert">
+                  {{t('cover-image-description')}}
+                </p>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
+                                         [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
+              </ng-template>
+            </li>
+          }
 
           <!-- Progress Tab -->
           <li [ngbNavItem]="TabID.Progress">
