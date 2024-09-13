@@ -10461,6 +10461,19 @@
         }
       }
     },
+    "/api/Server/sync-themes": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Runs the Sync Themes task",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [

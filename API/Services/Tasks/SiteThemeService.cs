@@ -208,6 +208,13 @@ public class ThemeService : IThemeService
     /// <returns></returns>
     private async Task<IDictionary<string, ThemeMetadata>> GetReadme()
     {
+        // Try and delete a Readme file if it already exists
+        var existingReadmeFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, "README.md");
+        if (_directoryService.FileSystem.File.Exists(existingReadmeFile))
+        {
+            _directoryService.DeleteFiles([existingReadmeFile]);
+        }
+
         var tempDownloadFile = await GithubReadme.DownloadFileAsync(_directoryService.TempDirectory);
 
         // Read file into Markdown

@@ -200,8 +200,10 @@
         "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
-        "default-theme": "Default theme",
+        "default-theme": "Default",
         "download": "{{changelog.download}}",
+        "downloaded": "Downloaded",
+        "downloadable": "Downloadable",
         "apply": "{{common.apply}}",
         "applied": "Applied",
         "active-theme": "Active",
@@ -1356,6 +1358,10 @@
         "analyze-files-task": "Analyze Files",
         "analyze-files-task-desc": "Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.",
         "analyze-files-task-success": "File analysis has been queued",
+
+        "sync-themes-task": "Sync Themes",
+        "sync-themes-task-desc": "Synchronize downloaded themes with upstream changes if version matches.",
+        "sync-themes-success": "Synchronization of themes has been queued",
 
         "check-for-updates-task": "Check for Updates",
         "check-for-updates-task-desc": "See if there are any Stable releases ahead of your version."

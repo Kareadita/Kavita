@@ -41,6 +41,10 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/analyze-files', {});
   }
 
+  syncThemes() {
+    return this.http.post(this.baseUrl + 'server/sync-themes', {});
+  }
+
   checkForUpdate() {
     return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update');
   }
