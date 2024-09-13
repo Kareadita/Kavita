@@ -150,6 +150,10 @@ export class CardItemComponent implements OnInit {
    */
   @Input() linkUrl?: string;
   /**
+   * Show the format of the series
+   */
+  @Input() showFormat: boolean = true;
+  /**
    * Event emitted when item is clicked
    */
   @Output() clicked = new EventEmitter<string>();

@@ -73,10 +73,14 @@
     </div>
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-title-container">
-        <app-series-format [format]="format"></app-series-format>
+        @if (showFormat) {
+          <app-series-format [format]="format"></app-series-format>
+        }
 
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-          <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
+          @if (isPromoted(); as isPromoted) {
+            <span class="me-1"><app-promoted-icon [promoted]="isPromoted"></app-promoted-icon></span>
+          }
           @if (linkUrl) {
             <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
           } @else {

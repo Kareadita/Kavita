@@ -19,7 +19,7 @@
                        [linkUrl]="'/collections/' + item.id"
                        (clicked)="loadCollection(item)"
                        (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
-                       [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true">
+                       [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true" [showFormat]="false">
 
           <ng-template #subtitle>
             <app-collection-owner [collection]="item"></app-collection-owner>
