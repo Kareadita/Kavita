@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read:'theme-manager'">
 
   <div class="position-relative">
-    @if (selectedTheme !== undefined && (hasAdmin$ | async)) {
+    @if ((hasAdmin$ | async)) {
       <button class="btn btn-primary-outline position-absolute custom-position" (click)="selectTheme(undefined)" [title]="t('add')">
         <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
       </button>
@@ -16,12 +16,20 @@
       <div class="pe-2">
         <ul style="height: 100%" class="list-group list-group-flush">
 
-          @for (theme of themeService.themes$ | async; track theme.name) {
-            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
+          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 40px" aria-hidden="true">
+            <div class="fw-bold section-header">{{t('downloaded')}}</div>
+          </li>
+
+          @for (theme of downloadedThemes; track theme.name) {
+            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: true}"></ng-container>
           }
 
+          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 40px" aria-hidden="true">
+            <div class="fw-bold section-header">{{t('downloadable')}}</div>
+          </li>
+
           @for (theme of downloadableThemes; track theme.name) {
-            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme}"></ng-container>
+            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: false}"></ng-container>
           }
         </ul>
       </div>
@@ -114,25 +122,27 @@
   </div>
 
 
-  <ng-template #themeOption let-item>
+  <ng-template #themeOption let-item let-downloaded="downloaded">
     @if (item !== undefined) {
 
       <li class="list-group-item d-flex justify-content-between align-items-start {{selectedTheme && selectedTheme.name === item.name ? 'active' : ''}}" (click)="selectTheme(item)">
         <div class="ms-2 me-auto">
           <div class="fw-bold">{{item.name | sentenceCase}}</div>
 
-          @if (item.hasOwnProperty('provider')) {
-            <span class="pill p-1 me-1 provider">{{item.provider | siteThemeProvider}}</span>
+          @if (item.provider !== ThemeProvider.System && item.compatibleVersion) {
+            <span class="pill p-1 me-1 version">v{{item.compatibleVersion}}</span>
           } @else if (item.hasOwnProperty('lastCompatibleVersion')) {
-            <span class="pill p-1 me-1 provider">{{ThemeProvider.Custom | siteThemeProvider}}</span><span class="pill p-1 me-1 version">v{{item.lastCompatibleVersion}}</span>
+            <span class="pill p-1 me-1 version">v{{item.lastCompatibleVersion}}</span>
           }
+
           @if (currentTheme && item.name === currentTheme.name) {
             <span class="pill p-1 active">{{t('active-theme')}}</span>
           }
+
+          @if (item.hasOwnProperty('isDefault') && item.isDefault) {
+            <span class="pill p-1 ms-1">{{t('default-theme')}}</span>
+          }
         </div>
-        @if (item.hasOwnProperty('isDefault') && item.isDefault) {
-          <i class="fa-solid fa-star" [attr.aria-label]="t('default-theme')"></i>
-        }
       </li>
     }
   </ng-template>

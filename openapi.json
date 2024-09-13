@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.6",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.9",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -1107,139 +1107,6 @@
               "text/json": {
                 "schema": {
                   "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Cbl/validate": {
-      "post": {
-        "tags": [
-          "Cbl"
-        ],
-        "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
-        "parameters": [
-          {
-            "name": "comicVineMatching",
-            "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "FormBody with parameter name of cbl",
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "cbl": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "cbl": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Cbl/import": {
-      "post": {
-        "tags": [
-          "Cbl"
-        ],
-        "summary": "Performs the actual import (assuming dryRun = false)",
-        "parameters": [
-          {
-            "name": "dryRun",
-            "in": "query",
-            "description": "If true, will only emulate the import but not perform. This should be done to preview what will happen",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "comicVineMatching",
-            "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "FormBody with parameter name of cbl",
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "cbl": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "cbl": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
                 }
               }
             }
@@ -9356,6 +9223,23 @@
               "format": "int32",
               "default": 0
             }
+          },
+          {
+            "name": "context",
+            "in": "query",
+            "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\r\nThis enum dictates which field to use for the lookup.",
+            "schema": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\r\nThis enum dictates which field to use for the lookup.",
+              "format": "int32",
+              "default": 1
+            }
           }
         ],
         "requestBody": {
@@ -10570,6 +10454,19 @@
           "Server"
         ],
         "summary": "Bust Kavita+ Cache",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Server/sync-themes": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Runs the Sync Themes task",
         "responses": {
           "200": {
             "description": "OK"
@@ -14593,7 +14490,7 @@
           },
           "hasBeenRated": {
             "type": "boolean",
-            "description": "If the rating has been explicitly set. Otherwise the 0.0 rating should be ignored as it's not rated"
+            "description": "If the rating has been explicitly set. Otherwise, the 0.0 rating should be ignored as it's not rated"
           },
           "review": {
             "type": "string",
@@ -14603,7 +14500,8 @@
           "tagline": {
             "type": "string",
             "description": "An optional tagline for the review",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "seriesId": {
             "type": "integer",
@@ -15020,8 +14918,7 @@
             "type": "object",
             "additionalProperties": {
               "type": "integer",
-              "format": "int32",
-              "nullable": true
+              "format": "int32"
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
@@ -15093,99 +14990,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "CblBookResult": {
-        "type": "object",
-        "properties": {
-          "order": {
-            "type": "integer",
-            "description": "Order in the CBL",
-            "format": "int32"
-          },
-          "series": {
-            "type": "string",
-            "nullable": true
-          },
-          "volume": {
-            "type": "string",
-            "nullable": true
-          },
-          "number": {
-            "type": "string",
-            "nullable": true
-          },
-          "libraryId": {
-            "type": "integer",
-            "description": "Used on Series conflict",
-            "format": "int32"
-          },
-          "seriesId": {
-            "type": "integer",
-            "description": "Used on Series conflict",
-            "format": "int32"
-          },
-          "readingListName": {
-            "type": "string",
-            "description": "The name of the reading list",
-            "nullable": true
-          },
-          "reason": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CblImportSummaryDto": {
-        "type": "object",
-        "properties": {
-          "cblName": {
-            "type": "string",
-            "nullable": true
-          },
-          "fileName": {
-            "type": "string",
-            "description": "Used only for Kavita's UI, the filename of the cbl",
-            "nullable": true
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CblBookResult"
-            },
-            "nullable": true
-          },
-          "success": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "successfulInserts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CblBookResult"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents the summary from the Import of a given CBL"
       },
       "Chapter": {
         "required": [
@@ -15970,8 +15774,7 @@
             "type": "object",
             "additionalProperties": {
               "type": "integer",
-              "format": "int32",
-              "nullable": true
+              "format": "int32"
             },
             "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
@@ -17468,7 +17271,8 @@
               12,
               13,
               14,
-              15
+              15,
+              16
             ],
             "type": "integer",
             "format": "int32"
@@ -23276,10 +23080,6 @@
     {
       "name": "Account",
       "description": "All Account matters"
-    },
-    {
-      "name": "Cbl",
-      "description": "Responsible for the CBL import flow"
     },
     {
       "name": "Collection",

@@ -39,7 +39,7 @@ const colorScapeSelector = 'colorscape';
 })
 export class ColorscapeService {
   private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
-  public colors$ = this.colorSubject.asObservable();
+  public readonly colors$ = this.colorSubject.asObservable();
 
   private minDuration = 1000; // minimum duration
   private maxDuration = 4000; // maximum duration

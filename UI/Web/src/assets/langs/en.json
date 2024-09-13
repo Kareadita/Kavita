@@ -27,7 +27,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
-        "update": "Update"
+        "update": "Update",
+        "account-detail-title": "Account Details"
     },
 
     "user-scrobble-history": {
@@ -199,8 +200,10 @@
         "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
-        "default-theme": "Default theme",
+        "default-theme": "Default",
         "download": "{{changelog.download}}",
+        "downloaded": "Downloaded",
+        "downloadable": "Downloadable",
         "apply": "{{common.apply}}",
         "applied": "Applied",
         "active-theme": "Active",
@@ -258,7 +261,7 @@
         "title": "Edit Device",
         "device-name-label": "{{manage-devices.name-label}}",
         "platform-label": "{{manage-devices.platform-label}}",
-        
+
         "email-label": "{{common.email}}",
         "email-tooltip": "This email will be used to accept the file via Send To",
         "device-platform-label": "Device Platform",
@@ -731,7 +734,6 @@
     "confirm-email": {
         "title": "Register",
         "description": "Complete the form to complete your registration",
-        "error-label": "Errors: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
@@ -853,7 +855,8 @@
         "teams-title": "Teams",
         "locations-title": "Locations",
         "language-title": "Language",
-        "age-rating-title": "Age Rating"
+        "age-rating-title": "Age Rating",
+        "links-title": "Weblinks"
     },
 
     "download-button": {
@@ -1356,6 +1359,10 @@
         "analyze-files-task-desc": "Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.",
         "analyze-files-task-success": "File analysis has been queued",
 
+        "sync-themes-task": "Sync Themes",
+        "sync-themes-task-desc": "Synchronize downloaded themes with upstream changes if version matches.",
+        "sync-themes-success": "Synchronization of themes has been queued",
+
         "check-for-updates-task": "Check for Updates",
         "check-for-updates-task-desc": "See if there are any Stable releases ahead of your version."
     },
@@ -1463,7 +1470,8 @@
         "title-alt": "Kavita - {{collectionName}} Collection",
         "series-header": "Series",
         "sync-progress": "Series Collected: {{title}}",
-        "last-sync": "Last Sync: {{date}}"
+        "last-sync": "Last Sync: {{date}}",
+        "item-count": "{{common.item-count}}"
     },
 
     "all-collections": {
@@ -1783,8 +1791,9 @@
 
     "metadata-filter-row": {
         "unit-reading-date": "Date",
-        "unit-average-rating": "Average Rating (Kavita+) - only for cached series",
-        "unit-reading-progress": "Percent"
+        "unit-average-rating": "Kavita+ external rating, percent",
+        "unit-reading-progress": "Percent",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
 
     "sort-field-pipe": {
@@ -1946,7 +1955,7 @@
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
         "links-label": "{{series-metadata-detail.links-label}}",
@@ -2223,7 +2232,8 @@
         "is-after": "Is after",
         "is-in-last": "Is in last",
         "is-not-in-last": "Is not in last",
-        "must-contains": "Must Contains"
+        "must-contains": "Must Contains",
+        "is-empty": "Is Empty"
     },
 
 
@@ -2450,7 +2460,7 @@
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email",
-        "password-validation": "Password must be between 6 and 32 characters in length",
+        "password-validation": "Password must be between 6 and 256 characters in length",
         "year-validation": "This must be a valid year greater than 1000 and 4 characters long"
     },
 

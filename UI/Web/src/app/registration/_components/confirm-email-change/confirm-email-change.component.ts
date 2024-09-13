@@ -4,7 +4,6 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ThemeService } from 'src/app/_services/theme.service';
-import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
@@ -17,7 +16,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     styleUrls: ['./confirm-email-change.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SplashContainerComponent, NgIf, TranslocoDirective]
+  imports: [SplashContainerComponent, TranslocoDirective]
 })
 export class ConfirmEmailChangeComponent implements OnInit {
 

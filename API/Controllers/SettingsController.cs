@@ -23,6 +23,7 @@ using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers;
 
@@ -370,7 +371,7 @@ public class SettingsController : BaseApiController
         return Ok(updateSettingsDto);
     }
 
-    public void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
+    private void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
     {
         _directoryService.ExistOrCreate(bookmarkDirectory);
         _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);

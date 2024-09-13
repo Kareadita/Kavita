@@ -3,37 +3,48 @@
     <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
       <p>{{t('description')}}</p>
-      <div class="text-danger" *ngIf="errors.length > 0">
-        <p>{{t('error-label')}}</p>
-        <ul>
-          <li *ngFor="let error of errors">{{error}}</li>
-        </ul>
-      </div>
+      @if (errors.length > 0) {
+        <div class="text-danger">
+          <p>{{t('error-label')}}</p>
+          <div class="mb-2">
+            @for (error of errors; track error) {
+              <div>{{error}}</div>
+            }
+          </div>
+        </div>
+      }
+
       <form [formGroup]="registerForm" (ngSubmit)="submit()">
         <div class="mb-3">
           <label for="username" class="form-label">{{t('username-label')}}</label>
           <input id="username" class="form-control" formControlName="username" type="text"
                  aria-describeby="inviteForm-username-validations"
                  [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
-          <div id="inviteForm-username-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-            <div *ngIf="registerForm.get('username')?.errors?.required">
-              {{t('required-field')}}
+          @if (registerForm.dirty || registerForm.touched) {
+            <div id="inviteForm-username-validations" class="invalid-feedback">
+              @if (registerForm.get('username')?.errors?.required) {
+                <div>{{t('required-field')}}</div>
+              }
             </div>
-          </div>
+          }
+
         </div>
 
         <div class="mb-3" style="width:100%">
           <label for="email" class="form-label">{{t('email-label')}}</label>
           <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required readonly
                  [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-          <div id="inviteForm-email-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-            <div *ngIf="registerForm.get('email')?.errors?.required">
-              {{t('required-field')}}
+
+          @if (registerForm.dirty || registerForm.touched) {
+            <div id="inviteForm-email-validations" class="invalid-feedback">
+              @if (registerForm.get('email')?.errors?.required) {
+                <div>{{t('required-field')}}</div>
+              }
+              @if (registerForm.get('email')?.errors?.email) {
+                <div>{{t('valid-email')}}</div>
+              }
             </div>
-            <div *ngIf="registerForm.get('email')?.errors?.email">
-              {{t('valid-email')}}
-            </div>
-          </div>
+          }
         </div>
 
         <div class="mb-3">
@@ -43,14 +54,17 @@
           </ng-template>
           <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
           <input id="password" class="form-control" maxlength="256" minlength="6" pattern="^.{6,256}$" formControlName="password" type="password" aria-describedby="password-help">
-          <div id="inviteForm-password-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-            <div *ngIf="registerForm.get('password')?.errors?.required">
-              {{t('required-field')}}
+
+          @if (registerForm.dirty || registerForm.touched) {
+            <div id="inviteForm-password-validations" class="invalid-feedback">
+              @if (registerForm.get('password')?.errors?.required) {
+                <div>{{t('required-field')}}</div>
+              }
+              @if (registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern) {
+                <div>{{t('password-validation')}}</div>
+              }
             </div>
-            <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern">
-              {{t('password-validation')}}
-            </div>
-          </div>
+          }
         </div>
 
         <div class="float-end">

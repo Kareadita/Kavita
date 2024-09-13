@@ -106,6 +106,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'analyze-files-task-success'
     },
     {
+      name: 'sync-themes-task',
+      description: 'sync-themes-desc',
+      api: this.serverService.syncThemes(),
+      successMessage: 'sync-themes-success'
+    },
+    {
       name: 'check-for-updates-task',
       description: 'check-for-updates-task-desc',
       api: this.serverService.checkForUpdate(),

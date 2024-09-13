@@ -26,7 +26,7 @@
                        [linkUrl]="'/lists/' + item.id"
                        (clicked)="handleClick(item)"
                       (selection)="bulkSelectionService.handleCardSelection('readingList', position, lists.length, $event)"
-                      [selected]="bulkSelectionService.isCardSelected('readingList', position)" [allowSelection]="true"></app-card-item>
+                      [selected]="bulkSelectionService.isCardSelected('readingList', position)" [allowSelection]="true" [showFormat]="false"></app-card-item>
       </ng-template>
 
       <ng-template #noData>

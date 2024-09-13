@@ -37,7 +37,7 @@ public interface ITaskScheduler
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
     Task CheckForUpdate();
-
+    Task SyncThemes();
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -165,8 +165,8 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(),
             Cron.Monthly, RecurringJobOptions);
 
-        RecurringJob.AddOrUpdate(SyncThemesTaskId, () => _themeService.SyncThemes(),
-            Cron.Weekly, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(SyncThemesTaskId, () => SyncThemes(),
+            Cron.Daily, RecurringJobOptions);
 
         await ScheduleKavitaPlusTasks();
     }
@@ -442,6 +442,11 @@ public class TaskScheduler : ITaskScheduler
         var update = await _versionUpdaterService.CheckForUpdate();
         if (update == null) return;
         await _versionUpdaterService.PushUpdate(update);
+    }
+
+    public async Task SyncThemes()
+    {
+        await _themeService.SyncThemes();
     }
 
     /// <summary>

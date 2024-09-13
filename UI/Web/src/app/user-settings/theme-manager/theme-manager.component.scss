@@ -37,11 +37,15 @@
     background-color: var(--card-bg-color);
     border-radius: 5px;
   }
+
+
 }
+
 
 .list-group-item, .list-group-item.active {
   border-top-width: 0;
   border-bottom-width: 0;
+
 }
 
 .card {
@@ -67,4 +71,8 @@ ngx-file-drop ::ng-deep > div {
 .custom-position {
   right: 15px;
   top: -42px;
+}
+
+.section-header {
+  color: var(--primary-color);
 }

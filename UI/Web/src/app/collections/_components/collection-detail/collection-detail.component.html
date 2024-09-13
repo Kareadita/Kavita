@@ -7,11 +7,12 @@
             {{collectionTag.title}}<span class="ms-1" *ngIf="collectionTag.promoted">(<i aria-hidden="true" class="fa fa-angle-double-up"></i>)</span>
             <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
           </h4>
+          <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
         </ng-container>
       </app-side-nav-companion-bar>
     </div>
 
-    <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="collectionTag !== undefined" #scrollingBlock>
+    <div class="container-fluid" *ngIf="collectionTag !== undefined">
       @if (summary.length > 0 || collectionTag.source !== ScrobbleProvider.Kavita) {
         <div class="row mb-3">
           <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
@@ -43,13 +44,11 @@
       <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
       <app-card-detail-layout *ngIf="filter"
-        [header]="t('series-header')"
         [isLoading]="isLoading"
         [items]="series"
         [pagination]="pagination"
         [filterSettings]="filterSettings"
         [filterOpen]="filterOpen"
-        [parentScroll]="scrollingBlock"
         [trackByIdentity]="trackByIdentity"
         [jumpBarKeys]="jumpbarKeys"
         (applyFilter)="updateFilter($event)">

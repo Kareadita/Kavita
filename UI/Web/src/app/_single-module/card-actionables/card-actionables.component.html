@@ -21,7 +21,7 @@
         } @else {
           @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async)) {
             <!-- Submenu items -->
-            <div ngbDropdown #subMenuHover="ngbDropdown" placement="right-top"
+            <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
                  (click)="preventEvent($event); openSubmenu(action.title, subMenuHover)"
                  (mouseover)="preventEvent($event); openSubmenu(action.title, subMenuHover)"
                  (mouseleave)="preventEvent($event)">
