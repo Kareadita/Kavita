@@ -40,6 +40,8 @@ import {forkJoin} from "rxjs";
 import { MangaFormat } from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {VolumeService} from "../../_services/volume.service";
+import {User} from "../../_models/user";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
   General = 'general-tab',
@@ -125,6 +127,7 @@ export class EditVolumeModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
+  user!: User;
 
 
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.runTask.bind(this)), blackList);
@@ -136,6 +139,16 @@ export class EditVolumeModalComponent implements OnInit {
   size: number = 0;
   files: Array<MangaFile> = [];
 
+  constructor() {
+    this.accountService.currentUser$.subscribe(user => {
+      this.user = user!;
+
+      if (!this.accountService.hasAdminRole(user!)) {
+        this.activeId = TabID.Info;
+      }
+      this.cdRef.markForCheck();
+    });
+  }
 
 
   ngOnInit() {
