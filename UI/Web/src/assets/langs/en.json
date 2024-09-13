@@ -27,7 +27,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
-        "update": "Update"
+        "update": "Update",
+        "account-detail-title": "Account Details"
     },
 
     "user-scrobble-history": {
