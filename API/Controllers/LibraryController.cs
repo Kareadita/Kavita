@@ -19,6 +19,7 @@ using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -132,13 +133,19 @@ public class LibraryController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
-        await _libraryWatcher.RestartWatching();
-        await _taskScheduler.ScanLibrary(library.Id);
+        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
+        if (library.FolderWatching)
+        {
+            await _libraryWatcher.RestartWatching();
+        }
+
+        BackgroundJob.Enqueue(() => _taskScheduler.ScanLibrary(library.Id, false));
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
             MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
-        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
         return Ok();
     }
 
