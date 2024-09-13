@@ -1,0 +1,18 @@
+
+.color-box-container {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.color-box {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+  margin-right: 10px;
+}
+
+.hex-code {
+  font-size: 16px;
+  color: var(--primary-color);
+}

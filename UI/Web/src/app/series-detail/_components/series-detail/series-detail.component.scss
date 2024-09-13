@@ -1,6 +1,4 @@
-.user-review {
-  font-style: italic;
-}
+@use '../../../../series-detail-common';
 
 .to-read-counter {
   position: absolute;
@@ -8,59 +6,25 @@
   left: 20px;
 }
 
-.under-image {
-  background-color: var(--breadcrumb-bg-color);
-  color: white;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  text-align: center;
-}
-
-.rating-star {
-  margin-top: 2px;
-  font-size: 1.5rem;
-}
-
-.card-container{
+.card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 158px);
+  grid-template-columns: repeat(auto-fill, 160px);
   grid-gap: 0.5rem;
   justify-content: space-around;
+  padding-bottom: 20px;
 }
 
-.virtual-scroller, virtual-scroller {
-  width: 100%;
-  max-height: calc(var(--vh)*100 - 170px);
+::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--primary-color);
+  padding: 5px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: var(--primary-color-dark-shade);
+  }
 }
 
-// This is responsible for ensuring we scroll down and only tabs and companion bar is visible
-.main-container {
-  // Height set dynamically by get ScrollingBlockHeight()
-  overflow-y: auto;
-  position: relative;
-  overscroll-behavior-y: none;
-}
 
-.title, .subtitle-with-actionable {
-  margin-bottom: 0;
-}
-
-.image-container {
-  max-height: 400px;
-  max-width: 280px;
-}
-
-.info-container {
-  align-items: flex-start;
-}
-
-::ng-deep .progress {
-  border-radius: 0px;
-}
-
-.dropdown-toggle-split {
-  border-top-right-radius: 6px !important;
-  border-bottom-right-radius: 6px !important;
-  border-top-left-radius: 0px !important;
-  border-bottom-left-radius: 0px !important;
-}

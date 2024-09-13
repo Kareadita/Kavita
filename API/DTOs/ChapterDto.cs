@@ -10,7 +10,7 @@ namespace API.DTOs;
 /// A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying
 /// file (abstracted from type).
 /// </summary>
-public class ChapterDto : IHasReadTimeEstimate
+public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; init; }
     /// <summary>
@@ -158,5 +158,42 @@ public class ChapterDto : IHasReadTimeEstimate
     /// </summary>
     public int TotalCount { get; set; }
 
+    public bool LanguageLocked { get; set; }
+    public bool SummaryLocked { get; set; }
+    /// <summary>
+    /// Locked by user so metadata updates from scan loop will not override AgeRating
+    /// </summary>
+    public bool AgeRatingLocked { get; set; }
+    /// <summary>
+    /// Locked by user so metadata updates from scan loop will not override PublicationStatus
+    /// </summary>
+    public bool PublicationStatusLocked { get; set; }
+    public bool GenresLocked { get; set; }
+    public bool TagsLocked { get; set; }
+    public bool WriterLocked { get; set; }
+    public bool CharacterLocked { get; set; }
+    public bool ColoristLocked { get; set; }
+    public bool EditorLocked { get; set; }
+    public bool InkerLocked { get; set; }
+    public bool ImprintLocked { get; set; }
+    public bool LettererLocked { get; set; }
+    public bool PencillerLocked { get; set; }
+    public bool PublisherLocked { get; set; }
+    public bool TranslatorLocked { get; set; }
+    public bool TeamLocked { get; set; }
+    public bool LocationLocked { get; set; }
+    public bool CoverArtistLocked { get; set; }
+    public bool ReleaseYearLocked { get; set; }
+
     #endregion
+
+    public string CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 }

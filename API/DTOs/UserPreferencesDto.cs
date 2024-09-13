@@ -174,4 +174,6 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
+
+
 }

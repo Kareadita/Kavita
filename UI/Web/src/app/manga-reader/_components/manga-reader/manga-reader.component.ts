@@ -68,7 +68,7 @@ import {FittingIconPipe} from '../../../_pipes/fitting-icon.pipe';
 import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.component';
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 
 
@@ -1721,7 +1721,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // menu only code
   savePref() {
-    const modelSettings = this.generalSettingsForm.value;
+    const modelSettings = this.generalSettingsForm.getRawValue();
     // Get latest preferences from user, overwrite with what we manage in this UI, then save
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (!user) return;

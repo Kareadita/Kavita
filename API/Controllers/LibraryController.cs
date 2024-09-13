@@ -19,6 +19,7 @@ using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -132,13 +133,19 @@ public class LibraryController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
-        await _libraryWatcher.RestartWatching();
-        await _taskScheduler.ScanLibrary(library.Id);
+        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
+        if (library.FolderWatching)
+        {
+            await _libraryWatcher.RestartWatching();
+        }
+
+        BackgroundJob.Enqueue(() => _taskScheduler.ScanLibrary(library.Id, false));
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
             MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
-        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
         return Ok();
     }
 
@@ -310,9 +317,9 @@ public class LibraryController : BaseApiController
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("refresh-metadata")]
-    public ActionResult RefreshMetadata(int libraryId, bool force = true)
+    public ActionResult RefreshMetadata(int libraryId, bool force = true, bool forceColorscape = true)
     {
-        _taskScheduler.RefreshMetadata(libraryId, force);
+        _taskScheduler.RefreshMetadata(libraryId, force, forceColorscape);
         return Ok();
     }
 
@@ -409,7 +416,7 @@ public class LibraryController : BaseApiController
                 _taskScheduler.CleanupChapters(chapterIds);
             }
 
-            await _libraryWatcher.RestartWatching();
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
 
             foreach (var seriesId in seriesIds)
             {
@@ -496,16 +503,17 @@ public class LibraryController : BaseApiController
         _unitOfWork.LibraryRepository.Update(library);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(userId, "generic-library-update"));
+
+        if (folderWatchingUpdate || originalFoldersCount != dto.Folders.Count() || typeUpdate)
+        {
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
+        }
+
         if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
-            await _libraryWatcher.RestartWatching();
             await _taskScheduler.ScanLibrary(library.Id);
         }
 
-        if (folderWatchingUpdate)
-        {
-            await _libraryWatcher.RestartWatching();
-        }
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
 

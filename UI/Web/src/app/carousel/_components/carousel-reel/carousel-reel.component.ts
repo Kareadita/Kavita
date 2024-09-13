@@ -1,18 +1,30 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  TemplateRef
+} from '@angular/core';
 import { Swiper, SwiperEvents } from 'swiper/types';
 import { SwiperModule } from 'swiper/angular';
-import { NgIf, NgClass, NgFor, NgTemplateOutlet } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-    selector: 'app-carousel-reel',
-    templateUrl: './carousel-reel.component.html',
-    styleUrls: ['./carousel-reel.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgIf, NgClass, SwiperModule, NgFor, NgTemplateOutlet, TranslocoDirective]
+  selector: 'app-carousel-reel',
+  templateUrl: './carousel-reel.component.html',
+  styleUrls: ['./carousel-reel.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [NgClass, SwiperModule, NgTemplateOutlet, TranslocoDirective]
 })
 export class CarouselReelComponent {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
   @ContentChild('promptToAdd') promptToAddTemplate!: TemplateRef<any>;
@@ -31,10 +43,6 @@ export class CarouselReelComponent {
   @Output() sectionClick = new EventEmitter<string>();
 
   swiper: Swiper | undefined;
-
-
-
-  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
   nextPage() {
     if (this.swiper) {

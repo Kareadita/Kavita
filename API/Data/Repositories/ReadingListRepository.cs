@@ -36,6 +36,8 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
+    Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId,
+        bool includePromoted);
     void Remove(ReadingListItem item);
     void Add(ReadingList list);
     void BulkRemove(IEnumerable<ReadingListItem> items);
@@ -83,7 +85,7 @@ public class ReadingListRepository : IReadingListRepository
         return await _context.ReadingList
             .Where(c => c.Id == readingListId)
             .Select(c => c.CoverImage)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
@@ -166,6 +168,8 @@ public class ReadingListRepository : IReadingListRepository
             .ToListAsync();
     }
 
+
+
     public void Remove(ReadingListItem item)
     {
         _context.ReadingListItem.Remove(item);
@@ -196,6 +200,19 @@ public class ReadingListRepository : IReadingListRepository
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
+            .AsSplitQuery()
+            .OrderBy(l => l.Title)
+            .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
+            .AsNoTracking();
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId, bool includePromoted)
+    {
+        var query = _context.ReadingList
+            .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
+            .Where(l => l.Items.Any(i => i.ChapterId == chapterId))
             .AsSplitQuery()
             .OrderBy(l => l.Title)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)

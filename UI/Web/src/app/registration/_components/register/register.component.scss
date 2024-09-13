@@ -1,4 +1,35 @@
-input {
-    background-color: #fff !important;
-    color: black !important;
+.custom-input {
+    background-color: var(--login-input-background-color);
+    color: var(--login-input-color);
+    border-color: var(--login-input-border-color);
+    font-family: var(--login-input-font-family);
+
+    &.is-invalid {
+        border-color: var(--bs-form-invalid-border-color);
+    }
+
+    &:focus {
+        border-color: var(--login-input-border-color-focus);
+        box-shadow: var(--login-input-box-shadow-focus);
+    }
+
+    &::placeholder {
+        opacity: var(--login-input-placeholder-opacity);
+        color: var(--login-input-placeholder-color);
+        font-family: var(--login-input-font-family);
+      }
+}
+
+label {
+    font-family: var(--login-input-font-family);
+    margin-bottom: 0;
+}
+
+p {
+    font-family: var(--login-input-font-family);
+}
+
+.btn {
+    width: 100%;
+    font-family: var(--login-input-font-family);
 }

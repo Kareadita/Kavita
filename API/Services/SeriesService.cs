@@ -175,6 +175,10 @@ public class SeriesService : ISeriesService
                     series.Metadata.Genres.Add(genre);
                 }, () => series.Metadata.GenresLocked = true);
             }
+            else
+            {
+                series.Metadata.Genres = new List<Genre>();
+            }
 
 
             if (updateSeriesMetadataDto.SeriesMetadata?.Tags is {Count: > 0})
@@ -187,6 +191,10 @@ public class SeriesService : ISeriesService
                 {
                     series.Metadata.Tags.Add(tag);
                 }, () => series.Metadata.TagsLocked = true);
+            }
+            else
+            {
+                series.Metadata.Tags = new List<Tag>();
             }
 
             if (updateSeriesMetadataDto.SeriesMetadata != null)
@@ -617,7 +625,7 @@ public class SeriesService : ISeriesService
     }
 
     /// <summary>
-    /// Update the relations attached to the Series. Does not generate associated Sequel/Prequel pairs on target series.
+    /// Update the relations attached to the Series. Generates associated Sequel/Prequel pairs on target series.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -635,13 +643,88 @@ public class SeriesService : ISeriesService
         UpdateRelationForKind(dto.AlternativeSettings, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeSetting).ToList(), series, RelationKind.AlternativeSetting);
         UpdateRelationForKind(dto.AlternativeVersions, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeVersion).ToList(), series, RelationKind.AlternativeVersion);
         UpdateRelationForKind(dto.Doujinshis, series.Relations.Where(r => r.RelationKind == RelationKind.Doujinshi).ToList(), series, RelationKind.Doujinshi);
-        UpdateRelationForKind(dto.Prequels, series.Relations.Where(r => r.RelationKind == RelationKind.Prequel).ToList(), series, RelationKind.Prequel);
-        UpdateRelationForKind(dto.Sequels, series.Relations.Where(r => r.RelationKind == RelationKind.Sequel).ToList(), series, RelationKind.Sequel);
         UpdateRelationForKind(dto.Editions, series.Relations.Where(r => r.RelationKind == RelationKind.Edition).ToList(), series, RelationKind.Edition);
         UpdateRelationForKind(dto.Annuals, series.Relations.Where(r => r.RelationKind == RelationKind.Annual).ToList(), series, RelationKind.Annual);
 
+        await UpdatePrequelSequelRelations(dto.Prequels, series, RelationKind.Prequel);
+        await UpdatePrequelSequelRelations(dto.Sequels, series, RelationKind.Sequel);
+
         if (!_unitOfWork.HasChanges()) return true;
         return await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Updates Prequel/Sequel relations and creates reciprocal relations on target series.
+    /// </summary>
+    /// <param name="targetSeriesIds">List of target series IDs</param>
+    /// <param name="series">The current series being updated</param>
+    /// <param name="kind">The relation kind (Prequel or Sequel)</param>
+    private async Task UpdatePrequelSequelRelations(ICollection<int> targetSeriesIds, Series series, RelationKind kind)
+    {
+        var existingRelations = series.Relations.Where(r => r.RelationKind == kind).ToList();
+
+        // Remove relations that are not in the new list
+        foreach (var relation in existingRelations.Where(relation => !targetSeriesIds.Contains(relation.TargetSeriesId)))
+        {
+            series.Relations.Remove(relation);
+            await RemoveReciprocalRelation(series.Id, relation.TargetSeriesId, GetOppositeRelationKind(kind));
+        }
+
+        // Add new relations
+        foreach (var targetSeriesId in targetSeriesIds)
+        {
+            if (series.Relations.Any(r => r.RelationKind == kind && r.TargetSeriesId == targetSeriesId))
+                continue;
+
+            series.Relations.Add(new SeriesRelation
+            {
+                Series = series,
+                SeriesId = series.Id,
+                TargetSeriesId = targetSeriesId,
+                RelationKind = kind
+            });
+
+            await AddReciprocalRelation(series.Id, targetSeriesId, GetOppositeRelationKind(kind));
+        }
+
+        _unitOfWork.SeriesRepository.Update(series);
+    }
+
+    private static RelationKind GetOppositeRelationKind(RelationKind kind)
+    {
+        return kind == RelationKind.Prequel ? RelationKind.Sequel : RelationKind.Prequel;
+    }
+
+    private async Task AddReciprocalRelation(int sourceSeriesId, int targetSeriesId, RelationKind kind)
+    {
+        var targetSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(targetSeriesId, SeriesIncludes.Related);
+        if (targetSeries == null) return;
+
+        if (targetSeries.Relations.Any(r => r.RelationKind == kind && r.TargetSeriesId == sourceSeriesId))
+            return;
+
+        targetSeries.Relations.Add(new SeriesRelation
+        {
+            Series = targetSeries,
+            SeriesId = targetSeriesId,
+            TargetSeriesId = sourceSeriesId,
+            RelationKind = kind
+        });
+
+        _unitOfWork.SeriesRepository.Update(targetSeries);
+    }
+
+    private async Task RemoveReciprocalRelation(int sourceSeriesId, int targetSeriesId, RelationKind kind)
+    {
+        var targetSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(targetSeriesId, SeriesIncludes.Related);
+        if (targetSeries == null) return;
+
+        var relationToRemove = targetSeries.Relations.FirstOrDefault(r => r.RelationKind == kind && r.TargetSeriesId == sourceSeriesId);
+        if (relationToRemove != null)
+        {
+            targetSeries.Relations.Remove(relationToRemove);
+            _unitOfWork.SeriesRepository.Update(targetSeries);
+        }
     }
 
 

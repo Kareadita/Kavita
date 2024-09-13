@@ -12,7 +12,7 @@ import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TopUserRead } from '../../_models/top-reads';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 export const TimePeriods: Array<{title: string, value: number}> =
   [{title: 'this-week', value: new Date().getDay() || 1},

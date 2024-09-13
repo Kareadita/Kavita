@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   EventEmitter,
@@ -13,8 +14,8 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { NavService } from 'src/app/_services/nav.service';
 import { ToggleService } from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
+import {tap} from "rxjs";
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -23,11 +24,14 @@ import {TranslocoDirective} from "@ngneat/transloco";
 @Component({
   selector: 'app-side-nav-companion-bar',
   standalone: true,
-  imports: [CommonModule, NgbTooltip, TranslocoDirective],
+  imports: [NgbTooltip, TranslocoDirective],
   templateUrl: './side-nav-companion-bar.component.html',
   styleUrls: ['./side-nav-companion-bar.component.scss']
 })
 export class SideNavCompanionBarComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   /**
    * If the page should show a filter
    */
@@ -64,11 +68,11 @@ export class SideNavCompanionBarComponent implements OnInit {
         this.filterOpen.emit(this.isFilterOpen);
       }
     });
-  }
 
-  toggleFilter() {
-    this.isFilterOpen = !this.isFilterOpen;
-    this.filterOpen.emit(this.isFilterOpen);
+    this.toggleService.toggleState$.pipe(takeUntilDestroyed(this.destroyRef), tap(isOpen => {
+      this.isFilterOpen = isOpen;
+      this.cdRef.markForCheck();
+    })).subscribe();
   }
 
   openExtrasDrawer() {

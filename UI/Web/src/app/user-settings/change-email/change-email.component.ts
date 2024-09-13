@@ -1,14 +1,16 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {shareReplay, take} from 'rxjs';
+import {shareReplay} from 'rxjs';
 import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { ApiKeyComponent } from '../api-key/api-key.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import {NgIf, NgFor, JsonPipe} from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
     selector: 'app-change-email',
@@ -16,7 +18,7 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, JsonPipe]
+  imports: [NgbTooltip, NgbCollapse, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, ScrobbleProviderNamePipe, SettingTitleComponent, SettingItemComponent]
 })
 export class ChangeEmailComponent implements OnInit {
 
@@ -95,5 +97,14 @@ export class ChangeEmailComponent implements OnInit {
     this.isViewMode = !this.isViewMode;
     this.resetForm();
   }
+
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
+    this.cdRef.markForCheck();
+    this.resetForm();
+  }
+
+
+
 
 }

@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
-import {CommonModule} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 export interface KeyboardShortcut {
   /**
@@ -17,18 +16,14 @@ export interface KeyboardShortcut {
 @Component({
   selector: 'app-shortcuts-modal',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, TranslocoDirective],
+  imports: [NgbModalModule, TranslocoDirective],
   templateUrl: './shortcuts-modal.component.html',
   styleUrls: ['./shortcuts-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ShortcutsModalComponent {
 
+  protected readonly modal = inject(NgbActiveModal);
+
   @Input() shortcuts: Array<KeyboardShortcut> = [];
-
-  constructor(public modal: NgbActiveModal) { }
-
-  close() {
-    this.modal.close();
-  }
 }

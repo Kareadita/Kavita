@@ -52,7 +52,9 @@ public class ReadingListServiceTests
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null!);
 
-        _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>(), Substitute.For<IEventHub>());
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
+        _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(), ds);
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),

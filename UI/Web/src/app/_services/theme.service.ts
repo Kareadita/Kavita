@@ -1,9 +1,17 @@
 import {DOCUMENT} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, SecurityContext} from '@angular/core';
+import {
+  DestroyRef,
+  inject,
+  Inject,
+  Injectable,
+  Renderer2,
+  RendererFactory2,
+  SecurityContext
+} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
-import {map, ReplaySubject, take} from 'rxjs';
+import {filter, map, ReplaySubject, take, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
@@ -11,11 +19,13 @@ import {SiteTheme, ThemeProvider} from '../_models/preferences/site-theme';
 import {TextResonse} from '../_types/text-response';
 import {EVENTS, MessageHubService} from './message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
-
+import {NavigationEnd, Router} from "@angular/router";
+import {ColorscapeService} from "./colorscape.service";
+import {ColorScape} from "../_models/theme/colorscape";
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +33,8 @@ import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event"
 export class ThemeService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly colorTransitionService = inject(ColorscapeService);
+
   public defaultTheme: string = 'dark';
   public defaultBookTheme: string = 'Dark';
 
@@ -42,8 +54,15 @@ export class ThemeService {
 
 
   constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
-  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService) {
+  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService,
+  private router: Router) {
     this.renderer = rendererFactory.createRenderer(null, null);
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.setColorScape('');
+    });
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
@@ -90,21 +109,21 @@ export class ThemeService {
     return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
 
-    /**
-     * --theme-color from theme. Updates the meta tag
-     * @returns
-     */
-    getThemeColor() {
-      return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
-    }
+  /**
+   * --theme-color from theme. Updates the meta tag
+   * @returns
+   */
+  getThemeColor() {
+    return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
+  }
 
-    /**
-     * --msapplication-TileColor from theme. Updates the meta tag
-     * @returns
-     */
-    getTileColor() {
-      return getComputedStyle(this.document.body).getPropertyValue('--title-color').trim();
-    }
+  /**
+   * --msapplication-TileColor from theme. Updates the meta tag
+   * @returns
+   */
+  getTileColor() {
+    return getComputedStyle(this.document.body).getPropertyValue('--title-color').trim();
+  }
 
   getCssVariable(variable: string) {
     return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
@@ -148,10 +167,6 @@ export class ThemeService {
     }));
   }
 
-  scan() {
-    return this.httpClient.post(this.baseUrl + 'theme/scan', {});
-  }
-
   /**
    * Sets the book theme on the body tag so css variable overrides can take place
    * @param selector brtheme- prefixed string
@@ -165,6 +180,26 @@ export class ThemeService {
     this.unsetBookThemes();
   }
 
+
+  /**
+   * Set's the background color from a single primary color.
+   * @param primaryColor
+   * @param complementaryColor
+   */
+  setColorScape(primaryColor: string, complementaryColor: string | null = null) {
+    this.colorTransitionService.setColorScape(primaryColor, complementaryColor);
+  }
+
+  /**
+   * Trigger a request to get the colors for a given entity and apply them
+   * @param entity
+   * @param id
+   */
+  refreshColorScape(entity: 'series' | 'volume' | 'chapter', id: number) {
+    return this.httpClient.get<ColorScape>(`${this.baseUrl}colorscape/${entity}?id=${id}`).pipe(tap((cs) => {
+      this.setColorScape(cs.primary || '', cs.secondary);
+    }));
+  }
 
   /**
    * Sets the theme as active. Will inject a style tag into document to load a custom theme and apply the selector to the body
@@ -187,7 +222,6 @@ export class ThemeService {
           const styleElem = this.document.createElement('style');
           styleElem.id = 'theme-' + theme.name;
           styleElem.appendChild(this.document.createTextNode(content));
-
           this.renderer.appendChild(this.document.head, styleElem);
 
           // Check if the theme has --theme-color and apply it to meta tag
@@ -238,6 +272,4 @@ export class ThemeService {
   private unsetBookThemes() {
     Array.from(this.document.body.classList).filter(cls => cls.startsWith('brtheme-')).forEach(c => this.document.body.classList.remove(c));
   }
-
-
 }

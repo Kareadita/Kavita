@@ -7,7 +7,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { NgTemplateOutlet, NgIf } from '@angular/common';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-confirm-reset-password',
@@ -22,7 +22,7 @@ export class ConfirmResetPasswordComponent {
   token: string = '';
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6)]),
   });
 
   constructor(private route: ActivatedRoute, private router: Router,

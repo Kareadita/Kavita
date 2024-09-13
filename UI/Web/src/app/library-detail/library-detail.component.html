@@ -1,36 +1,38 @@
-<ng-container *transloco="let t">
-  <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
-    <h2 title>
-      <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
-      <span>{{libraryName}}</span>
-    </h2>
-    @if (active.fragment === '') {
-      <h6 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h6>
+<div class="main-container container-fluid">
+  <ng-container *transloco="let t">
+    <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
+      <h4 title>
+        <span>{{libraryName}}</span>
+        <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
+      </h4>
+      @if (active.fragment === '') {
+        <h5 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h5>
+      }
+
+    </app-side-nav-companion-bar>
+    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-loading [absolute]="true" [loading]="bulkLoader"></app-loading>
+    @if (filter) {
+      <app-card-detail-layout
+                              [isLoading]="loadingSeries"
+                              [items]="series"
+                              [pagination]="pagination"
+                              [filterSettings]="filterSettings"
+                              [trackByIdentity]="trackByIdentity"
+                              [filterOpen]="filterOpen"
+                              [jumpBarKeys]="jumpKeys"
+                              [refresh]="refresh"
+                              (applyFilter)="updateFilter($event)"
+      >
+        <ng-template #cardItem let-item let-position="idx">
+          <app-series-card [series]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
+                          (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
+                          [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+        </ng-template>
+      </app-card-detail-layout>
     }
 
-  </app-side-nav-companion-bar>
-  <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-  <app-loading [absolute]="true" [loading]="bulkLoader"></app-loading>
-  @if (filter) {
-    <app-card-detail-layout
-                            [isLoading]="loadingSeries"
-                            [items]="series"
-                            [pagination]="pagination"
-                            [filterSettings]="filterSettings"
-                            [trackByIdentity]="trackByIdentity"
-                            [filterOpen]="filterOpen"
-                            [jumpBarKeys]="jumpKeys"
-                            [refresh]="refresh"
-                            (applyFilter)="updateFilter($event)"
-    >
-      <ng-template #cardItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
-                         (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                         [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
-      </ng-template>
-    </app-card-detail-layout>
-  }
 
 
-
-</ng-container>
+  </ng-container>
+</div>

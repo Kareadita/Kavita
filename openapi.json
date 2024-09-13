@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.1.19",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.9",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -1114,60 +1114,79 @@
         }
       }
     },
-    "/api/Cbl/validate": {
-      "post": {
+    "/api/Chapter": {
+      "get": {
         "tags": [
-          "Cbl"
+          "Chapter"
         ],
-        "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
+        "summary": "Gets a single chapter",
         "parameters": [
           {
-            "name": "comicVineMatching",
+            "name": "chapterId",
             "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
+            "description": "",
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "cbl": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "cbl": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                  "$ref": "#/components/schemas/ChapterDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                  "$ref": "#/components/schemas/ChapterDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chapter"
+        ],
+        "summary": "Removes a Chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -1175,72 +1194,35 @@
         }
       }
     },
-    "/api/Cbl/import": {
+    "/api/Chapter/update": {
       "post": {
         "tags": [
-          "Cbl"
+          "Chapter"
         ],
-        "summary": "Performs the actual import (assuming dryRun = false)",
-        "parameters": [
-          {
-            "name": "dryRun",
-            "in": "query",
-            "description": "If true, will only emulate the import but not perform. This should be done to preview what will happen",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "comicVineMatching",
-            "in": "query",
-            "description": "Use comic vine matching or not. Defaults to false",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
+        "summary": "Update chapter metadata",
         "requestBody": {
+          "description": "",
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "cbl": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "cbl": {
-                  "style": "form"
-                }
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChapterDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CblImportSummaryDto"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -1702,12 +1684,137 @@
         }
       }
     },
+    "/api/ColorScape/series": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a series",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/volume": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a volume",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/chapter": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a chapter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Device/create": {
       "post": {
         "tags": [
           "Device"
         ],
+        "summary": "Creates a new Device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1728,7 +1835,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              }
+            }
           }
         }
       }
@@ -1738,7 +1862,9 @@
         "tags": [
           "Device"
         ],
+        "summary": "Updates an existing Device",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1759,7 +1885,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDto"
+                }
+              }
+            }
           }
         }
       }
@@ -2584,6 +2727,37 @@
         }
       }
     },
+    "/api/Image/publisher": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns the image associated with a publisher",
+        "parameters": [
+          {
+            "name": "publisherName",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Image/cover-upload": {
       "get": {
         "tags": [
@@ -2948,6 +3122,14 @@
           },
           {
             "name": "force",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "forceColorscape",
             "in": "query",
             "schema": {
               "type": "boolean",
@@ -6255,10 +6437,12 @@
         "tags": [
           "Reader"
         ],
+        "summary": "Deletes the user's personal table of content for the given chapter",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6267,6 +6451,7 @@
           {
             "name": "pageNum",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6275,6 +6460,7 @@
           {
             "name": "title",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -6524,10 +6710,60 @@
         "tags": [
           "ReadingList"
         ],
-        "summary": "Returns all Reading Lists the user has access to that have a series within it.",
+        "summary": "Returns all Reading Lists the user has access to that the given series within it.",
         "parameters": [
           {
             "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ReadingList/lists-for-chapter": {
+      "get": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Returns all Reading Lists the user has access to that has the given chapter within it.",
+        "parameters": [
+          {
+            "name": "chapterId",
             "in": "query",
             "description": "",
             "schema": {
@@ -8987,6 +9223,23 @@
               "format": "int32",
               "default": 0
             }
+          },
+          {
+            "name": "context",
+            "in": "query",
+            "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\r\nThis enum dictates which field to use for the lookup.",
+            "schema": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\r\nThis enum dictates which field to use for the lookup.",
+              "format": "int32",
+              "default": 1
+            }
           }
         ],
         "requestBody": {
@@ -10201,6 +10454,19 @@
           "Server"
         ],
         "summary": "Bust Kavita+ Cache",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Server/sync-themes": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Runs the Sync Themes task",
         "responses": {
           "200": {
             "description": "OK"
@@ -12222,6 +12488,7 @@
         ],
         "summary": "Uploads a new theme file",
         "requestBody": {
+          "description": "",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -12448,6 +12715,40 @@
         }
       }
     },
+    "/api/Upload/volume": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Replaces volume cover image and locks it with a base64 encoded image.",
+        "description": "This will not update the underlying chapter",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Upload/library": {
       "post": {
         "tags": [
@@ -12511,7 +12812,8 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/Users/delete-user": {
@@ -12811,6 +13113,82 @@
                   "items": {
                     "type": "string"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Volume": {
+      "get": {
+        "tags": [
+          "Volume"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Volume"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -13531,7 +13909,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Path to the (managed) image file",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -13668,6 +14053,14 @@
           "coverImage": {
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -14097,7 +14490,7 @@
           },
           "hasBeenRated": {
             "type": "boolean",
-            "description": "If the rating has been explicitly set. Otherwise the 0.0 rating should be ignored as it's not rated"
+            "description": "If the rating has been explicitly set. Otherwise, the 0.0 rating should be ignored as it's not rated"
           },
           "review": {
             "type": "string",
@@ -14107,7 +14500,8 @@
           "tagline": {
             "type": "string",
             "description": "An optional tagline for the review",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "seriesId": {
             "type": "integer",
@@ -14597,99 +14991,6 @@
         },
         "additionalProperties": false
       },
-      "CblBookResult": {
-        "type": "object",
-        "properties": {
-          "order": {
-            "type": "integer",
-            "description": "Order in the CBL",
-            "format": "int32"
-          },
-          "series": {
-            "type": "string",
-            "nullable": true
-          },
-          "volume": {
-            "type": "string",
-            "nullable": true
-          },
-          "number": {
-            "type": "string",
-            "nullable": true
-          },
-          "libraryId": {
-            "type": "integer",
-            "description": "Used on Series conflict",
-            "format": "int32"
-          },
-          "seriesId": {
-            "type": "integer",
-            "description": "Used on Series conflict",
-            "format": "int32"
-          },
-          "readingListName": {
-            "type": "string",
-            "description": "The name of the reading list",
-            "nullable": true
-          },
-          "reason": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CblImportSummaryDto": {
-        "type": "object",
-        "properties": {
-          "cblName": {
-            "type": "string",
-            "nullable": true
-          },
-          "fileName": {
-            "type": "string",
-            "description": "Used only for Kavita's UI, the filename of the cbl",
-            "nullable": true
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CblBookResult"
-            },
-            "nullable": true
-          },
-          "success": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "successfulInserts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CblBookResult"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents the summary from the Import of a given CBL"
-      },
       "Chapter": {
         "required": [
           "number",
@@ -14757,7 +15058,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Relative path to the (managed) image file representing the cover image",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -14881,6 +15189,69 @@
           "isbn": {
             "type": "string",
             "nullable": true
+          },
+          "ageRatingLocked": {
+            "type": "boolean"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "isbnLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
           },
           "people": {
             "type": "array",
@@ -15215,6 +15586,80 @@
             "type": "integer",
             "description": "Total number of issues for the series",
             "format": "int32"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "publicationStatusLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "releaseYearLocked": {
+            "type": "boolean"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -15605,6 +16050,21 @@
           }
         },
         "additionalProperties": false
+      },
+      "ColorScapeDto": {
+        "type": "object",
+        "properties": {
+          "primary": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "A set of colors for the color scape system in the UI"
       },
       "ConfirmEmailDto": {
         "required": [
@@ -16811,7 +17271,8 @@
               12,
               13,
               14,
-              15
+              15,
+              16
             ],
             "type": "integer",
             "format": "int32"
@@ -17217,6 +17678,14 @@
             "nullable": true
           },
           "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
             "type": "string",
             "nullable": true
           },
@@ -17808,6 +18277,10 @@
             "type": "string",
             "description": "Exception message",
             "nullable": true
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -18230,7 +18703,14 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Absolute path to the (managed) image file",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "coverImageLocked": {
@@ -18338,6 +18818,14 @@
           "coverImage": {
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "startingYear": {
@@ -18620,6 +19108,10 @@
           "forceUpdate": {
             "type": "boolean",
             "description": "Should the task force opening/re-calculation."
+          },
+          "forceColorscape": {
+            "type": "boolean",
+            "description": "Should the task force re-calculation of colorscape."
           }
         },
         "additionalProperties": false,
@@ -19263,6 +19755,14 @@
             "description": "The type of all the files attached to this series",
             "format": "int32"
           },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
           "sortNameLocked": {
             "type": "boolean"
           },
@@ -19550,10 +20050,27 @@
             "description": "The highest level folder for this Series",
             "nullable": true
           },
+          "lowestFolderPath": {
+            "type": "string",
+            "description": "Lowest path (that is under library root) that contains all files for the series.",
+            "nullable": true
+          },
           "lastFolderScanned": {
             "type": "string",
             "description": "The last time the folder for this series was scanned",
             "format": "date-time"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20943,6 +21460,247 @@
         },
         "additionalProperties": false
       },
+      "UpdateChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "description": "Genres for the Chapter",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Chapter",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Highest Age Rating from all Chapters",
+            "format": "int32"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the content (BCP-47 code)",
+            "nullable": true
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "isbnLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
+          },
+          "sortOrderLocked": {
+            "type": "boolean",
+            "description": "Can the sort order be updated on scan or is it locked from UI"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "Date which chapter was released",
+            "format": "date-time"
+          },
+          "titleName": {
+            "type": "string",
+            "description": "Chapter title",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateDefaultThemeDto": {
         "type": "object",
         "properties": {
@@ -21672,6 +22430,10 @@
             "type": "string",
             "description": "Base Url encoding of the file to upload from (can be null)",
             "nullable": true
+          },
+          "lockCover": {
+            "type": "boolean",
+            "description": "Lock the cover or not"
           }
         },
         "additionalProperties": false
@@ -22136,13 +22898,6 @@
             "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
             "format": "float"
           },
-          "chapters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Chapter"
-            },
-            "nullable": true
-          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -22161,7 +22916,17 @@
           },
           "coverImage": {
             "type": "string",
-            "description": "Absolute path to the (managed) image file",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
             "nullable": true
           },
           "pages": {
@@ -22185,6 +22950,13 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chapter"
+            },
+            "nullable": true
           },
           "series": {
             "$ref": "#/components/schemas/Series"
@@ -22269,630 +23041,22 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "securitySchemes": {
-      "Bearer": {
-        "type": "apiKey",
-        "description": "Please insert JWT with Bearer into field",
-        "name": "Authorization",
-        "in": "header"
-      }
-    }
-  },
-  "security": [
-    {
-      "Bearer": [ ]
-    }
-  ],
-  "tags": [
-    {
-      "name": "Account",
-      "description": "All Account matters"
-    },
-    {
-      "name": "Cbl",
-      "description": "Responsible for the CBL import flow"
-    },
-    {
-      "name": "Collection",
-      "description": "APIs for Collections"
-    },
-    {
-      "name": "Device",
-      "description": "Responsible interacting and creating Devices"
-    },
-    {
-      "name": "Download",
-      "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
-    },
-    {
-      "name": "Filter",
-      "description": "This is responsible for Filter caching"
-    },
-    {
-      "name": "Image",
-      "description": "Responsible for servicing up images stored in Kavita for entities"
-    },
-    {
-      "name": "Panels",
-      "description": "For the Panels app explicitly"
-    },
-    {
-      "name": "Rating",
-      "description": "Responsible for providing external ratings for Series"
-    },
-    {
-      "name": "Reader",
-      "description": "For all things regarding reading, mainly focusing on non-Book related entities"
-    },
-    {
-      "name": "Search",
-      "description": "Responsible for the Search interface from the UI"
-    },
-    {
-      "name": "Stream",
-      "description": "Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)"
-    },
-    {
-      "name": "Tachiyomi",
-      "description": "All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any\r\nother purposes."
-    },
-    {
-      "name": "Upload",
-      "description": ""
-    },
-    {
-      "name": "WantToRead",
-      "description": "Responsible for all things Want To Read"
-    }
-  ]
-}"UserDtoICount": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/UserDto"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserPreferencesDto": {
-        "required": [
-          "autoCloseMenu",
-          "backgroundColor",
-          "blurUnreadSummaries",
-          "bookReaderFontFamily",
-          "bookReaderFontSize",
-          "bookReaderImmersiveMode",
-          "bookReaderLayoutMode",
-          "bookReaderLineSpacing",
-          "bookReaderMargin",
-          "bookReaderReadingDirection",
-          "bookReaderTapToPaginate",
-          "bookReaderThemeName",
-          "bookReaderWritingStyle",
-          "collapseSeriesRelationships",
-          "emulateBook",
-          "globalPageLayoutMode",
-          "layoutMode",
-          "locale",
-          "noTransitions",
-          "pageSplitOption",
-          "pdfLayoutMode",
-          "pdfScrollMode",
-          "pdfSpreadMode",
-          "pdfTheme",
-          "promptForDownloadSize",
-          "readerMode",
-          "readingDirection",
-          "scalingOption",
-          "shareReviews",
-          "showScreenHints",
-          "swipeToPaginate",
-          "theme"
-        ],
-        "type": "object",
-        "properties": {
-          "readingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
-            "format": "int32"
-          },
-          "scalingOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How should the image be scaled to screen",
-            "format": "int32"
-          },
-          "pageSplitOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: Which side of a split image should we show first",
-            "format": "int32"
-          },
-          "readerMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\r\n<example>\r\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\r\nby clicking top/bottom sides of reader.\r\n</example>",
-            "format": "int32"
-          },
-          "layoutMode": {
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "Manga Reader Option: How many pages to display in the reader at once",
-            "format": "int32"
-          },
-          "emulateBook": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
-          },
-          "backgroundColor": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Manga Reader Option: Background color of the reader"
-          },
-          "swipeToPaginate": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Should swiping trigger pagination"
-          },
-          "autoCloseMenu": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
-          },
-          "showScreenHints": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
-          },
-          "bookReaderMargin": {
-            "type": "integer",
-            "description": "Book Reader Option: Override extra Margin",
-            "format": "int32"
-          },
-          "bookReaderLineSpacing": {
-            "type": "integer",
-            "description": "Book Reader Option: Override line-height",
-            "format": "int32"
-          },
-          "bookReaderFontSize": {
-            "type": "integer",
-            "description": "Book Reader Option: Override font size",
-            "format": "int32"
-          },
-          "bookReaderFontFamily": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Book Reader Option: Maps to the default Kavita font-family (inherit) or an override"
-          },
-          "bookReaderTapToPaginate": {
-            "type": "boolean",
-            "description": "Book Reader Option: Allows tapping on side of screens to paginate"
-          },
-          "bookReaderReadingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Book Reader Option: What direction should the next/prev page buttons go",
-            "format": "int32"
-          },
-          "bookReaderWritingStyle": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Book Reader Option: What writing style should be used, horizontal or vertical.",
-            "format": "int32"
-          },
-          "theme": {
-            "$ref": "#/components/schemas/SiteThemeDto"
-          },
-          "bookReaderThemeName": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "bookReaderLayoutMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookReaderImmersiveMode": {
-            "type": "boolean",
-            "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
-          },
-          "globalPageLayoutMode": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Global Site Option: If the UI should layout items as Cards or List items",
-            "format": "int32"
-          },
-          "blurUnreadSummaries": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already"
-          },
-          "promptForDownloadSize": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB."
-          },
-          "noTransitions": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
-          },
-          "collapseSeriesRelationships": {
-            "type": "boolean",
-            "description": "When showing series, only parent series or series with no relationships will be returned"
-          },
-          "shareReviews": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
-          },
-          "locale": {
-            "minLength": 1,
-            "type": "string",
-            "description": "UI Site Global Setting: The language locale that should be used for the user"
-          },
-          "pdfTheme": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Theme of the Reader",
-            "format": "int32"
-          },
-          "pdfScrollMode": {
-            "enum": [
-              0,
-              1,
-              3
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Scroll mode of the reader",
-            "format": "int32"
-          },
-          "pdfLayoutMode": {
-            "enum": [
-              0,
-              2
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Layout Mode of the reader",
-            "format": "int32"
-          },
-          "pdfSpreadMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Spread Mode of the reader",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserReadStatistics": {
-        "type": "object",
-        "properties": {
-          "totalPagesRead": {
-            "type": "integer",
-            "description": "Total number of pages read",
-            "format": "int64"
-          },
-          "totalWordsRead": {
-            "type": "integer",
-            "description": "Total number of words read",
-            "format": "int64"
-          },
-          "timeSpentReading": {
-            "type": "integer",
-            "description": "Total time spent reading based on estimates",
-            "format": "int64"
-          },
-          "chaptersRead": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastActive": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "avgHoursPerWeekSpentReading": {
-            "type": "number",
-            "format": "double"
-          },
-          "percentReadPerLibrary": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SingleStatCount"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserReviewDto": {
-        "type": "object",
-        "properties": {
-          "tagline": {
-            "type": "string",
-            "description": "A tagline for the review",
-            "nullable": true
-          },
-          "body": {
-            "type": "string",
-            "description": "The main review",
-            "nullable": true
-          },
-          "bodyJustText": {
-            "type": "string",
-            "description": "The main body with just text, for review preview",
-            "nullable": true
-          },
-          "seriesId": {
-            "type": "integer",
-            "description": "The series this is for",
-            "format": "int32"
-          },
-          "libraryId": {
-            "type": "integer",
-            "description": "The library this series belongs in",
-            "format": "int32"
-          },
-          "username": {
-            "type": "string",
-            "description": "The user who wrote this",
-            "nullable": true
-          },
-          "totalVotes": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rating": {
-            "type": "number",
-            "format": "float"
-          },
-          "rawBody": {
-            "type": "string",
-            "nullable": true
-          },
-          "score": {
-            "type": "integer",
-            "description": "How many upvotes this review has gotten",
-            "format": "int32"
-          },
-          "siteUrl": {
-            "type": "string",
-            "description": "If External, the url of the review",
-            "nullable": true
-          },
-          "isExternal": {
-            "type": "boolean",
-            "description": "Does this review come from an external Source"
-          },
-          "provider": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "description": "If this review is External, which Provider did it come from",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents a User Review for a given Series"
-      },
-      "Volume": {
-        "required": [
-          "maxNumber",
-          "minNumber",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "description": "A String representation of the volume number. Allows for floats. Can also include a range (1-2).",
-            "nullable": true
-          },
-          "lookupName": {
-            "type": "string",
-            "description": "This is just the original Parsed volume number for lookups",
-            "nullable": true
-          },
-          "number": {
-            "type": "integer",
-            "description": "The minimum number in the Name field in Int form",
-            "format": "int32",
-            "deprecated": true
-          },
-          "minNumber": {
-            "type": "number",
-            "description": "The minimum number in the Name field",
-            "format": "float"
-          },
-          "maxNumber": {
-            "type": "number",
-            "description": "The maximum number in the Name field (same as Minimum if Name isn't a range)",
-            "format": "float"
-          },
-          "chapters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Chapter"
-            },
-            "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "coverImage": {
-            "type": "string",
-            "description": "Absolute path to the (managed) image file",
-            "nullable": true
-          },
-          "pages": {
-            "type": "integer",
-            "description": "Total pages of all chapters in this volume",
-            "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total Word count of all chapters in this volume.",
             "format": "int64"
           },
-          "minHoursToRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "maxHoursToRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "series": {
-            "$ref": "#/components/schemas/Series"
-          },
-          "seriesId": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "VolumeDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "minNumber": {
-            "type": "number",
-            "format": "float"
-          },
-          "maxNumber": {
-            "type": "number",
-            "format": "float"
-          },
-          "name": {
+          "coverImage": {
             "type": "string",
             "nullable": true
           },
-          "number": {
-            "type": "integer",
-            "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
-            "format": "int32",
-            "deprecated": true
-          },
-          "pages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pagesRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lastModifiedUtc": {
+          "primaryColor": {
             "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "created": {
-            "type": "string",
-            "description": "When chapter was created in local server time",
-            "format": "date-time"
-          },
-          "lastModified": {
-            "type": "string",
-            "description": "When chapter was last modified in local server time",
-            "format": "date-time"
-          },
-          "seriesId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ChapterDto"
-            },
             "nullable": true
           },
-          "minHoursToRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "maxHoursToRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22916,10 +23080,6 @@
     {
       "name": "Account",
       "description": "All Account matters"
-    },
-    {
-      "name": "Cbl",
-      "description": "Responsible for the CBL import flow"
     },
     {
       "name": "Collection",

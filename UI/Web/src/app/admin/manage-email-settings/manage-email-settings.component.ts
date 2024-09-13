@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
@@ -9,9 +9,14 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
+import {ManageMediaIssuesComponent} from "../manage-media-issues/manage-media-issues.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {BytesPipe} from "../../_pipes/bytes.pipe";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -20,13 +25,14 @@ import {ManageAlertsComponent} from "../manage-alerts/manage-alerts.component";
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageAlertsComponent, TitleCasePipe, NgbAlert]
+    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
+  private readonly destroyRef = inject(DestroyRef);
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
@@ -46,6 +52,23 @@ export class ManageEmailSettingsComponent implements OnInit {
       this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
       this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
 
+      // Automatically save settings as we edit them
+      this.settingsForm.valueChanges.pipe(
+        distinctUntilChanged(),
+        debounceTime(100),
+        filter(_ => this.settingsForm.valid),
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(_ => {
+          const data = this.packData();
+          return this.settingsService.updateServerSettings(data);
+        }),
+        tap(settings => {
+          this.serverSettings = settings;
+          this.resetForm();
+          this.cdRef.markForCheck();
+        })
+      ).subscribe();
+
       this.cdRef.markForCheck();
     });
   }
@@ -53,15 +76,15 @@ export class ManageEmailSettingsComponent implements OnInit {
   resetForm() {
     this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
 
-    this.settingsForm.addControl('host', new FormControl(this.serverSettings.smtpConfig.host, []));
-    this.settingsForm.addControl('port', new FormControl(this.serverSettings.smtpConfig.port, []));
-    this.settingsForm.addControl('userName', new FormControl(this.serverSettings.smtpConfig.userName, []));
-    this.settingsForm.addControl('enableSsl', new FormControl(this.serverSettings.smtpConfig.enableSsl, []));
-    this.settingsForm.addControl('password', new FormControl(this.serverSettings.smtpConfig.password, []));
-    this.settingsForm.addControl('senderAddress', new FormControl(this.serverSettings.smtpConfig.senderAddress, []));
-    this.settingsForm.addControl('senderDisplayName', new FormControl(this.serverSettings.smtpConfig.senderDisplayName, []));
-    this.settingsForm.addControl('sizeLimit', new FormControl(this.serverSettings.smtpConfig.sizeLimit, [Validators.min(1)]));
-    this.settingsForm.addControl('customizedTemplates', new FormControl(this.serverSettings.smtpConfig.customizedTemplates, [Validators.min(1)]));
+    this.settingsForm.get('host')?.setValue(this.serverSettings.smtpConfig.host, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('port')?.setValue(this.serverSettings.smtpConfig.port, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('userName')?.setValue(this.serverSettings.smtpConfig.userName, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('enableSsl')?.setValue(this.serverSettings.smtpConfig.enableSsl, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('password')?.setValue(this.serverSettings.smtpConfig.password, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('senderAddress')?.setValue(this.serverSettings.smtpConfig.senderAddress, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('senderDisplayName')?.setValue(this.serverSettings.smtpConfig.senderDisplayName, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('sizeLimit')?.setValue(this.serverSettings.smtpConfig.sizeLimit, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('customizedTemplates')?.setValue(this.serverSettings.smtpConfig.customizedTemplates, {onlySelf: true, emitEvent: false});
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
@@ -84,7 +107,7 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  async saveSettings() {
+  packData() {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
     modelSettings.hostName = this.settingsForm.get('hostName')?.value;
@@ -98,6 +121,12 @@ export class ManageEmailSettingsComponent implements OnInit {
     modelSettings.smtpConfig.senderDisplayName = this.settingsForm.get('senderDisplayName')?.value;
     modelSettings.smtpConfig.sizeLimit = this.settingsForm.get('sizeLimit')?.value;
     modelSettings.smtpConfig.customizedTemplates = this.settingsForm.get('customizedTemplates')?.value;
+
+    return modelSettings;
+  }
+
+  async saveSettings() {
+    const modelSettings = this.packData();
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;

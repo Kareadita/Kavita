@@ -1,0 +1,29 @@
+
+
+<ng-container *transloco="let t; read:'nav-header'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('nav-link-header')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" (click)="closeIfOnSettings()" [title]="t('settings')">{{t('settings')}}</a>
+    </div>
+    <div class="mb-3">
+      <a routerLink="/all-filters/">{{t('all-filters')}}</a>
+    </div>
+    <div class="mb-3">
+      <a routerLink="/announcements/">{{t('announcements')}}</a>
+    </div>
+    <div class="mb-3">
+      <a [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
+    </div>
+    <div class="mb-3">
+      <a href="javascript:void(0);" (click)="logout()">{{t('logout')}}</a>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+  </div>
+
+</ng-container>

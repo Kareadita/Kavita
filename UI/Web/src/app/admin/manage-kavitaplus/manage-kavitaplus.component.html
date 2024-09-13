@@ -1,0 +1,7 @@
+<app-license></app-license>
+
+@if (accountService.hasValidLicense$ | async) {
+  <div class="mt-4">
+    <app-kavitaplus-metadata-breakdown-stats></app-kavitaplus-metadata-breakdown-stats>
+  </div>
+}

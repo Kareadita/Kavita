@@ -29,6 +29,7 @@ public interface IDirectoryService
     string LocalizationDirectory { get; }
     string CustomizedTemplateDirectory { get; }
     string TemplateDirectory { get; }
+    string PublisherDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
@@ -88,11 +89,12 @@ public class DirectoryService : IDirectoryService
     public string LocalizationDirectory { get; }
     public string CustomizedTemplateDirectory { get; }
     public string TemplateDirectory { get; }
+    public string PublisherDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
     private static readonly Regex ExcludeDirectories = new Regex(
-        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle",
+        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle|\.yacreaderlibrary",
         MatchOptions,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
@@ -125,6 +127,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(CustomizedTemplateDirectory);
         TemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "EmailTemplates");
         ExistOrCreate(TemplateDirectory);
+        PublisherDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "images", "publishers");
+        ExistOrCreate(PublisherDirectory);
     }
 
     /// <summary>

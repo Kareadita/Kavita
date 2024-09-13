@@ -46,6 +46,7 @@
     --accordion-header-bg-color: grey;
     --br-actionbar-button-hover-border-color: #6c757d;
     --br-actionbar-bg-color: white;
+    --default-state-scrollbar: var(--primary-color-scrollbar);
 }
 
 
@@ -53,6 +54,22 @@ $dark-form-background-no-opacity: rgb(1, 4, 9);
 $primary-color: #0062cc;
 $action-bar-height: 38px;
 
+.reader-container {
+  &::-webkit-scrollbar {
+    background-color: transparent;  /*make scrollbar space invisible */
+    width: inherit;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--default-state-scrollbar); /*makes it invisible when not hovering*/
+  }
+
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--primary-color-scrollbar); /*On hover, it will turn grey*/
+    }
+  }
+}
 
 // Drawer
 .control-container {

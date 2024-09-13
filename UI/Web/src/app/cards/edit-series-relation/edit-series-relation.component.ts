@@ -22,7 +22,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {CommonModule} from "@angular/common";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {WikiLink} from "../../_models/wiki";
 

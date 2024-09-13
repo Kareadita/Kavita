@@ -6,9 +6,9 @@ import { ThemeService } from 'src/app/_services/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {take} from "rxjs/operators";
 
 @Component({
@@ -17,7 +17,7 @@ import {take} from "rxjs/operators";
     styleUrls: ['./confirm-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SplashContainerComponent, NgIf, NgFor, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+  imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
 export class ConfirmEmailComponent implements OnDestroy {
   /**
@@ -28,7 +28,7 @@ export class ConfirmEmailComponent implements OnDestroy {
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required]),
     username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")]),
   });
 
   /**

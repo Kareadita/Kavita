@@ -1,7 +1,81 @@
-<ng-container *ngIf="data !== undefined">
-    <app-card-item [title]="data.name" [actions]="actions" [suppressLibraryLink]="suppressLibraryLink" [imageUrl]="imageUrl" 
-    [entity]="data" [total]="data.pages" [read]="data.pagesRead" (clicked)="handleClick()"
-    [allowSelection]="allowSelection" (selection)="selection.emit(selected)" [selected]="selected"
-    [overlayInformation]="(relation | relationship)"
-    ></app-card-item>
+<ng-container *transloco="let t; read: 'card-item'">
+  <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}">
+    <div class="overlay" (click)="handleClick()">
+      @if (series.pages > 0) {
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-image>
+      } @else if (series.pages === 0) {
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+      }
+
+      <div class="progress-banner">
+        @if (series.pagesRead > 0 && series.pagesRead < series.pages && series.pages > 0 && series.pagesRead !== series.pages) {
+          <p ngbTooltip="{{((series.pagesRead / series.pages) * 100) | number:'1.0-1'}}%">
+            <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
+          </p>
+        }
+
+        <span class="download">
+          <app-download-indicator [download$]="download$"></app-download-indicator>
+        </span>
+      </div>
+
+      @if(series.pages === 0) {
+        <div class="error-banner">
+          {{t('cannot-read')}}
+        </div>
+      }
+
+      @if (series.pagesRead === 0 && series.pages > 0) {
+        <div class="badge-container">
+          <div class="not-read-badge"></div>
+        </div>
+      }
+
+      @if (allowSelection) {
+        <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">
+          <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{series.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
+        </div>
+      }
+
+      @if (count > 1) {
+        <div class="count">
+          <span class="badge bg-primary">{{count}}</span>
+        </div>
+      }
+
+      <div class="card-overlay"></div>
+      <div class="series overlay-information">
+        <div class="overlay-information--centered">
+              <span class="card-title library mx-auto" style="width: auto;" (click)="read($event)">
+                <!-- Card Image -->
+                <div>
+                  <i class="fa-solid fa-book" aria-hidden="true"></i>
+                </div>
+              </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body meta-title" [ngbTooltip]="series.localizedName.length > 34 ? series.localizedName : null">
+      <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+        {{relation ? (relation | relationship) : (series.localizedName | defaultValue)}}
+      </div>
+    </div>
+
+    <div class="card-title-container">
+      <app-series-format [format]="series.format"></app-series-format>
+      <span class="card-title" [ngbTooltip]="series.name" id="{{series.id}}">
+        <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
+          {{series.name}}
+        </a>
+      </span>
+
+      @if (actions && actions.length > 0) {
+        <span class="card-actions">
+            <app-card-actionables (actionHandler)="handleSeriesActionCallback($event, series)" [actions]="actions" [labelBy]="series.name"></app-card-actionables>
+        </span>
+      }
+    </div>
+
+  </div>
+
 </ng-container>

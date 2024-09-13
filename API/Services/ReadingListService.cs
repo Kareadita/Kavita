@@ -48,6 +48,7 @@ public interface IReadingListService
     Task CreateReadingListsFromSeries(Series series, Library library);
 
     Task CreateReadingListsFromSeries(int libraryId, int seriesId);
+    Task<string> GenerateReadingListCoverImage(int readingListId);
 }
 
 /// <summary>
@@ -59,15 +60,20 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
+    private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
+
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 
-    public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger, IEventHub eventHub)
+    public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger,
+        IEventHub eventHub, IImageService imageService, IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
+        _imageService = imageService;
+        _directoryService = directoryService;
     }
 
     public static string FormatTitle(ReadingListItemDto item)
@@ -488,8 +494,12 @@ public class ReadingListService : IReadingListService
 
                 if (!_unitOfWork.HasChanges()) continue;
 
+
+                _imageService.UpdateColorScape(readingList);
                 await CalculateReadingListAgeRating(readingList);
+
                 await _unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
+
                 await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1,
                     user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
                 await _unitOfWork.CommitAsync();
@@ -540,6 +550,7 @@ public class ReadingListService : IReadingListService
             Results = new List<CblBookResult>(),
             SuccessfulInserts = new List<CblBookResult>()
         };
+
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
         // Is there another reading list with the same name?
@@ -632,6 +643,7 @@ public class ReadingListService : IReadingListService
         var allSeriesLocalized = userSeries.ToDictionary(s => s.NormalizedLocalizedName);
 
         var readingListNameNormalized = Parser.Normalize(cblReading.Name);
+
         // Get all the user's reading lists
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
@@ -736,7 +748,10 @@ public class ReadingListService : IReadingListService
         }
 
         // If there are no items, don't create a blank list
-        if (!_unitOfWork.HasChanges() || !readingList.Items.Any()) return importSummary;
+        if (!_unitOfWork.HasChanges() || readingList.Items.Count == 0) return importSummary;
+
+
+        _imageService.UpdateColorScape(readingList);
         await _unitOfWork.CommitAsync();
 
 
@@ -786,5 +801,34 @@ public class ReadingListService : IReadingListService
         var cblReadingList = (CblReadingList) reader.Deserialize(file);
         file.Close();
         return cblReadingList;
+    }
+
+    public async Task<string> GenerateReadingListCoverImage(int readingListId)
+    {
+        // TODO: Currently reading lists are dynamically generated at runtime. This needs to be overhauled to be generated and stored within
+        // the Reading List (and just expire every so often) so we can utilize ColorScapes.
+        // Check if a cover already exists for the reading list
+        // var potentialExistingCoverPath = _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory,
+        //     ImageService.GetReadingListFormat(readingListId));
+        // if (_directoryService.FileSystem.File.Exists(potentialExistingCoverPath))
+        // {
+        //     // Check if we need to update CoverScape
+        //
+        // }
+
+        var covers = await _unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingListId);
+        var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
+            ImageService.GetReadingListFormat(readingListId));
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        destFile += settings.EncodeMediaAs.GetExtension();
+
+        if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
+        ImageService.CreateMergedImage(
+            covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
+            settings.CoverImageSize,
+            destFile);
+        // TODO: Refactor this so that reading lists have a dedicated cover image so we can calculate primary/secondary colors
+
+        return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
 }

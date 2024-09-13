@@ -1,0 +1,73 @@
+<ng-container *transloco="let t; read:'edit-device-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal">
+    <form [formGroup]="settingsForm">
+      <div class="row g-0 mb-2">
+        @if(settingsForm.get('name'); as formControl) {
+          <label for="settings-name" class="form-label">{{t('device-name-label')}}</label>
+          <input id="settings-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
+          @if (formControl.errors; as errors) {
+            @if (errors.required) {
+              <p class="invalid-feedback">
+                {{t('required-field')}}
+              </p>
+            }
+          }
+        }
+      </div>
+
+      <div class="row g-0 mb-2">
+          <label for="email" class="form-label">{{t('email-label')}}
+            <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
+            <ng-template #emailTooltip>{{t('email-tooltip')}}</ng-template>
+              <span class="visually-hidden" id="email-help">
+            <ng-container></ng-container>
+          </span>
+          </label>
+
+          @if (settingsForm.get('email'); as formControl) {
+            <input id="email" aria-describedby="email-help"
+                   class="form-control" formControlName="email" type="email" inputmode="email"
+                   placeholder="id@kindle.com" [class.is-invalid]="formControl.invalid && formControl.touched">
+            @if (formControl.errors; as errors) {
+              @if (errors.required) {
+                <p class="invalid-feedback">{{t('required-field')}}</p>
+              }
+              @if (errors.email) {
+                <p class="invalid-feedback">{{t('valid-email')}}</p>
+              }
+            }
+          }
+      </div>
+
+      <div class="row g-0 mb-2">
+          <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
+          @if(settingsForm.get('platform'); as formControl) {
+            <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"
+                    [class.is-invalid]="formControl.invalid && formControl.touched">
+              @for(platform of devicePlatforms; track platform) {
+                <option [value]="platform">{{platform | devicePlatform}}</option>
+              }
+            </select>
+            @if (formControl.errors; as errors) {
+              @if (errors.required) {
+                <p class="invalid-feedback">{{t('required-field')}}</p>
+              }
+              @if (errors.email) {
+                <p class="invalid-feedback">{{t('valid-email')}}</p>
+              }
+            }
+          }
+
+      </div>
+    </form>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+  </div>
+</ng-container>

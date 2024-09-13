@@ -1,125 +1,158 @@
 <ng-container *transloco="let t; read: 'manage-email-settings'">
-  <div class="container-fluid">
-    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-      <h4 id="email-header">{{t('title')}}</h4>
+  <p>{{t('description')}}</p>
 
-      <p>{{t('setting-description')}}</p>
-      @if (settingsForm.dirty) {
-        <ngb-alert [type]="'warning'">
-          {{t('test-warning')}}
-        </ngb-alert>
+  <form [formGroup]="settingsForm">
+    <p class="alert alert-warning">{{t('setting-description')}}</p>
+
+    @if (settingsForm.dirty) {
+      <div class="alert alert-warning">{{t('test-warning')}}</div>
+    }
+
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('hostName'); as formControl) {
+        <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
+          <ng-template #view>
+            {{formControl.value | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <div class="input-group">
+              <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
+                     [class.is-invalid]="formControl.invalid && formControl.touched">
+              <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
+              <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
+            </div>
+
+            @if(settingsForm.dirty || settingsForm.touched) {
+              <div id="hostname-validations" class="invalid-feedback">
+                @if (formControl.errors?.pattern) {
+                  <div>{{t('host-name-validation')}}</div>
+                }
+              </div>
+            }
+          </ng-template>
+        </app-setting-item>
       }
-      <div class="mb-3 pe-2 ps-2 ">
-        <label for="settings-hostname" class="form-label">{{t('host-name-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
-        <ng-template #hostNameTooltip>{{t('host-name-tooltip')}}</ng-template>
-        <span class="visually-hidden" id="settings-hostname-help">
-          <ng-container [ngTemplateOutlet]="hostNameTooltip"></ng-container>
-        </span>
-        <div class="input-group">
-          <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-                 [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
-          <button class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
-          <button class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
-        </div>
+    </div>
 
-        <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
-          <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
-            {{t('host-name-validation')}}
-          </div>
-        </div>
-      </div>
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('senderAddress'); as formControl) {
+        <app-setting-item [title]="t('sender-address-label')" [subtitle]="t('sender-address-tooltip')">
+          <ng-template #view>
+            {{formControl.value | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
-      <div class="mt-3">
-        <div class="row g-0">
-          <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-sender-address" class="form-label">{{t('sender-address-label')}}</label>
-            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="senderAddressTooltip" role="button" tabindex="0"></i>
-            <ng-template #senderAddressTooltip>{{t('sender-address-tooltip')}}</ng-template>
-            <span class="visually-hidden" id="settings-sender-address-help"><ng-container [ngTemplateOutlet]="senderAddressTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="senderAddress" id="settings-sender-address" />
-          </div>
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('senderDisplayName'); as formControl) {
+        <app-setting-item [title]="t('sender-displayname-label')" [subtitle]="t('sender-displayname-tooltip')">
+          <ng-template #view>
+            {{formControl.value | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('host'); as formControl) {
+        <app-setting-item [title]="t('host-label')" [subtitle]="t('host-tooltip')">
+          <ng-template #view>
+            {{formControl.value | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="text" class="form-control" formControlName="host" id="settings-host" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('port'); as formControl) {
+        <app-setting-item [title]="t('port-label')">
+          <ng-template #view>
+            {{formControl.value | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
-          <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-sender-displayname" class="form-label">{{t('sender-displayname-label')}}</label>
-            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="senderDisplayNameTooltip" role="button" tabindex="0"></i>
-            <ng-template #senderDisplayNameTooltip>{{t('sender-displayname-tooltip')}}</ng-template>
-            <span class="visually-hidden" id="settings-sender-displayname-help"><ng-container [ngTemplateOutlet]="senderDisplayNameTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="senderDisplayName" id="settings-sender-displayname" />
-          </div>
-        </div>
-
-        <div class="row g-0">
-          <div class="col-md-4 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-sender-address" class="form-label">{{t('host-label')}}</label>
-            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="hostTooltip" role="button" tabindex="0"></i>
-            <ng-template #hostTooltip>{{t('host-tooltip')}}</ng-template>
-            <span class="visually-hidden" id="settings-host-help"><ng-container [ngTemplateOutlet]="hostTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="host" id="settings-host" />
-          </div>
-
-          <div class="col-md-4 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-port" class="form-label">{{t('port-label')}}</label>
-            <input type="number" min="1" class="form-control" aria-describedby="email-header" formControlName="port" id="settings-port" />
-          </div>
-
-          <div class="col-md-4 col-sm-12 pe-2 ps-2 mb-2">
-            <div class="form-check form-switch" style="margin-top: 36px">
-              <input type="checkbox" id="settings-enable-ssl" role="switch" formControlName="enableSsl" class="form-check-input"
-                     aria-labelledby="auto-close-label">
-              <label class="form-check-label" for="settings-enable-ssl">{{t('enable-ssl-label')}}</label>
+    <div class="row g-0 mt-2">
+      @if(settingsForm.get('enableSsl'); as formControl) {
+        <app-setting-switch [title]="t('enable-ssl-label')">
+          <ng-template #switch>
+            <div class="form-check form-switch">
+              <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableSsl">
             </div>
-          </div>
-        </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
 
-        <div class="row g-0">
-          <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-username" class="form-label">{{t('username-label')}}</label>
-            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="usernameTooltip" role="button" tabindex="0"></i>
-            <ng-template #usernameTooltip>{{t('username-tooltip')}}</ng-template>
-            <span class="visually-hidden" id="settings-username-help"><ng-container [ngTemplateOutlet]="usernameTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="userName" id="settings-username" />
-          </div>
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('userName'); as formControl) {
+        <app-setting-item [title]="t('username-label')" [subtitle]="t('username-tooltip')">
+          <ng-template #view>
+            {{formControl.value | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="text" class="form-control" formControlName="userName" id="settings-username" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
-          <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-password" class="form-label">{{t('password-label')}}</label>
-            <input type="password" class="form-control" aria-describedby="email-header" formControlName="password" id="settings-password" />
-          </div>
-        </div>
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('password'); as formControl) {
+        <app-setting-item [title]="t('password-label')">
+          <ng-template #view>
+            {{formControl.value ? '********' : null | defaultValue}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="text" class="form-control" formControlName="password" id="settings-password" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
-        <div class="row g-0">
-          <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
-            <label for="settings-size-limit" class="form-label">{{t('size-limit-label')}}</label>
-            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="sizeLimitTooltip" role="button" tabindex="0"></i>
-            <ng-template #sizeLimitTooltip>{{t('size-limit-tooltip')}}</ng-template>
-            <span class="visually-hidden" id="settings-size-limit-help"><ng-container [ngTemplateOutlet]="sizeLimitTooltip"></ng-container></span>
-            <input type="text" class="form-control" aria-describedby="email-header" formControlName="sizeLimit" id="settings-size-limit" />
-          </div>
+    <div class="row g-0 mt-2">
+      @if (settingsForm.get('sizeLimit'); as formControl) {
+        <app-setting-item [title]="t('size-limit-label')" [subtitle]="t('size-limit-tooltip')">
+          <ng-template #view>
+            {{formControl.value | bytes}}
+          </ng-template>
+          <ng-template #edit>
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" />
+          </ng-template>
+        </app-setting-item>
+      }
+    </div>
 
-          <div class="col-md-6 col-sm-12 pe-2 ps-2 mb-2">
-            <div class="form-check form-switch" style="margin-top: 36px">
-              <input type="checkbox" id="settings-customized-templates" role="switch" formControlName="customizedTemplates" class="form-check-input"
-                     aria-labelledby="auto-close-label">
-              <label class="form-check-label" for="settings-customized-templates">{{t('customized-templates-label')}}</label>
-
-              <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="customizedTemplatesTooltip" role="button" tabindex="0"></i>
-              <ng-template #customizedTemplatesTooltip>{{t('customized-templates-tooltip')}}</ng-template>
-              <span class="visually-hidden" id="settings-customized-templates-help"><ng-container [ngTemplateOutlet]="customizedTemplatesTooltip"></ng-container></span>
+    <div class="row g-0 mt-2">
+      @if(settingsForm.get('customizedTemplates'); as formControl) {
+        <app-setting-switch [title]="t('customized-templates-label')" [subtitle]="t('customized-templates-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch">
+              <input id="settings-customized-templates" type="checkbox" class="form-check-input" formControlName="customizedTemplates">
             </div>
-          </div>
-        </div>
-      </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
 
-
-
-      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
-        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="test()">{{t('test')}}</button>
-        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
-        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">{{t('reset')}}</button>
-        <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
-      </div>
-    </form>
-  </div>
+    <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mt-4">
+      <button type="button" class="flex-fill btn btn-secondary me-2" (click)="test()">{{t('test')}}</button>
+      <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
+    </div>
+  </form>
 
 </ng-container>

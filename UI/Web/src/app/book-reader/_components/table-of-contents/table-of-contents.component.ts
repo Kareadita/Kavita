@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { BookChapterItem } from '../../_models/book-chapter-item';
 import { NgIf, NgFor } from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-table-of-contents',

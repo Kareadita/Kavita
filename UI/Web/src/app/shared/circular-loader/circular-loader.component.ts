@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {CommonModule, NgClass, NgStyle} from "@angular/common";
+import {NgClass, NgStyle} from "@angular/common";
 import {NgCircleProgressModule } from "ng-circle-progress";
 
 @Component({

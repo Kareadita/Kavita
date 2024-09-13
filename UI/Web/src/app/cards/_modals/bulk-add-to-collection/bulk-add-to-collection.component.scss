@@ -1,5 +1,5 @@
 .clickable:hover, .clickable:focus {
-    background-color: lightgreen;
+    background-color: var(--list-group-hover-bg-color, --primary-color);
 }
 
 .collection {

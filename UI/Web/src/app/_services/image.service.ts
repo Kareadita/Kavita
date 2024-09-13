@@ -91,6 +91,10 @@ export class ImageService {
     return `${this.baseUrl}image/web-link?url=${encodeURIComponent(url)}&apiKey=${this.encodedKey}`;
   }
 
+  getPublisherImage(name: string) {
+    return `${this.baseUrl}image/publisher?publisherName=${encodeURIComponent(name)}&apiKey=${this.encodedKey}`;
+  }
+
   getCoverUploadImage(filename: string) {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
   }

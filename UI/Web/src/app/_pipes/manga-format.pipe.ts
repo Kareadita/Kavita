@@ -1,6 +1,6 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import { MangaFormat } from '../_models/manga-format';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 /**
  * Returns the string name for the format

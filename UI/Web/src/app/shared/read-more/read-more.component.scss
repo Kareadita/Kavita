@@ -2,3 +2,11 @@
   color: transparent;
   text-shadow: 0 0 5px var(--body-text-color);
 }
+
+.read-more-cont {
+  font-size: 0.8rem;
+
+  div {
+    word-break: break-word;
+  }
+}

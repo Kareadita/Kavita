@@ -1,0 +1,30 @@
+<ng-container *transloco="let t; read: 'customize-dashboard-modal'">
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-pills" orientation="horizontal" style="min-width: 154px;">
+    <li [ngbNavItem]="TabID.Dashboard">
+      <a ngbNavLink>{{t(TabID.Dashboard)}}</a>
+      <ng-template ngbNavContent>
+        <app-customize-dashboard-streams></app-customize-dashboard-streams>
+      </ng-template>
+    </li>
+
+    <li [ngbNavItem]="TabID.SideNav">
+      <a ngbNavLink>{{t(TabID.SideNav)}}</a>
+      <ng-template ngbNavContent>
+        <app-customize-sidenav-streams></app-customize-sidenav-streams>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="TabID.SmartFilters">
+      <a ngbNavLink>{{t(TabID.SmartFilters)}}</a>
+      <ng-template ngbNavContent>
+        <app-manage-smart-filters></app-manage-smart-filters>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="TabID.ExternalSources">
+      <a ngbNavLink>{{t(TabID.ExternalSources)}}</a>
+      <ng-template ngbNavContent>
+        <app-manage-external-sources></app-manage-external-sources>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav" class="tab-content mt-3 mb-3"></div>
+</ng-container>

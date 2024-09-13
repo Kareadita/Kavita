@@ -39,7 +39,7 @@ import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {RouterLink, RouterLinkActive} from "@angular/router";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -134,13 +134,25 @@ export class CardItemComponent implements OnInit {
    */
   @Input() count: number = 0;
   /**
-   * Additional information to show on the overlay area. Will always render.
+   * Show a read button. Emits on (readClicked)
    */
-  @Input() overlayInformation: string = '';
+  @Input() showReadButton: boolean = false;
   /**
    * If overlay is enabled, should the text be centered or not
    */
   @Input() centerOverlay = false;
+  /**
+   * Will generate a button to instantly read
+   */
+  @Input() hasReadButton = false;
+  /**
+   * A method that if defined will return the url
+   */
+  @Input() linkUrl?: string;
+  /**
+   * Show the format of the series
+   */
+  @Input() showFormat: boolean = true;
   /**
    * Event emitted when item is clicked
    */
@@ -149,6 +161,7 @@ export class CardItemComponent implements OnInit {
    * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
+  @Output() readClicked = new EventEmitter<Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter>();
   @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
   /**
    * Library name item belongs to
@@ -229,9 +242,10 @@ export class CardItemComponent implements OnInit {
       const nextDate = (this.entity as NextExpectedChapter);
 
       const tokens = nextDate.title.split(':');
-      this.overlayInformation = `
-              <i class="fa-regular fa-clock mb-2" style="font-size: 26px" aria-hidden="true"></i>
-              <div>${tokens[0]}</div><div>${tokens[1]}</div>`;
+      // this.overlayInformation = `
+      //         <i class="fa-regular fa-clock mb-2" style="font-size: 26px" aria-hidden="true"></i>
+      //         <div>${tokens[0]}</div><div>${tokens[1]}</div>`;
+      // // todo: figure out where this caller is
       this.centerOverlay = true;
 
       if (nextDate.expectedDate) {
@@ -386,5 +400,12 @@ export class CardItemComponent implements OnInit {
     //   if (!a.isAllowed) return true;
     //   return a.isAllowed(a, this.entity);
     // });
+  }
+
+  clickRead(event: any) {
+    event.stopPropagation();
+    if (this.bulkSelectionService.hasSelections()) return;
+
+    this.readClicked.emit(this.entity);
   }
 }

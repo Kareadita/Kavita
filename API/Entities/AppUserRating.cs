@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace API.Entities;
 #nullable enable
 public class AppUserRating
@@ -9,7 +11,7 @@ public class AppUserRating
     /// </summary>
     public float Rating { get; set; }
     /// <summary>
-    /// If the rating has been explicitly set. Otherwise the 0.0 rating should be ignored as it's not rated
+    /// If the rating has been explicitly set. Otherwise, the 0.0 rating should be ignored as it's not rated
     /// </summary>
     public bool HasBeenRated { get; set; }
     /// <summary>
@@ -19,6 +21,7 @@ public class AppUserRating
     /// <summary>
     /// An optional tagline for the review
     /// </summary>
+    [Obsolete("No longer used")]
     public string? Tagline { get; set; }
     public int SeriesId { get; set; }
     public Series Series { get; set; } = null!;

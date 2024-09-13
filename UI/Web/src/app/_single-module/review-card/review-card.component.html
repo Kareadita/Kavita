@@ -1,36 +1,31 @@
 <ng-container *transloco="let t; read:'review-card'">
-  <div class="card clickable mb-3" style="max-width: 320px; max-height: 160px; height: 160px" (click)="showModal()">
+  <div class="card review-card clickable mb-3" (click)="showModal()">
     <div class="row g-0">
-      <div class="col-md-2 d-none d-md-block">
-        <i class="img-fluid rounded-start fa-solid fa-circle-user profile-image" aria-hidden="true"></i>
+      <div class="col-md-2 col-sm-2 col-2 d-block p-2">
         @if (isMyReview) {
-          <div class="my-review">
-            <i class="fa-solid fa-star" aria-hidden="true" [title]="t('your-review')"></i>
-            <span class="visually-hidden">{{t('your-review')}}</span>
-          </div>
+          <i class="d-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
+          <img class="me-2" [ngSrc]="ScrobbleProvider.Kavita | providerImage:true" width="40" height="40" alt="">
+        } @else {
+          <img class="me-2" [ngSrc]="review.provider | providerImage:true" width="40" height="40" alt="">
         }
       </div>
-      <div class="col-md-10">
-        <div class="card-body">
+      <div class="col-md-10 col-sm-10 col-10">
+        <div class="card-body p-2">
+          <!--
           <h6 class="card-title">
             {{review.isExternal ? t('external-review') : t('local-review')}}
-          </h6>
+          </h6>-->
           <p class="card-text no-images">
-            <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
+            <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="150" [showToggle]="false"></app-read-more>
           </p>
         </div>
       </div>
 
-      <div class="card-footer bg-transparent text-muted">
+      <div class="card-footer bg-transparent text-muted p-2">
         <div>
           @if (isMyReview) {
-            <i class="d-md-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
-            <img class="me-2" [ngSrc]="ScrobbleProvider.Kavita | providerImage" width="20" height="20" alt="">
             {{review.username}}
-          } @else {
-            <img class="me-2" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
           }
-
           {{(isMyReview ? '' : review.username | defaultValue:'')}}
         </div>
         @if (review.isExternal){

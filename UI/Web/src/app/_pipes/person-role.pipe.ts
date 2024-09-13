@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import { PersonRole } from '../_models/metadata/person';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'personRole',

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
+import {Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library/library';
@@ -20,7 +20,7 @@ import {AsyncPipe, NgForOf, NgTemplateOutlet} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {DashboardService} from "../../_services/dashboard.service";
@@ -32,7 +32,9 @@ import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-import {ServerService} from "../../_services/server.service";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {ReaderService} from "../../_services/reader.service";
+import {QueryContext} from "../../_models/metadata/v2/query-context";
 
 enum StreamId {
   OnDeck,
@@ -57,7 +59,7 @@ export class DashboardComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly metadataService = inject(MetadataService);
   private readonly recommendationService = inject(RecommendationService);
-  public readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly libraryService = inject(LibraryService);
   private readonly seriesService = inject(SeriesService);
   private readonly router = inject(Router);
@@ -68,11 +70,10 @@ export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
-  private readonly serverService = inject(ServerService);
+  private readonly readerService = inject(ReaderService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
-  isAdmin$: Observable<boolean> = of(false);
 
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
@@ -126,13 +127,6 @@ export class DashboardComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
-
-
-    this.isAdmin$ = this.accountService.currentUser$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map(user => (user && this.accountService.hasAdminRole(user)) || false),
-      shareReplay({bufferSize: 1, refCount: true})
-    );
   }
 
   ngOnInit(): void {
@@ -164,7 +158,7 @@ export class DashboardComponent implements OnInit {
           case StreamType.SmartFilter:
             s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
               switchMap(filter => {
-                return this.seriesService.getAllSeriesV2(0, 20, filter);
+                return this.seriesService.getAllSeriesV2(0, 20, filter, QueryContext.Dashboard);
               }))
                 .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
@@ -208,6 +202,13 @@ export class DashboardComponent implements OnInit {
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
     await this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);
+  }
+
+  async handleRecentlyAddedChapterRead(item: RecentlyAddedItem) {
+    // Get Continue Reading point and open directly
+    this.readerService.getCurrentChapter(item.seriesId).subscribe(chapter => {
+      this.readerService.readChapter(item.libraryId, item.seriesId, chapter, false);
+    });
   }
 
   async handleFilterSectionClick(stream: DashboardStream) {
@@ -257,4 +258,6 @@ export class DashboardComponent implements OnInit {
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
   }
+
+  protected readonly SettingsTabId = SettingsTabId;
 }

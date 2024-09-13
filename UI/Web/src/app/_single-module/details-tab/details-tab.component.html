@@ -1,0 +1,134 @@
+<ng-container *transloco="let t; read: 'details-tab'">
+<div class="details pb-3">
+  <div class="mb-3">
+    <h4 class="header">{{t('genres-title')}}</h4>
+    <app-badge-expander [includeComma]="true" [items]="genres" [itemsTillExpander]="3">
+      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
+      </ng-template>
+    </app-badge-expander>
+  </div>
+
+  <div class="mb-3">
+    <h4 class="header">{{t('tags-title')}}</h4>
+    <app-badge-expander [includeComma]="true" [items]="tags" [itemsTillExpander]="3">
+      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
+      </ng-template>
+    </app-badge-expander>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="webLinks" [title]="t('weblinks-title')">
+      <ng-template #carouselItem let-item>
+        <a class="me-1" [href]="item | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="item">
+          <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(item)"
+                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+        </a>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  @if (genres.length > 0 || tags.length > 0) {
+    <div class="setting-section-break" aria-hidden="true"></div>
+  }
+
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.writers" [title]="t('writers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Writers, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.colorists" [title]="t('colorists-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Colorist, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.editors" [title]="t('editors-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Editor, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.coverArtists" [title]="t('cover-artists-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.CoverArtist, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.inkers" [title]="t('inkers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Inker, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.letterers" [title]="t('letterers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Letterer, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.pencillers" [title]="t('pencillers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Penciller, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.translators" [title]="t('translators-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Translators, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Characters, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.locations" [title]="t('locations-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Location, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.teams" [title]="t('teams-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Team, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.imprints" [title]="t('imprints-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item" (click)="openPerson(FilterField.Imprint, item)"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+</div>
+</ng-container>

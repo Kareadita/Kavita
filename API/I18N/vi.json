@@ -42,5 +42,9 @@
     "no-user": "Ngươi dùng không tồn tại",
     "user-already-confirmed": "Người dùng này đã xác minh",
     "generic-user-update": "Có sự cố đã xảy ra khi cập nhật thông tin người dùng",
-    "user-already-invited": "Người dùng đã được mời qua email này nhưng chưa chấp nhận lời mời."
+    "user-already-invited": "Người dùng đã được mời qua email này nhưng chưa chấp nhận lời mời.",
+    "generate-token": "Đã xảy ra sự cố khi tạo mã xác nhận email. Xem bản ghi",
+    "locked-out": "Bạn đã bị khóa do quá nhiều lần thử đăng nhập. Vui lòng chờ 10 phút.",
+    "unable-to-reset-key": "Có sự cố xảy ra, không thể đặt lại khóa",
+    "share-multiple-emails": "Một Email không thể được dùng chung cho nhiều tải khoản"
 }

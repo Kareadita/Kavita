@@ -23,6 +23,7 @@ using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers;
 
@@ -164,8 +165,6 @@ public class SettingsController : BaseApiController
 
         foreach (var setting in currentSettings)
         {
-            UpdateSchedulingSettings(setting, updateSettingsDto);
-
             if (setting.Key == ServerSettingKey.OnDeckProgressDays &&
                 updateSettingsDto.OnDeckProgressDays + string.Empty != setting.Value)
             {
@@ -204,6 +203,8 @@ public class SettingsController : BaseApiController
                 Configuration.CacheSize = updateSettingsDto.CacheSize;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
+
+            UpdateSchedulingSettings(setting, updateSettingsDto);
 
             UpdateEmailSettings(setting, updateSettingsDto);
 
@@ -293,14 +294,6 @@ public class SettingsController : BaseApiController
             {
                 setting.Value = updateSettingsDto.AllowStatCollection + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
-                if (!updateSettingsDto.AllowStatCollection)
-                {
-                    _taskScheduler.CancelStatsTasks();
-                }
-                else
-                {
-                    await _taskScheduler.ScheduleStatsTasks();
-                }
             }
 
             if (setting.Key == ServerSettingKey.TotalBackups &&
@@ -341,20 +334,27 @@ public class SettingsController : BaseApiController
         {
             await _unitOfWork.CommitAsync();
 
+            if (!updateSettingsDto.AllowStatCollection)
+            {
+                _taskScheduler.CancelStatsTasks();
+            }
+            else
+            {
+                await _taskScheduler.ScheduleStatsTasks();
+            }
+
             if (updateBookmarks)
             {
-                _directoryService.ExistOrCreate(bookmarkDirectory);
-                _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
-                _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
+                BackgroundJob.Enqueue(() => UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory));
             }
 
             if (updateSettingsDto.EnableFolderWatching)
             {
-                await _libraryWatcher.StartWatching();
+                BackgroundJob.Enqueue(() => _libraryWatcher.StartWatching());
             }
             else
             {
-                _libraryWatcher.StopWatching();
+                BackgroundJob.Enqueue(() => _libraryWatcher.StopWatching());
             }
         }
         catch (Exception ex)
@@ -366,8 +366,16 @@ public class SettingsController : BaseApiController
 
 
         _logger.LogInformation("Server Settings updated");
-        await _taskScheduler.ScheduleTasks();
+        BackgroundJob.Enqueue(() => _taskScheduler.ScheduleTasks());
+
         return Ok(updateSettingsDto);
+    }
+
+    private void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
+    {
+        _directoryService.ExistOrCreate(bookmarkDirectory);
+        _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
+        _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
     }
 
     private void UpdateSchedulingSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
