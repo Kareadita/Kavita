@@ -63,7 +63,10 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
 
     public MangaFileBuilder WithHash()
     {
-        _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
+        if (_mangaFile.Format == MangaFormat.Epub)
+        {
+            _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
+        }
         return this;
     }
 }
