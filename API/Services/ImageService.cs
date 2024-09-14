@@ -579,45 +579,145 @@ public class ImageService : IImageService
         return lightness is > WhiteThreshold or < BlackThreshold;
     }
 
-    private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
-    {
-        var random = new Random();
-        var centroids = points.OrderBy(x => random.Next()).Take(k).ToList();
+    public static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
+	{
+		// Initialize centroids using k-means++ for better starting positions
+		var centroids = InitializeCentroidsKMeansPlusPlus(points, k);
 
-        for (var i = 0; i < maxIterations; i++)
-        {
-            var clusters = new List<Vector3>[k];
-            for (var j = 0; j < k; j++)
-            {
-                clusters[j] = [];
-            }
+		var assignments = new int[points.Count];
+		var clusters = new List<int>[k];
+		for (int i = 0; i < k; i++)
+		{
+			clusters[i] = new List<int>();
+		}
 
-            foreach (var point in points)
-            {
-                var nearestCentroidIndex = centroids
-                    .Select((centroid, index) => new { Index = index, Distance = Vector3.DistanceSquared(centroid, point) })
-                    .OrderBy(x => x.Distance)
-                    .First().Index;
-                clusters[nearestCentroidIndex].Add(point);
-            }
+		for (var iteration = 0; iteration < maxIterations; iteration++)
+		{
+			bool centroidsChanged = false;
 
-            var newCentroids = clusters.Select(cluster =>
-                cluster.Count != 0 ? new Vector3(
-                    cluster.Average(p => p.X),
-                    cluster.Average(p => p.Y),
-                    cluster.Average(p => p.Z)
-                ) : Vector3.Zero
-            ).ToList();
+			foreach (var cluster in clusters)
+			{
+				cluster.Clear();
+			}
 
-            if (centroids.SequenceEqual(newCentroids))
-                break;
+			// Assign points to the nearest centroid
+			Parallel.For(0, points.Count, i =>
+			{
+				var point = points[i];
+				int nearestCentroidIndex = 0;
+				float minDistanceSquared = float.MaxValue;
 
-            centroids = newCentroids;
-        }
+				for (int c = 0; c < k; c++)
+				{
+					var centroid = centroids[c];
+					float dx = point.X - centroid.X;
+					float dy = point.Y - centroid.Y;
+					float dz = point.Z - centroid.Z;
+					float distanceSquared = dx * dx + dy * dy + dz * dz;
 
-        return centroids;
-    }
+					if (distanceSquared < minDistanceSquared)
+					{
+						minDistanceSquared = distanceSquared;
+						nearestCentroidIndex = c;
+					}
+				}
 
+				assignments[i] = nearestCentroidIndex;
+			});
+
+			// Build clusters
+			for (int i = 0; i < points.Count; i++)
+			{
+				clusters[assignments[i]].Add(i);
+			}
+
+			// Update centroids
+			for (int c = 0; c < k; c++)
+			{
+				var cluster = clusters[c];
+				if (cluster.Count == 0)
+					continue;
+
+				float sumX = 0, sumY = 0, sumZ = 0;
+				foreach (var index in cluster)
+				{
+					var point = points[index];
+					sumX += point.X;
+					sumY += point.Y;
+					sumZ += point.Z;
+				}
+
+				var count = cluster.Count;
+				var newCentroid = new Vector3(sumX / count, sumY / count, sumZ / count);
+
+				// Check if centroids have changed significantly
+				if (!IsCentroidConverged(centroids[c], newCentroid))
+				{
+					centroidsChanged = true;
+					centroids[c] = newCentroid;
+				}
+			}
+
+			if (!centroidsChanged)
+				break;
+		}
+
+		return centroids;
+	}
+	// K-means++ initialization for better starting centroids
+	private static List<Vector3> InitializeCentroidsKMeansPlusPlus(List<Vector3> points, int k)
+	{
+		var random = new Random();
+		var centroids = new List<Vector3> { points[random.Next(points.Count)] };
+		var distances = new float[points.Count];
+
+		for (int i = 1; i < k; i++)
+		{
+			float totalDistance = 0;
+			for (int p = 0; p < points.Count; p++)
+			{
+				var point = points[p];
+				var minDistance = float.MaxValue;
+
+				foreach (var centroid in centroids)
+				{
+					var dx = point.X - centroid.X;
+					var dy = point.Y - centroid.Y;
+					var dz = point.Z - centroid.Z;
+					var distanceSquared = dx * dx + dy * dy + dz * dz;
+
+					if (distanceSquared < minDistance)
+					{
+						minDistance = distanceSquared;
+					}
+				}
+				distances[p] = minDistance;
+				totalDistance += minDistance;
+			}
+
+			var targetDistance = random.NextDouble() * totalDistance;
+			totalDistance = 0;
+
+			for (int p = 0; p < points.Count; p++)
+			{
+				totalDistance += distances[p];
+				if (totalDistance >= targetDistance)
+				{
+					centroids.Add(points[p]);
+					break;
+				}
+			}
+		}
+
+		return centroids;
+	}
+
+	// Helper method to check centroid convergence with a tolerance
+	private static bool IsCentroidConverged(Vector3 oldCentroid, Vector3 newCentroid, float tolerance = 0.0001f)
+	{
+		return Vector3.DistanceSquared(oldCentroid, newCentroid) <= tolerance * tolerance;
+	}
+	
     public static List<Vector3> SortByBrightness(List<Vector3> colors)
     {
         return colors.OrderBy(c => 0.299 * c.X + 0.587 * c.Y + 0.114 * c.Z).ToList();
