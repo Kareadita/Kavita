@@ -73,21 +73,21 @@
 
 
     <div class="card-title-container">
-        <span class="card-title" id="{{chapter.id}}" tabindex="0" [ngbTooltip]="chapter.isSpecial ? (chapter.title || chapter.range) : null">
-          <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{chapter.id}}">
-            @if (chapter.isSpecial) {
-             {{chapter.title || chapter.range}}
-            } @else {
-              <app-entity-title [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
-            }
-          </a>
-        </span>
+      <span class="card-title" id="{{chapter.id}}" tabindex="0" [ngbTooltip]="chapter.isSpecial ? (chapter.title || chapter.range) : null">
+        <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{chapter.id}}">
+          @if (chapter.isSpecial) {
+           {{chapter.title || chapter.range}}
+          } @else {
+            <app-entity-title [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
+          }
+        </a>
+      </span>
 
-        @if (actions && actions.length > 0) {
-          <span class="card-actions float-end">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="chapter.titleName"></app-card-actionables>
-          </span>
-        }
+      @if (actions && actions.length > 0) {
+        <span class="card-actions">
+          <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="chapter.titleName"></app-card-actionables>
+        </span>
+      }
     </div>
 
   </div>

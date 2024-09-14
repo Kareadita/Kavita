@@ -1,20 +1,19 @@
 <ng-container *transloco="let t; read: 'all-filters'">
-  <app-side-nav-companion-bar [hasFilter]="false">
-    <h2 title>
-      {{t('title')}}
-    </h2>
-    <div subtitle>
-      <h6>
-        <span>{{t('count', {count: filters.length | number})}}</span>
-        <a class="ms-2" href="/all-series?name=New%20Filter">{{t('create')}}</a>
-      </h6>
+  <div class="main-container">
+    <app-side-nav-companion-bar [hasFilter]="false">
+      <h4 title>
+        {{t('title')}}
+      </h4>
+      <div subtitle>
+        <h6>
+          <span>{{t('count', {count: filters.length | number})}}</span>
+          <a class="ms-2" href="/all-series?name=New%20Filter">{{t('create')}}</a>
+        </h6>
 
-    </div>
+      </div>
 
-  </app-side-nav-companion-bar>
+    </app-side-nav-companion-bar>
 
-  <app-manage-smart-filters></app-manage-smart-filters>
-
-
-
+    <app-manage-smart-filters></app-manage-smart-filters>
+  </div>
 </ng-container>

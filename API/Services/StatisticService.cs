@@ -69,7 +69,8 @@ public class StatisticService : IStatisticService
         var totalPagesRead = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Where(p => libraryIds.Contains(p.LibraryId))
-            .SumAsync(p => p.PagesRead);
+            .Select(p => (int?) p.PagesRead)
+            .SumAsync() ?? 0;
 
         var timeSpentReading = await TimeSpentReadingForUsersAsync(new List<int>() {userId}, libraryIds);
 

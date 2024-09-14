@@ -161,6 +161,7 @@ export class ActionFactoryService {
 
   isAdmin = false;
 
+
   constructor(private accountService: AccountService, private deviceService: DeviceService) {
     this.accountService.currentUser$.subscribe((user) => {
       if (user) {

@@ -6,7 +6,7 @@ import { ThemeService } from 'src/app/_services/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {take} from "rxjs/operators";
@@ -17,7 +17,7 @@ import {take} from "rxjs/operators";
     styleUrls: ['./confirm-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SplashContainerComponent, NgIf, NgFor, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+  imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
 export class ConfirmEmailComponent implements OnDestroy {
   /**
