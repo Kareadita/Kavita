@@ -5,13 +5,13 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class BookHash : Migration
+    public partial class KoreaderHash : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Hash",
+                name: "KoreaderHash",
                 table: "MangaFile",
                 type: "TEXT",
                 nullable: true);
@@ -21,7 +21,7 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Hash",
+                name: "KoreaderHash",
                 table: "MangaFile");
         }
     }
