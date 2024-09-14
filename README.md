@@ -1,8 +1,7 @@
 ﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
-![new_github_preview_stills](https://user-images.githubusercontent.com/735851/169657008-37812c18-5490-4e2a-9dcb-4806f8c87c69.gif)
-![new_github_preview_stills](https://github.com/user-attachments/assets/056932db-9b8e-416d-8b45-341f9a1dab37)
+![new_github_preview_stills](https://github.com/user-attachments/assets/f016b34f-3c4c-4f07-8e72-12cd6f4e71ea)
 
 Kavita is a fast, feature rich, cross-platform reading server. Built with a focus for being a full solution for all your reading needs. Set up your own server and share
 your reading collection with your friends and family!
