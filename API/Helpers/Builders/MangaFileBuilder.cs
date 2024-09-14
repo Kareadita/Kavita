@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using API.Entities;
 using API.Entities.Enums;
@@ -20,7 +20,7 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
             Pages = pages,
             LastModified = File.GetLastWriteTime(filePath),
             LastModifiedUtc = File.GetLastWriteTimeUtc(filePath),
-            FileName = Parser.RemoveExtensionIfSupported(filePath)
+            FileName = Parser.RemoveExtensionIfSupported(filePath),
         };
     }
 
@@ -58,6 +58,15 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
     public MangaFileBuilder WithId(int id)
     {
         _mangaFile.Id = Math.Max(id, 0);
+        return this;
+    }
+
+    public MangaFileBuilder WithHash()
+    {
+        if (_mangaFile.Format == MangaFormat.Epub)
+        {
+            _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
+        }
         return this;
     }
 }

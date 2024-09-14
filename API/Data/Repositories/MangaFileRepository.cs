@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
@@ -10,6 +11,7 @@ public interface IMangaFileRepository
 {
     void Update(MangaFile file);
     Task<IList<MangaFile>> GetAllWithMissingExtension();
+    Task<MangaFile> GetByKoreaderHash(string hash);
 }
 
 public class MangaFileRepository : IMangaFileRepository
@@ -31,5 +33,11 @@ public class MangaFileRepository : IMangaFileRepository
         return await _context.MangaFile
             .Where(f => string.IsNullOrEmpty(f.Extension))
             .ToListAsync();
+    }
+
+    public Task<MangaFile> GetByKoreaderHash(string hash)
+    {
+        return _context.MangaFile
+            .FirstOrDefaultAsync(f => f.KoreaderHash == hash.ToUpper());
     }
 }
