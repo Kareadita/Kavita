@@ -740,7 +740,8 @@
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Register"
+        "register": "Register",
+        "error-label": "Error:"
     },
 
     "confirm-email-change": {
