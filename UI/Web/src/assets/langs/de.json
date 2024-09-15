@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Speichern…",
-        "update": "Aktualisierung"
+        "update": "Aktualisierung",
+        "account-detail-title": "Konto Details"
     },
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
@@ -188,12 +189,13 @@
         "upload-continued": "eine CSS Datei",
         "description": "Kavita ist in meinen Farben erhältlich. Finde ein Farbschema, das deinen Bedürfnissen entspricht, oder erstellen selbst eines und teile dieses. Die Themen können für dein Konto oder für alle Konten angewendet werden.",
         "preview-default": "Wähle zunächst ein Theme aus",
-        "default-theme": "Standard-Schema",
+        "default-theme": "Standard",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "delete": "{{common.delete}}",
         "download": "{{changelog.donload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Heruntergeladen"
     },
     "theme": {
         "theme-dark": "dunkel",
