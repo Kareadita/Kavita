@@ -182,6 +182,12 @@ $image-width: 160px;
   padding: 0 5px;
 }
 
+.meta-title {
+  .card-title {
+    max-width: unset;
+  }
+}
+
 .card-title {
   font-size: 0.8rem;
   margin: 0;
