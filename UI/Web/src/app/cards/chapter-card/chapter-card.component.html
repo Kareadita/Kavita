@@ -73,6 +73,8 @@
 
 
     <div class="card-title-container">
+      <span class="card-format">
+      </span>
       <span class="card-title" id="{{chapter.id}}" tabindex="0" [ngbTooltip]="chapter.isSpecial ? (chapter.title || chapter.range) : null">
         <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/chapter/{{chapter.id}}">
           @if (chapter.isSpecial) {
@@ -82,12 +84,11 @@
           }
         </a>
       </span>
-
+      <span class="card-actions">
       @if (actions && actions.length > 0) {
-        <span class="card-actions">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="chapter.titleName"></app-card-actionables>
-        </span>
       }
+    </span>
     </div>
 
   </div>
