@@ -1,14 +1,14 @@
 {
     "login": {
-        "title": "Přihlásit se",
+        "title": "Přihlaste se ke svému účtu",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Zapomenuté heslo?",
-        "submit": "{{common.submit}}"
+        "submit": "Přihlásit se"
     },
     "dashboard": {
-        "no-libraries": "Zatím nejsou nastaveny žádné knihovny. Nakonfigurujte některé v",
+        "no-libraries": "Zatím nejsou nastaveny žádné knihovny. Vytvořte některé v",
         "server-settings-link": "Nastavení serveru",
         "not-granted": "Nebyl vám udělen přístup k žádným knihovnám.",
         "on-deck-title": "Na palubě",
@@ -25,12 +25,13 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Ukládání…",
-        "update": "Aktualizace"
+        "update": "Aktualizace",
+        "account-detail-title": "Detaily účtu"
     },
     "user-scrobble-history": {
         "title": "Scrobble historie",
         "description": "Zde najdete všechny scrobble události spojené s vaším účtem. Aby události existovaly, musíte mít nakonfigurovaného aktivního poskytovatele scrobble. Všechny události, které byly zpracovány, budou po měsíci vymazány. Pokud existují nezpracované události, je pravděpodobné, že nemohou tvořit shody proti proudu. Obraťte se prosím na svého administrátora a nechte je opravit.",
-        "filter-label": "Filtr",
+        "filter-label": "{{common.filter}}",
         "created-header": "Vytvořeno",
         "last-modified-header": "Naposledy změněno",
         "type-header": "Typ",
@@ -42,7 +43,10 @@
         "rating": "Hodnocení {{r}}",
         "not-applicable": "Nelze použít",
         "processed": "Zpracováno",
-        "not-processed": "Nezpracováno"
+        "not-processed": "Nezpracováno",
+        "special": "{{entity-title.special}}",
+        "volume-num": "Svazek {{num}}",
+        "chapter-num": "Kapitola {{num}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Pokrok ve čtení",
@@ -60,7 +64,8 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "Recenze musí mít alespoň {{count}} znaků",
-        "required": "{{ověření.požadovaného-pole}}"
+        "required": "{{ověření.požadovaného-pole}}",
+        "delete": "{{common.delete}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -83,12 +88,12 @@
     "user-preferences": {
         "title": "Uživatelský panel",
         "pref-description": "Toto jsou globální nastavení, která jsou vázána na váš účet.",
-        "account-tab": "Účet",
-        "preferences-tab": "Předvolby",
-        "theme-tab": "Téma",
-        "devices-tab": "Zařízení",
-        "stats-tab": "Statistiky",
-        "scrobbling-tab": "Scrobbling",
+        "account-tab": "{{tabs.account-tab}}",
+        "preferences-tab": "{{tabs.preferences-tab}}",
+        "theme-tab": "{{tabs.theme-tab}}",
+        "devices-tab": "{{tabs.devices-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "success-toast": "Uživatelské předvolby byly aktualizovány",
         "global-settings-title": "Globální nastavení",
         "page-layout-mode-label": "Režim rozvržení stránky",
@@ -146,7 +151,11 @@
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "smart-filters-tab": "Chytré filtry"
+        "smart-filters-tab": "{{tabs.smart-filters-tab}}",
+        "reading-mode-tooltip": "Změna stránkování na vertikální, horizontální nebo nekonečné posunování",
+        "background-color-tooltip": "Barva pozadí čtečky obrázků",
+        "auto-close-menu-tooltip": "Mělo by se menu automaticky zavřít",
+        "show-screen-hints-tooltip": "Zobrazení překryvného okna pro lepší orientaci v oblasti a směru stránkování"
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -553,7 +562,6 @@
         "bookmark-label": "Název záložky"
     },
     "confirm-email": {
-        "error-label": "Chyby: ",
         "username-label": "{{common.uživatelské-jméno}}",
         "register": "Registrace",
         "title": "Registrace",

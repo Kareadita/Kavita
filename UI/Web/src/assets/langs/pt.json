@@ -4,13 +4,13 @@
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "Esqueceu a Password?",
-        "submit": "Iniciar sessão"
+        "forgot-password": "Esqueceu a senha?",
+        "submit": "Fazer login"
     },
     "dashboard": {
         "no-libraries": "Não existem bibliotecas configuradas. Crie algumas em",
-        "server-settings-link": "Definições do servidor",
-        "not-granted": "Não lhe foi atribuído acesso a nenhuma biblioteca.",
+        "server-settings-link": "Configurações do servidor",
+        "not-granted": "Você não recebeu acesso a nenhuma biblioteca.",
         "on-deck-title": "Leituras em Curso",
         "recently-updated-title": "Séries Atualizadas Recentemente",
         "recently-added-title": "Séries Adicionadas Recentemente",
@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "A Guardar…",
-        "update": "Atualizar"
+        "update": "Atualizar",
+        "account-detail-title": "Detalhes da Conta"
     },
     "user-scrobble-history": {
         "title": "Histórico de Scrobble",
@@ -46,7 +47,7 @@
         "volume-num": "Volume {{num}}",
         "chapter-num": "Capítulo {{num}}",
         "special": "{{entity-title.special}}",
-        "not-read-warning": "Os providers the upstream manterão o número maior"
+        "not-read-warning": "Os provedores de upstream sempre manterão o maior número"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Leitura Efetuada",
@@ -182,7 +183,7 @@
         "applied": "Aplicado",
         "updated-toastr": "O tema por defeito do site foi atualizado para {{name}}",
         "scan-queued": "Foi agendado um scan the temas do site",
-        "default-theme": "Tema por defeito",
+        "default-theme": "Defeito",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "preview-default": "Selecione um tema primeiro",
         "preview-default-admin": "Selecione um tema primeiro ou carregue um manualmente",
@@ -193,7 +194,9 @@
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "um ficheiro css",
         "preview-title": "Pré-visualizar",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Descarregado",
+        "downloadable": "Descarregável"
     },
     "theme": {
         "theme-dark": "Escuro",
@@ -226,7 +229,8 @@
         "edit": "{{common.edit}}",
         "email-setup-alert": "Deseja enviar ficheiros para os seus dispositivos? Peça ao administrador para primeiro configurar o Email!",
         "name-label": "Nome",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -582,7 +586,7 @@
         "activate-discordId-tooltip": "Associe a sua conta Discord com o Kavita+. Isto irá dar-lhe acesso a canais privados que são usados para definir os desenvolvimentos futuros do Kavita.",
         "discord-validation": "Este User Id do Discord não é válido. O seu user id não é o mesmo que o seu nome no Discord.",
         "activate-reset": "{{common.reset}}",
-        "activate-reset-tooltip": "Invalidar um registo anterior que usa a sua licença. Requer a Licença e o Email",
+        "activate-reset-tooltip": "Invalide um registro anterior usando sua licença. Requer licença e e-mail",
         "kavita+-requirement": "O Kavita+ funciona apenas com a última versão e as 2 versões anteriores. Qualquer outra versão poderá não funcionar.",
         "kavita+-desc-part-1": "O Kavita+ é um serviço de subscrição premium que desbloqueia funcionalidades para todos os utilizadores desta instância do Kavita. Compre uma subscrição para desbloquear ",
         "kavita+-desc-part-2": "benefícios premium",
@@ -630,7 +634,6 @@
     "confirm-email": {
         "title": "Registar",
         "description": "Complete o formulário para terminar o seu registo",
-        "error-label": "Erros: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
@@ -1119,7 +1122,10 @@
         "custom": "Personalizado",
         "daily": "Diário",
         "weekly": "Semanal",
-        "convert-media-task-success": "A Conversão de Ficheiros para Codificação Destino foi colocada em fila"
+        "convert-media-task-success": "A Conversão de Ficheiros para Codificação Destino foi colocada em fila",
+        "sync-themes-success": "A sincronização de temas foi colocada em fila de espera",
+        "sync-themes-task": "Sincronizar Temas",
+        "sync-themes-task-desc": "Sincronizar temas descarregados com alterações upstream se a versão corresponder."
     },
     "manage-users": {
         "title": "Utilizadores Ativos",
@@ -1191,7 +1197,8 @@
         "title-alt": "Kavita - Coleção {{collectionName}}",
         "series-header": "Séries",
         "last-sync": "Última Sincronização: {{date}}",
-        "sync-progress": "Série Colecionada: {{title}}"
+        "sync-progress": "Série Colecionada: {{title}}",
+        "item-count": "{{common.item-count}}"
     },
     "all-collections": {
         "title": "Coleções",
@@ -1815,7 +1822,7 @@
     "validation": {
         "required-field": "Este campo é obrigatório",
         "valid-email": "Este deve ser um email válido",
-        "password-validation": "A palavra passe tem de ter entre 6 a 32 caracteres",
+        "password-validation": "A palavra passe tem de ter entre 6 a 256 caracteres",
         "year-validation": "O ano tem de ser um valor válido maior que 1000 e com 4 caracteres"
     },
     "entity-type": {
@@ -1928,7 +1935,8 @@
     "metadata-filter-row": {
         "unit-reading-progress": "Percentagem",
         "unit-reading-date": "Data",
-        "unit-average-rating": "Classificação Média (Kavita+) - apenas para séries em cache"
+        "unit-average-rating": "Kavita+ notação externa, percentagem",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -2020,7 +2028,8 @@
         "is-before": "Antes de",
         "equal": "Igual a",
         "does-not-contain": "Não contém",
-        "is-after": "Depois de"
+        "is-after": "Depois de",
+        "is-empty": "Está vazio"
     },
     "manage-smart-filters": {
         "no-data": "Não foram criados Filtros Inteligentes",
@@ -2250,7 +2259,7 @@
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "pages-label": "{{edit-chapter-modal.pages-count}}",
         "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "links-label": "{{series-metadata-detail.links-label}}",
         "range-hours": "{{value}} {{hourWord}}"
@@ -2308,7 +2317,8 @@
         "age-rating-title": "Classificação etária",
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
-        "inkers-title": "Arte-finalistas"
+        "inkers-title": "Arte-finalistas",
+        "links-title": "Ligações Web"
     },
     "download-button": {
         "download-tooltip": "Descarregar",
