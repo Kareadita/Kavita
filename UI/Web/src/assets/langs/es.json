@@ -371,7 +371,8 @@
         "email-label": "Correo electrónico",
         "email-setup-alert": "¿Quieres enviar archivos a tus dispositivos? ¡Pídele a tu administrador que configure primero el correo electrónico!",
         "no-data": "{{typeahead.no-data}}",
-        "name-label": "Nombre"
+        "name-label": "Nombre",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "restriction-selector": {
         "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
@@ -921,7 +922,6 @@
     "confirm-email": {
         "title": "Registrar",
         "description": "Completa el formulario para completar tu registro",
-        "error-label": "Errores: ",
         "email-label": "{{common.email}}",
         "valid-email": "{{common.valid-email}}",
         "required-field": "{{common.required-field}}",

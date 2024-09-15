@@ -25,7 +25,8 @@
         "not-valid-email": "验证邮箱",
         "cancel": "{{common.cancel}}",
         "saving": "保存…",
-        "update": "更新"
+        "update": "更新",
+        "account-detail-title": "帐户详细信息"
     },
     "user-scrobble-history": {
         "title": "Scrobble历史",
@@ -183,7 +184,7 @@
         "updated-toastr": "网站默认值已更新为{{name}}",
         "scan-queued": "网站主题扫描已进入队列",
         "description": "Kavita 采用我的颜色，找到一种满足您需求的配色方案，或者自己构建一个配色方案并分享。 主题可以应用于您的帐户或应用于所有帐户。",
-        "default-theme": "默认主题",
+        "default-theme": "默认",
         "download": "{{changelog.download}}",
         "active-theme": "活动",
         "upload": "{{cover-image-chooser.upload}}",
@@ -193,7 +194,9 @@
         "preview-default-admin": "首先选择主题或手动上传主题",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "preview-title": "预览",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "已下载",
+        "downloadable": "可下载"
     },
     "theme": {
         "theme-dark": "黑暗",
@@ -226,7 +229,8 @@
         "edit": "编辑",
         "email-setup-alert": "想要将文件发送到您的设备？请先让您的管理员设置电子邮件设置！",
         "no-data": "{{typeahead.no-data}}",
-        "name-label": "名称"
+        "name-label": "名称",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "密码",
@@ -630,7 +634,6 @@
     "confirm-email": {
         "title": "注册",
         "description": "请完善表格以完成注册程序",
-        "error-label": "错误： ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
@@ -1119,7 +1122,10 @@
         "cleanup-tooltip": "Kavita 运行清理任务的频率。这可能很繁重，在大多数情况下应该在午夜执行",
         "daily": "每日",
         "weekly": "每周",
-        "convert-media-task-success": "媒体到目标编码的转换已排队"
+        "convert-media-task-success": "媒体到目标编码的转换已排队",
+        "sync-themes-task": "同步主题",
+        "sync-themes-task-desc": "如果版本匹配，则将下载的主题与上游更改同步。",
+        "sync-themes-success": "主题同步已排队"
     },
     "manage-users": {
         "title": "活跃用户",
@@ -1191,7 +1197,8 @@
         "title-alt": "Kavita - {{collectionName}} 收藏",
         "series-header": "系列",
         "sync-progress": "系列收藏：{{title}}",
-        "last-sync": "上次同步：{{date}}"
+        "last-sync": "上次同步：{{date}}",
+        "item-count": "{{common.item-count}}"
     },
     "all-collections": {
         "title": "收藏",
@@ -1815,7 +1822,7 @@
     "validation": {
         "required-field": "必填项",
         "valid-email": "必须输入有效的电子邮件地址",
-        "password-validation": "密码长度必须在6到32个字符之间",
+        "password-validation": "密码长度必须介于 6 到 256 个字符之间",
         "year-validation": "这必须是大于 1000 且长度为 4 个字符的有效年份"
     },
     "entity-type": {
@@ -1927,7 +1934,8 @@
         "is-in-last": "在最近",
         "is-not-in-last": "不在最近",
         "does-not-contain": "不包含",
-        "must-contains": "必须包含"
+        "must-contains": "必须包含",
+        "is-empty": "为空"
     },
     "cover-image-size": {
         "default": "默认 (320x455)",
@@ -1958,7 +1966,8 @@
     "metadata-filter-row": {
         "unit-reading-progress": "百分比",
         "unit-reading-date": "日期",
-        "unit-average-rating": "平均评分 (Kavita+) - 仅适用于缓存系列"
+        "unit-average-rating": "Kavita+ 外部评级，百分比",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "stream-pipe": {
         "recently-updated": "{{dashboard.recently-updated-title}}",
@@ -2249,7 +2258,7 @@
         "range-hours": "{{value}} {{hourWord}}",
         "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
@@ -2317,6 +2326,7 @@
         "imprints-title": "压印",
         "teams-title": "团队",
         "age-rating-title": "年龄分级",
-        "language-title": "语言"
+        "language-title": "语言",
+        "links-title": "网络链接"
     }
 }

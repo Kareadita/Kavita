@@ -1,0 +1,117 @@
+{
+    "login": {
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "title": "Συνδεθείτε με τον λογαριασμό σας",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Ξεχάσατε τον κωδικό σας;",
+        "submit": "Συνδεθείτε"
+    },
+    "dashboard": {
+        "server-settings-link": "Ρυθμίσεις διακομιστή",
+        "not-granted": "Δεν σας έχει δοθεί πρόσβαση σε καμία βιβλιοθήκη.",
+        "recently-updated-title": "Πρόσφατα Ανανεωμένη Σειρά",
+        "recently-added-title": "Πρόσφατα Προστιθέμενη Σειρά",
+        "no-libraries": "Δεν έχουν ρυθμιστεί βιβλιοθήκες ακόμα. Δημιουργείστε μερικές στο",
+        "more-in-genre-title": "Περισσότερα Στο {{genre}}"
+    },
+    "edit-user": {
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "cancel": "{{common.cancel}}",
+        "saving": "Αποθήκευση…",
+        "update": "Ενημέρωση",
+        "edit": "{{common.edit}}",
+        "email": "{{common.email}}",
+        "not-valid-email": "{{validation.valid-email}}",
+        "required": "{{validation.required-field}}"
+    },
+    "user-scrobble-history": {
+        "title": "Ιστορικό Scrobble",
+        "not-read-warning": "Upstream πάροχοι πάντα κρατάνε τον υψηλότερο αριθμό",
+        "last-modified-header": "Τελευταία Τροποποίηση",
+        "series-header": "Σειρά",
+        "is-processed-header": "Έχει Επεξεργαστεί",
+        "no-data": "Χωρίς Δεδομένα",
+        "volume-and-chapter-num": "Τόμος {{v}} Κεφάλαιο {{n}}",
+        "volume-num": "Τόμος {{num}}",
+        "rating": "Βαθμολογία {{r}}",
+        "not-processed": "Μη Επεξεργασμένο",
+        "description": "Εδώ θα βρείτε όλα τα συμβάντα scrobble συνδεδεμένα με τον λογαριασμό σας. Για να υπάρχουν αυτά τα συμβάντα, πρέπει να έχετε ρυθμίσει έναν ενεργό πάροχο scrobble. Όλα τα συμβάντα που έχουν επεξεργαστεί θα διαγραφούν μετά απο έναν μήνα. Εάν υπάρχουν μη-επεξεργασμένα συμβάντα, είναι αρκετά πιθανό να μην μπορούν να σχηματίσουν αντιστοιχίες upstream. Παρακαλούμε επικοινωνήστε με τον διαχειριστή σας για να τα διορθώσετε.",
+        "filter-label": "{{common.filter}}",
+        "data-header": "Δεδομένα",
+        "chapter-num": "Κεφάλαιο {{num}}",
+        "created-header": "Δημιουργήθηκε",
+        "not-applicable": "Μη Εφαρμόσιμο",
+        "processed": "Επεξεργασμένο",
+        "special": "{{entity-title.special}}"
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Πρόοδος Ανάγνωσης",
+        "score-updated": "Ενημέρωση Βαθμολογίας",
+        "want-to-read-add": "Θέλω να Διαβάσω: Προσθήκη",
+        "want-to-read-remove": "Θέλω να Διαβάσω: Αφαίρεση",
+        "review": "Ενημέρωση Κριτικής"
+    },
+    "spoiler": {
+        "click-to-show": "Spoiler, κάντε κλικ για να το δείτε"
+    },
+    "review-series-modal": {
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}",
+        "review-label": "Κριτική",
+        "min-length": "Η κριτική πρέπει να περιέχει τουλάχιστον {{count}} χαρακτήρες",
+        "title": "Επεξεργασία Κριτικής",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+    "review-card-modal": {
+        "external-mod": "(external)",
+        "user-review": "Η κριτική του {{username}}",
+        "go-to-review": "Πάνε Στην Κριτική",
+        "close": "{{common.close}}"
+    },
+    "review-card": {
+        "your-review": "Αυτή είναι η κριτική σου",
+        "local-review": "Τοπική Κριτική",
+        "rating-percentage": "Βαθμολογία {{r}}%",
+        "external-review": "Εξωτερική Κριτική"
+    },
+    "theme-manager": {
+        "preview-title": "Προεπισκόπηση",
+        "preview-default": "Επιλέξετε ένα θέμα πρώτα",
+        "preview-default-admin": "Επιλέξτε ένα θέμα πρώτα ή ανεβάστε ένα χειροκίνητα"
+    },
+    "series-detail": {
+        "user-reviews-plus": "Εξωτερικές Κριτικές",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "user-reviews-local": "Τοπικές Κριτικές"
+    },
+    "series-preview-drawer": {
+        "staff-label": "Προσωπικό",
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "view-series": "Προβολή Σειράς",
+        "provided-by-label": "Παρέχεται Από",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "vols-and-chapters": "{{volCount}} Τόμοι / {{chpCount}} Κεφάλαια",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+    },
+    "toasts": {
+        "review-deleted": "Διαγραμμένη κριτική",
+        "delete-review": "Είστε σίγουρος ότι θέλετε να διαγράψετε την κριτική σας;"
+    },
+    "user-preferences": {
+        "share-series-reviews-tooltip": "Να συμπεριλάβει το Kavita τις κριτικές σας σε άλλους χρήστες",
+        "share-series-reviews-label": "Μοιράστε τις κριτικές της σειράς"
+    },
+    "library-settings-modal": {
+        "allow-scrobbling-tooltip": "Θα πρέπει το Kavita να κάνει scrobble γεγονότα ανάγνωσης, καταστάσεις ανάγνωσης αργότερα, τις αξιολογήσεις και τις κριτικές σε ρυθμισμένους παρόχους. Αυτό θα συμβεί μόνο εάν ο διακομιστής έχει ενεργή συνδρομή Kavita+."
+    },
+    "kavitaplus-metadata-breakdown-stats": {
+        "description": "Το Kavita συλλέγει μεταδεδομένα (αξιολογήσεις, κριτικές, συστάσεις κ.λπ.) αργά με την πάροδο του χρόνου για τις επιλέξιμες σειρές."
+    },
+    "tabs": {
+        "reviews-tab": "Κριτικές"
+    }
+}

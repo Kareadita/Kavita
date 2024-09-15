@@ -1,6 +1,6 @@
 {
     "login": {
-        "title": "เข้าสู่ระบบ",
+        "title": "ลงชื่อเข้าใช้บัญชีของคุณ",
         "username": "ชื่อผู้ใช้",
         "password": "รหัสผ่าน",
         "password-validation": "{{validation.password-validation}}",
