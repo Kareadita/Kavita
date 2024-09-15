@@ -73,9 +73,11 @@
     </div>
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-title-container">
-        @if (showFormat) {
-          <app-series-format [format]="format"></app-series-format>
-        }
+        <span class="card-format">
+          @if (showFormat) {
+            <app-series-format [format]="format"></app-series-format>
+          }  
+        </span>
 
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
           @if (isPromoted(); as isPromoted) {
@@ -87,14 +89,13 @@
             {{title}}
           }
         </span>
-
+        <span class="card-actions">
         @if (actions && actions.length > 0) {
-          <span class="card-actions">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-          </span>
-        } @else {
-        }
 
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+
+        }
+        </span>
       </div>
     }
   </div>
