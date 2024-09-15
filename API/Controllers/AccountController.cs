@@ -773,6 +773,7 @@ public class AccountController : BaseApiController
         {
             validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
         }
+
         validationErrors.AddRange(await _accountService.ValidatePassword(user, dto.Password));
 
         if (validationErrors.Any())
