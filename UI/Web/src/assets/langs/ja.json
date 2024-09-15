@@ -43,7 +43,10 @@
         "is-processed-header": "処理済み",
         "title": "Scrobble 履歴",
         "description": "ここでは、アカウントにリンクされたすべての Scrobble イベントを見つけることができます。イベントが存在するためには、アクティブな Scrobble プロバイダが構成されている必要があります。処理されたすべてのイベントは1か月後にクリアされます。処理されていないイベントがある場合、おそらくこれらは上流で一致を形成できない可能性があります。修正するためには、管理者に連絡してください。",
-        "not-read-warning": "上流のプロバイダーは最も高い数字を維持する"
+        "not-read-warning": "上流のプロバイダーは最も高い数字を維持する",
+        "special": "{{entity-title.special}}",
+        "volume-num": "第{{num}}巻",
+        "chapter-num": "第{{num}}章"
     },
     "scrobble-event-type-pipe": {
         "want-to-read-add": "読みたい: 追加",
@@ -155,7 +158,6 @@
         "title": "登録",
         "description": "登録を完了するには、フォームに必要事項を入力してください｡",
         "register": "登録",
-        "error-label": "Errors: ",
         "password-validation": "{{validation.password-validation}}",
         "valid-email": "{{common.valid-email}}",
         "email-label": "{{common.email}}",
@@ -399,7 +401,8 @@
         "margin-book-label": "余白",
         "pdf-reader-settings-title": "PDFリーダー",
         "pdf-spread-mode-label": "見開き設定",
-        "pdf-spread-mode-tooltip": "ページのレイアウト。単一または見開き (奇数・偶数)"
+        "pdf-spread-mode-tooltip": "ページのレイアウト。単一または見開き (奇数・偶数)",
+        "pdf-theme-label": "テーマ"
     },
     "person-role-pipe": {
         "other": "その他",

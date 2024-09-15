@@ -583,7 +583,6 @@
     "confirm-email": {
         "email-label": "{{common.email}}",
         "username-label": "{{common.username}}",
-        "error-label": "Błędy: ",
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "title": "Rejestracja",
@@ -1160,7 +1159,7 @@
         "media-issue-title": "Problemy z mediami",
         "save": "{{common.save}}",
         "encode-as-description-part-3": "Czy mogę używać AVIF?",
-        "media-warning": "Zadanie konwersji multimediów należy uruchomić na karcie Zadania",
+        "media-warning": "Po zapisaniu należy uruchomić zadanie konwersji multimediów na karcie Zadania",
         "encode-as-tooltip": "Wszystkie media zarządzane przez Kavitę (okładki, zakładki, ikony ulubionych) będą kodowane jako ten typ.",
         "encode-as-description-part-1": "WebP/AVIF może drastycznie zmniejszyć wymagania dotyczące miejsca na pliki. WebP/AVIF nie jest obsługiwany we wszystkich przeglądarkach i wersjach. Aby dowiedzieć się, czy te ustawienia są odpowiednie dla Twojej konfiguracji, odwiedź stronę ",
         "bookmark-dir-tooltip": "Lokalizacja, w której będą przechowywane zakładki. Zakładki są plikami źródłowymi i mogą być duże. Wybierz lokalizację z odpowiednią ilością miejsca. Katalog jest zarządzany; inne pliki w katalogu zostaną usunięte. Jeśli korzystasz z Dockera, zamontuj dodatkowy wolumin i użyj go.",

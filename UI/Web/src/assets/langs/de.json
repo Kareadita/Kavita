@@ -226,7 +226,8 @@
         "edit": "{{common.edit}}",
         "email-setup-alert": "Möchten Sie Dateien an Ihre Geräte senden? Lassen Sie Ihren Administrator zuerst die E-Mail-Einstellungen vornehmen!",
         "name-label": "Name",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -567,8 +568,7 @@
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Registrieren",
-        "error-label": "Fehler: "
+        "register": "Registrieren"
     },
     "confirm-email-change": {
         "title": "E-Mail-Änderung bestätigen",

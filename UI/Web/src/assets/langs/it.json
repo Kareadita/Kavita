@@ -591,7 +591,6 @@
     "confirm-email": {
         "title": "Registrati",
         "description": "Compila il form per completare la tua registrazione",
-        "error-label": "Errori: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
