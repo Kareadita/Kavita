@@ -52,13 +52,23 @@
 
     @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {
       <div class="card-body meta-title">
+        <span class="card-format">
+        </span>
         <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
           {{volume.name}}
         </div>
+
+        @if (actions && actions.length > 0) {
+          <span class="card-actions">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
+          </span>
+        }
       </div>
     }
 
     <div class="card-title-container">
+      <span class="card-format">
+      </span>
       <span class="card-title" id="{{volume.id}}" tabindex="0">
         <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/volume/{{volume.id}}">
           {{volume.name}}

@@ -178,6 +178,14 @@ $image-width: 160px;
     }
 }
 
+.card-actions {
+  min-width: 15.82px;
+}
+
+.card-format {
+  min-width: 22px;
+}
+
 ::ng-deep app-card-actionables .dropdown .dropdown-toggle {
   padding: 0 5px;
 }
