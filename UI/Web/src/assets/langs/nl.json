@@ -547,7 +547,6 @@
     "confirm-email": {
         "title": "Registreren",
         "description": "Vul het formulier in om uw registratie te voltooien",
-        "error-label": "Fouten: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",

@@ -182,5 +182,7 @@
     "collection-tag-duplicate": "この名前のコレクションは既に存在しています",
     "account-email-invalid": "管理者アカウントに登録されている電子メールは有効な電子メールではありません。 テストメールを送信できませんでした。",
     "check-updates": "アップデートをチェックする",
-    "license-check": "ライセンスを確認"
+    "license-check": "ライセンスを確認",
+    "collection-already-exists": "コレクションは既に存在しています",
+    "email-settings-invalid": "メール設定に不足している情報があります。すべてのメール設定が保存されていることを確認してください。"
 }

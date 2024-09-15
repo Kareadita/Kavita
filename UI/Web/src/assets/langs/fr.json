@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Sauvegarde en cours…",
-        "update": "Mise à jour"
+        "update": "Mise à jour",
+        "account-detail-title": "Détails du compte"
     },
     "user-scrobble-history": {
         "title": "Historique de scrobble",
@@ -76,7 +77,7 @@
     "review-card": {
         "your-review": "Voici votre critique",
         "external-review": "Critique externe",
-        "local-review": "Avis locale",
+        "local-review": "Critique locale",
         "rating-percentage": "Évaluation {{r}}%"
     },
     "want-to-read": {
@@ -185,10 +186,12 @@
         "upload-continued": "un fichier CSS",
         "preview-default-admin": "Sélectionnez d'abord un thème ou téléversez-en un manuellement",
         "preview-default": "Sélectionnez d'abord un thème",
-        "default-theme": "Thème par défaut",
+        "default-theme": "Défaut",
         "preview-title": "Prévisualiser",
         "description": "Kavita est disponible dans mes couleurs, trouvez une combinaison de couleurs qui réponde à vos besoins ou créez-en une vous-même et partagez-la. Les thèmes peuvent être appliqués à votre compte ou à tous les comptes.",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Téléchargé",
+        "downloadable": "Téléchargeable"
     },
     "theme": {
         "theme-dark": "Sombre",
@@ -221,7 +224,8 @@
         "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita par un navigateur web mais qui, en revanche, disposent d'une adresse courriel acceptant de recevoir des fichiers.",
         "email-setup-alert": "Vous souhaitez envoyer des fichiers à vos appareils ? Configurez d'abord vos paramètres d'E-mail !",
         "name-label": "Nom",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -654,7 +658,8 @@
         "is-before": "Est avant",
         "equal": "Égal à",
         "does-not-contain": "Ne contient pas",
-        "is-after": "Est après"
+        "is-after": "Est après",
+        "is-empty": "Est vide"
     },
     "filter-field-pipe": {
         "file-path": "Chemin du fichier",
@@ -728,7 +733,7 @@
         "minutes": "{{value}} minutes"
     },
     "validation": {
-        "password-validation": "Le mot de passe doit comporter entre 6 et 32 caractères",
+        "password-validation": "Le mot de passe doit comporter entre 6 et 256 caractères",
         "valid-email": "Ce doit être un courriel valide",
         "required-field": "Ce champ est requis",
         "year-validation": "Il doit s'agir d'une année valide supérieure à 1000 et comportant 4 caractères"
@@ -1069,8 +1074,7 @@
         "password-label": "{{common.password}}",
         "register": "S'enregistrer",
         "username-label": "{{common.username}}",
-        "required-field": "{{common.required-field}}",
-        "error-label": "Erreurs : "
+        "required-field": "{{common.required-field}}"
     },
     "bookmarks": {
         "delete-success": "Les marque-pages ont été supprimés",
@@ -1289,7 +1293,7 @@
         "host-name-validation": "Le nom d'hôte doit commencer par http(s) et ne pas se terminer par /",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "description": "Pour utiliser certaines fonctions de Kavita, comme l'envoi vers un appareil, un fournisseur de courrier électronique doit être configuré. D'autres fonctions, comme Oublier le mot de passe, nécessitent l'intervention de l'administrateur sans la configuration d'un fournisseur de courrier électronique.",
+        "description": "Afin d'utiliser certaines fonctions de Kavita comme Mot de passe oublié et Envoyer à Appareil, un fournisseur d'e-mail doit être mis en place. D'autres caractéristiques comme le changement de mot de passe sont moins sûres sans configuration Email.",
         "send-to-warning": "Si vous souhaitez que l'envoi vers un appareil fonctionne, vous devez paramétré votre service de messagerie",
         "email-settings-title": "Paramètres E-mail",
         "sender-address-label": "Adresse d’expéditeur",
@@ -1476,7 +1480,10 @@
         "cleanup-label": "Nettoyage",
         "cleanup-tooltip": "Fréquence à laquelle Kavita exécutera des tâches de nettoyage. Ces tâches peuvent être lourdes et devraient être exécutées à minuit dans la plupart des cas",
         "custom": "Personallisé",
-        "convert-media-task-success": "La conversion du média vers l'encodage cible a été mise dans la file d'attente"
+        "convert-media-task-success": "La conversion du média vers l'encodage cible a été mise dans la file d'attente",
+        "sync-themes-task": "Sync Thèmes",
+        "sync-themes-task-desc": "Synchroniser les thèmes téléchargés avec les modifications du dépôt d'origine si les versions correspondent.",
+        "sync-themes-success": "La synchronisation des thèmes a été mise en file d'attente"
     },
     "manage-media-settings": {
         "cover-image-size-label": "Taille de l'image de couverture",
@@ -1768,12 +1775,14 @@
         "no-data": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
         "title-alt": "Kavita - Collection {{collectionName}}",
         "sync-progress": "Séries collectées : {{title}}",
-        "last-sync": "Dernière synchro : {{date}}"
+        "last-sync": "Dernière synchro : {{date}}",
+        "item-count": "{{common.item-count}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Pourcentage",
         "unit-reading-date": "Date",
-        "unit-average-rating": "Note moyenne (Kavita+) - uniquement pour les séries mises en cache"
+        "unit-average-rating": "Notation externe de Kavita+, en pourcentage",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "file-breakdown-stats": {
         "format-title": "Format",
@@ -2224,7 +2233,7 @@
         "size-label": "{{edit-series-modal.size-title}}",
         "range-hours": "{{value}} {{hourWord}}",
         "id-label": "ID",
-        "sort-order-tooltip": "L'ordre de lecture de ce chapitre dans le volume"
+        "sort-order-tooltip": "L'ordre de lecture dans lequel ce chapitre est placé au sein du volume"
     },
     "edit-volume-modal": {
         "title": "Modifier",
@@ -2246,7 +2255,7 @@
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
     "tabs": {
@@ -2307,7 +2316,8 @@
         "letterers-title": "Lettreurs",
         "imprints-title": "Labels",
         "age-rating-title": "Classification par âge",
-        "language-title": "Langue"
+        "language-title": "Langue",
+        "links-title": "Liens internet"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",

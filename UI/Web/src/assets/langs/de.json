@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Speichern…",
-        "update": "Aktualisierung"
+        "update": "Aktualisierung",
+        "account-detail-title": "Konto Details"
     },
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
@@ -188,12 +189,13 @@
         "upload-continued": "eine CSS Datei",
         "description": "Kavita ist in meinen Farben erhältlich. Finde ein Farbschema, das deinen Bedürfnissen entspricht, oder erstellen selbst eines und teile dieses. Die Themen können für dein Konto oder für alle Konten angewendet werden.",
         "preview-default": "Wähle zunächst ein Theme aus",
-        "default-theme": "Standard-Schema",
+        "default-theme": "Standard",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "delete": "{{common.delete}}",
         "download": "{{changelog.donload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Heruntergeladen"
     },
     "theme": {
         "theme-dark": "dunkel",
@@ -226,7 +228,8 @@
         "edit": "{{common.edit}}",
         "email-setup-alert": "Möchten Sie Dateien an Ihre Geräte senden? Lassen Sie Ihren Administrator zuerst die E-Mail-Einstellungen vornehmen!",
         "name-label": "Name",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -567,8 +570,7 @@
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Registrieren",
-        "error-label": "Fehler: "
+        "register": "Registrieren"
     },
     "confirm-email-change": {
         "title": "E-Mail-Änderung bestätigen",

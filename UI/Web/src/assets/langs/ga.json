@@ -288,7 +288,7 @@
         "discord-validation": "Ní Aitheantas Úsáideora Discord bailí é seo. Ní hé d'aitheantas úsáideora d'ainm úsáideora discord.",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
-        "activate-reset-tooltip": "Neamhbhailigh clárúchán roimhe seo trí úsáid a bhaint as do cheadúnas. Teastaíonn Ceadúnas agus Ríomhphost araon",
+        "activate-reset-tooltip": "Neamhbhailí clárúchán roimhe seo trí úsáid a bhaint as do cheadúnas. Teastaíonn Ceadúnas agus Ríomhphost araon",
         "activate-save": "{{common.save}}",
         "kavita+-desc-part-1": "Is seirbhís síntiús préimhe é Kavita + a dhíghlasálann gnéithe do gach úsáideoir ar an ásc Kavita seo. Ceannaigh síntiús le díghlasáil ",
         "kavita+-desc-part-2": "sochair phréimhe",
@@ -309,7 +309,6 @@
         "register": "Cláraigh",
         "title": "Cláraigh",
         "description": "Comhlánaigh an fhoirm chun do chlárúchán a chomhlánú",
-        "error-label": "Earráidí: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
@@ -702,7 +701,10 @@
         "analyze-files-task-desc": "Ritheann tasc fadtréimhseach a dhéanfaidh anailís ar chomhaid chun síneadh agus méid a ghiniúint. Níor chóir é seo a reáchtáil ach uair amháin don scaoileadh v0.7. Ní gá má shuiteáil tú post v0.7.",
         "analyze-files-task-success": "Tá anailís comhad curtha i scuaine",
         "check-for-updates-task": "Seiceáil le haghaidh Nuashonruithe",
-        "convert-media-task-success": "Tá Tiontú Meáin go Sprioc-Ionchódú curtha i scuaine"
+        "convert-media-task-success": "Tá Tiontú Meáin go Sprioc-Ionchódú curtha i scuaine",
+        "sync-themes-success": "Tá sioncronú téamaí curtha i scuaine",
+        "sync-themes-task-desc": "Sioncrónaigh téamaí íoslódála le hathruithe in aghaidh an tsrutha má oireann an leagan.",
+        "sync-themes-task": "Téamaí Sioncronaithe"
     },
     "manage-users": {
         "title": "Úsáideoirí Gníomhacha",
@@ -802,7 +804,8 @@
         "no-data-filtered": "Níl aon mhíreanna comhoiriúnach leis an scagaire reatha.",
         "title-alt": "Kavita - {{collectionName}} Bailiúchán",
         "series-header": "Sraith",
-        "sync-progress": "Sraith Bailithe: {{title}}"
+        "sync-progress": "Sraith Bailithe: {{title}}",
+        "item-count": "{{common.item-count}}"
     },
     "reading-list-detail": {
         "remove-read": "Bain Léigh",
@@ -1419,7 +1422,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Ag sábháil…",
-        "update": "Nuashonrú"
+        "update": "Nuashonrú",
+        "account-detail-title": "Sonraí Cuntais"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Dul Chun Cinn léitheoireachta",
@@ -1458,7 +1462,7 @@
         "description": "Tagann Kavita i mo dathanna, faigh scéim dathanna a fhreastalaíonn ar do chuid riachtanas nó ceann a thógáil duit féin agus é a roinnt. Is féidir téamaí a chur i bhfeidhm ar do chuntas nó a chur i bhfeidhm ar gach cuntas.",
         "site-themes": "Téamaí an tSuímh",
         "set-default": "Socraigh Réamhshocrú",
-        "default-theme": "Téama réamhshocraithe",
+        "default-theme": "Réamhshocrú",
         "download": "{{changelog.download}}",
         "applied": "Curtha i bhfeidhm",
         "active-theme": "Gníomhach",
@@ -1471,7 +1475,9 @@
         "preview-default": "Roghnaigh téama ar dtús",
         "preview-default-admin": "Roghnaigh téama ar dtús nó uaslódáil ceann de láimh",
         "preview-title": "Réamhamharc",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Íosluchtaithe",
+        "downloadable": "Iníosluchtaithe"
     },
     "user-holds": {
         "title": "Coinníonn Scrobble",
@@ -1490,7 +1496,8 @@
         "email-setup-alert": "An bhfuil fonn ort comhaid a sheoladh chuig do ghléasanna? Bíodh do shocruithe ríomhphoist socraithe do riarthóir ar dtús!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "theme": {
         "theme-dark": "Dorcha",
@@ -1542,7 +1549,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "email-updated-description": "Is féidir leat an nasc seo thíos a úsáid chun an ríomhphost do do chuntas a dheimhniú. Má tá socruithe ríomhphoist cumraithe, beidh ríomhphost seolta agus is féidir an nasc a úsáid chun an ríomhphost a dhearbhú."
+        "email-updated-description": "Is féidir leat an nasc seo thíos a úsáid chun an ríomhphost le do chuntas a dheimhniú. Má tá socruithe ríomhphoist cumraithe, beidh ríomhphost seolta agus is féidir an nasc a úsáid chun an ríomhphost a dhearbhú."
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -2009,8 +2016,9 @@
     },
     "metadata-filter-row": {
         "unit-reading-date": "Dáta",
-        "unit-average-rating": "Rátáil Meán (Kavita +) - ach amháin le haghaidh sraith i dtaisce",
-        "unit-reading-progress": "Faoin gcéad"
+        "unit-average-rating": "Kavita+ rátáil sheachtrach, faoin gcéad",
+        "unit-reading-progress": "Faoin gcéad",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "sort-field-pipe": {
         "sort-name": "Ainm Sórtála",
@@ -2140,12 +2148,13 @@
         "is-after": "An bhfuil tar éis",
         "is-in-last": "An bhfuil sa deireadh",
         "is-not-in-last": "Nach bhfuil sa deireadh",
-        "must-contains": "Ní mór go mbeadh"
+        "must-contains": "Ní mór go mbeadh",
+        "is-empty": "An bhfuil Folamh"
     },
     "validation": {
         "required-field": "Tá an réimse seo ag teastáil",
         "valid-email": "Ní mór gur ríomhphost bailí é seo",
-        "password-validation": "Ní mór pasfhocal a bheith idir 6 agus 32 carachtar ar fhad",
+        "password-validation": "Caithfidh pasfhocal a bheith idir 6 agus 256 carachtar ar fad",
         "year-validation": "Caithfidh sé seo a bheith ina bliain bhailí níos mó ná 1000 agus 4 charachtar ar fad"
     },
     "entity-type": {
@@ -2234,7 +2243,7 @@
         "save": "{{common.save}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "pages-label": "{{edit-chapter-modal.pages-count}}",
@@ -2317,6 +2326,7 @@
         "teams-title": "Foirne",
         "locations-title": "Suímh",
         "language-title": "Teanga",
-        "age-rating-title": "Rátáil Aoise"
+        "age-rating-title": "Rátáil Aoise",
+        "links-title": "Naisc Ghréasáin"
     }
 }
