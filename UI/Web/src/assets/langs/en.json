@@ -1462,7 +1462,6 @@
         "theme": "Theme",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
-        "cbl-repo": "You can find many reading lists in the community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>.",
         "mal-stack-import": "MAL Stack"
     },
 
@@ -1668,7 +1667,8 @@
         "validate-cbl-step": "Validate CBL",
         "dry-run-step": "Dry Run",
         "final-import-step": "Final Step",
-        "comicvine-parsing-label": "Use Comic Vine Series matching"
+        "comicvine-parsing-label": "Use Comic Vine Series matching",
+        "cbl-repo": "You can find many reading lists in the community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
 
     "pdf-reader": {
