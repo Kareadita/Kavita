@@ -13,7 +13,7 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
         info.ComicInfo = comicInfo;
 
         // We need a special piece of code to override the Series IF there is a special marker in the filename for epub files
-        if (info.IsSpecial && info.Volumes == "0" && info.ComicInfo.Series != info.Series)
+        if (info.IsSpecial && info.Volumes is "0" or "0.0" && info.ComicInfo.Series != info.Series)
         {
             info.Series = info.ComicInfo.Series;
         }

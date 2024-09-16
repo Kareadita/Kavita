@@ -478,9 +478,6 @@ public class SeriesService : ISeriesService
 
         foreach (var chapter in chapters)
         {
-            // if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
-            // else chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
-
             chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
 
             if (!chapter.IsSpecial) continue;
@@ -536,7 +533,12 @@ public class SeriesService : ISeriesService
         {
             var firstChapter = volume.Chapters.First();
             // On Books, skip volumes that are specials, since these will be shown
-            if (firstChapter.IsSpecial) return false;
+            // if (firstChapter.IsSpecial)
+            // {
+            //     // Some books can be SP marker and also position of 0, this will trick Kavita into rendering it as part of a non-special volume
+            //     // We need to rename the entity so that it renders out correctly
+            //     return false;
+            // }
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
                 if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return false;
@@ -550,7 +552,7 @@ public class SeriesService : ISeriesService
                 volume.Name = firstChapter.TitleName;
             }
 
-            return true;
+            return !firstChapter.IsSpecial;
         }
 
         volume.Name = $"{volumeLabel.Trim()} {volume.Name}".Trim();
