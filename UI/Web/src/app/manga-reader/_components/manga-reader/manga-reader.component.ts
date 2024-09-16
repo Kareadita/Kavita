@@ -812,7 +812,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
     );
 
-    //console.log('Requesting page ', pageNum, ' found page: ', img, ' and app is requesting new image? ', forceNew);
+    console.log('Requesting page ', pageNum, ' found page: ', img, ' and app is requesting new image? ', forceNew);
     if (!img || forceNew) {
       img = new Image();
       img.src = this.getPageUrl(pageNum, chapterId);
@@ -1416,7 +1416,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let numOffset = this.pageNum + i;
 
       if (numOffset > this.maxPages - 1) {
-        continue;
+        break;
       }
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
@@ -1532,14 +1532,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (direction === PAGING_DIRECTION.BACKWARDS) {
       if (this.continuousChapterInfos[ChapterInfoPosition.Previous] === undefined) return;
       const n = this.continuousChapterInfos[ChapterInfoPosition.Previous]!.pages;
-      pages = Array.from({length: n + 1}, (v, k) => n - k);
+      // Ensure we only load up to 5 pages backward
+      pages = Array.from({ length: Math.min(n + 1, 5) }, (v, k) => n - k);
     } else {
       pages = [0, 1, 2, 3, 4];
     }
 
-    let images = [];
+    const images = [];
     pages.forEach((_, i: number) => {
-      let img = new Image();
+      const img = new Image();
       img.src = this.getPageUrl(i, chapterId);
       images.push(img)
     });
