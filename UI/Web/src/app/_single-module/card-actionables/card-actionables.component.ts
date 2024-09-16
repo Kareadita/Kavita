@@ -8,13 +8,16 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {NavLinkModalComponent} from "../../nav/_components/nav-link-modal/nav-link-modal.component";
+import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 
 @Component({
   selector: 'app-card-actionables',
@@ -29,6 +32,10 @@ export class CardActionablesComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly modalService = inject(NgbModal);
+
+  protected readonly Breakpoint = Breakpoint;
 
   @Input() iconClass = 'fa-ellipsis-v';
   @Input() btnClass = '';
@@ -109,5 +116,15 @@ export class CardActionablesComponent implements OnInit {
   performDynamicClick(event: any, action: ActionItem<any>, dynamicItem: any) {
     action._extra = dynamicItem;
     this.performAction(event, action);
+  }
+
+  openMobileActionableMenu(event: any) {
+    this.preventEvent(event);
+
+    const ref = this.modalService.open(ActionableModalComponent, {fullscreen: 'sm'});
+    ref.componentInstance.actions = this.actions;
+    ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
+      this.performAction(event, action);
+    });
   }
 }

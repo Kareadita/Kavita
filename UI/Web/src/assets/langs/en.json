@@ -2420,7 +2420,10 @@
         "promote": "Promote",
         "promote-tooltip": "Make the item visible to all users",
         "new-collection": "New Collection",
-        "multiple-selections": "Multiple Selections"
+        "multiple-selections": "Multiple Selections",
+        "back-to": "Back to {{action}}",
+        "title": "Actions"
+
     },
 
     "preferences": {
