@@ -39,6 +39,8 @@ export class ActionableModalComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
 
   @Input() actions: ActionItem<any>[] = [];
+  @Input() willRenderAction!: (action: ActionItem<any>) => boolean;
+  @Input() shouldRenderSubMenu!: (action: ActionItem<any>, dynamicList: null | Array<any>) => boolean;
   @Output() actionPerformed = new EventEmitter<ActionItem<any>>();
 
   currentLevel: string[] = [];
@@ -87,10 +89,10 @@ export class ActionableModalComponent implements OnInit {
     }
   }
 
-  willRenderAction(action: ActionItem<any>) {
-    if (this.user === undefined) return false;
-
-    return this.accountService.canInvokeAction(this.user, action.action);
-  }
+  // willRenderAction(action: ActionItem<any>) {
+  //   if (this.user === undefined) return false;
+  //
+  //   return this.accountService.canInvokeAction(this.user, action.action);
+  // }
 
 }

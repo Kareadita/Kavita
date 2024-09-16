@@ -4,9 +4,9 @@
       <h4 class="modal-title">{{t('title')}}</h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.close()"></button>
     </div>
-    <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': utilityService.getActiveBreakpoint() !== Breakpoint.Mobile}">
+    <div class="modal-body scrollable-modal">
       @if (currentLevel.length > 0) {
-        <button class="btn btn-secondary w-100 mb-3" (click)="handleBack()">
+        <button class="btn btn-secondary w-100 mb-3 text-start" (click)="handleBack()">
           ← {{t('back-to', {action: t(currentLevel[currentLevel.length - 1])})}}
         </button>
       }
@@ -14,7 +14,7 @@
       <div class="d-grid gap-2">
         @for (action of currentItems; track action.title) {
           @if (willRenderAction(action)) {
-            <button class="btn btn-outline-primary text-start d-flex justify-content-between align-items-center"
+            <button class="btn btn-outline-primary text-start d-flex justify-content-between align-items-center w-100"
                     (click)="handleItemClick(action)">
               {{t(action.title)}}
               @if (action.children.length > 0 || action.dynamicList) {

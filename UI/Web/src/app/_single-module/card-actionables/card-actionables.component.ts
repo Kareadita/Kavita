@@ -123,6 +123,8 @@ export class CardActionablesComponent implements OnInit {
 
     const ref = this.modalService.open(ActionableModalComponent, {fullscreen: 'sm'});
     ref.componentInstance.actions = this.actions;
+    ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
+    ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
     ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
       this.performAction(event, action);
     });
