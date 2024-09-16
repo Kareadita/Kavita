@@ -17,7 +17,7 @@ import {
   TrackByFunction,
   ViewChild
 } from '@angular/core';
-import {NavigationEnd, NavigationStart, Router} from '@angular/router';
+import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
