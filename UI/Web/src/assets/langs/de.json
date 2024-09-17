@@ -2292,11 +2292,7 @@
         "customize": "Anpassen",
         "import-cbl": "CBL importieren",
         "title": "Aktionen",
-        "back-to": "Zurück zu {{action}}",
-        "downloaded": "Heruntergeladen",
-        "downloadable": "Herunterladbar",
-        "register": "Registrieren",
-        "error-label": "Fehler:"
+        "back-to": "Zurück zu {{action}}"
     },
     "read-time-pipe": {
         "hours": "Stunden",
