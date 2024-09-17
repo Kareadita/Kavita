@@ -398,6 +398,9 @@ export class LibrarySettingsModalComponent implements OnInit {
       case Action.GenerateColorScape:
         await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
         break;
+      case (Action.AnalyzeFiles):
+        await this.actionService.analyzeFiles(this.library!);
+        break;
       case Action.Delete:
         await this.actionService.deleteLibrary(this.library!, () => {
           this.modal.dismiss();
