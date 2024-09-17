@@ -640,7 +640,8 @@
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Registrar"
+        "register": "Registrar",
+        "error-label": "Erro:"
     },
     "confirm-email-change": {
         "title": "Validar alteração de e-mail",
@@ -1337,7 +1338,8 @@
         "validate-cbl-step": "Validar CBL",
         "final-import-step": "Passo Final",
         "dry-run-step": "Funcionamento a Seco",
-        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine"
+        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine",
+        "cbl-repo": "Você pode encontrar muitas listas de leitura na comunidade <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "pdf-reader": {
         "loading-message": "Carregando... PDFs podem demorar mais do que o esperado",
@@ -1783,7 +1785,9 @@
         "customize-tooltip": "A FAZER",
         "mark-visible-tooltip": "A FAZER",
         "mark-invisible-tooltip": "A FAZER",
-        "promote-tooltip": "Tornar o item visível para todos os usuários"
+        "promote-tooltip": "Tornar o item visível para todos os usuários",
+        "back-to": "Voltar para {{action}}",
+        "title": "Ações"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",

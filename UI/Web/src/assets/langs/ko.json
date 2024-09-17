@@ -1555,7 +1555,8 @@
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}"
+        "valid-email": "{{common.valid-email}}",
+        "error-label": "에러:"
     },
     "register": {
         "username-label": "{{common.username}}",

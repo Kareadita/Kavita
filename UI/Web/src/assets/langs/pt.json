@@ -640,7 +640,8 @@
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Registar"
+        "register": "Registar",
+        "error-label": "Erro:"
     },
     "confirm-email-change": {
         "title": "Validar Alteração de Email",
@@ -1337,7 +1338,8 @@
         "validate-cbl-step": "Validar CBL",
         "dry-run-step": "Simulação",
         "final-import-step": "Passo Final",
-        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine"
+        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine",
+        "cbl-repo": "Pode encontrar muitas listas de leitura no seguinte <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repositório</a>."
     },
     "pdf-reader": {
         "loading-message": "A carregar....PDFs podem demorar mais que o esperado",
@@ -1783,7 +1785,9 @@
         "delete-tooltip": "Não é possível reverter esta decisão",
         "view-series-tooltip": "A FAZER",
         "import-cbl-tooltip": "Cria uma Lista de Leitura a partir de um ficheiro CBL",
-        "import-mal-stack-tooltip": "Cria uma Coleção Inteligente a partir de Pilha de Interesses do MAL"
+        "import-mal-stack-tooltip": "Cria uma Coleção Inteligente a partir de Pilha de Interesses do MAL",
+        "title": "Ações",
+        "back-to": "Voltar para {{action}}"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
