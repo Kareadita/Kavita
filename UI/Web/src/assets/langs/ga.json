@@ -313,7 +313,8 @@
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}"
+        "valid-email": "{{common.valid-email}}",
+        "error-label": "Earráid:"
     },
     "confirm-email-change": {
         "title": "Bailíochtaigh Athrú Ríomhphoist",
@@ -334,7 +335,7 @@
         "layout-mode-option-list": "Liosta",
         "continue-from": "Lean ar aghaidh {{title}}",
         "read": "{{common.read}}",
-        "incognito": "Incognito",
+        "incognito": "Go hanaithnid",
         "page-settings-title": "Socruithe an Leathanaigh",
         "close": "{{common.close}}",
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
@@ -796,7 +797,7 @@
         "cbl-import": "Liosta Léitheoireachta CBL",
         "mal-stack-import": "Cruach MAL",
         "user-stats": "Stait",
-        "info-section-title": "Eolas"
+        "info-section-title": "Faisnéis"
     },
     "collection-detail": {
         "last-sync": "Sioncronú Deireanach: {{date}}",
@@ -815,7 +816,7 @@
         "continue": "Lean ar aghaidh",
         "read": "{{common.read}}",
         "read-options-alt": "Léigh roghanna",
-        "incognito-alt": "(Incognito)",
+        "incognito-alt": "(Go hanaithnid)",
         "no-data": "Ní chuirfear aon ní leis",
         "characters-title": "{{metadata-fields.characters-title}}"
     },
@@ -859,7 +860,8 @@
         "validate-cbl-step": "Bailíochtaigh CBL",
         "dry-run-step": "Rith Tirim",
         "final-import-step": "An Chéim Dheiridh",
-        "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic"
+        "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic",
+        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "pdf-spread-mode-pipe": {
         "odd": "Scaipeadh Corr",
@@ -1123,7 +1125,7 @@
         "all-series": "{{side-nav.all-series}}"
     },
     "filter-field-pipe": {
-        "imprint": "Imprint",
+        "imprint": "Inphriontáil",
         "publisher": "Foilsitheoir",
         "read-progress": "Léigh Dul Chun Cinn",
         "read-time": "Am Léite",
@@ -1328,7 +1330,9 @@
         "import-cbl-tooltip": "Cruthaíonn sé Liosta Léitheoireachta ó Chomhad CBL",
         "unpromote-tooltip": "Srian an infheictheacht chuig do chuntas amháin",
         "promote-tooltip": "Déan an mhír sofheicthe do gach úsáideoir",
-        "mark-invisible-tooltip": "TODO"
+        "mark-invisible-tooltip": "TODO",
+        "back-to": "Ar ais go dtí {{action}}",
+        "title": "Gníomhartha"
     },
     "preferences": {
         "original": "Bunleagan",
@@ -1691,7 +1695,7 @@
         "publisher": "Foilsitheoir",
         "writer": "Scríbhneoir",
         "other": "Eile",
-        "imprint": "Imprint",
+        "imprint": "Imphriontáil",
         "translator": "Aistritheoir",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}"
@@ -1953,7 +1957,7 @@
     },
     "collection-owner": {
         "collection-created-label": "Cruthaithe ag: {{owner}}",
-        "collection-via-label": "via {{source}}"
+        "collection-via-label": "tríd {{source}}"
     },
     "edit-reading-list-modal": {
         "title": "Cuir Liosta Léitheoireachta in Eagar: {{name}}",
@@ -2272,7 +2276,7 @@
         "volumes-tab": "Imleabhair",
         "books-tab": "Leabhair",
         "specials-tab": "Speisialtaí",
-        "info-tab": "Eolas",
+        "info-tab": "Faisnéis",
         "theme-tab": "Téama",
         "stats-tab": "Stait",
         "related-tab": "Gaolmhar",

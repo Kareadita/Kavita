@@ -624,7 +624,9 @@
         "delete-tooltip": "이 결정을 되돌릴 수 있는 방법은 없습니다",
         "edit-tooltip": "설정 또는 세부정보 수정",
         "unpromote-tooltip": "귀하의 계정에만 공개를 제한하십시오",
-        "promote-tooltip": "모든 사용자가 항목을 볼 수 있도록 설정"
+        "promote-tooltip": "모든 사용자가 항목을 볼 수 있도록 설정",
+        "title": "작업",
+        "back-to": "{{action}}으로 돌아가기"
     },
     "preferences": {
         "original": "원본",
@@ -1180,7 +1182,8 @@
         "validate-warning": "가져오기를 방해하는 CBL 문제가 있습니다. 이 문제를 수정한 후 다시 시도하십시오.",
         "import-description": "시작하려면 .cbl 파일을 가져옵니다. Kavita는 가져오기 전에 여러 검사를 수행합니다. 일부 단계는 파일 문제로 인해 진행이 차단됩니다.",
         "dry-run-step": "모의 실행",
-        "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용"
+        "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용",
+        "cbl-repo": "커뮤니티에서 많은 독서 목록을 찾을 수 있습니다. <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>보고</a>."
     },
     "pdf-reader": {
         "loading-message": "로딩 중……PDF가 예상보다 오래 걸릴 수 있습니다",
@@ -1555,7 +1558,8 @@
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}"
+        "valid-email": "{{common.valid-email}}",
+        "error-label": "에러:"
     },
     "register": {
         "username-label": "{{common.username}}",

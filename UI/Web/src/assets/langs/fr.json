@@ -592,7 +592,7 @@
         "imprint-label": "{{metadata-fields.imprints-title}}",
         "location-label": "{{metadata-fields.locations-title}}",
         "team-label": "{{metadata-fields.teams-title}}",
-        "loose-leaf-volume": "Chapitres en vrac",
+        "loose-leaf-volume": "Chapitres non rattachés",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "folder-path-tooltip": "Chemin racine de la bibliothèque contenant tous les fichiers des séries",
         "lowest-folder-path-title": "Chemin d'accès au dossier le plus bas",
@@ -1074,7 +1074,8 @@
         "password-label": "{{common.password}}",
         "register": "S'enregistrer",
         "username-label": "{{common.username}}",
-        "required-field": "{{common.required-field}}"
+        "required-field": "{{common.required-field}}",
+        "error-label": "Erreur :"
     },
     "bookmarks": {
         "delete-success": "Les marque-pages ont été supprimés",
@@ -1233,7 +1234,9 @@
         "generate-colorscape-tooltip": "Générer les ambiances de couleurs et toutes les couvertures manquantes",
         "analyze-files-tooltip": "Analyse des fichiers en fonction du type d'extension et de la taille",
         "view-series-tooltip": "TODO",
-        "import-mal-stack-tooltip": "Crée une collection intelligente à partir de vos piles d'intérêts MAL"
+        "import-mal-stack-tooltip": "Crée une collection intelligente à partir de vos piles d'intérêts MAL",
+        "back-to": "Retour à {{action}}",
+        "title": "Actions"
     },
     "bulk-operations": {
         "mark-as-read": "Marquer comme lu",
@@ -1580,7 +1583,8 @@
         "import": "Importer",
         "next": "Suivant",
         "dry-run-step": "Simuler",
-        "comicvine-parsing-label": "Utiliser la correspondance des séries de Comic Vine"
+        "comicvine-parsing-label": "Utiliser la correspondance des séries de Comic Vine",
+        "cbl-repo": "Vous trouverez de nombreuses listes de lecture dans la communauté <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "carousel-reel": {
         "next-items": "Éléments suivants",
