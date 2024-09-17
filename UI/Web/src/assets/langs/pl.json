@@ -294,7 +294,7 @@
         "comics-label": "Komiksy: {{value}} godz.",
         "time-selection-label": "Przedział czasowy",
         "books-label": "Książki: {{value}} godz.",
-        "title": "Najwięksi czytelnicy",
+        "title": "Najlepsi czytelnicy",
         "this-week": "{{time-periods.this-week}}"
     },
     "directory-picker": {
@@ -1732,7 +1732,7 @@
         "collections-unpromoted": "Niepromowane kolekcje"
     },
     "actionable": {
-        "details": "Detale",
+        "details": "Szczegóły",
         "import-cbl": "Importuj CBL",
         "scan-library": "Skanuj bibliotekę",
         "analyze-files": "Analizuj pliki",

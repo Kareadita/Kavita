@@ -1354,9 +1354,9 @@
         "clean-up-want-to-read-task-desc": "Entfernt alle Serien, die Benutzer vollständig gelesen haben, die sich in der Kategorie \"Zu lesen\" befinden und den Veröffentlichungsstatus \"Abgeschlossen\" haben. Läuft alle 24 Stunden.",
         "library-scan-label": "Bibliotheks-Scan",
         "library-scan-tooltip": "Wie oft Kavita die Metadaten der Bibliotheksdateien überprüft und aktualisiert.",
-        "library-database-backup-label": "Kavita Backup",
         "sync-themes-task": "Themen synchronisieren",
-        "sync-themes-task-desc": "Synchronisieren Sie heruntergeladene Designs mit Upstream-Änderungen, wenn die Version übereinstimmt.",
+        "library-database-backup-label": "Kavita Backup",
+        "sync-themes-task-desc": "Heruntergeladene Designs mit Änderungen vom Upstream synchronisieren, wenn die Version übereinstimmt.",
         "sync-themes-success": "Die Synchronisierung der Themen wurde in die Warteschlange gestellt"
     },
     "manage-media-settings": {
@@ -2293,6 +2293,10 @@
         "import-cbl": "CBL importieren",
         "title": "Aktionen",
         "back-to": "Zurück zu {{action}}"
+        "downloaded": "Heruntergeladen",
+        "downloadable": "Herunterladbar"
+        "register": "Registrieren",
+        "error-label": "Fehler:"
     },
     "read-time-pipe": {
         "hours": "Stunden",
