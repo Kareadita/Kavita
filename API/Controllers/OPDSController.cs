@@ -549,12 +549,15 @@ public class OpdsController : BaseApiController
                 Id = readingListDto.Id.ToString(),
                 Title = readingListDto.Title,
                 Summary = readingListDto.Summary,
-                Links = new List<FeedLink>()
-                {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
-                }
+                Links =
+                [
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                        $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                        $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                        $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
+                ]
             });
         }
 
@@ -573,7 +576,7 @@ public class OpdsController : BaseApiController
 
     [HttpGet("{apiKey}/reading-list/{readingListId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey)
+    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 0)
     {
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
@@ -592,7 +595,7 @@ public class OpdsController : BaseApiController
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
         foreach (var item in items)
         {
             var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(item.ChapterId);
