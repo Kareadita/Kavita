@@ -1,7 +1,7 @@
 import {
   AsyncPipe,
   DecimalPipe,
-  DOCUMENT, JsonPipe,
+  DOCUMENT, JsonPipe, Location,
   NgClass,
   NgOptimizedImage,
   NgStyle,
@@ -189,6 +189,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly seriesService = inject(SeriesService);
   private readonly metadataService = inject(MetadataService);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
@@ -561,9 +562,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   updateUrl(activeTab: TabID) {
-    var tokens = this.router.url.split('#');
+    const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
-    window.history.replaceState({}, '', newUrl);
+    this.location.replaceState(newUrl)
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
