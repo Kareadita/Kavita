@@ -1109,8 +1109,9 @@
 
     "entity-title": {
         "special": "Special",
-        "issue-num": "Issue #",
-        "chapter": "Chapter"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
 
     "external-series-card": {
