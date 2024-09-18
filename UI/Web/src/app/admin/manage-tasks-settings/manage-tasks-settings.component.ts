@@ -162,16 +162,10 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
         debounceTime(100),
-        filter(_ => {
-          // This has a unique situation, so we can't just check if valid. We need to check the custom fields
-
-          return this.settingsForm.valid;
-        }),
-
+        filter(_ => this.settingsForm.valid),
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
           const data = this.packData();
-          console.log('data: ', data)
           return this.settingsService.updateServerSettings(data);
         }),
         tap(settings => {
