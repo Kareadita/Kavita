@@ -1133,7 +1133,7 @@
     "manage-email-settings": {
         "description": "In order to use some functions of Kavita like Send To Device an email provider must be setup. Other features like Forgot Password require admin intervention without Email setup.",
         "setting-description": "You must fill out both Host Name and SMTP settings to use email-based functionality within Kavita.",
-        "test-warning": "You must save before using Test button.",
+        "test-warning": "You must have valid settings before hitting Test.",
         "send-to-warning": "If you want Send to Device to work you must setup your email settings",
         "email-url-label": "Email Service URL",
         "email-url-tooltip": "Use fully qualified URL of the email service. Do not include ending slash.",

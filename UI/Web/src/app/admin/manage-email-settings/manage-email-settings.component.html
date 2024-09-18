@@ -2,11 +2,7 @@
   <p>{{t('description')}}</p>
 
   <form [formGroup]="settingsForm">
-    <p class="alert alert-warning">{{t('setting-description')}}</p>
-
-    @if (settingsForm.dirty) {
-      <div class="alert alert-warning">{{t('test-warning')}}</div>
-    }
+    <p class="alert alert-warning">{{t('setting-description')}} {{t('test-warning')}}</p>
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('hostName'); as formControl) {
