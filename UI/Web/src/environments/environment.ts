@@ -6,6 +6,7 @@ const IP = 'localhost';
 
 export const environment = {
   production: false,
+  baseUrl: 'http://' + IP + ':5000/',
   apiUrl: 'http://' + IP + ':5000/api/',
   hubUrl: 'http://'+ IP + ':5000/hubs/',
   buyLink: 'https://buy.stripe.com/test_9AQ5mi058h1PcIo3cf?prefilled_promo_code=FREETRIAL',

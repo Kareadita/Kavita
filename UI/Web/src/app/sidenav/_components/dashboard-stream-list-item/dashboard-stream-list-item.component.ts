@@ -13,6 +13,7 @@ import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
+import { environment } from "../../../../environments/environment";
 
 @Component({
   selector: 'app-dashboard-stream-list-item',
@@ -26,4 +27,6 @@ export class DashboardStreamListItemComponent {
   @Input({required: true}) item!: DashboardStream;
   @Input({required: true}) position: number = 0;
   @Output() hide: EventEmitter<DashboardStream> = new EventEmitter<DashboardStream>();
+
+  baseUrl = environment.baseUrl;
 }

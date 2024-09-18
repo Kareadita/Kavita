@@ -4,6 +4,7 @@ import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
+import { environment } from "../../../../environments/environment";
 
 @Component({
   selector: 'app-sidenav-stream-list-item',
@@ -18,4 +19,6 @@ export class SidenavStreamListItemComponent {
   @Input({required: true}) position: number = 0;
   @Output() hide: EventEmitter<SideNavStream> = new EventEmitter<SideNavStream>();
   protected readonly SideNavStreamType = SideNavStreamType;
+
+  baseUrl = environment.baseUrl;
 }

@@ -3,6 +3,7 @@ const BASE_URL = getBaseUrl();
 
 export const environment = {
   production: true,
+  baseUrl: BASE_URL,
   apiUrl: `${BASE_URL}api/`,
   hubUrl:`${BASE_URL}hubs/`,
   buyLink: 'https://buy.stripe.com/00gcOQanFajG0hi5ko?prefilled_promo_code=FREETRIAL',

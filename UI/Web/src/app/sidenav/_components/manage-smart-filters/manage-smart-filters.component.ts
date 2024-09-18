@@ -6,6 +6,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {ActionService} from "../../../_services/action.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import { environment } from "../../../../environments/environment";
 
 @Component({
   selector: 'app-manage-smart-filters',
@@ -20,6 +21,8 @@ export class ManageSmartFiltersComponent {
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionService = inject(ActionService);
+
+  baseUrl = environment.baseUrl;
 
   filters: Array<SmartFilter> = [];
   listForm: FormGroup = new FormGroup({
