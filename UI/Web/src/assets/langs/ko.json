@@ -693,11 +693,11 @@
         "annual": "연간"
     },
     "publication-status-pipe": {
-        "ended": "종료",
-        "ongoing": "진행중",
-        "hiatus": "중단",
+        "ended": "누락",
+        "ongoing": "연재중",
+        "hiatus": "휴재",
         "completed": "완결",
-        "cancelled": "취소"
+        "cancelled": "연재중단"
     },
     "person-role-pipe": {
         "character": "캐릭터",
