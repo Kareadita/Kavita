@@ -16093,7 +16093,7 @@
             "type": "string"
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string"
           },
@@ -16153,7 +16153,7 @@
             "type": "string"
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string"
           }
@@ -19143,7 +19143,7 @@
             "nullable": true
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string"
           }
@@ -19282,7 +19282,7 @@
             "description": "The Username of the User"
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string",
             "description": "The new password"
