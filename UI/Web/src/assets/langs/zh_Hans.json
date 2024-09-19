@@ -1645,7 +1645,7 @@
         "email-service-reset": "电子邮件服务已重置",
         "email-service-reachable": "Kavita电子邮件服务连接成功",
         "email-service-unresponsive": "电子邮件服务的网址没有响应。",
-        "refresh-covers-queued": "已为{{name}}排队刷新封面",
+        "refresh-covers-queued": "刷新 {{name}} 队列中的封面",
         "library-file-analysis-queued": "已为{{name}}排队进行资料库文件分析",
         "entity-read": "{{name}}已标记为已读",
         "entity-unread": "{{name}}已标记为未读",
