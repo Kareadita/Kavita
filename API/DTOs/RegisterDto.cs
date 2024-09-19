@@ -11,6 +11,6 @@ public class RegisterDto
     /// </summary>
     public string Email { get; init; } = default!;
     [Required]
-    [StringLength(32, MinimumLength = 6)]
+    [StringLength(256, MinimumLength = 6)]
     public string Password { get; set; } = default!;
 }
