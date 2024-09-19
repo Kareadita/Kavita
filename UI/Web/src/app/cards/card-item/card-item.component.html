@@ -73,22 +73,29 @@
     </div>
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-title-container">
-        <div>
-          <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-            <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
+        <span class="card-format">
+          @if (showFormat) {
             <app-series-format [format]="format"></app-series-format>
-            @if (linkUrl) {
-              <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
-            } @else {
-              {{title}}
-            }
-          </span>
-          @if (actions && actions.length > 0) {
-            <span class="card-actions float-end">
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-            </span>
+          }  
+        </span>
+
+        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
+          @if (isPromoted(); as isPromoted) {
+            <span class="me-1"><app-promoted-icon [promoted]="isPromoted"></app-promoted-icon></span>
           }
-        </div>
+          @if (linkUrl) {
+            <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
+          } @else {
+            {{title}}
+          }
+        </span>
+        <span class="card-actions">
+        @if (actions && actions.length > 0) {
+
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+
+        }
+        </span>
       </div>
     }
   </div>

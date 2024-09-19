@@ -149,9 +149,6 @@ $image-width: 160px;
 }
 
 .card-actions {
-  position: absolute;
-  bottom: 0;
-  right: 0;
   z-index: 115;
 }
 
@@ -161,8 +158,54 @@ $image-width: 160px;
   margin-top: 0px;
 }
 
+.card-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+
+    .card-title {
+      font-size: 0.8rem;
+      margin: 0;
+      text-align: center;
+      max-width: 110px;
+    
+      a {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+}
+
+.card-actions {
+  min-width: 15.82px;
+}
+
+.card-format {
+  min-width: 22px;
+}
+
+::ng-deep app-card-actionables .dropdown .dropdown-toggle {
+  padding: 0 5px;
+}
+
+.meta-title {
+  .card-title {
+    max-width: unset;
+  }
+}
+
 .card-title {
   font-size: 0.8rem;
+  margin: 0;
+  padding: 10px 0;
+  text-align: center;
+  max-width: 120px;
+
+  a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .card-body > div:nth-child(2) {
@@ -178,6 +221,9 @@ $image-width: 160px;
 .overlay-information {
   visibility: hidden;
   display: none;
+    .card-title {
+      padding: 10px;
+    }
 }
 
 .chapter,

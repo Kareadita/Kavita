@@ -277,4 +277,16 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Runs the Sync Themes task
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("sync-themes")]
+    public async Task<ActionResult> SyncThemes()
+    {
+        await _taskScheduler.SyncThemes();
+        return Ok();
+    }
+
 }

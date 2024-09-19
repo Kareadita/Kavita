@@ -19,14 +19,16 @@
 
       <div class="card-title-container">
         @if (data.name.length > 0) {
+          <img class="me-1" [ngSrc]="data.provider | providerImage" width="20" height="20" alt="">
           <a #link class="card-title" [href]="data.url" target="_blank" rel="noreferrer nofollow">
             <span class="card-title" placement="top" id="{{data.name}}" [ngbTooltip]="data.name" (click)="handleClick()" tabindex="0">
-              <img class="me-1" [ngSrc]="data.provider | providerImage" width="20" height="20" alt="">
               {{data.name}}
             </span>
           </a>
-        }
 
+        }
+        <span class="card-actions">
+        </span>
       </div>
 
     </div>

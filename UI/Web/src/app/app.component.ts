@@ -22,6 +22,7 @@ import {ServerService} from "./_services/server.service";
 import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
 import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
+import {translate} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-root',
@@ -88,6 +89,8 @@ export class AppComponent implements OnInit {
       if (!user) return false;
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
+
+
   }
 
   @HostListener('window:resize', ['$event'])
@@ -110,28 +113,40 @@ export class AppComponent implements OnInit {
     const user = this.accountService.getUserFromLocalStorage();
     this.accountService.setCurrentUser(user);
 
-    if (user) {
-      // Bootstrap anything that's needed
-      this.themeService.getThemes().subscribe();
-      this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
+    if (!user) return;
 
-      // Every hour, have the UI check for an update. People seriously stay out of date
-      interval(2* 60 * 60 * 1000) // 2 hours in milliseconds
-        .pipe(
-          switchMap(() => this.accountService.currentUser$),
-          filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
-          switchMap(_ => this.serverService.checkHowOutOfDate()),
-          filter(versionOutOfDate => {
-            return !isNaN(versionOutOfDate) && versionOutOfDate > 2;
-          }),
-          tap(versionOutOfDate => {
-            if (!this.ngbModal.hasOpenModals()) {
-              const ref = this.ngbModal.open(OutOfDateModalComponent, {size: 'xl', fullscreen: 'md'});
-              ref.componentInstance.versionsOutOfDate = versionOutOfDate;
-            }
-          })
-        )
-        .subscribe();
-    }
+    // Bootstrap anything that's needed
+    this.themeService.getThemes().subscribe();
+    this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
+
+    // Get the server version, compare vs localStorage, and if different bust locale cache
+    this.serverService.getVersion(user.apiKey).subscribe(version => {
+      const cachedVersion = localStorage.getItem('kavita--version');
+      if (cachedVersion == null || cachedVersion != version) {
+        // Bust locale cache
+        localStorage.removeItem('@transloco/translations/timestamp');
+        localStorage.removeItem('@transloco/translations');
+        location.reload();
+      }
+      localStorage.setItem('kavita--version', version);
+    });
+
+    // Every hour, have the UI check for an update. People seriously stay out of date
+    interval(2* 60 * 60 * 1000) // 2 hours in milliseconds
+      .pipe(
+        switchMap(() => this.accountService.currentUser$),
+        filter(u => u !== undefined && this.accountService.hasAdminRole(u)),
+        switchMap(_ => this.serverService.checkHowOutOfDate()),
+        filter(versionOutOfDate => {
+          return !isNaN(versionOutOfDate) && versionOutOfDate > 2;
+        }),
+        tap(versionOutOfDate => {
+          if (!this.ngbModal.hasOpenModals()) {
+            const ref = this.ngbModal.open(OutOfDateModalComponent, {size: 'xl', fullscreen: 'md'});
+            ref.componentInstance.versionsOutOfDate = versionOutOfDate;
+          }
+        })
+      )
+      .subscribe();
   }
 }

@@ -175,7 +175,6 @@
         "virtual-pages": "virtuálne stránky"
     },
     "confirm-email": {
-        "error-label": "Chyby: ",
         "register": "Registrovať",
         "description": "Registráciu dokončíte vyplnením formulára",
         "title": "Registrovať"

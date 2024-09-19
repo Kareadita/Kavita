@@ -12,12 +12,12 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Output,
+  Output, SimpleChange, SimpleChanges,
   TemplateRef,
   TrackByFunction,
   ViewChild
 } from '@angular/core';
-import {NavigationEnd, NavigationStart, Router} from '@angular/router';
+import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
@@ -153,13 +153,21 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
 
     const startIndex = this.jumpbarService.getResumePosition(this.router.url);
     if (startIndex > 0) {
       setTimeout(() => this.virtualScroller.scrollToIndex(startIndex, true, 0, ANIMATION_TIME_MS), 10);
+      return;
+    }
+
+    if (changes.hasOwnProperty('isLoading')) {
+      const loadingChange = changes['isLoading'] as SimpleChange;
+      if (loadingChange.previousValue === true && loadingChange.currentValue === false) {
+        setTimeout(() => this.virtualScroller.scrollToIndex(0, true, 0, ANIMATION_TIME_MS), 10);
+      }
     }
   }
 

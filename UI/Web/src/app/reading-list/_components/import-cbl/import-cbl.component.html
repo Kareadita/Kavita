@@ -4,12 +4,13 @@
     <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex"></app-step-tracker>
   </div>
 
-  <!-- This is going to need to have a fixed height with a scrollbar-->
   <div>
     @switch (currentStepIndex) {
       @case (Step.Import) {
         <div class="row g-0">
           <p>{{t('import-description')}}</p>
+          <p [innerHTML]="t('cbl-repo') | safeHtml"></p>
+
           <form [formGroup]="uploadForm" enctype="multipart/form-data">
             <file-upload formControlName="files"></file-upload>
           </form>

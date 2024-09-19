@@ -9,7 +9,8 @@ import {PdfScrollMode} from "../_models/preferences/pdf-scroll-mode";
 export class PdfScrollModePipe implements PipeTransform {
 
   transform(value: PdfScrollMode): string {
-    switch (value) {
+    const v = parseInt(value + '', 10) as PdfScrollMode;
+    switch (v) {
       case PdfScrollMode.Wrapped: return translate('preferences.pdf-multiple');
       case PdfScrollMode.Page: return translate('preferences.pdf-page');
       case PdfScrollMode.Horizontal: return translate('preferences.pdf-horizontal');

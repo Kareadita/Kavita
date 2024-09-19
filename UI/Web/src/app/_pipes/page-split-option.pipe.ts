@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {translate} from "@jsverse/transloco";
 import {PageSplitOption} from "../_models/preferences/page-split-option";
+import {ScalingOption} from "../_models/preferences/scaling-option";
 
 @Pipe({
   name: 'pageSplitOption',
@@ -9,7 +10,8 @@ import {PageSplitOption} from "../_models/preferences/page-split-option";
 export class PageSplitOptionPipe implements PipeTransform {
 
   transform(value: PageSplitOption): string {
-    switch (value) {
+    const v = parseInt(value + '', 10) as PageSplitOption;
+    switch (v) {
       case PageSplitOption.FitSplit: return translate('preferences.fit-to-screen');
       case PageSplitOption.NoSplit: return translate('preferences.no-split');
       case PageSplitOption.SplitLeftToRight: return translate('preferences.split-left-to-right');

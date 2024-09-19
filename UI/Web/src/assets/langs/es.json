@@ -25,7 +25,8 @@
         "required": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "account-detail-title": "Detalles de la cuenta"
     },
     "user-scrobble-history": {
         "data-header": "Datos",
@@ -162,7 +163,8 @@
         "validate-cbl-step": "Validar CBL",
         "dry-run-step": "Prueba",
         "final-import-step": "Último paso",
-        "comicvine-parsing-label": "Utilice la combinación de la serie Comic Vine"
+        "comicvine-parsing-label": "Utilice la combinación de la serie Comic Vine",
+        "cbl-repo": "Puedes encontrar muchas listas de lectura en la comunidad en el <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repositorio</a>."
     },
     "pdf-reader": {
         "incognito-mode": "Modo incógnito",
@@ -317,7 +319,7 @@
         "apply": "{{common.apply}}",
         "scan-queued": "Escaneo de Temas añadido a la cola",
         "description": "Kavita viene en varios colores, encuentra un esquema de color que satisfaga tus necesidades o construye con uno tú mismo y compártelo. Los temas pueden aplicarse a tu cuenta o a todas las cuentas.",
-        "default-theme": "Tema por defecto",
+        "default-theme": "Por defecto",
         "download": "{{changelog.download}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload-continued": "un archivo css",
@@ -327,7 +329,9 @@
         "preview-default-admin": "Selecciona primero un tema o cargue uno manualmente",
         "preview-default": "Selecciona un tema",
         "preview-title": "‐Vista previa",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Descargado",
+        "downloadable": "Descargable"
     },
     "spoiler": {
         "click-to-show": "Alerta de spoiler, haz clic para mostrar"
@@ -371,7 +375,8 @@
         "email-label": "Correo electrónico",
         "email-setup-alert": "¿Quieres enviar archivos a tus dispositivos? ¡Pídele a tu administrador que configure primero el correo electrónico!",
         "no-data": "{{typeahead.no-data}}",
-        "name-label": "Nombre"
+        "name-label": "Nombre",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "restriction-selector": {
         "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
@@ -921,14 +926,14 @@
     "confirm-email": {
         "title": "Registrar",
         "description": "Completa el formulario para completar tu registro",
-        "error-label": "Errores: ",
         "email-label": "{{common.email}}",
         "valid-email": "{{common.valid-email}}",
         "required-field": "{{common.required-field}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrar",
         "username-label": "{{common.username}}",
-        "password-label": "{{common.password}}"
+        "password-label": "{{common.password}}",
+        "error-label": "Error:"
     },
     "confirm-email-change": {
         "title": "Validar cambio de correo",
@@ -971,7 +976,7 @@
     "validation": {
         "valid-email": "Este debe ser un correo electrónico válido",
         "required-field": "Este campo es obligatorio",
-        "password-validation": "La contraseña debe tener entre 6 y 32 caracteres",
+        "password-validation": "La contraseña debe tener entre 6 y 256 caracteres",
         "year-validation": "Este debe ser un año válido mayor que 1000 y que conste de 4 caracteres"
     },
     "entity-type": {
@@ -1041,7 +1046,9 @@
         "promote-tooltip": "Ítem visible para todos los usuarios",
         "new-collection": "Nueva Colección",
         "multiple-selections": "Selecciones múltiples",
-        "unpromote-tooltip": "Sólo visible para tu cuenta"
+        "unpromote-tooltip": "Sólo visible para tu cuenta",
+        "back-to": "Volver a {{action}}",
+        "title": "Acciones"
     },
     "preferences": {
         "automatic": "Automático",
@@ -1685,7 +1692,8 @@
         "less-than-or-equal": "Menor o igual que",
         "is-before": "Antes de",
         "does-not-contain": "No contiene",
-        "is-after": "Después de"
+        "is-after": "Después de",
+        "is-empty": "Está vacío"
     },
     "manage-system": {
         "more-info-title": "Más información",
@@ -1752,7 +1760,10 @@
         "daily": "A diario",
         "weekly": "Semanalmente",
         "custom": "Personalizado",
-        "convert-media-task-success": "La conversión del archivo a la codificación elegida se ha añadido a la cola"
+        "convert-media-task-success": "La conversión del archivo a la codificación elegida se ha añadido a la cola",
+        "sync-themes-task-desc": "Sincronizar los temas descargados con los cambios ascendentes si la versión coincide.",
+        "sync-themes-task": "Sincronizar temas",
+        "sync-themes-success": "La sincronización de temas se ha puesto en espera"
     },
     "manage-users": {
         "edit-user-tooltip": "Editar",
@@ -1894,7 +1905,8 @@
         "title-alt": "Kavita - Colección {{collectionName}}",
         "series-header": "Series",
         "sync-progress": "Series recopiladas: {{title}}",
-        "last-sync": "Última sincronización: {{date}}"
+        "last-sync": "Última sincronización: {{date}}",
+        "item-count": "{{common.item-count}}"
     },
     "infinite-scroller": {
         "continuous-reading-next-chapter-alt": "Desplázate hacia arriba para ir al capítulo siguiente",
@@ -1923,7 +1935,8 @@
     "metadata-filter-row": {
         "unit-reading-progress": "Portentaje",
         "unit-reading-date": "Fecha",
-        "unit-average-rating": "Valoración media (Kavita+) - sólo para series en caché"
+        "unit-average-rating": "Valoración externa de Kavita+, en porcentaje",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "manage-external-sources": {
         "description": "Mejora tu experiencia añadiendo servidores externos e inclúyelos cómodamente en tu barra lateral para acceder rápidamente tanto a tu servidor como al de tus amigos.",
@@ -2192,7 +2205,7 @@
         "title": "Editar",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
@@ -2227,7 +2240,8 @@
         "teams-title": "Equipos",
         "locations-title": "Ubicaciones",
         "age-rating-title": "Clasificación por edades",
-        "language-title": "Idioma"
+        "language-title": "Idioma",
+        "links-title": "Enlaces"
     },
     "download-button": {
         "download-tooltip": "Descargar",

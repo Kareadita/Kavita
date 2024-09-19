@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Salvando…",
-        "update": "Atualizar"
+        "update": "Atualizar",
+        "account-detail-title": "Detalhes da Conta"
     },
     "user-scrobble-history": {
         "title": "Histórico de scrobble",
@@ -190,10 +191,12 @@
         "upload-continued": "um arquivo css",
         "preview-default": "Selecione um tema primeiro",
         "preview-default-admin": "Selecione um tema primeiro ou carregue um manualmente",
-        "default-theme": "Tema Padrão",
+        "default-theme": "Padrão",
         "download": "{{changelog.download}}",
         "preview-title": "Prévia",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloadable": "Baixável",
+        "downloaded": "Baixado"
     },
     "theme": {
         "theme-dark": "Escuro",
@@ -226,7 +229,8 @@
         "edit": "{{common.edit}}",
         "email-setup-alert": "Quer enviar arquivos para seus dispositivos? Peça ao seu administrador que configure as configurações de e-mail primeiro!",
         "name-label": "Nome",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -630,14 +634,14 @@
     "confirm-email": {
         "title": "Registrar",
         "description": "Preencha o formulário para concluir seu cadastro",
-        "error-label": "Erros: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Registrar"
+        "register": "Registrar",
+        "error-label": "Erro:"
     },
     "confirm-email-change": {
         "title": "Validar alteração de e-mail",
@@ -1119,7 +1123,10 @@
         "cron-notation": "Esta não é uma notação Cron válida",
         "weekly": "Semanal",
         "custom": "Personalizado",
-        "convert-media-task-success": "A Conversão de Mídia em Codificação de Destino foi colocada na fila"
+        "convert-media-task-success": "A Conversão de Mídia em Codificação de Destino foi colocada na fila",
+        "sync-themes-task": "Sincronizar Temas",
+        "sync-themes-task-desc": "Sincronize os temas baixados com alterações upstream se a versão corresponder.",
+        "sync-themes-success": "A sincronização de temas foi colocada na fila"
     },
     "manage-users": {
         "title": "Usuários Ativos",
@@ -1191,7 +1198,8 @@
         "title-alt": "Kavita - {{collectionName}} Coleção",
         "series-header": "Séries",
         "sync-progress": "Série Coletada: {{title}}",
-        "last-sync": "Última Sincronização: {{date}}"
+        "last-sync": "Última Sincronização: {{date}}",
+        "item-count": "{{common.item-count}}"
     },
     "all-collections": {
         "title": "Coleções",
@@ -1330,7 +1338,8 @@
         "validate-cbl-step": "Validar CBL",
         "final-import-step": "Passo Final",
         "dry-run-step": "Funcionamento a Seco",
-        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine"
+        "comicvine-parsing-label": "Usar a correspondência da série Comic Vine",
+        "cbl-repo": "Você pode encontrar muitas listas de leitura na comunidade <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "pdf-reader": {
         "loading-message": "Carregando... PDFs podem demorar mais do que o esperado",
@@ -1776,7 +1785,9 @@
         "customize-tooltip": "A FAZER",
         "mark-visible-tooltip": "A FAZER",
         "mark-invisible-tooltip": "A FAZER",
-        "promote-tooltip": "Tornar o item visível para todos os usuários"
+        "promote-tooltip": "Tornar o item visível para todos os usuários",
+        "back-to": "Voltar para {{action}}",
+        "title": "Ações"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -1815,7 +1826,7 @@
     "validation": {
         "required-field": "Este campo é obrigatório",
         "valid-email": "Este deve ser um e-mail válido",
-        "password-validation": "A senha deve ter entre 6 e 32 caracteres",
+        "password-validation": "A senha deve ter entre 6 e 256 caracteres",
         "year-validation": "Este deve ser um ano válido maior que 1000 e 4 caracteres"
     },
     "entity-type": {
@@ -1927,7 +1938,8 @@
         "contains": "Contém",
         "is-in-last": "É no final de",
         "is-not-in-last": "Não é no final de",
-        "must-contains": "Deve Conter"
+        "must-contains": "Deve Conter",
+        "is-empty": "Está Vazio"
     },
     "cover-image-size": {
         "default": "Padrão (320x455)",
@@ -1958,7 +1970,8 @@
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",
         "unit-reading-date": "Data",
-        "unit-average-rating": "Avaliação média (Kavita+) – apenas para séries em cache"
+        "unit-average-rating": "Avaliação externa Kavita+, porcentagem",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "manage-external-sources": {
         "description": "Melhore a sua experiência adicionando servidores externos e inclua-os convenientemente no seu Navegador Lateral para acesso rápido ao seu servidor e ao servidor do seu amigo.",
@@ -2225,7 +2238,7 @@
         "links-label": "{{series-metadata-detail.links-label}}",
         "save": "{{common.save}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "words-label": "{{edit-chapter-modal.length-title}}",
@@ -2317,6 +2330,7 @@
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "age-rating-title": "Classificação Etária",
-        "language-title": "Idioma"
+        "language-title": "Idioma",
+        "links-title": "Links da web"
     }
 }

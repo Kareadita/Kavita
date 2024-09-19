@@ -288,7 +288,7 @@
         "discord-validation": "Ní Aitheantas Úsáideora Discord bailí é seo. Ní hé d'aitheantas úsáideora d'ainm úsáideora discord.",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "{{common.reset}}",
-        "activate-reset-tooltip": "Neamhbhailigh clárúchán roimhe seo trí úsáid a bhaint as do cheadúnas. Teastaíonn Ceadúnas agus Ríomhphost araon",
+        "activate-reset-tooltip": "Neamhbhailí clárúchán roimhe seo trí úsáid a bhaint as do cheadúnas. Teastaíonn Ceadúnas agus Ríomhphost araon",
         "activate-save": "{{common.save}}",
         "kavita+-desc-part-1": "Is seirbhís síntiús préimhe é Kavita + a dhíghlasálann gnéithe do gach úsáideoir ar an ásc Kavita seo. Ceannaigh síntiús le díghlasáil ",
         "kavita+-desc-part-2": "sochair phréimhe",
@@ -309,12 +309,12 @@
         "register": "Cláraigh",
         "title": "Cláraigh",
         "description": "Comhlánaigh an fhoirm chun do chlárúchán a chomhlánú",
-        "error-label": "Earráidí: ",
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}"
+        "valid-email": "{{common.valid-email}}",
+        "error-label": "Earráid:"
     },
     "confirm-email-change": {
         "title": "Bailíochtaigh Athrú Ríomhphoist",
@@ -335,7 +335,7 @@
         "layout-mode-option-list": "Liosta",
         "continue-from": "Lean ar aghaidh {{title}}",
         "read": "{{common.read}}",
-        "incognito": "Incognito",
+        "incognito": "Go hanaithnid",
         "page-settings-title": "Socruithe an Leathanaigh",
         "close": "{{common.close}}",
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
@@ -702,7 +702,10 @@
         "analyze-files-task-desc": "Ritheann tasc fadtréimhseach a dhéanfaidh anailís ar chomhaid chun síneadh agus méid a ghiniúint. Níor chóir é seo a reáchtáil ach uair amháin don scaoileadh v0.7. Ní gá má shuiteáil tú post v0.7.",
         "analyze-files-task-success": "Tá anailís comhad curtha i scuaine",
         "check-for-updates-task": "Seiceáil le haghaidh Nuashonruithe",
-        "convert-media-task-success": "Tá Tiontú Meáin go Sprioc-Ionchódú curtha i scuaine"
+        "convert-media-task-success": "Tá Tiontú Meáin go Sprioc-Ionchódú curtha i scuaine",
+        "sync-themes-success": "Tá sioncronú téamaí curtha i scuaine",
+        "sync-themes-task-desc": "Sioncrónaigh téamaí íoslódála le hathruithe in aghaidh an tsrutha má oireann an leagan.",
+        "sync-themes-task": "Téamaí Sioncronaithe"
     },
     "manage-users": {
         "title": "Úsáideoirí Gníomhacha",
@@ -794,7 +797,7 @@
         "cbl-import": "Liosta Léitheoireachta CBL",
         "mal-stack-import": "Cruach MAL",
         "user-stats": "Stait",
-        "info-section-title": "Eolas"
+        "info-section-title": "Faisnéis"
     },
     "collection-detail": {
         "last-sync": "Sioncronú Deireanach: {{date}}",
@@ -802,7 +805,8 @@
         "no-data-filtered": "Níl aon mhíreanna comhoiriúnach leis an scagaire reatha.",
         "title-alt": "Kavita - {{collectionName}} Bailiúchán",
         "series-header": "Sraith",
-        "sync-progress": "Sraith Bailithe: {{title}}"
+        "sync-progress": "Sraith Bailithe: {{title}}",
+        "item-count": "{{common.item-count}}"
     },
     "reading-list-detail": {
         "remove-read": "Bain Léigh",
@@ -812,7 +816,7 @@
         "continue": "Lean ar aghaidh",
         "read": "{{common.read}}",
         "read-options-alt": "Léigh roghanna",
-        "incognito-alt": "(Incognito)",
+        "incognito-alt": "(Go hanaithnid)",
         "no-data": "Ní chuirfear aon ní leis",
         "characters-title": "{{metadata-fields.characters-title}}"
     },
@@ -856,7 +860,8 @@
         "validate-cbl-step": "Bailíochtaigh CBL",
         "dry-run-step": "Rith Tirim",
         "final-import-step": "An Chéim Dheiridh",
-        "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic"
+        "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic",
+        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "pdf-spread-mode-pipe": {
         "odd": "Scaipeadh Corr",
@@ -1120,7 +1125,7 @@
         "all-series": "{{side-nav.all-series}}"
     },
     "filter-field-pipe": {
-        "imprint": "Imprint",
+        "imprint": "Inphriontáil",
         "publisher": "Foilsitheoir",
         "read-progress": "Léigh Dul Chun Cinn",
         "read-time": "Am Léite",
@@ -1325,7 +1330,9 @@
         "import-cbl-tooltip": "Cruthaíonn sé Liosta Léitheoireachta ó Chomhad CBL",
         "unpromote-tooltip": "Srian an infheictheacht chuig do chuntas amháin",
         "promote-tooltip": "Déan an mhír sofheicthe do gach úsáideoir",
-        "mark-invisible-tooltip": "TODO"
+        "mark-invisible-tooltip": "TODO",
+        "back-to": "Ar ais go dtí {{action}}",
+        "title": "Gníomhartha"
     },
     "preferences": {
         "original": "Bunleagan",
@@ -1419,7 +1426,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Ag sábháil…",
-        "update": "Nuashonrú"
+        "update": "Nuashonrú",
+        "account-detail-title": "Sonraí Cuntais"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Dul Chun Cinn léitheoireachta",
@@ -1458,7 +1466,7 @@
         "description": "Tagann Kavita i mo dathanna, faigh scéim dathanna a fhreastalaíonn ar do chuid riachtanas nó ceann a thógáil duit féin agus é a roinnt. Is féidir téamaí a chur i bhfeidhm ar do chuntas nó a chur i bhfeidhm ar gach cuntas.",
         "site-themes": "Téamaí an tSuímh",
         "set-default": "Socraigh Réamhshocrú",
-        "default-theme": "Téama réamhshocraithe",
+        "default-theme": "Réamhshocrú",
         "download": "{{changelog.download}}",
         "applied": "Curtha i bhfeidhm",
         "active-theme": "Gníomhach",
@@ -1471,7 +1479,9 @@
         "preview-default": "Roghnaigh téama ar dtús",
         "preview-default-admin": "Roghnaigh téama ar dtús nó uaslódáil ceann de láimh",
         "preview-title": "Réamhamharc",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Íosluchtaithe",
+        "downloadable": "Iníosluchtaithe"
     },
     "user-holds": {
         "title": "Coinníonn Scrobble",
@@ -1490,7 +1500,8 @@
         "email-setup-alert": "An bhfuil fonn ort comhaid a sheoladh chuig do ghléasanna? Bíodh do shocruithe ríomhphoist socraithe do riarthóir ar dtús!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "theme": {
         "theme-dark": "Dorcha",
@@ -1542,7 +1553,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "email-updated-description": "Is féidir leat an nasc seo thíos a úsáid chun an ríomhphost do do chuntas a dheimhniú. Má tá socruithe ríomhphoist cumraithe, beidh ríomhphost seolta agus is féidir an nasc a úsáid chun an ríomhphost a dhearbhú."
+        "email-updated-description": "Is féidir leat an nasc seo thíos a úsáid chun an ríomhphost le do chuntas a dheimhniú. Má tá socruithe ríomhphoist cumraithe, beidh ríomhphost seolta agus is féidir an nasc a úsáid chun an ríomhphost a dhearbhú."
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -1684,7 +1695,7 @@
         "publisher": "Foilsitheoir",
         "writer": "Scríbhneoir",
         "other": "Eile",
-        "imprint": "Imprint",
+        "imprint": "Imphriontáil",
         "translator": "Aistritheoir",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}"
@@ -1946,7 +1957,7 @@
     },
     "collection-owner": {
         "collection-created-label": "Cruthaithe ag: {{owner}}",
-        "collection-via-label": "via {{source}}"
+        "collection-via-label": "tríd {{source}}"
     },
     "edit-reading-list-modal": {
         "title": "Cuir Liosta Léitheoireachta in Eagar: {{name}}",
@@ -2009,8 +2020,9 @@
     },
     "metadata-filter-row": {
         "unit-reading-date": "Dáta",
-        "unit-average-rating": "Rátáil Meán (Kavita +) - ach amháin le haghaidh sraith i dtaisce",
-        "unit-reading-progress": "Faoin gcéad"
+        "unit-average-rating": "Kavita+ rátáil sheachtrach, faoin gcéad",
+        "unit-reading-progress": "Faoin gcéad",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "sort-field-pipe": {
         "sort-name": "Ainm Sórtála",
@@ -2140,12 +2152,13 @@
         "is-after": "An bhfuil tar éis",
         "is-in-last": "An bhfuil sa deireadh",
         "is-not-in-last": "Nach bhfuil sa deireadh",
-        "must-contains": "Ní mór go mbeadh"
+        "must-contains": "Ní mór go mbeadh",
+        "is-empty": "An bhfuil Folamh"
     },
     "validation": {
         "required-field": "Tá an réimse seo ag teastáil",
         "valid-email": "Ní mór gur ríomhphost bailí é seo",
-        "password-validation": "Ní mór pasfhocal a bheith idir 6 agus 32 carachtar ar fhad",
+        "password-validation": "Caithfidh pasfhocal a bheith idir 6 agus 256 carachtar ar fad",
         "year-validation": "Caithfidh sé seo a bheith ina bliain bhailí níos mó ná 1000 agus 4 charachtar ar fad"
     },
     "entity-type": {
@@ -2234,7 +2247,7 @@
         "save": "{{common.save}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "pages-label": "{{edit-chapter-modal.pages-count}}",
@@ -2263,7 +2276,7 @@
         "volumes-tab": "Imleabhair",
         "books-tab": "Leabhair",
         "specials-tab": "Speisialtaí",
-        "info-tab": "Eolas",
+        "info-tab": "Faisnéis",
         "theme-tab": "Téama",
         "stats-tab": "Stait",
         "related-tab": "Gaolmhar",
@@ -2317,6 +2330,7 @@
         "teams-title": "Foirne",
         "locations-title": "Suímh",
         "language-title": "Teanga",
-        "age-rating-title": "Rátáil Aoise"
+        "age-rating-title": "Rátáil Aoise",
+        "links-title": "Naisc Ghréasáin"
     }
 }

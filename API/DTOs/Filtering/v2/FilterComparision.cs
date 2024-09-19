@@ -53,4 +53,8 @@ public enum FilterComparison
     /// Is Date not between now and X seconds ago
     /// </summary>
     IsNotInLast = 15,
+    /// <summary>
+    /// There are no records
+    /// </summary>
+    IsEmpty = 16
 }

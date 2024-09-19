@@ -8,18 +8,6 @@
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
-          <!-- Cover Tab -->
-          <li [ngbNavItem]="TabID.CoverImage">
-            <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
-            <ng-template ngbNavContent>
-              <p class="alert alert-warning" role="alert">
-                {{t('cover-image-description')}}
-              </p>
-              <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
-                                       [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
-            </ng-template>
-          </li>
-
           <!-- Info Tab -->
           <li [ngbNavItem]="TabID.Info">
             <a ngbNavLink>{{t(TabID.Info)}}</a>
@@ -88,7 +76,7 @@
                 </div>
               </div>
 
-              @if (accountService.isAdmin$ | async) {
+              @if (user && accountService.hasAdminRole(user)) {
                 <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
                     @for (file of files; track file.id) {
@@ -102,6 +90,20 @@
 
             </ng-template>
           </li>
+
+          <!-- Cover Tab -->
+          @if (user && accountService.hasAdminRole(user)) {
+            <li [ngbNavItem]="TabID.CoverImage">
+              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+              <ng-template ngbNavContent>
+                <p class="alert alert-warning" role="alert">
+                  {{t('cover-image-description')}}
+                </p>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
+                                         [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
+              </ng-template>
+            </li>
+          }
 
           <!-- Progress Tab -->
           <li [ngbNavItem]="TabID.Progress">
@@ -120,11 +122,13 @@
             <a ngbNavLink>{{t(TabID.Tasks)}}</a>
             <ng-template ngbNavContent>
               @for(task of tasks; track task.action) {
-                <div class="mt-3 mb-3">
-                  <app-setting-button [subtitle]="task.description">
-                    <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
-                  </app-setting-button>
-                </div>
+                @if (accountService.canInvokeAction(user, task.action)) {
+                  <div class="mt-3 mb-3">
+                    <app-setting-button [subtitle]="task.description">
+                      <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                    </app-setting-button>
+                  </div>
+                }
               }
             </ng-template>
           </li>

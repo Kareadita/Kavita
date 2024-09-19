@@ -2,9 +2,9 @@
   <app-splash-container>
     <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
-      <p *ngIf="!confirmed; else confirmedMessage">{{t('non-confirm-description')}}</p>
-
-      <ng-template #confirmedMessage>
+      @if (!confirmed) {
+        {{t('non-confirm-description')}}
+      } @else {
         <div class="card">
           <div class="card-body">
             <div class="card-title">
@@ -13,7 +13,7 @@
             <p>{{t('confirm-description')}}</p>
           </div>
         </div>
-      </ng-template>
+      }
     </ng-container>
   </app-splash-container>
 </ng-container>

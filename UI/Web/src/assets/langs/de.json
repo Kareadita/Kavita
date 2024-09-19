@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Speichern…",
-        "update": "Aktualisierung"
+        "update": "Aktualisierung",
+        "account-detail-title": "Konto Details"
     },
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
@@ -188,12 +189,14 @@
         "upload-continued": "eine CSS Datei",
         "description": "Kavita ist in meinen Farben erhältlich. Finde ein Farbschema, das deinen Bedürfnissen entspricht, oder erstellen selbst eines und teile dieses. Die Themen können für dein Konto oder für alle Konten angewendet werden.",
         "preview-default": "Wähle zunächst ein Theme aus",
-        "default-theme": "Standard-Schema",
+        "default-theme": "Standard",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "delete": "{{common.delete}}",
         "download": "{{changelog.donload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloaded": "Heruntergeladen",
+        "downloadable": "Herunterladbar"
     },
     "theme": {
         "theme-dark": "dunkel",
@@ -226,7 +229,8 @@
         "edit": "{{common.edit}}",
         "email-setup-alert": "Möchten Sie Dateien an Ihre Geräte senden? Lassen Sie Ihren Administrator zuerst die E-Mail-Einstellungen vornehmen!",
         "name-label": "Name",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -568,7 +572,7 @@
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrieren",
-        "error-label": "Fehler: "
+        "error-label": "Fehler:"
     },
     "confirm-email-change": {
         "title": "E-Mail-Änderung bestätigen",
@@ -1350,7 +1354,10 @@
         "clean-up-want-to-read-task-desc": "Entfernt alle Serien, die Benutzer vollständig gelesen haben, die sich in der Kategorie \"Zu lesen\" befinden und den Veröffentlichungsstatus \"Abgeschlossen\" haben. Läuft alle 24 Stunden.",
         "library-scan-label": "Bibliotheks-Scan",
         "library-scan-tooltip": "Wie oft Kavita die Metadaten der Bibliotheksdateien überprüft und aktualisiert.",
-        "library-database-backup-label": "Kavita Backup"
+        "sync-themes-task": "Themen synchronisieren",
+        "library-database-backup-label": "Kavita Backup",
+        "sync-themes-task-desc": "Heruntergeladene Designs mit Änderungen vom Upstream synchronisieren, wenn die Version übereinstimmt.",
+        "sync-themes-success": "Die Synchronisierung der Themen wurde in die Warteschlange gestellt"
     },
     "manage-media-settings": {
         "reset": "{{common.reset}}",
@@ -1541,7 +1548,8 @@
         "validate-warning": "Es gibt Probleme mit dem CBL, die einen Import verhindern. Beheben Sie diese Probleme und versuchen Sie es erneut.",
         "dry-run-description": "Dies ist ein Probelauf und zeigt, was passiert, wenn Sie auf Weiter drücken und den Import durchführen. Alle Fehlschläge werden nicht importiert.",
         "validate-cbl-step": "CBL validieren",
-        "final-import-step": "Letzter Schritt"
+        "final-import-step": "Letzter Schritt",
+        "cbl-repo": "Viele Leselisten finden Sie in der Community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "draggable-ordered-list": {
         "remove-item-alt": "Artikel entfernen",
@@ -1930,7 +1938,8 @@
         "does-not-contain": "Enthält nicht",
         "not-equal": "Nicht gleich",
         "is-before": "Ist vor",
-        "greater-than": "Größer als"
+        "greater-than": "Größer als",
+        "is-empty": "Ist Leer"
     },
     "card-detail-layout": {
         "total-items": "{{count}} Artikel insgesamt",
@@ -1948,7 +1957,8 @@
         "title-alt": "Kavita - {{collectionName}} Kollektion",
         "series-header": "Serie",
         "sync-progress": "Gesammelte Serien: {{title}}",
-        "last-sync": "Letzte Synchronisierung: {{date}}"
+        "last-sync": "Letzte Synchronisierung: {{date}}",
+        "item-count": "{{common.item-count}}"
     },
     "stream-list-item": {
         "smart-filter": "Smart Filter",
@@ -2015,7 +2025,7 @@
     "validation": {
         "valid-email": "Dies muss eine gültige E-Mail sein",
         "required-field": "Dieses Feld wird benötigt",
-        "password-validation": "Das Passwort muss zwischen 6 und 32 Zeichen lang sein",
+        "password-validation": "Das Passwort muss zwischen 6 und 256 Zeichen lang sein",
         "year-validation": "Dies muss eine gültige Jahreszahl sein, die größer als 1000 und 4 Zeichen lang ist"
     },
     "all-collections": {
@@ -2151,7 +2161,8 @@
         "tags-title": "Tags",
         "genres-title": "Genres",
         "age-rating-title": "Altersfreigabe",
-        "language-title": "Sprache"
+        "language-title": "Sprache",
+        "links-title": "Weblinks"
     },
     "download-button": {
         "download-tooltip": "Herunterladen",
@@ -2172,9 +2183,10 @@
         "promoted": "{{common.promoted}}"
     },
     "metadata-filter-row": {
-        "unit-average-rating": "Durchschnittliche Bewertung (Kavita+) - nur für gecachte Serien",
+        "unit-average-rating": "Externes Rating von Kavita+, Prozent",
         "unit-reading-progress": "Prozentsatz",
-        "unit-reading-date": "Datum"
+        "unit-reading-date": "Datum",
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
     },
     "edit-volume-modal": {
         "title": "bearbeiten",
@@ -2188,7 +2200,7 @@
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
-        "date-added-label": "{{edit-chapter-modal.date-added-title}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "links-label": "{{series-metadata-detail.links-label}}",
         "last-read-label": "{{edit-chapter-modal.last-read-label}}",
         "read-time-label": "{{edit-chapter-modal.read-time-label}}",
@@ -2278,7 +2290,9 @@
         "download": "Herunterladen",
         "read-incognito": "Inkognito lesen",
         "customize": "Anpassen",
-        "import-cbl": "CBL importieren"
+        "import-cbl": "CBL importieren",
+        "title": "Aktionen",
+        "back-to": "Zurück zu {{action}}"
     },
     "read-time-pipe": {
         "hours": "Stunden",

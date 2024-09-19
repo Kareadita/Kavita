@@ -6,7 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import {distinctUntilChanged, map, take} from 'rxjs';
+import {distinctUntilChanged, map, take, tap} from 'rxjs';
 import { ThemeService } from 'src/app/_services/theme.service';
 import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
@@ -65,9 +65,11 @@ export class ThemeManagerComponent {
   user: User | undefined;
   selectedTheme: ThemeContainer | undefined;
   downloadableThemes: Array<DownloadableSiteTheme> = [];
+  downloadedThemes: Array<SiteTheme> = [];
   hasAdmin$ = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}),
-    map(c => c && this.accountService.hasAdminRole(c))
+    takeUntilDestroyed(this.destroyRef),
+    map(c => c && this.accountService.hasAdminRole(c)),
+    shareReplay({refCount: true, bufferSize: 1}),
   );
 
   files: NgxFileDropEntry[] = [];
@@ -77,6 +79,11 @@ export class ThemeManagerComponent {
 
 
   constructor() {
+
+    this.themeService.themes$.pipe(tap(themes => {
+      this.downloadedThemes = themes;
+      this.cdRef.markForCheck();
+    })).subscribe();
 
     this.loadDownloadableThemes();
 
@@ -118,7 +125,6 @@ export class ThemeManagerComponent {
       pref.theme = theme;
       this.accountService.updatePreferences(pref).subscribe();
       // Updating theme emits the new theme to load on the themes$
-
     });
   }
 
@@ -152,8 +158,15 @@ export class ThemeManagerComponent {
   }
 
   downloadTheme(theme: DownloadableSiteTheme) {
-    this.themeService.downloadTheme(theme).subscribe(theme => {
-      this.removeDownloadedTheme(theme);
+    this.themeService.downloadTheme(theme).subscribe(downloadedTheme => {
+      this.removeDownloadedTheme(downloadedTheme);
+      this.themeService.getThemes().subscribe(themes => {
+        this.downloadedThemes = themes;
+        const oldTheme = this.downloadedThemes.filter(d => d.name === theme.name)[0];
+        this.selectTheme(oldTheme);
+        this.cdRef.markForCheck();
+      });
+
     });
   }
 

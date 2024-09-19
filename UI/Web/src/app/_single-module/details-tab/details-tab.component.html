@@ -2,7 +2,7 @@
 <div class="details pb-3">
   <div class="mb-3">
     <h4 class="header">{{t('genres-title')}}</h4>
-    <app-badge-expander [includeComma]="true" [items]="genres">
+    <app-badge-expander [includeComma]="true" [items]="genres" [itemsTillExpander]="3">
       <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
         <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
       </ng-template>
@@ -11,7 +11,7 @@
 
   <div class="mb-3">
     <h4 class="header">{{t('tags-title')}}</h4>
-    <app-badge-expander [includeComma]="true" [items]="tags">
+    <app-badge-expander [includeComma]="true" [items]="tags" [itemsTillExpander]="3">
       <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
         <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
       </ng-template>
