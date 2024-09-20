@@ -462,7 +462,7 @@
         "artist": "设计师",
         "character": "角色",
         "colorist": "上色师",
-        "cover-artist": "封面设计",
+        "cover-artist": "{{artist}}",
         "editor": "编辑",
         "inker": "上墨师",
         "letterer": "嵌字师",
@@ -682,7 +682,7 @@
         "incognito": "隐身模式",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "编辑系列信息",
+        "edit-series-alt": "編輯訊息",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "books-tab": "{{tabs.books-tab}}",
         "volumes-tab": "{{tabs.volumes-tab}}",
@@ -917,8 +917,9 @@
     },
     "entity-title": {
         "special": "特刊",
-        "issue-num": "期 #",
-        "chapter": "章节"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "打开外部链接"
@@ -954,7 +955,7 @@
         "gmail-label": "Gmail",
         "outlook-label": "Outlook",
         "setting-description": "您必须填写主机名和 SMTP 设置才能使用 Kavita 中的基于电子邮件的功能。",
-        "test-warning": "使用测试按钮之前必须保存。"
+        "test-warning": "在點擊“測試”之前，您必須具有有效的設定。"
     },
     "manage-library": {
         "title": "资料库",
@@ -1892,7 +1893,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "收藏标签",
         "colorist": "上色师",
-        "cover-artist": "封面设计",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "editor": "编辑",
         "formats": "格式",
         "genres": "{{metadata-fields.genres-title}}",

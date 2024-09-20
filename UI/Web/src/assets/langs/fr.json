@@ -4,7 +4,7 @@
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "Mot de passe oublié ?",
+        "forgot-password": "Mot de passe oublié?",
         "submit": "Se connecter"
     },
     "dashboard": {
@@ -416,7 +416,7 @@
         "other": "Autre",
         "penciller": "Crayonneur",
         "letterer": "Lettreur",
-        "cover-artist": "Artiste de la couverture",
+        "cover-artist": "{{artist}}",
         "character": "Personnage",
         "artist": "Artiste",
         "inker": "Encreur",
@@ -668,7 +668,7 @@
         "collection-tags": "Étiquettes de la collection",
         "characters": "{{metadata-fields.characters-title}}",
         "languages": "Langues",
-        "cover-artist": "Artiste de couverture",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "writers": "{{metadata-fields.writers-title}}",
         "release-year": "{{sort-field-pipe.release-year}}",
         "read-progress": "Progrès de lecture",
@@ -987,7 +987,7 @@
         "read-incognito": "Lire en mode privé",
         "specials-tab": "{{tabs.specials-tab}}",
         "recommendations-tab": "{{tabs.recommendations-tab}}",
-        "edit-series-alt": "Modifier les informations sur la série",
+        "edit-series-alt": "Modifier les informations",
         "layout-mode-option-list": "Liste",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "no-pages": "{{toasts.no-pages}}",
@@ -1317,7 +1317,7 @@
         "gmail-label": "Gmail",
         "outlook-label": "Outlook",
         "setting-description": "Vous devez remplir les paramètres Nom d'hôte et SMTP pour utiliser les fonctionnalités de messagerie électronique dans Kavita.",
-        "test-warning": "Vous devez enregistrer avant d'utiliser le bouton Test."
+        "test-warning": "Vous devez avoir des paramètres valides avant de cliquer sur Test."
     },
     "bulk-add-to-collection": {
         "collection-label": "Collection",
@@ -1332,8 +1332,9 @@
     },
     "entity-title": {
         "special": "Spécial",
-        "chapter": "Chapitre",
-        "issue-num": "Numéro #"
+        "chapter": "{{common.chapter-num}}",
+        "issue-num": "{{common.issue-hash-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "manage-library": {
         "add-library": "Ajouter une bibliothèque",

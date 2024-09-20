@@ -614,7 +614,7 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "incognito": "Incógnito",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "Editar informacion de la serie",
+        "edit-series-alt": "Editar información",
         "volumes-tab": "{{tabs.volumes-tab}}",
         "specials-tab": "{{tabs.specials-tab}}",
         "related-tab": "{{tabs.related-tab}}",
@@ -895,7 +895,7 @@
         "artist": "Artista",
         "writer": "Escritor",
         "character": "Personaje",
-        "cover-artist": "Artista de portada",
+        "cover-artist": "{{artist}}",
         "editor": "Editor",
         "other": "Otro",
         "publisher": "Editorial",
@@ -1469,8 +1469,9 @@
     },
     "entity-title": {
         "special": "Especial",
-        "chapter": "Capítulo",
-        "issue-num": "Número #"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Abrir externamente"
@@ -1506,7 +1507,7 @@
         "outlook-label": "Outlook",
         "gmail-label": "Gmail",
         "setting-description": "Para poder utilizar las funciones de correo electrónico de Kavita, debes rellenar los campos nombre del host y SMTP.",
-        "test-warning": "Debes guardar antes de utilizar el botón Probar."
+        "test-warning": "Debe tener configuraciones válidas antes de presionar Probar."
     },
     "cover-image-size": {
         "xlarge": "Extragrande (1265x1795)",
@@ -1658,7 +1659,7 @@
         "genres": "{{metadata-fields.genres-title}}",
         "release-year": "{{sort-field-pipe.release-year}}",
         "writers": "{{metadata-fields.writers-title}}",
-        "cover-artist": "Artista de la portada",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "read-progress": "Progreso de la lectura",
         "editor": "Editor",
         "read-time": "Tiempo de lectura",

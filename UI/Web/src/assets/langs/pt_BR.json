@@ -462,7 +462,7 @@
         "artist": "Artista",
         "character": "Personagem",
         "colorist": "Colorista",
-        "cover-artist": "Artista da Capa",
+        "cover-artist": "{{artist}}",
         "editor": "Editor",
         "inker": "Arte-finalista",
         "letterer": "Letrista",
@@ -682,7 +682,7 @@
         "incognito": "Incógnito",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "Editar Informações da Série",
+        "edit-series-alt": "Editar informações",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "books-tab": "{{tabs.books-tab}}",
         "volumes-tab": "{{tabs.volumes-tab}}",
@@ -917,8 +917,9 @@
     },
     "entity-title": {
         "special": "Especial",
-        "issue-num": "Número #",
-        "chapter": "Capítulo"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Abrir Externamente"
@@ -953,7 +954,7 @@
         "username-tooltip": "O nome de usuário usado para autenticação no host",
         "gmail-label": "Gmail",
         "outlook-label": "Outlook",
-        "test-warning": "Você deve salvar antes de usar o botão Teste.",
+        "test-warning": "Você deve ter configurações válidas antes de clicar em Testar.",
         "setting-description": "Você deve preencher as configurações de nome do host e SMTP para usar a funcionalidade baseada em e-mail no Kavita."
     },
     "manage-library": {
@@ -1893,7 +1894,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Coleção de Tags",
         "colorist": "Colorista",
-        "cover-artist": "Artista da Capa",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "editor": "Editor",
         "genres": "{{metadata-fields.genres-title}}",
         "inker": "Arte-finalista",

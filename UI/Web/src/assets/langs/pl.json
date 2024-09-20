@@ -1403,8 +1403,9 @@
     },
     "entity-title": {
         "special": "Special",
-        "chapter": "Rozdział",
-        "issue-num": "Wydanie #"
+        "chapter": "{{common.chapter-num}}",
+        "issue-num": "{{common.issue-hash-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "card-detail-layout": {
         "jumpkey-count": "{{count}} Serii",

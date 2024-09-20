@@ -345,7 +345,7 @@
         "read-options-alt": "Léigh roghanna",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "Cuir Eolas faoin tSraith in Eagar",
+        "edit-series-alt": "Cuir Eolas in Eagar",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "books-tab": "{{tabs.books-tab}}",
         "volumes-tab": "{{tabs.volumes-tab}}",
@@ -524,7 +524,7 @@
         "gmail-label": "GmailName",
         "description": "Chun úsáid a bhaint as roinnt feidhmeanna de chuid Kavita cosúil le Send To Device ní mór soláthraí ríomhphoist a shocrú. Teastaíonn idirghabháil riaracháin ó ghnéithe eile cosúil le Forgot Password gan socrú Ríomhphost.",
         "setting-description": "Ní mór duit socruithe Ainm Óstach agus SMTP araon a líonadh chun feidhmiúlacht ríomhphost-bhunaithe a úsáid laistigh de Kavita.",
-        "test-warning": "Ní mór duit sábháil sula n-úsáideann tú cnaipe Tástála.",
+        "test-warning": "Ní mór socruithe bailí a bheith agat sula mbuaileann tú Tástáil.",
         "send-to-warning": "Más mian leat Seol chuig gléas a bheith ag obair ní mór duit do shocruithe ríomhphoist a shocrú",
         "email-url-label": "URL na Seirbhíse Ríomhphoist",
         "email-url-tooltip": "Úsáid URL láncháilithe na seirbhíse ríomhphoist. Ná cuir deireadh le slais.",
@@ -1134,7 +1134,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Clibeanna Bailiúcháin",
         "colorist": "Dathóir",
-        "cover-artist": "Ealaíontóir Clúdaigh",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "editor": "Eagarthóir",
         "formats": "Formáidí",
         "genres": "{{metadata-fields.genres-title}}",
@@ -1849,8 +1849,9 @@
     },
     "entity-title": {
         "special": "Speisialta",
-        "issue-num": "Eisiúint #",
-        "chapter": "Caibidil 1009"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Oscail Seachtrach"
