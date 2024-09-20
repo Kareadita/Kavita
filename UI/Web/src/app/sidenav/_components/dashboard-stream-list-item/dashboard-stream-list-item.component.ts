@@ -13,11 +13,12 @@ import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-dashboard-stream-list-item',
   standalone: true,
-  imports: [ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe, NgClass],
+  imports: [ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe, NgClass, RouterLink],
   templateUrl: './dashboard-stream-list-item.component.html',
   styleUrls: ['./dashboard-stream-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

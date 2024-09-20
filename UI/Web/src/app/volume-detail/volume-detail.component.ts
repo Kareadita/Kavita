@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe, Location} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -198,6 +198,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly utilityService = inject(UtilityService);
   private readonly readingListService = inject(ReadingListService);
   private readonly messageHub = inject(MessageHubService);
+  private readonly location = inject(Location);
 
 
   protected readonly AgeRating = AgeRating;
@@ -555,8 +556,9 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   updateUrl(activeTab: TabID) {
-    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    window.history.replaceState({}, '', newUrl);
+    const tokens = this.location.path().split('#');
+    const newUrl = `${tokens[0]}#${activeTab}`;
+    this.location.replaceState(newUrl)
   }
 
   openPerson(field: FilterField, value: number) {

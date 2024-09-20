@@ -6,11 +6,12 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {ActionService} from "../../../_services/action.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-manage-smart-filters',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, NgbTooltip],
+  imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, NgbTooltip, RouterLink],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

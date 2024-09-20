@@ -29,13 +29,13 @@
         <div class="ps-1" *ngIf="!item.isProvided">
           <ng-container [ngSwitch]="item.streamType">
             <ng-container *ngSwitchCase="SideNavStreamType.Library">
-              <a [href]="'/library/' + this.item.libraryId" target="_blank">{{item.library?.name}}</a>
+              <a [routerLink]="'/library/' + this.item.libraryId" target="_blank">{{item.library?.name}}</a>
             </ng-container>
             <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">
-              <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
+              <a [routerLink]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
             </ng-container>
             <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">
-              <a [href]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>
+              <a [routerLink]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>
             </ng-container>
           </ng-container>
         </div>

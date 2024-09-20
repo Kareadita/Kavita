@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe} from "@angular/common";
+import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe, Location} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
@@ -171,6 +171,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly messageHub = inject(MessageHubService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
+  private readonly location = inject(Location);
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
@@ -331,8 +332,9 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   updateUrl(activeTab: TabID) {
-    const newUrl = `${this.router.url.split('#')[0]}#${activeTab}`;
-    window.history.replaceState({}, '', newUrl);
+    const tokens = this.location.path().split('#');
+    const newUrl = `${tokens[0]}#${activeTab}`;
+    this.location.replaceState(newUrl)
   }
 
   openPerson(field: FilterField, value: number) {
