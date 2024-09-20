@@ -21,7 +21,7 @@ import {allEncodeFormats} from '../_models/encode-format';
 import {ManageMediaIssuesComponent} from '../manage-media-issues/manage-media-issues.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {allCoverImageSizes} from '../_models/cover-image-size';
+import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
 import {pageLayoutModes} from "../../_models/preferences/preferences";
 import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -62,7 +62,7 @@ export class ManageMediaSettingsComponent implements OnInit {
       this.serverSettings = settings;
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, [Validators.required]));
       this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
-      this.settingsForm.addControl('coverImageSize', new FormControl(this.serverSettings.coverImageSize, [Validators.required]));
+      this.settingsForm.addControl('coverImageSize', new FormControl(this.serverSettings.coverImageSize || CoverImageSize.Default, [Validators.required]));
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
