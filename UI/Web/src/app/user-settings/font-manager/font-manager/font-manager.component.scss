@@ -1,0 +1,26 @@
+.pill {
+  font-size: .8rem;
+  background-color: var(--card-bg-color);
+  border-radius: 0.375rem;
+}
+
+.list-group-item, .list-group-item.active {
+  border-top-width: 0;
+  border-bottom-width: 0;
+}
+
+ngx-file-drop ::ng-deep > div {
+  // styling for the outer drop box
+  width: 100%;
+  border: 2px solid var(--primary-color);
+  border-radius: 5px;
+  height: 100px;
+  margin: auto;
+
+  > div {
+    // styling for the inner box (template)
+    width: 100%;
+    display: inline-block;
+
+  }
+}

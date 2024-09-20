@@ -6,7 +6,7 @@
       </h2>
     </app-side-nav-companion-bar>
     <div class="row col-me-4 pb-3">
-  
+
       @if (accountService.currentUser$ | async; as user) {
         @if (accountService.hasAdminRole(user)) {
           @defer (when fragment === SettingsTabId.General; prefetch on idle) {
@@ -16,7 +16,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.Email; prefetch on idle) {
             @if (fragment === SettingsTabId.Email) {
               <div class="col-xxl-6 col-12">
@@ -24,7 +24,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.Media; prefetch on idle) {
             @if (fragment === SettingsTabId.Media) {
               <div class="col-xxl-6 col-12">
@@ -32,7 +32,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.Users; prefetch on idle) {
             @if (fragment === SettingsTabId.Users) {
               <div class="scale col-md-12">
@@ -40,7 +40,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.Libraries; prefetch on idle) {
             @if (fragment === SettingsTabId.Libraries) {
               <div class="scale col-md-12">
@@ -48,7 +48,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.MediaIssues; prefetch on idle) {
             @if (fragment === SettingsTabId.MediaIssues) {
               <div class="scale col-md-12">
@@ -56,7 +56,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.System; prefetch on idle) {
             @if (fragment === SettingsTabId.System) {
               <div class="scale col-md-12">
@@ -64,7 +64,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.Statistics; prefetch on idle) {
             @if (fragment === SettingsTabId.Statistics) {
               <div class="scale col-md-12">
@@ -72,7 +72,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.Tasks; prefetch on idle) {
             @if (fragment === SettingsTabId.Tasks) {
               <div class="scale col-md-12">
@@ -80,7 +80,7 @@
               </div>
             }
           }
-  
+
           @defer (when fragment === SettingsTabId.KavitaPlus; prefetch on idle) {
             @if (fragment === SettingsTabId.KavitaPlus) {
               <div class="scale col-md-12">
@@ -89,8 +89,8 @@
             }
           }
         }
-  
-  
+
+
         @defer (when fragment === SettingsTabId.Account; prefetch on idle) {
           @if (fragment === SettingsTabId.Account) {
             <div class="col-xxl-6 col-12">
@@ -104,7 +104,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.Preferences; prefetch on idle) {
           @if (fragment === SettingsTabId.Preferences) {
             <div class="col-xxl-6 col-12">
@@ -112,7 +112,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.Customize; prefetch on idle) {
           @if (fragment === SettingsTabId.Customize) {
             <div class="scale col-md-12">
@@ -120,7 +120,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
           @if (fragment === SettingsTabId.Clients) {
             <div class="col-xxl-6 col-12">
@@ -128,7 +128,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.Theme; prefetch on idle) {
           @if (fragment === SettingsTabId.Theme) {
             <div class="scale col-md-12">
@@ -136,7 +136,15 @@
             </div>
           }
         }
-  
+
+        @defer (when fragment === SettingsTabId.Font; prefetch on idle) {
+          @if (fragment === SettingsTabId.Font) {
+            <div class="scale col-md-12">
+              <app-font-manager></app-font-manager>
+            </div>
+          }
+        }
+
         @defer (when fragment === SettingsTabId.Devices; prefetch on idle) {
           @if (fragment === SettingsTabId.Devices) {
             <div class="scale col-md-12">
@@ -144,7 +152,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.UserStats; prefetch on idle) {
           @if (fragment === SettingsTabId.UserStats) {
             <div class="scale col-md-12">
@@ -152,7 +160,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.CBLImport; prefetch on idle) {
           @if (fragment === SettingsTabId.CBLImport) {
             <div class="scale col-md-12">
@@ -160,7 +168,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
           @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
             <div class="scale col-md-12">
@@ -168,7 +176,7 @@
             </div>
           }
         }
-  
+
         @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
           @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {
             <div class="scale col-md-12">

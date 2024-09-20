@@ -107,6 +107,7 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
+        "font-tab": "{{tabs.font-tab}}",
 
         "success-toast": "User preferences updated",
 
@@ -216,7 +217,28 @@
         "preview-default": "Select a theme first",
         "preview-default-admin": "Select a theme first or upload one manually",
         "preview-title": "Preview",
-        "add": "{{common.add}}"
+        "preview-title": "Preview",
+        "add": "Add"
+    },
+
+    "font-manager": {
+        "title": "Font Manager",
+        "description": "Kavita comes with a few fonts, but you can add your own. This page is for adding and removing fonts, use the book reading settings to choose the font you want to use.",
+        "enter-an-url-pre-title": "Enter an {{url}}",
+        "url": "url",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "a font file",
+        "preview-default": "Upload your own font via file or url",
+        "delete": "{{common.delete}}",
+        "force-delete": "Force {{common.delete}}",
+        "force-delete-warning": "Force delete will remove the font, and reset users selected font to default if they are using this font.",
+        "url-label": "Url",
+        "back": "Back",
+        "load": "Load",
+        "default-font-no-preview": "This font cannot be previewed. This will take the default style from the book.",
+        "add-new-font": "Add",
+        "filter-system-fonts-label": "Filter System Fonts"
     },
 
     "theme": {
@@ -1461,6 +1483,7 @@
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
+        "font": "Font",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
         "mal-stack-import": "MAL Stack"
@@ -2096,7 +2119,12 @@
         "invalid-password-reset-url": "Invalid reset password url",
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
-        "theme-already-in-use": "Theme already exists by that name"
+        "theme-already-in-use": "Theme already exists by that name",
+        "delete-font-in-use": "Font is currently in use by at least one user, cannot delete",
+        "font-manual-upload": "There was an issue creating Font from manual upload",
+        "font-already-in-use": "Font already exists by that name",
+        "cant-delete-system-font": "Cannot delete system font",
+        "font-not-found": "Couldn't find usable font from that url"
     },
 
     "metadata-builder": {
@@ -2351,14 +2379,16 @@
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
         "mal-token-required": "MAL Token is required, set in User Settings",
-        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?"
+        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
+        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal",
+        "confirm-delete-font-force": "{{toasts.confirm-delete-font}}. If used by users, will reset theirs to default"
     },
 
     "read-time-pipe": {
         "less-than-hour": "<1 Hour",
         "hour": "Hour",
         "hours": "Hours"
-    },
+       },
 
     "actionable": {
         "scan-library": "Scan Library",
@@ -2505,7 +2535,8 @@
         "devices-tab": "Devices",
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
-        "smart-filters-tab": "Smart Filters"
+        "smart-filters-tab": "Smart Filters",
+        "fonts-tab": "Font"
     },
 
     "common": {

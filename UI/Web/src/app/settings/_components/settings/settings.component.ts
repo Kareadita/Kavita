@@ -53,6 +53,7 @@ import {
   ImportMalCollectionComponent
 } from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
 import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/import-cbl.component";
+import {FontManagerComponent} from "../../../user-settings/font-manager/font-manager/font-manager.component";
 
 @Component({
   selector: 'app-settings',
@@ -92,7 +93,8 @@ import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/i
     ManageMediaIssuesComponent,
     ManageCustomizationComponent,
     ImportMalCollectionComponent,
-    ImportCblComponent
+    ImportCblComponent,
+    FontManagerComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

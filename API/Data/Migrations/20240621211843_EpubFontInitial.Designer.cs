@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240621211843_EpubFontInitial")]
+    partial class EpubFontInitial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -230,14 +233,8 @@ namespace API.Data.Migrations
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("Promoted")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecondaryColor")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("Source")
                         .HasColumnType("INTEGER");
@@ -719,9 +716,6 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("AgeRatingLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("AlternateCount")
                         .HasColumnType("INTEGER");
 
@@ -734,16 +728,7 @@ namespace API.Data.Migrations
                     b.Property<int>("AvgHoursToRead")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("CharacterLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ColoristLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Count")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CoverArtistLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CoverImage")
@@ -758,25 +743,10 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("EditorLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("GenresLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ISBN")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("");
-
-                    b.Property<bool>("ISBNLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ImprintLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("InkerLocked")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsSpecial")
                         .HasColumnType("INTEGER");
@@ -784,20 +754,11 @@ namespace API.Data.Migrations
                     b.Property<string>("Language")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("LanguageLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("LettererLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("LocationLocked")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxHoursToRead")
                         .HasColumnType("INTEGER");
@@ -817,25 +778,10 @@ namespace API.Data.Migrations
                     b.Property<int>("Pages")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("PencillerLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("PublisherLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Range")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReleaseDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("ReleaseDateLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SeriesGroup")
@@ -856,28 +802,13 @@ namespace API.Data.Migrations
                     b.Property<string>("Summary")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("SummaryLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("TagsLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("TeamLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TitleName")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("TitleNameLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("TotalCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("TranslatorLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("VolumeId")
@@ -889,9 +820,6 @@ namespace API.Data.Migrations
                         .HasDefaultValue("");
 
                     b.Property<long>("WordCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("WriterLocked")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -1107,12 +1035,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
@@ -1620,14 +1542,8 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("Promoted")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecondaryColor")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("StartingMonth")
                         .HasColumnType("INTEGER");
@@ -1916,12 +1832,6 @@ namespace API.Data.Migrations
                     b.Property<int>("Pages")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SecondaryColor")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("SortName")
                         .HasColumnType("TEXT");
 
@@ -2081,9 +1991,6 @@ namespace API.Data.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("CoverImageLocked")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -2119,12 +2026,6 @@ namespace API.Data.Migrations
 
                     b.Property<int>("Pages")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SecondaryColor")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");

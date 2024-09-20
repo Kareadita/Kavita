@@ -66,6 +66,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
     public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
     public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
+    public DbSet<EpubFont> EpubFont { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

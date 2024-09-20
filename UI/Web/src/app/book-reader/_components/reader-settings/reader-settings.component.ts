@@ -19,7 +19,7 @@ import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ThemeService } from 'src/app/_services/theme.service';
-import { FontFamily, BookService } from '../../_services/book.service';
+import {BookService} from '../../_services/book.service';
 import { BookBlackTheme } from '../../_models/book-black-theme';
 import { BookDarkTheme } from '../../_models/book-dark-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
@@ -27,6 +27,8 @@ import { BookPaperTheme } from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@jsverse/transloco";
+import {FontService} from "../../../_services/font.service";
+import {EpubFont} from "../../../_models/preferences/epub-font";
 
 /**
  * Used for book reader. Do not use for other components
@@ -83,6 +85,7 @@ export const bookColorThemes = [
 ];
 
 const mobileBreakpointMarginOverride = 700;
+const defaultFontFamily = 'Default';
 
 @Component({
     selector: 'app-reader-settings',
@@ -130,8 +133,7 @@ export class ReaderSettingsComponent implements OnInit {
   /**
    * List of all font families user can select from
    */
-  fontOptions: Array<string> = [];
-  fontFamilies: Array<FontFamily> = [];
+  fontFamilies: Array<EpubFont> = [];
   /**
    * Internal property used to capture all the different css properties to render on all elements
    */
@@ -171,20 +173,20 @@ export class ReaderSettingsComponent implements OnInit {
 
   constructor(private bookService: BookService, private accountService: AccountService,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
-    private readonly cdRef: ChangeDetectorRef) {}
+    private readonly cdRef: ChangeDetectorRef, private fontService: FontService) {}
 
   ngOnInit(): void {
-
-    this.fontFamilies = this.bookService.getFontFamilies();
-    this.fontOptions = this.fontFamilies.map(f => f.title);
-    this.cdRef.markForCheck();
+    this.fontService.getFonts().subscribe(fonts => {
+      this.fontFamilies = fonts;
+      this.cdRef.markForCheck();
+    })
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
 
         if (this.user.preferences.bookReaderFontFamily === undefined) {
-          this.user.preferences.bookReaderFontFamily = 'default';
+          this.user.preferences.bookReaderFontFamily = defaultFontFamily;
         }
         if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
           this.user.preferences.bookReaderFontSize = 100;
@@ -208,11 +210,10 @@ export class ReaderSettingsComponent implements OnInit {
 
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(fontName => {
-          const familyName = this.fontFamilies.filter(f => f.title === fontName)[0].family;
-          if (familyName === 'default') {
+          if (fontName === defaultFontFamily) {
             this.pageStyles['font-family'] = 'inherit';
           } else {
-            this.pageStyles['font-family'] = "'" + familyName + "'";
+            this.pageStyles['font-family'] = "'" + fontName + "'";
           }
 
           this.styleUpdate.emit(this.pageStyles);

@@ -36,6 +36,7 @@ export enum SettingsTabId {
   Preferences = 'preferences',
   Clients = 'clients',
   Theme = 'theme',
+  Font = 'font',
   Devices = 'devices',
   UserStats = 'user-stats',
   Scrobbling = 'scrobbling',
@@ -101,6 +102,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         new SideNavItem(SettingsTabId.Customize),
         new SideNavItem(SettingsTabId.Clients),
         new SideNavItem(SettingsTabId.Theme),
+        new SideNavItem(SettingsTabId.Font),
         new SideNavItem(SettingsTabId.Devices),
         new SideNavItem(SettingsTabId.UserStats),
       ]

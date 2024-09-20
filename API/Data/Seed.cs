@@ -9,9 +9,11 @@ using API.Constants;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.Font;
 using API.Entities.Enums.Theme;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +27,97 @@ public static class Seed
     /// Generated on Startup. Seed.SeedSettings must run before
     /// </summary>
     public static ImmutableArray<ServerSetting> DefaultSettings;
+
+    public static readonly ImmutableArray<EpubFont> DefaultFonts =
+    [
+        ..new List<EpubFont>
+        {
+            new ()
+            {
+                Name = "Default",
+                NormalizedName = Parser.Normalize("Default"),
+                Provider = FontProvider.System,
+                FileName = string.Empty,
+            },
+            new ()
+            {
+                Name = "Merriweather",
+                NormalizedName = Parser.Normalize("Merriweather"),
+                Provider = FontProvider.System,
+                FileName = "Merriweather-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "EB Garamond",
+                NormalizedName = Parser.Normalize("EB Garamond"),
+                Provider = FontProvider.System,
+                FileName = "EBGaramond-VariableFont_wght.woff2",
+            },
+            new ()
+            {
+                Name = "Fira Sans",
+                NormalizedName = Parser.Normalize("Fira Sans"),
+                Provider = FontProvider.System,
+                FileName = "FiraSans-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Lato",
+                NormalizedName = Parser.Normalize("Lato"),
+                Provider = FontProvider.System,
+                FileName = "Lato-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Libre Baskerville",
+                NormalizedName = Parser.Normalize("Libre Baskerville"),
+                Provider = FontProvider.System,
+                FileName = "LibreBaskerville-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Libre Caslon",
+                NormalizedName = Parser.Normalize("Libre Caslon"),
+                Provider = FontProvider.System,
+                FileName = "LibreCaslonText-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Nanum Gothic",
+                NormalizedName = Parser.Normalize("Nanum Gothic"),
+                Provider = FontProvider.System,
+                FileName = "NanumGothic-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Open Dyslexic 2",
+                NormalizedName = Parser.Normalize("Open Dyslexic 2"),
+                Provider = FontProvider.System,
+                FileName = "OpenDyslexic-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Oswald",
+                NormalizedName = Parser.Normalize("Oswald"),
+                Provider = FontProvider.System,
+                FileName = "Oswald-VariableFont_wght.woff2",
+            },
+            new ()
+            {
+                Name = "RocknRoll One",
+                NormalizedName = Parser.Normalize("RocknRoll One"),
+                Provider = FontProvider.System,
+                FileName = "RocknRollOne-Regular.woff2",
+            },
+            new ()
+            {
+                Name = "Spartan",
+                NormalizedName = Parser.Normalize("Spartan"),
+                Provider = FontProvider.System,
+                FileName = "Spartan-VariableFont_wght.woff2",
+            },
+        }
+    ];
 
     public static readonly ImmutableArray<SiteTheme> DefaultThemes = [
         ..new List<SiteTheme>
@@ -143,10 +236,26 @@ public static class Seed
 
         foreach (var theme in DefaultThemes)
         {
-            var existing = context.SiteTheme.FirstOrDefault(s => s.Name.Equals(theme.Name));
+            var existing = await context.SiteTheme.FirstOrDefaultAsync(s => s.Name.Equals(theme.Name));
             if (existing == null)
             {
                 await context.SiteTheme.AddAsync(theme);
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task SeedFonts(DataContext context)
+    {
+        await context.Database.EnsureCreatedAsync();
+
+        foreach (var font in DefaultFonts)
+        {
+            var existing = await context.EpubFont.FirstOrDefaultAsync(f => f.Name.Equals(font.Name));
+            if (existing == null)
+            {
+                await context.EpubFont.AddAsync(font);
             }
         }
 
@@ -259,7 +368,7 @@ public static class Seed
 
         foreach (var defaultSetting in DefaultSettings)
         {
-            var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
+            var existing = await context.ServerSetting.FirstOrDefaultAsync(s => s.Key == defaultSetting.Key);
             if (existing == null)
             {
                 await context.ServerSetting.AddAsync(defaultSetting);
@@ -269,15 +378,15 @@ public static class Seed
         await context.SaveChangesAsync();
 
         // Port, IpAddresses and LoggingLevel are managed in appSettings.json. Update the DB values to match
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.Port)).Value =
             Configuration.Port + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.IpAddresses).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.IpAddresses)).Value =
             Configuration.IpAddresses;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheDirectory)).Value =
             directoryService.CacheDirectory + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.BackupDirectory)).Value =
             DirectoryService.BackupDirectory + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheSize).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
         await context.SaveChangesAsync();
 
