@@ -67,6 +67,7 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
         {
             _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
         }
+
         return this;
     }
 }

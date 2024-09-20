@@ -21,7 +21,6 @@ public static class KoreaderHelper
     /// <param name="filePath">The path to the file to hash</param>
     public static string HashContents(string filePath)
     {
-
         if (string.IsNullOrEmpty(filePath))
         {
             return null;
@@ -29,15 +28,15 @@ public static class KoreaderHelper
 
         using var file = File.OpenRead(filePath);
 
-        int step = 1024;
-        int size = 1024;
+        var step = 1024;
+        var size = 1024;
         MD5 md5 = MD5.Create();
         byte[] buffer = new byte[size];
 
-        for (int i = -1; i < 10; i++)
+        for (var i = -1; i < 10; i++)
         {
             file.Position = step << 2 * i;
-            int bytesRead = file.Read(buffer, 0, size);
+            var bytesRead = file.Read(buffer, 0, size);
             if (bytesRead > 0)
             {
                 md5.TransformBlock(buffer, 0, bytesRead, buffer, 0);
@@ -50,7 +49,7 @@ public static class KoreaderHelper
 
         file.Close();
         md5.TransformFinalBlock(new byte[0], 0, 0);
-        
+
         return BitConverter.ToString(md5.Hash).Replace("-", string.Empty).ToUpper();
 
     }
@@ -64,6 +63,7 @@ public static class KoreaderHelper
         var fileName = Path.GetFileName(filePath);
         var fileNameBytes = Encoding.ASCII.GetBytes(fileName);
         var bytes = MD5.HashData(fileNameBytes);
+
         return BitConverter.ToString(bytes).Replace("-", string.Empty);
     }
 
@@ -92,7 +92,7 @@ public static class KoreaderHelper
     public static string GetKoreaderPosition(ProgressDto progressDto)
     {
         string lastTag;
-        int koreaderPageNumber = progressDto.PageNum + 1;
+        var koreaderPageNumber = progressDto.PageNum + 1;
         if (string.IsNullOrEmpty(progressDto.BookScrollId))
         {
             lastTag = "a";
