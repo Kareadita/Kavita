@@ -41,7 +41,15 @@
           {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
         }
 
-        {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}
+        @if (number !== LooseLeafOrSpecial) {
+          @if (isChapter) {
+            {{t('chapter') + ' ' + number}}
+          } @else {
+            {{volumeTitle}}
+          }
+        } @else {
+          {{t('special')}}
+        }
       }
     }
 

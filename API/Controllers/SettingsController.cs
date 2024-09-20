@@ -371,7 +371,8 @@ public class SettingsController : BaseApiController
         return Ok(updateSettingsDto);
     }
 
-    private void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
+    // Public for Hangfire
+    public void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
     {
         _directoryService.ExistOrCreate(bookmarkDirectory);
         _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
