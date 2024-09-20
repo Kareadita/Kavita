@@ -1,21 +1,25 @@
 <ng-container *transloco="let t; read: 'details-tab'">
 <div class="details pb-3">
-  <div class="mb-3">
+  <div class="mb-3 ms-1">
     <h4 class="header">{{t('genres-title')}}</h4>
-    <app-badge-expander [includeComma]="true" [items]="genres" [itemsTillExpander]="3">
-      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
-      </ng-template>
-    </app-badge-expander>
+    <div class="ms-3">
+      <app-badge-expander [includeComma]="true" [items]="genres" [itemsTillExpander]="3">
+        <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+          <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
+        </ng-template>
+      </app-badge-expander>
+    </div>
   </div>
 
-  <div class="mb-3">
+  <div class="mb-3 ms-1">
     <h4 class="header">{{t('tags-title')}}</h4>
-    <app-badge-expander [includeComma]="true" [items]="tags" [itemsTillExpander]="3">
-      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
-      </ng-template>
-    </app-badge-expander>
+    <div class="ms-3">
+      <app-badge-expander [includeComma]="true" [items]="tags" [itemsTillExpander]="3">
+        <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+          <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
+        </ng-template>
+      </app-badge-expander>
+    </div>
   </div>
 
   <div class="mb-3">
@@ -29,7 +33,7 @@
     </app-carousel-reel>
   </div>
 
-  @if (genres.length > 0 || tags.length > 0) {
+  @if (genres.length > 0 || tags.length > 0 || webLinks.length > 0) {
     <div class="setting-section-break" aria-hidden="true"></div>
   }
 

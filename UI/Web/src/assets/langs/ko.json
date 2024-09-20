@@ -693,11 +693,11 @@
         "annual": "연간"
     },
     "publication-status-pipe": {
-        "ended": "종료",
-        "ongoing": "진행중",
-        "hiatus": "중단",
+        "ended": "누락",
+        "ongoing": "연재중",
+        "hiatus": "휴재",
         "completed": "완결",
-        "cancelled": "취소"
+        "cancelled": "연재중단"
     },
     "person-role-pipe": {
         "character": "캐릭터",
@@ -705,7 +705,7 @@
         "writer": "작가",
         "other": "그 외",
         "artist": "작가",
-        "cover-artist": "표지 작가",
+        "cover-artist": "{{artist}}",
         "editor": "편집자",
         "inker": "잉커",
         "letterer": "레터러",
@@ -825,7 +825,7 @@
     "series-detail": {
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "시리즈 정보 편집",
+        "edit-series-alt": "정보 편집",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "이 볼륨에는 챕터가 없습니다. 읽을 수 없습니다.",
         "cover-change": "브라우저에서 이미지를 새로 고치는 데 최대 1분이 걸릴 수 있습니다. 그때까지는 일부 페이지에 이전 이미지가 표시될 수 있습니다.",
@@ -982,8 +982,9 @@
     },
     "entity-title": {
         "special": "스페셜",
-        "issue-num": "이슈 #",
-        "chapter": "챕터"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -1016,7 +1017,7 @@
         "username-tooltip": "호스트에 대해 인증하는 데 사용되는 사용자 이름",
         "host-tooltip": "이메일 서버의 발신/SMTP 주소",
         "setting-description": "Kavita 내에서 이메일 기반 기능을 사용하려면 호스트 이름과 SMTP 설정을 모두 입력해야 합니다.",
-        "test-warning": "테스트 버튼을 사용하기 전에 반드시 저장해야 합니다."
+        "test-warning": "테스트를 누르기 전에 설정이 유효해야 합니다."
     },
     "manage-scrobble-errors": {
         "edit-item-alt": "편집 {{seriesName}}",
@@ -1885,7 +1886,7 @@
     "filter-field-pipe": {
         "collection-tags": "컬렉션 태그",
         "colorist": "컬러리스트",
-        "cover-artist": "커버 아티스트",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "editor": "편집자",
         "summary": "요약",
         "tags": "{{metadata-fields.tags-title}}",

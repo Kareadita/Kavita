@@ -527,7 +527,7 @@
         "artist": "Artist",
         "character": "Character",
         "colorist": "Colorist",
-        "cover-artist": "Cover Artist",
+        "cover-artist": "{{artist}}",
         "editor": "Editor",
         "inker": "Inker",
         "letterer": "Letterer",
@@ -788,7 +788,7 @@
         "incognito": "Incognito",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "Edit Series Information",
+        "edit-series-alt": "Edit Information",
         "reviews-tab": "{{tabs.reviews-tab}}",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "books-tab": "{{tabs.books-tab}}",
@@ -1109,8 +1109,9 @@
 
     "entity-title": {
         "special": "Special",
-        "issue-num": "Issue #",
-        "chapter": "Chapter"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
 
     "external-series-card": {
@@ -1132,7 +1133,7 @@
     "manage-email-settings": {
         "description": "In order to use some functions of Kavita like Send To Device an email provider must be setup. Other features like Forgot Password require admin intervention without Email setup.",
         "setting-description": "You must fill out both Host Name and SMTP settings to use email-based functionality within Kavita.",
-        "test-warning": "You must save before using Test button.",
+        "test-warning": "You must have valid settings before hitting Test.",
         "send-to-warning": "If you want Send to Device to work you must setup your email settings",
         "email-url-label": "Email Service URL",
         "email-url-tooltip": "Use fully qualified URL of the email service. Do not include ending slash.",
@@ -2188,7 +2189,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Collection Tags",
         "colorist": "Colorist",
-        "cover-artist": "Cover Artist",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "editor": "Editor",
         "formats": "Formats",
         "genres": "{{metadata-fields.genres-title}}",

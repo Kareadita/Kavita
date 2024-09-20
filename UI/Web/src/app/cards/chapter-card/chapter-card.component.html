@@ -80,7 +80,7 @@
           @if (chapter.isSpecial) {
            {{chapter.title || chapter.range}}
           } @else {
-            <app-entity-title [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title>
+            <app-entity-title [entity]="chapter" [prioritizeTitleName]="false" [libraryType]="libraryType"></app-entity-title>
           }
         </a>
       </span>

@@ -462,7 +462,7 @@
         "artist": "Artista",
         "character": "Personagem",
         "colorist": "Colorista",
-        "cover-artist": "Artista de Capa",
+        "cover-artist": "{{artist}}",
         "editor": "Editor",
         "inker": "Arte-Finalista",
         "letterer": "Letrista",
@@ -682,7 +682,7 @@
         "incognito": "Incógnito",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "edit-series-alt": "Editar Informação da Série",
+        "edit-series-alt": "Editar informações",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "books-tab": "{{tabs.books-tab}}",
         "volumes-tab": "{{tabs.volumes-tab}}",
@@ -917,8 +917,9 @@
     },
     "entity-title": {
         "special": "Especial",
-        "issue-num": "Número #",
-        "chapter": "Capítulo"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Abrir Externo"
@@ -953,7 +954,7 @@
         "username-tooltip": "O nome de utilizador usado para autenticar no host",
         "outlook-label": "Outlook",
         "gmail-label": "Gmail",
-        "test-warning": "Tem de gravar antes de usar o botão Teste.",
+        "test-warning": "Deve ter definições válidas antes de clicar em Teste.",
         "setting-description": "Tem de preencher o nome do Host e as definições de SMTP para poder usar as funcionalidades do Kavita baseadas em email."
     },
     "manage-library": {
@@ -1890,7 +1891,7 @@
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
-        "cover-artist": "Artista de Capa",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "formats": "Formatos",
         "genres": "{{metadata-fields.genres-title}}",
         "libraries": "Bibliotecas",

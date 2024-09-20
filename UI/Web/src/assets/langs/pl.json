@@ -622,7 +622,7 @@
     },
     "series-detail": {
         "continue": "Kontynuuj",
-        "edit-series-alt": "Edytuj informacje o serii",
+        "edit-series-alt": "Edytuj informacje",
         "storyline-tab": "{{tabs.storyline-tab}}",
         "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "Plik wysłany e-mailem do {{deviceName}}",
@@ -1199,7 +1199,7 @@
         "size-limit-tooltip": "Ile bajtów może obsłużyć serwer poczty e-mail dla załączników",
         "gmail-label": "Gmail",
         "outlook-label": "Outlook",
-        "test-warning": "Musisz zapisać przed użyciem przycisku Test.",
+        "test-warning": "Przed naciśnięciem przycisku Test wprowadź prawidłowe ustawienia.",
         "setting-description": "Aby korzystać z funkcji poczty e-mail w Kavita, należy wypełnić zarówno ustawienia nazwy hosta, jak i SMTP."
     },
     "manage-media-settings": {
@@ -1403,8 +1403,9 @@
     },
     "entity-title": {
         "special": "Special",
-        "chapter": "Rozdział",
-        "issue-num": "Wydanie #"
+        "chapter": "{{common.chapter-num}}",
+        "issue-num": "{{common.issue-hash-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "card-detail-layout": {
         "jumpkey-count": "{{count}} Serii",

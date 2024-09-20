@@ -13,7 +13,7 @@ public class ResetPasswordDto
     /// The new password
     /// </summary>
     [Required]
-    [StringLength(32, MinimumLength = 6)]
+    [StringLength(256, MinimumLength = 6)]
     public string Password { get; init; } = default!;
     /// <summary>
     /// The old, existing password. If an admin is performing the change, this is not required. Otherwise, it is.

@@ -6,11 +6,13 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {ActionService} from "../../../_services/action.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {RouterLink} from "@angular/router";
+import {APP_BASE_HREF} from "@angular/common";
 
 @Component({
   selector: 'app-manage-smart-filters',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, NgbTooltip],
+  imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, NgbTooltip, RouterLink],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,6 +22,7 @@ export class ManageSmartFiltersComponent {
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionService = inject(ActionService);
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
   filters: Array<SmartFilter> = [];
   listForm: FormGroup = new FormGroup({

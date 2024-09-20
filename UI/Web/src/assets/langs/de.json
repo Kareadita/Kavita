@@ -625,7 +625,7 @@
         "continue-incognito": "Unsichtbar fortsetzen",
         "incognito": "Unsichtbar",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
-        "edit-series-alt": "Bearbeite die Serieninformationen",
+        "edit-series-alt": "Informationen bearbeiten",
         "user-reviews-local": "Lokale Bewertungen",
         "user-reviews-plus": "Externe Bewertungen",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
@@ -832,8 +832,9 @@
     },
     "entity-title": {
         "special": "Spezial",
-        "issue-num": "Ausgabe #",
-        "chapter": "Kapitel"
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Extern öffnen"
@@ -867,7 +868,7 @@
         "email-settings-title": "E-Mail-Einstellungen",
         "outlook-label": "Outlook",
         "setting-description": "Sie müssen sowohl den Hostnamen als auch die SMTP-Einstellungen ausfüllen, um die E-Mail-basierten Funktionen von Kavita nutzen zu können.",
-        "test-warning": "Sie müssen speichern, bevor Sie die Schaltfläche Test verwenden.",
+        "test-warning": "Sie müssen über gültige Einstellungen verfügen, bevor Sie auf „Testen“ klicken.",
         "size-limit-tooltip": "Wie viele Bytes kann der E-Mail-Server für Anhänge verarbeiten",
         "customized-templates-label": "Angepasste Templates"
     },
@@ -1135,7 +1136,7 @@
     },
     "filter-field-pipe": {
         "want-to-read": "Möchte ich lesen",
-        "cover-artist": "Cover Künstler",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
         "read-time": "Lesezeit",
         "location": "Standort",
         "file-path": "Datei-Pfad",
@@ -1251,7 +1252,7 @@
         "character": "Charakter",
         "editor": "Editor",
         "publisher": "Herausgeber",
-        "cover-artist": "Cover Künstler",
+        "cover-artist": "{{artist}}",
         "translator": "Übersetzer",
         "colorist": "Kolorist",
         "imprint": "Impressum",
