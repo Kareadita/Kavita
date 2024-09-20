@@ -22,7 +22,6 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 })
 export class EntityTitleComponent implements OnInit {
 
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly LooseLeafOrSpecial = LooseLeafOrDefaultNumber + "";
   protected readonly LibraryType = LibraryType;
 
@@ -61,11 +60,6 @@ export class EntityTitleComponent implements OnInit {
       this.volumeTitle = c.volumeTitle || '';
       this.titleName = c.titleName || '';
       this.number = c.range;
-
-      // If loose leaf/special
-      if (this.number === this.LooseLeafOrSpecial) {
-
-      }
 
     } else {
       const v = this.utilityService.asVolume(this.entity);

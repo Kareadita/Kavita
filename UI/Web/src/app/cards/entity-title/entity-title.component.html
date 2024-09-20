@@ -33,12 +33,19 @@
     @case (LibraryType.Manga) {
       @if (titleName !== '' && prioritizeTitleName) {
         @if (isChapter && includeChapter) {
-          {{t('chapter') + ' '  + number + ' - ' }}
+          @if (number === LooseLeafOrSpecial) {
+            {{t('chapter') + ' - ' }}
+          } @else {
+            {{t('chapter') + ' '  + number + ' - ' }}
+          }
+
         }
         {{titleName}}
       } @else {
         @if (includeVolume && volumeTitle !== '') {
-          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+          @if (number !== LooseLeafOrSpecial && isChapter && includeVolume) {
+            {{volumeTitle}}
+          }
         }
 
         @if (number !== LooseLeafOrSpecial) {

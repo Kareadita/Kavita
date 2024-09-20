@@ -345,7 +345,7 @@ public class SettingsController : BaseApiController
 
             if (updateBookmarks)
             {
-                BackgroundJob.Enqueue(() => UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory));
+                UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory);
             }
 
             if (updateSettingsDto.EnableFolderWatching)
@@ -371,8 +371,8 @@ public class SettingsController : BaseApiController
         return Ok(updateSettingsDto);
     }
 
-    // Public for Hangfire
-    public void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
+
+    private void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
     {
         _directoryService.ExistOrCreate(bookmarkDirectory);
         _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
