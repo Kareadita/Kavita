@@ -1172,7 +1172,7 @@
         "no-data": "There are no libraries. Try creating one.",
         "loading": "{{common.loading}}",
         "last-scanned-title": "Last Scanned",
-        "shared-folders-title": "Shared Folders",
+        "shared-folders-title": "Folders",
         "type-title": "Type",
         "scan-library": "Scan Library",
         "delete-library": "Delete Library",
