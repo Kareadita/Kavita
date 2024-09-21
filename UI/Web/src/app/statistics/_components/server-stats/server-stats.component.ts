@@ -23,7 +23,7 @@ import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
 import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {

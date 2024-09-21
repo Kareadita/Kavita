@@ -53,7 +53,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public long WordCount { get; set; }
     public int MinHoursToRead { get; set; }
     public int MaxHoursToRead { get; set; }
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
 
 
     // Relationships

@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.3.2",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.12",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -4382,15 +4382,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
             }
           }
         ],
@@ -15187,8 +15178,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "webLinks": {
             "type": "string",
@@ -15451,8 +15442,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "webLinks": {
             "type": "string",
@@ -16093,7 +16084,7 @@
             "type": "string"
           },
           "password": {
-            "maxLength": 256,
+            "maxLength": 32,
             "minLength": 6,
             "type": "string"
           },
@@ -16153,7 +16144,7 @@
             "type": "string"
           },
           "password": {
-            "maxLength": 256,
+            "maxLength": 32,
             "minLength": 6,
             "type": "string"
           }
@@ -17511,9 +17502,9 @@
             "format": "int32"
           },
           "avgHours": {
-            "type": "integer",
+            "type": "number",
             "description": "Estimated average hours to read the selection",
-            "format": "int32"
+            "format": "float"
           }
         },
         "additionalProperties": false,
@@ -19143,7 +19134,7 @@
             "nullable": true
           },
           "password": {
-            "maxLength": 256,
+            "maxLength": 32,
             "minLength": 6,
             "type": "string"
           }
@@ -19282,7 +19273,7 @@
             "description": "The Username of the User"
           },
           "password": {
-            "maxLength": 256,
+            "maxLength": 32,
             "minLength": 6,
             "type": "string",
             "description": "The new password"
@@ -19707,7 +19698,7 @@
           },
           "lastModified": {
             "type": "string",
-            "description": "Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc",
+            "description": "Whenever a modification occurs. ex: New volumes, removed volumes, title update, etc",
             "format": "date-time"
           },
           "createdUtc": {
@@ -19801,8 +19792,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "metadata": {
             "$ref": "#/components/schemas/SeriesMetadata"
@@ -20051,8 +20042,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "folderPath": {
             "type": "string",
@@ -21417,18 +21408,18 @@
             "nullable": true
           },
           "comicsTime": {
-            "type": "integer",
+            "type": "number",
             "description": "Amount of time read on Comic libraries",
-            "format": "int64"
+            "format": "float"
           },
           "booksTime": {
-            "type": "integer",
+            "type": "number",
             "description": "Amount of time read on",
-            "format": "int64"
+            "format": "float"
           },
           "mangaTime": {
-            "type": "integer",
-            "format": "int64"
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false
@@ -22957,8 +22948,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "chapters": {
             "type": "array",
@@ -23048,8 +23039,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "wordCount": {
             "type": "integer",

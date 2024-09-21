@@ -698,6 +698,7 @@ public class ReaderService : IReaderService
         {
             var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 0);
             var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 0);
+
             return new HourEstimateRangeDto
             {
                 MinHours = Math.Min(minHours, maxHours),
@@ -708,6 +709,7 @@ public class ReaderService : IReaderService
 
         var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 0);
         var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 0);
+
         return new HourEstimateRangeDto
         {
             MinHours = Math.Min(minHoursPages, maxHoursPages),

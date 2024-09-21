@@ -21,5 +21,5 @@ public interface IHasReadTimeEstimate
     /// Average hours to read the chapter
     /// </summary>
     /// <remarks>Uses a fixed number to calculate from <see cref="ReaderService"/></remarks>
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
 }
