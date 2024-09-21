@@ -63,8 +63,9 @@
             {{library.lastScanned | timeAgo | defaultDate}}
           </td>
           <td>
+            <!-- On Mobile we want to use ... for each row -->
             @if (useActionables$ | async) {
-              <app-card-actionables [actions]="actions" (actionHandler)="performBulkAction($event)"></app-card-actionables>
+              <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, library)"></app-card-actionables>
             } @else {
               <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')"><i class="fa fa-sync-alt" aria-hidden="true"></i></button>
               <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i></button>
