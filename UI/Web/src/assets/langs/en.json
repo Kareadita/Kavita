@@ -1183,7 +1183,17 @@
         "actions-header": "{{manage-users.actions-header}}",
         "name-header": "{{manage-users.name-header}}",
         "deselect-all": "{{common.deselect-all}}",
-        "select-all": "{{common.select-all}}"
+        "select-all": "{{common.select-all}}",
+        "cancel": "{{common.cancel}}",
+        "apply": "{{common.apply}}"
+    },
+
+    "copy-settings-from-library-modal": {
+        "close": "{{common.close}}",
+        "select": "Select",
+        "title": "Copy settings from one library to multiple others",
+        "description": "Select a modal then press save. You will select all the libraries that these settings will apply to.",
+        "select-option": "Select a Library"
     },
 
     "manage-media-settings": {
@@ -2353,7 +2363,8 @@
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
         "mal-token-required": "MAL Token is required, set in User Settings",
-        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?"
+        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
+        "must-select-library": "At least one library must be selected"
     },
 
     "read-time-pipe": {
@@ -2425,8 +2436,8 @@
         "new-collection": "New Collection",
         "multiple-selections": "Multiple Selections",
         "back-to": "Back to {{action}}",
-        "title": "Actions"
-
+        "title": "Actions",
+        "copy-settings": "Copy Settings To"
     },
 
     "preferences": {

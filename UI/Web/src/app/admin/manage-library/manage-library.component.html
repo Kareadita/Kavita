@@ -1,10 +1,9 @@
 <ng-container *transloco="let t; read: 'manage-library'">
   <div class="position-relative">
-    @if (hasSomeSelected) {
-      <div class="position-absolute custom-position-2">
-        <app-card-actionables [btnClass]="'btn-primary-outline'" [actions]="bulkActions"></app-card-actionables>
-      </div>
-    }
+    <div class="position-absolute custom-position-2 btn btn-primary-outline">
+      <span>Bulk Actions</span>
+      <app-card-actionables [actions]="bulkActions" (actionHandler)="performBulkAction($event)"></app-card-actionables>
+    </div>
 
     <button class="btn btn-primary-outline position-absolute  custom-position" (click)="addLibrary()" [title]="t('add-library')">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
@@ -12,6 +11,17 @@
   </div>
 
   <!-- TODO: We need a filter bar when there is more than 10 libraries -->
+
+  @if (bulkMode) {
+   <div class="alert alert-warning">
+    Select which libraries you want to perform the bulk action against
+
+     <div>
+       <button class="btn btn-secondary">{{t('cancel')}}</button>
+       <button class="btn btn-primary">{{t('apply')}}</button>
+     </div>
+   </div>
+  }
 
   <table class="table table-striped">
     <thead>
@@ -36,7 +46,7 @@
           <td>
             <div class="form-check">
               <input id="select-library-{{idx}}" type="checkbox" class="form-check-input"
-                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
+                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
               <label for="select-library-{{idx}}" class="form-check-label visually-hidden">{{library.name}}</label>
             </div>
           </td>
@@ -54,7 +64,7 @@
           </td>
           <td>
             @if (useActionables$ | async) {
-              <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, library)"></app-card-actionables>
+              <app-card-actionables [actions]="actions" (actionHandler)="performBulkAction($event)"></app-card-actionables>
             } @else {
               <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')"><i class="fa fa-sync-alt" aria-hidden="true"></i></button>
               <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i></button>

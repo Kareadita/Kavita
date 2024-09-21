@@ -108,6 +108,10 @@ export enum Action {
    * Invoke a refresh covers as false to generate colorscapes
    */
   GenerateColorScape = 26,
+  /**
+   * Copy settings from one entity to another
+   */
+  CopySettings = 27
 }
 
 /**
@@ -252,6 +256,24 @@ export class ActionFactoryService {
 
     // Filter out tasks that don't make sense
     return tasks.filter(t => !blacklist.includes(t.action));
+  }
+
+  getBulkLibraryActions(callback: ActionCallback<Library>) {
+    const actions = [...this.libraryActions].filter(a => {
+      return [Action.Delete, Action.Scan, Action.GenerateColorScape, Action.AnalyzeFiles, Action.CopySettings].includes(a.action);
+    });
+    actions.push({
+      _extra: undefined,
+      class: undefined,
+      description: '',
+      dynamicList: undefined,
+      action: Action.CopySettings,
+      callback: this.dummyCallback,
+      children: [],
+      requiresAdmin: true,
+      title: 'copy-settings'
+    })
+    return this.applyCallbackToList(actions, callback);
   }
 
   private _resetActions() {
