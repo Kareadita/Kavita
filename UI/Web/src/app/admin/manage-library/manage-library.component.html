@@ -10,6 +10,13 @@
   <table class="table table-striped">
     <thead>
     <tr>
+      <th scope="col">
+        <div class="form-check">
+          <input id="select-all" type="checkbox" class="form-check-input"
+                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+          <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all')}}</label>
+        </div>
+      </th>
       <th scope="col">{{t('name-header')}}</th>
       <th scope="col">{{t('type-title')}}</th>
       <th scope="col">{{t('shared-folders-title')}}</th>
@@ -20,7 +27,14 @@
     <tbody>
       @for(library of libraries; track library.name + library.type + library.folders.length + library.lastScanned; let idx = $index) {
         <tr>
-          <td id="username--{{idx}}">
+          <td>
+            <div class="form-check">
+              <input id="select-library-{{idx}}" type="checkbox" class="form-check-input"
+                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
+              <label for="select-library-{{idx}}" class="form-check-label visually-hidden">{{library.name}}</label>
+            </div>
+          </td>
+          <td id="library--{{idx}}">
             <a [routerLink]="'/library/' + library.id">{{library.name}}</a>
           </td>
           <td>

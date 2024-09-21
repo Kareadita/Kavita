@@ -1181,7 +1181,9 @@
         "edit-library-by-name": "Delete {{name}}",
         "folder-count": "{{num}} folders",
         "actions-header": "{{manage-users.actions-header}}",
-        "name-header": "{{manage-users.name-header}}"
+        "name-header": "{{manage-users.name-header}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
 
     "manage-media-settings": {

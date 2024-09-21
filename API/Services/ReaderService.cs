@@ -703,7 +703,7 @@ public class ReaderService : IReaderService
             {
                 MinHours = Math.Min(minHours, maxHours),
                 MaxHours = Math.Max(minHours, maxHours),
-                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
+                AvgHours = wordCount / AvgWordsPerHour
             };
         }
 
@@ -714,7 +714,7 @@ public class ReaderService : IReaderService
         {
             MinHours = Math.Min(minHoursPages, maxHoursPages),
             MaxHours = Math.Max(minHoursPages, maxHoursPages),
-            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
+            AvgHours = pageCount / AvgPagesPerMinute / 60F
         };
     }
 

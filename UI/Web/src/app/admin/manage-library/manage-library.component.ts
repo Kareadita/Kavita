@@ -33,6 +33,8 @@ import {Action, ActionFactoryService, ActionItem} from "../../_services/action-f
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {BehaviorSubject, Observable} from "rxjs";
+import {Select2Module} from "ng-select2-component";
+import {SelectionModel} from "../../typeahead/_models/selection-model";
 
 @Component({
     selector: 'app-manage-library',
@@ -40,7 +42,7 @@ import {BehaviorSubject, Observable} from "rxjs";
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe, AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe, CardActionablesComponent]
+    imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe, AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe, CardActionablesComponent, Select2Module]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -66,11 +68,19 @@ export class ManageLibraryComponent implements OnInit {
   deletionInProgress: boolean = false;
   useActionableSource = new BehaviorSubject<boolean>(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
   useActionables$: Observable<boolean> = this.useActionableSource.asObservable();
+  selectedLibraries: Array<{selected: boolean, data: Library}> = [];
+  selections!: SelectionModel<Library>;
+  selectAll: boolean = false;
+
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   onResize(){
     this.useActionableSource.next(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
+  }
+
+  get hasSomeSelected() {
+    return this.selections != null && this.selections.hasSomeSelected();
   }
 
   ngOnInit(): void {
@@ -118,6 +128,7 @@ export class ManageLibraryComponent implements OnInit {
     this.cdRef.markForCheck();
     this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
       this.libraries = [...libraries];
+      this.setupSelections();
       this.loading = false;
       this.cdRef.markForCheck();
     });
@@ -185,4 +196,27 @@ export class ManageLibraryComponent implements OnInit {
       action.callback(action, library);
     }
   }
+
+  setupSelections() {
+    this.selections = new SelectionModel<Library>(false, this.libraries);
+    this.cdRef.markForCheck();
+  }
+
+  toggleAll() {
+    this.selectAll = !this.selectAll;
+    this.libraries.forEach(s => this.selections.toggle(s, this.selectAll));
+    this.cdRef.markForCheck();
+  }
+
+  handleSelection(item: Library) {
+    this.selections.toggle(item);
+    const numberOfSelected = this.selections.selected().length;
+    if (numberOfSelected == 0) {
+      this.selectAll = false;
+    } else if (numberOfSelected == this.selectedLibraries.length) {
+      this.selectAll = true;
+    }
+    this.cdRef.markForCheck();
+  }
+
 }
