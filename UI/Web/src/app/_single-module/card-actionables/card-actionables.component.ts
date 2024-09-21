@@ -16,7 +16,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
-import {NavLinkModalComponent} from "../../nav/_components/nav-link-modal/nav-link-modal.component";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 
 @Component({

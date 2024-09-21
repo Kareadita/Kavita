@@ -71,6 +71,7 @@ export class ManageLibraryComponent implements OnInit {
   selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;
   selectAll: boolean = false;
+  bulkActions = this.actions;
 
 
   @HostListener('window:resize', ['$event'])
@@ -85,6 +86,8 @@ export class ManageLibraryComponent implements OnInit {
 
   ngOnInit(): void {
     this.getLibraries();
+
+    this.bulkActions = this.actions.filter(a => [Action.Delete, Action.Scan, Action.GenerateColorScape, Action.AnalyzeFiles].includes(a.action));
 
     // when a progress event comes in, show it on the UI next to library
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef),

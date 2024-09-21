@@ -810,6 +810,7 @@ public class ReaderService : IReaderService
     {
         switch(libraryType)
         {
+            case LibraryType.Image:
             case LibraryType.Manga:
                 return "Chapter" + (includeSpace ? " " : string.Empty);
             case LibraryType.Comic:
