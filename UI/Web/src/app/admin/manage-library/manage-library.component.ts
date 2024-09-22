@@ -2,25 +2,28 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef, HostListener,
+  DestroyRef,
+  HostListener,
   inject,
   OnInit
 } from '@angular/core';
-import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged, filter, take } from 'rxjs/operators';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { LibrarySettingsModalComponent } from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
-import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
-import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
-import { Library } from 'src/app/_models/library/library';
-import { LibraryService } from 'src/app/_services/library.service';
-import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {distinctUntilChanged, filter, take} from 'rxjs/operators';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {
+  LibrarySettingsModalComponent
+} from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
+import {NotificationProgressEvent} from 'src/app/_models/events/notification-progress-event';
+import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
+import {Library} from 'src/app/_models/library/library';
+import {LibraryService} from 'src/app/_services/library.service';
+import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import { TimeAgoPipe } from '../../_pipes/time-ago.pipe';
-import { LibraryTypePipe } from '../../_pipes/library-type.pipe';
-import { RouterLink } from '@angular/router';
+import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
+import {TimeAgoPipe} from '../../_pipes/time-ago.pipe';
+import {LibraryTypePipe} from '../../_pipes/library-type.pipe';
+import {RouterLink} from '@angular/router';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {AsyncPipe, TitleCasePipe} from "@angular/common";
@@ -28,7 +31,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {Breakpoint, KEY_CODES, UtilityService} from "../../shared/_services/utility.service";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -38,6 +41,7 @@ import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
+import {FormControl, FormGroup} from "@angular/forms";
 
 @Component({
     selector: 'app-manage-library',
@@ -73,12 +77,12 @@ export class ManageLibraryComponent implements OnInit {
   deletionInProgress: boolean = false;
   useActionableSource = new BehaviorSubject<boolean>(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
   useActionables$: Observable<boolean> = this.useActionableSource.asObservable();
-  selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;
   selectAll: boolean = false;
   bulkMode = false;
   bulkAction: Action | null = null;
   sourceCopyToLibrary: Library | null = null;
+  bulkForm = new FormGroup({'includeType': new FormControl(false)});
   isShiftDown: boolean = false;
   lastSelectedIndex: number | null = null;
 
@@ -149,6 +153,7 @@ export class ManageLibraryComponent implements OnInit {
     this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
       this.libraries = [...libraries];
       this.setupSelections();
+      this.resetBulkMode();
       this.loading = false;
       this.cdRef.markForCheck();
     });
@@ -189,33 +194,58 @@ export class ManageLibraryComponent implements OnInit {
     await this.actionService.scanLibrary(library);
   }
 
-  async handleBulkAction(action: ActionItem<Library>, library : Library | null) {
+
+  async applyBulkAction() {
+    if (!this.bulkMode) return;
 
     // Get Selected libraries
-    const selectedLibraries = this.selectedLibraries.filter(l => l.selected).map(l => l.data);
+    const selected = this.selections.selected();
 
     // Queue up actions in a background queue that runs each job and listens to SignalR events to move to the next (or timeout)
-    if (selectedLibraries.length === 0 && action.action !== Action.CopySettings) {
+    if (selected.length === 0 && this.bulkAction !== Action.CopySettings) {
       await this.confirmService.alert(translate('toasts.must-select-library'));
+      this.resetBulkMode();
       return;
     }
+
+    switch(this.bulkAction) {
+      case (Action.Scan):
+        break;
+      case Action.RefreshMetadata:
+        break
+      case Action.GenerateColorScape:
+        break;
+      case Action.CopySettings:
+        // Remove the source library from the list
+        break;
+    }
+
+    // Refresh libraries as things changed
+    this.getLibraries();
+  }
+
+  async handleBulkAction(action: ActionItem<Library>, library : Library | null) {
 
     this.bulkAction = action.action;
     this.cdRef.markForCheck();
 
     switch (action.action) {
-      // case(Action.Scan):
-      //   await this.actionService.scanLibrary(library);
-      //   break;
-      // case(Action.RefreshMetadata):
-      //   await this.actionService.refreshLibraryMetadata(library);
-      //   break;
-      // case(Action.GenerateColorScape):
-      //   await this.actionService.refreshLibraryMetadata(library, undefined, false, true);
-      //   break;
-      // case (Action.Delete):
-      //   await this.deleteLibrary(library);
-      //   break;
+      case(Action.Scan):
+        //await this.actionService.scanLibrary(library);
+        this.applyBulkAction();
+        break;
+      case(Action.RefreshMetadata):
+        //await this.actionService.refreshLibraryMetadata(library);
+        this.applyBulkAction();
+        break;
+      case(Action.GenerateColorScape):
+        //await this.actionService.refreshLibraryMetadata(library, undefined, false, true);
+        this.applyBulkAction();
+        break;
+      case (Action.Delete):
+        //await this.deleteLibrary(library);
+        this.applyBulkAction();
+        break;
       case (Action.CopySettings):
         // Prompt the user
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
@@ -232,6 +262,7 @@ export class ManageLibraryComponent implements OnInit {
         break;
     }
   }
+
 
   async handleAction(action: ActionItem<Library>, library: Library) {
     switch (action.action) {
@@ -296,26 +327,15 @@ export class ManageLibraryComponent implements OnInit {
     // Manage the state of "Select All" and "Has Some Selected"
     const numberOfSelected = this.selections.selected().length;
     this.selectAll = numberOfSelected === this.libraries.length;
-    //this.hasSomeSelected = numberOfSelected > 0 && numberOfSelected < this.libraries.length;
 
     this.cdRef.markForCheck();
   }
 
-  // handleSelection(item: Library) {
-  //   this.selections.toggle(item);
-  //
-  //   if (this.isShiftDown) {
-  //     // Select multiple
-  //
-  //   }
-  //
-  //   const numberOfSelected = this.selections.selected().length;
-  //   if (numberOfSelected == 0) {
-  //     this.selectAll = false;
-  //   } else if (numberOfSelected == this.selectedLibraries.length) {
-  //     this.selectAll = true;
-  //   }
-  //   this.cdRef.markForCheck();
-  // }
 
+  resetBulkMode() {
+    this.bulkAction = null;
+    this.bulkMode = false;
+    this.sourceCopyToLibrary = null;
+    this.cdRef.markForCheck();
+  }
 }

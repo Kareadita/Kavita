@@ -14,15 +14,20 @@
   @if (bulkMode) {
    <div class="alert alert-warning">
      @if (bulkAction === Action.CopySettings && sourceCopyToLibrary) {
-       Select which libraries to copy the settings from {{sourceCopyToLibrary.name}} to
+       Select which libraries to copy the settings from {{sourceCopyToLibrary.name}} to.
+       <form [formGroup]="bulkForm">
+         <div class="form-check form-switch">
+           <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType">
+         </div>
+       </form>
      } @else {
-       Select which libraries you want to perform the bulk action, {{bulkAction}}, against
+       Select which libraries you want to perform the bulk action, {{bulkAction}}, against.
      }
 
 
      <div>
-       <button class="btn btn-secondary">{{t('cancel')}}</button>
-       <button class="btn btn-primary">{{t('apply')}}</button>
+       <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
+       <button class="btn btn-primary" (click)="applyBulkAction()">{{t('apply')}}</button>
      </div>
    </div>
   }

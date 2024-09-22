@@ -2251,7 +2251,10 @@
         "is-empty": "Is Empty"
     },
 
-
+    "confirm": {
+        "alert": "Alert",
+        "confirm": "Confirm"
+    },
 
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
