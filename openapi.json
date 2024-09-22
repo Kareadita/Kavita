@@ -3082,6 +3082,38 @@
         }
       }
     },
+    "/api/Library/scan-multiple": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Enqueues a bunch of library scans",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Library/scan-all": {
       "post": {
         "tags": [
@@ -14960,6 +14992,24 @@
           },
           "localizedSeriesName": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkActionDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "force": {
+            "type": "boolean",
             "nullable": true
           }
         },

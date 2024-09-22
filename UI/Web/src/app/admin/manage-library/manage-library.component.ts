@@ -49,7 +49,9 @@ import {FormControl, FormGroup} from "@angular/forms";
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe, AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe, CardActionablesComponent, Select2Module]
+    imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
+      AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe,
+      CardActionablesComponent, Select2Module]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -210,8 +212,12 @@ export class ManageLibraryComponent implements OnInit {
 
     switch(this.bulkAction) {
       case (Action.Scan):
+        await this.confirmService.alert(translate('toasts.bulk-scan'));
+        this.libraryService.scanMultipleLibraries(selected.map(l => l.id)).subscribe();
         break;
       case Action.RefreshMetadata:
+        if (!await this.confirmService.confirm(translate('toasts.bulk-covers'))) return;
+        this.libraryService.refreshMetadataMultipleLibraries(selected.map(l => l.id)).subscribe();
         break
       case Action.GenerateColorScape:
         break;

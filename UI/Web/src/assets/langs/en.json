@@ -2367,7 +2367,9 @@
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
         "mal-token-required": "MAL Token is required, set in User Settings",
         "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
-        "must-select-library": "At least one library must be selected"
+        "must-select-library": "At least one library must be selected",
+        "bulk-scan": "Scanning multiple libraries will be done linearly. This may take a long time and not complete depending on library size.",
+        "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?"
     },
 
     "read-time-pipe": {
@@ -2440,7 +2442,7 @@
         "multiple-selections": "Multiple Selections",
         "back-to": "Back to {{action}}",
         "title": "Actions",
-        "copy-settings": "Copy Settings To"
+        "copy-settings": "Copy Settings From"
     },
 
     "preferences": {

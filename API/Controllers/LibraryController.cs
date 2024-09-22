@@ -303,6 +303,22 @@ public class LibraryController : BaseApiController
     }
 
     /// <summary>
+    /// Enqueues a bunch of library scans
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("scan-multiple")]
+    public async Task<ActionResult> ScanMultiple(BulkActionDto dto)
+    {
+        foreach (var libraryId in dto.Ids)
+        {
+            await _taskScheduler.ScanLibrary(libraryId, dto.Force ?? false);
+        }
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Scans a given library for file changes. If another scan task is in progress, will reschedule the invocation for 3 hours in future.
     /// </summary>
     /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
@@ -320,6 +336,18 @@ public class LibraryController : BaseApiController
     public ActionResult RefreshMetadata(int libraryId, bool force = true, bool forceColorscape = true)
     {
         _taskScheduler.RefreshMetadata(libraryId, force, forceColorscape);
+        return Ok();
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("refresh-metadata-multiple")]
+    public ActionResult RefreshMetadataMultiple(BulkActionDto dto)
+    {
+        foreach (var libraryId in dto.Ids)
+        {
+            _taskScheduler.RefreshMetadata(libraryId, dto.Force ?? false);
+        }
+
         return Ok();
     }
 
