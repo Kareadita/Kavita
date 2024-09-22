@@ -341,11 +341,11 @@ public class LibraryController : BaseApiController
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("refresh-metadata-multiple")]
-    public ActionResult RefreshMetadataMultiple(BulkActionDto dto)
+    public ActionResult RefreshMetadataMultiple(BulkActionDto dto, bool forceColorscape = true)
     {
         foreach (var libraryId in dto.Ids)
         {
-            _taskScheduler.RefreshMetadata(libraryId, dto.Force ?? false);
+            _taskScheduler.RefreshMetadata(libraryId, dto.Force ?? false, forceColorscape);
         }
 
         return Ok();
@@ -356,6 +356,18 @@ public class LibraryController : BaseApiController
     public ActionResult Analyze(int libraryId)
     {
         _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
+        return Ok();
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("analyze-multiple")]
+    public ActionResult AnalyzeMultiple(BulkActionDto dto)
+    {
+        foreach (var libraryId in dto.Ids)
+        {
+            _taskScheduler.AnalyzeFilesForLibrary(libraryId, dto.Force ?? false);
+        }
+
         return Ok();
     }
 

@@ -198,7 +198,9 @@ export class ManageLibraryComponent implements OnInit {
 
 
   async applyBulkAction() {
-    if (!this.bulkMode) return;
+    if (!this.bulkMode) {
+      this.resetBulkMode();
+    }
 
     // Get Selected libraries
     const selected = this.selections.selected();
@@ -217,43 +219,37 @@ export class ManageLibraryComponent implements OnInit {
         break;
       case Action.RefreshMetadata:
         if (!await this.confirmService.confirm(translate('toasts.bulk-covers'))) return;
-        this.libraryService.refreshMetadataMultipleLibraries(selected.map(l => l.id)).subscribe();
+        this.libraryService.refreshMetadataMultipleLibraries(selected.map(l => l.id), true, false).subscribe(() => this.getLibraries());
         break
+      case Action.AnalyzeFiles:
+        this.libraryService.analyzeFilesMultipleLibraries(selected.map(l => l.id)).subscribe(() => this.getLibraries());
+        break;
       case Action.GenerateColorScape:
+        this.libraryService.refreshMetadataMultipleLibraries(selected.map(l => l.id), false, true).subscribe(() => this.getLibraries());
         break;
       case Action.CopySettings:
         // Remove the source library from the list
+        const includeType = this.bulkForm.get('includeType')!.value + '' == 'true';
+        this.libraryService.copySettingsFromLibrary(this.sourceCopyToLibrary!.id, selected.map(l => l.id), includeType).subscribe(() => this.getLibraries());
         break;
     }
-
-    // Refresh libraries as things changed
-    this.getLibraries();
   }
 
   async handleBulkAction(action: ActionItem<Library>, library : Library | null) {
 
+    this.bulkMode = true;
     this.bulkAction = action.action;
     this.cdRef.markForCheck();
 
     switch (action.action) {
       case(Action.Scan):
-        //await this.actionService.scanLibrary(library);
-        this.applyBulkAction();
-        break;
       case(Action.RefreshMetadata):
-        //await this.actionService.refreshLibraryMetadata(library);
-        this.applyBulkAction();
-        break;
       case(Action.GenerateColorScape):
-        //await this.actionService.refreshLibraryMetadata(library, undefined, false, true);
-        this.applyBulkAction();
-        break;
       case (Action.Delete):
-        //await this.deleteLibrary(library);
-        this.applyBulkAction();
+        await this.applyBulkAction();
         break;
       case (Action.CopySettings):
-        // Prompt the user
+        // Prompt the user for the library then wait for them to manually trigger applyBulkAction
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
         ref.componentInstance.libraries = this.libraries;
         ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number | null) => {
@@ -263,8 +259,6 @@ export class ManageLibraryComponent implements OnInit {
           this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
           this.cdRef.markForCheck();
         });
-        break;
-      default:
         break;
     }
   }
