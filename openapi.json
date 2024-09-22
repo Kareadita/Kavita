@@ -3270,6 +3270,39 @@
         }
       }
     },
+    "/api/Library/copy-settings-from": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Copy the library settings (adv tab + optional type) to a set of other libraries.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopySettingsFromLibraryDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopySettingsFromLibraryDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopySettingsFromLibraryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Library/scan-folder": {
       "post": {
         "tags": [
@@ -16282,6 +16315,28 @@
         },
         "additionalProperties": false
       },
+      "CopySettingsFromLibraryDto": {
+        "type": "object",
+        "properties": {
+          "sourceLibraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetLibraryIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "includeType": {
+            "type": "boolean",
+            "description": "Include copying over the type"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateDeviceDto": {
         "required": [
           "emailAddress",
@@ -21900,7 +21955,6 @@
           "folderWatching",
           "id",
           "includeInDashboard",
-          "includeInRecommended",
           "includeInSearch",
           "manageCollections",
           "manageReadingLists",
@@ -21939,9 +21993,6 @@
             "type": "boolean"
           },
           "includeInDashboard": {
-            "type": "boolean"
-          },
-          "includeInRecommended": {
             "type": "boolean"
           },
           "includeInSearch": {

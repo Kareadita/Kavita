@@ -26,7 +26,7 @@ import {LibraryTypePipe} from '../../_pipes/library-type.pipe';
 import {RouterLink} from '@angular/router';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {AsyncPipe, TitleCasePipe} from "@angular/common";
+import {AsyncPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
@@ -49,9 +49,9 @@ import {FormControl, FormGroup} from "@angular/forms";
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-      AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe,
-      CardActionablesComponent, Select2Module]
+  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
+    AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe,
+    CardActionablesComponent, Select2Module, NgTemplateOutlet]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -203,12 +203,15 @@ export class ManageLibraryComponent implements OnInit {
     }
 
     // Get Selected libraries
-    const selected = this.selections.selected();
+    let selected = this.selections.selected();
 
-    // Queue up actions in a background queue that runs each job and listens to SignalR events to move to the next (or timeout)
-    if (selected.length === 0 && this.bulkAction !== Action.CopySettings) {
+    // Remove the source library id from selected (if applicable)
+    if (this.bulkAction === Action.CopySettings) {
+      selected = selected.filter(l => l.id !== this.sourceCopyToLibrary!.id);
+    }
+
+    if (selected.length === 0) {
       await this.confirmService.alert(translate('toasts.must-select-library'));
-      this.resetBulkMode();
       return;
     }
 
@@ -229,6 +232,9 @@ export class ManageLibraryComponent implements OnInit {
         break;
       case Action.CopySettings:
         // Remove the source library from the list
+        if (selected.length === 1 && selected[0].id === this.sourceCopyToLibrary!.id) {
+          return;
+        }
         const includeType = this.bulkForm.get('includeType')!.value + '' == 'true';
         this.libraryService.copySettingsFromLibrary(this.sourceCopyToLibrary!.id, selected.map(l => l.id), includeType).subscribe(() => this.getLibraries());
         break;
@@ -336,6 +342,12 @@ export class ManageLibraryComponent implements OnInit {
     this.bulkAction = null;
     this.bulkMode = false;
     this.sourceCopyToLibrary = null;
-    this.cdRef.markForCheck();
+    this.libraries.forEach(s => {
+      if (this.selections.isSelected(s)) {
+        this.selections.toggle(s, false)
+      }
+    });
+    this.selectAll = false;
+      this.cdRef.markForCheck();
   }
 }

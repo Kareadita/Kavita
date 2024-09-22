@@ -9,25 +9,22 @@
     </button>
   </div>
 
-  <!-- TODO: We need a filter bar when there is more than 10 libraries -->
-
-  @if (bulkMode) {
+  @if (bulkMode && bulkAction === Action.CopySettings && sourceCopyToLibrary) {
    <div class="alert alert-warning">
-     @if (bulkAction === Action.CopySettings && sourceCopyToLibrary) {
-       Select which libraries to copy the settings from {{sourceCopyToLibrary.name}} to.
-       <form [formGroup]="bulkForm">
-         <div class="form-check form-switch">
-           <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType">
-         </div>
-       </form>
-     } @else {
-       Select which libraries you want to perform the bulk action, {{bulkAction}}, against.
-     }
+     {{t('bulk-copy-to', {libraryName: sourceCopyToLibrary.name})}}
+     <form [formGroup]="bulkForm">
+       <div class="form-check form-switch">
+         <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType" aria-describedby="include-type-help">
+         <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
+         <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
+         <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
+         <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip"></ng-container></span>
+       </div>
+     </form>
 
-
-     <div>
+     <div class="mt-2">
        <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
-       <button class="btn btn-primary" (click)="applyBulkAction()">{{t('apply')}}</button>
+       <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!hasSomeSelected">{{t('apply')}}</button>
      </div>
    </div>
   }
