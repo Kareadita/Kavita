@@ -61,6 +61,7 @@ export class ManageLibraryComponent implements OnInit {
   private readonly actionService = inject(ActionService);
 
   protected readonly Breakpoint = Breakpoint;
+  protected readonly Action = Action;
 
   actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   bulkActions = this.actionFactoryService.getBulkLibraryActions(this.handleBulkAction.bind(this));
@@ -76,6 +77,8 @@ export class ManageLibraryComponent implements OnInit {
   selections!: SelectionModel<Library>;
   selectAll: boolean = false;
   bulkMode = false;
+  bulkAction: Action | null = null;
+  sourceCopyToLibrary: Library | null = null;
   isShiftDown: boolean = false;
   lastSelectedIndex: number | null = null;
 
@@ -192,10 +195,13 @@ export class ManageLibraryComponent implements OnInit {
     const selectedLibraries = this.selectedLibraries.filter(l => l.selected).map(l => l.data);
 
     // Queue up actions in a background queue that runs each job and listens to SignalR events to move to the next (or timeout)
-    if (selectedLibraries.length === 0) {
+    if (selectedLibraries.length === 0 && action.action !== Action.CopySettings) {
       await this.confirmService.alert(translate('toasts.must-select-library'));
       return;
     }
+
+    this.bulkAction = action.action;
+    this.cdRef.markForCheck();
 
     switch (action.action) {
       // case(Action.Scan):
@@ -214,10 +220,11 @@ export class ManageLibraryComponent implements OnInit {
         // Prompt the user
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
         ref.componentInstance.libraries = this.libraries;
-        ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: Library | null) => {
+        ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number | null) => {
           if (res === null) return;
           // res will be the library the user chose
           this.bulkMode = true;
+          this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
           this.cdRef.markForCheck();
         });
         break;
@@ -254,12 +261,6 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-
-  async performBulkAction(action: ActionItem<Library>) {
-    if (typeof action.callback === 'function') {
-      await this.handleBulkAction(action, null);
-    }
-  }
 
   setupSelections() {
     this.selections = new SelectionModel<Library>(false, this.libraries);

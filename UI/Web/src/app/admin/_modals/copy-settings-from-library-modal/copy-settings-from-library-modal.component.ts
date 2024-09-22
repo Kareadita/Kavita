@@ -25,6 +25,6 @@ export class CopySettingsFromLibraryModalComponent {
   });
 
   save() {
-    this.modal.close(this.libForm.get('library')?.value);
+    this.modal.close(parseInt(this.libForm.get('library')?.value + '', 10));
   }
 }

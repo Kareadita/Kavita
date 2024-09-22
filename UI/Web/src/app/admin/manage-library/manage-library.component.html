@@ -1,8 +1,7 @@
 <ng-container *transloco="let t; read: 'manage-library'">
   <div class="position-relative">
-    <div class="position-absolute custom-position-2 btn btn-primary-outline">
-      <span>Bulk Actions</span>
-      <app-card-actionables [actions]="bulkActions" (actionHandler)="performBulkAction($event)"></app-card-actionables>
+    <div class="position-absolute custom-position-2">
+      <app-card-actionables [actions]="bulkActions" btnClass="btn-primary-outline" [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null)"></app-card-actionables>
     </div>
 
     <button class="btn btn-primary-outline position-absolute  custom-position" (click)="addLibrary()" [title]="t('add-library')">
@@ -14,7 +13,12 @@
 
   @if (bulkMode) {
    <div class="alert alert-warning">
-    Select which libraries you want to perform the bulk action against
+     @if (bulkAction === Action.CopySettings && sourceCopyToLibrary) {
+       Select which libraries to copy the settings from {{sourceCopyToLibrary.name}} to
+     } @else {
+       Select which libraries you want to perform the bulk action, {{bulkAction}}, against
+     }
+
 
      <div>
        <button class="btn btn-secondary">{{t('cancel')}}</button>

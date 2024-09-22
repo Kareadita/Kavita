@@ -1192,7 +1192,7 @@
         "close": "{{common.close}}",
         "select": "Select",
         "title": "Copy settings from one library to multiple others",
-        "description": "Select a modal then press save. You will select all the libraries that these settings will apply to.",
+        "description": "Select a library to copy settings from and on the next screen select libraries to apply to.",
         "select-option": "Select a Library"
     },
 
