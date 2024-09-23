@@ -347,7 +347,7 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.CacheDirectory));
     }
 
-    private void TrackFoundSeriesAndFiles(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, IList<ScannedSeriesResult> seenSeries)
+    private static void TrackFoundSeriesAndFiles(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, IList<ScannedSeriesResult> seenSeries)
     {
         foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0))
         {
@@ -543,9 +543,9 @@ public class ScannerService : IScannerService
         var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime);
 
         UpdateLastScanned(library);
-
-
         _unitOfWork.LibraryRepository.Update(library);
+
+
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 4: Save Library", library.Name);
         if (await _unitOfWork.CommitAsync())
         {
@@ -587,25 +587,30 @@ public class ScannerService : IScannerService
     {
         try
         {
-            // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
-            // NOTE: This implementation is expensive
-            _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan");
-            var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(parsedSeries.Keys.ToList(), library.Id);
-            _logger.LogDebug("[ScannerService] Found {Count} series that needs to be removed: {SeriesList}",
-                removedSeries.Count, removedSeries.Select(s => s.Name));
-            _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan - complete");
+            _logger.LogDebug("[ScannerService] Removing series that were not found during the scan");
 
+            var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(parsedSeries.Keys.ToList(), library.Id);
+            _logger.LogDebug("[ScannerService] Found {Count} series to remove: {SeriesList}",
+                removedSeries.Count, string.Join(", ", removedSeries.Select(s => s.Name)));
+
+            // Commit the changes
             await _unitOfWork.CommitAsync();
 
-            foreach (var s in removedSeries)
+            // Notify for each removed series
+            foreach (var series in removedSeries)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
+                await _eventHub.SendMessageAsync(
+                    MessageFactory.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(series.Id, series.Name, series.LibraryId),
+                    false
+                );
             }
+
+            _logger.LogDebug("[ScannerService] Series removal process completed");
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "[ScannerService] There was an issue deleting series for cleanup. Please check logs and rescan");
+            _logger.LogCritical(ex, "[ScannerService] Error during series cleanup. Please check logs and rescan.");
         }
     }
 
@@ -668,10 +673,4 @@ public class ScannerService : IScannerService
 
         return Tuple.Create(scanElapsedTime, processedSeries);
     }
-
-    public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
-    {
-        return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
-    }
-
 }
