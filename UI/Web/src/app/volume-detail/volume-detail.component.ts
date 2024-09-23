@@ -666,7 +666,6 @@ export class VolumeDetailComponent implements OnInit {
     const chaptersWithProgress = this.volume.chapters.filter(c => c.pagesRead < c.pages);
     if (chaptersWithProgress.length > 0 && this.volume.chapters.length > 1) {
       this.currentlyReadingChapter =  chaptersWithProgress[0];
-      console.log('Updating currentlyReading chapter', this.currentlyReadingChapter)
       this.cdRef.markForCheck();
     } else {
       this.currentlyReadingChapter = undefined;
