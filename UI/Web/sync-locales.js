@@ -30,29 +30,33 @@ function syncLocales() {
         let localeData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         let updated = false;
 
-        function updateNestedObject(source, target) {
+        function updateNestedObject(source, target, parentKeys = []) {
             const updatedTarget = {};
             Object.keys(source).forEach(key => {
+                const fullKeyPath = [...parentKeys, key].join('.'); // Track parent keys
                 if (typeof source[key] === 'object' && source[key] !== null) {
                     if (!target[key] || Object.keys(target[key]).length === 0) {
                         updatedTarget[key] = {};
                         updated = true;
+                        console.log(`Added new object for key: ${fullKeyPath}`);
                     } else {
                         updatedTarget[key] = target[key];
                     }
-                    updatedTarget[key] = updateNestedObject(source[key], updatedTarget[key]);
+                    updatedTarget[key] = updateNestedObject(source[key], updatedTarget[key], [...parentKeys, key]);
                 } else {
                     if (typeof source[key] === 'string') {
                         if (source[key].match(/{{.+\..+}}/)) {
                             if (target[key] !== source[key]) {
                                 updatedTarget[key] = source[key];
                                 updated = true;
+                                console.log(`Updated key: ${fullKeyPath}`);
                             } else {
                                 updatedTarget[key] = target[key];
                             }
                         } else if (!target.hasOwnProperty(key)) {
                             updatedTarget[key] = '';
                             updated = true;
+                            console.log(`Added empty string for key: ${fullKeyPath}`);
                         } else {
                             updatedTarget[key] = target[key];
                         }
