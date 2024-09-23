@@ -220,6 +220,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
     {
+        _logger.LogInformation("Enqueuing library file analysis for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
     }
 

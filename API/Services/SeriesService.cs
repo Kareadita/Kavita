@@ -453,10 +453,6 @@ public class SeriesService : ISeriesService
                 continue;
             }
 
-            volume.Chapters = volume.Chapters
-                .OrderBy(d => d.MinNumber, ChapterSortComparerDefaultLast.Default)
-                .ToList();
-
             if (RenameVolumeName(volume, libraryType, volumeLabel) || (bookTreatment && !volume.IsSpecial()))
             {
                 processedVolumes.Add(volume);

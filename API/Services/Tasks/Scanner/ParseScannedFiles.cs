@@ -435,7 +435,15 @@ public class ParseScannedFiles
         {
             if (scannedSeries[series].Count <= 0) continue;
 
-            UpdateSortOrder(scannedSeries, series);
+            try
+            {
+                UpdateSortOrder(scannedSeries, series);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue setting IssueOrder");
+            }
+
 
             processedScannedSeries.Add(new ScannedSeriesResult()
             {
@@ -500,88 +508,90 @@ public class ParseScannedFiles
     }
 
 
-    private void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
+    public static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
-        try
+        // Set the Sort order per Volume
+        var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
+        foreach (var volume in volumes)
         {
-            // Set the Sort order per Volume
-            var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
-            foreach (var volume in volumes)
+            var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
+            IList<ParserInfo> chapters;
+            var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
+            var hasAnySpMarker = infos.Exists(info => info.SpecialIndex > 0);
+            var counter = 0f;
+
+            // Handle specials with SpecialIndex
+            if (specialTreatment && hasAnySpMarker)
             {
-                var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
-                IList<ParserInfo> chapters;
-                var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
-                var hasAnySpMarker = infos.Exists(info => info.SpecialIndex > 0);
-                var counter = 0f;
-
-                if (specialTreatment && hasAnySpMarker)
-                {
-                    chapters = infos
-                        .OrderBy(info => info.SpecialIndex)
-                        .ToList();
-
-                    foreach (var chapter in chapters)
-                    {
-                        chapter.IssueOrder = counter;
-                        counter++;
-                    }
-                    continue;
-                }
-
-
-                // If everything is a special but we don't have any SpecialIndex, then order naturally and use 0, 1, 2
-                if (specialTreatment)
-                {
-                    chapters = infos
-                        .OrderByNatural(info => Parser.Parser.RemoveExtensionIfSupported(info.Filename)!)
-                        .ToList();
-
-                    foreach (var chapter in chapters)
-                    {
-                        chapter.IssueOrder = counter;
-                        counter++;
-                    }
-                    continue;
-                }
-
                 chapters = infos
-                    .OrderByNatural(info => info.Chapters, StringComparer.InvariantCulture)
+                    .OrderBy(info => info.SpecialIndex)
                     .ToList();
 
-                counter = 0f;
-                var prevIssue = string.Empty;
                 foreach (var chapter in chapters)
                 {
-                    if (float.TryParse(chapter.Chapters, CultureInfo.InvariantCulture, out var parsedChapter))
+                    chapter.IssueOrder = counter;
+                    counter++;
+                }
+                continue;
+            }
+
+            // Handle specials without SpecialIndex (natural order)
+            if (specialTreatment)
+            {
+                chapters = infos
+                    .OrderByNatural(info => Parser.Parser.RemoveExtensionIfSupported(info.Filename)!)
+                    .ToList();
+
+                foreach (var chapter in chapters)
+                {
+                    chapter.IssueOrder = counter;
+                    counter++;
+                }
+                continue;
+            }
+
+            // Ensure chapters are sorted numerically when possible, otherwise push unparseable to the end
+            chapters = infos
+                .OrderBy(info => float.TryParse(info.Chapters, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : float.MaxValue)
+                .ToList();
+
+            counter = 0f;
+            var prevIssue = string.Empty;
+            foreach (var chapter in chapters)
+            {
+                if (float.TryParse(chapter.Chapters, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
+                {
+                    // Parsed successfully, use the numeric value
+                    counter = parsedChapter;
+                    chapter.IssueOrder = counter;
+
+                    // Increment for next chapter (unless the next has a similar value, then add 0.1)
+                    if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, CultureInfo.InvariantCulture, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
                     {
-                        counter = parsedChapter;
-                        if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, CultureInfo.InvariantCulture, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
-                        {
-                            // Bump by 0.1
-                            counter += 0.1f;
-                        }
-                        chapter.IssueOrder = counter;
-                        prevIssue = $"{parsedChapter}";
+                        counter += 0.1f; // bump if same value as the previous issue
                     }
-                    else
+                    prevIssue = $"{parsedChapter}";
+                }
+                else
+                {
+                    // Unparsed chapters: use the current counter and bump for the next
+                    if (!string.IsNullOrEmpty(prevIssue) && prevIssue == counter.ToString(CultureInfo.InvariantCulture))
                     {
-                        // I need to bump by 0.1f as if the prevIssue matches counter
-                        if (!string.IsNullOrEmpty(prevIssue) && prevIssue == counter + "")
-                        {
-                            // Bump by 0.1
-                            counter += 0.1f;
-                        }
-                        chapter.IssueOrder = counter;
-                        counter++;
-                        prevIssue = chapter.Chapters;
+                        counter += 0.1f; // bump if same value as the previous issue
                     }
+                    chapter.IssueOrder = counter;
+                    counter++;
+                    prevIssue = chapter.Chapters;
                 }
             }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "There was an issue setting IssueOrder");
-        }
+    }
+
+
+    private bool HasAllSeriesFolderNotChangedSinceLastScan(IList<SeriesModified> seriesFolders,
+        string normalizedFolder)
+    {
+        return seriesFolders.All(f => HasSeriesFolderNotChangedSinceLastScan(f, normalizedFolder));
     }
 
     /// <summary>
@@ -601,12 +611,6 @@ public class ParseScannedFiles
         }
 
         return false;
-    }
-
-    private bool HasAllSeriesFolderNotChangedSinceLastScan(IList<SeriesModified> seriesFolders,
-        string normalizedFolder)
-    {
-        return seriesFolders.All(f => HasSeriesFolderNotChangedSinceLastScan(f, normalizedFolder));
     }
 
     private bool HasSeriesFolderNotChangedSinceLastScan(SeriesModified seriesModified, string normalizedFolder)
