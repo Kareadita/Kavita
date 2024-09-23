@@ -118,7 +118,8 @@ export class GroupedTypeaheadComponent implements OnInit {
 
 
   @HostListener('window:click', ['$event'])
-  handleDocumentClick(event: any) {
+  handleDocumentClick(event: MouseEvent) {
+    console.log('click: ', event)
     this.close();
 
   }
@@ -197,7 +198,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   }
 
   toggleIncludeFiles(val: boolean) {
-    const firstRun = val === false && val === this.includeChapterAndFiles;
+    const firstRun = !val && val === this.includeChapterAndFiles;
 
     this.includeChapterAndFiles = val;
     this.inputChanged.emit({value: this.searchTerm, includeFiles: this.includeChapterAndFiles});
