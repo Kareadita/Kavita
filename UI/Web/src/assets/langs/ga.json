@@ -1687,7 +1687,7 @@
         "artist": "Ealaíontóir",
         "character": "Carachtar",
         "colorist": "Dathóir",
-        "cover-artist": "Ealaíontóir Clúdaigh",
+        "cover-artist": "{{artist}}",
         "editor": "Eagarthóir",
         "inker": "InkerName",
         "letterer": "Leitir Ceanainn",

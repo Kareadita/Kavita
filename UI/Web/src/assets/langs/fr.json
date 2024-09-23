@@ -625,7 +625,7 @@
         "series-count": "{{num}} Séries",
         "item-count": "{{num}} Éléments",
         "book-num": "Livre",
-        "issue-hash-num": "Numéro",
+        "issue-hash-num": "Numéro #",
         "issue-num": "Numéro",
         "chapter-num": "Chapitre",
         "volume-num": "Volume",

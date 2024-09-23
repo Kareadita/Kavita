@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "ログイン",
+        "title": "アカウントにログイン",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "パスワードをお忘れですか?",
-        "submit": "{{common.submit}}"
+        "submit": "サインイン"
     },
     "dashboard": {
         "server-settings-link": "サーバー設定",
@@ -13,7 +13,7 @@
         "recently-added-title": "最近追加されたシリーズ",
         "on-deck-title": "最近読んでいる本",
         "more-in-genre-title": "ジャンルを追加する {{genre}}",
-        "no-libraries": "まだライブラリが設定されていません｡設定するには",
+        "no-libraries": "まだライブラリのセットアップはありません。 作成する",
         "not-granted": "すべてのライブラリーにアクセス権が与えられていません。"
     },
     "edit-user": {
@@ -25,7 +25,8 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "保存中…",
-        "update": "更新"
+        "update": "更新",
+        "account-detail-title": "口座の詳細"
     },
     "user-scrobble-history": {
         "series-header": "シリーズ",
@@ -95,8 +96,8 @@
     "directory-picker": {
         "name-header": "名前",
         "type-header": "入力",
-        "instructions": "フォルダーを選択するとフォルダー構成が表示されます。ディレクトリが見つかりませんか？まず/をチェックしてみてください。",
-        "title": "ディレクトリを選択",
+        "instructions": "入力するフォルダを選択します。 フォルダが表示されませんか? まずはチェック・チェックしてみてください.",
+        "title": "フォルダを選択",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "path-label": "パス",
@@ -126,7 +127,8 @@
         "edition": "エディション",
         "other": "その他",
         "alternative-setting": "代替の設定",
-        "contains": "含む"
+        "contains": "含む",
+        "annual": "アニュアルレポート"
     },
     "book-reader": {
         "settings-header": "設定",
@@ -162,7 +164,8 @@
         "valid-email": "{{common.valid-email}}",
         "email-label": "{{common.email}}",
         "username-label": "{{common.username}}",
-        "required-field": "{{common.required-field}}"
+        "required-field": "{{common.required-field}}",
+        "error-label": "エラー:"
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
@@ -177,7 +180,7 @@
         "password-label": "{{common.password}}",
         "register": "登録",
         "description": "管理者アカウントを登録するには、フォームに必要事項を入力してください。",
-        "email-tooltip": "メールアドレスは実際のものである必要はありませんが、パスワードを忘れた場合のアクセス手段として機能します。ただし、カスタムのメールサービスホストを使用せずにパスワードを忘れた場合、サーバーの外部に送信されることはありません。",
+        "email-tooltip": "Eメールは実際のアドレスではなく、パスワードを忘れたアクセスを提供します。 カビタのメールがなければ、サーバーの外に送られません.",
         "password-validation": "{{validation.password-validation}}",
         "username-label": "{{common.username}}",
         "required-field": "{{validation.required-field}}",
@@ -191,25 +194,58 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "no-pages": "{{toasts.no-pages}}",
-        "volumes-tab": "巻",
+        "volumes-tab": "{{tabs.volumes-tab}}",
         "layout-mode-option-card": "カード",
         "continue": "続き",
         "cover-change": "ブラウザが画像をリフレッシュするまで最大1分かかる場合があります。その間、一部のページでは古い画像が表示される可能性があります。",
         "incognito": "シークレット",
         "continue-from": "続き{{title}}",
         "read-options-alt": "読書オプション",
-        "books-tab": "本",
+        "books-tab": "{{tabs.books-tab}}",
         "send-to": "{{deviceName}}にファイルがメールで送信されました。",
-        "storyline-tab": "ストーリーライン",
+        "storyline-tab": "{{tabs.storyline-tab}}",
         "no-chapters": "この巻にはチャプターが存在しません。読むことはできません。",
         "continue-incognito": "シークレットモードで続ける",
         "page-settings-title": "ページ設定",
-        "related-tab": "関連",
+        "related-tab": "{{tabs.related-tab}}",
         "read-incognito": "シークレットモードで読む",
-        "specials-tab": "Specials",
-        "recommendations-tab": "おすすめ",
-        "edit-series-alt": "シリーズ情報を編集",
-        "layout-mode-option-list": "リスト"
+        "specials-tab": "{{tabs.specials-tab}}",
+        "recommendations-tab": "{{tabs.recommendations-tab}}",
+        "edit-series-alt": "情報の編集",
+        "layout-mode-option-list": "リスト",
+        "user-reviews-plus": "外部レビュー",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "ongoing": "{{publication-status-pipe.ongoing}}",
+        "time-left-alt": "残り時間",
+        "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "info-tab": "{{tabs.info-tab}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "pages-count": "{{num}} ページ",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "user-reviews-local": "ローカルレビュー",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "details-tab": "{{tabs.details-tab}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "pencillers-title": "{{metadata-fields.pencillers-title}}",
+        "imprints-title": "{{metadata-fields.imprints-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}",
+        "volume-num": "{{common.volume-num}}",
+        "words-count": "{{num}} ワード",
+        "weblinks-title": "リンク",
+        "more-alt": "もっと",
+        "publication-status-title": "出版物",
+        "publication-status-tooltip": "出版状況",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "release-date-title": "リリース"
     },
     "publication-status-stats": {
         "year-header": "年",
@@ -333,15 +369,15 @@
         "total-items": "合計{{count}}"
     },
     "user-preferences": {
-        "account-tab": "アカウント",
-        "theme-tab": "テーマ",
-        "devices-tab": "デバイス",
+        "account-tab": "{{tabs.account-tab}}",
+        "theme-tab": "{{tabs.theme-tab}}",
+        "devices-tab": "{{tabs.devices-tab}}",
         "global-settings-title": "グローバル設定",
         "page-splitting-tooltip": "分割されたページを見開きとして表示する",
         "reading-mode-label": "読書モード",
         "title": "ユーザーダッシュボード",
         "page-splitting-label": "ページ分割",
-        "smart-filters-tab": "スマートフィルター",
+        "smart-filters-tab": "{{tabs.smart-filters-tab}}",
         "disable-animations-tooltip": "この場所ではアニメーションをオフにします。e-ink端末(電子ペーパー)では便利です。",
         "collapse-series-relationships-tooltip": "Kavita上で関連するシリーズを表示する",
         "scaling-option-label": "スケーリング設定",
@@ -359,13 +395,13 @@
         "pref-description": "これらのグローバル設定はあなたのアカウントに紐つけられます｡",
         "blur-unread-summaries-tooltip": "読んでない巻や章のあらすじをぼかします(ネタバレを避けるため)",
         "success-toast": "ユーザー環境設定を更新しました",
-        "preferences-tab": "環境設定",
+        "preferences-tab": "{{tabs.preferences-tab}}",
         "disable-animations-label": "アニメーションを表示しない",
-        "stats-tab": "統計",
+        "stats-tab": "{{tabs.stats-tab}}",
         "reading-direction-label": "綴じ方向",
         "share-series-reviews-tooltip": "Kavitaはレビューを他のユーザーに共有する",
         "prompt-on-download-label": "ダウンロードはこちら",
-        "scrobbling-tab": "Scrobbling",
+        "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "auto-close-menu-label": "オートクローズメニュー",
         "emulate-comic-book-label": "コミックのエミュレート",
         "layout-mode-tooltip": "画面に単一の画像をレンダリングするか、横に並べた2つの画像をレンダリングします。",
@@ -385,7 +421,7 @@
         "writing-style-tooltip": "縦書き､横書きを切り替えます｡水平は左から右、垂直は上から下です。",
         "show-screen-hints-label": "画面ヒントを表示する",
         "tap-to-paginate-tooltip": "画面の端をタップして前/次のページに移動できるようにする",
-        "clients-api-key-tooltip": "APIキーはパスワードのように機能するので安全と機密性をためてください｡",
+        "clients-api-key-tooltip": "API キーはパスワードのようになります。 リセットすると、既存のクライアントが無効になります.",
         "color-theme-book-tooltip": "ブックリーダーのコンテンツとメニューに適用するカラーテーマ",
         "clients-opds-alert": "このサーバではOPDSが有効になっていません。 立ち読みユーザーには影響しません.",
         "reset": "{{common.reset}}",
@@ -397,25 +433,41 @@
         "font-size-book-label": "文字サイズ",
         "clients-opds-description": "外部クライアントを使用する場合は以下のAPIもしくは接続用URLを使用してください｡これはパスワードのように機能するのでプライバシーを保持してください｡",
         "line-height-book-tooltip": "書籍の行間の間隔",
-        "clients-opds-url-tooltip": "OPDS URL",
+        "clients-opds-url-tooltip": "サポートされている OPDS クライアントのリストを参照してください ",
         "margin-book-label": "余白",
         "pdf-reader-settings-title": "PDFリーダー",
         "pdf-spread-mode-label": "見開き設定",
         "pdf-spread-mode-tooltip": "ページのレイアウト。単一または見開き (奇数・偶数)",
-        "pdf-theme-label": "テーマ"
+        "pdf-theme-label": "テーマ",
+        "reading-mode-tooltip": "リーダーを垂直に、水平方向に、または無限スクロールを持つように変更",
+        "emulate-comic-book-tooltip": "書籍から読書をエミュレートする影効果を適用",
+        "swipe-to-paginate-tooltip": "画面上にスワイプすると、次のページまたは前のページがトリガーされるようになります",
+        "font-size-book-tooltip": "本のフォントに適用するスケーリングの割合",
+        "show-screen-hints-tooltip": "パジネーションエリアと方向を理解するためのオーバーレイを表示",
+        "pdf-scroll-mode-tooltip": "ページをスクロールする方法 縦/横/タップでパギン(スクロールなし)",
+        "auto-close-menu-tooltip": "メニュー自動閉鎖",
+        "pdf-theme-tooltip": "読者の色テーマ",
+        "clients-opds-url-label": "OPDS URL",
+        "clients-api-key-label": "APIキー",
+        "background-color-tooltip": "画像リーダーの背景色",
+        "pdf-scroll-mode-label": "スクロールモード"
     },
     "person-role-pipe": {
         "other": "その他",
         "colorist": "カラリスト",
         "penciller": "下書き",
         "letterer": "レタラー",
-        "cover-artist": "アシスタント",
+        "cover-artist": "{{artist}}",
         "character": "キャラクター原案",
         "artist": "原画",
         "editor": "編集",
         "publisher": "出版社",
         "inker": "線画担当",
-        "writer": "作者"
+        "writer": "作者",
+        "imprint": "インプリント",
+        "translator": "トランスレーター",
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
     },
     "manage-devices": {
         "no-devices": "セットアップされたデバイスがありません",
@@ -424,10 +476,13 @@
         "devices-title": "デバイス",
         "delete": "{{common.delete}}",
         "add": "{{common.apply}}",
-        "email-label": "メール: ",
+        "email-label": "メール",
         "edit": "{{common.edit}}",
-        "platform-label": "プラットフォーム: ",
-        "email-setup-alert": "デバイスにファイルを送信したいですか？まず､管理者がメールを設定する必要があります！"
+        "platform-label": "プラットフォーム",
+        "email-setup-alert": "デバイスにファイルを送信したいですか? 管理者設定のメール設定を最初に確認しましょう!",
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}",
+        "name-label": "名前"
     },
     "update-notification-modal": {
         "title": "新規アップデートのお知らせ!",
@@ -486,7 +541,7 @@
         "kavitaplus-eligible-label": "Kavita+ Eligible"
     },
     "restriction-selector": {
-        "age-rating-label": "年齢制限",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "title": "年齢制限の設定",
         "description": "選択した場合、少なくとも1つのアイテムが選択した制限よりも大きいすべてのシリーズおよび読書リストは、結果から削除されます。",
         "not-applicable-for-admins": "これは管理者には適応されません。",
@@ -527,7 +582,12 @@
         "activate-email-label": "{{common.email}}",
         "edit": "{{common.edit}}",
         "discord-validation": "これは有効なDiscordユーザーIDではありません。 ユーザ ID は、あなたのユーザ名ではありません.",
-        "activate-reset-tooltip": "ライセンスをサーバーに結びつけます｡ライセンスとメールアドレスがどちらも必要です｡"
+        "activate-reset-tooltip": "ライセンスを使用して、以前の登録を無効化します。 ライセンスとメールの両方が必要です",
+        "kavita+-desc-part-1": "Kavita+ は、この Kavita インスタンスのすべてのユーザーのための機能のロックを解除するプレミアムサブスクリプションサービスです。 サブスクリプションを購入してロック解除 ",
+        "kavita+-desc-part-2": "プレミアム特典",
+        "kavita+-desc-part-3": "今日は!",
+        "kavita+-requirement": "Kavita+ は、最新リリース (2 つのバージョン) でのみ動作するように設計されています。それ以外のものは動作しない可能性があります。",
+        "kavita+-releases": "リリースを参照"
     },
     "read-more": {
         "read-less": "あまり読まない",
@@ -605,7 +665,21 @@
         "site-themes": "サイトのテーマ",
         "apply": "{{common.apply}}",
         "scan-queued": "サイトテーマのスキャンがキューに入れられました",
-        "title": "テーママネージャー"
+        "title": "テーママネージャー",
+        "default-theme": "デフォルト",
+        "description": "カビタは私の色で来て、あなたのニーズを満たしているカラースキームを見つけるか、自分自身を構築し、それを共有します。 テーマは、アカウントに適用されるか、すべてのアカウントに適用される場合があります.",
+        "download": "{{changelog.download}}",
+        "active-theme": "アクティブ",
+        "upload": "{{cover-image-chooser.upload}}",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload-continued": "cssファイル",
+        "preview-default": "テーマを選択",
+        "preview-default-admin": "最初にテーマを選択するか、手動でアップロードする",
+        "preview-title": "プレビュー",
+        "downloaded": "ダウンロード",
+        "downloadable": "ダウンロード可能"
     },
     "time-duration-pipe": {
         "days": "{{value}} 日",
@@ -617,7 +691,10 @@
     "library-type-pipe": {
         "manga": "マンガ",
         "comic": "アメコミ",
-        "book": "本"
+        "book": "本",
+        "image": "画像",
+        "comicVine": "Comic Vine",
+        "lightNovel": "ライトノベル"
     },
     "theme": {
         "theme-black": "ブラック",
@@ -637,19 +714,25 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "token-valid": "トークンが有効です"
+        "token-valid": "トークンが有効です",
+        "scrobbling-applicable-label": "有効な振動",
+        "mal-instructions": "カビタは、認証のためにMALクライアントIDを使用しています。 Kavita の新しいクライアントを作成し、承認されると、クライアント ID とユーザー名を入力します.",
+        "generic-instructions": "Kavita+ がそれらと相互作用することを可能にする必要があるさまざまな外部サービスに関する情報を記入します.",
+        "mal-username-input-label": "MALユーザー名",
+        "loading": "{{common.loading}}",
+        "mal-token-input-label": "MALクライアントID"
     },
     "invite-user": {
         "setup-user-account": "ユーザーアカウントを設定",
         "invite-url-label": "招待URL",
         "title": "ユーザーを招待",
-        "setup-user-description": "以下のリンクを使用してユーザーアカウントを設定するか、コピーボタンを使用できます。新しいユーザーを登録する前にログアウトする必要があるかもしれません。もしKavitaがサーバーを外部からアクセス可能と判断できる場合（またはホスト名が設定されている場合）、ユーザーにメールが送信され、そのリンクを使用してアカウントの設定を完了することができます。そうでない場合は、以下のリンクを手動で送信するか、ログに記載されているリンクを使用してアカウントを設定してください。",
+        "setup-user-description": "以下のリンクを使用して、ユーザーのアカウントをセットアップしたり、コピーボタンを使うことができます。 リンクを使用する前にログアウトして新規ユーザーを登録する必要があります.",
         "inviting": "招待中…",
         "setup-user-account-tooltip": "以下のテキストをコピーし、新しいタブに貼り付けてください。新しいユーザーを登録する前にログアウトする必要があるかもしれません。",
         "setup-user-title": "ユーザーを招待",
         "invite": "招待",
         "required-field": "{{common.required-field}}",
-        "description": "ユーザーをサーバーに招待するには、招待する人のメールアドレスを入力してください。招待メールが送付されます。これを機能させるには、<a href=\"/admin/dashboard#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a>タブでホスト名とメール設定フィールドを設定している必要があります。そうでない場合、ユーザーの代わりに設定するためのリンクが提示されます。<br/><br/>メールは有効である必要はありません。",
+        "description": "ユーザーにメールを入力することで、サーバーにユーザーに招待します。 アカウントを作成するメールが届きます。 この作業のために、 <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a>タブで設定されたホスト名とメール設定フィールドを持っている必要があります。 それ以外の場合は、リンクがユーザーに代わってセットアップするために表示されます。<br/><br/> 有効なメールアドレスは必須ではありません.",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "email": "{{common.email}}",
@@ -670,7 +753,7 @@
         "email-not-confirmed": "このメールアドレスは確認されていません｡",
         "invite-url-tooltip": "新しいタブにコピーして貼り付ける",
         "setup-user-account": "ユーザーアカウントを設定する",
-        "email-updated-description": "以下のリンクからアカウントのメールを確認することができます。サーバーが外部からアクセス可能な場合、Eメールが送信され、このリンクを使用してEメールを確認することができます。",
+        "email-updated-description": "下記のリンクからアカウントのメール確認ができます。 メール設定が設定されている場合は、メールが送信され、メールを確認するためにリンクが使用できます.",
         "current-password-label": "今のパスワード",
         "permission-error": "あなたにはEメールを変更する権限がありません。サーバーの管理者に連絡してください。",
         "required-field": "{{validation.required-field}}",
@@ -698,7 +781,8 @@
         "books-label": "本: {{value}} 時間"
     },
     "site-theme-provider-pipe": {
-        "system": "システム"
+        "system": "システム",
+        "custom": "{{device-platform-pipe.custom}}"
     },
     "confirm-email-change": {
         "non-confirm-description": "メールの更新が認証されるまでお待ちください｡",
@@ -717,7 +801,11 @@
         "chapters": "{{value}} チャプター",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}"
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "pages-read-by-year-title": "ページの読み込み 年度別",
+        "words-read-by-year-title": "単語 読む 年度別",
+        "words-count": "{{num}} ワード",
+        "pages-count": "{{num}} ページ"
     },
     "changelog": {
         "download": "ダウンロード",
@@ -725,7 +813,7 @@
         "description": "{{installed}}が表示されない場合",
         "available": "利用可能",
         "installed": "インストール済",
-        "description-continued": "深夜にリリースされます｡利用可能なのはメインバージョンのみです。",
+        "description-continued": "タグは、毎晩リリースされます。 メジャーバージョンのみが公開されます。 夜間のタグは、その安定から夜間に表示されます.",
         "nightly": "ナイトリー: {{バージョン}}"
     },
     "publication-status-pipe": {
@@ -745,7 +833,8 @@
     },
     "all-filters": {
         "title": "全てのスマートフィルター",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
     },
     "personal-table-of-contents": {
         "delete": "{{bookmarkName}}を消去",
@@ -771,7 +860,7 @@
     },
     "reset-password": {
         "title": "パスワードリセット",
-        "description": "アカウントのEメールを入力してください。有効なEメールが登録されている場合、KavitaからEメールが送信されます。",
+        "description": "アカウントのメールアドレスを入力してください。 カビタは有効なものがファイルにある場合は、メールをお送りします。それ以外の場合は、管理者にパスワードをリセットするように依頼してください.",
         "submit": "{{common.submit}}",
         "valid-email": "{{validation.valid-email}}",
         "email-label": "{{common.email}}",
@@ -1450,10 +1539,13 @@
     },
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "これはユーザーが管理するシリーズのリストで、上流の Scrobble プロバイダに同期されません。シリーズをいつでも削除でき、次の Scrobble イベント（読書進捗、評価、読みたいステータス）が発生するとイベントがトリガーされます。"
+        "description": "これはユーザーが管理するシリーズのリストで、上流の Scrobble プロバイダに同期されません。シリーズをいつでも削除でき、次の Scrobble イベント（読書進捗、評価、読みたいステータス）が発生するとイベントがトリガーされます。",
+        "no-data": "{{typeahead.no-data}}"
     },
     "role-selector": {
-        "title": "役職"
+        "title": "役職",
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}"
     },
     "reading-list-detail": {
         "characters-title": "{{series-metadata-detail.characters-title}}",
@@ -1829,5 +1921,22 @@
         "odd": "見開き (奇数)",
         "even": "見開き (偶数)",
         "off": "単一"
+    },
+    "edit-device-modal": {
+        "close": "{{common.close}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "save": "{{common.save}}",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "email-label": "{{common.email}}",
+        "email-tooltip": "このメールアドレスは送信先でファイルを受信するために使用されます。",
+        "device-platform-label": "デバイスプラットフォーム",
+        "cancel": "{{common.cancel}}",
+        "title": "デバイスを編集",
+        "device-name-label": "{{manage-devices.name-label}}"
+    },
+    "metadata-fields": {
+        "collections-title": "{{side-nav.collections}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}"
     }
 }
