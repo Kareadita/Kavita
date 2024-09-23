@@ -69,6 +69,7 @@ public interface IDirectoryService
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
     IEnumerable<string> GetDirectories(string folderPath);
     IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
+    IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher);
     string GetParentDirectoryName(string fileOrFolder);
     IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null);
     DateTime GetLastWriteTime(string folderPath);
@@ -687,8 +688,9 @@ public class DirectoryService : IDirectoryService
     /// Returns all directories, including subdirectories. Automatically excludes directories that shouldn't be in scope.
     /// </summary>
     /// <param name="folderPath"></param>
+    /// <param name="matcher"></param>
     /// <returns></returns>
-    public IEnumerable<string> GetAllDirectories(string folderPath)
+    public IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher)
     {
         if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
         var directories = new List<string>();
@@ -697,7 +699,7 @@ public class DirectoryService : IDirectoryService
         foreach (var foundDir in foundDirs)
         {
             directories.Add(foundDir);
-            directories.AddRange(GetAllDirectories(foundDir));
+            directories.AddRange(GetAllDirectories(foundDir, matcher));
         }
 
         return directories;
