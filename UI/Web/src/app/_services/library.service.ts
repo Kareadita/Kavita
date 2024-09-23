@@ -93,12 +93,28 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId + '&force=' + force, {});
   }
 
+  scanMultipleLibraries(libraryIds: Array<number>, force = false) {
+    return this.httpClient.post(this.baseUrl + 'library/scan-multiple', {ids: libraryIds, force: force});
+  }
+
   analyze(libraryId: number) {
     return this.httpClient.post(this.baseUrl + 'library/analyze?libraryId=' + libraryId, {});
   }
 
   refreshMetadata(libraryId: number, forceUpdate = false, forceColorscape = false) {
     return this.httpClient.post(this.baseUrl + `library/refresh-metadata?libraryId=${libraryId}&force=${forceUpdate}&forceColorscape=${forceColorscape}`, {});
+  }
+
+  refreshMetadataMultipleLibraries(libraryIds: Array<number>, force = false, forceColorscape = false) {
+    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata-multiple?forceColorscape=' + forceColorscape, {ids: libraryIds, force: force});
+  }
+
+  analyzeFilesMultipleLibraries(libraryIds: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'library/analyze-multiple', {ids: libraryIds, force: false});
+  }
+
+  copySettingsFromLibrary(sourceLibraryId: number, targetLibraryIds: Array<number>, includeType: boolean) {
+    return this.httpClient.post(this.baseUrl + 'library/copy-settings-from', {sourceLibraryId, targetLibraryIds, includeType});
   }
 
   create(model: {name: string, type: number, folders: string[]}) {

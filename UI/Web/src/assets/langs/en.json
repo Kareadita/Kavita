@@ -1172,7 +1172,7 @@
         "no-data": "There are no libraries. Try creating one.",
         "loading": "{{common.loading}}",
         "last-scanned-title": "Last Scanned",
-        "shared-folders-title": "Shared Folders",
+        "shared-folders-title": "Folders",
         "type-title": "Type",
         "scan-library": "Scan Library",
         "delete-library": "Delete Library",
@@ -1181,7 +1181,23 @@
         "edit-library-by-name": "Delete {{name}}",
         "folder-count": "{{num}} folders",
         "actions-header": "{{manage-users.actions-header}}",
-        "name-header": "{{manage-users.name-header}}"
+        "name-header": "{{manage-users.name-header}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}",
+        "cancel": "{{common.cancel}}",
+        "apply": "{{common.apply}}",
+        "bulk-copy-to": "Select which libraries to copy the settings from {{libraryName}} to",
+        "include-type-label": "Include copying Library type",
+        "include-type-tooltip": "This will not scan automatically. On the next scan, you may have series shift due to parsing differences",
+        "bulk-action-label": "Bulk Action"
+    },
+
+    "copy-settings-from-library-modal": {
+        "close": "{{common.close}}",
+        "select": "Select",
+        "title": "Copy settings from one library to multiple others",
+        "description": "Select a library to copy settings from and on the next screen select libraries to apply to.",
+        "select-option": "Select a Library"
     },
 
     "manage-media-settings": {
@@ -2239,7 +2255,10 @@
         "is-empty": "Is Empty"
     },
 
-
+    "confirm": {
+        "alert": "Alert",
+        "confirm": "Confirm"
+    },
 
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
@@ -2351,7 +2370,10 @@
         "stack-imported": "Stack Imported",
         "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
         "mal-token-required": "MAL Token is required, set in User Settings",
-        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?"
+        "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
+        "must-select-library": "At least one library must be selected",
+        "bulk-scan": "Scanning multiple libraries will be done linearly. This may take a long time and not complete depending on library size.",
+        "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?"
     },
 
     "read-time-pipe": {
@@ -2423,8 +2445,8 @@
         "new-collection": "New Collection",
         "multiple-selections": "Multiple Selections",
         "back-to": "Back to {{action}}",
-        "title": "Actions"
-
+        "title": "Actions",
+        "copy-settings": "Copy Settings From"
     },
 
     "preferences": {

@@ -38,7 +38,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public DateTime Created { get; set; }
     /// <summary>
-    /// Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc
+    /// Whenever a modification occurs. ex: New volumes, removed volumes, title update, etc
     /// </summary>
     public DateTime LastModified { get; set; }
 
@@ -101,7 +101,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 
     public int MinHoursToRead { get; set; }
     public int MaxHoursToRead { get; set; }
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
 
     public SeriesMetadata Metadata { get; set; } = null!;
     public ExternalSeriesMetadata ExternalSeriesMetadata { get; set; } = null!;

@@ -1,15 +1,45 @@
 <ng-container *transloco="let t; read: 'manage-library'">
   <div class="position-relative">
+    <div class="position-absolute custom-position-2">
+      <app-card-actionables [actions]="bulkActions" btnClass="btn-primary-outline ms-1" [label]="t('bulk-action-label')" [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null)">
+      </app-card-actionables>
+    </div>
+
     <button class="btn btn-primary-outline position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
     </button>
   </div>
 
-  <!-- TODO: We need a filter bar when there is more than 10 libraries -->
+  @if (bulkMode && bulkAction === Action.CopySettings && sourceCopyToLibrary) {
+   <div class="alert alert-warning">
+     {{t('bulk-copy-to', {libraryName: sourceCopyToLibrary.name})}}
+     <form [formGroup]="bulkForm">
+       <div class="form-check form-switch">
+         <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType" aria-describedby="include-type-help">
+         <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
+         <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
+         <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
+         <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip"></ng-container></span>
+       </div>
+     </form>
+
+     <div class="mt-2">
+       <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
+       <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!hasSomeSelected">{{t('apply')}}</button>
+     </div>
+   </div>
+  }
 
   <table class="table table-striped">
     <thead>
     <tr>
+      <th scope="col">
+        <div class="form-check">
+          <input id="select-all" type="checkbox" class="form-check-input"
+                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+          <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all')}}</label>
+        </div>
+      </th>
       <th scope="col">{{t('name-header')}}</th>
       <th scope="col">{{t('type-title')}}</th>
       <th scope="col">{{t('shared-folders-title')}}</th>
@@ -20,7 +50,14 @@
     <tbody>
       @for(library of libraries; track library.name + library.type + library.folders.length + library.lastScanned; let idx = $index) {
         <tr>
-          <td id="username--{{idx}}">
+          <td>
+            <div class="form-check">
+              <input id="select-library-{{idx}}" type="checkbox" class="form-check-input"
+                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
+              <label for="select-library-{{idx}}" class="form-check-label visually-hidden">{{library.name}}</label>
+            </div>
+          </td>
+          <td id="library--{{idx}}">
             <a [routerLink]="'/library/' + library.id">{{library.name}}</a>
           </td>
           <td>
@@ -33,6 +70,7 @@
             {{library.lastScanned | timeAgo | defaultDate}}
           </td>
           <td>
+            <!-- On Mobile we want to use ... for each row -->
             @if (useActionables$ | async) {
               <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, library)"></app-card-actionables>
             } @else {

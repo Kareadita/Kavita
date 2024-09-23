@@ -11,8 +11,9 @@ import { Observable, switchMap, shareReplay } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TopUserRead } from '../../_models/top-reads';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
+import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
 
 export const TimePeriods: Array<{title: string, value: number}> =
   [{title: 'this-week', value: new Date().getDay() || 1},
@@ -28,15 +29,16 @@ export const TimePeriods: Array<{title: string, value: number}> =
     styleUrls: ['./top-readers.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgFor, AsyncPipe, TranslocoDirective]
+  imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, CarouselReelComponent]
 })
 export class TopReadersComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+
   formGroup: FormGroup;
   timePeriods = TimePeriods;
-
   users$: Observable<TopUserRead[]>;
-  private readonly destroyRef = inject(DestroyRef);
+
 
   constructor(private statsService: StatisticsService, private readonly cdRef: ChangeDetectorRef) {
     this.formGroup = new FormGroup({

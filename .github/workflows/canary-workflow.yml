@@ -101,7 +101,7 @@ jobs:
                 dotnet-version: 8.0.x
 
           - name: Install Swashbuckle CLI
-            run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+            run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
           - run: ./monorepo-build.sh
 

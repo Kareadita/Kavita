@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
@@ -26,7 +27,7 @@ public class WordCountAnalysisTests : AbstractDbTest
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
     private const long WordCount = 33608; // 37417 if splitting on space, 33608 if just character count
     private const long MinHoursToRead = 1;
-    private const long AvgHoursToRead = 2;
+    private const float AvgHoursToRead = 1.66954792f;
     private const long MaxHoursToRead = 3;
     public WordCountAnalysisTests() : base()
     {
@@ -81,7 +82,7 @@ public class WordCountAnalysisTests : AbstractDbTest
 
         Assert.Equal(WordCount, series.WordCount);
         Assert.Equal(MinHoursToRead, series.MinHoursToRead);
-        Assert.Equal(AvgHoursToRead, series.AvgHoursToRead);
+        Assert.True(series.AvgHoursToRead.Is(AvgHoursToRead));
         Assert.Equal(MaxHoursToRead, series.MaxHoursToRead);
 
         // Validate the Chapter gets updated correctly
@@ -148,13 +149,11 @@ public class WordCountAnalysisTests : AbstractDbTest
 
         Assert.Equal(WordCount * 2L, series.WordCount);
         Assert.Equal(MinHoursToRead * 2, series.MinHoursToRead);
-        //Assert.Equal(AvgHoursToRead * 2, series.AvgHoursToRead);
-        //Assert.Equal((MaxHoursToRead * 2) - 1, series.MaxHoursToRead); // This is just a rounding issue
 
         var firstVolume = series.Volumes.ElementAt(0);
         Assert.Equal(WordCount, firstVolume.WordCount);
         Assert.Equal(MinHoursToRead, firstVolume.MinHoursToRead);
-        Assert.Equal(AvgHoursToRead, firstVolume.AvgHoursToRead);
+        Assert.True(series.AvgHoursToRead.Is(AvgHoursToRead * 2));
         Assert.Equal(MaxHoursToRead, firstVolume.MaxHoursToRead);
 
         var secondVolume = series.Volumes.ElementAt(1);

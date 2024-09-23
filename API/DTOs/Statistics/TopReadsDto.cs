@@ -8,11 +8,11 @@ public class TopReadDto
     /// <summary>
     /// Amount of time read on Comic libraries
     /// </summary>
-    public long ComicsTime { get; set; }
+    public float ComicsTime { get; set; }
     /// <summary>
     /// Amount of time read on
     /// </summary>
-    public long BooksTime { get; set; }
-    public long MangaTime { get; set; }
+    public float BooksTime { get; set; }
+    public float MangaTime { get; set; }
 }
 

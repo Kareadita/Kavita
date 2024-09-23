@@ -18,19 +18,20 @@ import {SelectionModel} from "../../../typeahead/_models/selection-model";
 })
 export class LibraryAccessModalComponent implements OnInit {
 
+  protected readonly modal = inject(NgbActiveModal);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly libraryService = inject(LibraryService);
+
   @Input() member: Member | undefined;
   allLibraries: Library[] = [];
   selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;
   selectAll: boolean = false;
 
-  cdRef = inject(ChangeDetectorRef);
-
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  constructor(public modal: NgbActiveModal, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libs => {
