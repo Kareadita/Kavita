@@ -186,8 +186,6 @@ public class DirectoryService : IDirectoryService
             rootPath = rootPath.Replace(FileSystem.Path.DirectorySeparatorChar, FileSystem.Path.AltDirectorySeparatorChar);
         }
 
-
-
         var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
         var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
         var paths = new List<string>();
@@ -228,24 +226,33 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
+        if (!FileSystem.Directory.Exists(path))
+            yield break; // Use yield break to exit the iterator early
 
-        if (fileNameRegex != string.Empty)
+        Regex? reSearchPattern = null;
+        if (!string.IsNullOrEmpty(fileNameRegex))
         {
-            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase,
-                Tasks.Scanner.Parser.Parser.RegexTimeout);
-            return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
-                .Where(file =>
-                {
-                    var fileName = FileSystem.Path.GetFileName(file);
-                    return reSearchPattern.IsMatch(fileName) &&
-                           !fileName.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
-                });
+            // Compile the regex for better performance when used frequently
+            reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled, Tasks.Scanner.Parser.Parser.RegexTimeout);
         }
 
-        return FileSystem.Directory.EnumerateFiles(path, "*", searchOption).Where(file =>
-            !FileSystem.Path.GetFileName(file).StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith));
+        // Enumerate files lazily
+        foreach (var file in FileSystem.Directory.EnumerateFiles(path, "*", searchOption))
+        {
+            var fileName = FileSystem.Path.GetFileName(file);
+
+            // Exclude macOS metadata files
+            if (fileName.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith))
+                continue;
+
+            // If a regex is provided, match the file name against it
+            if (reSearchPattern != null && !reSearchPattern.IsMatch(fileName))
+                continue;
+
+            yield return file; // Yield each matching file as it's found
+        }
     }
+
 
     /// <summary>
     /// Copies a file into a directory. Does not maintain parent folder of file.
@@ -342,7 +349,7 @@ public class DirectoryService : IDirectoryService
             return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
         }
 
-        return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
+        return !FileSystem.Directory.Exists(path) ? [] : FileSystem.Directory.GetFiles(path);
     }
 
     /// <summary>
@@ -609,45 +616,45 @@ public class DirectoryService : IDirectoryService
     /// <summary>
     /// Finds the lowest directory from a set of file paths. Does not return the root path, will always select the lowest non-root path.
     /// </summary>
-    /// <remarks>If the file paths do not contain anything from libraryFolders, this returns an empty dictionary back</remarks>
+    /// <remarks>If the file paths do not contain anything from libraryFolders, this returns null.</remarks>
     /// <param name="libraryFolders">List of top level folders which files belong to</param>
     /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
-    /// <returns></returns>
+    /// <returns>Lowest non-root path, or null if not found</returns>
     public string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
     {
-        var dirs = new Dictionary<string, string>();
+        // Normalize the file paths only once
         var normalizedFilePaths = filePaths.Select(Parser.NormalizePath).ToList();
 
-        foreach (var folder in libraryFolders.Select(Parser.NormalizePath))
+        // Use a HashSet to avoid duplicate directories
+        var dirs = new HashSet<string>();
+
+        // Iterate through each library folder and collect matching directories
+        foreach (var normalizedFolder in libraryFolders.Select(Parser.NormalizePath))
         {
             foreach (var file in normalizedFilePaths)
             {
-                if (!file.Contains(folder)) continue;
-
-                var lowestPath =   Path.GetDirectoryName(file);
-                if (!string.IsNullOrEmpty(lowestPath))
+                // If the file path contains the folder path, get its directory
+                if (file.Contains(normalizedFolder))
                 {
-                    dirs.TryAdd(Parser.NormalizePath(lowestPath), string.Empty);
+                    var lowestPath = Path.GetDirectoryName(file);
+                    if (!string.IsNullOrEmpty(lowestPath))
+                    {
+                        dirs.Add(Parser.NormalizePath(lowestPath)); // Add to HashSet (automatically handles duplicates)
+                    }
                 }
-
             }
         }
 
-        if (dirs.Keys.Count == 1) return dirs.Keys.First();
-        if (dirs.Keys.Count > 1)
+        // Early return if there is only one directory
+        if (dirs.Count == 1)
         {
-            // For each key, validate that each file exists in the key path
-            foreach (var folder in dirs.Keys)
-            {
-                if (normalizedFilePaths.TrueForAll(filePath => filePath.Contains(Parser.NormalizePath(folder))))
-                {
-                    return folder;
-                }
-            }
+            return dirs.First();
         }
 
-        return null;
+        // Check if all files exist within any of the found directories else return null
+        return dirs.FirstOrDefault(dir => normalizedFilePaths.TrueForAll(filePath => filePath.Contains(dir)));
     }
+
 
     /// <summary>
     /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
