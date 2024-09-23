@@ -1357,7 +1357,7 @@
         "library-scan-tooltip": "Wie oft Kavita die Metadaten der Bibliotheksdateien überprüft und aktualisiert.",
         "sync-themes-task": "Themen synchronisieren",
         "library-database-backup-label": "Kavita Backup",
-        "sync-themes-task-desc": "Heruntergeladene Designs mit Änderungen vom Upstream synchronisieren, wenn die Version übereinstimmt.",
+        "sync-themes-task-desc": "Synchronisieren Sie heruntergeladene Themen mit vorgeschalteten Änderungen, wenn die Version übereinstimmt.",
         "sync-themes-success": "Die Synchronisierung der Themen wurde in die Warteschlange gestellt"
     },
     "manage-media-settings": {
@@ -2184,7 +2184,7 @@
         "promoted": "{{common.promoted}}"
     },
     "metadata-filter-row": {
-        "unit-average-rating": "Externes Rating von Kavita+, Prozent",
+        "unit-average-rating": "Kavita+ externes Rating, Prozent",
         "unit-reading-progress": "Prozentsatz",
         "unit-reading-date": "Datum",
         "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
