@@ -40,6 +40,10 @@ export class CardActionablesComponent implements OnInit {
   @Input() btnClass = '';
   @Input() actions: ActionItem<any>[] = [];
   @Input() labelBy = 'card';
+  /**
+   * Text to display as if actionable was a button
+   */
+  @Input() label = '';
   @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 

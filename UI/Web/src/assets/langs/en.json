@@ -1188,7 +1188,8 @@
         "apply": "{{common.apply}}",
         "bulk-copy-to": "Select which libraries to copy the settings from {{libraryName}} to",
         "include-type-label": "Include copying Library type",
-        "include-type-tooltip": "This will not scan automatically. On the next scan, you may have series shift due to parsing differences"
+        "include-type-tooltip": "This will not scan automatically. On the next scan, you may have series shift due to parsing differences",
+        "bulk-action-label": "Bulk Action"
     },
 
     "copy-settings-from-library-modal": {
