@@ -528,7 +528,7 @@
         "close": "{{common.close}}",
         "inviting": "Zapraszam…",
         "notice": "{{manage-settings.notice}}",
-        "description": "Zaproś użytkownika na swój serwer, podając jego adres e-mail. Otrzyma on wiadomość e-mail umożliwiającą utworzenie konta. Aby to zadziałało, musisz mieć ustawione pola ustawień Nazwa hosta i Adres <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">e-mail</a>w zakładce, w przeciwnym razie zostanie wyświetlony link umożliwiający konfigurację w imieniu użytkownika.<br/><br/>E-mail nie musi być ważny.",
+        "description": "Zaproś użytkownika na swój serwer, podając jego adres e-mail. Otrzyma on wiadomość e-mail umożliwiającą utworzenie konta. Aby to zadziałało, musisz mieć ustawione pola ustawień Nazwa hosta i Adres <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">e-mail</a> w zakładce, w przeciwnym razie zostanie wyświetlony link umożliwiający konfigurację w imieniu użytkownika.<br/><br/>E-mail nie musi być ważny.",
         "setup-user-description": "Możesz użyć poniższego linku, aby skonfigurować konto dla swojego użytkownika lub użyć przycisku kopiowania.Może być konieczne wylogowanie się przed użyciem linku do rejestracji nowego użytkownika."
     },
     "library-selector": {
