@@ -209,6 +209,20 @@ public class StatsController : BaseApiController
     }
 
     /// <summary>
+    /// Returns a count of time spent reading per year for a given userId.
+    /// </summary>
+    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <returns></returns>
+    [HttpGet("time-spent-reading-per-year")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> TimeSpentReadingPerYear(int userId = 0)
+    {
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin) userId = User.GetUserId();
+        return Ok(_statService.GetTimeSpentReadingByYear(userId));
+    }
+
+    /// <summary>
     /// Returns a count of words read per year for a given userId.
     /// </summary>
     /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
