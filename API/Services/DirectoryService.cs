@@ -72,7 +72,6 @@ public interface IDirectoryService
     string GetParentDirectoryName(string fileOrFolder);
     IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null);
     DateTime GetLastWriteTime(string folderPath);
-    GlobMatcher? CreateMatcherFromFile(string filePath);
 }
 public class DirectoryService : IDirectoryService
 {
@@ -95,11 +94,9 @@ public class DirectoryService : IDirectoryService
 
     private static readonly Regex ExcludeDirectories = new Regex(
         @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle|\.yacreaderlibrary",
-        MatchOptions,
-        Tasks.Scanner.Parser.Parser.RegexTimeout);
+        MatchOptions, Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
-        MatchOptions,
-        Tasks.Scanner.Parser.Parser.RegexTimeout);
+        MatchOptions, Parser.RegexTimeout);
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
@@ -136,20 +133,36 @@ public class DirectoryService : IDirectoryService
     /// </summary>
     /// <remarks>This will always exclude <see cref="Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith"/> patterns</remarks>
     /// <param name="path">Directory to search</param>
-    /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
+    /// <param name="searchPatternExpression">Regex version of search pattern (e.g., \.mp3|\.mp4). Defaults to * meaning all files.</param>
     /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
     /// <returns>List of file paths</returns>
     public IEnumerable<string> GetFilesWithCertainExtensions(string path,
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
-        var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        // If directory doesn't exist, exit the iterator with no results
+        if (!FileSystem.Directory.Exists(path))
+            yield break;
 
-        return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
-            .Where(file =>
-                reSearchPattern.IsMatch(FileSystem.Path.GetExtension(file)) && !FileSystem.Path.GetFileName(file).StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith));
+        // Compile the regex pattern for faster repeated matching
+        var reSearchPattern = new Regex(searchPatternExpression,
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            Parser.RegexTimeout);
+
+        // Enumerate files in the directory and apply filters
+        foreach (var file in FileSystem.Directory.EnumerateFiles(path, "*", searchOption))
+        {
+            var fileName = FileSystem.Path.GetFileName(file);
+            var fileExtension = FileSystem.Path.GetExtension(file);
+
+            // Check if the file matches the pattern and exclude macOS metadata files
+            if (reSearchPattern.IsMatch(fileExtension) && !fileName.StartsWith(Parser.MacOsMetadataFileStartsWith))
+            {
+                yield return file;
+            }
+        }
     }
+
 
 
     /// <summary>
@@ -391,10 +404,12 @@ public class DirectoryService : IDirectoryService
         {
             foreach (var file in di.EnumerateFiles())
             {
+                if (!file.Exists) continue;
                 file.Delete();
             }
             foreach (var dir in di.EnumerateDirectories())
             {
+                if (!dir.Exists) continue;
                 dir.Delete(true);
             }
         }
@@ -699,7 +714,7 @@ public class DirectoryService : IDirectoryService
     }
 
     /// <summary>
-    /// Scans a directory by utilizing a recursive folder search. If a .kavitaignore file is found, will ignore matching patterns
+    /// Scans a directory by utilizing a recursive folder search.
     /// </summary>
     /// <param name="folderPath"></param>
     /// <param name="fileTypes"></param>
@@ -709,42 +724,38 @@ public class DirectoryService : IDirectoryService
     {
         _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
+
         if (!Exists(folderPath)) return files;
 
-        var potentialIgnoreFile = FileSystem.Path.Join(folderPath, KavitaIgnoreFile);
-        if (matcher == null)
+        // Stack to hold directories to process
+        var directoriesToProcess = new Stack<string>();
+        directoriesToProcess.Push(folderPath);
+
+        while (directoriesToProcess.Count > 0)
         {
-            matcher = CreateMatcherFromFile(potentialIgnoreFile);
+            var currentDirectory = directoriesToProcess.Pop();
+
+            // Get files from the current directory
+            var filesInCurrentDirectory = GetFilesWithCertainExtensions(currentDirectory, fileTypes);
+            files.AddRange(filesInCurrentDirectory);
+
+            // Get subdirectories and add them to the stack
+            var subdirectories = GetDirectories(currentDirectory, matcher);
+            foreach (var subdirectory in subdirectories)
+            {
+                directoriesToProcess.Push(subdirectory);
+            }
         }
-        else
+
+        // Filter out unwanted files based on matcher if provided
+        if (matcher != null)
         {
-            matcher.Merge(CreateMatcherFromFile(potentialIgnoreFile));
-        }
-
-
-        var directories = GetDirectories(folderPath, matcher);
-
-        foreach (var directory in directories)
-        {
-            files.AddRange(ScanFiles(directory, fileTypes, matcher));
-        }
-
-
-        // Get the matcher from either ignore or global (default setup)
-        if (matcher == null)
-        {
-            files.AddRange(GetFilesWithCertainExtensions(folderPath, fileTypes));
-        }
-        else
-        {
-            var foundFiles = GetFilesWithCertainExtensions(folderPath,
-                    fileTypes)
-                .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));
-            files.AddRange(foundFiles);
+            files = files.Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name)).ToList();
         }
 
         return files;
     }
+
 
     /// <summary>
     /// Recursively scans a folder and returns the max last write time on any folders and files
@@ -759,35 +770,6 @@ public class DirectoryService : IDirectoryService
         if (fileEntries.Length == 0) return DateTime.MaxValue;
         return fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
     }
-
-    /// <summary>
-    /// Generates a GlobMatcher from a .kavitaignore file found at path. Returns null otherwise.
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <returns></returns>
-    public GlobMatcher? CreateMatcherFromFile(string filePath)
-    {
-        if (!FileSystem.File.Exists(filePath))
-        {
-            return null;
-        }
-
-        // Read file in and add each line to Matcher
-        var lines = FileSystem.File.ReadAllLines(filePath);
-        if (lines.Length == 0)
-        {
-            return null;
-        }
-
-        GlobMatcher matcher = new();
-        foreach (var line in lines.Where(s => !string.IsNullOrEmpty(s)))
-        {
-            matcher.AddExclude(line);
-        }
-
-        return matcher;
-    }
-
 
     /// <summary>
     /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed

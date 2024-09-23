@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using API.Services;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -920,8 +921,9 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-
-        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
+        var globMatcher = new GlobMatcher();
+        globMatcher.AddExclude("*.*");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions, globMatcher);
 
         Assert.Empty(allFiles);
 
@@ -945,7 +947,9 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
+        var globMatcher = new GlobMatcher();
+        globMatcher.AddExclude("**/Accel World/*");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions, globMatcher);
 
         Assert.Single(allFiles); // Ignore files are not counted in files, only valid extensions
 
@@ -974,7 +978,10 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions);
+        var globMatcher = new GlobMatcher();
+        globMatcher.AddExclude("**/Accel World/*");
+        globMatcher.AddExclude("**/ArtBooks/*");
+        var allFiles = ds.ScanFiles("C:/Data/", API.Services.Tasks.Scanner.Parser.Parser.SupportedExtensions, globMatcher);
 
         Assert.Equal(2, allFiles.Count); // Ignore files are not counted in files, only valid extensions
 
