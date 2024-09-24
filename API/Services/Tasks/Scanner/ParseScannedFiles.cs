@@ -122,7 +122,7 @@ public class ParseScannedFiles
     /// <param name="seriesPaths">A dictionary mapping a normalized path to a list of <see cref="SeriesModified"/> to help scanner skip I/O</param>
     /// <param name="folderPath">A library folder or series folder</param>
     /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
-    public async Task<IList<ScanResult>> ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
+    public async Task<IList<ScanResult>> ScanFiles(string folderPath, bool scanDirectoryByDirectory,
         IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false)
     {
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
@@ -595,7 +595,7 @@ private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<Se
         ConcurrentBag<ScannedSeriesResult> processedScannedSeries, bool forceCheck)
     {
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
-        var scanResults = await ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
+        var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
         foreach (var scanResult in scanResults)

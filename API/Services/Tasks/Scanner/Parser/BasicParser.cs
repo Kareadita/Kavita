@@ -79,7 +79,13 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             // NOTE: This uses rootPath. LibraryRoot works better for manga, but it's not always that way.
             // It might be worth writing some logic if the file is a special, to take the folder above the Specials/
             // if present
-            ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
+            var tempRootPath = rootPath;
+            if (rootPath.EndsWith("Specials") || rootPath.EndsWith("Specials/"))
+            {
+                tempRootPath = rootPath.Replace("Specials", string.Empty).TrimEnd('/');
+            }
+
+            ParseFromFallbackFolders(filePath, tempRootPath, type, ref ret);
         }
 
         if (string.IsNullOrEmpty(ret.Series))
