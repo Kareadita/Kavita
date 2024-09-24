@@ -801,10 +801,26 @@ private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<Se
             MessageFactory.FileScanProgressEvent($"{files.Count} files in {normalizedFolder}", library.Name, ProgressEventType.Updated));
 
         // Parse files into ParserInfos
-        result.ParserInfos = files
-            .Select(file => _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type))
-            .Where(info => info != null)
-            .ToList()!;
+        var fileCount = files.Count;
+        if (fileCount < 100)
+        {
+            // Process files sequentially
+            result.ParserInfos = files
+                .Select(file => _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type))
+                .Where(info => info != null)
+                .ToList()!;
+        }
+        else
+        {
+            // Process files in parallel
+            var tasks = files.Select(file => Task.Run(() =>
+                _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type)));
+
+            var infos = await Task.WhenAll(tasks);
+            result.ParserInfos = infos.Where(info => info != null).ToList()!;
+        }
+
+        _logger.LogDebug("[ScannerService] Parsed {Count} files for {Folder}", result.ParserInfos.Count, normalizedFolder);
     }
 
 
