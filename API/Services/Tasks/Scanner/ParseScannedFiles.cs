@@ -152,7 +152,7 @@ public class ParseScannedFiles
         foreach (var directory in allDirectories)
         {
             // Don't process any folders where we've already scanned everything below
-            if (processedDirs.Any(d => d.StartsWith(directory)))
+            if (processedDirs.Any(d => d.StartsWith(directory + Path.DirectorySeparatorChar) || d.Equals(directory)))
             {
                 // Skip this directory as we've already processed a parent
                 continue;
