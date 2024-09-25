@@ -139,99 +139,83 @@ public class ParseScannedFiles
         return await ScanSingleDirectory(folderPath, seriesPaths, library, forceCheck, result, fileExtensions, matcher);
     }
 
-    /// <summary>
-    /// Scans directories and processes changes, optimizing for Publisher/Series folder structure.
-    /// Detects both folder changes and new folders, ensuring appropriate scanning.
-    /// </summary>
-    // private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
-    //     Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
-    // {
-    //     var directories = _directoryService.GetDirectories(folderPath, matcher).Select(Parser.Parser.NormalizePath);
-    //
-    //     foreach (var directory in directories)
-    //     {
-    //         var sw = Stopwatch.StartNew();
-    //         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-    //             MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
-    //
-    //         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
-    //         {
-    //             HandleUnchangedFolder(result, folderPath, directory);
-    //         }
-    //         else if (!forceCheck && ShouldOptimizeForSeries(seriesPaths, directory))
-    //         {
-    //             await HandleMultipleSeriesFolders(result, seriesPaths[directory], directory, library.Name, folderPath, fileExtensions, matcher);
-    //         }
-    //         else
-    //         {
-    //             PerformFullScan(result, directory, folderPath, fileExtensions, matcher);
-    //         }
-    //         _logger.LogDebug("Processing {Directory} took {TimeMs}ms to check", directory, sw.ElapsedMilliseconds);
-    //     }
-    //
-    //     return result;
-    // }
-
     private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
     Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
-{
-    var allDirectories = _directoryService.GetAllDirectories(folderPath, matcher)
-        .Select(Parser.Parser.NormalizePath)
-        .OrderByDescending(d => d.Length)
-        .ToList();
-
-    var processedDirs = new HashSet<string>();
-
-    foreach (var directory in allDirectories)
     {
-        if (processedDirs.Any(d => d.StartsWith(directory)))
+        var allDirectories = _directoryService.GetAllDirectories(folderPath, matcher)
+            .Select(Parser.Parser.NormalizePath)
+            .OrderByDescending(d => d.Length)
+            .ToList();
+
+        var processedDirs = new HashSet<string>();
+
+        foreach (var directory in allDirectories)
         {
-            // Skip this directory as we've already processed a parent
-            continue;
+            // Don't process any folders where we've already scanned everything below
+            if (processedDirs.Any(d => d.StartsWith(directory)))
+            {
+                // Skip this directory as we've already processed a parent
+                continue;
+            }
+
+            // Skip directories ending with "Specials", let the parent handle it
+            if (directory.EndsWith("Specials", StringComparison.OrdinalIgnoreCase))
+            {
+                // Log or handle that we are skipping this directory
+                _logger.LogDebug("Skipping {Directory} as it ends with 'Specials'", directory);
+                continue;
+            }
+
+            var sw = Stopwatch.StartNew();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
+
+            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
+            {
+                HandleUnchangedFolder(result, folderPath, directory);
+            }
+            else
+            {
+                PerformFullScan(result, directory, folderPath, fileExtensions, matcher);
+            }
+
+            processedDirs.Add(directory);
+            _logger.LogDebug("Processing {Directory} took {TimeMs}ms to check", directory, sw.ElapsedMilliseconds);
         }
 
-        var sw = Stopwatch.StartNew();
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
-
-        if (!forceCheck && HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
-        {
-            HandleUnchangedFolder(result, folderPath, directory);
-        }
-        else if (!forceCheck && ShouldOptimizeForSeries(seriesPaths, directory))
-        {
-            await HandleMultipleSeriesFolders(result, seriesPaths[directory], directory, library.Name, folderPath, fileExtensions, matcher);
-        }
-        else
-        {
-            PerformFullScan(result, directory, folderPath, fileExtensions, matcher);
-        }
-
-        processedDirs.Add(directory);
-        _logger.LogDebug("Processing {Directory} took {TimeMs}ms to check", directory, sw.ElapsedMilliseconds);
+        return result;
     }
 
-    return result;
-}
-
-private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
-{
-    if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
+    /// <summary>
+    /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second
+    /// </summary>
+    /// <param name="seriesPaths"></param>
+    /// <param name="directory">This should be normalized</param>
+    /// <param name="forceCheck"></param>
+    /// <returns></returns>
+    private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
-        return false;
-    }
-
-    foreach (var series in seriesList)
-    {
-        var lastWriteTime = _directoryService.GetLastWriteTime(series.LowestFolderPath!).Truncate(TimeSpan.TicksPerSecond);
-        if (series.LastScanned.Truncate(TimeSpan.TicksPerSecond) < lastWriteTime)
+        // With the bottom-up approach, this can report a false positive where a nested folder will get scanned even though a parent is the series
+        // This can't really be avoided. This is more likely to happen on Image chapter folder library layouts.
+        if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
         {
             return false;
         }
+
+        foreach (var series in seriesList)
+        {
+            var lastWriteTime = _directoryService.GetLastWriteTime(series.LowestFolderPath!).Truncate(TimeSpan.TicksPerSecond);
+            var seriesLastScanned = series.LastScanned.Truncate(TimeSpan.TicksPerSecond);
+            if (seriesLastScanned < lastWriteTime)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    return true;
-}
+
 
 
 
@@ -659,111 +643,6 @@ private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<Se
     }
 
 
-
-
-    // private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, ScanResult scanResult,
-    //     List<ScannedSeriesResult> processedScannedSeries)
-    // {
-    //     // scanResult is updated with the parsed infos
-    //     await ProcessScanResult(scanResult, seriesPaths, library); // NOTE: This may be able to be parallelized
-    //
-    //     // We now have all the parsed infos from the scan result, perform any merging that is necessary and post processing steps
-    //     var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-    //
-    //     // Merge any series together (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagator series
-    //     MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
-    //
-    //     // Combine everything into scannedSeries
-    //     foreach (var info in scanResult.ParserInfos)
-    //     {
-    //         try
-    //         {
-    //             TrackSeries(scannedSeries, info);
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             _logger.LogError(ex,
-    //                 "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
-    //                 info?.FullFilePath);
-    //         }
-    //     }
-    //
-    //     foreach (var series in scannedSeries.Keys)
-    //     {
-    //         if (scannedSeries[series].Count <= 0) continue;
-    //
-    //         try
-    //         {
-    //             UpdateSortOrder(scannedSeries, series);
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             _logger.LogError(ex, "There was an issue setting IssueOrder");
-    //         }
-    //
-    //
-    //         processedScannedSeries.Add(new ScannedSeriesResult()
-    //         {
-    //             HasChanged = scanResult.HasChanged,
-    //             ParsedSeries = series,
-    //             ParsedInfos = scannedSeries[series]
-    //         });
-    //     }
-    // }
-
-    // /// <summary>
-    // /// For a given ScanResult, sets the ParserInfos on the result
-    // /// </summary>
-    // /// <param name="result"></param>
-    // /// <param name="seriesPaths"></param>
-    // /// <param name="library"></param>
-    // private async Task ProcessScanResult(ScanResult result, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library)
-    // {
-    //     // TODO: This should return the result as we are modifying it as a side effect
-    //
-    //     // If the folder hasn't changed, generate fake ParserInfos for the Series that were in that folder.
-    //     var normalizedFolder = Parser.Parser.NormalizePath(result.Folder);
-    //     if (!result.HasChanged)
-    //     {
-    //         result.ParserInfos = seriesPaths[normalizedFolder]
-    //             .Select(fp => new ParserInfo()
-    //             {
-    //                 Series = fp.SeriesName,
-    //                 Format = fp.Format,
-    //             })
-    //             .ToList();
-    //
-    //         _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", normalizedFolder);
-    //         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-    //             MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, library.Name, ProgressEventType.Updated));
-    //         return;
-    //     }
-    //
-    //     var files = result.Files;
-    //
-    //     // When processing files for a folder and we do enter, we need to parse the information and combine parser infos
-    //     // NOTE: We might want to move the merge step later in the process, like return and combine.
-    //
-    //     if (files.Count == 0)
-    //     {
-    //         _logger.LogInformation("[ScannerService] {Folder} is empty, no longer in this location, or has no file types that match Library File Types", normalizedFolder);
-    //         result.ParserInfos = ArraySegment<ParserInfo>.Empty;
-    //         return;
-    //     }
-    //
-    //     _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, normalizedFolder);
-    //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-    //         MessageFactory.FileScanProgressEvent($"{files.Count} files in {normalizedFolder}", library.Name, ProgressEventType.Updated));
-    //
-    //     // Multiple Series can exist within a folder. We should instead put these infos on the result and perform merging above
-    //     IList<ParserInfo> infos = files
-    //         .Select(file => _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type))
-    //         .Where(info => info != null)
-    //         .ToList()!;
-    //
-    //     result.ParserInfos = infos;
-    // }
-
     /// <summary>
     /// For a given ScanResult, sets the ParserInfos on the result
     /// </summary>
@@ -902,34 +781,6 @@ private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<Se
             }
         }
     }
-
-    /// <summary>
-    /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second
-    /// </summary>
-    /// <param name="seriesPaths"></param>
-    /// <param name="normalizedFolder"></param>
-    /// <param name="forceCheck"></param>
-    /// <returns></returns>
-    // private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
-    // {
-    //     if (forceCheck) return false;
-    //
-    //     return seriesPaths.TryGetValue(normalizedFolder, out var v) && HasAllSeriesFolderNotChangedSinceLastScan(v, normalizedFolder);
-    // }
-
-    private bool HasAllSeriesFolderNotChangedSinceLastScan(IList<SeriesModified> seriesFolders,
-        string normalizedFolder)
-    {
-        return seriesFolders.All(f => HasSeriesFolderNotChangedSinceLastScan(f, normalizedFolder));
-    }
-
-    private bool HasSeriesFolderNotChangedSinceLastScan(SeriesModified seriesModified, string normalizedFolder)
-    {
-        return _directoryService.Exists(normalizedFolder) && seriesModified.LastScanned.Truncate(TimeSpan.TicksPerSecond) >=
-               _directoryService.GetLastWriteTime(normalizedFolder)
-                   .Truncate(TimeSpan.TicksPerSecond);
-    }
-
 
 
     /// <summary>

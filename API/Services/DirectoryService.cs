@@ -769,16 +769,26 @@ public class DirectoryService : IDirectoryService
     /// <summary>
     /// Recursively scans a folder and returns the max last write time on any folders and files
     /// </summary>
-    /// <remarks>If the folder is empty or non-existant, this will return MaxValue for a DateTime</remarks>
+    /// <remarks>If the folder is empty or non-existent, this will return MaxValue for a DateTime</remarks>
     /// <param name="folderPath"></param>
     /// <returns>Max Last Write Time</returns>
     public DateTime GetLastWriteTime(string folderPath)
     {
         if (!FileSystem.Directory.Exists(folderPath)) return DateTime.MaxValue;
+
         var fileEntries = FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
         if (fileEntries.Length == 0) return DateTime.MaxValue;
-        return fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
+
+        // Find the max last write time of the files
+        var maxFiles = fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
+
+        // Get the last write time of the directory itself
+        var directoryLastWriteTime = FileSystem.Directory.GetLastWriteTime(folderPath);
+
+        // Use comparison to get the max DateTime value
+        return directoryLastWriteTime > maxFiles ? directoryLastWriteTime : maxFiles;
     }
+
 
     /// <summary>
     /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
