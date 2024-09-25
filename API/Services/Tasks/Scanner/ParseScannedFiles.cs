@@ -215,10 +215,6 @@ public class ParseScannedFiles
         return true;
     }
 
-
-
-
-
     /// <summary>
     /// Handles directories that haven't changed since the last scan.
     /// </summary>
@@ -226,7 +222,7 @@ public class ParseScannedFiles
     {
         if (result.Exists(r => r.Folder == directory))
         {
-            _logger.LogDebug("[ProcessFiles] Skipping adding {Directory} as it's already added", directory);
+            _logger.LogDebug("[ProcessFiles] Skipping adding {Directory} as it's already added, this indicates a bad layout issue", directory);
         }
         else
         {
@@ -236,81 +232,16 @@ public class ParseScannedFiles
     }
 
     /// <summary>
-    /// Optimizes the scan for folders containing multiple series by checking if specific series folders have changed.
-    /// </summary>
-    private async Task HandleMultipleSeriesFolders(List<ScanResult> result, IList<SeriesModified> seriesList,
-        string directory, string libraryName, string folderPath, string fileExtensions, GlobMatcher matcher)
-    {
-        _logger.LogDebug("[ProcessFiles] {Directory} is dirty and has multiple series folders, checking if we can avoid a full scan", directory);
-
-        foreach (var seriesModified in seriesList)
-        {
-            var hasFolderChangedSinceLastScan = seriesModified.LastScanned.Truncate(TimeSpan.TicksPerSecond) <
-                                                _directoryService.GetLastWriteTime(seriesModified.LowestFolderPath!).Truncate(TimeSpan.TicksPerSecond);
-
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.FileScanProgressEvent(seriesModified.LowestFolderPath!, libraryName, ProgressEventType.Updated));
-
-            if (!hasFolderChangedSinceLastScan)
-            {
-                DetectNewFoldersAndHandleUnchanged(result, seriesModified, folderPath, matcher, fileExtensions, directory);
-            }
-            else
-            {
-                _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} changed for Series {SeriesName}",
-                    directory, seriesModified.LowestFolderPath, seriesModified.SeriesName);
-                var files = _directoryService.ScanFiles(seriesModified.LowestFolderPath!, fileExtensions, matcher);
-                result.Add(CreateScanResult(seriesModified.LowestFolderPath!, folderPath, true, files));
-            }
-        }
-    }
-
-    /// <summary>
-    /// Detects new folders that were added to a series and handles them.
-    /// </summary>
-    private void DetectNewFoldersAndHandleUnchanged(List<ScanResult> result, SeriesModified seriesModified,
-        string folderPath, GlobMatcher matcher, string fileExtensions, string directory)
-    {
-        var currentSubdirectories = _directoryService.GetDirectories(directory, matcher).Select(Parser.Parser.NormalizePath);
-        var knownSeriesPaths = seriesModified.LibraryRoots.Select(Parser.Parser.NormalizePath).ToList();
-
-        // Check if there are any new folders that aren't part of the known series
-        var newFolders = currentSubdirectories.Except(knownSeriesPaths).ToList();
-
-        if (newFolders.Count != 0)
-        {
-            _logger.LogDebug("[ProcessFiles] New folders detected in {Directory}, scanning new folders", directory);
-            foreach (var newFolder in newFolders)
-            {
-                var files = _directoryService.ScanFiles(newFolder, fileExtensions, matcher);
-                _logger.LogDebug("[ProcessFiles] {Directory} contains {FilesCount} files", directory, files.Count);
-                result.Add(CreateScanResult(newFolder, folderPath, true, files));
-            }
-        }
-        else
-        {
-            _logger.LogDebug("[ProcessFiles] {Directory} subfolder {Folder} did not change and no new folders detected, skipping",
-                directory, seriesModified.LowestFolderPath);
-            result.Add(CreateScanResult(seriesModified.LowestFolderPath!, folderPath, false, ArraySegment<string>.Empty));
-        }
-    }
-
-
-    /// <summary>
-    /// Checks if the directory can be optimized for scanning by checking individual series folders.
-    /// </summary>
-    private static bool ShouldOptimizeForSeries(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory)
-    {
-        return seriesPaths.TryGetValue(directory, out var series) && series.Count > 1 && series.All(s => !string.IsNullOrEmpty(s.LowestFolderPath));
-    }
-
-    /// <summary>
     /// Performs a full scan of the directory and adds it to the result.
     /// </summary>
     private void PerformFullScan(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher)
     {
         _logger.LogDebug("[ProcessFiles] Performing full scan on {Directory}", directory);
         var files = _directoryService.ScanFiles(directory, fileExtensions, matcher);
+        if (files.Count == 0)
+        {
+            _logger.LogDebug("[ProcessFiles] Empty directory: {Directory}. Keeping empty will cause Kavita to scan this each time", directory);
+        }
         result.Add(CreateScanResult(directory, folderPath, true, files));
     }
 
@@ -470,57 +401,6 @@ public class ParseScannedFiles
         return info.Series;
     }
 
-
-    /// <summary>
-    /// This will process series by folder groups. This is used solely by ScanSeries
-    /// </summary>
-    /// <param name="library">This should have the FileTypes included</param>
-    /// <param name="folders"></param>
-    /// <param name="isLibraryScan">If true, does a directory scan first (resulting in folders being tackled in parallel), else does an immediate scan files</param>
-    /// <param name="seriesPaths">A map of Series names -> existing folder paths to handle skipping folders</param>
-    /// <param name="forceCheck">Defaults to false</param>
-    /// <returns></returns>
-    // public async Task<IList<ScannedSeriesResult>> ScanLibrariesForSeriesOld(Library library,
-    //     IEnumerable<string> folders, bool isLibraryScan,
-    //     IDictionary<string, IList<SeriesModified>> seriesPaths, bool forceCheck = false)
-    // {
-    //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
-    //
-    //     _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count());
-    //     var processedScannedSeries = new List<ScannedSeriesResult>();
-    //     //var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
-    //     foreach (var folderPath in folders)
-    //     {
-    //         try
-    //         {
-    //             _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
-    //             var scanResults = await ProcessFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
-    //
-    //             _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
-    //             foreach (var scanResult in scanResults)
-    //             {
-    //                 await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
-    //             }
-    //
-    //             // This reduced a 1.1k series networked scan by a little more than 1 hour, but the order series were added to Kavita was not alphabetical
-    //             // await Task.WhenAll(scanResults.Select(async scanResult =>
-    //             // {
-    //             //     await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
-    //             // }));
-    //
-    //         }
-    //         catch (ArgumentException ex)
-    //         {
-    //             _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folderPath);
-    //         }
-    //     }
-    //
-    //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
-    //
-    //     return processedScannedSeries.ToList();
-    //
-    // }
-
     /// <summary>
     /// This will process series by folder groups. This is used solely by ScanSeries
     /// </summary>
@@ -540,23 +420,16 @@ public class ParseScannedFiles
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count());
         var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
 
-        try
+        foreach (var folder in folders)
         {
-            await Parallel.ForEachAsync(folders, async (folderPath, cancellationToken) =>
+            try
             {
-                try
-                {
-                    await ScanAndParseFolder(folderPath, library, isLibraryScan, seriesPaths, processedScannedSeries, forceCheck);
-                }
-                catch (ArgumentException ex)
-                {
-                    _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folderPath);
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[ScannerService] Error occurred while processing folders");
+                await ScanAndParseFolder(folder, library, isLibraryScan, seriesPaths, processedScannedSeries, forceCheck);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folder);
+            }
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
