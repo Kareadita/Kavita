@@ -258,17 +258,17 @@ public class ScannerService : IScannerService
         }
 
         // If the series path doesn't exist anymore, it was either moved or renamed. We need to essentially delete it
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        //var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name, 1));
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (scanElapsedTime, processedSeries) = await ScanFiles(library, new []{ folderPath },
+        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, new []{ folderPath },
             false, true);
 
-        // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
-        TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
+        // // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
+        // var parsedSeries = TrackFoundSeriesAndFiles(processedSeries);
 
         _logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
 
@@ -347,13 +347,16 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.CacheDirectory));
     }
 
-    private static void TrackFoundSeriesAndFiles(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, IList<ScannedSeriesResult> seenSeries)
+    private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries)
     {
-        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0))
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0 && s.HasChanged))
         {
             var parsedFiles = series.ParsedInfos;
             parsedSeries.Add(series.ParsedSeries, parsedFiles);
         }
+
+        return parsedSeries;
     }
 
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
@@ -530,13 +533,14 @@ public class ScannerService : IScannerService
         }
 
 
-        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan Files", library.Name);
-        var (scanElapsedTime, processedSeries) = await ScanFiles(library, libraryFolderPaths,
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan & Parse Files", library.Name);
+        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
-        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Track Found Series", library.Name);
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        TrackFoundSeriesAndFiles(parsedSeries, processedSeries);
+        // _logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Track Found Series", library.Name);
+
+        // We need to collect SeenSeries and filter out anything that hasn't changed
+
 
         // We need to remove any keys where there is no actual parser info
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Process Parsed Series", library.Name);
@@ -610,36 +614,41 @@ public class ScannerService : IScannerService
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "[ScannerService] Error during series cleanup. Please check logs and rescan.");
+            _logger.LogCritical(ex, "[ScannerService] Error during series cleanup. Please check logs and rescan");
         }
     }
 
     private async Task<int> ProcessParsedSeries(bool forceUpdate, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library, long scanElapsedTime)
     {
-        var toProcess = parsedSeries.Keys
-            .Where(k => parsedSeries[k].Any() && !string.IsNullOrEmpty(parsedSeries[k][0].Filename))
-            .ToList();
+        // Iterate over the dictionary and remove only the ParserInfos that don't need processing
+        var toProcess = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+
+        foreach (var series in parsedSeries)
+        {
+            // Filter out ParserInfos where FullFilePath is empty (i.e., folder not modified)
+            var validInfos = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename)).ToList();
+
+            if (validInfos.Count != 0)
+            {
+                toProcess[series.Key] = validInfos;
+            }
+        }
 
         if (toProcess.Count > 0)
         {
-            // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
+            // Prime shared entities if there are any series to process
             await _processSeries.Prime();
         }
 
         var totalFiles = 0;
-        //var tasks = new List<Task>();
         var seriesLeftToProcess = toProcess.Count;
+
         foreach (var pSeries in toProcess)
         {
-            totalFiles += parsedSeries[pSeries].Count;
-            //tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
-            // We can't do Task.WhenAll because of concurrency issues.
-            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, forceUpdate);
+            totalFiles += pSeries.Value.Count;
+            await _processSeries.ProcessSeriesAsync(pSeries.Value, library, seriesLeftToProcess, forceUpdate);
             seriesLeftToProcess--;
         }
-
-        //await Task.WhenAll(tasks);
-
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
@@ -648,6 +657,7 @@ public class ScannerService : IScannerService
 
         return totalFiles;
     }
+
 
     private static void UpdateLastScanned(Library library)
     {
@@ -660,7 +670,7 @@ public class ScannerService : IScannerService
         library.UpdateLastScanned(time);
     }
 
-    private async Task<Tuple<long, IList<ScannedSeriesResult>>> ScanFiles(Library library, IEnumerable<string> dirs,
+    private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs,
         bool isLibraryScan, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
@@ -671,6 +681,8 @@ public class ScannerService : IScannerService
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
-        return Tuple.Create(scanElapsedTime, processedSeries);
+        var parsedSeries = TrackFoundSeriesAndFiles(processedSeries);
+
+        return Tuple.Create(scanElapsedTime, parsedSeries);
     }
 }

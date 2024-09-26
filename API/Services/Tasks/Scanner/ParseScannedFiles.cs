@@ -140,7 +140,7 @@ public class ParseScannedFiles
     }
 
     private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
-    Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
+        Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
     {
         var allDirectories = _directoryService.GetAllDirectories(folderPath, matcher)
             .Select(Parser.Parser.NormalizePath)
@@ -454,45 +454,17 @@ public class ParseScannedFiles
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
         var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
 
+        // Aggregate the scanned series across all scanResults
+        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
         foreach (var scanResult in scanResults)
         {
-            await ParseAndTrackSeries(library, seriesPaths, scanResult, processedScannedSeries);
-        }
-    }
-
-    /// <summary>
-    /// Parses and tracks series from scan results
-    /// </summary>
-    /// <param name="library"></param>
-    /// <param name="seriesPaths"></param>
-    /// <param name="scanResult"></param>
-    /// <param name="processedScannedSeries"></param>
-    private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, ScanResult scanResult,
-        ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
-    {
-        // scanResult is updated with the parsed info
-        await ProcessScanResult(scanResult, seriesPaths, library);
-
-        // Perform any merging that is necessary and post processing steps
-        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-
-        // Merge localized series (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagatoro series
-        MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
-
-        // Combine everything into scannedSeries
-        foreach (var info in scanResult.ParserInfos)
-        {
-            try
-            {
-                TrackSeries(scannedSeries, info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info?.FullFilePath);
-            }
+            await ParseAndTrackSeries(library, seriesPaths, scanResult, scannedSeries);
         }
 
+        // Now transform and add to processedScannedSeries AFTER everything is processed
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Grouped parsed results for all parsed folders", library.Name);
         foreach (var series in scannedSeries.Keys)
         {
             if (scannedSeries[series].Count <= 0) continue;
@@ -508,10 +480,42 @@ public class ParseScannedFiles
 
             processedScannedSeries.Add(new ScannedSeriesResult()
             {
-                HasChanged = scanResult.HasChanged,
+                HasChanged = scanResults.Any(sr => sr.HasChanged),  // Combine HasChanged flag
                 ParsedSeries = series,
                 ParsedInfos = scannedSeries[series]
             });
+        }
+    }
+
+    /// <summary>
+    /// Parses and tracks series from scan results
+    /// </summary>
+    /// <param name="library"></param>
+    /// <param name="seriesPaths"></param>
+    /// <param name="scanResult"></param>
+    /// <param name="scannedSeries"></param>
+    private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths,
+        ScanResult scanResult, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
+    {
+        // scanResult is updated with the parsed info
+        await ProcessScanResult(scanResult, seriesPaths, library);
+
+        // Merge localized series (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagatoro series
+        MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
+
+        // Perform any merging that is necessary and post-processing steps
+
+        // Combine everything into scannedSeries
+        foreach (var info in scanResult.ParserInfos)
+        {
+            try
+            {
+                TrackSeries(scannedSeries, info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info?.FullFilePath);
+            }
         }
     }
 
@@ -678,6 +682,7 @@ public class ParseScannedFiles
             .Select(i => i.LocalizedSeries)
             .Distinct()
             .FirstOrDefault();
+
         if (string.IsNullOrEmpty(localizedSeries)) return;
 
         // Find non-localized series, normalizing by capitalization

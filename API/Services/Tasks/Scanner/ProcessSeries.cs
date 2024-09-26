@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -245,8 +246,6 @@ public class ProcessSeries : IProcessSeries
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
 
-                    // BackgroundJob.Enqueue(() =>
-                    //     _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
                     await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
@@ -268,7 +267,6 @@ public class ProcessSeries : IProcessSeries
 
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
-        // BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
         await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
     }
 
@@ -777,10 +775,44 @@ public class ProcessSeries : IProcessSeries
 
 
         // Remove chapters that aren't in parsedInfos or have no files linked
+        // var existingChapters = volume.Chapters.ToList();
+        // foreach (var existingChapter in existingChapters)
+        // {
+        //     if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
+        //     {
+        //         _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+        //             existingChapter.Range, volume.Name, parsedInfos[0].Series);
+        //         volume.Chapters.Remove(existingChapter);
+        //     }
+        //     else
+        //     {
+        //         // Ensure we remove any files that no longer exist AND order
+        //         existingChapter.Files = existingChapter.Files
+        //             .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
+        //             .OrderByNatural(f => f.FilePath)
+        //             .ToList();
+        //         existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+        //     }
+        // }
+
+        // This represents the directories that were part of the current scan.
+        var scannedDirectories = parsedInfos
+            .Select(p => Path.GetDirectoryName(p.FullFilePath))
+            .Distinct()
+            .ToList();
+
         var existingChapters = volume.Chapters.ToList();
         foreach (var existingChapter in existingChapters)
         {
-            if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
+            // Check if this chapter has files from directories that were part of the current scan
+            var chapterFileDirectories = existingChapter.Files
+                .Select(f => Path.GetDirectoryName(f.FilePath))
+                .Distinct()
+                .ToList();
+
+            // Only remove the chapter if its files are from a directory that was scanned and it's not in parserInfos anymore
+            if (existingChapter.Files.Count == 0 ||
+                chapterFileDirectories.Exists(dir => scannedDirectories.Contains(dir)) && !parsedInfos.HasInfo(existingChapter))
             {
                 _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
@@ -788,11 +820,13 @@ public class ProcessSeries : IProcessSeries
             }
             else
             {
-                // Ensure we remove any files that no longer exist AND order
+                // Ensure we remove any files that no longer exist AND reorder the remaining files
                 existingChapter.Files = existingChapter.Files
                     .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
                     .OrderByNatural(f => f.FilePath)
                     .ToList();
+
+                // Update the page count after filtering the files
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
             }
         }
