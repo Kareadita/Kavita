@@ -112,6 +112,7 @@ export class AllSeriesComponent implements OnInit {
     private readonly cdRef: ChangeDetectorRef) {
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    console.log('url: ', this.route.snapshot);
 
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
       this.filter = filter;

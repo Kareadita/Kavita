@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -731,8 +731,8 @@ namespace API.Data.Migrations
                     b.Property<string>("AlternateSeries")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("AvgHoursToRead")
-                        .HasColumnType("INTEGER");
+                    b.Property<float>("AvgHoursToRead")
+                        .HasColumnType("REAL");
 
                     b.Property<bool>("CharacterLocked")
                         .HasColumnType("INTEGER");
@@ -1809,8 +1809,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AvgHoursToRead")
-                        .HasColumnType("INTEGER");
+                    b.Property<float>("AvgHoursToRead")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
@@ -2040,8 +2040,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AvgHoursToRead")
-                        .HasColumnType("INTEGER");
+                    b.Property<float>("AvgHoursToRead")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");

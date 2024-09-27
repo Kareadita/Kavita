@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.2.12",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.3.2",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -3082,6 +3082,38 @@
         }
       }
     },
+    "/api/Library/scan-multiple": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Enqueues a bunch of library scans",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Library/scan-all": {
       "post": {
         "tags": [
@@ -3144,6 +3176,47 @@
         }
       }
     },
+    "/api/Library/refresh-metadata-multiple": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "name": "forceColorscape",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Library/analyze": {
       "post": {
         "tags": [
@@ -3159,6 +3232,70 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Library/analyze-multiple": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Library/copy-settings-from": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Copy the library settings (adv tab + optional type) to a set of other libraries.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopySettingsFromLibraryDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopySettingsFromLibraryDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopySettingsFromLibraryDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -4382,6 +4519,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
             }
           }
         ],
@@ -14956,6 +15102,24 @@
         },
         "additionalProperties": false
       },
+      "BulkActionDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "force": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "BulkRemoveBookmarkForSeriesDto": {
         "type": "object",
         "properties": {
@@ -15178,8 +15342,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "webLinks": {
             "type": "string",
@@ -15442,8 +15606,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "webLinks": {
             "type": "string",
@@ -16084,7 +16248,7 @@
             "type": "string"
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string"
           },
@@ -16144,9 +16308,31 @@
             "type": "string"
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CopySettingsFromLibraryDto": {
+        "type": "object",
+        "properties": {
+          "sourceLibraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetLibraryIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "includeType": {
+            "type": "boolean",
+            "description": "Include copying over the type"
           }
         },
         "additionalProperties": false
@@ -17502,9 +17688,9 @@
             "format": "int32"
           },
           "avgHours": {
-            "type": "integer",
+            "type": "number",
             "description": "Estimated average hours to read the selection",
-            "format": "int32"
+            "format": "float"
           }
         },
         "additionalProperties": false,
@@ -19134,7 +19320,7 @@
             "nullable": true
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string"
           }
@@ -19273,7 +19459,7 @@
             "description": "The Username of the User"
           },
           "password": {
-            "maxLength": 32,
+            "maxLength": 256,
             "minLength": 6,
             "type": "string",
             "description": "The new password"
@@ -19698,7 +19884,7 @@
           },
           "lastModified": {
             "type": "string",
-            "description": "Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc",
+            "description": "Whenever a modification occurs. ex: New volumes, removed volumes, title update, etc",
             "format": "date-time"
           },
           "createdUtc": {
@@ -19792,8 +19978,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "metadata": {
             "$ref": "#/components/schemas/SeriesMetadata"
@@ -20042,8 +20228,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "folderPath": {
             "type": "string",
@@ -21408,18 +21594,18 @@
             "nullable": true
           },
           "comicsTime": {
-            "type": "integer",
+            "type": "number",
             "description": "Amount of time read on Comic libraries",
-            "format": "int64"
+            "format": "float"
           },
           "booksTime": {
-            "type": "integer",
+            "type": "number",
             "description": "Amount of time read on",
-            "format": "int64"
+            "format": "float"
           },
           "mangaTime": {
-            "type": "integer",
-            "format": "int64"
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false
@@ -21769,7 +21955,6 @@
           "folderWatching",
           "id",
           "includeInDashboard",
-          "includeInRecommended",
           "includeInSearch",
           "manageCollections",
           "manageReadingLists",
@@ -21808,9 +21993,6 @@
             "type": "boolean"
           },
           "includeInDashboard": {
-            "type": "boolean"
-          },
-          "includeInRecommended": {
             "type": "boolean"
           },
           "includeInSearch": {
@@ -22948,8 +23130,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "chapters": {
             "type": "array",
@@ -23039,8 +23221,8 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           },
           "wordCount": {
             "type": "integer",

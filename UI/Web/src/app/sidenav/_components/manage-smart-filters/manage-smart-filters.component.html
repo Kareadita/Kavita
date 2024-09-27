@@ -19,7 +19,7 @@
             <i class="fa-solid fa-triangle-exclamation red me-2" [ngbTooltip]="t('errored')"></i>
             <span class="visually-hidden">{{t('errored')}}</span>
           }
-          <a [href]="'/all-series?' + f.filter" target="_blank">{{f.name}}</a>
+          <a [href]="baseUrl + 'all-series?' + f.filter" target="_blank">{{f.name}}</a>
         </span>
         <button class="btn btn-danger float-end" (click)="deleteFilter(f)">
           <i class="fa-solid fa-trash" aria-hidden="true"></i>

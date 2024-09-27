@@ -448,9 +448,7 @@ public class Startup
         }
         catch (Exception ex)
         {
-            if ((ex.Message.Contains("Permission denied")
-                 || ex.Message.Contains("UnauthorizedAccessException"))
-                && baseUrl.Equals(Configuration.DefaultBaseUrl) && OsInfo.IsDocker)
+            if (ex is UnauthorizedAccessException && baseUrl.Equals(Configuration.DefaultBaseUrl) && OsInfo.IsDocker)
             {
                 // Swallow the exception as the install is non-root and Docker
                 return;

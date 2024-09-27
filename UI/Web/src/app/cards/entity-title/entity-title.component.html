@@ -33,31 +33,50 @@
     @case (LibraryType.Manga) {
       @if (titleName !== '' && prioritizeTitleName) {
         @if (isChapter && includeChapter) {
-          {{t('chapter') + ' '  + number + ' - ' }}
+          @if (number === LooseLeafOrSpecial) {
+            {{t('chapter') + ' - ' }}
+          } @else {
+            {{t('chapter') + ' '  + number + ' - ' }}
+          }
+
         }
         {{titleName}}
       } @else {
         @if (includeVolume && volumeTitle !== '') {
-          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+          @if (number !== LooseLeafOrSpecial && isChapter && includeVolume) {
+            {{volumeTitle}}
+          }
         }
 
-        {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}
+        @if (number !== LooseLeafOrSpecial) {
+          @if (isChapter) {
+            {{t('chapter') + ' ' + number}}
+          } @else {
+            {{volumeTitle}}
+          }
+        } @else {
+          {{t('special')}}
+        }
       }
     }
 
     @case (LibraryType.Book) {
       @if (titleName !== '' && prioritizeTitleName) {
         {{titleName}}
+      } @else if (number === LooseLeafOrSpecial) {
+        {{null | defaultValue}}
       } @else {
-        {{volumeTitle}}
+        {{t('book-num', {num: volumeTitle})}}
       }
     }
 
     @case (LibraryType.LightNovel) {
       @if (titleName !== '' && prioritizeTitleName) {
         {{titleName}}
+      } @else if (number === LooseLeafOrSpecial) {
+        {{null | defaultValue}}
       } @else {
-        {{volumeTitle}}
+        {{t('book-num', {num: (isChapter ? number : volumeTitle)})}}
       }
     }
 

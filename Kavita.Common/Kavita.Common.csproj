@@ -3,7 +3,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.8.3.1</AssemblyVersion>
+        <AssemblyVersion>0.8.3.4</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <TieredPGO>true</TieredPGO>
     </PropertyGroup>
@@ -18,6 +18,6 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="xunit.assert" Version="2.9.0" />
+      <PackageReference Include="xunit.assert" Version="2.9.1" />
     </ItemGroup>
 </Project>

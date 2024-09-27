@@ -1,14 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, map, switchMap, take, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
   NgbAlert,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ManageMediaIssuesComponent} from "../manage-media-issues/manage-media-issues.component";
@@ -25,7 +25,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
+    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, AsyncPipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

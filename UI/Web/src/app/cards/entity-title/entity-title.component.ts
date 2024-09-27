@@ -4,6 +4,7 @@ import { Chapter, LooseLeafOrDefaultNumber } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library/library';
 import { Volume } from 'src/app/_models/volume';
 import {TranslocoModule} from "@jsverse/transloco";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 /**
  * This is primarily used for list item
@@ -12,7 +13,8 @@ import {TranslocoModule} from "@jsverse/transloco";
   selector: 'app-entity-title',
   standalone: true,
   imports: [
-    TranslocoModule
+    TranslocoModule,
+    DefaultValuePipe
   ],
   templateUrl: './entity-title.component.html',
   styleUrls: ['./entity-title.component.scss'],
@@ -20,7 +22,6 @@ import {TranslocoModule} from "@jsverse/transloco";
 })
 export class EntityTitleComponent implements OnInit {
 
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly LooseLeafOrSpecial = LooseLeafOrDefaultNumber + "";
   protected readonly LibraryType = LibraryType;
 
@@ -59,6 +60,7 @@ export class EntityTitleComponent implements OnInit {
       this.volumeTitle = c.volumeTitle || '';
       this.titleName = c.titleName || '';
       this.number = c.range;
+
     } else {
       const v = this.utilityService.asVolume(this.entity);
       this.volumeTitle = v.name || '';

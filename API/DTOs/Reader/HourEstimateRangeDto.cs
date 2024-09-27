@@ -16,5 +16,5 @@ public record HourEstimateRangeDto
     /// <summary>
     /// Estimated average hours to read the selection
     /// </summary>
-    public int AvgHours { get; init; } = 1;
+    public float AvgHours { get; init; } = 1f;
 }

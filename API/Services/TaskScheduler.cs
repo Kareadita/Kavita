@@ -220,6 +220,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
     {
+        _logger.LogInformation("Enqueuing library file analysis for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
     }
 
@@ -421,6 +422,12 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
     }
 
+    /// <summary>
+    /// Calculates TimeToRead and bytes
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="forceUpdate"></param>
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
         if (HasAlreadyEnqueuedTask("WordCountAnalyzerService", "ScanSeries", [libraryId, seriesId, forceUpdate]))

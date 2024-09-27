@@ -43,7 +43,7 @@ public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
     /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
     public long WordCount { get; set; }
 
     /// <summary>

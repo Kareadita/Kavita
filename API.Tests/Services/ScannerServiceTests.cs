@@ -112,8 +112,18 @@ public class ScannerServiceTests : AbstractDbTest
 
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
+    }
 
-        Assert.True(true);
+    [Fact]
+    public async Task ScanLibrary_ShouldCombineNestedFolder()
+    {
+        var testcase = "Series and Series-Series Combined - Manga.json";
+        var postLib = await GenerateScannerData(testcase);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
     }
 
     private async Task<Library> GenerateScannerData(string testcase)

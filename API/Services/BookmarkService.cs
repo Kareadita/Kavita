@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -90,6 +91,13 @@ public class BookmarkService : IBookmarkService
         var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
         if (bookmark == null) return;
 
+        // Validate the bookmark isn't already in target format
+        if (bookmark.FileName.EndsWith(encodeFormat.GetExtension()))
+        {
+            // Nothing to ddo
+            return;
+        }
+
         bookmark.FileName = await _mediaConversionService.SaveAsEncodingFormat(bookmarkDirectory, bookmark.FileName,
             BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId), encodeFormat);
         _unitOfWork.UserRepository.Update(bookmark);
@@ -137,7 +145,7 @@ public class BookmarkService : IBookmarkService
             _unitOfWork.UserRepository.Add(bookmark);
             await _unitOfWork.CommitAsync();
 
-            if (settings.EncodeMediaAs == EncodeFormat.WEBP)
+            if (settings.EncodeMediaAs != EncodeFormat.PNG)
             {
                 // Enqueue a task to convert the bookmark to webP
                 BackgroundJob.Enqueue(() => ConvertBookmarkToEncoding(bookmark.Id));

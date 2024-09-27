@@ -22,7 +22,7 @@ import {ServerService} from "./_services/server.service";
 import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
 import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
-import {translate} from "@jsverse/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-root',
@@ -47,6 +47,7 @@ export class AppComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
+  private readonly translocoService = inject(TranslocoService);
 
   protected readonly Breakpoint = Breakpoint;
 
@@ -126,6 +127,9 @@ export class AppComponent implements OnInit {
         // Bust locale cache
         localStorage.removeItem('@transloco/translations/timestamp');
         localStorage.removeItem('@transloco/translations');
+        (this.translocoService as any).cache.delete(localStorage.getItem('kavita-locale') || 'en');
+        (this.translocoService as any).cache.clear();
+        localStorage.setItem('kavita--version', version);
         location.reload();
       }
       localStorage.setItem('kavita--version', version);

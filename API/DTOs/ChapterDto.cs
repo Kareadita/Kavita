@@ -111,7 +111,7 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
     /// <summary>
     /// Comma-separated link of urls to external services that have some relation to the Chapter
     /// </summary>

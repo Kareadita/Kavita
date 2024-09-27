@@ -1,7 +1,7 @@
 import {
   AsyncPipe,
   DecimalPipe,
-  DOCUMENT, JsonPipe,
+  DOCUMENT, JsonPipe, Location,
   NgClass,
   NgOptimizedImage,
   NgStyle,
@@ -211,6 +211,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly themeService = inject(ThemeService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly scrobbleService = inject(ScrobblingService);
+  private readonly location = inject(Location);
 
   protected readonly LibraryType = LibraryType;
   protected readonly TabID = TabID;
@@ -523,6 +524,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
 
+
+
     this.route.fragment.pipe(tap(frag => {
       if (frag !== null && this.activeTabId !== (frag as TabID)) {
         this.activeTabId = frag as TabID;
@@ -561,9 +564,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   updateUrl(activeTab: TabID) {
-    var tokens = this.router.url.split('#');
+    const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
-    window.history.replaceState({}, '', newUrl);
+    this.location.replaceState(newUrl)
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {

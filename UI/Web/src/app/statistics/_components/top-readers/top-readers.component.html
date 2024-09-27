@@ -9,28 +9,34 @@
           <label for="time-select-top-reads" class="form-check-label visually-hidden">{{t('time-selection-label')}}</label>
           <select id="time-select-top-reads" class="form-select" formControlName="days"
                   [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
-            <option *ngFor="let item of timePeriods" [value]="item.value">{{t(item.title)}}</option>
+            @for (item of timePeriods; track item.value) {
+              <option [value]="item.value">{{t(item.title)}}</option>
+            }
           </select>
         </div>
       </form>
     </div>
   </div>
 
-
-  <ng-container>
-    <div class="grid row g-0">
-      <div class="card" *ngFor="let user of (users$ | async)">
-        <div class="card-header text-center">
-          {{user.username}}
+  @if (users$ | async; as users) {
+    <app-carousel-reel [alwaysShow]="false" [clickableTitle]="false" [items]="users">
+      <ng-template #carouselItem let-item>
+        <div class="card me-2">
+          <div class="card-header text-center">
+            {{item.username}}
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">{{t('comics-label', {value: item.comicsTime})}}</li>
+            <li class="list-group-item">{{t('manga-label', {value: item.mangaTime})}}</li>
+            <li class="list-group-item">{{t('books-label', {value: item.booksTime})}}</li>
+          </ul>
         </div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">{{t('comics-label', {value: user.comicsTime})}}</li>
-          <li class="list-group-item">{{t('manga-label', {value: user.mangaTime})}}</li>
-          <li class="list-group-item">{{t('books-label', {value: user.booksTime})}}</li>
-        </ul>
-      </div>
-    </div>
-  </ng-container>
+      </ng-template>
+    </app-carousel-reel>
+  }
+
+
+
 
 
 

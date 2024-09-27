@@ -19,8 +19,6 @@ public class UpdateLibraryDto
     [Required]
     public bool IncludeInDashboard { get; init; }
     [Required]
-    public bool IncludeInRecommended { get; init; }
-    [Required]
     public bool IncludeInSearch { get; init; }
     [Required]
     public bool ManageCollections { get; init; }

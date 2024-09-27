@@ -16,7 +16,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
-import {NavLinkModalComponent} from "../../nav/_components/nav-link-modal/nav-link-modal.component";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 
 @Component({
@@ -41,6 +40,10 @@ export class CardActionablesComponent implements OnInit {
   @Input() btnClass = '';
   @Input() actions: ActionItem<any>[] = [];
   @Input() labelBy = 'card';
+  /**
+   * Text to display as if actionable was a button
+   */
+  @Input() label = '';
   @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 

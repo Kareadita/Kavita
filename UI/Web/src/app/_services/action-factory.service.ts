@@ -108,6 +108,10 @@ export enum Action {
    * Invoke a refresh covers as false to generate colorscapes
    */
   GenerateColorScape = 26,
+  /**
+   * Copy settings from one entity to another
+   */
+  CopySettings = 27
 }
 
 /**
@@ -253,6 +257,43 @@ export class ActionFactoryService {
     // Filter out tasks that don't make sense
     return tasks.filter(t => !blacklist.includes(t.action));
   }
+
+  getBulkLibraryActions(callback: ActionCallback<Library>) {
+
+    // Scan is currently not supported due to the backend not being able to handle it yet
+    const actions = this.flattenActions<Library>(this.libraryActions).filter(a => {
+      return [Action.Delete, Action.GenerateColorScape, Action.AnalyzeFiles, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
+    });
+
+    actions.push({
+      _extra: undefined,
+      class: undefined,
+      description: '',
+      dynamicList: undefined,
+      action: Action.CopySettings,
+      callback: this.dummyCallback,
+      children: [],
+      requiresAdmin: true,
+      title: 'copy-settings'
+    })
+    return this.applyCallbackToList(actions, callback);
+  }
+
+  flattenActions<T>(actions: Array<ActionItem<T>>): Array<ActionItem<T>> {
+    return actions.reduce<Array<ActionItem<T>>>((flatArray, action) => {
+      if (action.action !== Action.Submenu) {
+        flatArray.push(action);
+      }
+
+      // Recursively flatten the children, if any
+      if (action.children && action.children.length > 0) {
+        flatArray.push(...this.flattenActions<T>(action.children));
+      }
+
+      return flatArray;
+    }, [] as Array<ActionItem<T>>); // Explicitly defining the type of flatArray
+  }
+
 
   private _resetActions() {
     this.libraryActions = [

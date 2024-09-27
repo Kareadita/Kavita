@@ -595,7 +595,6 @@ public class StatisticService : IStatisticService
                     .Contains(c.Id))
             })
             .OrderByDescending(d => d.Chapters.Sum(c => c.AvgHoursToRead))
-            .Take(5)
             .ToList();
 
 
@@ -615,16 +614,17 @@ public class StatisticService : IStatisticService
             chapterLibLookup.Add(cl.ChapterId, cl.LibraryId);
         }
 
-        var user = new Dictionary<int, Dictionary<LibraryType, long>>();
+        var user = new Dictionary<int, Dictionary<LibraryType, float>>();
         foreach (var userChapter in topUsersAndReadChapters)
         {
-            if (!user.ContainsKey(userChapter.User.Id)) user.Add(userChapter.User.Id, new Dictionary<LibraryType, long>());
+            if (!user.ContainsKey(userChapter.User.Id)) user.Add(userChapter.User.Id, []);
             var libraryTimes = user[userChapter.User.Id];
 
             foreach (var chapter in userChapter.Chapters)
             {
                 var library = libraries.First(l => l.Id == chapterLibLookup[chapter.Id]);
-                if (!libraryTimes.ContainsKey(library.Type)) libraryTimes.Add(library.Type, 0L);
+                libraryTimes.TryAdd(library.Type, 0f);
+
                 var existingHours = libraryTimes[library.Type];
                 libraryTimes[library.Type] = existingHours + chapter.AvgHoursToRead;
             }
