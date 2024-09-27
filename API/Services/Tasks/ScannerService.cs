@@ -638,6 +638,14 @@ public class ScannerService : IScannerService
         {
             // Prime shared entities if there are any series to process
             await _processSeries.Prime();
+
+            // TODO: For all Genres in the ParserInfos, do a bulk check against the DB on what is not in the DB and create them
+            // This will ensure all Genres are pre-created and allow our Genre lookup (and Priming) to be much simplier. It will be slower, but more consistent.
+
+            // TODO: Do the above for Tags as well
+
+            // TODO: Do the above for People as well (until we overhaul the People code)
+
         }
 
         var totalFiles = 0;

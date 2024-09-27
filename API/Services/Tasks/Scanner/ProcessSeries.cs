@@ -193,6 +193,7 @@ public class ProcessSeries : IProcessSeries
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
+                    // Note to self: I've seen this trigger for an AppUser before indicating the way we are spawning ProcessSeries isn't getting it's own DBContext.
                     foreach (var entry in ex.Entries)
                     {
                         if (entry.Entity is Series)
@@ -795,41 +796,94 @@ public class ProcessSeries : IProcessSeries
         //     }
         // }
 
-        // This represents the directories that were part of the current scan.
-        var scannedDirectories = parsedInfos
-            .Select(p => Path.GetDirectoryName(p.FullFilePath))
-            .Distinct()
-            .ToList();
+        // // This represents the directories that were part of the current scan.
+        // var scannedDirectories = parsedInfos
+        //     .Select(p => Path.GetDirectoryName(p.FullFilePath))
+        //     .Distinct()
+        //     .ToList();
+        //
+        // var existingChapters = volume.Chapters.ToList();
+        // foreach (var existingChapter in existingChapters)
+        // {
+        //     // Check if this chapter has files from directories that were part of the current scan
+        //     var chapterFileDirectories = existingChapter.Files
+        //         .Select(f => Path.GetDirectoryName(f.FilePath))
+        //         .Distinct()
+        //         .ToList();
+        //
+        //     // Only remove the chapter if its files are from a directory that was scanned and it's not in parserInfos anymore
+        //     if (existingChapter.Files.Count == 0 ||
+        //         chapterFileDirectories.Exists(dir => scannedDirectories.Contains(dir)) && !parsedInfos.HasInfo(existingChapter))
+        //     {
+        //         _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+        //             existingChapter.Range, volume.Name, parsedInfos[0].Series);
+        //         volume.Chapters.Remove(existingChapter);
+        //     }
+        //     else
+        //     {
+        //         // Ensure we remove any files that no longer exist AND reorder the remaining files
+        //         existingChapter.Files = existingChapter.Files
+        //             .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
+        //             .OrderByNatural(f => f.FilePath)
+        //             .ToList();
+        //
+        //         // Update the page count after filtering the files
+        //         existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+        //     }
+        // }
 
         var existingChapters = volume.Chapters.ToList();
-        foreach (var existingChapter in existingChapters)
+
+// Extract the directories (without filenames) from parserInfos
+var parsedDirectories = parsedInfos
+    .Select(p => Path.GetDirectoryName(p.FullFilePath)) // Get directory path
+    .Distinct()
+    .ToList();
+
+foreach (var existingChapter in existingChapters)
+{
+    // Get the directories for the files in the current chapter
+    var chapterFileDirectories = existingChapter.Files
+        .Select(f => Path.GetDirectoryName(f.FilePath)) // Get directory path minus the filename
+        .Distinct()
+        .ToList();
+
+    // Check if any of the chapter's file directories match the parsedDirectories
+    var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
+
+    if (hasMatchingDirectory)
+    {
+        // Ensure we remove any files that no longer exist AND order the remaining files
+        existingChapter.Files = existingChapter.Files
+            .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
+            .OrderByNatural(f => f.FilePath)
+            .ToList();
+
+        // Update the chapter's page count after filtering the files
+        existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+
+        // If no files remain after filtering, remove the chapter
+        if (existingChapter.Files.Count == 0)
         {
-            // Check if this chapter has files from directories that were part of the current scan
-            var chapterFileDirectories = existingChapter.Files
-                .Select(f => Path.GetDirectoryName(f.FilePath))
-                .Distinct()
-                .ToList();
-
-            // Only remove the chapter if its files are from a directory that was scanned and it's not in parserInfos anymore
-            if (existingChapter.Files.Count == 0 ||
-                chapterFileDirectories.Exists(dir => scannedDirectories.Contains(dir)) && !parsedInfos.HasInfo(existingChapter))
-            {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
-                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
-                volume.Chapters.Remove(existingChapter);
-            }
-            else
-            {
-                // Ensure we remove any files that no longer exist AND reorder the remaining files
-                existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-                    .OrderByNatural(f => f.FilePath)
-                    .ToList();
-
-                // Update the page count after filtering the files
-                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
-            }
+            _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                existingChapter.Range, volume.Name, parsedInfos[0].Series);
+            volume.Chapters.Remove(existingChapter);
         }
+    }
+    else
+    {
+        // If there are no matching directories in the current scan, check if the files still exist on disk
+        var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
+
+        // If no files exist, remove the chapter
+        if (!filesExist)
+        {
+            _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
+                existingChapter.Range, volume.Name, parsedInfos[0].Series);
+            volume.Chapters.Remove(existingChapter);
+        }
+    }
+}
     }
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)

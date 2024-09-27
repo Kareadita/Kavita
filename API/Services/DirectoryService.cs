@@ -55,7 +55,7 @@ public interface IDirectoryService
     bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "");
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
-    string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
+    string? FindLowestDirectoriesFromFiles(IList<string> libraryFolders,
         IList<string> filePaths);
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
@@ -620,13 +620,13 @@ public class DirectoryService : IDirectoryService
     /// <param name="libraryFolders">List of top level folders which files belong to</param>
     /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
     /// <returns>Lowest non-root path, or null if not found</returns>
-    public string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
+    public string? FindLowestDirectoriesFromFiles(IList<string> libraryFolders, IList<string> filePaths)
     {
         // Normalize the file paths only once
         var normalizedFilePaths = filePaths.Select(Parser.NormalizePath).ToList();
 
-        // Use a HashSet to avoid duplicate directories
-        var dirs = new HashSet<string>();
+        // Use a list to store all directories for comparison
+        var dirs = new List<string>();
 
         // Iterate through each library folder and collect matching directories
         foreach (var normalizedFolder in libraryFolders.Select(Parser.NormalizePath))
@@ -634,26 +634,40 @@ public class DirectoryService : IDirectoryService
             foreach (var file in normalizedFilePaths)
             {
                 // If the file path contains the folder path, get its directory
-                if (file.Contains(normalizedFolder))
+                if (!file.Contains(normalizedFolder)) continue;
+
+                var lowestPath = Path.GetDirectoryName(file);
+                if (!string.IsNullOrEmpty(lowestPath))
                 {
-                    var lowestPath = Path.GetDirectoryName(file);
-                    if (!string.IsNullOrEmpty(lowestPath))
-                    {
-                        dirs.Add(Parser.NormalizePath(lowestPath)); // Add to HashSet (automatically handles duplicates)
-                    }
+                    dirs.Add(Parser.NormalizePath(lowestPath)); // Add to list
                 }
             }
         }
 
-        // Early return if there is only one directory
-        if (dirs.Count == 1)
+        if (dirs.Count == 0)
         {
-            return dirs.First();
+            return null; // No directories found
         }
 
-        // Check if all files exist within any of the found directories else return null
-        return dirs.FirstOrDefault(dir => normalizedFilePaths.TrueForAll(filePath => filePath.Contains(dir)));
+        // Now find the deepest common directory among all paths
+        var commonPath = dirs.Aggregate(GetCommonPath);
+
+        // Return the common path if it exists and is not one of the root directories
+        return libraryFolders.Any(folder => commonPath == Parser.NormalizePath(folder)) ? null : commonPath;
     }
+
+    private static string GetCommonPath(string path1, string path2)
+    {
+        var parts1 = path1.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var parts2 = path2.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        var commonParts = parts1.Zip(parts2, (p1, p2) => p1 == p2 ? p1 : null)
+            .TakeWhile(part => part != null)
+            .ToArray();
+
+        return Parser.NormalizePath(string.Join(Path.DirectorySeparatorChar.ToString(), commonParts));
+    }
+
 
 
     /// <summary>

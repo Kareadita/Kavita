@@ -68,8 +68,33 @@ public class ScannerServiceTests : AbstractDbTest
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
-        Assert.Single(postLib.Series);
         Assert.Equal(2, postLib.Series.First().Volumes.Count);
+    }
+
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeries()
+    {
+        var testcase = "Flat Series - Manga.json";
+        var postLib = await GenerateScannerData(testcase);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+
+        // TODO: Trigger a deletion of ch 10
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecial()
+    {
+        var testcase = "Flat Series with Specials - Manga.json";
+        var postLib = await GenerateScannerData(testcase);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(4, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
     private async Task<Library> GenerateScannerData(string testcase)
