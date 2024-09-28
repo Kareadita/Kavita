@@ -64,10 +64,7 @@ public class ImageServiceTests
             using var thumbnail = new MagickImage(imagePath);
 
             var size = ImageService.GetSizeForDimensions(thumbnail, dims.Width, dims.Height);
-            var crop = ImageService.GetCropForDimensions(thumbnail, dims.Width, dims.Height);
             thumbnail.Thumbnail(size);
-            if (crop)
-                thumbnail.Crop(dims.Width, dims.Height, Gravity.Center);
 
             var outputFileName = fileName + outputExtension + ".png";
             thumbnail.Write(Path.Join(_testDirectory, outputFileName));

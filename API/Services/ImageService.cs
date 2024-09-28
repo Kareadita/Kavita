@@ -215,10 +215,8 @@ public class ImageService : IImageService
     private MagickImage Thumbnail(MagickImage sourceImage, int width, int height)
     {
         var geometry = GetSizeForDimensions(sourceImage, width, height);
-        bool crop = GetCropForDimensions(sourceImage, width, height);
+    
         sourceImage.Thumbnail(geometry);
-        if (crop)
-            sourceImage.Crop(width, height, Gravity.Center);
         return sourceImage;
     }
     public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
