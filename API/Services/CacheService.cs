@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -240,23 +240,23 @@ public class CacheService : ICacheService
                     break;
                 case MangaFormat.Epub:
                 case MangaFormat.Pdf:
+                {
+                    if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
                     {
-                        if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
-                        {
-                            _logger.LogError("{File} does not exist on disk", files[0].FilePath);
-                            throw new KavitaException($"{files[0].FilePath} does not exist on disk");
-                        }
-                        if (extractPdfImages)
-                        {
-                            _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
-                            break;
-                        }
-                        removeNonImages = false;
-
-                        _directoryService.ExistOrCreate(extractPath);
-                        _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                        _logger.LogError("{File} does not exist on disk", files[0].FilePath);
+                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
+                    }
+                    if (extractPdfImages)
+                    {
+                        _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
                         break;
                     }
+                    removeNonImages = false;
+
+                    _directoryService.ExistOrCreate(extractPath);
+                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                    break;
+                }
             }
         }
 

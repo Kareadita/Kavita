@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -8,10 +8,8 @@ using API.Services;
 using EasyCaching.Core;
 using ImageMagick;
 using Microsoft.Extensions.Logging;
-
 using NSubstitute;
 using Xunit;
-
 
 namespace API.Tests.Services;
 

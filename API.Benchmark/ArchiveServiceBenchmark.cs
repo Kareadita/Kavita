@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Abstractions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -8,7 +8,6 @@ using BenchmarkDotNet.Order;
 using EasyCaching.Core;
 using ImageMagick;
 using NSubstitute;
-
 
 namespace API.Benchmark;
 
@@ -22,7 +21,6 @@ public class ArchiveServiceBenchmark
     private readonly ArchiveService _archiveService;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
-
     private const string SourceImage = "C:/Users/josep/Pictures/obey_by_grrsa-d6llkaa_colored_by_me.png";
 
 

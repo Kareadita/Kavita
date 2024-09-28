@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
 using MimeTypes;
