@@ -296,6 +296,33 @@ public class ParseScannedFiles
         };
     }
 
+    /// <summary>
+    /// Processes scanResults to track all series across the combined results.
+    /// Ensures series are correctly grouped even if they span multiple folders.
+    /// </summary>
+    /// <param name="scanResults">A collection of scan results</param>
+    /// <param name="scannedSeries">A concurrent dictionary to store the tracked series</param>
+    private void TrackSeriesAcrossScanResults(IList<ScanResult> scanResults, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
+    {
+        // Flatten all ParserInfos from scanResults
+        var allInfos = scanResults.SelectMany(sr => sr.ParserInfos).ToList();
+
+        // Iterate through each ParserInfo and track the series
+        foreach (var info in allInfos)
+        {
+            if (info == null) continue;
+
+            try
+            {
+                TrackSeries(scannedSeries, info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info?.FullFilePath);
+            }
+        }
+    }
+
 
     /// <summary>
     /// Attempts to either add a new instance of a series mapping to the _scannedSeries bag or adds to an existing.
@@ -460,32 +487,170 @@ public class ParseScannedFiles
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
         foreach (var scanResult in scanResults)
         {
-            await ParseAndTrackSeries(library, seriesPaths, scanResult, scannedSeries);
+            await ParseFiles(scanResult, seriesPaths, library);
         }
 
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Merge any localized series with series {Folder}", library.Name, folderPath);
+        scanResults = MergeLocalizedSeriesAcrossScanResults(scanResults);
+
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.E: Group all parsed data into logical Series", library.Name);
+        TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+
         // Now transform and add to processedScannedSeries AFTER everything is processed
-        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Grouped parsed results for all parsed folders", library.Name);
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
+        GenerateProcessedScannedSeries(scannedSeries, scanResults, processedScannedSeries);
+    }
+
+    /// <summary>
+    /// Processes and generates the final results for processedScannedSeries after updating sort order.
+    /// </summary>
+    /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
+    /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
+    /// <param name="processedScannedSeries">A thread-safe concurrent bag of processed series results</param>
+    private void GenerateProcessedScannedSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+    {
+        // First, update the sort order for all series
+        UpdateSeriesSortOrder(scannedSeries);
+
+        // Now, generate the final processed scanned series results
+        CreateFinalSeriesResults(scannedSeries, scanResults, processedScannedSeries);
+    }
+
+    /// <summary>
+    /// Updates the sort order for all series in the scannedSeries dictionary.
+    /// </summary>
+    /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
+    private void UpdateSeriesSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
+    {
         foreach (var series in scannedSeries.Keys)
         {
             if (scannedSeries[series].Count <= 0) continue;
 
             try
             {
-                UpdateSortOrder(scannedSeries, series);
+                UpdateSortOrder(scannedSeries, series);  // Call to method that updates sort order
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ScannerService] Issue occurred while setting IssueOrder for series {SeriesName}", series.Name);
             }
+        }
+    }
 
-            processedScannedSeries.Add(new ScannedSeriesResult()
+    /// <summary>
+    /// Generates the final processed scanned series results after processing the sort order.
+    /// </summary>
+    /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
+    /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
+    /// <param name="processedScannedSeries">The list where processed results will be added</param>
+    private void CreateFinalSeriesResults(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries,
+        IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+    {
+        foreach (var series in scannedSeries.Keys)
+        {
+            if (scannedSeries[series].Count <= 0) continue;
+
+            processedScannedSeries.Add(new ScannedSeriesResult
             {
-                HasChanged = scanResults.Any(sr => sr.HasChanged),  // Combine HasChanged flag
+                HasChanged = scanResults.Any(sr => sr.HasChanged),  // Combine HasChanged flag across all scanResults
                 ParsedSeries = series,
                 ParsedInfos = scannedSeries[series]
             });
         }
     }
+
+    /// <summary>
+    /// Merges localized series with the series field across all scan results.
+    /// Combines ParserInfos from all scanResults and processes them collectively
+    /// to ensure consistent series names.
+    /// </summary>
+    /// <param name="scanResults">A collection of scan results</param>
+    /// <returns>A new list of scan results with merged series</returns>
+    private IList<ScanResult> MergeLocalizedSeriesAcrossScanResults(IList<ScanResult> scanResults)
+    {
+        // Flatten all ParserInfos across scanResults
+        var allInfos = scanResults.SelectMany(sr => sr.ParserInfos).ToList();
+
+        // Filter relevant infos (non-special and with localized series, grouping by Format)
+        var relevantInfos = allInfos
+            .Where(i => !i.IsSpecial && !string.IsNullOrEmpty(i.LocalizedSeries))
+            .GroupBy(i => i.Format)
+            .SelectMany(g => g.ToList())
+            .ToList();
+
+        if (relevantInfos.Count == 0) return scanResults;
+
+        // Get the first distinct localized series
+        var localizedSeries = relevantInfos
+            .Select(i => i.LocalizedSeries)
+            .Distinct()
+            .FirstOrDefault();
+
+        if (string.IsNullOrEmpty(localizedSeries)) return scanResults;
+
+        // Find non-localized series, normalizing by capitalization
+        var distinctSeries = relevantInfos
+            .DistinctBy(r => r.Series)
+            .Select(r => r.Series)
+            .ToList();
+
+        if (distinctSeries.Count == 0) return scanResults;
+
+        string? nonLocalizedSeries = null;
+
+        switch (distinctSeries.Count)
+        {
+            case 1:
+                nonLocalizedSeries = distinctSeries[0];
+                break;
+            case <= 2:
+                nonLocalizedSeries = distinctSeries.FirstOrDefault(s => !s.Equals(Parser.Parser.Normalize(localizedSeries)));
+                break;
+            default:
+                _logger.LogError(
+                    "[ScannerService] Multiple series detected across scan results that contain localized series. " +
+                    "This will cause them to group incorrectly. Please separate series into their own dedicated folder: {LocalizedSeries}",
+                    string.Join(", ", distinctSeries)
+                );
+                return scanResults;
+        }
+
+        if (nonLocalizedSeries == null) return scanResults;
+
+        var seriesToBeRemapped = allInfos.Where(i => i.Series.Equals(localizedSeries)).ToList();
+
+        // Update infos that need mapping
+        foreach (var infoNeedingMapping in seriesToBeRemapped)
+        {
+            infoNeedingMapping.Series = nonLocalizedSeries;
+
+            // Find the scan result containing the localized info
+            var localizedScanResult = scanResults.FirstOrDefault(sr => sr.ParserInfos.Contains(infoNeedingMapping));
+            if (localizedScanResult != null)
+            {
+                // Remove the localized series from this scan result
+                localizedScanResult.ParserInfos.Remove(infoNeedingMapping);
+
+                // Find the scan result that should be merged with
+                var nonLocalizedScanResult = scanResults.FirstOrDefault(sr => sr.ParserInfos.Any(pi => pi.Series == nonLocalizedSeries));
+                if (nonLocalizedScanResult != null)
+                {
+                    // Add the remapped info to the non-localized scan result
+                    nonLocalizedScanResult.ParserInfos.Add(infoNeedingMapping);
+                }
+            }
+        }
+
+        // Remove or clear any scan results that now have no ParserInfos after merging
+        scanResults = scanResults
+            .Where(sr => sr.ParserInfos.Any())  // Keep only those with non-empty ParserInfos
+            .ToList();
+
+        return scanResults;
+    }
+
+
 
     /// <summary>
     /// Parses and tracks series from scan results
@@ -498,7 +663,9 @@ public class ParseScannedFiles
         ScanResult scanResult, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
     {
         // scanResult is updated with the parsed info
-        await ProcessScanResult(scanResult, seriesPaths, library);
+        await ParseFiles(scanResult, seriesPaths, library);
+
+        // With the new scanner loop, this might be better to move and do against all series after being scanned
 
         // Merge localized series (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagatoro series
         MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
@@ -526,7 +693,7 @@ public class ParseScannedFiles
     /// <param name="result"></param>
     /// <param name="seriesPaths"></param>
     /// <param name="library"></param>
-    private async Task ProcessScanResult(ScanResult result, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library)
+    private async Task ParseFiles(ScanResult result, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library)
     {
         var normalizedFolder = Parser.Parser.NormalizePath(result.Folder);
 
