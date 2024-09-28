@@ -438,7 +438,7 @@ public class ParseScannedFiles
     /// <param name="forceCheck">Defaults to false</param>
     /// <returns></returns>
     public async Task<IList<ScannedSeriesResult>> ScanLibrariesForSeries(Library library,
-        IEnumerable<string> folders, bool isLibraryScan,
+        IList<string> folders, bool isLibraryScan,
         IDictionary<string, IList<SeriesModified>> seriesPaths, bool forceCheck = false)
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -544,7 +544,7 @@ public class ParseScannedFiles
     /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
     /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
     /// <param name="processedScannedSeries">The list where processed results will be added</param>
-    private void CreateFinalSeriesResults(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries,
+    private static void CreateFinalSeriesResults(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries,
         IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
     {
         foreach (var series in scannedSeries.Keys)
@@ -565,6 +565,12 @@ public class ParseScannedFiles
     /// Combines ParserInfos from all scanResults and processes them collectively
     /// to ensure consistent series names.
     /// </summary>
+    /// <example>
+    /// Accel World v01.cbz has Series "Accel World" and Localized Series "World of Acceleration"
+    /// World of Acceleration v02.cbz has Series "World of Acceleration"
+    /// After running this code, we'd have:
+    /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
+    /// </example>
     /// <param name="scanResults">A collection of scan results</param>
     /// <returns>A new list of scan results with merged series</returns>
     private IList<ScanResult> MergeLocalizedSeriesAcrossScanResults(IList<ScanResult> scanResults)
@@ -627,19 +633,16 @@ public class ParseScannedFiles
 
             // Find the scan result containing the localized info
             var localizedScanResult = scanResults.FirstOrDefault(sr => sr.ParserInfos.Contains(infoNeedingMapping));
-            if (localizedScanResult != null)
-            {
-                // Remove the localized series from this scan result
-                localizedScanResult.ParserInfos.Remove(infoNeedingMapping);
+            if (localizedScanResult == null) continue;
 
-                // Find the scan result that should be merged with
-                var nonLocalizedScanResult = scanResults.FirstOrDefault(sr => sr.ParserInfos.Any(pi => pi.Series == nonLocalizedSeries));
-                if (nonLocalizedScanResult != null)
-                {
-                    // Add the remapped info to the non-localized scan result
-                    nonLocalizedScanResult.ParserInfos.Add(infoNeedingMapping);
-                }
-            }
+            // Remove the localized series from this scan result
+            localizedScanResult.ParserInfos.Remove(infoNeedingMapping);
+
+            // Find the scan result that should be merged with
+            var nonLocalizedScanResult = scanResults.FirstOrDefault(sr => sr.ParserInfos.Any(pi => pi.Series == nonLocalizedSeries));
+
+            // Add the remapped info to the non-localized scan result
+            nonLocalizedScanResult?.ParserInfos.Add(infoNeedingMapping);
         }
 
         // Remove or clear any scan results that now have no ParserInfos after merging
@@ -648,42 +651,6 @@ public class ParseScannedFiles
             .ToList();
 
         return scanResults;
-    }
-
-
-
-    /// <summary>
-    /// Parses and tracks series from scan results
-    /// </summary>
-    /// <param name="library"></param>
-    /// <param name="seriesPaths"></param>
-    /// <param name="scanResult"></param>
-    /// <param name="scannedSeries"></param>
-    private async Task ParseAndTrackSeries(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths,
-        ScanResult scanResult, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
-    {
-        // scanResult is updated with the parsed info
-        await ParseFiles(scanResult, seriesPaths, library);
-
-        // With the new scanner loop, this might be better to move and do against all series after being scanned
-
-        // Merge localized series (like Nagatoro/nagator.cbz, japanesename.cbz) -> Nagatoro series
-        MergeLocalizedSeriesWithSeries(scanResult.ParserInfos);
-
-        // Perform any merging that is necessary and post-processing steps
-
-        // Combine everything into scannedSeries
-        foreach (var info in scanResult.ParserInfos)
-        {
-            try
-            {
-                TrackSeries(scannedSeries, info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info?.FullFilePath);
-            }
-        }
     }
 
 
@@ -706,13 +673,14 @@ public class ParseScannedFiles
 
             _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed", normalizedFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, library.Name, ProgressEventType.Updated));
+                MessageFactory.FileScanProgressEvent($"Skipped {normalizedFolder}", library.Name, ProgressEventType.Updated));
             return;
         }
 
         var files = result.Files;
+        var fileCount = files.Count;
 
-        if (files.Count == 0)
+        if (fileCount == 0)
         {
             _logger.LogInformation("[ScannerService] {Folder} is empty or has no matching file types", normalizedFolder);
             result.ParserInfos = ArraySegment<ParserInfo>.Empty;
@@ -721,10 +689,9 @@ public class ParseScannedFiles
 
         _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, normalizedFolder);
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent($"{files.Count} files in {normalizedFolder}", library.Name, ProgressEventType.Updated));
+            MessageFactory.FileScanProgressEvent($"{fileCount} files in {normalizedFolder}", library.Name, ProgressEventType.Updated));
 
         // Parse files into ParserInfos
-        var fileCount = files.Count;
         if (fileCount < 100)
         {
             // Process files sequentially
@@ -825,73 +792,4 @@ public class ParseScannedFiles
             }
         }
     }
-
-
-    /// <summary>
-    /// Checks if there are any ParserInfos that have a Series that matches the LocalizedSeries field in any other info.
-    /// If so, rewrites the infos with the series name instead of the localized name, so they stack.
-    /// </summary>
-    /// <example>
-    /// Accel World v01.cbz has Series "Accel World" and Localized Series "World of Acceleration"
-    /// World of Acceleration v02.cbz has Series "World of Acceleration"
-    /// After running this code, we'd have:
-    /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
-    /// </example>
-    /// <param name="infos">A collection of ParserInfos</param>
-    private void MergeLocalizedSeriesWithSeries(IList<ParserInfo> infos)
-    {
-        // Filter relevant infos (non-special and with localized series)
-        var relevantInfos = infos.Where(i => !i.IsSpecial && !string.IsNullOrEmpty(i.LocalizedSeries)).ToList();
-        if (relevantInfos.Count == 0) return;
-
-        // Get the first distinct localized series
-        var localizedSeries = relevantInfos
-            .Select(i => i.LocalizedSeries)
-            .Distinct()
-            .FirstOrDefault();
-
-        if (string.IsNullOrEmpty(localizedSeries)) return;
-
-        // Find non-localized series, normalizing by capitalization
-        var distinctSeries = infos
-            .Where(i => !i.IsSpecial)
-            .Select(i => Parser.Parser.Normalize(i.Series))
-            .Distinct()
-            .ToList();
-
-        if (distinctSeries.Count == 0) return;
-
-        string? nonLocalizedSeries = null;
-
-        switch (distinctSeries.Count)
-        {
-            // Handle the case where there is exactly one non-localized series
-            case 1:
-                nonLocalizedSeries = distinctSeries[0];
-                break;
-            case <= 2:
-                // Look for a non-localized series different from the localized one
-                nonLocalizedSeries = distinctSeries.FirstOrDefault(s => !s.Equals(Parser.Parser.Normalize(localizedSeries)));
-                break;
-            default:
-                // Log an error when there are more than 2 distinct series in the folder
-                _logger.LogError(
-                    "[ScannerService] Multiple series detected within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series): {LocalizedSeries}",
-                    string.Join(", ", distinctSeries)
-                );
-                break;
-        }
-
-        if (nonLocalizedSeries == null) return;
-
-        var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
-
-        // Update infos that need mapping
-        foreach (var infoNeedingMapping in infos.Where(i => !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
-        {
-            infoNeedingMapping.Series = nonLocalizedSeries;
-            infoNeedingMapping.LocalizedSeries = localizedSeries;
-        }
-    }
-
 }

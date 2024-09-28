@@ -264,7 +264,7 @@ public class ScannerService : IScannerService
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name, 1));
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, new []{ folderPath },
+        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, [folderPath],
             false, true);
 
         // // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
@@ -537,20 +537,14 @@ public class ScannerService : IScannerService
         var (scanElapsedTime, parsedSeries) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
-        // _logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Track Found Series", library.Name);
-
-        // We need to collect SeenSeries and filter out anything that hasn't changed
-
-
         // We need to remove any keys where there is no actual parser info
-        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Process Parsed Series", library.Name);
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Process and Update Database", library.Name);
         var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime);
 
         UpdateLastScanned(library);
         _unitOfWork.LibraryRepository.Update(library);
 
-
-        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 4: Save Library", library.Name);
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Save Library", library.Name);
         if (await _unitOfWork.CommitAsync())
         {
             if (isSingleScan)
@@ -678,7 +672,7 @@ public class ScannerService : IScannerService
         library.UpdateLastScanned(time);
     }
 
-    private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs,
+    private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IList<string> dirs,
         bool isLibraryScan, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
