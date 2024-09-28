@@ -634,7 +634,7 @@ public class ScannerService : IScannerService
             await _processSeries.Prime();
 
             // TODO: For all Genres in the ParserInfos, do a bulk check against the DB on what is not in the DB and create them
-            // This will ensure all Genres are pre-created and allow our Genre lookup (and Priming) to be much simplier. It will be slower, but more consistent.
+            // This will ensure all Genres are pre-created and allow our Genre lookup (and Priming) to be much simpler. It will be slower, but more consistent.
 
             // TODO: Do the above for Tags as well
 

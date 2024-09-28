@@ -152,7 +152,7 @@ public class ParseScannedFiles
         foreach (var directory in allDirectories)
         {
             // Don't process any folders where we've already scanned everything below
-            if (processedDirs.Any(d => d.StartsWith(directory + Path.DirectorySeparatorChar) || d.Equals(directory)))
+            if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
             {
                 // Skip this directory as we've already processed a parent
                 continue;
@@ -166,7 +166,7 @@ public class ParseScannedFiles
                 continue;
             }
 
-            var sw = Stopwatch.StartNew();
+            //var sw = Stopwatch.StartNew();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
@@ -180,7 +180,7 @@ public class ParseScannedFiles
             }
 
             processedDirs.Add(directory);
-            _logger.LogDebug("Processing {Directory} took {TimeMs}ms to check", directory, sw.ElapsedMilliseconds);
+            //_logger.LogDebug("Processing {Directory} took {TimeMs}ms to check", directory, sw.ElapsedMilliseconds);
         }
 
         return result;
