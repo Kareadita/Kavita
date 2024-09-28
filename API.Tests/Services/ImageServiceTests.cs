@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -6,11 +6,12 @@ using System.Text;
 using API.Entities.Enums;
 using API.Services;
 using EasyCaching.Core;
+using ImageMagick;
 using Microsoft.Extensions.Logging;
-using NetVips;
+
 using NSubstitute;
 using Xunit;
-using Image = NetVips.Image;
+
 
 namespace API.Tests.Services;
 
@@ -60,17 +61,16 @@ public class ImageServiceTests
         {
             var fileName = Path.GetFileNameWithoutExtension(imagePath);
             var dims = CoverImageSize.Default.GetDimensions();
-            using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
+            using var thumbnail = new MagickImage(imagePath);
 
-            var size = ImageService.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
-            var crop = ImageService.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
-
-            using var thumbnail = Image.Thumbnail(imagePath, dims.Width, dims.Height,
-                size: size,
-                crop: crop);
+            var size = ImageService.GetSizeForDimensions(thumbnail, dims.Width, dims.Height);
+            var crop = ImageService.GetCropForDimensions(thumbnail, dims.Width, dims.Height);
+            thumbnail.Thumbnail(size);
+            if (crop)
+                thumbnail.Crop(dims.Width, dims.Height, Gravity.Center);
 
             var outputFileName = fileName + outputExtension + ".png";
-            thumbnail.WriteToFile(Path.Join(_testDirectory, outputFileName));
+            thumbnail.Write(Path.Join(_testDirectory, outputFileName));
         }
     }
 
@@ -105,7 +105,7 @@ public class ImageServiceTests
             var outputPath = Path.Combine(_testDirectory, fileName + "_output.png");
             var dims = CoverImageSize.Default.GetDimensions();
 
-            using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
+            using var sourceImage = new MagickImage(imagePath);
             htmlBuilder.AppendLine("<div class=\"image-row\">");
             htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImageService.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
             htmlBuilder.AppendLine($"<img src=\"./{Path.GetFileName(imagePath)}\" alt=\"{fileName}\">");
@@ -165,9 +165,9 @@ public class ImageServiceTests
     private static void GenerateColorImage(string hexColor, string outputPath)
     {
         var color = ImageService.HexToRgb(hexColor);
-        using var colorImage = Image.Black(200, 100);
-        using var output = colorImage + new[] { color.R / 255.0, color.G / 255.0, color.B / 255.0 };
-        output.WriteToFile(outputPath);
+        using var colorImage =
+            new MagickImage(MagickColor.FromRgb(color.R, color.G, color.B), 200, 100);
+        colorImage.Write(outputPath);
     }
 
     private void GenerateHtmlFileForColorScape()

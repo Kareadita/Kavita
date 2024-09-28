@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -18,12 +18,11 @@ using Docnet.Core.Models;
 using Docnet.Core.Readers;
 using ExCSS;
 using HtmlAgilityPack;
+using ImageMagick;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using Nager.ArticleNumber;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
 using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
@@ -1277,12 +1276,14 @@ public class BookService : IBookService
     {
         using var pageReader = docReader.GetPageReader(pageNumber);
         var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
+        var floats = rawBytes.Select(a=> (float)a*256F).ToArray();
         var width = pageReader.GetPageWidth();
         var height = pageReader.GetPageHeight();
-        var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
-
+        using MagickImage image = new MagickImage(rawBytes, width, height,MagickFormat.Bgra);
+        using var pixels = image.GetPixels();
+        pixels.SetArea(0,0,width, height, floats);
         stream.Seek(0, SeekOrigin.Begin);
-        image.SaveAsPng(stream);
+        image.Write(stream, MagickFormat.Png);
         stream.Seek(0, SeekOrigin.Begin);
     }
 

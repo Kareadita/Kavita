@@ -1,9 +1,9 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
-using API.Services.ImageConversion;
+
 using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
@@ -35,10 +35,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IArchiveService, ArchiveService>();
 
-        services.AddScoped<IImageConverterProvider, JpegXLImageConverterProvider>();
-        services.AddScoped<IImageConverterProvider, Jpeg2000ImageConverterProvider>();
-        services.AddScoped<IImageConverterProvider, AvifImageConverterProvider>();
-        services.AddScoped<IImageConverterProvider, HeifImageConverterProvider>();
         services.AddScoped<IImageConverterService, ImageConverterService>();
 
         services.AddScoped<IBackupService, BackupService>();

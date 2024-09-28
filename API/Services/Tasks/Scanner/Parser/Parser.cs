@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
@@ -25,7 +26,21 @@ public static class Parser
 
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
-    public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif|\.jxl|\.heif|\.heic|\.j2k|\.jp2)"; // Don't forget to update CoverChooser
+    public static Dictionary<string, List<string>> NonUniversalSupportedMimeMappings = new Dictionary<string, List<string>>()
+        {
+            { "jp2", ["jp2", "j2k"] } ,
+            { "j2k", ["jp2", "j2k"] } ,
+            { "heif", ["heif", "heic"] } ,
+            { "heic", ["heif", "heic"] } ,
+            { "jxl", ["jxl"] } ,
+            { "avif", ["avif"] } ,
+        };
+    public static string[] NonUniversalFileImageExtensionArray = { "avif", "jxl", "heif", "heic", "j2k", "jp2" };
+    public static string[] UniversalFileImageExtensionArray = { "png", "jpeg", "jpg", "webp", "gif" };
+    public static string NonUniversalFileImageExtensions = @"^(\." + string.Join(@"|\.", NonUniversalFileImageExtensionArray) + ")";
+    public static string ImageFileExtensions = @"^(\." + string.Join(@"|\.", UniversalFileImageExtensionArray.Union(NonUniversalFileImageExtensionArray)) + ")"; // Don't forget to update CoverChooser
+
+
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
     public const string EpubFileExtension = @"\.epub";
     public const string PdfFileExtension = @"\.pdf";
@@ -33,7 +48,7 @@ public static class Parser
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
 
-    public const string SupportedExtensions =
+    public static string SupportedExtensions =
         ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
 
     private const RegexOptions MatchOptions =

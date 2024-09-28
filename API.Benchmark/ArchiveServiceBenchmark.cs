@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -6,11 +6,9 @@ using API.Services;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using EasyCaching.Core;
+using ImageMagick;
 using NSubstitute;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
+
 
 namespace API.Benchmark;
 
@@ -24,8 +22,7 @@ public class ArchiveServiceBenchmark
     private readonly ArchiveService _archiveService;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
-    private readonly PngEncoder _pngEncoder = new PngEncoder();
-    private readonly WebpEncoder _webPEncoder = new WebpEncoder();
+
     private const string SourceImage = "C:/Users/josep/Pictures/obey_by_grrsa-d6llkaa_colored_by_me.png";
 
 
@@ -67,9 +64,11 @@ public class ArchiveServiceBenchmark
         _directoryService.ExistOrCreate(outputDirectory);
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
-        using var thumbnail2 = SixLabors.ImageSharp.Image.Load(stream);
-        thumbnail2.Mutate(x => x.Resize(320, 0));
-        thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.png"), _pngEncoder);
+        using var thumbnail2 = new MagickImage(stream);
+        int width = 320;
+        int height = (int)(thumbnail2.Height * (width / (double)thumbnail2.Width));
+        thumbnail2.Thumbnail(width, height);
+        thumbnail2.Write(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.png"));
     }
 
     [Benchmark]
@@ -79,9 +78,11 @@ public class ArchiveServiceBenchmark
         _directoryService.ExistOrCreate(outputDirectory);
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
-        using var thumbnail2 = SixLabors.ImageSharp.Image.Load(stream);
-        thumbnail2.Mutate(x => x.Resize(320, 0));
-        thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.webp"), _webPEncoder);
+        using var thumbnail2 = new MagickImage(stream);
+        int width = 320;
+        int height = (int)(thumbnail2.Height * (width / (double)thumbnail2.Width));
+        thumbnail2.Thumbnail(width, height);
+        thumbnail2.Write(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.webp"));
     }
 
     [Benchmark]
@@ -91,8 +92,11 @@ public class ArchiveServiceBenchmark
         _directoryService.ExistOrCreate(outputDirectory);
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
-        using var thumbnail = NetVips.Image.ThumbnailStream(stream, 320);
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, "netvips.png"));
+        using var thumbnail = new MagickImage(stream);
+        int width = 320;
+        int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
+        thumbnail.Thumbnail(width, height);
+        thumbnail.Write(_directoryService.FileSystem.Path.Join(outputDirectory, "netvips.png"));
     }
 
     [Benchmark]
@@ -102,8 +106,11 @@ public class ArchiveServiceBenchmark
         _directoryService.ExistOrCreate(outputDirectory);
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
-        using var thumbnail = NetVips.Image.ThumbnailStream(stream, 320);
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, "netvips.webp"));
+        using var thumbnail = new MagickImage(stream);
+        int width = 320;
+        int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
+        thumbnail.Thumbnail(width, height);
+        thumbnail.Write(_directoryService.FileSystem.Path.Join(outputDirectory, "netvips.webp"));
     }
 
     // Benchmark to test default GetNumberOfPages from archive

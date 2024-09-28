@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using API.Helpers;
+using API.Services.Tasks.Scanner.Parser;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 
@@ -69,7 +70,7 @@ public static class HttpExtensions
     /// Retrieves the supported image types extensions from the Accept header of the HTTP request.
     /// </summary>
     /// <param name="request">The HTTP request.</param>
-    /// <returns>A list of supported image types extensions.</returns>
+    /// <returns>A list of supported image types extensions by the Browser.</returns>
     public static List<string> SupportedImageTypesFromRequest(this HttpRequest request)
     {
         var acceptHeader = request.Headers["Accept"].ToString();
@@ -80,15 +81,8 @@ public static class HttpExtensions
         List<string> supportedExtensions = new List<string>();
 
         //Add default extensions supported by all browsers.
-
-        //NOTE: Will user parser, instead of this list, but first fixing low-hanging fruits, and showstopper issues.
-
-        supportedExtensions.Add("jpeg");
-        supportedExtensions.Add("jpg");
-        supportedExtensions.Add("png");
-        supportedExtensions.Add("gif");
-        supportedExtensions.Add("webp");
-        //Browser add specific image mime types, when the image type is not a global standard.
+        supportedExtensions.AddRange(Parser.UniversalFileImageExtensionArray);
+        //Browser add specific image mime types, when the image type is not a global standard, browser specify the specific image type in the accept header.
         //Let's reuse that to identify the additional image types supported by the browser.
         foreach (string v in split)
         {
@@ -96,36 +90,18 @@ public static class HttpExtensions
             {
                 string mimeimagepart = v.Substring(6).ToLowerInvariant();
                 if (mimeimagepart.StartsWith("*")) continue;
-
-                if (mimeimagepart == "svg+xml")
+                if (Parser.NonUniversalSupportedMimeMappings.ContainsKey(mimeimagepart))
                 {
-                    mimeimagepart = "svg";
+                    Parser.NonUniversalSupportedMimeMappings[mimeimagepart].ForEach(x => AddExtension(supportedExtensions, x));
                 }
-
-                if (mimeimagepart == "jp2")
+                else if (mimeimagepart == "svg+xml")
                 {
-                    AddExtension(supportedExtensions, "j2k");
+                    AddExtension(supportedExtensions, "svg");
                 }
-
-                if (mimeimagepart == "j2k")
-                {
-                    AddExtension(supportedExtensions, "jp2");
-                }
-
-                if (mimeimagepart == "heif")
-                {
-                    AddExtension(supportedExtensions, "heic");
-                }
-
-                if (mimeimagepart == "heic")
-                {
-                    AddExtension(supportedExtensions, "heif");
-                }
-
-                AddExtension(supportedExtensions, mimeimagepart);
+                else
+                    AddExtension(supportedExtensions, mimeimagepart);
             }
         }
-
         return supportedExtensions;
     }
 }

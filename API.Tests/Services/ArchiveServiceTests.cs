@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -8,8 +8,8 @@ using API.Archive;
 using API.Entities.Enums;
 using API.Services;
 using EasyCaching.Core;
+using ImageMagick;
 using Microsoft.Extensions.Logging;
-using NetVips;
 using NSubstitute;
 using NSubstitute.Extensions;
 using Xunit;
@@ -171,7 +171,13 @@ public class ArchiveServiceTests
         var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
-        var expectedBytes = Image.Thumbnail(Path.Join(testDirectory, expectedOutputFile), 320).WriteToBuffer(".png");
+        using var thumbnail = new MagickImage(Path.Join(testDirectory, expectedOutputFile));
+        int width = 320;
+        int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
+        thumbnail.Thumbnail(width, height);
+        using MemoryStream stream = new MemoryStream();
+        thumbnail.Write(stream, MagickFormat.Png32);
+        var expectedBytes = stream.ToArray();
 
         archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
 

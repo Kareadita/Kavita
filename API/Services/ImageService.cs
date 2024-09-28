@@ -14,13 +14,9 @@ using EasyCaching.Core;
 using Flurl;
 using Flurl.Http;
 using HtmlAgilityPack;
+using ImageMagick;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using NetVips;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Quantization;
-using Image = NetVips.Image;
 
 namespace API.Services;
 #nullable enable
@@ -146,13 +142,13 @@ public class ImageService : IImageService
     /// <param name="targetWidth"></param>
     /// <param name="targetHeight"></param>
     /// <returns></returns>
-    public static Enums.Size GetSizeForDimensions(Image image, int targetWidth, int targetHeight)
+    public static MagickGeometry GetSizeForDimensions(MagickImage image, int targetWidth, int targetHeight)
     {
         try
         {
             if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
             {
-                return Enums.Size.Force;
+                return new MagickGeometry(targetWidth, targetHeight) { IgnoreAspectRatio = true };
             }
         }
         catch (Exception)
@@ -160,27 +156,27 @@ public class ImageService : IImageService
             /* Swallow */
         }
 
-        return Enums.Size.Both;
+        return new MagickGeometry(targetWidth, targetHeight) { IgnoreAspectRatio = true, FillArea = true };
     }
 
-    public static Enums.Interesting? GetCropForDimensions(Image image, int targetWidth, int targetHeight)
+    public static bool GetCropForDimensions(MagickImage image, int targetWidth, int targetHeight)
     {
         try
         {
             if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
             {
-                return null;
+                return false;
             }
         } catch (Exception)
         {
             /* Swallow */
-            return null;
+            return false;
         }
 
-        return Enums.Interesting.Attention;
+        return true; //crop
     }
 
-    public static bool WillScaleWell(Image sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
+    public static bool WillScaleWell(MagickImage sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
     {
         // Calculate the aspect ratios
         var sourceAspectRatio = (double) sourceImage.Width / sourceImage.Height;
@@ -211,23 +207,30 @@ public class ImageService : IImageService
         return aspectRatio > 1.25;
     }
 
+    private MagickImage Thumbnail(string path, int width, int height)
+    {
+        var sourceImage = new MagickImage(path);
+        return Thumbnail(sourceImage, width, height);
+    }
+    private MagickImage Thumbnail(MagickImage sourceImage, int width, int height)
+    {
+        var geometry = GetSizeForDimensions(sourceImage, width, height);
+        bool crop = GetCropForDimensions(sourceImage, width, height);
+        sourceImage.Thumbnail(geometry);
+        if (crop)
+            sourceImage.Crop(width, height, Gravity.Center);
+        return sourceImage;
+    }
     public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
         try
         {
-            if (!_converterService.IsVipsSupported(path)) //If Vips supports the format, there is no need to convert the image, since in this case the consumer is not the browser.
-                path = _converterService.ConvertFile(path);
-
             var (width, height) = size.GetDimensions();
-            using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
-
-            using var thumbnail = Image.Thumbnail(path, width, height: height,
-                size: GetSizeForDimensions(sourceImage, width, height),
-                crop: GetCropForDimensions(sourceImage, width, height));
+            using var thumbnail = Thumbnail(path, width, height);
             var filename = fileName + encodeFormat.GetExtension();
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+            thumbnail.Write(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
         }
         catch (Exception ex)
@@ -254,15 +257,8 @@ public class ImageService : IImageService
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
 
-        using var sourceImage = _converterService.GetImageFromStream(originalNameWithExtension, stream);
-
-        var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
-        var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);
-
-        using var thumbnail = sourceImage.ThumbnailImage(targetWidth, targetHeight,
-            size: scalingSize,
-            crop: scalingCrop);
-
+        using var sourceImage = new MagickImage(stream);
+        using var thumbnail = Thumbnail(sourceImage, targetWidth, targetHeight);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
 
@@ -273,55 +269,37 @@ public class ImageService : IImageService
 
         try
         {
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
-
+            thumbnail.Write(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
         }
-        catch (VipsException)
+        catch (Exception)
         {
-            // NetVips Issue: https://github.com/kleisauke/net-vips/issues/234
-            // Saving pdf covers from a stream can fail, so revert to old code
-
-            if (stream.CanSeek) stream.Position = 0;
-            using var thumbnail2 = Image.ThumbnailStream(stream, targetWidth, height: targetHeight,
-                size: scalingSize,
-                crop: scalingCrop);
-            thumbnail2.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
-
-            return filename;
+            return string.Empty; //IDK?
         }
     }
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        if (!_converterService.IsVipsSupported(sourceFile)) //If Vips supports the format, there is no need to convert the image, since in this case the consumer is not the browser.
-            sourceFile = _converterService.ConvertFile(sourceFile);
-
         var (width, height) = size.GetDimensions();
-        using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
-
-        using var thumbnail = Image.Thumbnail(sourceFile, width, height: height,
-            size: GetSizeForDimensions(sourceImage, width, height),
-            crop: GetCropForDimensions(sourceImage, width, height));
+        using var thumbnail = Thumbnail(sourceFile, width, height);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
         {
             _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         } catch (Exception) {/* Swallow exception */}
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        thumbnail.Write(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
     }
 
-    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
+    public async Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
     {
         var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
-
-        using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
-        sourceImage.WriteToFile(outputFile);
-        return Task.FromResult(outputFile);
+        using var sourceImage = new MagickImage(filePath);
+        await sourceImage.WriteAsync(outputFile).ConfigureAwait(false);
+        return outputFile;
     }
 
     /// <summary>
@@ -333,17 +311,16 @@ public class ImageService : IImageService
     {
         try
         {
-            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath);
-            if (info == null) return false;
-
-            return true;
+            MagickImageInfo info = new MagickImageInfo(filePath);
+            if (info.Width > 0 || info.Height > 0)
+                return true;
         }
         catch (Exception)
         {
             /* Swallow Exception */
         }
 
-        return false;
+        return true;
     }
 
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
@@ -418,18 +395,18 @@ public class ImageService : IImageService
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.PngloadStream(faviconStream);
+            using var image = new MagickImage(faviconStream);
             var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
             switch (encodeFormat)
             {
                 case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    await image.WriteAsync(Path.Combine(_directoryService.FaviconDirectory, filename),MagickFormat.Png32).ConfigureAwait(false);
                     break;
                 case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    await image.WriteAsync(Path.Combine(_directoryService.FaviconDirectory, filename), MagickFormat.WebP).ConfigureAwait(false);
                     break;
                 case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    await image.WriteAsync(Path.Combine(_directoryService.FaviconDirectory, filename), MagickFormat.Avif).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
@@ -464,18 +441,18 @@ public class ImageService : IImageService
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.PngloadStream(publisherStream);
+            using var image = new MagickImage(publisherStream);
             var filename = GetPublisherFormat(publisherName, encodeFormat);
             switch (encodeFormat)
             {
                 case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    await image.WriteAsync(Path.Combine(_directoryService.FaviconDirectory, filename), MagickFormat.Png32).ConfigureAwait(false);
                     break;
                 case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    await image.WriteAsync(Path.Combine(_directoryService.FaviconDirectory, filename), MagickFormat.WebP).ConfigureAwait(false);
                     break;
                 case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    await image.WriteAsync(Path.Combine(_directoryService.FaviconDirectory, filename), MagickFormat.Avif).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
@@ -493,22 +470,20 @@ public class ImageService : IImageService
 
     private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
     {
-        using var image = Image.NewFromFile(imagePath);
+        var settings = new MagickReadSettings { ColorSpace = ColorSpace.RGB };
+        using var sourceImage = new MagickImage(imagePath, settings);
+
+        MagickImage im = new MagickImage(imagePath);
         // Resize the image to speed up processing
-        var resizedImage = image.Resize(0.1);
-
-        var processedImage = PreProcessImage(resizedImage);
-
-
+        im.Resize(new Percentage(10));
         // Convert image to RGB array
-        var pixels = processedImage.WriteToMemory().ToArray();
-
-        // Convert to list of Vector3 (RGB)
+        float[] pixels = im.GetPixels().ToArray();
+        float mul = 1F / 255F;
         var rgbPixels = new List<Vector3>();
-        for (var i = 0; i < pixels.Length - 2; i += 3)
-        {
-            rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
-        }
+        // Convert to list of Vector3 (RGB)
+
+        for (int x = 0; x < pixels.Length; x += 3)
+            rgbPixels.Add(new Vector3(pixels[x] * mul, pixels[x+1] * mul, pixels[x + 2] * mul));
 
         // Perform k-means clustering
         var clusters = KMeansClustering(rgbPixels, 4);
@@ -529,7 +504,7 @@ public class ImageService : IImageService
 
         return (null, null);
     }
-
+    /*
     private static (Vector3?, Vector3?) GetPrimaryColorSharp(string imagePath)
     {
         using var image = SixLabors.ImageSharp.Image.Load<Rgb24>(imagePath);
@@ -548,6 +523,7 @@ public class ImageService : IImageService
         // This will give you a dominant color in HEX format i.e #5E35B1FF
         return (new Vector3(dominantColor.R, dominantColor.G, dominantColor.B), new Vector3(dominantColor.R, dominantColor.G, dominantColor.B));
     }
+
 
     private static Image PreProcessImage(Image image)
     {
@@ -583,7 +559,7 @@ public class ImageService : IImageService
 
         return histogram;
     }
-
+    */
     private static bool IsColorCloseToWhiteOrBlack(Vector3 color)
     {
         var (_, _, lightness) = RgbToHsl(color);
@@ -814,9 +790,12 @@ public class ImageService : IImageService
     {
         try
         {
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
+
+            using var thumbnail = new MagickImage(Convert.FromBase64String(encodedImage));
+            int thumbnailHeight = (int)(thumbnail.Height * ((double)thumbnailWidth / thumbnail.Width));
+            thumbnail.Thumbnail(thumbnailWidth, thumbnailHeight);
             fileName += encodeFormat.GetExtension();
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName));
+            thumbnail.Write(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName));
             return fileName;
         }
         catch (Exception e)
@@ -932,7 +911,7 @@ public class ImageService : IImageService
         }
 
 
-        var image = Image.Black(width, height);
+        var image = new MagickImage(MagickColor.FromRgb(0,0,0), width, height);
 
         var thumbnailWidth = image.Width / cols;
         var thumbnailHeight = image.Height / rows;
@@ -940,8 +919,8 @@ public class ImageService : IImageService
         for (var i = 0; i < coverImages.Count; i++)
         {
             if (!File.Exists(coverImages[i])) continue;
-            var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+            var tile = new MagickImage(coverImages[i]);
+            tile.Thumbnail(thumbnailWidth, thumbnailHeight);
 
             var row = i / cols;
             var col = i % cols;
@@ -954,11 +933,10 @@ public class ImageService : IImageService
                 x = (image.Width - thumbnailWidth) / 2;
                 y = thumbnailHeight;
             }
-
-            image = image.Insert(tile, x, y);
+            image.Composite(tile,x,y,CompositeOperator.Over);
         }
 
-        image.WriteToFile(dest);
+        image.Write(dest);
     }
 
     public void UpdateColorScape(IHasCoverImage entity)

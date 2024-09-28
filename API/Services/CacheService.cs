@@ -11,11 +11,10 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using ImageMagick;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using NetVips;
 using static System.Net.Mime.MediaTypeNames;
-using Image = NetVips.Image;
 
 namespace API.Services;
 #nullable enable
@@ -95,21 +94,19 @@ public class CacheService : ICacheService
         }
 
         var dimensions = new List<FileDimensionDto>();
-        var originalCacheSize = Cache.MaxFiles;
         try
         {
-            Cache.MaxFiles = 0;
             for (var i = 0; i < files.Length; i++)
             {
                 var file = files[i];
-                var dimension = _converterService.GetDimensions(file);
+                MagickImageInfo info = new MagickImageInfo(file);
 
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
-                    Height = dimension.Value.Height,
-                    Width = dimension.Value.Width,
-                    IsWide = dimension.Value.Width > dimension.Value.Height,
+                    Height = info.Height,
+                    Width = info.Width,
+                    IsWide = info.Width > info.Height,
                     FileName = file.Replace(cachePath, string.Empty)
                 });
             }
@@ -120,7 +117,6 @@ public class CacheService : ICacheService
         }
         finally
         {
-            Cache.MaxFiles = originalCacheSize;
         }
 
         _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);
