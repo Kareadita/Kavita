@@ -597,7 +597,7 @@ public class ParseScannedFiles
 
         if (distinctSeries.Count == 0) return scanResults;
 
-        string? nonLocalizedSeries = null;
+        string? nonLocalizedSeries;
 
         switch (distinctSeries.Count)
         {
