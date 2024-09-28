@@ -206,24 +206,6 @@ public class ParseScannedFilesTests : AbstractDbTest
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
-        // var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        //
-        // Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        // {
-        //     var skippedScan = parsedInfo.Item1;
-        //     var parsedFiles = parsedInfo.Item2;
-        //     if (parsedFiles.Count == 0) return Task.CompletedTask;
-        //
-        //     var foundParsedSeries = new ParsedSeries()
-        //     {
-        //         Name = parsedFiles.First().Series,
-        //         NormalizedName = parsedFiles.First().Series.ToNormalized(),
-        //         Format = parsedFiles.First().Format
-        //     };
-        //
-        //     parsedSeries.Add(foundParsedSeries, parsedFiles);
-        //     return Task.CompletedTask;
-        // }
 
         var library =
             await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,

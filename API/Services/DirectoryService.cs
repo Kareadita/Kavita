@@ -650,17 +650,18 @@ public class DirectoryService : IDirectoryService
         }
 
         // Now find the deepest common directory among all paths
-        var commonPath = dirs.Aggregate(GetCommonPath);
+        var commonPath = dirs.Aggregate(GetDeepestCommonPath); // Use new method to get deepest path
 
         // Return the common path if it exists and is not one of the root directories
         return libraryFolders.Any(folder => commonPath == Parser.NormalizePath(folder)) ? null : commonPath;
     }
 
-    private static string GetCommonPath(string path1, string path2)
+    private static string GetDeepestCommonPath(string path1, string path2)
     {
         var parts1 = path1.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var parts2 = path2.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
+        // Get the longest matching parts, ensuring that deeper parts in hierarchy are considered
         var commonParts = parts1.Zip(parts2, (p1, p2) => p1 == p2 ? p1 : null)
             .TakeWhile(part => part != null)
             .ToArray();

@@ -106,7 +106,8 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        // TODO: Figure out how to fix this lack of RBS
+        //var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
         return await _context.Person
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
