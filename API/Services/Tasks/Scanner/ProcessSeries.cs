@@ -283,39 +283,53 @@ public class ProcessSeries : IProcessSeries
 
     public async Task CreateAllGenresAsync(ICollection<string> genres)
     {
-        // Pass the non-normalized genres directly to the repository
-        var nonExistingGenres = await _unitOfWork.GenreRepository.GetAllGenresNotInListAsync(genres);
-
-        // Create and attach new genres using the non-normalized names
-        foreach (var genre in nonExistingGenres)
+        try
         {
-            var newGenre = new GenreBuilder(genre).Build();
-            _unitOfWork.GenreRepository.Attach(newGenre);
+            // Pass the non-normalized genres directly to the repository
+            var nonExistingGenres = await _unitOfWork.GenreRepository.GetAllGenresNotInListAsync(genres);
+
+            // Create and attach new genres using the non-normalized names
+            foreach (var genre in nonExistingGenres)
+            {
+                var newGenre = new GenreBuilder(genre).Build();
+                _unitOfWork.GenreRepository.Attach(newGenre);
+            }
+
+            // Commit changes
+            if (nonExistingGenres.Count > 0)
+            {
+                await _unitOfWork.CommitAsync();
+            }
         }
-
-        // Commit changes
-        if (nonExistingGenres.Count > 0)
+        catch (Exception ex)
         {
-            await _unitOfWork.CommitAsync();
+            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Genres");
         }
     }
 
     public async Task CreateAllTagsAsync(ICollection<string> tags)
     {
-        // Pass the non-normalized tags directly to the repository
-        var nonExistingTags = await _unitOfWork.TagRepository.GetAllTagsNotInListAsync(tags);
-
-        // Create and attach new genres using the non-normalized names
-        foreach (var tag in nonExistingTags)
+        try
         {
-            var newTag = new TagBuilder(tag).Build();
-            _unitOfWork.TagRepository.Attach(newTag);
+            // Pass the non-normalized tags directly to the repository
+            var nonExistingTags = await _unitOfWork.TagRepository.GetAllTagsNotInListAsync(tags);
+
+            // Create and attach new genres using the non-normalized names
+            foreach (var tag in nonExistingTags)
+            {
+                var newTag = new TagBuilder(tag).Build();
+                _unitOfWork.TagRepository.Attach(newTag);
+            }
+
+            // Commit changes
+            if (nonExistingTags.Count > 0)
+            {
+                await _unitOfWork.CommitAsync();
+            }
         }
-
-        // Commit changes
-        if (nonExistingTags.Count > 0)
+        catch (Exception ex)
         {
-            await _unitOfWork.CommitAsync();
+            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Tags");
         }
     }
 
