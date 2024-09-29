@@ -1749,45 +1749,36 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="libraryId"></param>
     public async Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
     {
-        if (seenSeries.Count == 0) return Array.Empty<Series>();
+        if (!seenSeries.Any()) return Array.Empty<Series>();
 
-        var ids = new List<int>();
+        // Get all series from DB in one go, based on libraryId
+        var dbSeries = await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .ToListAsync();
+
+        // Get a set of matching series ids for the given parsedSeries
+        var ids = new HashSet<int>();
+
         foreach (var parsedSeries in seenSeries)
         {
-            try
+            var matchingSeries = dbSeries
+                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName)
+                .OrderBy(s => s.Id) // Sort to handle potential duplicates
+                .ToList();
+
+            // Prefer the first match or handle duplicates by choosing the last one
+            if (matchingSeries.Any())
             {
-                var seriesId = await _context.Series
-                    .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
-                                s.LibraryId == libraryId)
-                    .Select(s => s.Id)
-                    .SingleOrDefaultAsync();
-                if (seriesId > 0)
-                {
-                    ids.Add(seriesId);
-                }
-            }
-            catch (Exception)
-            {
-                // This is due to v0.5.6 introducing bugs where we could have multiple series get duplicated and no way to delete them
-                // This here will delete the 2nd one as the first is the one to likely be used.
-                var sId = await _context.Series
-                    .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
-                                s.LibraryId == libraryId)
-                    .Select(s => s.Id)
-                    .OrderBy(s => s)
-                    .LastAsync();
-                if (sId > 0)
-                {
-                    ids.Add(sId);
-                }
+                ids.Add(matchingSeries.Last().Id);
             }
         }
 
-        var seriesToRemove = await _context.Series
-            .Where(s => s.LibraryId == libraryId)
+        // Filter out series that are not in the seenSeries
+        var seriesToRemove = dbSeries
             .Where(s => !ids.Contains(s.Id))
-            .ToListAsync();
+            .ToList();
 
+        // Remove series in bulk
         _context.Series.RemoveRange(seriesToRemove);
 
         return seriesToRemove;

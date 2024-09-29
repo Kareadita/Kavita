@@ -6,6 +6,7 @@ using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ public interface IGenreRepository
     Task<int> GetCountAsync();
     Task<GenreTagDto> GetRandomGenre();
     Task<GenreTagDto> GetGenreById(int id);
+    Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames);
 }
 
 public class GenreRepository : IGenreRepository
@@ -132,5 +134,32 @@ public class GenreRepository : IGenreRepository
             .OrderBy(p => p.NormalizedTitle)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Gets all genres that are not already present in the system.
+    /// Normalizes genres for lookup, but returns non-normalized names for creation.
+    /// </summary>
+    /// <param name="genreNames">The list of genre names (non-normalized).</param>
+    /// <returns>A list of genre names that do not exist in the system.</returns>
+    public async Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames)
+    {
+        // Create a dictionary mapping normalized names to non-normalized names
+        var normalizedToOriginalMap = genreNames.Distinct()
+            .ToDictionary(Parser.Normalize, genre => genre);
+
+        var normalizedGenreNames = normalizedToOriginalMap.Keys.ToList();
+
+        // Query the database for existing genres using the normalized names
+        var existingGenres = await _context.Genre
+            .Where(g => normalizedGenreNames.Contains(g.NormalizedTitle)) // Assuming you have a normalized field
+            .Select(g => g.NormalizedTitle)
+            .ToListAsync();
+
+        // Find the normalized genres that do not exist in the database
+        var missingGenres = normalizedGenreNames.Except(existingGenres).ToList();
+
+        // Return the original non-normalized genres for the missing ones
+        return missingGenres.Select(normalizedName => normalizedToOriginalMap[normalizedName]).ToList();
     }
 }
