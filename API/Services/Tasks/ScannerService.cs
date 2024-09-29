@@ -630,15 +630,25 @@ public class ScannerService : IScannerService
 
         if (toProcess.Count > 0)
         {
-            // Prime shared entities if there are any series to process
-            await _processSeries.Prime();
 
-            // TODO: For all Genres in the ParserInfos, do a bulk check against the DB on what is not in the DB and create them
+            // For all Genres in the ParserInfos, do a bulk check against the DB on what is not in the DB and create them
             // This will ensure all Genres are pre-created and allow our Genre lookup (and Priming) to be much simpler. It will be slower, but more consistent.
+            var allGenres = toProcess
+                .SelectMany(s => s.Value
+                    .SelectMany(p => p.ComicInfo?.Genre?
+                                         .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split on comma and remove empty entries
+                                         .Select(g => g.Trim()) // Trim each genre
+                                         .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
+                                     ?? [])); // Handle null Genre or ComicInfo safely
+
+            await _processSeries.CreateAllGenresAsync(allGenres.ToList());
 
             // TODO: Do the above for Tags as well
 
             // TODO: Do the above for People as well (until we overhaul the People code)
+
+            // Prime shared entities if there are any series to process
+            await _processSeries.Prime();
 
         }
 

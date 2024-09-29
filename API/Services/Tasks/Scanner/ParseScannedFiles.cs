@@ -149,6 +149,7 @@ public class ParseScannedFiles
 
         var processedDirs = new HashSet<string>();
 
+        _logger.LogDebug("[ScannerService] Step 1.C Found {DirectoryCount} directories to process for {FolderPath}", allDirectories.Count, folderPath);
         foreach (var directory in allDirectories)
         {
             // Don't process any folders where we've already scanned everything below
@@ -385,7 +386,7 @@ public class ParseScannedFiles
                                                       || ps.NormalizedName.Equals(normalizedLocalizedSeries)
                                                       || ps.NormalizedName.Equals(normalizedSortSeries))))
             {
-                _logger.LogCritical("[ScannerService] Matches: {SeriesName} matches on {SeriesKey}", info.Series, seriesKey.Name);
+                _logger.LogCritical("[ScannerService] Matches: '{SeriesName}' matches on '{SeriesKey}'", info.Series, seriesKey.Name);
             }
         }
     }
@@ -590,55 +591,83 @@ public class ParseScannedFiles
         // Flatten all ParserInfos across scanResults
         var allInfos = scanResults.SelectMany(sr => sr.ParserInfos).ToList();
 
-        // Filter relevant infos (non-special and with localized series, grouping by Format)
-        var relevantInfos = allInfos
+        // Filter relevant infos (non-special and with localized series)
+        var relevantInfos = GetRelevantInfos(allInfos);
+
+        if (relevantInfos.Count == 0) return scanResults;
+
+        // Get distinct localized series and process each one
+        var distinctLocalizedSeries = relevantInfos
+            .Select(i => i.LocalizedSeries)
+            .Distinct()
+            .ToList();
+
+        foreach (var localizedSeries in distinctLocalizedSeries)
+        {
+            if (string.IsNullOrEmpty(localizedSeries)) continue;
+
+            // Process the localized series for merging
+            ProcessLocalizedSeries(scanResults, allInfos, relevantInfos, localizedSeries);
+        }
+
+        // Remove or clear any scan results that now have no ParserInfos after merging
+        return scanResults.Where(sr => sr.ParserInfos.Any()).ToList();
+    }
+
+    private static List<ParserInfo> GetRelevantInfos(List<ParserInfo> allInfos)
+    {
+        return allInfos
             .Where(i => !i.IsSpecial && !string.IsNullOrEmpty(i.LocalizedSeries))
             .GroupBy(i => i.Format)
             .SelectMany(g => g.ToList())
             .ToList();
+    }
 
-        if (relevantInfos.Count == 0) return scanResults;
+    private void ProcessLocalizedSeries(IList<ScanResult> scanResults, List<ParserInfo> allInfos, List<ParserInfo> relevantInfos, string localizedSeries)
+    {
+        var seriesForLocalized = GetSeriesForLocalized(relevantInfos, localizedSeries);
+        if (seriesForLocalized.Count == 0) return;
 
-        // Get the first distinct localized series
-        var localizedSeries = relevantInfos
-            .Select(i => i.LocalizedSeries)
-            .Distinct()
-            .FirstOrDefault();
+        var nonLocalizedSeries = GetNonLocalizedSeries(seriesForLocalized, localizedSeries);
+        if (nonLocalizedSeries == null) return;
 
-        if (string.IsNullOrEmpty(localizedSeries)) return scanResults;
+        // Remap and update relevant ParserInfos
+        RemapSeries(scanResults, allInfos, localizedSeries, nonLocalizedSeries);
 
-        // Find non-localized series, normalizing by capitalization
-        var distinctSeries = relevantInfos
+    }
+
+    private static List<string> GetSeriesForLocalized(List<ParserInfo> relevantInfos, string localizedSeries)
+    {
+        return relevantInfos
+            .Where(i => i.LocalizedSeries == localizedSeries)
             .DistinctBy(r => r.Series)
             .Select(r => r.Series)
             .ToList();
+    }
 
-        if (distinctSeries.Count == 0) return scanResults;
-
-        string? nonLocalizedSeries;
-
-        switch (distinctSeries.Count)
+    private string? GetNonLocalizedSeries(List<string> seriesForLocalized, string localizedSeries)
+    {
+        switch (seriesForLocalized.Count)
         {
             case 1:
-                nonLocalizedSeries = distinctSeries[0];
-                break;
+                return seriesForLocalized[0];
             case <= 2:
-                nonLocalizedSeries = distinctSeries.FirstOrDefault(s => !s.Equals(Parser.Parser.Normalize(localizedSeries)));
-                break;
+                return seriesForLocalized.FirstOrDefault(s => !s.Equals(Parser.Parser.Normalize(localizedSeries)));
             default:
                 _logger.LogError(
                     "[ScannerService] Multiple series detected across scan results that contain localized series. " +
                     "This will cause them to group incorrectly. Please separate series into their own dedicated folder: {LocalizedSeries}",
-                    string.Join(", ", distinctSeries)
+                    string.Join(", ", seriesForLocalized)
                 );
-                return scanResults;
+                return null;
         }
+    }
 
-        if (nonLocalizedSeries == null) return scanResults;
-
+    private void RemapSeries(IList<ScanResult> scanResults, List<ParserInfo> allInfos, string localizedSeries, string nonLocalizedSeries)
+    {
+        // Find all infos that need to be remapped from the localized series to the non-localized series
         var seriesToBeRemapped = allInfos.Where(i => i.Series.Equals(localizedSeries)).ToList();
 
-        // Update infos that need mapping
         foreach (var infoNeedingMapping in seriesToBeRemapped)
         {
             infoNeedingMapping.Series = nonLocalizedSeries;
@@ -653,18 +682,15 @@ public class ParseScannedFiles
             // Find the scan result that should be merged with
             var nonLocalizedScanResult = scanResults.FirstOrDefault(sr => sr.ParserInfos.Any(pi => pi.Series == nonLocalizedSeries));
 
+            if (nonLocalizedScanResult == null) continue;
+
             // Add the remapped info to the non-localized scan result
-            nonLocalizedScanResult?.ParserInfos.Add(infoNeedingMapping);
+            nonLocalizedScanResult.ParserInfos.Add(infoNeedingMapping);
+
+            // Assign the higher folder path (i.e., the one closer to the root)
+            //nonLocalizedScanResult.Folder = DirectoryService.GetDeepestCommonPath(localizedScanResult.Folder, nonLocalizedScanResult.Folder);
         }
-
-        // Remove or clear any scan results that now have no ParserInfos after merging
-        scanResults = scanResults
-            .Where(sr => sr.ParserInfos.Any())  // Keep only those with non-empty ParserInfos
-            .ToList();
-
-        return scanResults;
     }
-
 
     /// <summary>
     /// For a given ScanResult, sets the ParserInfos on the result

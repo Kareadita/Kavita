@@ -656,7 +656,7 @@ public class DirectoryService : IDirectoryService
         return libraryFolders.Any(folder => commonPath == Parser.NormalizePath(folder)) ? null : commonPath;
     }
 
-    private static string GetDeepestCommonPath(string path1, string path2)
+    public static string GetDeepestCommonPath(string path1, string path2)
     {
         var parts1 = path1.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var parts2 = path2.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -668,7 +668,6 @@ public class DirectoryService : IDirectoryService
 
         return Parser.NormalizePath(string.Join(Path.DirectorySeparatorChar.ToString(), commonParts));
     }
-
 
 
     /// <summary>

@@ -35,6 +35,13 @@ public interface IProcessSeries
 
     void Reset();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
+    /// <summary>
+    /// Given a list of all Genres, generates new Genre entries for any that do not exist.
+    /// Does not delete anything, that will be handled by nightly task
+    /// </summary>
+    /// <param name="genres"></param>
+    /// <returns></returns>
+    Task CreateAllGenresAsync(ICollection<string> genres);
 }
 
 /// <summary>
@@ -269,6 +276,27 @@ public class ProcessSeries : IProcessSeries
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
         await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
+    }
+
+
+    public async Task CreateAllGenresAsync(ICollection<string> genres)
+    {
+        // Pass the non-normalized genres directly to the repository
+        var nonExistingGenres = await _unitOfWork.GenreRepository.GetAllGenresNotInListAsync(genres);
+
+        // Create and attach new genres using the non-normalized names
+        foreach (var genre in nonExistingGenres)
+        {
+            var newGenre = new GenreBuilder(genre).Build();
+            _unitOfWork.GenreRepository.Attach(newGenre);
+        }
+
+        // Commit changes
+        if (nonExistingGenres.Count > 0)
+        {
+            await _unitOfWork.CommitAsync();
+        }
+
     }
 
 
