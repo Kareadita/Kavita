@@ -630,7 +630,6 @@ public class ScannerService : IScannerService
 
         if (toProcess.Count > 0)
         {
-
             // For all Genres in the ParserInfos, do a bulk check against the DB on what is not in the DB and create them
             // This will ensure all Genres are pre-created and allow our Genre lookup (and Priming) to be much simpler. It will be slower, but more consistent.
             var allGenres = toProcess
@@ -643,7 +642,15 @@ public class ScannerService : IScannerService
 
             await _processSeries.CreateAllGenresAsync(allGenres.ToList());
 
-            // TODO: Do the above for Tags as well
+            var allTags = toProcess
+                .SelectMany(s => s.Value
+                    .SelectMany(p => p.ComicInfo?.Tags?
+                                         .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split on comma and remove empty entries
+                                         .Select(g => g.Trim()) // Trim each genre
+                                         .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
+                                     ?? [])); // Handle null Tag or ComicInfo safely
+
+            await _processSeries.CreateAllTagsAsync(allTags.ToList());
 
             // TODO: Do the above for People as well (until we overhaul the People code)
 

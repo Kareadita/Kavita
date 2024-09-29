@@ -40,8 +40,13 @@ public interface IProcessSeries
     /// Does not delete anything, that will be handled by nightly task
     /// </summary>
     /// <param name="genres"></param>
-    /// <returns></returns>
     Task CreateAllGenresAsync(ICollection<string> genres);
+    /// <summary>
+    /// Given a list of all Tags, generates new Tag entries for any that do not exist.
+    /// Does not delete anything, that will be handled by nightly task
+    /// </summary>
+    /// <param name="tags"></param>
+    Task CreateAllTagsAsync(ICollection<string> tags);
 }
 
 /// <summary>
@@ -58,7 +63,6 @@ public class ProcessSeries : IProcessSeries
     private readonly IFileService _fileService;
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
-    private readonly ICollectionTagService _collectionTagService;
     private readonly IReadingListService _readingListService;
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly ITagManagerService _tagManagerService;
@@ -66,8 +70,7 @@ public class ProcessSeries : IProcessSeries
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
-        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService, IReadingListService readingListService,
+        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService, IReadingListService readingListService,
         IExternalMetadataService externalMetadataService, ITagManagerService tagManagerService)
     {
         _unitOfWork = unitOfWork;
@@ -79,7 +82,6 @@ public class ProcessSeries : IProcessSeries
         _fileService = fileService;
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
-        _collectionTagService = collectionTagService;
         _readingListService = readingListService;
         _externalMetadataService = externalMetadataService;
         _tagManagerService = tagManagerService;
@@ -296,7 +298,25 @@ public class ProcessSeries : IProcessSeries
         {
             await _unitOfWork.CommitAsync();
         }
+    }
 
+    public async Task CreateAllTagsAsync(ICollection<string> tags)
+    {
+        // Pass the non-normalized tags directly to the repository
+        var nonExistingTags = await _unitOfWork.TagRepository.GetAllTagsNotInListAsync(tags);
+
+        // Create and attach new genres using the non-normalized names
+        foreach (var tag in nonExistingTags)
+        {
+            var newTag = new TagBuilder(tag).Build();
+            _unitOfWork.TagRepository.Attach(newTag);
+        }
+
+        // Commit changes
+        if (nonExistingTags.Count > 0)
+        {
+            await _unitOfWork.CommitAsync();
+        }
     }
 
 

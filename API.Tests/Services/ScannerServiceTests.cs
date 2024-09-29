@@ -132,7 +132,7 @@ public class ScannerServiceTests : AbstractDbTest
             Substitute.For<IEventHub>(),
             ds, Substitute.For<ICacheHelper>(), mockReadingService, Substitute.For<IFileService>(),
             Substitute.For<IMetadataService>(),
-            Substitute.For<IWordCountAnalyzerService>(), Substitute.For<ICollectionTagService>(),
+            Substitute.For<IWordCountAnalyzerService>(),
             Substitute.For<IReadingListService>(),
             Substitute.For<IExternalMetadataService>(), new TagManagerService(_unitOfWork, Substitute.For<ILogger<TagManagerService>>()));
 
