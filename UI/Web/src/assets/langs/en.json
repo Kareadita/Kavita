@@ -221,6 +221,7 @@
 
     "theme": {
         "theme-dark": "Dark",
+        "theme-darker": "Darker",
         "theme-black": "Black",
         "theme-paper": "Paper",
         "theme-white": "White"
@@ -1003,6 +1004,7 @@
         "color-theme-title": "Color Theme",
 
         "theme-dark": "Dark",
+        "theme-darker": "Darker",
         "theme-black": "Black",
         "theme-white": "White",
         "theme-paper": "Paper"

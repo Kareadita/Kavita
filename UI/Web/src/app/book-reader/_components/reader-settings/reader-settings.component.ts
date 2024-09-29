@@ -22,6 +22,7 @@ import { ThemeService } from 'src/app/_services/theme.service';
 import { FontFamily, BookService } from '../../_services/book.service';
 import { BookBlackTheme } from '../../_models/book-black-theme';
 import { BookDarkTheme } from '../../_models/book-dark-theme';
+import { BookDarkerTheme } from '../../_models/book-darker-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
 import { BookPaperTheme } from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -49,6 +50,16 @@ export const bookColorThemes = [
     selector: 'brtheme-dark',
     content: BookDarkTheme,
     translationKey: 'theme-dark'
+  },
+  {
+    name: 'Darker',
+    colorHash: '#202020',
+    isDarkTheme: true,
+    isDefault: false,
+    provider: ThemeProvider.System,
+    selector: 'brtheme-darker',
+    content: BookDarkerTheme,
+    translationKey: 'theme-darker'
   },
   {
     name: 'Black',
