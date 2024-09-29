@@ -71,7 +71,7 @@ public interface IDirectoryService
     IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
     IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher = null);
     string GetParentDirectoryName(string fileOrFolder);
-    IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null);
+    IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null, SearchOption searchOption = SearchOption.AllDirectories);
     DateTime GetLastWriteTime(string folderPath);
 }
 public class DirectoryService : IDirectoryService
@@ -742,32 +742,44 @@ public class DirectoryService : IDirectoryService
     /// <param name="folderPath"></param>
     /// <param name="fileTypes"></param>
     /// <param name="matcher"></param>
+    /// <param name="searchOption">Pass TopDirectories</param>
     /// <returns></returns>
-    public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null)
+    public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null,
+        SearchOption searchOption = SearchOption.AllDirectories)
     {
         _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
 
         if (!Exists(folderPath)) return files;
 
-        // Stack to hold directories to process
-        var directoriesToProcess = new Stack<string>();
-        directoriesToProcess.Push(folderPath);
-
-        while (directoriesToProcess.Count > 0)
+        if (searchOption == SearchOption.AllDirectories)
         {
-            var currentDirectory = directoriesToProcess.Pop();
 
-            // Get files from the current directory
-            var filesInCurrentDirectory = GetFilesWithCertainExtensions(currentDirectory, fileTypes);
-            files.AddRange(filesInCurrentDirectory);
+            // Stack to hold directories to process
+            var directoriesToProcess = new Stack<string>();
+            directoriesToProcess.Push(folderPath);
 
-            // Get subdirectories and add them to the stack
-            var subdirectories = GetDirectories(currentDirectory, matcher);
-            foreach (var subdirectory in subdirectories)
+            while (directoriesToProcess.Count > 0)
             {
-                directoriesToProcess.Push(subdirectory);
+                var currentDirectory = directoriesToProcess.Pop();
+
+                // Get files from the current directory
+                var filesInCurrentDirectory = GetFilesWithCertainExtensions(currentDirectory, fileTypes);
+                files.AddRange(filesInCurrentDirectory);
+
+                // Get subdirectories and add them to the stack
+                var subdirectories = GetDirectories(currentDirectory, matcher);
+                foreach (var subdirectory in subdirectories)
+                {
+                    directoriesToProcess.Push(subdirectory);
+                }
             }
+        }
+        else
+        {
+            // If TopDirectoryOnly is specified, only get files in the specified folder
+            var filesInCurrentDirectory = GetFilesWithCertainExtensions(folderPath, fileTypes);
+            files.AddRange(filesInCurrentDirectory);
         }
 
         // Filter out unwanted files based on matcher if provided

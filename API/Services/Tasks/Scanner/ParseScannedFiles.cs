@@ -154,7 +154,8 @@ public class ParseScannedFiles
             // Don't process any folders where we've already scanned everything below
             if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
             {
-                // Skip this directory as we've already processed a parent
+                // Skip this directory as we've already processed a parent unless there are loose files at that directory
+                CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher);
                 continue;
             }
 
@@ -166,7 +167,6 @@ public class ParseScannedFiles
                 continue;
             }
 
-            //var sw = Stopwatch.StartNew();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
@@ -180,7 +180,6 @@ public class ParseScannedFiles
             }
 
             processedDirs.Add(directory);
-            //_logger.LogDebug("Processing {Directory} took {TimeMs}ms to check", directory, sw.ElapsedMilliseconds);
         }
 
         return result;
@@ -241,6 +240,19 @@ public class ParseScannedFiles
         if (files.Count == 0)
         {
             _logger.LogDebug("[ProcessFiles] Empty directory: {Directory}. Keeping empty will cause Kavita to scan this each time", directory);
+        }
+        result.Add(CreateScanResult(directory, folderPath, true, files));
+    }
+
+    /// <summary>
+    /// Performs a full scan of the directory and adds it to the result.
+    /// </summary>
+    private void CheckSurfaceFiles(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher)
+    {
+        var files = _directoryService.ScanFiles(directory, fileExtensions, matcher, SearchOption.TopDirectoryOnly);
+        if (files.Count == 0)
+        {
+            return;
         }
         result.Add(CreateScanResult(directory, folderPath, true, files));
     }

@@ -116,6 +116,16 @@ public class ScannerServiceTests : AbstractDbTest
         _unitOfWork.LibraryRepository.Add(library);
         await _unitOfWork.CommitAsync();
 
+        var scanner = CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        return postLib;
+    }
+
+    private ScannerService CreateServices()
+    {
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         var mockReadingService = new MockReadingItemService(ds, Substitute.For<IBookService>());
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
@@ -130,11 +140,7 @@ public class ScannerServiceTests : AbstractDbTest
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
             mockReadingService, processSeries, Substitute.For<IWordCountAnalyzerService>());
-
-        await scanner.ScanLibrary(library.Id);
-
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-        return postLib;
+        return scanner;
     }
 
     private static (string Publisher, LibraryType Type) SplitPublisherAndLibraryType(string input)
