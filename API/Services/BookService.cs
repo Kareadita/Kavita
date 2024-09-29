@@ -1276,10 +1276,17 @@ public class BookService : IBookService
     {
         using var pageReader = docReader.GetPageReader(pageNumber);
         var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
-        var floats = rawBytes.Select(a=> (float)a*256F).ToArray();
+        var floats = new float[rawBytes.Length];
+        for (var i = 0; i < rawBytes.Length; i += 4)
+        {
+            floats[i] = rawBytes[i + 2] << 8;
+            floats[i + 1] = rawBytes[i + 1] << 8;
+            floats[i+2] = rawBytes[i] << 8;
+            floats[i+3] = rawBytes[i + 3] << 8;
+        }
         var width = pageReader.GetPageWidth();
         var height = pageReader.GetPageHeight();
-        using MagickImage image = new MagickImage(rawBytes, width, height,MagickFormat.Bgra);
+        MagickImage image = new MagickImage(MagickColor.FromRgba(0, 0, 0,0), width, height);
         using var pixels = image.GetPixels();
         pixels.SetArea(0,0,width, height, floats);
         stream.Seek(0, SeekOrigin.Begin);

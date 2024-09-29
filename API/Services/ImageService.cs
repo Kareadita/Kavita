@@ -789,7 +789,7 @@ public class ImageService : IImageService
         try
         {
 
-            using var thumbnail = new MagickImage(Convert.FromBase64String(encodedImage));
+            using var thumbnail = MagickImage.FromBase64(encodedImage);
             int thumbnailHeight = (int)(thumbnail.Height * ((double)thumbnailWidth / thumbnail.Width));
             thumbnail.Thumbnail(thumbnailWidth, thumbnailHeight);
             fileName += encodeFormat.GetExtension();
