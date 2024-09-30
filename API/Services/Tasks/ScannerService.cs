@@ -640,7 +640,7 @@ public class ScannerService : IScannerService
                                          .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
                                      ?? [])); // Handle null Genre or ComicInfo safely
 
-            await _processSeries.CreateAllGenresAsync(allGenres.ToList());
+            await _processSeries.CreateAllGenresAsync(allGenres.Distinct().ToList());
 
             var allTags = toProcess
                 .SelectMany(s => s.Value
@@ -650,7 +650,7 @@ public class ScannerService : IScannerService
                                          .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
                                      ?? [])); // Handle null Tag or ComicInfo safely
 
-            await _processSeries.CreateAllTagsAsync(allTags.ToList());
+            await _processSeries.CreateAllTagsAsync(allTags.Distinct().ToList());
 
             // TODO: Do the above for People as well (until we overhaul the People code)
 

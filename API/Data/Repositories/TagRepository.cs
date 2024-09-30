@@ -85,7 +85,8 @@ public class TagRepository : ITagRepository
     {
         // Create a dictionary mapping normalized names to non-normalized names
         var normalizedToOriginalMap = tags.Distinct()
-            .ToDictionary(Parser.Normalize, tag => tag);
+            .GroupBy(Parser.Normalize)
+            .ToDictionary(group => group.Key, group => group.First());
 
         var normalizedTagNames = normalizedToOriginalMap.Keys.ToList();
 
