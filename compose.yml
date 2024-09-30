@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=goodpass
+      - POSTGRES_USER=user_san
+      - POSTGRES_DB=database_chan

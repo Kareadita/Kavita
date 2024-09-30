@@ -116,3 +116,24 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
 * Copyright 2020-2024
 
+Contributing:
+
+I added a compose.yml file for docker-compose up to make the process of booting up a postgresql db easier.
+
+`docker compose up`
+drag the schema.sql file into the container root/ directory (can use docker desktop to make this easy)
+
+exec into the container and then run the following:
+`psql -U user_san -d postgres`
+`CREATE DATABASE database_chan;`
+`exit`
+
+`psql -U user_san -d database_chan -f k_schema.sql`
+
+Then, on host FS:
+
+cd /Kavita/UI/Web 
+npm run start
+
+open kavita solution
+run API (Edit DB connection string in ApplicationServiceSExtensions if needed)
