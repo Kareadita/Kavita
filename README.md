@@ -137,3 +137,10 @@ npm run start
 
 open kavita solution
 run API (Edit DB connection string in ApplicationServiceSExtensions if needed)
+
+docker compose to test kavita container as docker image:
+
+./build.sh
+
+Then
+docker compose up w/ uncommented kavita section

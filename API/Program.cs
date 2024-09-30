@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -72,29 +73,14 @@ public class Program
 
             try
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
                 var context = services.GetRequiredService<DataContext>();
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                 var isDbCreated = await context.Database.CanConnectAsync();
-                if (isDbCreated && pendingMigrations.Any())
+                if (isDbCreated)
                 {
-                    logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
-                    var migrationDirectory = await GetMigrationDirectory(context, directoryService);
-                    directoryService.ExistOrCreate(migrationDirectory);
+                    var schemaScript = await File.ReadAllTextAsync("/schema.sql");
 
-                    if (!directoryService.FileSystem.File.Exists(
-                            directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
-                    {
-                        directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
-                        logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
-                    }
+                    context.Database.ExecuteSqlRaw(schemaScript);
                 }
-
-
-
-                await context.Database.MigrateAsync();
-
-
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);

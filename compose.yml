@@ -9,3 +9,17 @@ services:
       - POSTGRES_PASSWORD=goodpass
       - POSTGRES_USER=user_san
       - POSTGRES_DB=database_chan
+  # kavita:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 80:5000
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_PORT=5432
+  #     - DB_NAME=database_chan
+  #     - DB_USER=user_san
+  #     - DB_PASSWORD=goodpass

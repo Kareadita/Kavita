@@ -20,6 +20,8 @@ COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
 COPY API/config/appsettings.json /tmp/config/appsettings.json
 
+COPY schema.sql /schema.sql
+
 #Installs program dependencies
 RUN apt-get update \
   && apt-get install -y libicu-dev libssl1.1 libgdiplus curl \
