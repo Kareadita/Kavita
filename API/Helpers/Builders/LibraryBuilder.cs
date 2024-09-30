@@ -2,7 +2,6 @@
 using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
-using SQLitePCL;
 
 namespace API.Helpers.Builders;
 

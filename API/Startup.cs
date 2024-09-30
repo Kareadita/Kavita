@@ -6,12 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
-using API.Data.ManualMigrations;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
@@ -29,11 +26,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -226,66 +221,6 @@ public class Startup
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-        // Apply Migrations
-        try
-        {
-            Task.Run(async () =>
-                {
-                    // Apply all migrations on startup
-                    var dataContext = serviceProvider.GetRequiredService<DataContext>();
-
-
-                    logger.LogInformation("Running Migrations");
-
-                    // v0.7.9
-                    await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.7.11
-                    await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
-                    await MigrateLibrariesToHaveAllFileTypes.Migrate(unitOfWork, dataContext, logger);
-
-
-                    // v0.7.14
-                    await MigrateEmailTemplates.Migrate(directoryService, logger);
-                    await MigrateVolumeNumber.Migrate(dataContext, logger);
-                    await MigrateWantToReadImport.Migrate(unitOfWork, dataContext, directoryService, logger);
-                    await MigrateManualHistory.Migrate(dataContext, logger);
-                    await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
-
-                    // v0.8.0
-                    await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateChapterNumber.Migrate(dataContext, logger);
-                    await MigrateProgressExport.Migrate(dataContext, directoryService, logger);
-                    await MigrateMixedSpecials.Migrate(dataContext, unitOfWork, directoryService, logger);
-                    await MigrateLooseLeafChapters.Migrate(dataContext, unitOfWork, directoryService, logger);
-                    await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateChapterRange.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateMangaFilePath.Migrate(dataContext, logger);
-                    await MigrateCollectionTagToUserCollections.Migrate(dataContext, unitOfWork, logger);
-
-                    // v0.8.1
-                    await MigrateLowestSeriesFolderPath.Migrate(dataContext, unitOfWork, logger);
-
-                    // v0.8.2
-                    await ManualMigrateThemeDescription.Migrate(dataContext, logger);
-                    await MigrateInitialInstallData.Migrate(dataContext, logger, directoryService);
-                    await MigrateSeriesLowestFolderPath.Migrate(dataContext, logger, directoryService);
-
-                    //  Update the version in the DB after all migrations are run
-                    var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
-                    installVersion.Value = BuildInfo.Version.ToString();
-                    unitOfWork.SettingsRepository.Update(installVersion);
-                    await unitOfWork.CommitAsync();
-
-                    logger.LogInformation("Running Migrations - complete");
-                }).GetAwaiter()
-                .GetResult();
-        }
-        catch (Exception ex)
-        {
-            logger.LogCritical(ex, "An error occurred during migration");
-        }
-
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<SecurityEventMiddleware>();
 

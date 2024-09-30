@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using API.Data.ManualMigrations;
 using API.DTOs.Progress;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using API.Data.ManualMigrations;
-using API.DTOs;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;

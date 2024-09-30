@@ -76,7 +76,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
 
-        services.AddSqLite();
+        services.AddPostgresql();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 
         services.AddEasyCaching(options =>
@@ -102,11 +102,11 @@ public static class ApplicationServiceExtensions
         });
     }
 
-    private static void AddSqLite(this IServiceCollection services)
+    private static void AddPostgresql(this IServiceCollection services)
     {
         services.AddDbContextPool<DataContext>(options =>
         {
-            options.UseSqlite("Data source=config/kavita.db", builder =>
+            options.UseNpgsql("Host=localhost;Port=5432;Database=database_chan;Username=user_san;Password=goodpass", builder =>
             {
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });

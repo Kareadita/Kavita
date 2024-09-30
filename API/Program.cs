@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
-using API.Data.ManualMigrations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Logging;
@@ -89,33 +88,6 @@ public class Program
                         directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
                         logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
                     }
-                }
-
-                // Apply Before manual migrations that need to run before actual migrations
-                if (isDbCreated)
-                {
-                    Task.Run(async () =>
-                        {
-                            // Apply all migrations on startup
-                            logger.LogInformation("Running Manual Migrations");
-
-                            try
-                            {
-                                // v0.7.14
-                                await MigrateWantToReadExport.Migrate(context, directoryService, logger);
-
-                                // v0.8.2
-                                await ManualMigrateSwitchToWal.Migrate(context, logger);
-                            }
-                            catch (Exception ex)
-                            {
-                                /* Swallow */
-                            }
-
-                            await unitOfWork.CommitAsync();
-                            logger.LogInformation("Running Manual Migrations - complete");
-                        }).GetAwaiter()
-                        .GetResult();
                 }
 
 
