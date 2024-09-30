@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO.Abstractions;
 using API.Constants;
 using API.Data;
 using API.Helpers;
@@ -104,9 +105,14 @@ public static class ApplicationServiceExtensions
 
     private static void AddPostgresql(this IServiceCollection services)
     {
+        var connectionString = $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                               $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                               $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                               $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
+                               $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")}";
         services.AddDbContextPool<DataContext>(options =>
         {
-            options.UseNpgsql("Host=localhost;Port=5432;Database=database_chan;Username=user_san;Password=goodpass", builder =>
+            options.UseNpgsql(connectionString, builder =>
             {
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
