@@ -12,6 +12,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
@@ -640,7 +641,7 @@ public class ScannerService : IScannerService
                                          .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
                                      ?? [])); // Handle null Genre or ComicInfo safely
 
-            await _processSeries.CreateAllGenresAsync(allGenres.Distinct().ToList());
+            await CreateAllGenresAsync(allGenres.Distinct().ToList());
 
             var allTags = toProcess
                 .SelectMany(s => s.Value
@@ -650,9 +651,35 @@ public class ScannerService : IScannerService
                                          .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
                                      ?? [])); // Handle null Tag or ComicInfo safely
 
-            await _processSeries.CreateAllTagsAsync(allTags.Distinct().ToList());
+            await CreateAllTagsAsync(allTags.Distinct().ToList());
 
-            // TODO: Do the above for People as well (until we overhaul the People code)
+            // Do the above for People as well (until we overhaul the People code)
+            var allPeople = toProcess
+                .SelectMany(s => s.Value
+                    .SelectMany(p => new List<(string Name, PersonRole Role)>
+                            {
+                                // Map each person to their respective role
+                                (p.ComicInfo?.Writer ?? string.Empty, PersonRole.Writer),
+                                (p.ComicInfo?.Penciller ?? string.Empty, PersonRole.Penciller),
+                                (p.ComicInfo?.Inker ?? string.Empty, PersonRole.Inker),
+                                (p.ComicInfo?.Colorist ?? string.Empty, PersonRole.Colorist),
+                                (p.ComicInfo?.Letterer ?? string.Empty, PersonRole.Letterer),
+                                (p.ComicInfo?.CoverArtist ?? string.Empty, PersonRole.CoverArtist),
+                                (p.ComicInfo?.Editor ?? string.Empty, PersonRole.Editor),
+                                (p.ComicInfo?.Publisher ?? string.Empty, PersonRole.Publisher),
+                                (p.ComicInfo?.Imprint ?? string.Empty, PersonRole.Imprint),
+                                (p.ComicInfo?.Characters ?? string.Empty, PersonRole.Character),
+                                (p.ComicInfo?.Teams ?? string.Empty, PersonRole.Team),
+                                (p.ComicInfo?.Locations ?? string.Empty, PersonRole.Location)
+                            }
+                            .Where(pair => !string.IsNullOrWhiteSpace(pair.Name)) // Filter out empty/null names
+                            .Select(pair => (pair.Name.Trim(), pair.Role)) // Trim the names
+                    ))
+                .Distinct() // Ensure distinct people (name and role)
+                .ToList();
+
+            // Pass the distinct list of people to the method that creates missing ones in the DB
+            await CreateAllPeopleAsync(allPeople);
 
             // Prime shared entities if there are any series to process
             await _processSeries.Prime();
@@ -703,5 +730,98 @@ public class ScannerService : IScannerService
         var parsedSeries = TrackFoundSeriesAndFiles(processedSeries);
 
         return Tuple.Create(scanElapsedTime, parsedSeries);
+    }
+
+    /// <summary>
+    /// Given a list of all Genres, generates new Genre entries for any that do not exist.
+    /// Does not delete anything, that will be handled by nightly task
+    /// </summary>
+    /// <param name="genres"></param>
+    private async Task CreateAllGenresAsync(ICollection<string> genres)
+    {
+        try
+        {
+            // Pass the non-normalized genres directly to the repository
+            var nonExistingGenres = await _unitOfWork.GenreRepository.GetAllGenresNotInListAsync(genres);
+
+            // Create and attach new genres using the non-normalized names
+            foreach (var genre in nonExistingGenres)
+            {
+                var newGenre = new GenreBuilder(genre).Build();
+                _unitOfWork.GenreRepository.Attach(newGenre);
+            }
+
+            // Commit changes
+            if (nonExistingGenres.Count > 0)
+            {
+                await _unitOfWork.CommitAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Genres");
+        }
+    }
+
+    /// <summary>
+    /// Given a list of all Tags, generates new Tag entries for any that do not exist.
+    /// Does not delete anything, that will be handled by nightly task
+    /// </summary>
+    /// <param name="tags"></param>
+    private async Task CreateAllTagsAsync(ICollection<string> tags)
+    {
+        try
+        {
+            // Pass the non-normalized tags directly to the repository
+            var nonExistingTags = await _unitOfWork.TagRepository.GetAllTagsNotInListAsync(tags);
+
+            // Create and attach new genres using the non-normalized names
+            foreach (var tag in nonExistingTags)
+            {
+                var newTag = new TagBuilder(tag).Build();
+                _unitOfWork.TagRepository.Attach(newTag);
+            }
+
+            // Commit changes
+            if (nonExistingTags.Count > 0)
+            {
+                await _unitOfWork.CommitAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Tags");
+        }
+    }
+
+    /// <summary>
+    /// Given a list of all People/Role, generates new People entries for any that do not exist.
+    /// Does not delete anything, that will be handled by nightly task
+    /// </summary>
+    /// <param name="people"></param>
+    private async Task CreateAllPeopleAsync(ICollection<(string Name, PersonRole Role)> people)
+    {
+        try
+        {
+            // Get all people (names and roles) that do not exist in the database
+            var nonExistingPeople = await _unitOfWork.PersonRepository.GetAllPeopleNotInListAsync(people);
+
+            // Create and attach new people
+            foreach (var (name, role) in nonExistingPeople)
+            {
+                var newPerson = new PersonBuilder(name, role).Build();
+                _unitOfWork.PersonRepository.Attach(newPerson);
+            }
+
+            // Commit changes
+            if (nonExistingPeople.Count > 0)
+            {
+                await _unitOfWork.CommitAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all People");
+        }
     }
 }

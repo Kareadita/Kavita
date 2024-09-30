@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -6,6 +7,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,9 @@ public interface IPersonRepository
     Task<int> GetCountAsync();
 
     Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
+
+    Task<List<(string Name, PersonRole Role)>> GetAllPeopleNotInListAsync(
+        ICollection<(string Name, PersonRole Role)> people);
 }
 
 public class PersonRepository : IPersonRepository
@@ -124,5 +129,33 @@ public class PersonRepository : IPersonRepository
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<List<(string Name, PersonRole Role)>> GetAllPeopleNotInListAsync(ICollection<(string Name, PersonRole Role)> people)
+    {
+        // Normalize person names and create a dictionary mapping normalized names and roles to their original names and roles
+        var normalizedToOriginalMap = people.Distinct()
+            .GroupBy(p => (NormalizedName: Parser.Normalize(p.Name), p.Role))
+            .ToDictionary(group => group.Key, group => group.First());
+
+        var normalizedPeople = normalizedToOriginalMap.Keys.ToList();
+
+        // Query the database for existing people using the normalized names and roles
+        var existingPeople = await _context.Person
+            .Where(p => normalizedPeople
+                .Select(np => new { np.NormalizedName, np.Role })
+                .Contains(new { p.NormalizedName, p.Role }))
+            .Select(p => new { p.NormalizedName, p.Role })
+            .ToListAsync();
+
+        // Find the normalized people (names and roles) that do not exist in the database
+        var missingPeople = normalizedPeople
+            .Except(existingPeople.Select(ep => (ep.NormalizedName, ep.Role)))
+            .ToList();
+
+        // Return the original non-normalized names and roles for the missing people
+        return missingPeople
+            .Select(normalizedPerson => normalizedToOriginalMap[normalizedPerson])
+            .ToList();
     }
 }

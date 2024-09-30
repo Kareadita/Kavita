@@ -17,7 +17,6 @@ using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using Hangfire;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -35,18 +34,6 @@ public interface IProcessSeries
 
     void Reset();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
-    /// <summary>
-    /// Given a list of all Genres, generates new Genre entries for any that do not exist.
-    /// Does not delete anything, that will be handled by nightly task
-    /// </summary>
-    /// <param name="genres"></param>
-    Task CreateAllGenresAsync(ICollection<string> genres);
-    /// <summary>
-    /// Given a list of all Tags, generates new Tag entries for any that do not exist.
-    /// Does not delete anything, that will be handled by nightly task
-    /// </summary>
-    /// <param name="tags"></param>
-    Task CreateAllTagsAsync(ICollection<string> tags);
 }
 
 /// <summary>
@@ -279,60 +266,6 @@ public class ProcessSeries : IProcessSeries
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
         await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
     }
-
-
-    public async Task CreateAllGenresAsync(ICollection<string> genres)
-    {
-        try
-        {
-            // Pass the non-normalized genres directly to the repository
-            var nonExistingGenres = await _unitOfWork.GenreRepository.GetAllGenresNotInListAsync(genres);
-
-            // Create and attach new genres using the non-normalized names
-            foreach (var genre in nonExistingGenres)
-            {
-                var newGenre = new GenreBuilder(genre).Build();
-                _unitOfWork.GenreRepository.Attach(newGenre);
-            }
-
-            // Commit changes
-            if (nonExistingGenres.Count > 0)
-            {
-                await _unitOfWork.CommitAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Genres");
-        }
-    }
-
-    public async Task CreateAllTagsAsync(ICollection<string> tags)
-    {
-        try
-        {
-            // Pass the non-normalized tags directly to the repository
-            var nonExistingTags = await _unitOfWork.TagRepository.GetAllTagsNotInListAsync(tags);
-
-            // Create and attach new genres using the non-normalized names
-            foreach (var tag in nonExistingTags)
-            {
-                var newTag = new TagBuilder(tag).Build();
-                _unitOfWork.TagRepository.Attach(newTag);
-            }
-
-            // Commit changes
-            if (nonExistingTags.Count > 0)
-            {
-                await _unitOfWork.CommitAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Tags");
-        }
-    }
-
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
@@ -838,114 +771,56 @@ public class ProcessSeries : IProcessSeries
 
 
         // Remove chapters that aren't in parsedInfos or have no files linked
-        // var existingChapters = volume.Chapters.ToList();
-        // foreach (var existingChapter in existingChapters)
-        // {
-        //     if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
-        //     {
-        //         _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
-        //             existingChapter.Range, volume.Name, parsedInfos[0].Series);
-        //         volume.Chapters.Remove(existingChapter);
-        //     }
-        //     else
-        //     {
-        //         // Ensure we remove any files that no longer exist AND order
-        //         existingChapter.Files = existingChapter.Files
-        //             .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-        //             .OrderByNatural(f => f.FilePath)
-        //             .ToList();
-        //         existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
-        //     }
-        // }
-
-        // // This represents the directories that were part of the current scan.
-        // var scannedDirectories = parsedInfos
-        //     .Select(p => Path.GetDirectoryName(p.FullFilePath))
-        //     .Distinct()
-        //     .ToList();
-        //
-        // var existingChapters = volume.Chapters.ToList();
-        // foreach (var existingChapter in existingChapters)
-        // {
-        //     // Check if this chapter has files from directories that were part of the current scan
-        //     var chapterFileDirectories = existingChapter.Files
-        //         .Select(f => Path.GetDirectoryName(f.FilePath))
-        //         .Distinct()
-        //         .ToList();
-        //
-        //     // Only remove the chapter if its files are from a directory that was scanned and it's not in parserInfos anymore
-        //     if (existingChapter.Files.Count == 0 ||
-        //         chapterFileDirectories.Exists(dir => scannedDirectories.Contains(dir)) && !parsedInfos.HasInfo(existingChapter))
-        //     {
-        //         _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
-        //             existingChapter.Range, volume.Name, parsedInfos[0].Series);
-        //         volume.Chapters.Remove(existingChapter);
-        //     }
-        //     else
-        //     {
-        //         // Ensure we remove any files that no longer exist AND reorder the remaining files
-        //         existingChapter.Files = existingChapter.Files
-        //             .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-        //             .OrderByNatural(f => f.FilePath)
-        //             .ToList();
-        //
-        //         // Update the page count after filtering the files
-        //         existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
-        //     }
-        // }
 
         var existingChapters = volume.Chapters.ToList();
 
-// Extract the directories (without filenames) from parserInfos
-var parsedDirectories = parsedInfos
-    .Select(p => Path.GetDirectoryName(p.FullFilePath)) // Get directory path
-    .Distinct()
-    .ToList();
-
-foreach (var existingChapter in existingChapters)
-{
-    // Get the directories for the files in the current chapter
-    var chapterFileDirectories = existingChapter.Files
-        .Select(f => Path.GetDirectoryName(f.FilePath)) // Get directory path minus the filename
-        .Distinct()
-        .ToList();
-
-    // Check if any of the chapter's file directories match the parsedDirectories
-    var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
-
-    if (hasMatchingDirectory)
-    {
-        // Ensure we remove any files that no longer exist AND order the remaining files
-        existingChapter.Files = existingChapter.Files
-            .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-            .OrderByNatural(f => f.FilePath)
+        // Extract the directories (without filenames) from parserInfos
+        var parsedDirectories = parsedInfos
+            .Select(p => Path.GetDirectoryName(p.FullFilePath)) // Get directory path
+            .Distinct()
             .ToList();
 
-        // Update the chapter's page count after filtering the files
-        existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
-
-        // If no files remain after filtering, remove the chapter
-        if (existingChapter.Files.Count == 0)
+        foreach (var existingChapter in existingChapters)
         {
-            _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
-                existingChapter.Range, volume.Name, parsedInfos[0].Series);
-            volume.Chapters.Remove(existingChapter);
-        }
-    }
-    else
-    {
-        // If there are no matching directories in the current scan, check if the files still exist on disk
-        var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
+            // Get the directories for the files in the current chapter
+            var chapterFileDirectories = existingChapter.Files
+                .Select(f => Path.GetDirectoryName(f.FilePath)) // Get directory path minus the filename
+                .Distinct()
+                .ToList();
 
-        // If no files exist, remove the chapter
-        if (!filesExist)
-        {
-            _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
-                existingChapter.Range, volume.Name, parsedInfos[0].Series);
-            volume.Chapters.Remove(existingChapter);
+            // Check if any of the chapter's file directories match the parsedDirectories
+            var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
+
+            if (hasMatchingDirectory)
+            {
+                // Ensure we remove any files that no longer exist AND order the remaining files
+                existingChapter.Files = existingChapter.Files
+                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
+                    .OrderByNatural(f => f.FilePath)
+                    .ToList();
+
+                // Update the chapter's page count after filtering the files
+                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+
+                // If no files remain after filtering, remove the chapter
+                if (existingChapter.Files.Count != 0) continue;
+
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                volume.Chapters.Remove(existingChapter);
+            }
+            else
+            {
+                // If there are no matching directories in the current scan, check if the files still exist on disk
+                var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
+
+                // If no files exist, remove the chapter
+                if (filesExist) continue;
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
+                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                volume.Chapters.Remove(existingChapter);
+            }
         }
-    }
-}
     }
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
