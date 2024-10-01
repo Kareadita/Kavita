@@ -10,6 +10,7 @@ using API.DTOs;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
+using API.Helpers;
 using EasyCaching.Core;
 using Flurl;
 using Flurl.Http;
@@ -17,6 +18,7 @@ using HtmlAgilityPack;
 using ImageMagick;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using static API.Helpers.SmartCropHelper;
 
 namespace API.Services;
 #nullable enable
@@ -155,26 +157,9 @@ public class ImageService : IImageService
         {
             /* Swallow */
         }
-
-        return new MagickGeometry(targetWidth, targetHeight) { IgnoreAspectRatio = true, FillArea = true };
+        return SmartCropHelper.SmartCrop(image, targetWidth, targetHeight);
     }
 
-    public static bool GetCropForDimensions(MagickImage image, int targetWidth, int targetHeight)
-    {
-        try
-        {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
-            {
-                return false;
-            }
-        } catch (Exception)
-        {
-            /* Swallow */
-            return false;
-        }
-
-        return true; //crop
-    }
 
     public static bool WillScaleWell(MagickImage sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
     {
@@ -207,15 +192,19 @@ public class ImageService : IImageService
         return aspectRatio > 1.25;
     }
 
-    private MagickImage Thumbnail(string path, int width, int height)
+    public static MagickImage Thumbnail(string path, int width, int height)
     {
         var sourceImage = new MagickImage(path);
         return Thumbnail(sourceImage, width, height);
     }
-    private MagickImage Thumbnail(MagickImage sourceImage, int width, int height)
+    public static MagickImage Thumbnail(MagickImage sourceImage, int width, int height)
     {
         var geometry = GetSizeForDimensions(sourceImage, width, height);
-    
+        if (geometry.Width != width && geometry.Height != height)
+        {
+            sourceImage.Crop(geometry);
+            geometry = new MagickGeometry(width, height) { IgnoreAspectRatio = true };
+        }
         sourceImage.Thumbnail(geometry);
         return sourceImage;
     }
@@ -476,7 +465,7 @@ public class ImageService : IImageService
         im.Resize(new Percentage(10));
         // Convert image to RGB array
         float[] pixels = im.GetPixels().ToArray();
-        float mul = 1F / 255F;
+        float mul = 1F / 256F;
         var rgbPixels = new List<Vector3>();
         // Convert to list of Vector3 (RGB)
 

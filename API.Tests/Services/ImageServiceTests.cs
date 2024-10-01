@@ -59,11 +59,8 @@ public class ImageServiceTests
         {
             var fileName = Path.GetFileNameWithoutExtension(imagePath);
             var dims = CoverImageSize.Default.GetDimensions();
-            using var thumbnail = new MagickImage(imagePath);
-
-            var size = ImageService.GetSizeForDimensions(thumbnail, dims.Width, dims.Height);
-            thumbnail.Thumbnail(size);
-
+            var thumbnail = new MagickImage(imagePath);
+            thumbnail = ImageService.Thumbnail(thumbnail, dims.Width, dims.Height);
             var outputFileName = fileName + outputExtension + ".png";
             thumbnail.Write(Path.Join(_testDirectory, outputFileName));
         }
