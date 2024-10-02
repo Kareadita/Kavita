@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -85,7 +86,19 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
                 tempRootPath = rootPath.Replace("Specials", string.Empty).TrimEnd('/');
             }
 
-            ParseFromFallbackFolders(filePath, tempRootPath, type, ref ret);
+            // Check if the folder the file exists in is Specials/ and if so, take the parent directory as series (cleaned)
+            var fileDirectory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(fileDirectory) &&
+                (fileDirectory.EndsWith("Specials", StringComparison.OrdinalIgnoreCase) ||
+                 fileDirectory.EndsWith("Specials/", StringComparison.OrdinalIgnoreCase)))
+            {
+                ret.Series = Parser.CleanTitle(Directory.GetParent(fileDirectory)?.Name ?? string.Empty);
+            }
+
+            if (string.IsNullOrEmpty(ret.Series))
+            {
+                ParseFromFallbackFolders(filePath, tempRootPath, type, ref ret);
+            }
         }
 
         if (string.IsNullOrEmpty(ret.Series))

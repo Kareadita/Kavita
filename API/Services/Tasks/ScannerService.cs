@@ -658,7 +658,7 @@ public class ScannerService : IScannerService
                 .SelectMany(s => s.Value
                     .SelectMany(p => new List<(string Name, PersonRole Role)>
                             {
-                                // Map each person to their respective role
+                                // Split comma-delimited strings into individual names
                                 (p.ComicInfo?.Writer ?? string.Empty, PersonRole.Writer),
                                 (p.ComicInfo?.Penciller ?? string.Empty, PersonRole.Penciller),
                                 (p.ComicInfo?.Inker ?? string.Empty, PersonRole.Inker),
@@ -672,9 +672,14 @@ public class ScannerService : IScannerService
                                 (p.ComicInfo?.Teams ?? string.Empty, PersonRole.Team),
                                 (p.ComicInfo?.Locations ?? string.Empty, PersonRole.Location)
                             }
+                            // Split by comma for each field that contains comma-delimited values
+                            .SelectMany(pair => pair.Name
+                                    .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split by comma and remove empty entries
+                                    .Select(name => pair with {Name = name.Trim()}) // Trim each name and keep the role
+                            )
                             .Where(pair => !string.IsNullOrWhiteSpace(pair.Name)) // Filter out empty/null names
-                            .Select(pair => (pair.Name.Trim(), pair.Role)) // Trim the names
-                    ))
+                    )
+                )
                 .Distinct() // Ensure distinct people (name and role)
                 .ToList();
 
@@ -688,6 +693,7 @@ public class ScannerService : IScannerService
 
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
+        _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing", toProcess.Count);
 
         foreach (var pSeries in toProcess)
         {

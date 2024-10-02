@@ -350,6 +350,8 @@ public class ParseScannedFiles
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
+        // BUG: This will fail for Solo Leveling & Solo Leveling (Manga)
+
         var normalizedSeries = info.Series.ToNormalized();
         var normalizedSortSeries = info.SeriesSort.ToNormalized();
         var normalizedLocalizedSeries = info.LocalizedSeries.ToNormalized();
