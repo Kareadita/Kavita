@@ -54,7 +54,10 @@ public class ScannerServiceTests : AbstractDbTest
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
         var testcase = "Publisher - ComicVine.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
@@ -64,7 +67,10 @@ public class ScannerServiceTests : AbstractDbTest
     public async Task ScanLibrary_ShouldCombineNestedFolder()
     {
         var testcase = "Series and Series-Series Combined - Manga.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -76,7 +82,10 @@ public class ScannerServiceTests : AbstractDbTest
     public async Task ScanLibrary_FlatSeries()
     {
         var testcase = "Flat Series - Manga.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -86,10 +95,13 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
     [Fact]
-    public async Task ScanLibrary_FlatSeriesWithSpecial()
+    public async Task ScanLibrary_FlatSeriesWithSpecialFolder()
     {
-        var testcase = "Flat Series with Specials - Manga.json";
-        var postLib = await GenerateScannerData(testcase);
+        var testcase = "Flat Series with Specials Folder - Manga.json";
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -97,10 +109,25 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecial()
+    {
+        const string testcase = "Flat Special - Manga.json";
+
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
+    }
+
     private async Task<Library> GenerateScannerData(string testcase)
     {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase));
-        _testOutputHelper.WriteLine($"Test Directory Path: {testDirectoryPath}");
 
         var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
 
@@ -116,12 +143,7 @@ public class ScannerServiceTests : AbstractDbTest
         _unitOfWork.LibraryRepository.Add(library);
         await _unitOfWork.CommitAsync();
 
-        var scanner = CreateServices();
-
-        await scanner.ScanLibrary(library.Id);
-
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-        return postLib;
+        return library;
     }
 
     private ScannerService CreateServices()
@@ -185,6 +207,8 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Generate the files and folders
         await Scaffold(testDirectory, filePaths);
+
+        _testOutputHelper.WriteLine($"Test Directory Path: {testDirectory}");
 
         return testDirectory;
     }

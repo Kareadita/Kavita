@@ -94,11 +94,11 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             {
                 ret.Series = Parser.CleanTitle(Directory.GetParent(fileDirectory)?.Name ?? string.Empty);
             }
-
-            if (string.IsNullOrEmpty(ret.Series))
+            else
             {
                 ParseFromFallbackFolders(filePath, tempRootPath, type, ref ret);
             }
+
         }
 
         if (string.IsNullOrEmpty(ret.Series))
