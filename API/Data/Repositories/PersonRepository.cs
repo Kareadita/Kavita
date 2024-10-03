@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -6,6 +7,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,9 @@ public interface IPersonRepository
     Task<int> GetCountAsync();
 
     Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
+
+    Task<List<(string Name, PersonRole Role)>> GetAllPeopleNotInListAsync(
+        ICollection<(string Name, PersonRole Role)> people);
 }
 
 public class PersonRepository : IPersonRepository
@@ -125,4 +130,50 @@ public class PersonRepository : IPersonRepository
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// Note: This can eat up a lot of RAM when there are many People in a DB
+    /// </summary>
+    /// <remarks>Diesel has 71K people/role combos in his DB. Until the rework we need to use batching to avoid ballooning the memory</remarks>
+    /// <param name="people"></param>
+    /// <returns></returns>
+    public async Task<List<(string Name, PersonRole Role)>> GetAllPeopleNotInListAsync(ICollection<(string Name, PersonRole Role)> people)
+    {
+        // Normalize the names and group by the normalized name and role
+        var normalizedToOriginalMap = people.Distinct()
+            .GroupBy(p => (NormalizedName: Parser.Normalize(p.Name), p.Role))
+            .ToDictionary(group => group.Key, group => group.First());
+
+        var normalizedPeople = normalizedToOriginalMap.Keys.ToList();
+
+        // To avoid memory ballooning, process people in batches
+        const int batchSize = 500; // Set a batch size based on expected memory limits and query performance
+        var missingPeople = new List<(string Name, PersonRole Role)>();
+
+        // Split the normalizedPeople into batches and process each batch
+        for (var i = 0; i < normalizedPeople.Count; i += batchSize)
+        {
+            var batch = normalizedPeople.Skip(i).Take(batchSize).ToList();
+
+            // Query the database for existing people in this batch
+            var existingPeople = await _context.Person
+                .Where(p => batch.Select(b => b.NormalizedName).Contains(p.NormalizedName) && batch.Select(b => b.Role).Contains(p.Role))
+                .Select(p => new { p.NormalizedName, p.Role })
+                .ToListAsync();
+
+            // Find the people that are missing from the database
+            var missingInBatch = batch
+                .Except(existingPeople.Select(ep => (ep.NormalizedName, ep.Role)))
+                .ToList();
+
+            // Add missing people to the final result
+            missingPeople.AddRange(missingInBatch);
+        }
+
+        // Return the original non-normalized names and roles for the missing people
+        return missingPeople
+            .Select(normalizedPerson => normalizedToOriginalMap[normalizedPerson])
+            .ToList();
+    }
+
 }

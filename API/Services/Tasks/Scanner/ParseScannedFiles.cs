@@ -350,6 +350,8 @@ public class ParseScannedFiles
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
+        // BUG: This will fail for Solo Leveling & Solo Leveling (Manga)
+
         var normalizedSeries = info.Series.ToNormalized();
         var normalizedSortSeries = info.SeriesSort.ToNormalized();
         var normalizedLocalizedSeries = info.LocalizedSeries.ToNormalized();
@@ -380,7 +382,7 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "[ScannerService] {SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
+            _logger.LogCritical("[ScannerService] {SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
             foreach (var seriesKey in scannedSeries.Keys.Where(ps =>
                          ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
                                                       || ps.NormalizedName.Equals(normalizedLocalizedSeries)
@@ -425,7 +427,7 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
+            _logger.LogCritical("[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
             var values = scannedSeries.Where(p =>
                 (p.Key.NormalizedName.ToNormalized() == normalizedSeries ||
                  p.Key.NormalizedName.ToNormalized() == normalizedLocalSeries) &&
@@ -747,8 +749,6 @@ public class ParseScannedFiles
             var infos = await Task.WhenAll(tasks);
             result.ParserInfos = infos.Where(info => info != null).ToList()!;
         }
-
-        _logger.LogDebug("[ScannerService] Parsed {Count} files for {Folder}", result.ParserInfos.Count, normalizedFolder);
     }
 
 

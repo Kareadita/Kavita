@@ -144,9 +144,11 @@ public class GenreRepository : IGenreRepository
     /// <returns>A list of genre names that do not exist in the system.</returns>
     public async Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames)
     {
-        // Create a dictionary mapping normalized names to non-normalized names
-        var normalizedToOriginalMap = genreNames.Distinct()
-            .ToDictionary(Parser.Normalize, genre => genre);
+        // Group the genres by their normalized names, keeping track of the original names
+        var normalizedToOriginalMap = genreNames
+            .Distinct()
+            .GroupBy(Parser.Normalize)
+            .ToDictionary(group => group.Key, group => group.First()); // Take the first original name for each normalized name
 
         var normalizedGenreNames = normalizedToOriginalMap.Keys.ToList();
 
