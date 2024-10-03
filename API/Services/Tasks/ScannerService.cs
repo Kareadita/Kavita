@@ -745,6 +745,8 @@ public class ScannerService : IScannerService
     /// <param name="genres"></param>
     private async Task CreateAllGenresAsync(ICollection<string> genres)
     {
+        _logger.LogInformation("[ScannerService] Attempting to pre-save all Genres");
+
         try
         {
             // Pass the non-normalized genres directly to the repository
@@ -776,6 +778,8 @@ public class ScannerService : IScannerService
     /// <param name="tags"></param>
     private async Task CreateAllTagsAsync(ICollection<string> tags)
     {
+        _logger.LogInformation("[ScannerService] Attempting to pre-save all Tags");
+
         try
         {
             // Pass the non-normalized tags directly to the repository
@@ -807,6 +811,8 @@ public class ScannerService : IScannerService
     /// <param name="people"></param>
     private async Task CreateAllPeopleAsync(ICollection<(string Name, PersonRole Role)> people)
     {
+        _logger.LogInformation("[ScannerService] Attempting to pre-save all People");
+
         try
         {
             // Get all people (names and roles) that do not exist in the database
