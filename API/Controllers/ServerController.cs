@@ -210,9 +210,13 @@ public class ServerController : BaseApiController
     /// Pull the Changelog for Kavita from Github and display
     /// </summary>
     /// <returns></returns>
+    [AllowAnonymous]
     [HttpGet("changelog")]
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
     {
+        // Strange bug where [Authorize] doesn't work
+        if (User.GetUserId() == 0) return Unauthorized();
+
         return Ok(await _versionUpdaterService.GetAllReleases());
     }
 
@@ -270,6 +274,18 @@ public class ServerController : BaseApiController
         _logger.LogInformation("Busting Kavita+ Cache");
         var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
         await provider.FlushAsync();
+        return Ok();
+    }
+
+    /// <summary>
+    /// Runs the Sync Themes task
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("sync-themes")]
+    public async Task<ActionResult> SyncThemes()
+    {
+        await _taskScheduler.SyncThemes();
         return Ok();
     }
 

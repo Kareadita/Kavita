@@ -1,0 +1,20 @@
+<ng-container *transloco="let t; read:'user-holds'">
+  <h5>{{t('title')}}</h5>
+  <p>{{t('description')}}</p>
+
+  <div class="row g-0">
+    <ul class="list-group mb-2">
+      @for(hold of holds$ | async; track hold.seriesName) {
+        <li class="list-group-item list-group-item-light">
+          <a class="btn-link" href="/library/{{hold.libraryId}}/series/{{hold.seriesId}}" target="_blank">{{hold.seriesName}}</a>
+        </li>
+      } @empty {
+        <li class="list-group-item list-group-item-light" style="text-align: center;">
+          {{t('no-data')}}
+        </li>
+      }
+
+    </ul>
+  </div>
+
+</ng-container>

@@ -1,0 +1,216 @@
+<ng-container *transloco="let t; read: 'series-detail'">
+
+  <app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="55"></app-bulk-operations>
+
+  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
+
+    @if (volume && series && libraryType !== null) {
+      <div class="row mb-0 mb-xl-3 info-container">
+        <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
+          <app-cover-image [entity]="volume" [coverImage]="imageService.getVolumeCoverImage(volume.id)" [continueTitle]="ContinuePointTitle" (read)="readVolume()"></app-cover-image>
+        </div>
+
+        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
+          <h4 class="title mb-2">
+            <a routerLink="/library/{{series.libraryId}}/series/{{series.id}}" class="dark-exempt btn-icon">{{series.name}}</a>
+          </h4>
+          <div class="subtitle mt-2 mb-2">
+            <span>
+              {{t('volume-num')}}
+              <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="true"></app-entity-title>
+            </span>
+          </div>
+
+          <app-metadata-detail-row [entity]="volumeCast"
+                                   [ageRating]="maxAgeRating"
+                                   [hasReadingProgress]="volume.pagesRead > 0"
+                                   [readingTimeEntity]="volume"
+                                   [libraryType]="libraryType"
+                                   [mangaFormat]="series.format">
+          </app-metadata-detail-row>
+
+          <!-- Rating goes here (after I implement support for rating individual issues -->
+<!--          @if (libraryType !== null && series) {-->
+<!--            <div class="mt-2 mb-2">-->
+<!--              <app-external-rating [seriesId]="series.id"-->
+<!--                                   [ratings]="[]"-->
+<!--                                   [userRating]="series.userRating"-->
+<!--                                   [hasUserRated]="series.hasUserRated"-->
+<!--                                   [libraryType]="libraryType">-->
+<!--              </app-external-rating>-->
+<!--            </div>-->
+<!--          }-->
+
+          <div class="mt-2 mb-3">
+            <div class="row g-0">
+              <div class="col-auto">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-primary-outline" (click)="readVolume()">
+                  <span>
+                <i class="fa {{volume.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{(volume.pagesRead > 0) ? t('continue') : t('read')}}</span>
+              </span>
+                  </button>
+                  <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
+                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <div class="dropdown-menu" ngbDropdownMenu>
+                      <button ngbDropdownItem (click)="readVolume(true)">
+                      <span>
+                        <i class="fa fa-glasses" aria-hidden="true"></i>
+                        <span class="read-btn--text">&nbsp;{{(volume.pagesRead > 0) ? t('continue-incognito') : t('read-incognito')}}</span>
+                      </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+              @if (accountService.isAdmin$ | async) {
+                <div class="col-auto ms-2">
+                  <button class="btn btn-secondary-outline" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
+                    <span><i class="fa fa-pen" aria-hidden="true"></i></span>
+                  </button>
+                </div>
+              }
+
+              <div class="col-auto ms-2 d-none d-md-block">
+                <div class="card-actions mt-2" [ngbTooltip]="t('more-alt')">
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="volumeActions" [labelBy]="series.name + ' ' + volume.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn"></app-card-actionables>
+                </div>
+              </div>
+
+              <div class="col-auto ms-2 d-none d-md-block">
+                <app-download-button [download$]="download$" [entity]="volume" entityType="volume"></app-download-button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="mt-2 mb-3">
+            <app-read-more [text]="volume.chapters[0].summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 585 : 250"></app-read-more>
+          </div>
+
+          <div class="mt-2">
+            <div class="row g-0">
+              <div class="col-6">
+                <span class="fw-bold">{{t('writers-title')}}</span>
+                <div>
+                  <app-badge-expander [items]="volumeCast.writers" [allowToggle]="false" (toggle)="switchTabsToDetail()">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+              <div class="col-6">
+                <span class="fw-bold">{{t('cover-artists-title')}}</span>
+                <div>
+                  <app-badge-expander [items]="volumeCast.coverArtists" [allowToggle]="false" (toggle)="switchTabsToDetail()">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 mb-2 upper-details">
+            <div class="row g-0">
+              <div class="col-6 pe-5">
+                <span class="fw-bold">{{t('genres-title')}}</span>
+                <div>
+                  <app-badge-expander [items]="genres"
+                                      [itemsTillExpander]="3"
+                                      [allowToggle]="false"
+                                      (toggle)="switchTabsToDetail()">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Genres, item.id)">{{item.title}}</a>
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <span class="fw-bold">{{t('tags-title')}}</span>
+                <div>
+                  <app-badge-expander [items]="tags"
+                                      [itemsTillExpander]="3"
+                                      [allowToggle]="false"
+                                      (toggle)="switchTabsToDetail()">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+      <div class="carousel-tabs-container mb-2">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
+          <li [ngbNavItem]="TabID.Chapters">
+          <a ngbNavLink>
+            {{utilityService.formatChapterName(libraryType!, false, false, true)}}
+            <span class="badge rounded-pill text-bg-secondary">{{volume.chapters.length}}</span>
+          </a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
+              <virtual-scroller #scroll [items]="volume.chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+                <div class="card-container row g-0" #container>
+                  @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item"
+                                      [seriesId]="seriesId"
+                                      [libraryId]="libraryId"
+                                      [libraryType]="libraryType"
+                                      [actions]="chapterActions"
+                                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume.chapters.length, $event)"
+                                      [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"
+                    ></app-chapter-card>
+                  }
+                </div>
+              </virtual-scroller>
+            }
+          </ng-template>
+        </li>
+
+          @if (volume.chapters.length === 1 && readingLists.length > 0) {
+            <li [ngbNavItem]="TabID.Related">
+              <a ngbNavLink>{{t('related-tab')}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                  <app-related-tab [readingLists]="readingLists"></app-related-tab>
+                }
+              </ng-template>
+            </li>
+          }
+
+          @if (showDetailsTab) {
+            <li [ngbNavItem]="TabID.Details" id="details-tab">
+              <a ngbNavLink>{{t('details-tab')}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                  <app-details-tab [metadata]="volumeCast" [genres]="genres" [tags]="tags"></app-details-tab>
+                }
+              </ng-template>
+            </li>
+          }
+        </ul>
+      </div>
+      <!-- Min height helps with scroll jerking when switching from chapter -> related/details -->
+      <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
+
+    }
+
+
+
+    <app-loading [loading]="isLoading"></app-loading>
+  </div>
+
+</ng-container>

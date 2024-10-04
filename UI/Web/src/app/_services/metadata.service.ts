@@ -17,6 +17,7 @@ import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
 import {SeriesDetailPlus} from "../_models/series-detail/series-detail-plus";
 import {LibraryType} from "../_models/library/library";
+import {IHasCast} from "../_models/common/i-has-cast";
 
 @Injectable({
   providedIn: 'root'
@@ -124,5 +125,53 @@ export class MetadataService {
     arr[index].comparison = filterStmt.comparison;
     arr[index].field = filterStmt.field;
     arr[index].value = filterStmt.value ? filterStmt.value + '' : '';
+  }
+
+  updatePerson(entity: IHasCast, persons: Person[], role: PersonRole) {
+    switch (role) {
+      case PersonRole.Other:
+        break;
+      case PersonRole.Artist:
+        break;
+      case PersonRole.CoverArtist:
+        entity.coverArtists = persons;
+        break;
+      case PersonRole.Character:
+        entity.characters = persons;
+        break;
+      case PersonRole.Colorist:
+        entity.colorists = persons;
+        break;
+      case PersonRole.Editor:
+        entity.editors = persons;
+        break;
+      case PersonRole.Inker:
+        entity.inkers = persons;
+        break;
+      case PersonRole.Letterer:
+        entity.letterers = persons;
+        break;
+      case PersonRole.Penciller:
+        entity.pencillers = persons;
+        break;
+      case PersonRole.Publisher:
+        entity.publishers = persons;
+        break;
+      case PersonRole.Imprint:
+        entity.imprints = persons;
+        break;
+      case PersonRole.Team:
+        entity.teams = persons;
+        break;
+      case PersonRole.Location:
+        entity.locations = persons;
+        break;
+      case PersonRole.Writer:
+        entity.writers = persons;
+        break;
+      case PersonRole.Translator:
+        entity.translators = persons;
+        break;
+    }
   }
 }

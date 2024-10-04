@@ -68,7 +68,7 @@ import {FittingIconPipe} from '../../../_pipes/fitting-icon.pipe';
 import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.component';
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 
 
@@ -1416,7 +1416,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let numOffset = this.pageNum + i;
 
       if (numOffset > this.maxPages - 1) {
-        continue;
+        break;
       }
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
@@ -1532,14 +1532,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (direction === PAGING_DIRECTION.BACKWARDS) {
       if (this.continuousChapterInfos[ChapterInfoPosition.Previous] === undefined) return;
       const n = this.continuousChapterInfos[ChapterInfoPosition.Previous]!.pages;
-      pages = Array.from({length: n + 1}, (v, k) => n - k);
+      // Ensure we only load up to 5 pages backward
+      pages = Array.from({ length: Math.min(n + 1, 5) }, (v, k) => n - k);
     } else {
       pages = [0, 1, 2, 3, 4];
     }
 
-    let images = [];
+    const images = [];
     pages.forEach((_, i: number) => {
-      let img = new Image();
+      const img = new Image();
       img.src = this.getPageUrl(i, chapterId);
       images.push(img)
     });
@@ -1721,7 +1722,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // menu only code
   savePref() {
-    const modelSettings = this.generalSettingsForm.value;
+    const modelSettings = this.generalSettingsForm.getRawValue();
     // Get latest preferences from user, overwrite with what we manage in this UI, then save
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (!user) return;

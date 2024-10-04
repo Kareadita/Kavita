@@ -26,3 +26,13 @@
     float: right;
     padding: var(--bs-dropdown-item-padding-y) 0;
 }
+
+.btn {
+    padding: 5px;
+}
+
+// Robbie added this but it broke most of the uses
+//.dropdown-toggle {
+//    padding-top: 0;
+//    padding-bottom: 0;
+//}

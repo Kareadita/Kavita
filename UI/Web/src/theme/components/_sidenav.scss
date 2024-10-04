@@ -1,4 +1,237 @@
-.side-nav {
+@import "../variables";
+
+.side-nav-container {
+    padding-bottom: 10px;
+    width: 190px;
     background-color: var(--side-nav-bg-color);
-    box-shadow: var(--side-nav-box-shadow);
+    height: calc((var(--vh) * 100) - 115px);
+    position: fixed;
+    margin: 0;
+    left: 10px;
+    top: 73px;
+    border-radius: var(--side-nav-border-radius);
+    transition:
+        width var(--side-nav-openclose-transition),
+        background-color var(--side-nav-bg-color-transition),
+        border-color var(--side-nav-border-transition);
+    border: var(--side-nav-border);
+
+    &::-webkit-scrollbar {
+        visibility: hidden;
+    }
+
+    &.preference {
+        height: calc((var(--vh) * 100));
+    }
+
+    &.no-donate {
+        height: calc((var(--vh) * 100) - 82px);
+    }
+
+    &.hidden {
+        display: none;
+        opacity: 0;
+    }
+
+    &.closed {
+        width: 55px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        background-color: var(--side-nav-closed-bg-color);
+        border: var(--side-nav-border-closed);
+    }
+
+    .side-nav {
+        overflow-y: hidden;
+        height: 100%;
+        mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
+
+        // For firefox
+        @supports (-moz-appearance: none) {
+            scrollbar-color: transparent transparent;
+            scrollbar-width: thin;
+        }
+
+        &::-webkit-scrollbar {
+            background-color: transparent; /*make scrollbar space invisible */
+            width: inherit;
+            display: none;
+            visibility: hidden;
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: transparent; /*makes it invisible when not hovering*/
+        }
+
+        &:hover {
+            scrollbar-width: thin;
+            overflow-y: auto;
+
+            // For firefox
+            @supports (-moz-appearance: none) {
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0);
+            }
+
+            &::-webkit-scrollbar-thumb {
+                visibility: visible;
+                background-color: rgba(255, 255, 255, 0.3); /*On hover, it will turn grey*/
+            }
+        }
+
+        .side-nav-item:first {
+            border-top-left-radius: var(--side-nav-border-radius);
+            border-top-right-radius: var(--side-nav-border-radius);
+        }
+    }
+}
+
+.sidenav-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 190px;
+    font-size: 12px;
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 999;
+    left: 10px;
+
+    .donate {
+        .side-nav-item {
+            width: 100%;
+            padding: 0 80px;
+            justify-content: center;
+            align-items: center;
+
+            &:hover {
+                background-color: unset !important;
+                color: white !important;
+
+                i {
+                    color: var(--side-nav-item-closed-color) !important;
+
+                    &:hover {
+                        color: white !important;
+                    }
+                }
+            }
+
+            span {
+                flex-grow: unset !important;
+                min-width: unset !important;
+
+                div {
+                    min-width: unset !important;
+
+                    i {
+                        font-size: 1rem !important;
+                    }
+                }
+            }
+
+            &.closed {
+                span {
+                    &.phone-hidden {
+                        div {
+                            width: 100%;
+                        }
+                    }
+
+                    .side-nav-text {
+                        div {
+                            width: 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &.closed {
+        width: 45px;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        .side-nav-item {
+            width: 100%;
+            padding: 0;
+            display: block;
+            line-height: 40px;
+            text-align: center;
+
+            &:hover {
+                background-color: unset;
+            }
+        }
+    }
+}
+
+@media (max-width: $grid-breakpoints-lg) {
+    .side-nav-container {
+        padding: 10px 0;
+        width: 55vw;
+        background-color: var(--side-nav-mobile-bg-color);
+        height: 100dvh;
+        position: fixed;
+        margin: 0;
+        left: 0;
+        top: 0;
+        transition: width var(--side-nav-openclose-transition);
+        z-index: 1050;
+        overflow-y: auto;
+        border: var(--side-nav-mobile-border);
+
+        &.no-donate {
+            height: 100dvh;
+        }
+
+        &.closed {
+            width: 0;
+            overflow: hidden;
+            box-shadow: none;
+        }
+
+        .side-nav {
+            overflow: auto;
+        }
+
+        .side-nav-item {
+            padding: 0;
+        }
+
+        .side-nav-item:first {
+            border-top-left-radius: var(--side-nav-border-radius);
+            border-top-right-radius: var(--side-nav-border-radius);
+        }
+    }
+
+    .sidenav-bottom {
+        display: none;
+        &.closed {
+            left: 10px;
+        }
+    }
+
+    .side-nav-overlay {
+        background-color: var(--side-nav-overlay-color);
+        width: 100vw;
+        height: calc((var(--vh) * 100) - var(--nav-mobile-offset));
+        position: absolute;
+        left: 0;
+        top: var(--nav-mobile-offset);
+        z-index: 998;
+
+        &.closed {
+            display: none;
+        }
+    }
+}
+
+.btn-close {
+    margin-top: -28px;
+    font-size: 0.8rem;
+    position: absolute;
+    right: 16px;
 }

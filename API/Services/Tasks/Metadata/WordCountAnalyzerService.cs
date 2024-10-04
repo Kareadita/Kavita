@@ -217,6 +217,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 chapter.MinHoursToRead = est.MinHours;
                 chapter.MaxHoursToRead = est.MaxHours;
                 chapter.AvgHoursToRead = est.AvgHours;
+
                 foreach (var file in chapter.Files)
                 {
                     UpdateFileAnalysis(file);

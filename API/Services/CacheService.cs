@@ -119,6 +119,7 @@ public class CacheService : ICacheService
         }
 
         _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);
+
         return dimensions;
     }
 

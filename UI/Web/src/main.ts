@@ -16,19 +16,20 @@ import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient} from '@ang
 import {
     provideTransloco, TranslocoConfig,
     TranslocoService
-} from "@ngneat/transloco";
+} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {HttpLoader} from "./httpLoader";
 import {
   provideTranslocoPersistLang,
-} from '@ngneat/transloco-persist-lang';
+} from "@jsverse/transloco-persist-lang";
 import {AccountService} from "./app/_services/account.service";
 import {switchMap} from "rxjs";
-import {provideTranslocoLocale} from "@ngneat/transloco-locale";
-import {provideTranslocoPersistTranslations} from "@ngneat/transloco-persist-translations";
+import {provideTranslocoLocale} from "@jsverse/transloco-locale";
+import {provideTranslocoPersistTranslations} from "@jsverse/transloco-persist-translations";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
 import {distinctUntilChanged} from "rxjs/operators";
+import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -115,6 +116,10 @@ const translocoOptions = {
   } as TranslocoConfig
 };
 
+function getBaseHref(platformLocation: PlatformLocation): string {
+  return platformLocation.getBaseHrefFromDOM();
+}
+
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
@@ -149,6 +154,11 @@ bootstrapApplication(AppComponent, {
         preLoad,
         Title,
         { provide: SAVER, useFactory: getSaver },
+        {
+          provide: APP_BASE_HREF,
+          useFactory: getBaseHref,
+          deps: [PlatformLocation]
+        },
         provideHttpClient(withInterceptorsFromDi())
     ]
 } as ApplicationConfig)

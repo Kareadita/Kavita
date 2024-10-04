@@ -19,6 +19,10 @@ import {PersonalToC} from "../_models/readers/personal-toc";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import NoSleep from 'nosleep.js';
 import {FullProgress} from "../_models/readers/full-progress";
+import {Volume} from "../_models/volume";
+import {UtilityService} from "../shared/_services/utility.service";
+import {translate} from "@jsverse/transloco";
+import {ToastrService} from "ngx-toastr";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -30,6 +34,12 @@ export const CHAPTER_ID_NOT_FETCHED = -2;
 export class ReaderService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly utilityService = inject(UtilityService);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
 
@@ -38,9 +48,7 @@ export class ReaderService {
 
   private noSleep = new NoSleep();
 
-  constructor(private httpClient: HttpClient, private router: Router,
-    private location: Location, private accountService: AccountService,
-    @Inject(DOCUMENT) private document: Document) {
+  constructor(private httpClient: HttpClient, @Inject(DOCUMENT) private document: Document) {
       this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);
@@ -352,5 +360,31 @@ export class ReaderService {
 
     }
     return '';
+  }
+
+  readVolume(libraryId: number, seriesId: number, volume: Volume, incognitoMode: boolean = false) {
+    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+      // Find the continue point chapter and load it
+      const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
+      if (unreadChapters.length > 0) {
+        this.readChapter(libraryId, seriesId, unreadChapters[0], incognitoMode);
+        return;
+      }
+      this.readChapter(libraryId, seriesId, volume.chapters[0], incognitoMode);
+      return;
+    }
+
+    // Sort the chapters, then grab first if no reading progress
+    this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0], incognitoMode);
+  }
+
+  readChapter(libraryId: number, seriesId: number, chapter: Chapter, incognitoMode: boolean = false) {
+    if (chapter.pages === 0) {
+      this.toastr.error(translate('series-detail.no-pages'));
+      return;
+    }
+
+    this.router.navigate(this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format),
+      {queryParams: {incognitoMode}});
   }
 }

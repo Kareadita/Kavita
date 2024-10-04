@@ -1,32 +1,55 @@
-//.theme-container {
-//  max-height: calc(100 * var(--vh));
-//  overflow-y: auto;
-//}
-
 .chooser {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 158px);
+  grid-template-columns: repeat(auto-fill, 160px);
   grid-gap: 0.5rem;
   justify-content: space-around;
 }
 
 .scroller {
-  max-height: calc(100dvh - 280px);
+  max-height: calc(100dvh - 180px);
   overflow-y: auto;
+
+  @media (max-width: 576px) {
+    max-height: calc(100dvh - 480px);
+  }
 }
 
 .pill {
   font-size: .8rem;
   background-color: var(--card-bg-color);
-  border-radius: 0.375rem;  
+  border-radius: 0.375rem;
+  color: var(--badge-text-color);
+
   &.active {
     background-color : var(--primary-color);
   }
 }
 
+.list-group-item {
+  background-color: transparent;
+
+  &:hover {
+    background-color: var(--card-bg-color);
+    border-radius: 5px;
+  }
+
+  &:active, &.active {
+    background-color: var(--card-bg-color);
+    border-radius: 5px;
+  }
+
+
+}
+
+
 .list-group-item, .list-group-item.active {
   border-top-width: 0;
   border-bottom-width: 0;
+
+}
+
+.card {
+  min-height: 100%;
 }
 
 ngx-file-drop ::ng-deep > div {
@@ -43,4 +66,13 @@ ngx-file-drop ::ng-deep > div {
     display: inline-block;
 
   }
+}
+
+.custom-position {
+  right: 15px;
+  top: -42px;
+}
+
+.section-header {
+  color: var(--primary-color);
 }

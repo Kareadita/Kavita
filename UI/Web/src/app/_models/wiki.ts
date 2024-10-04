@@ -18,5 +18,7 @@ export enum WikiLink {
   ScannerExclude = 'https://wiki.kavitareader.com/guides/admin-settings/libraries#exclude-patterns',
   Library = 'https://wiki.kavitareader.com/guides/admin-settings/libraries',
   UpdateNative = 'https://wiki.kavitareader.com/guides/updating/updating-native',
-  UpdateDocker = 'https://wiki.kavitareader.com/guides/updating/updating-docker'
+  UpdateDocker = 'https://wiki.kavitareader.com/guides/updating/updating-docker',
+  OpdsClients = 'https://wiki.kavitareader.com/guides/opds#opds-capable-clients',
+  Guides = 'https://wiki.kavitareader.com/guides'
 }

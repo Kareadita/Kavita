@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {PageViewModeType} from "ngx-extended-pdf-viewer";
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'pdfLayoutMode',

@@ -55,7 +55,7 @@
       <div class="clickable col-auto"
            *ngIf="showReset" tabindex="0" (click)="reset()"
            [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
-        <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="230px" width="158px" [imageUrl]="imageService.resetCoverImage"></app-image>
+        <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="232.91px" width="160px" [imageUrl]="imageService.resetCoverImage"></app-image>
         <ng-container *ngIf="showApplyButton">
           <br>
           <button style="width: 100%;" class="btn btn-secondary" (click)="resetImage()">{{t('reset')}}</button>
@@ -65,7 +65,7 @@
       <div class="clickable col-auto"
            *ngFor="let url of imageUrls; let idx = index;" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
            [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
-        <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
+        <app-image class="card-img-top" height="232.91px" width="160px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
         <ng-container *ngIf="showApplyButton">
           <br>
           <button class="btn btn-primary" style="width: 100%;"

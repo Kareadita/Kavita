@@ -19,6 +19,7 @@ using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -77,7 +78,6 @@ public class LibraryController : BaseApiController
             .WithFolders(dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList())
             .WithFolderWatching(dto.FolderWatching)
             .WithIncludeInDashboard(dto.IncludeInDashboard)
-            .WithIncludeInRecommended(dto.IncludeInRecommended)
             .WithManageCollections(dto.ManageCollections)
             .WithManageReadingLists(dto.ManageReadingLists)
             .WIthAllowScrobbling(dto.AllowScrobbling)
@@ -132,13 +132,19 @@ public class LibraryController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
-        await _libraryWatcher.RestartWatching();
-        await _taskScheduler.ScanLibrary(library.Id);
+        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
+        if (library.FolderWatching)
+        {
+            await _libraryWatcher.RestartWatching();
+        }
+
+        BackgroundJob.Enqueue(() => _taskScheduler.ScanLibrary(library.Id, false));
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
             MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
-        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
         return Ok();
     }
 
@@ -296,6 +302,22 @@ public class LibraryController : BaseApiController
     }
 
     /// <summary>
+    /// Enqueues a bunch of library scans
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("scan-multiple")]
+    public async Task<ActionResult> ScanMultiple(BulkActionDto dto)
+    {
+        foreach (var libraryId in dto.Ids)
+        {
+            await _taskScheduler.ScanLibrary(libraryId, dto.Force ?? false);
+        }
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Scans a given library for file changes. If another scan task is in progress, will reschedule the invocation for 3 hours in future.
     /// </summary>
     /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
@@ -310,9 +332,21 @@ public class LibraryController : BaseApiController
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("refresh-metadata")]
-    public ActionResult RefreshMetadata(int libraryId, bool force = true)
+    public ActionResult RefreshMetadata(int libraryId, bool force = true, bool forceColorscape = true)
     {
-        _taskScheduler.RefreshMetadata(libraryId, force);
+        _taskScheduler.RefreshMetadata(libraryId, force, forceColorscape);
+        return Ok();
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("refresh-metadata-multiple")]
+    public ActionResult RefreshMetadataMultiple(BulkActionDto dto, bool forceColorscape = true)
+    {
+        foreach (var libraryId in dto.Ids)
+        {
+            _taskScheduler.RefreshMetadata(libraryId, dto.Force ?? false, forceColorscape);
+        }
+
         return Ok();
     }
 
@@ -321,6 +355,61 @@ public class LibraryController : BaseApiController
     public ActionResult Analyze(int libraryId)
     {
         _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
+        return Ok();
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("analyze-multiple")]
+    public ActionResult AnalyzeMultiple(BulkActionDto dto)
+    {
+        foreach (var libraryId in dto.Ids)
+        {
+            _taskScheduler.AnalyzeFilesForLibrary(libraryId, dto.Force ?? false);
+        }
+
+        return Ok();
+    }
+
+
+    /// <summary>
+    /// Copy the library settings (adv tab + optional type) to a set of other libraries.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("copy-settings-from")]
+    public async Task<ActionResult> CopySettingsFromLibraryToLibraries(CopySettingsFromLibraryDto dto)
+    {
+        var sourceLibrary = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.SourceLibraryId, LibraryIncludes.ExcludePatterns | LibraryIncludes.FileTypes);
+        if (sourceLibrary == null) return BadRequest("SourceLibraryId must exist");
+
+        var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(dto.TargetLibraryIds, LibraryIncludes.ExcludePatterns | LibraryIncludes.FileTypes | LibraryIncludes.Folders);
+        foreach (var targetLibrary in libraries)
+        {
+            UpdateLibrarySettings(new UpdateLibraryDto()
+            {
+                Folders = targetLibrary.Folders.Select(s => s.Path),
+                Name = targetLibrary.Name,
+                Id = targetLibrary.Id,
+                Type = sourceLibrary.Type,
+                AllowScrobbling = sourceLibrary.AllowScrobbling,
+                ExcludePatterns = sourceLibrary.LibraryExcludePatterns.Select(p => p.Pattern).ToList(),
+                FolderWatching = sourceLibrary.FolderWatching,
+                ManageCollections = sourceLibrary.ManageCollections,
+                FileGroupTypes = sourceLibrary.LibraryFileTypes.Select(t => t.FileTypeGroup).ToList(),
+                IncludeInDashboard = sourceLibrary.IncludeInDashboard,
+                IncludeInSearch = sourceLibrary.IncludeInSearch,
+                ManageReadingLists = sourceLibrary.ManageReadingLists
+            }, targetLibrary, dto.IncludeType);
+        }
+
+        await _unitOfWork.CommitAsync();
+
+        if (sourceLibrary.FolderWatching)
+        {
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
+        }
+
         return Ok();
     }
 
@@ -409,7 +498,7 @@ public class LibraryController : BaseApiController
                 _taskScheduler.CleanupChapters(chapterIds);
             }
 
-            await _libraryWatcher.RestartWatching();
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
 
             foreach (var seriesId in seriesIds)
             {
@@ -467,10 +556,41 @@ public class LibraryController : BaseApiController
 
         var typeUpdate = library.Type != dto.Type;
         var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
-        library.Type = dto.Type;
+        UpdateLibrarySettings(dto, library);
+
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(userId, "generic-library-update"));
+
+        if (folderWatchingUpdate || originalFoldersCount != dto.Folders.Count() || typeUpdate)
+        {
+            BackgroundJob.Enqueue(() => _libraryWatcher.RestartWatching());
+        }
+
+        if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
+        {
+            await _taskScheduler.ScanLibrary(library.Id);
+        }
+
+        await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
+            MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
+
+        await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
+            MessageFactory.SideNavUpdateEvent(userId), false);
+
+        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
+        return Ok();
+
+    }
+
+    private void UpdateLibrarySettings(UpdateLibraryDto dto, Library library, bool updateType = true)
+    {
+        if (updateType)
+        {
+            library.Type = dto.Type;
+        }
+
         library.FolderWatching = dto.FolderWatching;
         library.IncludeInDashboard = dto.IncludeInDashboard;
-        library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
         library.ManageReadingLists = dto.ManageReadingLists;
@@ -486,36 +606,13 @@ public class LibraryController : BaseApiController
             .ToList();
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
-        if (library.Type == LibraryType.Comic)
+        if (library.Type is LibraryType.Comic or LibraryType.ComicVine)
         {
             _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name.Replace(Environment.NewLine, string.Empty));
             library.AllowScrobbling = false;
         }
 
-
         _unitOfWork.LibraryRepository.Update(library);
-
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(userId, "generic-library-update"));
-        if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
-        {
-            await _libraryWatcher.RestartWatching();
-            await _taskScheduler.ScanLibrary(library.Id);
-        }
-
-        if (folderWatchingUpdate)
-        {
-            await _libraryWatcher.RestartWatching();
-        }
-        await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
-            MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
-
-        await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
-            MessageFactory.SideNavUpdateEvent(userId), false);
-
-        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
-
-        return Ok();
-
     }
 
     /// <summary>

@@ -6,7 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import {distinctUntilChanged, map, take} from 'rxjs';
+import {distinctUntilChanged, map, take, tap} from 'rxjs';
 import { ThemeService } from 'src/app/_services/theme.service';
 import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
@@ -14,8 +14,8 @@ import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import {NgIf, NgFor, AsyncPipe, NgTemplateOutlet} from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import { AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../../cards/series-card/series-card.component";
@@ -29,6 +29,8 @@ import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file
 import {ReactiveFormsModule} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;
@@ -43,7 +45,9 @@ interface ThemeContainer {
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe, NgxFileDropModule, ReactiveFormsModule, Select2Module, LoadingComponent]
+  imports: [AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent,
+    SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe, NgxFileDropModule,
+    ReactiveFormsModule, Select2Module, LoadingComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
@@ -52,6 +56,7 @@ export class ThemeManagerComponent {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
+  private readonly modalService = inject(NgbModal);
 
   protected readonly ThemeProvider = ThemeProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
@@ -60,9 +65,11 @@ export class ThemeManagerComponent {
   user: User | undefined;
   selectedTheme: ThemeContainer | undefined;
   downloadableThemes: Array<DownloadableSiteTheme> = [];
+  downloadedThemes: Array<SiteTheme> = [];
   hasAdmin$ = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef), shareReplay({refCount: true, bufferSize: 1}),
-    map(c => c && this.accountService.hasAdminRole(c))
+    takeUntilDestroyed(this.destroyRef),
+    map(c => c && this.accountService.hasAdminRole(c)),
+    shareReplay({refCount: true, bufferSize: 1}),
   );
 
   files: NgxFileDropEntry[] = [];
@@ -72,6 +79,11 @@ export class ThemeManagerComponent {
 
 
   constructor() {
+
+    this.themeService.themes$.pipe(tap(themes => {
+      this.downloadedThemes = themes;
+      this.cdRef.markForCheck();
+    })).subscribe();
 
     this.loadDownloadableThemes();
 
@@ -113,7 +125,6 @@ export class ThemeManagerComponent {
       pref.theme = theme;
       this.accountService.updatePreferences(pref).subscribe();
       // Updating theme emits the new theme to load on the themes$
-
     });
   }
 
@@ -123,7 +134,12 @@ export class ThemeManagerComponent {
     });
   }
 
-  selectTheme(theme: SiteTheme | DownloadableSiteTheme) {
+  selectTheme(theme: SiteTheme | DownloadableSiteTheme | undefined) {
+    if (theme === undefined) {
+      this.selectedTheme = undefined;
+      return;
+    }
+
     if (theme.hasOwnProperty('provider')) {
       this.selectedTheme = {
         isSiteTheme: true,
@@ -142,8 +158,15 @@ export class ThemeManagerComponent {
   }
 
   downloadTheme(theme: DownloadableSiteTheme) {
-    this.themeService.downloadTheme(theme).subscribe(theme => {
-      this.removeDownloadedTheme(theme);
+    this.themeService.downloadTheme(theme).subscribe(downloadedTheme => {
+      this.removeDownloadedTheme(downloadedTheme);
+      this.themeService.getThemes().subscribe(themes => {
+        this.downloadedThemes = themes;
+        const oldTheme = this.downloadedThemes.filter(d => d.name === theme.name)[0];
+        this.selectTheme(oldTheme);
+        this.cdRef.markForCheck();
+      });
+
     });
   }
 
@@ -163,5 +186,13 @@ export class ThemeManagerComponent {
     }
     this.isUploadingTheme = true;
     this.cdRef.markForCheck();
+  }
+
+  previewImage(imgUrl: string) {
+    if (imgUrl === '') return;
+
+    const ref = this.modalService.open(PreviewImageModalComponent, {size: 'xl', fullscreen: 'lg'});
+    ref.componentInstance.title = this.selectedTheme!.name;
+    ref.componentInstance.image = imgUrl;
   }
 }

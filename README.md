@@ -1,9 +1,9 @@
 ﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
-![new_github_preview_stills](https://user-images.githubusercontent.com/735851/169657008-37812c18-5490-4e2a-9dcb-4806f8c87c69.gif)
+![new_github_preview_stills](https://github.com/user-attachments/assets/f016b34f-3c4c-4f07-8e72-12cd6f4e71ea)
 
-Kavita is a fast, feature rich, cross platform reading server. Built with a focus for being a full solution for all your reading needs. Setup your own server and share
+Kavita is a fast, feature rich, cross-platform reading server. Built with a focus for being a full solution for all your reading needs. Set up your own server and share
 your reading collection with your friends and family!
 
 [![Release](https://img.shields.io/github/release/Kareadita/Kavita.svg?style=flat&maxAge=3600)](https://github.com/Kareadita/Kavita/releases)
@@ -24,14 +24,14 @@ your reading collection with your friends and family!
 ## What Kavita Provides
 - Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
 - First class responsive readers that work great on any device (phone, tablet, desktop)
-- Dark mode and customizable theming support
-- External metadata integration and scrobbling for read status, ratings, and reviews (available via Kavita+) 
+- Customizable theming support: [Theme Repo](https://github.com/Kareadita/Themes) and [Documentation](https://wiki.kavitareader.com/guides/themes)
+- External metadata integration and scrobbling for read status, ratings, and reviews (available via [Kavita+](https://wiki.kavitareader.com/kavita+)) 
 - Rich Metadata support with filtering and searching
 - Ways to group reading material: Collections, Reading Lists (CBL Import), Want to Read
 - Ability to manage users with rich Role-based management for age restrictions, abilities within the app, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
+- Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
 - Full Localization Support
-- Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles.
 
 
 ## Support
@@ -52,7 +52,7 @@ install methods and platforms.
 [https://wiki.kavitareader.com/installation/getting-started](https://wiki.kavitareader.com/installation/getting-started)
 
 ## Feature Requests
-Got a great idea? Throw it up on [Discussions](https://github.com/Kareadita/Kavita/discussions/2529) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects?type=classic) first for a list of planned features before you submit an idea.
+Got a great idea? Throw it up on [Discussions](https://github.com/Kareadita/Kavita/discussions/2529) or vote on another idea. Many great features in Kavita are driven by our community. 
 
 ## Notice
 Kavita is being actively developed and should be considered beta software until the 1.0 release.
@@ -62,7 +62,7 @@ vision. You may lose data and have to restart. The Kavita team strives to avoid 
 ## Donate
 If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
 expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below. Kavita+ is also an 
-option which provides funding and you get a benefit.
+option which provides funding, and you get a benefit.
 
 ## Kavita+
 [Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
@@ -72,7 +72,7 @@ If you are interested, you can use the promo code `FIRSTTIME` for your initial s
 **If you already contribute via OpenCollective, please reach out to majora2007 for a provisioned license.**
 
 ## Localization
-Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro-bono. If you want to see Kavita in your language, please help us localize.
+Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro bono. If you want to see Kavita in your language, please help us localize.
 
 <a href="https://hosted.weblate.org/engage/kavita/">
 <img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />

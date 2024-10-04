@@ -195,5 +195,7 @@
     "account-email-invalid": "관리자 계정에 등록된 이메일이 유효한 이메일이 아닙니다. 테스트 이메일을 보낼 수 없습니다.",
     "email-settings-invalid": "이메일 설정 누락 된 정보. 모든 이메일 설정을 저장합니다.",
     "collection-already-exists": "컬렉션은 이미 존재합니다",
-    "error-import-stack": "MAL 스택을 가져오는 데 문제가 있었습니다"
+    "error-import-stack": "MAL 스택을 가져오는 데 문제가 있었습니다",
+    "generic-cover-person-save": "표지 이미지를 개인에 저장할 수 없습니다",
+    "generic-cover-volume-save": "표지 이미지를 볼륨에 저장할 수 없습니다"
 }

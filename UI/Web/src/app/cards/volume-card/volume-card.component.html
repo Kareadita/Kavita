@@ -1,0 +1,89 @@
+<ng-container *transloco="let t; read: 'card-item'">
+  <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}" >
+    <div class="overlay position-relative" (click)="handleClick($event)">
+      @if (volume.pages > 0 || suppressArchiveWarning) {
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
+      } @else if (volume.pages === 0 && !suppressArchiveWarning) {
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+      }
+
+      <div class="progress-banner">
+        @if (volume.pagesRead > 0 && volume.pagesRead < volume.pages && volume.pages > 0 && volume.pagesRead !== volume.pages) {
+          <p ngbTooltip="{{((volume.pagesRead / volume.pages) * 100) | number:'1.0-1'}}% Read">
+            <ngb-progressbar type="primary" height="5px" [value]="volume.pagesRead" [max]="volume.pages"></ngb-progressbar>
+          </p>
+        }
+
+        <span class="download">
+          <app-download-indicator [download$]="download$"></app-download-indicator>
+        </span>
+      </div>
+
+      @if(volume.pages === 0 && !suppressArchiveWarning) {
+        <div class="error-banner">
+          {{t('cannot-read')}}
+        </div>
+      }
+
+      @if (volume.pagesRead === 0 && volume.pages > 0) {
+        <div class="badge-container">
+          <div class="not-read-badge"></div>
+        </div>
+      }
+
+      @if (allowSelection) {
+        <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">
+          <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{volume.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
+        </div>
+      }
+      <div class="card-overlay"></div>
+
+      <div class="volume overlay-information" (click)="read($event)">
+        <div class="overlay-information--centered">
+              <span class="card-title library mx-auto" style="width: auto;">
+                <!-- Card Image -->
+                <div>
+                  <i class="fa-solid fa-book" aria-hidden="true"></i>
+                </div>
+              </span>
+        </div>
+      </div>
+    </div>
+
+    @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {
+      <div class="card-body meta-title">
+        <span class="card-format">
+        </span>
+        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+          {{volume.name}}
+        </div>
+
+        @if (actions && actions.length > 0) {
+          <span class="card-actions">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
+          </span>
+        }
+      </div>
+    }
+
+    <div class="card-title-container">
+      <span class="card-format">
+      </span>
+      <span class="card-title" id="{{volume.id}}" tabindex="0">
+        <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{seriesId}}/volume/{{volume.id}}">
+          {{volume.name}}
+        </a>
+      </span>
+
+      @if (actions && actions.length > 0) {
+        <span class="card-actions">
+          <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
+        </span>
+      }
+    </div>
+
+
+
+    </div>
+
+</ng-container>

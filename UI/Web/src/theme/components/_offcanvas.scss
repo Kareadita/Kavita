@@ -4,7 +4,7 @@
 }
 
 .offcanvas-end, .offcanvas-start, .offcanvas-top {
-    top: 56px;
+    top: var(--nav-offset);
 }
 
 .offcanvas-bottom {

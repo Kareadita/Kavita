@@ -1,19 +1,18 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
 
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEvent, ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
-import {ScrobbleEventTypePipe} from "../scrobble-event-type.pipe";
+import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
 import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, take} from "rxjs/operators";
 import {PaginatedResult, Pagination} from "../../_models/pagination";
 import {SortableHeader, SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ToastrService} from "ngx-toastr";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
@@ -21,7 +20,7 @@ import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapt
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule,
+  imports: [ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule,
     DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],

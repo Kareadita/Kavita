@@ -3,7 +3,7 @@
 We're always looking for people to help make Kavita even better, there are a number of ways to contribute.
 
 ## Documentation ##
-Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavitareader.com/) the better.
+Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavitareader.com/contributing) the better.
 
 ## Development ##
 

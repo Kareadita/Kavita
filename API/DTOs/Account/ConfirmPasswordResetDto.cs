@@ -9,6 +9,6 @@ public class ConfirmPasswordResetDto
     [Required]
     public string Token { get; set; } = default!;
     [Required]
-    [StringLength(32, MinimumLength = 6)]
+    [StringLength(256, MinimumLength = 6)]
     public string Password { get; set; } = default!;
 }

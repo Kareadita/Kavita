@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 
 @Pipe({

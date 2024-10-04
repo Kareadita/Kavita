@@ -20,7 +20,7 @@ import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { CoverImageChooserComponent } from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 enum TabID {
   General = 'general-tab',

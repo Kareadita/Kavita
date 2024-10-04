@@ -1,23 +1,27 @@
 <div class="card-item-container card">
   <div class="overlay">
-    <app-image [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="230px" width="158px" classes="extreme-blur"  [imageUrl]="imageUrl"></app-image>
+    <app-image [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="232.91px" width="160px" classes="extreme-blur"
+      [imageUrl]="imageUrl"></app-image>
 
     <div class="card-overlay"></div>
-    <ng-container *ngIf="entity.title | safeHtml as info">
-      <div class="overlay-information overlay-information--centered" *ngIf="info !== ''">
-        <div class="position-relative">
-          <span class="card-title library mx-auto" style="width: auto;">
-            <i class="fa-regular fa-clock mb-2" style="font-size: 26px" aria-hidden="true"></i>
-            <div class="upcoming-header">Upcoming</div>
-            <span [innerHTML]="info"></span>
-          </span>
+  </div>
+
+  @if (entity.title | safeHtml; as info) {
+    @if (info !== '') {
+      <div class="card-body meta-title">
+        <div class="card-content d-flex flex-column pt-2 pb-2 justify-content-center align-items-center text-center">
+
+          <div class="upcoming-header"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>Upcoming</div>
+          <span [innerHTML]="info"></span>
         </div>
       </div>
-    </ng-container>
+    }
+  }
 
+  <div class="card-title-container">
+    <span class="card-title" tabindex="0">
+      {{title}}
+    </span>
   </div>
 
-  <div class="card-body">
-    <span class="card-title" tabindex="0">{{title}}</span>
-  </div>
 </div>

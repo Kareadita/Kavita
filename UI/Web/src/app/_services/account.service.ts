@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import {DestroyRef, inject, Injectable } from '@angular/core';
-import {catchError, of, ReplaySubject, throwError} from 'rxjs';
+import {catchError, Observable, of, ReplaySubject, shareReplay, throwError} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -14,6 +14,7 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {Action} from "./action-factory.service";
 
 export enum Role {
   Admin = 'Admin',
@@ -42,6 +43,10 @@ export class AccountService {
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
   public currentUser$ = this.currentUserSource.asObservable();
+  public isAdmin$: Observable<boolean> = this.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
+    if (!u) return false;
+    return this.hasAdminRole(u);
+  }), shareReplay({bufferSize: 1, refCount: true}));
 
   private hasValidLicenseSource = new ReplaySubject<boolean>(1);
   /**
@@ -72,6 +77,29 @@ export class AccountService {
       this.isOnline = true;
       this.refreshToken().subscribe();
     });
+  }
+
+  canInvokeAction(user: User, action: Action) {
+    const isAdmin = this.hasAdminRole(user);
+    const canDownload = this.hasDownloadRole(user);
+    const canPromote = this.hasPromoteRole(user);
+
+    if (isAdmin) return true;
+    if (action === Action.Download) return canDownload;
+    if (action === Action.Promote || action === Action.UnPromote) return canPromote;
+    if (action === Action.Delete) return isAdmin;
+    return true;
+  }
+
+  hasAnyRole(user: User, roles: Array<Role>) {
+    if (!user || !user.roles) {
+      return false;
+    }
+    if (roles.length === 0) {
+      return true;
+    }
+
+    return roles.some(role => user.roles.includes(role));
   }
 
   hasAdminRole(user: User) {
@@ -153,7 +181,7 @@ export class AccountService {
     );
   }
 
-  setCurrentUser(user?: User) {
+  setCurrentUser(user?: User, refreshConnections = true) {
     if (user) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
@@ -173,6 +201,8 @@ export class AccountService {
 
     this.currentUser = user;
     this.currentUserSource.next(user);
+
+    if (!refreshConnections) return;
 
     this.stopRefreshTokenTimer();
 
@@ -296,7 +326,7 @@ export class AccountService {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
       if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = settings;
-        this.setCurrentUser(this.currentUser);
+        this.setCurrentUser(this.currentUser, false);
 
         // Update the locale on disk (for logout and compact-number pipe)
         localStorage.setItem(AccountService.localeKey, this.currentUser.preferences.locale);

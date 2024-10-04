@@ -1,4 +1,5 @@
 <ng-container *transloco="let t; read: 'manage-scrobble-errors'">
+  <h4>{{t('title')}}</h4>
   <p>{{t('description')}}</p>
 
   <form [formGroup]="formGroup">
@@ -12,7 +13,7 @@
       </div>
     </div>
   </form>
-  <table class="table table-striped table-hover table-sm table-hover">
+  <table class="table table-striped table-sm">
     <thead #header>
     <tr>
       <th scope="col" sortable="seriesId" (sort)="onSort($event)">
@@ -30,27 +31,34 @@
     </tr>
     </thead>
     <tbody #container>
-    <tr *ngIf="isLoading"><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
-    <ng-container *ngIf="data | filter: filterList as filteredData">
-      <tr *ngIf="filteredData.length === 0 && !isLoading"><td colspan="4" style="text-align: center;">No issues</td></tr>
-      <tr *ngFor="let item of filteredData; index as i">
-        <td>
-          <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
-        </td>
-        <td>
-          {{item.createdUtc  | utcToLocalTime | defaultValue }}
-        </td>
-        <td>
-          {{item.comment}}
-        </td>
-        <td>
-          <button class="btn btn-icon primary-icon" (click)="editSeries(item.seriesId)">
-            <i class="fa fa-pen me-1" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('edit-item-alt', {seriesName: item.details})}}</span>
-          </button>
-        </td>
-      </tr>
-    </ng-container>
+    @if (isLoading) {
+      <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+    } @else {
+      @if(data | filter: filterList; as filteredData) {
+        @for(item of filteredData; track item.seriesId; let i = $index) {
+          <tr>
+            <td>
+              <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
+            </td>
+            <td>
+              {{item.createdUtc  | utcToLocalTime | defaultValue }}
+            </td>
+            <td>
+              {{item.comment}}
+            </td>
+            <td>
+              <button class="btn btn-icon primary-icon" (click)="editSeries(item.seriesId)">
+                <i class="fa fa-pen me-1" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('edit-item-alt', {seriesName: item.details})}}</span>
+              </button>
+            </td>
+          </tr>
+        }
+        @empty {
+          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+        }
+      }
+    }
     </tbody>
   </table>
 

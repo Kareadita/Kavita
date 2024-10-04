@@ -1,0 +1,9 @@
+<ng-container *transloco="let t;">
+  <div class="container-fluid">
+    <ng-content></ng-content>
+
+    @if (subtitle) {
+      <div class="description text-muted" [innerHTML]="subtitle | safeHtml"></div>
+    }
+  </div>
+</ng-container>

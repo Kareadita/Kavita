@@ -59,6 +59,18 @@ public static class IncludesExtensions
                 .Include(c => c.People);
         }
 
+        if (includes.HasFlag(ChapterIncludes.Genres))
+        {
+            queryable = queryable
+                .Include(c => c.Genres);
+        }
+
+        if (includes.HasFlag(ChapterIncludes.Tags))
+        {
+            queryable = queryable
+                .Include(c => c.Tags);
+        }
+
         return queryable.AsSplitQuery();
     }
 
@@ -68,25 +80,25 @@ public static class IncludesExtensions
         if (includes.HasFlag(VolumeIncludes.Files))
         {
             queryable = queryable
-                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .Include(vol => vol.Chapters)
                 .ThenInclude(c => c.Files);
         } else if (includes.HasFlag(VolumeIncludes.Chapters))
         {
             queryable = queryable
-                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder));
+                .Include(vol => vol.Chapters);
         }
 
         if (includes.HasFlag(VolumeIncludes.People))
         {
             queryable = queryable
-                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .Include(vol => vol.Chapters)
                 .ThenInclude(c => c.People);
         }
 
         if (includes.HasFlag(VolumeIncludes.Tags))
         {
             queryable = queryable
-                .Include(vol => vol.Chapters.OrderBy(c => c.SortOrder))
+                .Include(vol => vol.Chapters)
                 .ThenInclude(c => c.Tags);
         }
 

@@ -18,4 +18,9 @@ public class RefreshSeriesDto
     /// </summary>
     /// <remarks>This is expensive if true. Defaults to true.</remarks>
     public bool ForceUpdate { get; init; } = true;
+    /// <summary>
+    /// Should the task force re-calculation of colorscape.
+    /// </summary>
+    /// <remarks>This is expensive if true. Defaults to true.</remarks>
+    public bool ForceColorscape { get; init; } = false;
 }

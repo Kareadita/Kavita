@@ -1,0 +1,48 @@
+@import "../../../theme/variables";
+
+.custom-position {
+    right: 15px;
+    top: -42px;
+}
+
+.custom-position-2 {
+  right: 160px;
+  top: -42px;
+}
+
+@media(max-width: 576px) {
+  .custom-position-2 {
+    right: 65px;
+  }
+}
+
+
+
+.member-name {
+    word-break: keep-all;
+    margin: 0;
+}
+
+.list-group-item:nth-child(even) {
+    background-color: var(--elevation-layer1);
+}
+
+.table {
+    @media (max-width: $grid-breakpoints-sm) {
+        overflow-x: auto;
+        width: 100% !important;
+        display: block;
+    }
+    .btn-container {
+        @media (max-width: $grid-breakpoints-lg) {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn {
+            width: 32px;
+        }
+    }
+}

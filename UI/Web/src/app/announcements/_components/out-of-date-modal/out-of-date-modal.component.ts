@@ -2,7 +2,7 @@ import {Component, DestroyRef, inject, Input} from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {NgbActiveModal, NgbHighlight, NgbModal, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ServerService} from "../../../_services/server.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";

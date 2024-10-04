@@ -32,7 +32,7 @@ import {AsyncPipe, DatePipe, DecimalPipe, NgClass, NgIf} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
@@ -46,7 +46,7 @@ import {Title} from "@angular/platform-browser";
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, NgbDropdown,
     NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
     PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent,
     ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective,

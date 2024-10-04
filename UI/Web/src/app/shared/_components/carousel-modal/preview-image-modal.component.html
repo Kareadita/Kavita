@@ -1,0 +1,16 @@
+<ng-container *transloco="let t">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{title}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('common.close')" (click)="modalService.close()"></button>
+  </div>
+  <div class="modal-body">
+    <a [href]="image | safeUrl" target="_blank" rel="noopener noreferrer">
+      <app-image [imageUrl]="image"></app-image>
+    </a>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modalService.close()">{{t('common.cancel')}}</button>
+  </div>
+
+</ng-container>

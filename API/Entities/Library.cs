@@ -5,11 +5,13 @@ using API.Entities.Interfaces;
 
 namespace API.Entities;
 
-public class Library : IEntityDate
+public class Library : IEntityDate, IHasCoverImage
 {
     public int Id { get; set; }
     public required string Name { get; set; }
     public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
     /// <summary>
     /// If Folder Watching is enabled for this library
@@ -77,5 +79,11 @@ public class Library : IEntityDate
         {
             LastScanned = (DateTime) time;
         }
+    }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
     }
 }

@@ -20,8 +20,8 @@ export class JumpbarService {
     return '';
   }
 
-  getResumePosition(key: string) {
-    if (this.resumeScroll.hasOwnProperty(key)) return this.resumeScroll[key];
+  getResumePosition(url: string) {
+    if (this.resumeScroll.hasOwnProperty(url)) return this.resumeScroll[url];
     return 0;
   }
 
@@ -29,8 +29,8 @@ export class JumpbarService {
     this.resumeKeys[key] = value;
   }
 
-  saveScrollOffset(key: string, value: number) {
-    this.resumeScroll[key] = value;
+  saveResumePosition(url: string, value: number) {
+    this.resumeScroll[url] = value;
   }
 
   generateJumpBar(jumpBarKeys: Array<JumpKey>, currentSize: number) {
@@ -93,10 +93,10 @@ export class JumpbarService {
   }
 
   /**
-   * 
+   *
    * @param data An array of objects
    * @param keySelector A method to fetch a string from the object, which is used to classify the JumpKey
-   * @returns 
+   * @returns
    */
    getJumpKeys(data :Array<any>, keySelector: (data: any) => string) {
     const keys: {[key: string]: number} = {};

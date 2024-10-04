@@ -7,8 +7,8 @@ import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { User } from 'src/app/_models/user';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {NgIf, NgFor, TitleCasePipe, NgTemplateOutlet} from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TitleCasePipe, NgTemplateOutlet} from '@angular/common';
+import {TranslocoModule} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-restriction-selector',
@@ -16,7 +16,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./restriction-selector.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgFor, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
+  imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class RestrictionSelectorComponent implements OnInit, OnChanges {
 

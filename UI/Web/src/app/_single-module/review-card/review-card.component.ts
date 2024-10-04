@@ -8,13 +8,12 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {UserReview} from "./user-review";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
 import {
-  ReviewSeriesModalCloseAction,
   ReviewSeriesModalCloseEvent,
   ReviewSeriesModalComponent
 } from "../review-series-modal/review-series-modal.component";
@@ -22,7 +21,7 @@ import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({

@@ -1,0 +1,36 @@
+<ng-container *transloco="let t; read: 'series-detail'">
+  <div class="mt-2 mb-2">
+    @if (entity.publishers.length > 0) {
+      <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
+        <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
+                  aria-hidden="true"></app-image>
+        <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>
+      </div>
+    }
+    <span class="me-2">
+      <app-age-rating-image [rating]="ageRating"></app-age-rating-image>
+    </span>
+
+    <span class="me-2">
+       <app-series-format [format]="mangaFormat" [useTitle]="false"></app-series-format>
+    </span>
+
+    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
+      <span class="word-count me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
+    } @else {
+      <span class="word-count me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
+    }
+
+    @if (hasReadingProgress && readingTimeLeft && readingTimeLeft.avgHours !== 0) {
+      <span class="time-left" [ngbTooltip]="t('time-left-alt')">
+        <i class="fa-solid fa-clock" aria-hidden="true"></i>
+        {{readingTimeLeft | readTimeLeft }}
+      </span>
+    } @else {
+      <span class="time-left" [ngbTooltip]="t('time-to-read-alt')">
+        <i class="fa-regular fa-clock" aria-hidden="true"></i>
+        {{readingTimeEntity | readTime }}
+      </span>
+    }
+  </div>
+</ng-container>

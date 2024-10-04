@@ -1,35 +1,76 @@
-<div class="row g-0">
-  <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
-       popoverTitle="Your Rating + Overall" [popoverClass]="utilityService.getActiveBreakpoint() > Breakpoint.Mobile ? 'md-popover' : 'lg-popover'">
+<ng-container *transloco="let t; read: 'external-rating'">
+  <div class="row g-0">
+
+
+      @if (utilityService.activeBreakpoint$ | async; as activeBreakpoint) {
+        @if (activeBreakpoint <= Breakpoint.Tablet) {
+          <div class="col-auto custom-col clickable" tabindex="0" role="button" (click)="openRatingModal()">
+            <ng-container [ngTemplateOutlet]="kavitaRating"></ng-container>
+          </div>
+        } @else {
+          <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
+               [popoverTitle]="t('kavita-tooltip')" popoverClass="md-popover">
+            <ng-container [ngTemplateOutlet]="kavitaRating"></ng-container>
+          </div>
+        }
+      }
+
+    @for (rating of ratings; track rating.provider + rating.averageScore) {
+      <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
+           [popoverTitle]="rating.provider | providerName" popoverClass="sm-popover">
+        <span class="badge rounded-pill me-1">
+          <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" alt="" aria-hidden="true">
+          {{rating.averageScore}}%
+        </span>
+      </div>
+    }
+
+    <div class="col-auto" style="padding-top: 8px">
+      <app-loading [loading]="isLoading" size="spinner-border-sm"></app-loading>
+    </div>
+
+    <div class="col-auto ms-2"  style="padding-top: 4px">
+      @for(link of webLinks; track link) {
+        <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">
+          <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
+                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+        </a>
+      }
+    </div>
+  </div>
+
+  <ng-template #kavitaRating>
     <span class="badge rounded-pill ps-0 me-1">
-<!--      <img class="me-1" ngSrc="assets/images/logo-32.png" width="24" height="24" alt="">-->
-      <app-image classes="me-1" imageUrl="assets/images/logo-32.png" width="24px" height="24px" />
-      <ng-container *ngIf="hasUserRated; else notYetRated">{{userRating * 20}}</ng-container>
-      <ng-template #notYetRated>N/A</ng-template>
-      <ng-container *ngIf="overallRating > 0"> + {{overallRating}}</ng-container>
-      <ng-container *ngIf="hasUserRated || overallRating > 0">%</ng-container>
+        <app-image classes="me-1" imageUrl="assets/images/logo-32.png" width="24px" height="24px" />
+        @if (hasUserRated) {
+          {{userRating * 20}}
+        } @else {
+          N/A
+        }
+
+        @if (overallRating > 0) {
+          + {{overallRating}}
+        }
+        @if (hasUserRated || overallRating > 0) {
+          %
+        }
     </span>
-  </div>
+  </ng-template>
 
-  <div class="col-auto custom-col clickable" *ngFor="let rating of ratings" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
-       [popoverTitle]="rating.provider | providerName" popoverClass="sm-popover">
-    <span class="badge rounded-pill me-1">
-      <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="" aria-hidden="true">
-      {{rating.averageScore}}%
-    </span>
-  </div>
-  <div class="col-auto" style="padding-top: 8px">
-    <app-loading [loading]="isLoading" size="spinner-border-sm"></app-loading>
-  </div>
-</div>
+  <ng-template #popContent>
+    <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="2"
+               [maxStars]="5" [color]="starColor"></ngx-stars>
+    {{userRating * 20}}%
+  </ng-template>
 
-<ng-template #popContent>
-  <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="utilityService.getActiveBreakpoint() > Breakpoint.Mobile ? 1 : 2"
-             [maxStars]="5" [color]="starColor"></ngx-stars>
-  {{userRating * 20}}%
-</ng-template>
+  <ng-template #externalPopContent let-rating="rating">
+    <div>
+      <i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}
+    </div>
 
-<ng-template #externalPopContent let-rating="rating">
-  <div><i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}</div>
-  <a *ngIf="rating.providerUrl" [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">Entry</a>
-</ng-template>
+    @if (rating.providerUrl) {
+      <a [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">{{t('entry-label')}}</a>
+    }
+  </ng-template>
+
+</ng-container>

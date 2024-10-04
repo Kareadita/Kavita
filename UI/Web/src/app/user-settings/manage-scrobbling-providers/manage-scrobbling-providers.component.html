@@ -1,151 +1,57 @@
 <ng-container *transloco="let t; read:'scrobbling-providers'">
-  <div class="card mt-2">
-    <div class="card-body">
-      <div class="card-title">
-        <div class="container-fluid row mb-2">
-          <div class="col-10 col-sm-11">
-            <h4>{{t('title')}}
-              @if(!aniListTokenExpired) {
-                <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('token-valid')"></i>
-                <span class="visually-hidden">{{t('token-valid')}}</span>
-              } @else {
-                <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('token-expired')"></i>
-                <span class="visually-hidden">{{t('token-expired')}}</span>
-              }
-            </h4>
-          </div>
-          <div class="col-1 text-end">
-            <button class="btn btn-primary btn-sm" [disabled]="!hasValidLicense" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
-          </div>
-        </div>
-      </div>
 
-      @if(loaded) {
-        <ng-container *ngIf="isViewMode">
-          <div class="container-fluid row">
-          <span class="col-12">
-            @if(!hasValidLicense) {
-              {{t('requires', {product: 'Kavita+'})}}
-            } @else {
-              <span>
-                <img class="me-2" width="32" height="32" ngSrc="assets/images/ExternalServices/AniList.png" alt="AniList" ngbTooltip="AniList">
-                @if(aniListToken && aniListToken.length > 0) {
-                  {{t('token-set')}}
-                } @else {
-                  {{t('no-token-set')}}
-                }
-                @if(aniListTokenExpired) {
-                  <i class="error fa-solid fa-exclamation-circle" [ngbTooltip]="t('token-expired')">
-                    <span class="visually-hidden">{{t('token-expired')}}</span>
-                  </i>
-                }
-              </span>
+  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)"></app-setting-title>
 
-              <span class="ms-2">
-                <img class="me-2" width="32" height="32" ngSrc="assets/images/ExternalServices/MAL.png" alt="MAL" ngbTooltip="MAL">
-                @if (malToken && malToken.length > 0) {
-                  {{t('token-set')}}
-                }
-                @else {
-                  {{t('no-token-set')}}
-                }
-              </span>
-
-                @if(malTokenExpired) {
-                  <i class="error fa-solid fa-exclamation-circle" [ngbTooltip]="t('token-expired')">
-                    <span class="visually-hidden">{{t('token-expired')}}</span>
-                  </i>
-                }
-
-              @if (!aniListToken && !malToken) {
-                {{t('no-token-set')}}
-              }
-            }
-          </span>
-        </div>
-      </ng-container>
-
-        <div [(ngbCollapse)]="isViewMode">
-          <p>{{t('generic-instructions')}}</p>
-          <form [formGroup]="formGroup">
-
-            <div class="mt-3" ngbAccordion #accordion [destroyOnHide]="false" [closeOthers]="true">
-              <div ngbAccordionItem="anilist">
-                <h2 ngbAccordionHeader>
-                  <button ngbAccordionButton id="anilist-token-header">
-                    AniList
-                    @if(!aniListTokenExpired) {
-                      <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('token-valid')"></i>
-                      <span class="visually-hidden">{{t('token-valid')}}</span>
-                    } @else {
-                      <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('token-expired')"></i>
-                      <span class="visually-hidden">{{t('token-expired')}}</span>
-                    }
-                  </button>
-                </h2>
-                <div ngbAccordionCollapse>
-                  <div ngbAccordionBody>
-                    <ng-template>
-                      <p>{{t('instructions', {service: 'AniList'})}}</p>
-                      <div class="form-group mb-3">
-                        <label for="anilist-token">{{t('token-input-label', {service: 'AniList'})}}</label>
-                        <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
-                      </div>
-                      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                        <a class="flex-fill btn btn-secondary me-2"
-                           href="https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
-                           target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
-                        <button type="button" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveAniListForm()">{{t('save')}}</button>
-                      </div>
-                    </ng-template>
-                  </div>
-                </div>
-              </div>
-
-              <div ngbAccordionItem="mal">
-                <h2 ngbAccordionHeader>
-                  <button ngbAccordionButton id="mal-token-header">
-                    MAL
-                    @if(!malTokenExpired) {
-                      <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('token-valid')"></i>
-                      <span class="visually-hidden">{{t('token-valid')}}</span>
-                    } @else {
-                      <i class="fa-solid fa-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('token-expired')"></i>
-                      <span class="visually-hidden">{{t('token-expired')}}</span>
-                    }
-                  </button>
-                </h2>
-                <div ngbAccordionCollapse>
-                  <div ngbAccordionBody>
-                    <ng-template>
-                      <p>{{t('mal-instructions', {service: 'MAL'})}}</p>
-                      <div class="form-group mb-3">
-                        <label for="mal-token">{{t('mal-token-input-label')}}</label>
-                        <input type="text" id="mal-token" class="form-control" formControlName="malClientId"/>
-                      </div>
-
-                      <div class="form-group mb-3">
-                        <label for="mal-username">{{t('mal-username-input-label')}}</label>
-                        <input type="text" id="mal-username" class="form-control" formControlName="malUsername"/>
-                      </div>
-                      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                        <button type="button" class="flex-fill btn btn-primary" aria-describedby="mal-token-header" (click)="saveMalForm()">{{t('save')}}</button>
-                      </div>
-                    </ng-template>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </form>
-        </div>
+  @if (loaded) {
+    <div class="container-fluid">
+      @if(!hasValidLicense) {
+        {{t('requires', {product: 'Kavita+'})}}
       } @else {
-        <app-loading [loading]="!loaded" [message]="t('loading')"></app-loading>
+        <form [formGroup]="formGroup">
+          <div class="row">
+            <app-scrobble-provider-item [token]="aniListToken" [provider]="ScrobbleProvider.AniList" [isEditMode]="!isViewMode">
+              <ng-template #edit>
+                <p>{{t('instructions', {service: ScrobbleProvider.AniList | scrobbleProviderName})}}</p>
+                <div class="form-group mb-3">
+                  <label for="anilist-token">{{t('token-input-label', {service: 'AniList'})}}</label>
+                  <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
+                </div>
+                <div class="text-end">
+                  <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                    <a class="flex-fill btn btn-secondary me-2"
+                       href="https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
+                       target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
+                    <button type="button" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveAniListForm()">{{t('save')}}</button>
+                  </div>
+                </div>
+              </ng-template>
+            </app-scrobble-provider-item>
+          </div>
+          <div class="row mt-2">
+            <app-scrobble-provider-item [token]="malToken" [provider]="ScrobbleProvider.Mal" [isEditMode]="!isViewMode">
+              <ng-template #edit>
+                <span class="md-4">
+                  <p>{{t('mal-instructions', {service: ScrobbleProvider.Mal | scrobbleProviderName})}}</p>
+                  <div class="form-group mb-3">
+                    <label for="mal-token">{{t('mal-token-input-label')}}</label>
+                    <input type="text" id="mal-token" class="form-control" formControlName="malClientId"/>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label for="mal-username">{{t('mal-username-input-label')}}</label>
+                    <input type="text" id="mal-username" class="form-control" formControlName="malUsername"/>
+                  </div>
+                  <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                    <button type="button" class="flex-fill btn btn-primary" aria-describedby="mal-token-header" (click)="saveMalForm()">{{t('save')}}</button>
+                  </div>
+                </span>
+              </ng-template>
+            </app-scrobble-provider-item>
+          </div>
+        </form>
       }
-
-
     </div>
-  </div>
-
-
+  } @else {
+    <app-loading [loading]="!loaded" [message]="t('loading')"></app-loading>
+  }
 </ng-container>

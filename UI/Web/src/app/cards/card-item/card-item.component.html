@@ -2,9 +2,9 @@
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       @if (total > 0 || suppressArchiveWarning) {
-        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
       } @else if (total === 0 && !suppressArchiveWarning) {
-        <app-image height="230px" width="158px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
       }
 
       <div class="progress-banner">
@@ -44,41 +44,58 @@
       }
 
       <div class="card-overlay"></div>
-      @if (overlayInformation | safeHtml; as info) {
-        @if (info !== '' ||  info !== null) {
-          <div class="overlay-information {{centerOverlay ? 'overlay-information--centered' : ''}}">
-            <div class="position-relative">
-              <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="info" placement="top" [innerHTML]="info"></span>
-            </div>
+
+      @if (showReadButton) {
+        <div class="series overlay-information">
+          <div class="overlay-information--centered">
+              <span class="card-title library mx-auto" style="width: auto;">
+                <span (click)="clickRead($event)">
+                  <div>
+                    <i class="fa-solid fa-book" aria-hidden="true"></i>
+                  </div>
+                </span>
+              </span>
           </div>
-        }
+        </div>
+      }
+    </div>
+    <div class="card-body meta-title">
+      @if (subtitleTemplate) {
+        <div style="text-align: center">
+          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+        </div>
+      }
+      @if (!suppressLibraryLink && libraryName) {
+        <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
+          {{libraryName | sentenceCase}}
+        </a>
       }
     </div>
     @if (title.length > 0 || actions.length > 0) {
-      <div class="card-body">
-        <div>
-          <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-            <app-promoted-icon [promoted]="isPromoted()"></app-promoted-icon>
+      <div class="card-title-container">
+        <span class="card-format">
+          @if (showFormat) {
             <app-series-format [format]="format"></app-series-format>
-            {{title}}
-          </span>
-          @if (actions && actions.length > 0) {
-            <span class="card-actions float-end">
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-            </span>
-          }
-        </div>
+          }  
+        </span>
 
-        @if (subtitleTemplate) {
-          <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
-          </div>
+        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
+          @if (isPromoted(); as isPromoted) {
+            <span class="me-1"><app-promoted-icon [promoted]="isPromoted"></app-promoted-icon></span>
+          }
+          @if (linkUrl) {
+            <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
+          } @else {
+            {{title}}
+          }
+        </span>
+        <span class="card-actions">
+        @if (actions && actions.length > 0) {
+
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+
         }
-        @if (!suppressLibraryLink && libraryName) {
-          <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active">
-            {{libraryName | sentenceCase}}
-          </a>
-        }
+        </span>
       </div>
     }
   </div>

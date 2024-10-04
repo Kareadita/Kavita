@@ -2,12 +2,12 @@
   <div class="row pt-2 g-0 list-item">
     <div class="g-0">
       <h5 class="mb-1 pb-0" id="item.id--{{position}}">
-        <span *ngIf="item.isProvided; else nonProvidedTitle">
+        @if (item.isProvided) {
           {{item.name | streamName }}
-        </span>
-        <ng-template #nonProvidedTitle>
+        } @else {
           {{item.name}}
-        </ng-template>
+        }
+
         <span class="float-end">
             <button class="btn btn-icon p-0" (click)="hide.emit(item)">
               <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
@@ -29,10 +29,10 @@
         <div class="ps-1" *ngIf="!item.isProvided">
           <ng-container [ngSwitch]="item.streamType">
             <ng-container *ngSwitchCase="SideNavStreamType.Library">
-              <a [href]="'/library/' + this.item.libraryId" target="_blank">{{item.library?.name}}</a>
+              <a [href]="baseUrl + 'library/' + this.item.libraryId" target="_blank">{{item.library?.name}}</a>
             </ng-container>
             <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">
-              <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
+              <a [href]="baseUrl + 'all-series?' + this.item.smartFilterEncoded">{{t('load-filter')}}</a>
             </ng-container>
             <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">
               <a [href]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>

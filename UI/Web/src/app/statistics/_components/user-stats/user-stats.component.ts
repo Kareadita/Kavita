@@ -12,7 +12,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
 import {UserStatsInfoCardsComponent} from '../user-stats-info-cards/user-stats-info-cards.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
 
 @Component({
@@ -33,22 +33,17 @@ import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
 })
 export class UserStatsComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly statService = inject(StatisticsService);
+  protected readonly accountService = inject(AccountService);
+  private readonly memberService = inject(MemberService);
+  private readonly libraryService = inject(LibraryService);
+
   userId: number | undefined = undefined;
   userStats$!: Observable<UserReadStatistics>;
   readSeries$!: Observable<ReadHistoryEvent[]>;
-  isAdmin$: Observable<boolean>;
   percentageRead$!: Observable<PieDataItem[]>;
-  private readonly destroyRef = inject(DestroyRef);
-
-  constructor(private readonly cdRef: ChangeDetectorRef, private statService: StatisticsService,
-    private accountService: AccountService, private memberService: MemberService,
-    private libraryService: LibraryService) {
-      this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
-        if (!u) return false;
-        return this.accountService.hasAdminRole(u);
-      }));
-
-    }
 
   ngOnInit(): void {
     this.memberService.getMember().subscribe(me => {

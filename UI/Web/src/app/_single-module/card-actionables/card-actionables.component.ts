@@ -8,18 +8,20 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
-import {CommonModule} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 
 @Component({
   selector: 'app-card-actionables',
   standalone: true,
-  imports: [CommonModule, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoDirective],
+  imports: [NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet],
   templateUrl: './card-actionables.component.html',
   styleUrls: ['./card-actionables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,11 +31,19 @@ export class CardActionablesComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly modalService = inject(NgbModal);
+
+  protected readonly Breakpoint = Breakpoint;
 
   @Input() iconClass = 'fa-ellipsis-v';
   @Input() btnClass = '';
   @Input() actions: ActionItem<any>[] = [];
   @Input() labelBy = 'card';
+  /**
+   * Text to display as if actionable was a button
+   */
+  @Input() label = '';
   @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
@@ -109,5 +119,17 @@ export class CardActionablesComponent implements OnInit {
   performDynamicClick(event: any, action: ActionItem<any>, dynamicItem: any) {
     action._extra = dynamicItem;
     this.performAction(event, action);
+  }
+
+  openMobileActionableMenu(event: any) {
+    this.preventEvent(event);
+
+    const ref = this.modalService.open(ActionableModalComponent, {fullscreen: 'sm'});
+    ref.componentInstance.actions = this.actions;
+    ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
+    ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
+    ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
+      this.performAction(event, action);
+    });
   }
 }

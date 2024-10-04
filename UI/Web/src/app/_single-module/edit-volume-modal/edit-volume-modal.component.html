@@ -1,0 +1,148 @@
+<ng-container *transloco="let t; read: 'edit-volume-modal'">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="false"></app-entity-title></h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+    <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': utilityService.getActiveBreakpoint() !== Breakpoint.Mobile}">
+      <form [formGroup]="editForm">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+
+          <!-- Info Tab -->
+          <li [ngbNavItem]="TabID.Info">
+            <a ngbNavLink>{{t(TabID.Info)}}</a>
+            <ng-template ngbNavContent>
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('pages-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{t('pages-count', {num: volume.pages | compactNumber})}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('words-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{t('words-count', {num: volume.wordCount | compactNumber})}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('read-time-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{volume | readTime }}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('size-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{size | bytes}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="row g-0">
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('date-added-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{volume.createdUtc | utcToLocalTime | translocoDate: {dateStyle: 'short', timeStyle: 'short' } | defaultDate}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <app-setting-item [title]="t('id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        {{volume.id}}
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+              </div>
+
+              @if (user && accountService.hasAdminRole(user)) {
+                <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                  <ng-template #view>
+                    @for (file of files; track file.id) {
+                      <div>
+                        <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
+                      </div>
+                    }
+                  </ng-template>
+                </app-setting-item>
+              }
+
+            </ng-template>
+          </li>
+
+          <!-- Cover Tab -->
+          @if (user && accountService.hasAdminRole(user)) {
+            <li [ngbNavItem]="TabID.CoverImage">
+              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+              <ng-template ngbNavContent>
+                <p class="alert alert-warning" role="alert">
+                  {{t('cover-image-description')}}
+                </p>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
+                                         [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
+              </ng-template>
+            </li>
+          }
+
+          <!-- Progress Tab -->
+          <li [ngbNavItem]="TabID.Progress">
+            <a ngbNavLink>{{t(TabID.Progress)}}</a>
+            <ng-template ngbNavContent>
+              @for(chapter of volume.chapters; track chapter.id) {
+                <h6><app-entity-title [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title></h6>
+                <app-edit-chapter-progress [chapter]="chapter"></app-edit-chapter-progress>
+                <div class="setting-section-break"></div>
+              }
+            </ng-template>
+          </li>
+
+          <!-- Tasks Tab -->
+          <li [ngbNavItem]="TabID.Tasks">
+            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+            <ng-template ngbNavContent>
+              @for(task of tasks; track task.action) {
+                @if (accountService.canInvokeAction(user, task.action)) {
+                  <div class="mt-3 mb-3">
+                    <app-setting-button [subtitle]="task.description">
+                      <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                    </app-setting-button>
+                  </div>
+                }
+              }
+            </ng-template>
+          </li>
+        </ul>
+      </form>
+
+      <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid" (click)="save()">{{t('save')}}</button>
+    </div>
+  </div>
+
+
+
+</ng-container>

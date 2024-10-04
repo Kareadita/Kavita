@@ -1,18 +1,44 @@
+@import '../../../../theme/variables';
+
+::ng-deep .side-nav.closed {
+    .side-nav-item {
+        .side-nav-text {
+            opacity: 0 !important;
+        }
+
+        .card-actions {
+           opacity: 0 !important;
+        }
+
+        &.active {
+            color: var(--side-nav-item-active-color);
+            background-color: unset !important;
+        }
+    }
+}
+
 .side-nav-item {
     position: relative;
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding: 0 10px;
+    padding: 0 0 0 10px;
     width: 100%;
     height: auto;
     min-height: 40px;
     overflow: hidden;
     cursor: pointer;
+    font-size: 0.9rem;
 
     .side-nav-text {
         opacity: 1;
         min-width: 100px;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+        text-overflow: ellipsis;
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
 
         div {
             min-width: 102px;
@@ -30,7 +56,6 @@
 
         div {
             align-items: center;
-            display: flex;
             height: 100%;
             justify-content: inherit;
             min-width: 30px;
@@ -55,6 +80,19 @@
         &.active {
             color: var(--side-nav-item-active-color);
             background-color: unset;
+        }
+
+        i {
+            color: var(--side-nav-item-closed-color);
+        }
+
+        &:hover {
+            color: var(--side-nav-hover-text-color);
+            background-color: var(--side-nav-hover-bg-color);
+
+            i {
+                color: var(--side-nav-item-closed-hover-color);
+            }
         }
     }
 
@@ -103,15 +141,19 @@ a {
     color: var(--side-nav-text-color);
 }
 
-@media (max-width: 576px) {
+@media (max-width: $grid-breakpoints-lg) {
     .side-nav-item {
         align-items: center;
-        padding: 15px 10px;
-        height: 70px;
+        padding: 0 10px;
+        height: 55px;
         font-size: 1rem;
 
         .side-nav-text {
             width: 100%;
+        }
+
+        span:last-child {
+            flex-grow: 0;
         }
 
 

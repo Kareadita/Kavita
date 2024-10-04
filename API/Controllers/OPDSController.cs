@@ -471,6 +471,7 @@ public class OpdsController : BaseApiController
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
 
+
         feed.Entries.AddRange(tags.Select(tag => new FeedEntry()
         {
             Id = tag.Id.ToString(),
@@ -539,6 +540,8 @@ public class OpdsController : BaseApiController
 
         var feed = CreateFeed("All Reading Lists", $"{apiKey}/reading-list", apiKey, prefix);
         SetFeedId(feed, "reading-list");
+        AddPagination(feed, readingLists, $"{prefix}{apiKey}/reading-list/");
+
         foreach (var readingListDto in readingLists)
         {
             feed.Entries.Add(new FeedEntry()
@@ -546,14 +549,18 @@ public class OpdsController : BaseApiController
                 Id = readingListDto.Id.ToString(),
                 Title = readingListDto.Title,
                 Summary = readingListDto.Summary,
-                Links = new List<FeedLink>()
-                {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
-                }
+                Links =
+                [
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                        $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                        $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                        $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
+                ]
             });
         }
+
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -569,7 +576,7 @@ public class OpdsController : BaseApiController
 
     [HttpGet("{apiKey}/reading-list/{readingListId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey)
+    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 0)
     {
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
@@ -588,7 +595,7 @@ public class OpdsController : BaseApiController
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
         foreach (var item in items)
         {
             var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(item.ChapterId);
@@ -869,6 +876,7 @@ public class OpdsController : BaseApiController
         feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesId}&apiKey={apiKey}"));
 
         var chapterDict = new Dictionary<int, short>();
+        var fileDict = new Dictionary<int, short>();
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
@@ -877,15 +885,18 @@ public class OpdsController : BaseApiController
             foreach (var chapter in chaptersForVolume)
             {
                 var chapterId = chapter.Id;
+                if (!chapterDict.TryAdd(chapterId, 0)) continue;
+
                 var chapterDto = _mapper.Map<ChapterDto>(chapter);
                 foreach (var mangaFile in chapter.Files)
                 {
-                    chapterDict.Add(chapterId, 0);
+                    // If a chapter has multiple files that are within one chapter, this dict prevents duplicate key exception
+                    if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
+
                     feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapterId, _mapper.Map<MangaFileDto>(mangaFile), series,
                         chapterDto, apiKey, prefix, baseUrl));
                 }
             }
-
         }
 
         var chapters = seriesDetail.StorylineChapters;
@@ -900,6 +911,8 @@ public class OpdsController : BaseApiController
             var chapterDto = _mapper.Map<ChapterDto>(chapter);
             foreach (var mangaFile in files)
             {
+                // If a chapter has multiple files that are within one chapter, this dict prevents duplicate key exception
+                if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
                 feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, chapter.VolumeId, chapter.Id, _mapper.Map<MangaFileDto>(mangaFile), series,
                     chapterDto, apiKey, prefix, baseUrl));
             }
@@ -911,6 +924,9 @@ public class OpdsController : BaseApiController
             var chapterDto = _mapper.Map<ChapterDto>(special);
             foreach (var mangaFile in files)
             {
+                // If a chapter has multiple files that are within one chapter, this dict prevents duplicate key exception
+                if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
+
                 feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, special.VolumeId, special.Id, _mapper.Map<MangaFileDto>(mangaFile), series,
                     chapterDto, apiKey, prefix, baseUrl));
             }
@@ -1014,7 +1030,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private static void AddPagination(Feed feed, PagedList<SeriesDto> list, string href)
+    private static void AddPagination<T>(Feed feed, PagedList<T> list, string href)
     {
         var url = href;
         if (href.Contains('?'))
