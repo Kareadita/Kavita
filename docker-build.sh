@@ -100,4 +100,4 @@ Package "linux-arm64"
 cd "$dir"
 
 #Builds Docker images
-#docker buildx build -t kizaing/kavita:nightly --platform linux/amd64,linux/arm/v7,linux/arm64 . --push
+docker buildx build -t kizaing/kavita:nightly --platform linux/amd64,linux/arm/v7,linux/arm64 . --push
